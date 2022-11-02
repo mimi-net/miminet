@@ -1,0 +1,29 @@
+<script id="config_main_form_script" type="text/plain">
+    <form id='config_main_form' action='/config_host_save' method='POST'>
+        <input type="hidden" id="host_id" name="host_id" value=""/>
+
+        <button id="config_main_form_submit_button" type="submit" className="btn btn-primary">Сохранить</button>
+    </form>
+</script>
+
+<script id="config_host_name_script" type="text/plain">
+    <div class="form-group">
+        <label for="config_host_name" class="text-sm">Имя хоста</label>
+        <input type="text" class="form-control form-control-sm" id="config_host_name" name="config_host_name" value=''>
+    </div>
+</script>
+
+<script id="config_host_interface_script" type="text/plain">
+    <div class="form-group">
+        <label id="config_host_iface_name_label_example" for="config_host_iface_name_example" class="text-sm">Имя интерфейса</label>
+        <input type="text" class="form-control form-control-sm" id="config_host_iface_name_example" name="config_host_iface_name_example" value='' readonly >
+    </div>
+     <div class="form-group">
+        <label id="config_host_ip_label_example" for="config_host_ip_example" class="text-sm">IP адрес</label>
+        <input type="text" class="form-control form-control-sm" id="config_host_ip_example" name="config_host_ip_example" value=''>
+    </div>
+    <div class="form-group">
+        <label id="config_host_mask_label_example" for="config_host_mask_example" class="text-sm">Маска подсети</label>
+        <input type="text" class="form-control form-control-sm" id="config_host_mask_example" name="config_host_mask_example" value=''>
+    </div>
+</script>

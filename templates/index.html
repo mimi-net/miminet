@@ -1,130 +1,42 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Веб-эмулятор</title>
-    <!-- CSS only -->
-    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.23.0/cytoscape.min.js"></script>
-    <script src="https://unpkg.com/ace-builds@1.4.8/src/ace.js"></script>
+{% extends "base.html" %}
+{% block title %}Веб-симулятор{% endblock %}
+{% block description %}Симуляция компьютерной сети в вебе{% endblock %}
+{% block content %}
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.js"></script>
-    <script src="{{ url_for('static', filename='cytoscape-edgehandles.js') }}"></script>
+<main>
+    <div class="container-fluid">
+        <div class="row flex-nowrap">
+            <div id="side_menu" class="col-auto col-md-3 col-xl-1 px-sm-2 px-0 bg-white">
+                <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 h-100">
+                    <a href="{{ url_for('index') }}" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-decoration-none">
+                        <span class="fs-5 d-none d-sm-inline">Menu</span>
+                    </a>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.min.js" integrity="sha384-IDwe1+LCz02ROU9k972gdyvl+AESN10+x7tBKgc9I5HFtuNz0wWnPclzo6p9vxnk" crossorigin="anonymous"></script>
-
-
-    <script src="{{ url_for('static', filename='icons.js') }}"></script>
-    <script src="{{ url_for('static', filename='netfront_f.js') }}"></script>
-
-    <style>
-           .active {
-               outline: 1px solid red;
-           }
-    </style>
-
-</head>
-<body>
-    <main>
-        <div class="container-fluid">
-            <div class="row flex-nowrap">
-                <div id="side_menu" class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-white">
-                    <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
-                        <a href="{{ url_for('index') }}" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-decoration-none">
-                            <span class="fs-5 d-none d-sm-inline">Menu</span>
-                        </a>
-
-                          <div class="row">
-                              <div class="col-sm-6">
-                                  <p class="drag" id="l2_switch"><a><img src="{{ url_for('static', filename="/images/l2_switch.png") }}"></a></p>
-                                  <p class="drag" id="host"><a><img src="{{ url_for('static', filename="/images/host.png") }}"></a></p>
-                              </div>
-                          </div>
-
+                    <div class="row">
+                        <div class="col-sm-6" style="height: 700px;">
+                            <p class="drag" id="l2_switch"><a><img src="{{ url_for('static', filename="/images/l2_switch.png") }}"></a></p>
+                            <p class="drag" id="host"><a><img src="{{ url_for('static', filename="/images/host.png") }}"></a></p>
+                        </div>
                     </div>
                 </div>
-                <div class="col py-3 bg-light">
-                    <div id="network_scheme" class="border bg-white border-primary h-100 w-100" style=""></div>
+            </div>
+
+            <div class="col py-3 bg-light">
+                <div id="network_scheme" class="border bg-white border-primary h-100 w-100" style=""></div>
+            </div>
+
+            <div id="right_side_menu" class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-white">
+                <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 h-100" id="config_content">
+                    <div class="row">
+                        <div class="col">
+                            <h3>Тут будут настройки устройств. Выделите любое на схеме.</h3>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
+</main>
 
-    </main>
-
-{% include 'host_config_modal.html' %}
-
-</body>
-<script>
-  const nodes = [
-      {
-          data: {id: "host_1" },
-          renderedPosition: { x: 745, y:189 },
-          classes: ['host'],
-          selectable: true,
-          config: {
-              type : 'host',
-              label: "host 1",
-          }
-
-      },
-      {
-          data: {id: "host_2"},
-          renderedPosition: { x: 752, y:415 },
-          classes: ['host'],
-          selectable: true,
-          config: {
-              type : 'host',
-          }
-      },
-      {
-          data: {id: "host_3"},
-          renderedPosition: {x: 509, y: 302 },
-          classes: ['host'],
-          selectable: true,
-          config: {
-              type : 'host',
-          }
-      },
-      {
-          data: {id: "l2_switch_1"},
-          renderedPosition: {x: 670, y:290, },
-          classes: ['l2_switch'],
-          selectable: true,
-          config: {
-              type : 'l2_switch',
-          }
-      }
-  ];
-
-  const edges = [
-      {
-          data: {
-              id: EdgeUid(),
-              source: 'l2_switch_1',
-              target: 'host_1'
-          }
-      },
-      {
-          data: {
-              id: EdgeUid(),
-              source: 'l2_switch_1',
-              target: 'host_2'
-          }
-      },
-      {
-          data: {
-              id: EdgeUid(),
-              source: 'l2_switch_1',
-              target: 'host_3'
-          }
-      },
-  ];
-
-  DrawGraph(nodes, edges);
-
-</script>
-<script src="{{ url_for('static', filename='netfront.js') }}"></script>
-</html>
+    <div id="config_host"></div>
+{% endblock %}

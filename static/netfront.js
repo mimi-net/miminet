@@ -21,13 +21,15 @@ $('#network_scheme').droppable({
       type = ui.draggable.prop('id')
 
       if (type === 'host'){
+          node_id = HostUid();
           nodes.push(
               {
-                  data: {id: HostUid()},
+                  data: {id: node_id, label: node_id},
                   renderedPosition: {x: ui.position.left - side_menu_width, y: ui.position.top},
                   classes: ['host'],
                   config: {
                       type: 'host',
+                      label: node_id,
                   }
               }
           );
@@ -36,13 +38,15 @@ $('#network_scheme').droppable({
       }
 
       if (type === 'l2_switch'){
+          node_id = l2SwitchUid();
           nodes.push(
               {
-                  data: {id: l2SwitchUid()},
+                  data: {id: node_id, label: node_id},
                   renderedPosition: {x: ui.position.left - side_menu_width, y: ui.position.top},
                   classes: ['l2_switch'],
                   config: {
                       type: 'l2_switch',
+                      label: node_id,
                   }
               }
           );

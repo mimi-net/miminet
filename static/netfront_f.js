@@ -14,6 +14,28 @@ const EdgeUid = function(){
     return "edge_" + uid();
 }
 
+const AddEdge = function(source_id, target_id){
+
+        let source_node = nodes.find(n => n.data.id === source_id);
+        let target_node = nodes.find(n => n.data.id === target_id);
+
+        // Do we find nodes?
+        if (!source_node || !target_node)
+        {
+            return;
+        }
+
+        // Add edge
+        edges.push({
+            data: {
+                id: EdgeUid(),
+                source: source_node.data.id,
+                target: target_node.data.id,
+            }
+        }
+        );
+}
+
 const prepareStylesheet = function() {
     const getColor = function(ele) {
       return ele.data('color') || '#ffaaaa';
@@ -31,7 +53,8 @@ const prepareStylesheet = function() {
       return ele.data('direction') || 'autorotate';
     };
     const getNodeLabel = function(ele) {
-      return ele.data('label') || ele.data('id');
+      // return ele.data('label') || ele.data('id');
+        return ele.data('label') || '';
     };
     let sheet = cytoscape.stylesheet()
         .selector('node')
@@ -44,6 +67,7 @@ const prepareStylesheet = function() {
           'content': getNodeLabel,
           'text-valign': 'top',
           'text-halign': 'center',
+            'font-size': '10px',
         })
         .selector('edge')
         .css({
@@ -58,6 +82,59 @@ const prepareStylesheet = function() {
           'text-outline-color': '#FFF',
           'text-outline-width': 1,
           'edge-text-rotation': getTextDirection,
+        })
+        .selector('.eh-handle')
+        .css({
+            'background-color': 'red',
+            'width': 8,
+            'height': 8,
+            'shape': 'ellipse',
+            'overlay-opacity': 0,
+            'border-width': 4, // makes the handle easier to hit
+            'border-opacity': 0
+        })
+
+        .selector('.eh-hover')
+        .css({
+            'background-color': 'red'
+        })
+
+        .selector('.eh-source')
+        .css({
+            'border-width': 2,
+            'border-color': 'red'
+        })
+
+        .selector('.eh-target')
+        .css({
+            'border-width': 2,
+            'border-color': 'red'
+        })
+
+        .selector('.eh-preview')
+        .css({
+            'background-color': 'red',
+            'line-color': 'red',
+            'target-arrow-color': 'red',
+            'source-arrow-color': 'red'
+        })
+
+        .selector('.eh-ghost-edge')
+        .css({
+            'background-color': 'red',
+            'line-color': 'red',
+            'target-arrow-color': 'red',
+            'source-arrow-color': 'red'
+        })
+
+        .selector('node[name]')
+        .css({
+            'content': 'data(name)'
+        })
+
+        .selector('.eh-ghost-edge.eh-preview-active')
+        .css({
+            'opacity': 0
         });
 
     const appendIconClass = function(stylesheet, cssClass) {
@@ -157,30 +234,61 @@ const DrawGraph = function(nodes, edges) {
 
         if (n.config.type === 'host'){
 
-            let host_label = n.config.label;
-            host_label = host_label || n.data.id;
+            let hostname = n.data.label;
+            hostname = hostname || n.data.id;
 
-            $('#hostConfigModalLabel').text('Конфигурация ' + host_label);
-            $('#hostConfigModal').modal('toggle');
+            // Create form
+            ConfigHostForm(n.data.id);
+
+            // Add hostname
+            ConfigHostName(hostname);
+
+            // Add interfaces
+            $.each(n.interface, function (i) {
+                iface_name = n.interface[i].name;
+
+                if (!iface_name){
+                    return;
+                }
+
+                ip_addr = n.interface[i].ip;
+
+                if (!ip_addr){
+                    ip_addr = '';
+                }
+
+                netmask = n.interface[i].netmask;
+
+                if (!netmask){
+                    netmask = '';
+                }
+
+                ConfigHostInterface(iface_name, ip_addr, netmask);
+
+            });
+            //ConfigHostInterface(hostname);
         }
+    });
+
+    // Add edge to the edges[]
+    cy.on('ehcomplete', (event, sourceNode, targetNode, addedEdge) => {
+        AddEdge(sourceNode._private.data.id, targetNode._private.data.id);
     });
 
     // Turn on/off eh.enableDrawMode();
     $(document).on('keyup keydown', function(e){
-
-    if (shifted != e.shiftKey)
-    {
-        shifted = e.shiftKey;
-
-        if (shifted)
+        if (shifted != e.shiftKey)
         {
-            eh.enableDrawMode();
-            console.log("Turn on drawmode");
-        } else {
-             eh.disableDrawMode();
-            console.log("Turn off drawmode");
+            shifted = e.shiftKey;
+            if (shifted)
+            {
+                eh.enableDrawMode();
+                console.log("Turn on drawmode");
+            } else {
+                eh.disableDrawMode();
+                console.log("Turn off drawmode");
+            }
         }
+    });
 
-    }
-});
 }

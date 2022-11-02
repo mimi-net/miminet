@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Веб-симулятор{% endblock %}
+{% block description %}Симуляция компьютерной сети в вебе{% endblock %}
+{% block content %}
+    <section>
+    <div class="container pt-5">
+        <div class="row">
+            <div class="col-12">
+                <h5>Сети</h5>
+                <hr>
+            </div>
+        </div>
+        <div class="row">
+            <div class="card-group">
+                <div class="card bg-primary mb-3" style="max-width: 18rem; height: 18rem; border: none;">
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                        <h2 class="text-white">+</h2>
+                        <a class="stretched-link text-decoration-none" href="{{ url_for('index') }}">
+                            <h5 class="text-white">Создать новую сеть</h5>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    </section>
+
+{% endblock %}
