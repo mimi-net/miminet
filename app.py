@@ -1,9 +1,11 @@
 import sys
 from flask import Flask, render_template, request
+from flask_login import login_required, current_user
 
 from miminet_config import SQLITE_DATABASE_NAME, SECRET_KEY
-from miminet_model import db, init_db
+from miminet_model import db, init_db, Network
 from miminet_auth import login_manager, login_index, google_login, google_callback, user_profile
+from miminet_network import create_network, web_network, update_network_config, delete_network
 
 app = Flask(__name__,  static_url_path='', static_folder='static', template_folder="templates")
 
@@ -28,14 +30,26 @@ app.add_url_rule('/google_login', methods=['GET'], view_func=google_login)
 app.add_url_rule('/google_callback', methods=['GET'], view_func=google_callback)
 app.add_url_rule('/profile.html', methods=['GET', 'POST'], view_func=user_profile)
 
+# Network
+app.add_url_rule('/create_network', methods=['GET'], view_func=create_network)
+app.add_url_rule('/web_network', methods=['GET'], view_func=web_network)
+app.add_url_rule('/update_network_config', methods=['GET', 'POST'], view_func=update_network_config)
+app.add_url_rule('/delete_network', methods=['GET', 'POST'], view_func=delete_network)
+
+
 @app.route('/')
 def index():  # put application's code here
     return render_template("index.html")
 
 
 @app.route('/home')
+@login_required
 def home():
-    return render_template("home.html")
+    user = current_user
+
+    networks = Network.query.filter(Network.author_id == user.id).all()
+
+    return render_template("home.html", networks = networks)
 
 
 @app.route('/edge')

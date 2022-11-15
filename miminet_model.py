@@ -10,7 +10,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 
 
-from miminet_config import SQLITE_DATABASE_NAME, SQLITE_DATABASE_BACKUP_NAME
+from miminet_config import SQLITE_DATABASE_NAME, SQLITE_DATABASE_BACKUP_NAME, make_empty_network
 
 convention = {
     "ix": 'ix_%(column_0_label)s',
@@ -36,6 +36,18 @@ class User(db.Model, UserMixin):
 
     vk_id = db.Column(db.String(255), nullable=True)
     google_id = db.Column(db.String(255), nullable=True)
+
+
+class Network(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    guid = db.Column(db.String(512), nullable=False)
+    title = db.Column(db.String(1024), default='Новая сеть', nullable=False)
+
+    network = db.Column(db.UnicodeText, default=make_empty_network, nullable=False)
+    preview_uri = db.Column(db.String(255), default='first_network.jpg', nullable=False)
 
 
 def init_db(app):

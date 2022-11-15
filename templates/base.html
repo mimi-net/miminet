@@ -4,15 +4,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="{% block description %}{% endblock %}">
-    <meta name="author" content="Илья Зеленчук">
+    <meta name="author" content="Илья Зеленчук, Зинаида Романова">
     <title>{% block title %}{% endblock %}</title>
 
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.23.0/cytoscape.min.js"></script>
+    <script src="{{ url_for('static', filename='/js/cytoscape.min.js') }}"></script>
     <script src="https://unpkg.com/ace-builds@1.4.8/src/ace.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.js"></script>
+    <script src="{{ url_for('static', filename='/js/lodash.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/cytoscape-edgehandles@3.6.0/cytoscape-edgehandles.min.js"></script>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
@@ -29,30 +29,125 @@
     </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-md navbar-light" style="background-color: #e3f2fd;">
-    <div class="container-fluid">
-        <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNavbar">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="navbar-collapse collapse" id="collapseNavbar">
-            <ul class="navbar-nav ms-auto">
-                {% if current_user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="nav-link" href="">Профиль</a>
+<nav class="navbar navbar-expand-md navbar-fixed-top navbar-dark bg-dark main-nav">
+    <div class="container">
+        <ul class="nav navbar-nav text-nowrap flex-row mx-md-auto order-1 order-md-2">
+            {% if current_user.is_authenticated %}
+                <li class="nav-item ">
+                    <a class="nav-link" href="{{ url_for('home') }}"><strong>Сети</strong></a>
                 </li>
-                {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('login_index') }}">Вход/Регистрация</a>
-                </li>
+                {% if network %}
+                    <li class="nav-item">
+                        <strong class="nav-link"> / </strong>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('web_network', guid=network.guid) }}"><strong>{{ network.title }}</strong></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fs-6" href="#netConfigModal" data-bs-toggle="modal" data-target="#netConfigModal">(настройки)</a>
+                    </li>
                 {% endif %}
-            </ul>
-        </div>
+
+
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('login_index') }}"><strong>Вход/Регистрация</strong></a>
+                </li>
+            {% endif %}
+        </ul>
     </div>
 </nav>
+
+{% if network %}
+<!-- Net configuration -->
+    <div class="modal" id="netConfigModal" tabindex="-1" role="dialog" aria-labelledby="netConfigModalLabel" aria-hidden="true" data-focus-on="input:first">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="netConfigModalLabel">Настройки сети</h5>
+                    <button id="networkConfigrationCancelIcon" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="networkConfigrationForm" method="POST" action="{{ url_for('update_network_config', guid=network.guid) }}">
+                        <div class="form-group">
+                            <label for="network_title" class="text-sm">Называние сети</label>
+                            <input type="text" class="form-control form-control-sm" id="network_title" name="network_title" value='{{ network.title }}'>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button id="networkDeleteButton" type="button" data-toggle="modal" class="btn btn-danger" href="#deleteNetConfirmModal">Удалить сеть</button>
+                    <button id="networkConfigrationCancel" type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    <button id="networkConfigrationSubmit" type="button" class="btn btn-primary">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteNetConfirmModal" class="modal hide fade" tabindex="-1" role="dialog" data-focus-on="input:first">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="netDeleteModalLabel">Вы точно хотите удалить эту сеть?</h5>
+                    <button id="networkDeleteCancelIcon" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="networkDeleteForm" method="POST" action="{{ url_for('delete_network', guid=network.guid) }}">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-dismiss="modal" class="btn" id="networkDeleteCancel">Нет</button>
+                    <button type="button" class="btn btn-danger" id="networkDeleteSubmitButton">Да, удалить!</button>
+                </div>
+    </div>
+    </div>
+    </div>
+
+
+{% endif %}
 
 {% block content %}
 {% endblock %}
 </body>
+
+<script>
+    $(document).ready(function() {
+        $("#networkConfigrationCancel").click(function(){
+            $('#netConfigModal').modal('hide');
+        });
+
+        $("#networkConfigrationCancelIcon").click(function(){
+            $('#netConfigModal').modal('hide');
+        });
+
+        $("#networkConfigrationSubmit").click(function(){
+            $("#networkConfigrationForm").submit(); // Submit the form
+        });
+
+        $("#networkDeleteButton").click(function(){
+            $('#netConfigModal').modal('hide');
+            $('#deleteNetConfirmModal').modal('toggle');
+        });
+
+        $("#networkDeleteCancelIcon").click(function(){
+            $('#deleteNetConfirmModal').modal('hide');
+        });
+
+        $("#networkDeleteCancel").click(function(){
+            $('#deleteNetConfirmModal').modal('hide');
+        });
+
+        $("#networkDeleteSubmitButton").click(function(){
+            $("#networkDeleteForm").submit(); // Submit the form
+        });
+
+    });
+</script>
+
 
 <script>
   const nodes = [
@@ -114,7 +209,6 @@
 
       }
   ];
-
   const edges = [
       {
           data: {
@@ -138,7 +232,6 @@
           }
       },
   ];
-
   DrawGraph(nodes, edges);
 
 </script>

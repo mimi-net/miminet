@@ -1,5 +1,6 @@
 import os
 import pathlib
+import json
 
 from datetime import datetime
 
@@ -18,3 +19,7 @@ SQLITE_DATABASE_NAME = 'miminet.db'
 
 current_data = datetime.today().strftime('%Y-%m-%d')
 SQLITE_DATABASE_BACKUP_NAME = 'backup_' + current_data + '.db'
+
+def make_empty_network():
+    default_network = '{"nodes" : [], "edges" : []}'
+    return default_network

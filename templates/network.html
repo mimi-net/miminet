@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ network.title }}{% endblock %}
+{% block description %}Симуляция компьютерной сети в вебе{% endblock %}
+{% block content %}
+
+<main>
+    <div class="container-fluid">
+        <div class="row flex-nowrap">
+            <div id="side_menu" class="col-auto col-md-3 col-xl-1 px-sm-2 px-0 bg-white">
+                <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 h-100">
+                    <a href="{{ url_for('index') }}" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-decoration-none">
+                        <span class="fs-5 d-none d-sm-inline">Menu</span>
+                    </a>
+
+                    <div class="row">
+                        <div class="col-sm-6" style="height: 700px;">
+                            <p class="drag" id="l2_switch"><a><img src="{{ url_for('static', filename="/images/l2_switch.png") }}"></a></p>
+                            <p class="drag" id="host"><a><img src="{{ url_for('static', filename="/images/host.png") }}"></a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col py-3 bg-light">
+                <div id="network_scheme" class="border bg-white border-primary h-100 w-100" style=""></div>
+            </div>
+
+            <div id="right_side_menu" class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-white">
+                <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 h-100" id="config_content">
+                    <div class="row">
+                        <div class="col">
+                            <h3>Тут будут настройки устройств. Выделите любое на схеме.</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+    <div id="config_host"></div>
+{% endblock %}
