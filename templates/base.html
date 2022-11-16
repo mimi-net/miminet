@@ -103,11 +103,9 @@
                     <button type="button" data-dismiss="modal" class="btn" id="networkDeleteCancel">Нет</button>
                     <button type="button" class="btn btn-danger" id="networkDeleteSubmitButton">Да, удалить!</button>
                 </div>
+            </div>
+        </div>
     </div>
-    </div>
-    </div>
-
-
 {% endif %}
 
 {% block content %}
@@ -147,10 +145,8 @@
 
     });
 </script>
-
-
 <script>
-  const nodes = [
+  const old_nodes = [
       {
           data: {id: "host_1", label: "host_1" },
           renderedPosition: { x: 745, y:189 },
@@ -209,7 +205,7 @@
 
       }
   ];
-  const edges = [
+  const old_edges = [
       {
           data: {
               id: 'edge1',
@@ -232,9 +228,12 @@
           }
       },
   ];
-  DrawGraph(nodes, edges);
+  //DrawGraph(nodes, edges);
 
 </script>
+
+{% block network %}
+{% endblock %}
 
 <script src="{{ url_for('static', filename='netfront.js') }}"></script>
 <script src="{{ url_for('static', filename='config.js') }}"></script>

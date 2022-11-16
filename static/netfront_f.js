@@ -14,6 +14,23 @@ const EdgeUid = function(){
     return "edge_" + uid();
 }
 
+const InterfaceUid = function(){
+    return "iface_" + uid();
+}
+
+
+const PostEdges = function(){
+    $.ajax({
+        type: 'POST',
+        url: '/post_network_edges?guid=' + network_guid,
+        data: JSON.stringify(edges),
+        success: function(data) {},
+        error: function(err) {console.log('Cannot post edges to server')},
+        contentType: "application/json",
+        dataType: 'json'
+    });
+}
+
 const AddEdge = function(source_id, target_id){
 
         let source_node = nodes.find(n => n.data.id === source_id);
@@ -26,14 +43,57 @@ const AddEdge = function(source_id, target_id){
         }
 
         // Add edge
+        let edge_id = EdgeUid();
+
         edges.push({
             data: {
-                id: EdgeUid(),
+                id: edge_id,
                 source: source_node.data.id,
                 target: target_node.data.id,
             }
+        });
+
+        // Add interface If edge connects to host
+        if (source_node.config.type === 'host'){
+
+            // Ok, we got host. Add new interface.
+            let iface_id = InterfaceUid();
+            source_node.interface.push({
+                  id: iface_id,
+                  name: iface_id,
+                  connect: edge_id,
+            });
+
+            // Update nodes
+            PostNodes();
         }
-        );
+
+        if (target_node.config.type === 'host'){
+
+            // Ok, we got host. Add new interface.
+            let iface_id = InterfaceUid();
+            target_node.interface.push({
+                  name: iface_id,
+                  connect: edge_id,
+            });
+
+            // Update nodes
+            PostNodes();
+        }
+
+
+}
+
+const PostNodes = function(){
+    $.ajax({
+        type: 'POST',
+        url: '/post_network_nodes?guid=' + network_guid,
+        data: JSON.stringify(nodes),
+        success: function(data) {},
+        error: function(err) {console.log('Cannot post nodes to server')},
+        contentType: "application/json",
+        dataType: 'json'
+    });
 }
 
 const prepareStylesheet = function() {
@@ -219,6 +279,7 @@ const DrawGraph = function(nodes, edges) {
         if ((nx != rx) || (ny != ry)) {
             n.renderedPosition.x = rx;
             n.renderedPosition.y = ry;
+            PostNodes();
             console.log("Change node position from: x=" + nx + ", y=" + ny + " to x=" + rx + ", y=" + ry);
         }
     });
@@ -270,9 +331,10 @@ const DrawGraph = function(nodes, edges) {
         }
     });
 
-    // Add edge to the edges[]
+    // Add edge to the edges[] and then save it to the server.
     cy.on('ehcomplete', (event, sourceNode, targetNode, addedEdge) => {
         AddEdge(sourceNode._private.data.id, targetNode._private.data.id);
+        PostEdges();
     });
 
     // Turn on/off eh.enableDrawMode();

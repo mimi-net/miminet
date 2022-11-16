@@ -1,6 +1,7 @@
 <script id="config_main_form_script" type="text/plain">
-    <form id='config_main_form' action='/config_host_save' method='POST'>
+    <form id='config_main_form' action='/host/safe_config' method='POST'>
         <input type="hidden" id="host_id" name="host_id" value=""/>
+        <input type="hidden" id="net_guid" name="net_guid" value=""/>
 
         <button id="config_main_form_submit_button" type="submit" className="btn btn-primary">Сохранить</button>
     </form>

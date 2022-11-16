@@ -2,7 +2,7 @@ import uuid
 import json
 
 from flask_login import login_required, current_user
-from flask import render_template, redirect, url_for, request, flash
+from flask import render_template, redirect, url_for, request, flash, make_response, jsonify
 
 from miminet_model import db, Network
 
@@ -24,13 +24,14 @@ def create_network():
 @login_required
 def update_network_config():
 
+    user = current_user
     network_guid = request.args.get('guid', type=str)
 
     if not network_guid:
         flash('Пропущен параметр GUID. И какую сеть мне открыть?!')
         return redirect('home')
 
-    net = Network.query.filter(Network.guid == network_guid).first()
+    net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
 
     if not net:
         flash('Нет такой сети')
@@ -43,7 +44,7 @@ def update_network_config():
             net.title=title
             db.session.commit()
 
-    return render_template("network.html", network=net)
+    return redirect(url_for('web_network', guid=net.guid))
 
 
 @login_required
@@ -84,4 +85,61 @@ def web_network():
         flash('Нет такой сети')
         return redirect('home')
 
-    return render_template("network.html", network=net)
+    jnet = json.loads(net.network)
+
+    return render_template("network.html", network=net, nodes=jnet['nodes'], edges=jnet['edges'])
+
+
+@login_required
+def post_nodes():
+
+    user = current_user
+    network_guid = request.args.get('guid', type=str)
+
+    if not network_guid:
+        flash('Пропущен параметр GUID. И какую сеть мне открыть?!')
+        return redirect('home')
+
+    net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
+
+    if not net:
+        flash('Нет такой сети')
+        return redirect('home')
+
+    if request.method == "POST":
+        nodes = request.json
+        jnet = json.loads(net.network)
+        jnet['nodes'] = nodes
+        net.network = json.dumps(jnet)
+        db.session.commit()
+
+    ret = {'message': 'Done', 'code': 'SUCCESS'}
+    return make_response(jsonify(ret), 201)
+
+
+@login_required
+def post_edges():
+
+    user = current_user
+    network_guid = request.args.get('guid', type=str)
+
+    if not network_guid:
+        flash('Пропущен параметр GUID. И какую сеть мне открыть?!')
+        return redirect('home')
+
+    net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
+
+    if not net:
+        flash('Нет такой сети')
+        return redirect('home')
+
+    if request.method == "POST":
+        edges = request.json
+        jnet = json.loads(net.network)
+        jnet['edges'] = edges
+        net.network = json.dumps(jnet)
+        print (edges)
+        db.session.commit()
+
+    ret = {'message': 'Done', 'code': 'SUCCESS'}
+    return make_response(jsonify(ret), 201)

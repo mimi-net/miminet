@@ -5,7 +5,8 @@ from flask_login import login_required, current_user
 from miminet_config import SQLITE_DATABASE_NAME, SECRET_KEY
 from miminet_model import db, init_db, Network
 from miminet_auth import login_manager, login_index, google_login, google_callback, user_profile
-from miminet_network import create_network, web_network, update_network_config, delete_network
+from miminet_network import create_network, web_network, update_network_config, delete_network, post_nodes, post_edges
+from miminet_host import safe_host_config
 
 app = Flask(__name__,  static_url_path='', static_folder='static', template_folder="templates")
 
@@ -35,6 +36,12 @@ app.add_url_rule('/create_network', methods=['GET'], view_func=create_network)
 app.add_url_rule('/web_network', methods=['GET'], view_func=web_network)
 app.add_url_rule('/update_network_config', methods=['GET', 'POST'], view_func=update_network_config)
 app.add_url_rule('/delete_network', methods=['GET', 'POST'], view_func=delete_network)
+app.add_url_rule('/post_network_nodes', methods=['GET', 'POST'], view_func=post_nodes)
+app.add_url_rule('/post_network_edges', methods=['GET', 'POST'], view_func=post_edges)
+
+
+# Hosts
+app.add_url_rule('/host/safe_config', methods=['GET', 'POST'], view_func=safe_host_config)
 
 
 @app.route('/')

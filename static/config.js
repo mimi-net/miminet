@@ -14,6 +14,7 @@ const ConfigHostForm = function(host_id){
 
     // Set host_id
     $('#host_id').val( host_id );
+    $('#net_guid').val( network_guid );
 }
 
 const ConfigHostName = function(hostname){

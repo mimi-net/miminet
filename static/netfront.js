@@ -30,9 +30,13 @@ $('#network_scheme').droppable({
                   config: {
                       type: 'host',
                       label: node_id,
-                  }
+                  },
+                  interface: [],
               }
           );
+
+          // post new nodes to the server
+          PostNodes();
           DrawGraph(nodes, edges);
           return;
       }
@@ -47,9 +51,12 @@ $('#network_scheme').droppable({
                   config: {
                       type: 'l2_switch',
                       label: node_id,
-                  }
+                  },
+                  interface: [],
               }
           );
+
+          PostNodes();
           DrawGraph(nodes, edges);
           return;
       }
