@@ -84,6 +84,79 @@ const AddEdge = function(source_id, target_id){
 
 }
 
+const DeleteNode = function(node_id) {
+
+    // Find node in nodes
+    let n = nodes.find(n => n.data.id === node_id);
+
+    if (!n) {
+        return;
+    }
+
+    edges_to_delete = []
+
+    // Find all edges that connected to the deleted node
+    $.each(edges , function(idx, edge) {
+
+        if (!edge){
+            return;
+        }
+
+        // Find the edge
+        if (edge.data.source === node_id)
+        {
+            // Find the node on the other side
+            let t = nodes.find(t => t.data.id === edge.data.target);
+
+            if (!t){
+                console.log("We have an edge without target node");
+                return;
+            }
+
+            // Iterate interface and delete one
+            let new_iface = t.interface.filter(function( iface ) {
+                return iface.id !== edge.id;
+            });
+
+            t.interface = new_iface;
+            edges_to_delete.unshift(idx);
+            return;
+        }
+
+        if (edge.data.target === node_id)
+        {
+            // Find the node on the other side
+            let t = nodes.find(t => t.data.id === edge.data.source);
+
+            if (!t){
+                console.log("We have an edge without target node");
+                return;
+            }
+
+            // Iterate interface and delete one
+            let new_iface = t.interface.filter(function( iface ) {
+                return iface.id !== edge.id;
+            });
+
+            t.interface = new_iface;
+            edges_to_delete.unshift(idx);
+            return;
+        }
+
+    });
+
+    $.each(edges_to_delete, function (idx, val){
+       edges.splice(val, 1);
+    });
+
+    // Delete the node
+    let node_index = nodes.findIndex(prop => prop.data.id === node_id)
+    nodes.splice(node_index,1)
+    DrawGraph(nodes, edges);
+    PostEdges();
+    PostNodes();
+}
+
 const PostNodes = function(){
     $.ajax({
         type: 'POST',
@@ -293,6 +366,8 @@ const DrawGraph = function(nodes, edges) {
             return;
         }
 
+        selecteed_node_id = n.data.id;
+
         if (n.config.type === 'host'){
 
             let hostname = n.data.label;
@@ -350,6 +425,17 @@ const DrawGraph = function(nodes, edges) {
                 eh.disableDrawMode();
                 console.log("Turn off drawmode");
             }
+        }
+    });
+
+    $(document).on('keyup', function(e){
+
+        if (e.keyCode == 8)
+        {
+            DeleteNode(selecteed_node_id);
+        } else if (e.keyCode ==  46)
+        {
+            DeleteNode(selecteed_node_id);
         }
     });
 

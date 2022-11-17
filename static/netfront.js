@@ -1,6 +1,7 @@
 side_menu = document.getElementById("side_menu");
 side_menu_width = 0;
 let shifted = false;
+let selecteed_node_id = 0;
 
 // Calculate width of the side menu for a adjustment os node position
 if (side_menu){

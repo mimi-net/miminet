@@ -138,7 +138,6 @@ def post_edges():
         jnet = json.loads(net.network)
         jnet['edges'] = edges
         net.network = json.dumps(jnet)
-        print (edges)
         db.session.commit()
 
     ret = {'message': 'Done', 'code': 'SUCCESS'}
