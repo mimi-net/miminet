@@ -1,9 +1,15 @@
+let NetworkState = 0; // 0 - edit, 1 - animation
+
 const uid = function(){
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
 const HostUid = function(){
     return "host_" + uid();
+}
+
+const PacketUid = function(){
+    return "pkt_" + uid();
 }
 
 const l2SwitchUid = function(){
@@ -199,8 +205,8 @@ const prepareStylesheet = function() {
           'border-width': 0,
           'content': getNodeLabel,
           'text-valign': 'top',
-          'text-halign': 'center',
-            'font-size': '10px',
+          'text-align': 'center',
+            'font-size': '8px',
         })
         .selector('edge')
         .css({
@@ -265,6 +271,17 @@ const prepareStylesheet = function() {
             'content': 'data(name)'
         })
 
+        .selector('node[type="packet"]')
+        .css({
+            'content': 'data(label)',
+            'text-valign': 'top',
+            'text-align': 'center',
+            'height': '5px',
+            'width': '5px',
+            'border-opacity': '0',
+            'border-width': '0px'
+        })
+
         .selector('.eh-ghost-edge.eh-preview-active')
         .css({
             'opacity': 0
@@ -289,7 +306,6 @@ const prepareStylesheet = function() {
 
     return sheet;
   };
-
 
 const DrawGraph = function(nodes, edges) {
 
@@ -327,7 +343,7 @@ const DrawGraph = function(nodes, edges) {
         disableBrowserGestures: true // during an edge drawing gesture, disable browser gestures such as two-finger trackpad swipe and pinch-to-zoom
     };
 
-    let eh = cy.edgehandles( defaults );
+    let eh = cy.edgehandles(defaults );
 
     cy.add(nodes);
     cy.add(edges);
@@ -412,31 +428,88 @@ const DrawGraph = function(nodes, edges) {
         PostEdges();
     });
 
-    // Turn on/off eh.enableDrawMode();
-    $(document).on('keyup keydown', function(e){
-        if (shifted != e.shiftKey)
-        {
-            shifted = e.shiftKey;
-            if (shifted)
-            {
-                eh.enableDrawMode();
-                console.log("Turn on drawmode");
-            } else {
-                eh.disableDrawMode();
-                console.log("Turn off drawmode");
-            }
-        }
-    });
-
     $(document).on('keyup', function(e){
 
-        if (e.keyCode == 8)
-        {
-            DeleteNode(selecteed_node_id);
-        } else if (e.keyCode ==  46)
+    if (e.keyCode ==  46)
         {
             DeleteNode(selecteed_node_id);
         }
     });
 
+}
+
+const DrawGraphStatic = function(nodes, edges, pkt) {
+
+    const cy = cytoscape({
+        container: document.getElementById("network_scheme"),
+        boxSelectionEnabled: true,
+        autounselectify: false,
+        style: prepareStylesheet(),
+        elements: [],
+        layout: 'preset',
+        zoom: 2,
+        fit: true,
+    });
+
+    cy.add(nodes);
+    cy.add(edges);
+
+    let zoom = cy.zoom();
+
+    pkt.forEach(function(p_item){
+
+        let edge = cy.edges('[id = "' + p_item['config']['path'] + '"]');
+
+        if (!edge) {
+            return;
+        }
+
+        let pkt_id = p_item['data']['id'];
+        let from_xy = undefined;
+        let to_xy = undefined;
+
+        if (edge.source().id() === p_item['config']['source']){
+            console.log('From source to target');
+
+            from_xy = edge.sourceEndpoint();
+            to_xy = edge.targetEndpoint();
+
+        } else if (edge.source().id() === p_item['config']['target'])
+        {
+            console.log("From target to source");
+
+            from_xy = edge.targetEndpoint();
+            to_xy = edge.sourceEndpoint();
+
+        } else {
+            console.log('Got edge but source and target id is not equal');
+            return;
+        }
+
+        p_item['renderedPosition'] = {x: from_xy['x'] * zoom, y: from_xy['y'] * zoom};
+        cy.add(p_item);
+
+        cy.nodes().last().animate({
+            renderedPosition: {x: to_xy['x'] * zoom, y: to_xy['y'] * zoom}
+        }, {
+            duration: 1000,
+            complete: function(){
+                cy.remove('[id = "' + pkt_id + '"]');
+            }
+        });
+    })
+
+    cy.nodes().ungrabify();
+    return cy;
+}
+
+const GetNetworkState = function()
+{
+    return NetworkState;
+}
+
+const SetNetworkState = function(state)
+{
+    NetworkState = state;
+    return NetworkState;
 }
