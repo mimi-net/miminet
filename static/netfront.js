@@ -77,37 +77,68 @@ $('#NetworkRunButton').click(function() {
 
         SetNetworkState(0);
         DrawGraph(nodes, edges);
+
+        let timeout_last_id = window.setTimeout(function() {}, 0);
+
+        while (timeout_last_id--) {
+            window.clearTimeout(timeout_last_id); // will do nothing if no timeout with id is present
+        }
     } else {
         $(this).text('Остановить');
         $(this).removeClass('btn-success');
         $(this).addClass('btn-warning');
 
-        let pkt_id = PacketUid();
-        let pkt_id2 = PacketUid();
-
-        pkt_array = [
-            {
-                data: {id: pkt_id, label: 'ARP request', type: 'packet'},
-                config:{
-                    type: 'ARP request',
-                    path: 'edge_las0sa7mo4903wdz54t',
-                    source: 'host_las0s8t5fmtx2xm3cdb',
-                    target: 'l2_switch_las0s9fc0tey23820d'
+        let pkt_array = [
+            [
+                {
+                    data: {id: PacketUid(), label: 'ARP request', type: 'packet'},
+                    config:{
+                        type: 'ARP request',
+                        path: 'edge_law8a484xvch79flkbr',
+                        source: 'host_law8a3d4xeer4q5tzwg',
+                        target: 'l2_switch_las0s9fc0tey23820d'
+                    }
                 }
-            },
-            {
-                data: {id: pkt_id2, label: 'ARP reply', type: 'packet'},
-                config:{
-                    type: 'ARP reply',
-                    path: 'edge_las0sa7mo4903wdz54t',
-                    source: 'l2_switch_las0s9fc0tey23820d',
-                    target: 'host_las0s8t5fmtx2xm3cdb'
+            ],
+            [
+                {
+                    data: {id: PacketUid(), label: 'ARP reply', type: 'packet'},
+                    config: {
+                        type: 'ARP reply',
+                        path: 'edge_law8a484xvch79flkbr',
+                        source: 'l2_switch_las0s9fc0tey23820d',
+                        target: 'host_law8a3d4xeer4q5tzwg'
+                    }
                 }
-            },
+            ],
+            [
+                {
+                    data: {id: PacketUid(), label: 'ICMP request', type: 'packet'},
+                    config:{
+                        type: 'ICMP request',
+                        path: 'edge_law8c7aywfigqotywpj',
+                        source: 'host_law8c6izj98ig8idt9g',
+                        target: 'l2_switch_las0s9fc0tey23820d'
+                    }
+                }
+            ],
+            [
+                {
+                    data: {id: PacketUid(), label: 'ICMP reply', type: 'packet'},
+                    config: {
+                        type: 'ICMP reply',
+                        path: 'edge_law8c7aywfigqotywpj',
+                        source: 'l2_switch_las0s9fc0tey23820d',
+                        target: 'host_law8c6izj98ig8idt9g'
+                    }
+                }
+            ],
         ]
 
         SetNetworkState(1);
-        cyy = DrawGraphStatic(nodes, edges, pkt_array);
+        DrawGraphStatic(nodes, edges, pkt_array);
+
+
     }
 
 })

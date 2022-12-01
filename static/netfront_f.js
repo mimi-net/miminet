@@ -24,7 +24,6 @@ const InterfaceUid = function(){
     return "iface_" + uid();
 }
 
-
 const PostEdges = function(){
     $.ajax({
         type: 'POST',
@@ -86,8 +85,6 @@ const AddEdge = function(source_id, target_id){
             // Update nodes
             PostNodes();
         }
-
-
 }
 
 const DeleteNode = function(node_id) {
@@ -438,29 +435,15 @@ const DrawGraph = function(nodes, edges) {
 
 }
 
-const DrawGraphStatic = function(nodes, edges, pkt) {
-
-    const cy = cytoscape({
-        container: document.getElementById("network_scheme"),
-        boxSelectionEnabled: true,
-        autounselectify: false,
-        style: prepareStylesheet(),
-        elements: [],
-        layout: 'preset',
-        zoom: 2,
-        fit: true,
-    });
-
-    cy.add(nodes);
-    cy.add(edges);
+const RunPackets = function (cy, pkts){
 
     let zoom = cy.zoom();
 
-    pkt.forEach(function(p_item){
+    pkts.forEach(function(p_item){
 
         let edge = cy.edges('[id = "' + p_item['config']['path'] + '"]');
 
-        if (!edge) {
+        if (!edge.source()) {
             return;
         }
 
@@ -498,9 +481,35 @@ const DrawGraphStatic = function(nodes, edges, pkt) {
             }
         });
     })
+}
+
+const DrawGraphStatic = function(nodes, edges, traffic) {
+
+    const cy = cytoscape({
+        container: document.getElementById("network_scheme"),
+        boxSelectionEnabled: true,
+        autounselectify: false,
+        style: prepareStylesheet(),
+        elements: [],
+        layout: 'preset',
+        zoom: 2,
+        fit: true,
+    });
+
+    cy.add(nodes);
+    cy.add(edges);
+
+    let timeout = 0;
+
+    traffic.forEach(function(pkts){
+        setTimeout(function(){RunPackets(cy, pkts)}, timeout);
+        timeout += 1500;
+    })
+
+    setTimeout(function(){$('#NetworkRunButton').click();}, timeout);
 
     cy.nodes().ungrabify();
-    return cy;
+    return;
 }
 
 const GetNetworkState = function()
