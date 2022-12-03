@@ -1,4 +1,4 @@
-let NetworkState = 0; // 0 - edit, 1 - animation
+let NetworkState = 0; // 0 - edit, 1 - simulation, 2 - animation
 
 const uid = function(){
     return Date.now().toString(36) + Math.random().toString(36).substr(2);

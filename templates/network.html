@@ -52,6 +52,7 @@
     const network_guid = "{{ network.guid }}";
     const nodes = {{ nodes | safe }};
     const edges = {{ edges | safe }};
+    const packets = {{ packets | safe }};
 
     DrawGraph(nodes, edges);
 </script>

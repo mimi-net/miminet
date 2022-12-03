@@ -87,7 +87,16 @@ def web_network():
 
     jnet = json.loads(net.network)
 
-    return render_template("network.html", network=net, nodes=jnet['nodes'], edges=jnet['edges'])
+    if not 'nodes' in jnet:
+        jnet['nodes'] = 'null'
+
+    if not 'edges' in jnet:
+        jnet['edges'] = 'null'
+
+    if not 'packets' in jnet:
+        jnet['packets'] = 'null'
+
+    return render_template("network.html", network=net, nodes=jnet['nodes'], edges=jnet['edges'], packets=jnet['packets'])
 
 
 @login_required

@@ -70,7 +70,8 @@ $('#network_scheme').droppable({
 
 $('#NetworkRunButton').click(function() {
 
-    if (GetNetworkState()){
+    // Network in running
+    if (GetNetworkState() == 2) {
         $(this).text('Запустить');
         $(this).removeClass('btn-warning');
         $(this).addClass('btn-success');
@@ -78,12 +79,15 @@ $('#NetworkRunButton').click(function() {
         SetNetworkState(0);
         DrawGraph(nodes, edges);
 
-        let timeout_last_id = window.setTimeout(function() {}, 0);
+        let timeout_last_id = window.setTimeout(function () {
+        }, 0);
 
         while (timeout_last_id--) {
             window.clearTimeout(timeout_last_id); // will do nothing if no timeout with id is present
         }
-    } else {
+    }
+    else if (GetNetworkState() === 1){
+
         $(this).text('Остановить');
         $(this).removeClass('btn-success');
         $(this).addClass('btn-warning');
@@ -138,6 +142,16 @@ $('#NetworkRunButton').click(function() {
         SetNetworkState(1);
         DrawGraphStatic(nodes, edges, pkt_array);
 
+    } else {
+
+        // Is network already simulated?
+        if (!packets){
+            $(this).text('Симуляция');
+            $(this).removeClass('btn-success');
+            $(this).removeClass('btn-warning');
+            $(this).addClass('btn-secondary');
+            $(this).prop('disabled', true);
+        }
 
     }
 
