@@ -70,27 +70,33 @@ $('#network_scheme').droppable({
 
 $('#NetworkRunButton').click(function() {
 
-    // Network in running
-    if (GetNetworkState() == 2) {
-        $(this).text('Запустить');
-        $(this).removeClass('btn-warning');
-        $(this).addClass('btn-success');
+    // Run simulating
+    if (GetNetworkState() === 0)
+    {
+        $(this).text('Симуляция');
+        $(this).removeClass('btn-primary');
+        $(this).addClass('btn-secondary');
+        $(this).prop('disabled', true);
 
-        SetNetworkState(0);
-        DrawGraph(nodes, edges);
-
-        let timeout_last_id = window.setTimeout(function () {
-        }, 0);
-
-        while (timeout_last_id--) {
-            window.clearTimeout(timeout_last_id); // will do nothing if no timeout with id is present
-        }
+        RunSimulation(network_guid);
+        SetNetworkState(1);
+        return;
     }
-    else if (GetNetworkState() === 1){
 
-        $(this).text('Остановить');
+    // Network in running
+    if (GetNetworkState() === 2) {
+
+        // Do we got a packets?
+        if (!packets){
+            console.log("Don't have a packets");
+            return;
+        }
+
+        $(this).text('Стоп');
         $(this).removeClass('btn-success');
-        $(this).addClass('btn-warning');
+        $(this).addClass('btn-danger');
+
+        SetNetworkState(3);
 
         let pkt_array = [
             [
@@ -138,21 +144,33 @@ $('#NetworkRunButton').click(function() {
                 }
             ],
         ]
-
-        SetNetworkState(1);
         DrawGraphStatic(nodes, edges, pkt_array);
 
-    } else {
+        let timeout_last_id = window.setTimeout(function () {
+        }, 0);
 
-        // Is network already simulated?
-        if (!packets){
-            $(this).text('Симуляция');
-            $(this).removeClass('btn-success');
-            $(this).removeClass('btn-warning');
-            $(this).addClass('btn-secondary');
-            $(this).prop('disabled', true);
+        while (timeout_last_id--) {
+            window.clearTimeout(timeout_last_id); // will do nothing if no timeout with id is present
         }
-
     }
 
+    if (GetNetworkState() === 3)
+    {
+        // Do we got a packets?
+        if (!packets){
+            $(this).text('Симулировать');
+            $(this).removeClass('btn-danger');
+            $(this).addClass('btn-primary');
+
+            SetNetworkState(0);
+            return;
+        }
+
+        $(this).text('Запустить');
+        $(this).removeClass('btn-danger');
+        $(this).addClass('btn-success');
+
+        SetNetworkState(2);
+        return;
+    }
 })

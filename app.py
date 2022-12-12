@@ -1,11 +1,15 @@
 import sys
+
 from flask import Flask, render_template, request
 from flask_login import login_required, current_user
+from flask_migrate import Migrate
 
 from miminet_config import SQLITE_DATABASE_NAME, SECRET_KEY
 from miminet_model import db, init_db, Network
 from miminet_auth import login_manager, login_index, google_login, google_callback, user_profile
-from miminet_network import create_network, web_network, update_network_config, delete_network, post_nodes, post_edges
+from miminet_network import create_network, web_network, update_network_config,\
+    delete_network, post_nodes, post_edges, post_nodes_edges
+from miminet_simulation import run_simulation
 from miminet_host import safe_host_config
 
 app = Flask(__name__,  static_url_path='', static_folder='static', template_folder="templates")
@@ -19,6 +23,9 @@ app.config['SESSION_COOKIE_NAME'] = "mimi_session"
 # Init Database
 db.app = app
 db.init_app(app)
+
+# Init Flask-Migrate
+migrate = Migrate(app, db)
 
 # Init LoginManager
 login_manager.init_app(app)
@@ -38,6 +45,10 @@ app.add_url_rule('/update_network_config', methods=['GET', 'POST'], view_func=up
 app.add_url_rule('/delete_network', methods=['GET', 'POST'], view_func=delete_network)
 app.add_url_rule('/post_network_nodes', methods=['GET', 'POST'], view_func=post_nodes)
 app.add_url_rule('/post_network_edges', methods=['GET', 'POST'], view_func=post_edges)
+app.add_url_rule('/post_nodes_edges', methods=['POST'], view_func=post_nodes_edges)
+
+# Simulation
+app.add_url_rule('/run_simulation', methods=['POST'], view_func=run_simulation)
 
 
 # Hosts

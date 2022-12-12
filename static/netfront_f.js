@@ -1,4 +1,5 @@
-let NetworkState = 0; // 0 - edit, 1 - simulation, 2 - animation
+let NetworkState = 0; // 0 - not simulated yet, 1 - simulating, 2 - ready to run, 3 - animated
+let SimulationId = 0;
 
 const uid = function(){
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -29,6 +30,18 @@ const PostEdges = function(){
         type: 'POST',
         url: '/post_network_edges?guid=' + network_guid,
         data: JSON.stringify(edges),
+        success: function(data) {},
+        error: function(err) {console.log('Cannot post edges to server')},
+        contentType: "application/json",
+        dataType: 'json'
+    });
+}
+
+const PostNodesEdges = function(){
+    $.ajax({
+        type: 'POST',
+        url: '/post_nodes_edges?guid=' + network_guid,
+        data: JSON.stringify([nodes, edges]),
         success: function(data) {},
         error: function(err) {console.log('Cannot post edges to server')},
         contentType: "application/json",
@@ -149,15 +162,18 @@ const DeleteNode = function(node_id) {
     });
 
     $.each(edges_to_delete, function (idx, val){
-       edges.splice(val, 1);
+        console.log(edges);
+        console.log(val);
+        edges.splice(val, 1);
+        console.log(edges);
     });
 
     // Delete the node
     let node_index = nodes.findIndex(prop => prop.data.id === node_id)
     nodes.splice(node_index,1)
+    PostNodesEdges();
     DrawGraph(nodes, edges);
-    PostEdges();
-    PostNodes();
+
 }
 
 const PostNodes = function(){
@@ -521,4 +537,72 @@ const SetNetworkState = function(state)
 {
     NetworkState = state;
     return NetworkState;
+}
+
+// Check whether simulation is over and we can run packets
+const CheckSimulation = function (simulation_id)
+{
+    $.ajax({
+        type: 'POST',
+        url: '/check_simulation?simulation_id=' + simulation_id,
+        data: '',
+        success: function(data) {
+            console.log(data);
+        },
+        error: function(err) {
+            console.log('Cannot check simulation id = ' + simulation_id);
+        },
+        contentType: "application/json",
+        dataType: 'json'
+    });
+}
+
+const RunSimulation = function (network_guid)
+{
+    $.ajax({
+        type: 'POST',
+        url: '/run_simulation?guid=' + network_guid,
+        data: '',
+        success: function(data) {
+            console.log(data);
+        },
+        error: function(err) {
+            console.log('Cannot run simulation guid = ' + network_guid);
+        },
+        contentType: "application/json",
+        dataType: 'json'
+    });
+
+}
+
+const SetNetworkRunButtonState = function(id, packets)
+{
+    // If we have packets, than we're ready to run
+    if (packets)
+    {
+        $('#NetworkRunButton').text('Запустить');
+        $('#NetworkRunButton').removeClass('btn-primary');
+        $('#NetworkRunButton').addClass('btn-success');
+        $('#NetworkRunButton').prop('disabled', false);
+
+        SetNetworkState(2);
+        return;
+    }
+
+    // Don't have a packets (not simulated yet). Do we have simulation id?
+    // If so, we're simulating.
+    if (id)
+    {
+        $('#NetworkRunButton').text('Симуляция');
+        $('#NetworkRunButton').removeClass('btn-primary');
+        $('#NetworkRunButton').addClass('btn-secondary');
+        $('#NetworkRunButton').prop('disabled', true);
+
+        CheckSimulation(id);
+        SetNetworkState(1);
+        return;
+    }
+
+    SetNetworkState(0);
+    return;
 }

@@ -6,7 +6,7 @@
 <main>
     <div class="container-fluid">
         <div class="row flex-nowrap">
-            <div id="side_menu" class="col-auto col-md-3 col-xl-1 px-sm-2 px-0 bg-white" style="height: 900px;">
+            <div id="side_menu" class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-white" style="height: 90vh;">
                 <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 h-100">
                     <a href="{{ url_for('index') }}" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-decoration-none">
                         <span class="fs-5 d-none d-sm-inline">Устройства</span>
@@ -21,7 +21,7 @@
 
                     <div class="row">
                         <div class="col">
-                            <button type="button" class="btn btn-success" id="NetworkRunButton">Запустить</button>
+                            <button type="button" class="btn btn-primary" id="NetworkRunButton">Симулировать</button>
                         </div>
                     </div>
                 </div>
@@ -49,10 +49,13 @@
 
 {% block network %}
 <script>
+
     const network_guid = "{{ network.guid }}";
     const nodes = {{ nodes | safe }};
     const edges = {{ edges | safe }};
     const packets = {{ packets | safe }};
+
+    SetNetworkRunButtonState({% if simulating %} {{simulating.id}} {% else %} 0 {% endif%}, packets);
 
     DrawGraph(nodes, edges);
 </script>

@@ -4,7 +4,7 @@ import json
 from flask_login import login_required, current_user
 from flask import render_template, redirect, url_for, request, flash, make_response, jsonify
 
-from miminet_model import db, Network
+from miminet_model import db, Network, Simulate
 
 @login_required
 def create_network():
@@ -54,7 +54,7 @@ def delete_network():
     network_guid = request.args.get('guid', type=str)
 
     if not network_guid:
-        flash('Пропущен параметр GUID. И какую сеть мне открыть?!')
+        flash('Пропущен параметр GUID. И какую сеть мне удалить?!')
         return redirect('home')
 
     net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
@@ -96,7 +96,12 @@ def web_network():
     if not 'packets' in jnet:
         jnet['packets'] = 'null'
 
-    return render_template("network.html", network=net, nodes=jnet['nodes'], edges=jnet['edges'], packets=jnet['packets'])
+    # Do we simulte this network now?
+    sim = Simulate.query.filter(Simulate.network_id == net.id).first()
+
+    return render_template("network.html", network=net, nodes=jnet['nodes'],
+                           edges=jnet['edges'], packets=jnet['packets'],
+                           simulating = sim)
 
 
 @login_required
@@ -107,13 +112,13 @@ def post_nodes():
 
     if not network_guid:
         flash('Пропущен параметр GUID. И какую сеть мне открыть?!')
-        return redirect('home')
+        return redirect(url_for('home'))
 
     net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
 
     if not net:
         flash('Нет такой сети')
-        return redirect('home')
+        return redirect(url_for('home'))
 
     if request.method == "POST":
         nodes = request.json
@@ -134,13 +139,13 @@ def post_edges():
 
     if not network_guid:
         flash('Пропущен параметр GUID. И какую сеть мне открыть?!')
-        return redirect('home')
+        return redirect(url_for('home'))
 
     net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
 
     if not net:
         flash('Нет такой сети')
-        return redirect('home')
+        return redirect(url_for('home'))
 
     if request.method == "POST":
         edges = request.json
@@ -151,3 +156,51 @@ def post_edges():
 
     ret = {'message': 'Done', 'code': 'SUCCESS'}
     return make_response(jsonify(ret), 201)
+
+
+@login_required
+def post_nodes_edges():
+
+    user = current_user
+    network_guid = request.args.get('guid', type=str)
+
+    if not network_guid:
+        ret = {'message': 'Пропущен параметр guid'}
+        return make_response(jsonify(ret), 400)
+
+    net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
+
+    if not net:
+        ret = {'message': 'Нет такой сети'}
+        return make_response(jsonify(ret), 400)
+
+    if request.method == "POST":
+        nodes = request.json[0]
+        edges = request.json[1]
+
+        jnet = json.loads(net.network)
+        jnet['edges'] = edges
+        jnet['nodes'] = nodes
+        net.network = json.dumps(jnet)
+        db.session.commit()
+
+    ret = {'message': 'Done', 'code': 'SUCCESS'}
+    return make_response(jsonify(ret), 201)
+
+
+@login_required
+def network_simulate():
+
+    user = current_user
+    network_guid = request.args.get('guid', type=str)
+
+    if not network_guid:
+        flash('Пропущен параметр GUID. Кого симулировать?!')
+        return redirect('home')
+
+    net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
+
+    if not net:
+        flash('Нет такой сети')
+        return redirect('home')
+

@@ -50,6 +50,16 @@ class Network(db.Model):
     preview_uri = db.Column(db.String(255), default='first_network.jpg', nullable=False)
 
 
+class Simulate(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
+
+    # Do we finish? (False - new, True - simulation is finished)
+    ready = db.Column(db.Boolean, default=False)
+    packets = db.Column(db.UnicodeText, nullable=True, default='')
+
+
 def init_db(app):
     # Data
 
