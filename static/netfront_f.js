@@ -73,8 +73,6 @@ const AddEdge = function(source_id, target_id){
 
         // Add interface If edge connects to host
         if (source_node.config.type === 'host'){
-
-            // Ok, we got host. Add new interface.
             let iface_id = InterfaceUid();
             source_node.interface.push({
                   id: iface_id,
@@ -84,12 +82,30 @@ const AddEdge = function(source_id, target_id){
         }
 
         if (target_node.config.type === 'host'){
-
-            // Ok, we got host. Add new interface.
             let iface_id = InterfaceUid();
             target_node.interface.push({
-                  name: iface_id,
-                  connect: edge_id,
+                id: iface_id,
+                name: iface_id,
+                connect: edge_id,
+            });
+        }
+
+        // Add interface if connected to switch
+        if (target_node.config.type === 'l2_switch'){
+            let iface_id = InterfaceUid();
+            target_node.interface.push({
+                id: iface_id,
+                name: iface_id,
+                connect: edge_id,
+            });
+        }
+
+        if (source_node.config.type === 'l2_switch'){
+            let iface_id = InterfaceUid();
+            source_node.interface.push({
+                id: iface_id,
+                name: iface_id,
+                connect: edge_id,
             });
         }
 }
@@ -125,7 +141,7 @@ const DeleteNode = function(node_id) {
 
             // Iterate interface and delete one
             let new_iface = t.interface.filter(function( iface ) {
-                return iface.id !== edge.id;
+                return iface.connect !== edge.data.id;
             });
 
             t.interface = new_iface;
@@ -145,7 +161,7 @@ const DeleteNode = function(node_id) {
 
             // Iterate interface and delete one
             let new_iface = t.interface.filter(function( iface ) {
-                return iface.id !== edge.id;
+                return iface.connect !== edge.data.id;
             });
 
             t.interface = new_iface;
@@ -156,10 +172,7 @@ const DeleteNode = function(node_id) {
     });
 
     $.each(edges_to_delete, function (idx, val){
-        console.log(edges);
-        console.log(val);
         edges.splice(val, 1);
-        console.log(edges);
     });
 
     // Delete the node
