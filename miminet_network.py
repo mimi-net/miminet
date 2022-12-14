@@ -125,6 +125,12 @@ def post_nodes():
         jnet = json.loads(net.network)
         jnet['nodes'] = nodes
         net.network = json.dumps(jnet)
+
+        # Remove all previous simulations
+        sims = Simulate.query.filter(Simulate.network_id == net.id).all()
+        for s in sims:
+            db.session.delete(s)
+
         db.session.commit()
 
     ret = {'message': 'Done', 'code': 'SUCCESS'}
@@ -182,6 +188,12 @@ def post_nodes_edges():
         jnet['edges'] = edges
         jnet['nodes'] = nodes
         net.network = json.dumps(jnet)
+
+        # Remove all previous simulations
+        sims = Simulate.query.filter(Simulate.network_id == net.id).all()
+        for s in sims:
+            db.session.delete(s)
+
         db.session.commit()
 
     ret = {'message': 'Done', 'code': 'SUCCESS'}
@@ -204,3 +216,29 @@ def network_simulate():
         flash('Нет такой сети')
         return redirect('home')
 
+
+@login_required
+def move_nodes():
+
+    user = current_user
+    network_guid = request.args.get('guid', type=str)
+
+    if not network_guid:
+        ret = {'message': 'Пропущен параметр GUID. И какую сеть мне открыть?!'}
+        return make_response(jsonify(ret), 400)
+
+    net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
+
+    if not net:
+        ret = {'message': 'Нет такой сети'}
+        return make_response(jsonify(ret), 400)
+
+    if request.method == "POST":
+        nodes = request.json
+        jnet = json.loads(net.network)
+        jnet['nodes'] = nodes
+        net.network = json.dumps(jnet)
+        db.session.commit()
+
+    ret = {'message': 'Done', 'code': 'SUCCESS'}
+    return make_response(jsonify(ret), 201)

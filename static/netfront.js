@@ -21,8 +21,13 @@ $('#network_scheme').droppable({
   drop: function (e, ui) {
       type = ui.draggable.prop('id')
 
-      if (GetNetworkState()){
+      if (GetNetworkState() === 3){
           return;
+      }
+
+      // We add new device. Drop the network state.
+      if (GetNetworkState()){
+        SetNetworkRunButtonState(0, null);
       }
 
       if (type === 'host'){

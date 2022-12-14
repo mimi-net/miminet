@@ -37,3 +37,28 @@ def run_simulation():
         return make_response(jsonify(ret), 201)
 
     return redirect(url_for('home'))
+
+
+@login_required
+def check_simulation():
+    user = current_user
+    simulation_id = request.args.get('simulation_id', type=int)
+
+    if not simulation_id:
+        ret = {'message': 'Пропущен параметр simulation_id.'}
+        return make_response(jsonify(ret), 400)
+
+    sim = Simulate.query.filter(Simulate.id == simulation_id).first()
+
+    if not sim:
+        ret = {'message': 'Нет такой симуляции'}
+        return make_response(jsonify(ret), 400)
+
+    if sim.ready:
+        ret = {'message': 'Симуляция завершена'}
+        db.session.delete(sim)
+        db.session.commit()
+        return make_response(jsonify(ret), 200)
+
+    ret = {'message': 'Сеть в процессе симуляции'}
+    return make_response(jsonify(ret), 210)

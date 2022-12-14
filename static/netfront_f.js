@@ -81,9 +81,6 @@ const AddEdge = function(source_id, target_id){
                   name: iface_id,
                   connect: edge_id,
             });
-
-            // Update nodes
-            PostNodes();
         }
 
         if (target_node.config.type === 'host'){
@@ -94,9 +91,6 @@ const AddEdge = function(source_id, target_id){
                   name: iface_id,
                   connect: edge_id,
             });
-
-            // Update nodes
-            PostNodes();
         }
 }
 
@@ -180,6 +174,18 @@ const PostNodes = function(){
     $.ajax({
         type: 'POST',
         url: '/post_network_nodes?guid=' + network_guid,
+        data: JSON.stringify(nodes),
+        success: function(data) {},
+        error: function(err) {console.log('Cannot post nodes to server')},
+        contentType: "application/json",
+        dataType: 'json'
+    });
+}
+
+const MoveNodes = function(){
+    $.ajax({
+        type: 'POST',
+        url: '/move_network_nodes?guid=' + network_guid,
         data: JSON.stringify(nodes),
         success: function(data) {},
         error: function(err) {console.log('Cannot post nodes to server')},
@@ -381,7 +387,7 @@ const DrawGraph = function(nodes, edges) {
         if ((nx != rx) || (ny != ry)) {
             n.renderedPosition.x = rx;
             n.renderedPosition.y = ry;
-            PostNodes();
+            MoveNodes();
             console.log("Change node position from: x=" + nx + ", y=" + ny + " to x=" + rx + ", y=" + ry);
         }
     });
@@ -438,7 +444,12 @@ const DrawGraph = function(nodes, edges) {
     // Add edge to the edges[] and then save it to the server.
     cy.on('ehcomplete', (event, sourceNode, targetNode, addedEdge) => {
         AddEdge(sourceNode._private.data.id, targetNode._private.data.id);
-        PostEdges();
+        PostNodesEdges();
+
+        // Reset network state
+        if (GetNetworkState()){
+            SetNetworkRunButtonState(0, null);
+        }
     });
 
     $(document).on('keyup', function(e){
@@ -543,14 +554,25 @@ const SetNetworkState = function(state)
 const CheckSimulation = function (simulation_id)
 {
     $.ajax({
-        type: 'POST',
+        type: 'GET',
         url: '/check_simulation?simulation_id=' + simulation_id,
         data: '',
-        success: function(data) {
-            console.log(data);
+        success: function(data, textStatus, xhr) {
+
+            // If we got 210 (processing) wait 1 sec and call themself again
+            if (xhr.status === 210)
+            {
+                setTimeout(CheckSimulation, 2000, simulation_id);
+            }
+
+            if (xhr.status === 200)
+            {
+                console.log(data);
+            }
         },
-        error: function(err) {
+        error: function(xhr) {
             console.log('Cannot check simulation id = ' + simulation_id);
+            SetNetworkRunButtonState(0, null);
         },
         contentType: "application/json",
         dataType: 'json'
@@ -563,8 +585,16 @@ const RunSimulation = function (network_guid)
         type: 'POST',
         url: '/run_simulation?guid=' + network_guid,
         data: '',
-        success: function(data) {
-            console.log(data);
+        success: function(data, textStatus, xhr) {
+            if (xhr.status === 201)
+            {
+                console.log("Simulation is running!");
+                // Ok, run CheckSimulation
+                if (data.simulation_id)
+                {
+                    CheckSimulation(data.simulation_id);
+                }
+            }
         },
         error: function(err) {
             console.log('Cannot run simulation guid = ' + network_guid);
@@ -603,6 +633,11 @@ const SetNetworkRunButtonState = function(id, packets)
         return;
     }
 
+    $('#NetworkRunButton').text('Симулировать');
+    $('#NetworkRunButton').removeClass('btn-secondary');
+    $('#NetworkRunButton').removeClass('btn-success');
+    $('#NetworkRunButton').addClass('btn-primary');
+    $('#NetworkRunButton').prop('disabled', false);
     SetNetworkState(0);
     return;
 }
