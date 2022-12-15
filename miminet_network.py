@@ -111,14 +111,14 @@ def post_nodes():
     network_guid = request.args.get('guid', type=str)
 
     if not network_guid:
-        flash('Пропущен параметр GUID. И какую сеть мне открыть?!')
-        return redirect(url_for('home'))
+        ret = {'message': 'Пропущен параметр guid'}
+        return make_response(jsonify(ret), 400)
 
     net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
 
     if not net:
-        flash('Нет такой сети')
-        return redirect(url_for('home'))
+        ret = {'message': 'Нет такой сети'}
+        return make_response(jsonify(ret), 400)
 
     if request.method == "POST":
         nodes = request.json
@@ -198,23 +198,6 @@ def post_nodes_edges():
 
     ret = {'message': 'Done', 'code': 'SUCCESS'}
     return make_response(jsonify(ret), 201)
-
-
-@login_required
-def network_simulate():
-
-    user = current_user
-    network_guid = request.args.get('guid', type=str)
-
-    if not network_guid:
-        flash('Пропущен параметр GUID. Кого симулировать?!')
-        return redirect('home')
-
-    net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
-
-    if not net:
-        flash('Нет такой сети')
-        return redirect('home')
 
 
 @login_required

@@ -22,7 +22,7 @@ const EdgeUid = function(){
 }
 
 const InterfaceUid = function(){
-    return "iface_" + uid();
+    return "iface" + uid();
 }
 
 const PostEdges = function(){
