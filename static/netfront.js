@@ -177,6 +177,7 @@ $('#NetworkRunButton').click(function() {
         $(this).removeClass('btn-danger');
         $(this).addClass('btn-success');
 
+        DrawGraph(nodes, edges);
         SetNetworkState(2);
         return;
     }
