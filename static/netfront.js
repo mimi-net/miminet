@@ -148,7 +148,7 @@ $('#NetworkRunButton').click(function() {
                     }
                 }
             ],
-        ]
+        ];
         DrawGraphStatic(nodes, edges, packets);
 
         let timeout_last_id = window.setTimeout(function () {
