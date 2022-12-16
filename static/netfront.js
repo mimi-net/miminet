@@ -150,6 +150,7 @@ $('#NetworkRunButton').click(function() {
             ],
         ];
         DrawGraphStatic(nodes, edges, packets);
+        return;
     }
 
     if (GetNetworkState() === 3)
