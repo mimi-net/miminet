@@ -580,7 +580,9 @@ const CheckSimulation = function (simulation_id)
 
             if (xhr.status === 200)
             {
+                packets = data.packets;
                 console.log(data);
+                SetNetworkRunButtonState(0, packets)
             }
         },
         error: function(xhr) {

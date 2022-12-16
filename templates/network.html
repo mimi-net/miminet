@@ -53,7 +53,7 @@
     const network_guid = "{{ network.guid }}";
     const nodes = {{ nodes | safe }};
     const edges = {{ edges | safe }};
-    const packets = {{ packets | safe }};
+    var packets = {{ packets | safe }};
 
     SetNetworkRunButtonState({% if simulating %} {{simulating.id}} {% else %} 0 {% endif%}, packets);
 
