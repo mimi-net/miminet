@@ -150,6 +150,10 @@ $('#NetworkRunButton').click(function() {
             ],
         ];
         DrawGraphStatic(nodes, edges, packets);
+    }
+
+    if (GetNetworkState() === 3)
+    {
 
         let timeout_last_id = window.setTimeout(function () {
         }, 0);
@@ -157,10 +161,7 @@ $('#NetworkRunButton').click(function() {
         while (timeout_last_id--) {
             window.clearTimeout(timeout_last_id); // will do nothing if no timeout with id is present
         }
-    }
 
-    if (GetNetworkState() === 3)
-    {
         // Do we got a packets?
         if (!packets){
             $(this).text('Симулировать');
