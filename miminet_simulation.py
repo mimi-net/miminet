@@ -55,9 +55,7 @@ def check_simulation():
         return make_response(jsonify(ret), 400)
 
     if sim.ready:
-        ret = {'message': 'Симуляция завершена'}
-        db.session.delete(sim)
-        db.session.commit()
+        ret = {'message': 'Симуляция завершена', 'packets' : sim.packets}
         return make_response(jsonify(ret), 200)
 
     ret = {'message': 'Сеть в процессе симуляции'}
