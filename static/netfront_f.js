@@ -45,6 +45,26 @@ const l2SwitchUid = function(){
     return "sw_" + uid();
 }
 
+const l2SwitchPortUid = function(switch_id){
+
+    let t = nodes.find(t => t.data.id === switch_id);
+
+    if (!t)
+    {
+        return -1;
+    }
+
+    for (let port_number = 1; port_number < 128; port_number++) {
+        port = t.data.id + "_" + port_number;
+
+        let i = t.interface.find(i => i.id === port);
+
+        if (!i){
+            return port;
+        }
+    }
+}
+
 const EdgeUid = function(){
     return "edge_" + uid();
 }
@@ -120,7 +140,7 @@ const AddEdge = function(source_id, target_id){
 
         // Add interface if connected to switch
         if (target_node.config.type === 'l2_switch'){
-            let iface_id = InterfaceUid();
+            let iface_id = l2SwitchPortUid(target_node.data.id);
             target_node.interface.push({
                 id: iface_id,
                 name: iface_id,
@@ -129,7 +149,7 @@ const AddEdge = function(source_id, target_id){
         }
 
         if (source_node.config.type === 'l2_switch'){
-            let iface_id = InterfaceUid();
+            let iface_id = l2SwitchPortUid(target_node.data.id);
             source_node.interface.push({
                 id: iface_id,
                 name: iface_id,
