@@ -6,6 +6,20 @@ const uid = function(){
 }
 
 const HostUid = function(){
+
+    let host_name = "host_";
+
+    for (let host_number = 1; host_number < 100; host_number++) {
+        host = host_name + host_number;
+
+        t = nodes.find(t => t.data.id === host);
+
+        if (!t)
+        {
+            return host;
+        }
+    }
+
     return "host_" + uid();
 }
 
@@ -14,7 +28,21 @@ const PacketUid = function(){
 }
 
 const l2SwitchUid = function(){
-    return "l2_switch_" + uid();
+
+    let sw_name = "l2sw";
+
+    for (let sw_number = 1; sw_number < 100; sw_number++) {
+        sw = sw_name + sw_number;
+
+        t = nodes.find(t => t.data.id === sw);
+
+        if (!t)
+        {
+            return sw;
+        }
+    }
+
+    return "sw_" + uid();
 }
 
 const EdgeUid = function(){
