@@ -149,7 +149,7 @@ const AddEdge = function(source_id, target_id){
         }
 
         if (source_node.config.type === 'l2_switch'){
-            let iface_id = l2SwitchPortUid(target_node.data.id);
+            let iface_id = l2SwitchPortUid(source_node.data.id);
             source_node.interface.push({
                 id: iface_id,
                 name: iface_id,
