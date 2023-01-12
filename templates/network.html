@@ -7,22 +7,29 @@
     <div class="container-fluid">
         <div class="row flex-nowrap">
             <div id="side_menu" class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-white" style="height: 90vh;">
-                <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 h-100">
-                    <a href="{{ url_for('index') }}" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-decoration-none">
-                        <span class="fs-5 d-none d-sm-inline">Устройства</span>
-                    </a>
-
-                    <div class="row">
-                        <div class="col">
-                            <p class="drag" id="l2_switch"><a><img src="{{ url_for('static', filename="/images/l2_switch.png") }}"></a></p>
-                            <p class="drag" id="host"><a><img src="{{ url_for('static', filename="/images/host.png") }}"></a></p>
-                        </div>
+                <div class="card border-0">
+                    <div class="card-body">
+                        <h5 class="card-title">Устройства</h5>
                     </div>
 
-                    <div class="row">
-                        <div class="col">
-                            <button type="button" class="btn btn-primary" id="NetworkRunButton">Симулировать</button>
-                        </div>
+                    <ul class="list-unstyled card-columns" style="column-count: 2;">
+                        <li class="border-0 text-center">
+                            <img class="drag" id="l2_switch" src="{{ url_for('static', filename='/images/l2_switch.png') }}"/>
+                            <div class="icon-text">
+                                <span>Switch (L2)</span>
+                            </div>
+                        </li>
+                        <li class="border-0 text-center">
+                            <img class="drag" id="host" src="{{ url_for('static', filename='/images/host.png') }}"/>
+                            <div class="icon-text pt-2">
+                                <span>Host</span>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="card-body text-center">
+                        <button type="button" class="btn btn-primary w-100" id="NetworkRunButton">Симулировать</button>
+                        <small id="NetworkRunButtonLabel" class="text-muted text-center">Ожидание 10-30 сек.</small>
                     </div>
                 </div>
             </div>

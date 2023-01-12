@@ -102,53 +102,6 @@ $('#NetworkRunButton').click(function() {
         $(this).addClass('btn-danger');
 
         SetNetworkState(3);
-
-        let pkt_array = [
-            [
-                {
-                    data: {id: PacketUid(), label: 'ARP request', type: 'packet'},
-                    config:{
-                        type: 'ARP request',
-                        path: 'edge_law8a484xvch79flkbr',
-                        source: 'host_law8a3d4xeer4q5tzwg',
-                        target: 'l2_switch_las0s9fc0tey23820d'
-                    }
-                }
-            ],
-            [
-                {
-                    data: {id: PacketUid(), label: 'ARP reply', type: 'packet'},
-                    config: {
-                        type: 'ARP reply',
-                        path: 'edge_law8a484xvch79flkbr',
-                        source: 'l2_switch_las0s9fc0tey23820d',
-                        target: 'host_law8a3d4xeer4q5tzwg'
-                    }
-                }
-            ],
-            [
-                {
-                    data: {id: PacketUid(), label: 'ICMP request', type: 'packet'},
-                    config:{
-                        type: 'ICMP request',
-                        path: 'edge_law8c7aywfigqotywpj',
-                        source: 'host_law8c6izj98ig8idt9g',
-                        target: 'l2_switch_las0s9fc0tey23820d'
-                    }
-                }
-            ],
-            [
-                {
-                    data: {id: PacketUid(), label: 'ICMP reply', type: 'packet'},
-                    config: {
-                        type: 'ICMP reply',
-                        path: 'edge_law8c7aywfigqotywpj',
-                        source: 'l2_switch_las0s9fc0tey23820d',
-                        target: 'host_law8c6izj98ig8idt9g'
-                    }
-                }
-            ],
-        ];
         DrawGraphStatic(nodes, edges, packets);
         return;
     }

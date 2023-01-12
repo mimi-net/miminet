@@ -518,6 +518,12 @@ const DrawGraph = function(nodes, edges) {
     if (e.keyCode ==  46)
         {
             DeleteNode(selecteed_node_id);
+            PostNodesEdges();
+
+            // Reset network state
+            if (GetNetworkState()){
+                SetNetworkRunButtonState(0, null);
+            }
         }
     });
 
@@ -620,7 +626,7 @@ const CheckSimulation = function (simulation_id)
         data: '',
         success: function(data, textStatus, xhr) {
 
-            // If we got 210 (processing) wait 1 sec and call themself again
+            // If we got 210 (processing) wait 2 sec and call themself again
             if (xhr.status === 210)
             {
                 setTimeout(CheckSimulation, 2000, simulation_id);
@@ -629,7 +635,6 @@ const CheckSimulation = function (simulation_id)
             if (xhr.status === 200)
             {
                 packets = JSON.parse(data.packets);
-                console.log(data);
                 SetNetworkRunButtonState(0, packets)
             }
         },
@@ -678,6 +683,10 @@ const SetNetworkRunButtonState = function(id, packets)
         $('#NetworkRunButton').addClass('btn-success');
         $('#NetworkRunButton').prop('disabled', false);
 
+        const pkt_count = packets.reduce((currentCount, row) => currentCount + row.length, 0);
+
+        $('#NetworkRunButtonLabel').text("Готова анимация: " + pkt_count + " пакетов");
+
         SetNetworkState(2);
         return;
     }
@@ -691,6 +700,8 @@ const SetNetworkRunButtonState = function(id, packets)
         $('#NetworkRunButton').addClass('btn-secondary');
         $('#NetworkRunButton').prop('disabled', true);
 
+        $('#NetworkRunButtonLabel').text("Ожидание 10-30 сек.");
+
         CheckSimulation(id);
         SetNetworkState(1);
         return;
@@ -701,6 +712,9 @@ const SetNetworkRunButtonState = function(id, packets)
     $('#NetworkRunButton').removeClass('btn-success');
     $('#NetworkRunButton').addClass('btn-primary');
     $('#NetworkRunButton').prop('disabled', false);
+
+    $('#NetworkRunButtonLabel').text("Ожидание 10-30 сек.");
+
     SetNetworkState(0);
     return;
 }
