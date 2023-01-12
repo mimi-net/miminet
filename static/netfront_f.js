@@ -343,7 +343,7 @@ const prepareStylesheet = function() {
           'content': getNodeLabel,
           'text-valign': 'top',
           'text-align': 'center',
-            'font-size': '8px',
+          'font-size': '8px',
         })
         .selector('edge')
         .css({
@@ -416,7 +416,8 @@ const prepareStylesheet = function() {
             'height': '5px',
             'width': '5px',
             'border-opacity': '0',
-            'border-width': '0px'
+            'border-width': '0px',
+            'text-wrap': 'wrap'
         })
 
         .selector('.eh-ghost-edge.eh-preview-active')
