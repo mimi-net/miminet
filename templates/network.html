@@ -7,30 +7,42 @@
     <div class="container-fluid">
         <div class="row flex-nowrap">
             <div id="side_menu" class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-white" style="height: 90vh;">
-                <div class="card border-0">
-                    <div class="card-body">
-                        <h5 class="card-title">Устройства</h5>
-                    </div>
+                <h5 class="py-3 ps-2">Устройства</h5>
 
-                    <ul class="list-unstyled card-columns" style="column-count: 2;">
-                        <li class="border-0 text-center">
+                <div class="card-columns" style="column-count: 2;">
+                    <div class="card border-0">
+                        <div class="card-body px-0 py-0 text-center">
                             <img class="drag" id="l2_switch" src="{{ url_for('static', filename='/images/l2_switch.png') }}"/>
                             <div class="icon-text">
                                 <span>Switch (L2)</span>
                             </div>
-                        </li>
-                        <li class="border-0 text-center">
+                        </div>
+                    </div>
+
+                    <div class="card border-0 text-center">
+                        <div class="card-body px-0 py-0 text-center">
                             <img class="drag" id="host" src="{{ url_for('static', filename='/images/host.png') }}"/>
                             <div class="icon-text pt-2">
                                 <span>Host</span>
                             </div>
-                        </li>
-                    </ul>
-
-                    <div class="card-body text-center">
-                        <button type="button" class="btn btn-primary w-100" id="NetworkRunButton">Симулировать</button>
-                        <small id="NetworkRunButtonLabel" class="text-muted text-center">Ожидание 10-30 сек.</small>
+                        </div>
                     </div>
+                </div>
+
+                <div class="card-columns" style="column-count: 1;">
+                    <div class="card border-0 py-0 ps-2">
+                        <div class="card-body">
+                            <img class="drag" id="l1_hub" src="{{ url_for('static', filename='/images/hub.png') }}"/>
+                            <div class="icon-text">
+                                <span>Hub (L1)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body text-center">
+                    <button type="button" class="btn btn-primary w-100" id="NetworkRunButton">Симулировать</button>
+                    <small id="NetworkRunButtonLabel" class="text-muted text-center">Ожидание 10-30 сек.</small>
                 </div>
             </div>
 

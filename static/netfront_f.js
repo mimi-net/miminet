@@ -27,6 +27,24 @@ const PacketUid = function(){
     return "pkt_" + uid();
 }
 
+const l1HubUid = function(){
+
+    let hub_name = "l1hub";
+
+    for (let hub_number = 1; hub_number < 100; hub_number++) {
+        hub = hub_name + hub_number;
+
+        t = nodes.find(t => t.data.id === hub);
+
+        if (!t)
+        {
+            return hub;
+        }
+    }
+
+    return "hub_" + uid();
+}
+
 const l2SwitchUid = function(){
 
     let sw_name = "l2sw";
@@ -48,6 +66,26 @@ const l2SwitchUid = function(){
 const l2SwitchPortUid = function(switch_id){
 
     let t = nodes.find(t => t.data.id === switch_id);
+
+    if (!t)
+    {
+        return -1;
+    }
+
+    for (let port_number = 1; port_number < 128; port_number++) {
+        port = t.data.id + "_" + port_number;
+
+        let i = t.interface.find(i => i.id === port);
+
+        if (!i){
+            return port;
+        }
+    }
+}
+
+const l1HubPortUid = function(hub_id){
+
+    let t = nodes.find(t => t.data.id === hub_id);
 
     if (!t)
     {
@@ -150,6 +188,25 @@ const AddEdge = function(source_id, target_id){
 
         if (source_node.config.type === 'l2_switch'){
             let iface_id = l2SwitchPortUid(source_node.data.id);
+            source_node.interface.push({
+                id: iface_id,
+                name: iface_id,
+                connect: edge_id,
+            });
+        }
+
+        // Add interface if connected to Hub
+        if (target_node.config.type === 'l1_hub'){
+            let iface_id = l1HubPortUid(target_node.data.id);
+            target_node.interface.push({
+                id: iface_id,
+                name: iface_id,
+                connect: edge_id,
+            });
+        }
+
+        if (source_node.config.type === 'l1_hub'){
+            let iface_id = l1HubPortUid(source_node.data.id);
             source_node.interface.push({
                 id: iface_id,
                 name: iface_id,

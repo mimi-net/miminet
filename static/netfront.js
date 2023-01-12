@@ -70,6 +70,27 @@ $('#network_scheme').droppable({
           DrawGraph(nodes, edges);
           return;
       }
+
+      if (type === 'l1_hub'){
+          node_id = l1HubUid();
+
+          nodes.push(
+              {
+                  data: {id: node_id, label: node_id},
+                  renderedPosition: {x: ui.position.left - side_menu_width, y: ui.position.top},
+                  classes: ['l1_hub'],
+                  config: {
+                      type: 'l1_hub',
+                      label: node_id,
+                  },
+                  interface: [],
+              }
+          );
+
+          PostNodes();
+          DrawGraph(nodes, edges);
+          return;
+      }
   }
 });
 
