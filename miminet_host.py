@@ -6,7 +6,7 @@ from flask_login import login_required, current_user
 
 
 @login_required
-def safe_host_config():
+def save_host_config():
 
     user = current_user
 
@@ -33,18 +33,39 @@ def safe_host_config():
         jnet = json.loads(net.network)
         nodes = jnet['nodes']
 
-        for node in nodes:
-            if node['data']['id'] == host_id:
+        nn = list(filter(lambda x: x['data']["id"] == host_id, nodes))
 
-                host_label = request.form.get('config_host_name')
+        if not nn:
+            flash('Хоста таким id не существует')
+            return redirect(url_for('web_network', guid=net.guid))
 
-                if host_label:
-                    print (node)
-                    node['data']['label'] = host_label
-                    node['config']['label'] = host_label
-                    print (node)
+        node = nn[0]
 
-                    net.network = json.dumps(jnet)
-                    db.session.commit()
+        # Set IP adresses
+        iface_ids = request.form.getlist('config_host_iface_ids[]')
+        for iface_id in iface_ids:
+
+            # Do we really have that iface?
+            if not node['interface']:
+                break
+
+            for interface in node['interface']:
+                if interface['id'] != iface_id:
+                    continue
+
+                host_ip_value = request.form.get('config_host_ip_' + str(iface_id))
+                host_mask_value = request.form.get('config_host_mask_' + str(iface_id))
+
+                interface['ip'] = host_ip_value
+                interface['netmask'] = host_mask_value
+
+        host_label = request.form.get('config_host_name')
+
+        if host_label:
+            node['config']['label'] = host_label
+            node['data']['label'] = node['config']['label']
+
+            net.network = json.dumps(jnet)
+            db.session.commit()
 
     return redirect(url_for('web_network', guid=net.guid))

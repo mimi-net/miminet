@@ -524,7 +524,7 @@ const DrawGraph = function(nodes, edges) {
 
         if (n.config.type === 'host'){
 
-            let hostname = n.data.label;
+            let hostname = n.config.label;
             hostname = hostname || n.data.id;
 
             // Create form
@@ -535,10 +535,35 @@ const DrawGraph = function(nodes, edges) {
 
             // Add interfaces
             $.each(n.interface, function (i) {
-                iface_name = n.interface[i].name;
+                let iface_id = n.interface[i].id;
 
-                if (!iface_name){
+                if (!iface_id){
                     return;
+                }
+
+                let connect_id = n.interface[i].connect;
+
+                if (!connect_id){
+                    return;
+                }
+
+                let edge = edges.find(e => e.data.id === connect_id);
+
+                if (!edge){
+                    return;
+                }
+
+                let source_host = edge.data.source;
+                let target_host = edge.data.target;
+
+
+                if (!source_host || !target_host){
+                    return;
+                }
+
+                let connected_to = target_host;
+                if (n.data.id === target_host){
+                    connected_to = source_host;
                 }
 
                 ip_addr = n.interface[i].ip;
@@ -553,7 +578,7 @@ const DrawGraph = function(nodes, edges) {
                     netmask = '';
                 }
 
-                ConfigHostInterface(iface_name, ip_addr, netmask);
+                ConfigHostInterface(iface_id, ip_addr, netmask, connected_to);
 
             });
             //ConfigHostInterface(hostname);

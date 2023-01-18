@@ -25,7 +25,7 @@ const ConfigHostName = function(hostname){
     $('#config_host_name').val(hostname);
 }
 
-const ConfigHostInterface = function(name, ip, netmask){
+const ConfigHostInterface = function(name, ip, netmask, connected_to){
 
     var elem = document.getElementById('config_host_interface_script');
     var eth = jQuery.extend({}, elem);
@@ -42,7 +42,8 @@ const ConfigHostInterface = function(name, ip, netmask){
     var text = eth.innerHTML;
 
     $(text).insertBefore('#config_main_form_submit_button');
-    $('#config_host_iface_name_' + name).val(name);
+    $('<input type="hidden" name="config_host_iface_ids[]" value="' + name + '"/>').insertBefore('#config_host_iface_name_' + name);
+    $('#config_host_iface_name_' + name).attr("placeholder", connected_to);
     $('#config_host_ip_' + name).val(ip);
     $('#config_host_mask_' + name).val(netmask);
 
