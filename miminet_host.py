@@ -49,15 +49,18 @@ def save_host_config():
             if not node['interface']:
                 break
 
-            for interface in node['interface']:
-                if interface['id'] != iface_id:
-                    continue
+            ii = list(filter(lambda x: x['id'] == iface_id, node['interface']))
 
-                host_ip_value = request.form.get('config_host_ip_' + str(iface_id))
-                host_mask_value = request.form.get('config_host_mask_' + str(iface_id))
+            if not ii:
+                continue
 
-                interface['ip'] = host_ip_value
-                interface['netmask'] = host_mask_value
+            interface = ii[0]
+
+            host_ip_value = request.form.get('config_host_ip_' + str(iface_id))
+            host_mask_value = request.form.get('config_host_mask_' + str(iface_id))
+
+            interface['ip'] = host_ip_value
+            interface['netmask'] = host_mask_value
 
         host_label = request.form.get('config_host_name')
 

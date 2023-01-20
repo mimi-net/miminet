@@ -328,10 +328,32 @@ const prepareStylesheet = function() {
     const getTextDirection = function(ele) {
       return ele.data('direction') || 'autorotate';
     };
+
     const getNodeLabel = function(ele) {
-      // return ele.data('label') || ele.data('id');
-        return ele.data('label') || '';
+
+        let label = ele.data('label') || '';
+        let n = nodes.find(n => n.data.id === ele.data('id'));
+
+        if (!n){
+            return label;
+        }
+
+        $.each(n.interface, function (i) {
+
+            let ip_addr = n.interface[i].ip;
+            let netmask = n.interface[i].netmask;
+
+            if (!ip_addr || !netmask){
+                return;
+            }
+
+            label = label + '\n' + ip_addr + "/" + netmask;
+        }
+        );
+
+        return label;
     };
+
     let sheet = cytoscape.stylesheet()
         .selector('node')
         .css({
@@ -344,6 +366,7 @@ const prepareStylesheet = function() {
           'text-valign': 'top',
           'text-align': 'center',
           'font-size': '8px',
+          'text-wrap': 'wrap'
         })
         .selector('edge')
         .css({

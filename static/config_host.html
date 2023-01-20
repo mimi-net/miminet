@@ -3,7 +3,7 @@
         <input type="hidden" id="host_id" name="host_id" value=""/>
         <input type="hidden" id="net_guid" name="net_guid" value=""/>
 
-        <button id="config_main_form_submit_button" type="submit" class="btn btn-primary w-100">Сохранить</button>
+        <button id="config_main_form_submit_button" type="submit" class="btn btn-success w-100">Сохранить</button>
     </form>
 </script>
 
@@ -15,16 +15,13 @@
 </script>
 
 <script id="config_host_interface_script" type="text/plain">
-    <div class="form-group">
-        <label id="config_host_iface_name_label_example" for="config_host_iface_name_example" class="text-sm">Интерфейс до</label>
+    <div class="form-group pb-1">
+        <label id="config_host_iface_name_label_example" for="config_host_iface_name_example" class="text-sm">Линк к</label>
         <input type="text" class="form-control form-control-sm" id="config_host_iface_name_example" name="config_host_iface_name_example" placeholder='' disabled>
     </div>
-     <div class="form-group">
-        <label id="config_host_ip_label_example" for="config_host_ip_example" class="text-sm">IP адрес</label>
-        <input type="text" class="form-control form-control-sm" id="config_host_ip_example" name="config_host_ip_example" value=''>
-    </div>
-    <div class="form-group pb-2">
-        <label id="config_host_mask_label_example" for="config_host_mask_example" class="text-sm">Маска подсети</label>
-        <input type="text" class="form-control form-control-sm" id="config_host_mask_example" name="config_host_mask_example" value=''>
+    <label id="config_host_ip_label_example" for="config_host_ip_example" class="text-sm">IP адрес \ Маска</label>
+    <div class="input-group pb-2 flex-nowrap">
+        <input type="text" class="form-control form-control-sm w-75" id="config_host_ip_example" name="config_host_ip_example" value=''>
+        <input type="number" class="form-control form-control-sm w-25" id="config_host_mask_example" name="config_host_mask_example" min="0" max="32" value="0">
     </div>
 </script>

@@ -14,7 +14,7 @@
                         <div class="card-body px-0 py-0 text-center">
                             <img class="drag" id="l2_switch" src="{{ url_for('static', filename='/images/l2_switch.png') }}"/>
                             <div class="icon-text">
-                                <span>Switch (L2)</span>
+                                <span>Свитч (L2)</span>
                             </div>
                         </div>
                     </div>
@@ -23,7 +23,7 @@
                         <div class="card-body px-0 py-0 text-center">
                             <img class="drag" id="host" src="{{ url_for('static', filename='/images/host.png') }}"/>
                             <div class="icon-text pt-2">
-                                <span>Host</span>
+                                <span>Хост</span>
                             </div>
                         </div>
                     </div>
@@ -32,9 +32,9 @@
                 <div class="card-columns" style="column-count: 1;">
                     <div class="card border-0 py-0 ps-2">
                         <div class="card-body">
-                            <img class="drag" id="l1_hub" src="{{ url_for('static', filename='/images/hub.png') }}"/>
+                            <img class="drag" id="l1_hub" src="{{ url_for('static', filename='/images/hub.png') }}" />
                             <div class="icon-text">
-                                <span>Hub (L1)</span>
+                                <span data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Хаб, он же концентратор, простейшее сетевое устойство.">Хаб (L1)</span>
                             </div>
                         </div>
                     </div>
@@ -46,16 +46,14 @@
                 </div>
             </div>
 
-            <div class="col py-3 bg-light">
+            <div class="col py-1 px-1 bg-light">
                 <div id="network_scheme" class="border bg-white border-primary h-100 w-100" style=""></div>
             </div>
 
-            <div id="right_side_menu" class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-white">
-                <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 h-100" id="config_content">
-                    <div class="row">
-                        <div class="col">
-                            <h3>Тут будут настройки устройств. Выделите любое на схеме.</h3>
-                        </div>
+            <div id="config_content" class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 pt-2 bg-white">
+                <div class="row">
+                    <div class="col">
+                        <h3>Тут будут настройки устройств. Выделите любое на схеме.</h3>
                     </div>
                 </div>
             </div>
