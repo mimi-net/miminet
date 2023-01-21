@@ -17,19 +17,106 @@
     <script src="https://cdn.jsdelivr.net/npm/cytoscape-edgehandles@3.6.0/cytoscape-edgehandles.min.js"></script>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.min.js" integrity="sha384-IDwe1+LCz02ROU9k972gdyvl+AESN10+x7tBKgc9I5HFtuNz0wWnPclzo6p9vxnk" crossorigin="anonymous"></script>
 
     <script src="{{ url_for('static', filename='icons.js') }}"></script>
     <script src="{{ url_for('static', filename='netfront_f.js') }}"></script>
-
+<!--Вместо style.css -->
     <style>
+
+           main {
+           font-family: 'Inter', sans-serif;
+           font-style: italic;
+           font-weight: bold;
+           font-size: 18px;
+           }
            .active {
                outline: 1px solid red;
            }
+           .header {
+                margin-top: 50px;
+                margin-bottom: 150px;
+           }
+           .logo {
+                display: inline-block;
+           }
+           img {
+                 margin-left: 50px;
+           }
+           .p {
+           margin-bottom: 150px;
+           color: #FFFFFF;
+           margin-left: 50px;
+           }
+
+           .btn-primary{
+           float: right;
+           border-radius: 5px;
+           background: #A3D4F7;
+           padding: 5px 15px;
+           font-family: 'Inter', sans-serif;
+           font-style: italic;
+           font-weight: bold;
+           font-size: 18px;
+           margin-left: 50px;
+           }
+
+           .btn-secondary {
+           border-radius: 5px;
+           background: #A3D4F7;
+           padding: 10px 40px;
+           font-family: 'Inter', sans-serif;
+           font-style: italic;
+           font-weight: bold;
+           font-size: 30px;
+           margin-left: 50px;
+           }
+           body{
+            background-color: #071726;
+           }
+
+           .section1 {
+                margin-top: 200px;
+           }
+           .host {
+           margin-left: 200px;
+           }
+           .step1 {
+           margin-bottom: 150px;
+           color: #FFFFFF;
+           margin-left: 50px;
+           }
+
+           .line {
+           margin-left: 200px;
+           }
+           .parameters {
+           margin-top: 70px;
+           margin-left: 150px;
+           }
+           .step3param {
+           margin-top: 130px;
+           margin-bottom: 150px;
+           color: #FFFFFF;
+           margin-left: 50px;
+           }
+           .step4topo {
+           margin-top: 130px;
+           margin-bottom: 150px;
+           color: #FFFFFF;
+           margin-left: 50px;
+           }
+
+
+
     </style>
 </head>
 <body>
+<!--
 <nav class="navbar navbar-expand-md navbar-fixed-top navbar-dark bg-dark main-nav">
     <div class="container">
         <ul class="nav navbar-nav text-nowrap flex-row mx-md-auto order-1 order-md-2">
@@ -50,14 +137,16 @@
                 {% endif %}
 
 
-            {% else %}
+         {% else %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('login_index') }}"><strong>Вход/Регистрация</strong></a>
                 </li>
             {% endif %}
+
         </ul>
     </div>
 </nav>
+-->
 
 {% if network %}
 <!-- Net configuration -->

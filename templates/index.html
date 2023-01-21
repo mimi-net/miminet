@@ -4,38 +4,85 @@
 {% block content %}
 
 <main>
-    <div class="container-fluid">
-        <div class="row flex-nowrap">
-            <div id="side_menu" class="col-auto col-md-3 col-xl-1 px-sm-2 px-0 bg-white">
-                <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 h-100">
-                    <a href="{{ url_for('index') }}" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-decoration-none">
-                        <span class="fs-5 d-none d-sm-inline">Menu</span>
-                    </a>
+    <!-- первая страница-->
+<section class="main-section">
+<div class="container">
+      <header class="header row">
 
-                    <div class="row">
-                        <div class="col-sm-6" style="height: 700px;">
-                            <p class="drag" id="l2_switch"><a><img src="{{ url_for('static', filename="/images/l2_switch.png") }}"></a></p>
-                            <p class="drag" id="host"><a><img src="{{ url_for('static', filename="/images/host.png") }}"></a></p>
-                        </div>
-                    </div>
+        <div class="col">
+          <div class="logo">
+              <img src="{{ url_for('static', filename='/images/logo.png') }}">
+          </div>
+        </div>
+
+        <div class="col text-right">
+          <button class="btn btn-primary">Вход</button>
+        </div>
+
+      </header>
+</div>
+    <div class="main-section-content container">
+      <div class="row">
+      <div class="col">
+          <p style="border-radius: 5px; padding: 5px 20px; background: #404040;  width:320px", class="p"> Жми на Старт, чтобы создать свою первую сеть!</p>
+          <img src="{{ url_for('static', filename='/images/topo.png') }}">
+      </div>
+        <div class="col">
+          <button class="btn btn-secondary">Старт</button>
+      </div>
+      </div>
+    </div>
+  </section>
+
+    <!-- вторая страница, шаг 1-->
+    <section class="section1">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                <img class="host" src="{{ url_for('static', filename='/images/pc.png') }}">
                 </div>
-            </div>
-
-            <div class="col py-3 bg-light">
-                <div id="network_scheme" class="border bg-white border-primary h-100 w-100" style=""></div>
-            </div>
-
-            <div id="right_side_menu" class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-white">
-                <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 h-100" id="config_content">
-                    <div class="row">
-                        <div class="col">
-                            <h3>Тут будут настройки устройств. Выделите любое на схеме.</h3>
-                        </div>
-                    </div>
+                <div class="col">
+                    <p style="border-radius: 5px; padding: 5px 20px; background: #404040;  width:320px", class="step1"> Шаг 1. Добавь устройство </p>
                 </div>
             </div>
         </div>
-    </div>
+    <!-- вторая страница, шаг 2-->
+        <div class="step2 container">
+             <div class="row">
+                <div class="col">
+                    <img class="line" src="{{ url_for('static', filename='/images/line.png') }}">
+                </div>
+                <div class="col">
+                    <p style="border-radius: 5px; padding: 5px 20px; background: #404040;  width:320px", class="step1"> Шаг 2. Соедини устройства </p>
+                </div>
+             </div>
+        </div>
+
+        <!-- вторая страница, шаг 3-->
+        <div class="step3 container">
+             <div class="row">
+                <div class="col">
+                    <img class="parameters" width="200px" height="200px" src="{{ url_for('static', filename='/images/parameters.png') }}">
+                </div>
+                <div class="col">
+                    <p style="border-radius: 5px; padding: 5px 20px; background: #404040;  width:320px", class="step3param"> Шаг 3. Настрой параметры </p>
+                </div>
+             </div>
+        </div>
+
+
+        <!-- вторая страница, шаг 4-->
+        <div class="step4 container">
+             <div class="row">
+                <div class="col">
+                    <img class="parameters" src="{{ url_for('static', filename='/images/topo.png') }}">
+                </div>
+                <div class="col">
+                    <p style="border-radius: 5px; padding: 5px 20px; background: #404040;  width:320px", class="step4topo"> Шаг 4. Запусти с помощью кнопки Симулировать</p>
+                </div>
+             </div>
+        </div>
+    </section>
 </main>
 
     <div id="config_host"></div>
