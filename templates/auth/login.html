@@ -7,11 +7,12 @@
   <div class="container py-3 h-100">
     <div class="row d-flex align-items-center justify-content-center h-100">
       <div class="col-md-8 col-lg-7 col-xl-6">
-        <img src="{{ url_for('static', filename="/svg/login.svg") }}"
-          class="img-fluid" alt="Phone image">
+        <img src="{{ url_for('static', filename='/images/logo.png') }}">
       </div>
       <div class="col-md-7 col-lg-5 col-xl-5 offset-xl-1">
+
         <form>
+
           <!-- Email input -->
           <div class="form-outline mb-4">
             <input type="email" id="form1Example13" class="form-control form-control-lg" />
@@ -24,25 +25,36 @@
             <label class="form-label" for="form1Example23">Пароль</label>
           </div>
 
-          <div class="d-flex justify-content-around align-items-center mb-4">
-            <a href="#!">Забыли пароль?</a>
-          </div>
-
           <!-- Submit button -->
-          <button type="submit" class="btn btn-primary btn-lg btn-block">Вход</button>
+            <div class="butt container">
+             <div class="row">
+                <button type="submit" class="btn btn-primary btn-block" >Вход</button>
+             </div>
+            </div>
 
           <div class="divider d-flex align-items-center my-4">
-            <p class="text-center fw-bold mx-3 mb-0 text-muted">Или</p>
+            <p class="text-center fw-bold mx-3 mb-0 text-muted"> Вход с помощью</p>
           </div>
 
-          <a class="btn btn-primary btn-lg btn-block" style="background-color: #3b5998" href="{{ url_for('google_login') }}"
-            role="button">
-            <i class="fab fa-facebook-f me-2"></i>Вход через Google
-          </a>
-          <a class="btn btn-primary btn-lg btn-block" style="background-color: #55acee" href="#!"
-            role="button">
-            <i class="fab fa-twitter me-2"></i>Вход через Вконтакте
-          </a>
+          <div class="login container">
+             <div class="row">
+                <div class="col">
+                    <a href="{{ url_for('google_login') }}">
+                    <img class="google" src="{{ url_for('static', filename='/images/google.png') }}" role="button">
+                    </a>
+                </div>
+                <div class="col">
+                    <a href="{{ url_for('login_index') }}">
+                    <img class="vk" src="{{ url_for('static', filename='/images/vk.png') }}" >
+                    </a>
+                </div>
+             </div>
+          </div>
+
+          <div class="text">
+            <a href="!#" class="alter"> Не зарегистрированы? Создай аккаунт </a>
+          </div>
+
 
         </form>
       </div>

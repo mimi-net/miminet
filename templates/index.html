@@ -16,7 +16,8 @@
         </div>
 
         <div class="col text-right">
-          <button class="btn btn-primary">Вход</button>
+            <!--href задает переход к идентификации -->
+          <a href="{{ url_for('login_index') }}" class="btn btn-primary" role="button" data-toggle="button" aria-pressed="true">Вход</a>
         </div>
 
       </header>
@@ -28,7 +29,7 @@
           <img src="{{ url_for('static', filename='/images/topo.png') }}">
       </div>
         <div class="col">
-          <button class="btn btn-secondary">Старт</button>
+          <a href="{{ url_for('home') }}" class="btn btn-primary btn-lg" role="button" data-toggle="button" aria-pressed="true">Старт</a>
       </div>
       </div>
     </div>
