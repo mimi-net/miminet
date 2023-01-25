@@ -88,20 +88,23 @@ def web_network():
     jnet = json.loads(net.network)
 
     if not 'nodes' in jnet:
-        jnet['nodes'] = 'null'
+        jnet['nodes'] = []
 
     if not 'edges' in jnet:
-        jnet['edges'] = 'null'
+        jnet['edges'] = []
 
     if not 'packets' in jnet:
         jnet['packets'] = 'null'
+
+    if not 'jobs' in jnet:
+        jnet['jobs'] = []
 
     # Do we simulte this network now?
     sim = Simulate.query.filter(Simulate.network_id == net.id).first()
 
     return render_template("network.html", network=net, nodes=jnet['nodes'],
-                           edges=jnet['edges'], packets=jnet['packets'],
-                           simulating = sim)
+                           edges=jnet['edges'], packets=jnet['packets'], jobs=jnet['jobs'],
+                           simulating=sim)
 
 
 @login_required

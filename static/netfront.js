@@ -6,7 +6,6 @@ let selecteed_node_id = 0;
 // Calculate width of the side menu for a adjustment os node position
 if (side_menu){
     side_menu_width = side_menu.offsetWidth;
-    console.log(side_menu_width);
 }
 
 $('.drag').draggable({

@@ -1,8 +1,13 @@
 import json
+import uuid
 
 from flask import render_template, redirect, url_for, request, flash
 from miminet_model import db, Network
 from flask_login import login_required, current_user
+
+
+def job_id_generator():
+    return uuid.uuid4().hex
 
 
 @login_required
@@ -40,6 +45,30 @@ def save_host_config():
             return redirect(url_for('web_network', guid=net.guid))
 
         node = nn[0]
+
+        # Add job?
+        job_id = int(request.form.get('config_host_job_select_field'))
+
+        if job_id:
+
+            if not jnet.get('jobs'):
+                jnet['jobs'] = []
+
+            job_level = len(jnet['jobs'])
+
+            if job_level < 10:
+
+                # ping -c 1 (1 param)
+                if job_id == 1:
+                    job_1_arg_1 = request.form.get('config_host_ping_c_1_ip')
+
+                    if job_1_arg_1:
+                        jnet['jobs'].append({'id': job_id_generator(),
+                                            'level': job_level,
+                                             'job_id' : job_id,
+                                             'host_id': node['data']['id'],
+                                             'arg_1': job_1_arg_1})
+
 
         # Set IP adresses
         iface_ids = request.form.getlist('config_host_iface_ids[]')

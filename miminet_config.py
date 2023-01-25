@@ -1,6 +1,5 @@
 import os
 import pathlib
-import json
 
 from datetime import datetime
 
@@ -21,5 +20,5 @@ current_data = datetime.today().strftime('%Y-%m-%d')
 SQLITE_DATABASE_BACKUP_NAME = 'backup_' + current_data + '.db'
 
 def make_empty_network():
-    default_network = '{"nodes" : [], "edges" : []}'
+    default_network = '{"nodes" : [], "edges" : [], "jobs" : []}'
     return default_network

@@ -48,3 +48,56 @@ const ConfigHostInterface = function(name, ip, netmask, connected_to){
     $('#config_host_mask_' + name).val(netmask);
 
 }
+
+
+const ConfigHostJobOnChange = function(evnt){
+
+    switch(evnt.target.value)
+    {
+        case '1':
+            let elem = document.getElementById('config_host_ping_c_1_script').innerHTML;
+            let host_id = document.getElementById('host_id');
+
+            if (!elem){
+                return;
+            }
+
+            $(elem).insertBefore(host_id);
+            break;
+
+        case '0':
+            $('div[name="config_host_select_input"]').remove();
+            break;
+
+        default:
+            console.log("Unknown target.value");
+    }
+
+}
+
+const ConfigHostJob = function(host_jobs){
+
+    let elem = document.getElementById('config_host_job_script').innerHTML;
+    let host_id = document.getElementById('host_id');
+
+    if (!elem || !host_id){
+        return;
+    }
+
+    $(elem).insertBefore(host_id);
+
+    // Set onchange
+    document.getElementById('config_host_job_select_field').addEventListener('change', ConfigHostJobOnChange);
+
+    // Print jobs if we have
+    if (!host_jobs)
+    {
+        return;
+    }
+
+    let job_list = document.getElementById('config_host_job_list_script').innerHTML;
+
+    if (!job_list){
+        return;
+    }
+}

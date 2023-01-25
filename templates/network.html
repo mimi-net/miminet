@@ -14,7 +14,7 @@
                         <div class="card-body px-0 py-0 text-center">
                             <img class="drag" id="l2_switch" src="{{ url_for('static', filename='/images/l2_switch.png') }}"/>
                             <div class="icon-text">
-                                <span>Свитч (L2)</span>
+                                <span data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Свитч (коммутатор) работает на втором уровне модели OSI.">Свитч (L2)</span>
                             </div>
                         </div>
                     </div>
@@ -34,7 +34,7 @@
                         <div class="card-body">
                             <img class="drag" id="l1_hub" src="{{ url_for('static', filename='/images/hub.png') }}" />
                             <div class="icon-text">
-                                <span data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Хаб, он же концентратор, простейшее сетевое устойство.">Хаб (L1)</span>
+                                <span data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Хаб (концентратор) &mdash; простейшее сетевое устойство.">Хаб (L1)</span>
                             </div>
                         </div>
                     </div>
@@ -47,7 +47,7 @@
             </div>
 
             <div class="col py-1 px-1 bg-light">
-                <div id="network_scheme" class="border bg-white border-primary h-100 w-100" style=""></div>
+                <div id="network_scheme" class="border bg-white border-primary h-100 w-100"></div>
             </div>
 
             <div id="config_content" class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 pt-2 bg-white">
@@ -70,6 +70,7 @@
     const network_guid = "{{ network.guid }}";
     const nodes = {{ nodes | safe }};
     const edges = {{ edges | safe }};
+    const jobs = {{ jobs | safe }};
     var packets = {{ packets | safe }};
 
     SetNetworkRunButtonState({% if simulating %} {{simulating.id}} {% else %} 0 {% endif%}, packets);

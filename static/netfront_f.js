@@ -556,6 +556,15 @@ const DrawGraph = function(nodes, edges) {
             // Add hostname
             ConfigHostName(hostname);
 
+            // Add jobs
+            let host_jobs = [];
+
+            if (jobs){
+                host_jobs = jobs.filter(j => j.host_id === n.data.id);
+            }
+
+            ConfigHostJob(host_jobs);
+
             // Add interfaces
             $.each(n.interface, function (i) {
                 let iface_id = n.interface[i].id;
@@ -604,7 +613,6 @@ const DrawGraph = function(nodes, edges) {
                 ConfigHostInterface(iface_id, ip_addr, netmask, connected_to);
 
             });
-            //ConfigHostInterface(hostname);
         }
     });
 
