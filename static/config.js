@@ -97,7 +97,10 @@ const ConfigHostJob = function(host_jobs){
 
     let job_list = document.getElementById('config_host_job_list_script').innerHTML;
 
+    console.log(job_list);
+
     if (!job_list){
         return;
     }
+
 }
