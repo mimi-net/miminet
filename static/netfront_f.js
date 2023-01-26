@@ -351,6 +351,15 @@ const prepareStylesheet = function() {
         }
         );
 
+        $.each(jobs, function (i) {
+            let j = jobs[i];
+
+            if (j.host_id === n.data.id){
+                label = label + '\n' + '(' + j.print_cmd + ')';
+            }
+
+        });
+
         return label;
     };
 
