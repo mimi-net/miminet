@@ -794,6 +794,7 @@ const SetNetworkRunButtonState = function(id, packets)
     {
         $('#NetworkRunButton').text('Запустить');
         $('#NetworkRunButton').removeClass('btn-primary');
+        $('#NetworkRunButton').removeClass('btn-secondary');
         $('#NetworkRunButton').addClass('btn-success');
         $('#NetworkRunButton').prop('disabled', false);
 
