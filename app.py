@@ -10,7 +10,7 @@ from miminet_auth import login_manager, login_index, google_login, google_callba
 from miminet_network import create_network, web_network, update_network_config,\
     delete_network, post_nodes, post_edges, post_nodes_edges, move_nodes
 from miminet_simulation import run_simulation, check_simulation
-from miminet_host import save_host_config
+from miminet_host import save_host_config, delete_job
 
 app = Flask(__name__,  static_url_path='', static_folder='static', template_folder="templates")
 
@@ -54,6 +54,7 @@ app.add_url_rule('/check_simulation', methods=['GET'], view_func=check_simulatio
 
 # Hosts
 app.add_url_rule('/host/save_config', methods=['GET', 'POST'], view_func=save_host_config)
+app.add_url_rule('/host/delete_job', methods=['GET'], view_func=delete_job)
 
 
 @app.route('/')

@@ -11,6 +11,34 @@ def job_id_generator():
 
 
 @login_required
+def delete_job():
+    user = current_user
+    network_guid = request.args.get('guid', type=str)
+    jid = request.args.get('id', type=str)
+
+    if not network_guid:
+        flash('Пропущен параметр GUID')
+        return redirect('home')
+
+    net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id == user.id).first()
+
+    if not net:
+        flash('Нет такой сети')
+        return redirect('home')
+
+    jnet = json.loads(net.network)
+
+    jobs = jnet['jobs']
+    jj = list(filter(lambda x: x["id"] != jid, jobs))
+    jnet['jobs'] = jj
+
+    net.network = json.dumps(jnet)
+    db.session.commit()
+
+    return redirect(url_for('web_network', guid=net.guid))
+
+
+@login_required
 def save_host_config():
 
     user = current_user
@@ -67,7 +95,8 @@ def save_host_config():
                                             'level': job_level,
                                              'job_id' : job_id,
                                              'host_id': node['data']['id'],
-                                             'arg_1': job_1_arg_1})
+                                             'arg_1': job_1_arg_1,
+                                             'print_cmd' : 'ping -c 1 ' + job_1_arg_1})
 
 
         # Set IP adresses

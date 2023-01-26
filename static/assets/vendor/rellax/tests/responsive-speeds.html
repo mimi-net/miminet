@@ -1,0 +1,103 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Responsive Speeds</title>
+    <style>
+      html,
+      body {
+        color: #223;
+        font-size: 21pt;
+        margin: 0;
+        padding: 0;
+      }
+
+      section {
+        margin-top: 30vh;
+        width: 100vw;
+        height: 200vh;
+        -webkit-box-flex: 1; /* OLD - iOS 6-, Safari 3.1-6 */
+        -webkit-flex: 1; /* Safari 6.1+. iOS 7.1+, BB10 */
+        -ms-flex: 1; /* IE 10 */
+        flex: 1; /* NEW, Spec - Firefox, Chrome */
+      }
+
+      h4 {
+        text-align: center;
+      }
+
+      .block {
+        background: #223;
+        position: relative;
+        padding-top: 45px;
+        width: 100%;
+      }
+
+      .block::before {
+        content: "Static BG - Mobile";
+        color: #fff;
+        position: absolute;
+        margin-left: 15px;
+        top: 0;
+      }
+
+      @media screen and (min-width: 768px) {
+        .block::before {
+          content: "Static BG - Tablet";
+        }
+      }
+
+      @media screen and (min-width: 1201px) {
+        .block::before {
+          content: "Static BG - Desktop";
+        }
+      }
+
+      span {
+        background: #eed;
+        color: #223;
+        text-align: left;
+        padding: 10px;
+        display: block;
+        width: 50%;
+        margin-left: 25%;
+        min-height: 100px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <div class="block">
+        <span
+          class="rellax"
+          data-rellax-speed="-2"
+          data-rellax-xs-speed="1"
+          data-rellax-mobile-speed="3"
+          data-rellax-tablet-speed="7"
+          data-rellax-desktop-speed="10"
+          >I move upwards faster on larger screens</span
+        >
+        <span
+          class="rellax"
+          data-rellax-speed="-2"
+          data-rellax-xs-speed="-1"
+          data-rellax-mobile-speed="-3"
+          data-rellax-tablet-speed="-7"
+          data-rellax-desktop-speed="-10"
+          >I move downwards faster on larger screens</span
+        >
+      </div>
+    </section>
+
+    <!-- Scripts -->
+    <script src="../rellax.js"></script>
+    <script>
+      var rellax = new Rellax(".rellax", {
+        breakpoints: [200, 400, 600]
+      });
+    </script>
+  </body>
+</html>

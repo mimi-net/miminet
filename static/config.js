@@ -27,8 +27,8 @@ const ConfigHostName = function(hostname){
 
 const ConfigHostInterface = function(name, ip, netmask, connected_to){
 
-    var elem = document.getElementById('config_host_interface_script');
-    var eth = jQuery.extend({}, elem);
+    let elem = document.getElementById('config_host_interface_script');
+    let eth = jQuery.extend({}, elem);
 
     if (!name){
         return;
@@ -56,13 +56,13 @@ const ConfigHostJobOnChange = function(evnt){
     {
         case '1':
             let elem = document.getElementById('config_host_ping_c_1_script').innerHTML;
-            let host_id = document.getElementById('host_id');
+            let host_job_list = document.getElementById('config_host_job_list');
 
-            if (!elem){
+            if (!elem || !host_job_list){
                 return;
             }
 
-            $(elem).insertBefore(host_id);
+            $(elem).insertBefore(host_job_list);
             break;
 
         case '0':
@@ -89,18 +89,34 @@ const ConfigHostJob = function(host_jobs){
     // Set onchange
     document.getElementById('config_host_job_select_field').addEventListener('change', ConfigHostJobOnChange);
 
+    elem = document.getElementById('config_host_job_list_script').innerHTML;
+    if (!elem){
+        return;
+    }
+
+    $(elem).insertBefore(host_id);
+
     // Print jobs if we have
     if (!host_jobs)
     {
         return;
     }
 
-    let job_list = document.getElementById('config_host_job_list_script').innerHTML;
+    $.each(host_jobs, function (i) {
+        let jid = host_jobs[i].id;
 
-    console.log(job_list);
+        elem = document.getElementById('config_host_job_list_elem_script');
 
-    if (!job_list){
-        return;
-    }
+        if (!elem){
+            return;
+        }
 
+        let job_elem = jQuery.extend({}, elem);
+        job_elem.innerHTML = job_elem.innerHTML.replace(/config_host_job_delete/g, 'config_host_job_delete_' + jid);
+        job_elem.innerHTML = job_elem.innerHTML.replace(/a\s+href=\"\"/g, 'a href="/host/delete_job?id=' + jid + '&guid=' + network_guid + '" ');
+        job_elem.innerHTML = job_elem.innerHTML.replace(/justify-content-between align-items-center\">/, 'justify-content-between align-items-center\">' + host_jobs[i].print_cmd);
+
+        let text = job_elem.innerHTML;
+        $(text).insertBefore(host_id);
+    });
 }
