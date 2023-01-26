@@ -105,6 +105,11 @@ const ConfigHostJob = function(host_jobs){
     $.each(host_jobs, function (i) {
         let jid = host_jobs[i].id;
 
+        if (i == 0){
+            $('#config_host_job_list').append('<label class="text-sm">Команды</label>');
+        }
+
+
         elem = document.getElementById('config_host_job_list_elem_script');
 
         if (!elem){
@@ -114,9 +119,10 @@ const ConfigHostJob = function(host_jobs){
         let job_elem = jQuery.extend({}, elem);
         job_elem.innerHTML = job_elem.innerHTML.replace(/config_host_job_delete/g, 'config_host_job_delete_' + jid);
         job_elem.innerHTML = job_elem.innerHTML.replace(/a\s+href=\"\"/g, 'a href="/host/delete_job?id=' + jid + '&guid=' + network_guid + '" ');
-        job_elem.innerHTML = job_elem.innerHTML.replace(/justify-content-between align-items-center\">/, 'justify-content-between align-items-center\">' + host_jobs[i].print_cmd);
+        job_elem.innerHTML = job_elem.innerHTML.replace(/justify-content-between align-items-center\">/, 'justify-content-between align-items-center\"><small>' + host_jobs[i].print_cmd + '</small>');
 
         let text = job_elem.innerHTML;
-        $(text).insertBefore(host_id);
+        //$(text).insertBefore(host_id);
+        $('#config_host_job_list').append(text);
     });
 }

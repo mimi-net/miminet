@@ -16,7 +16,7 @@
 
 <script id="config_host_job_script" type="text/plain">
     <div class="form-group" id="config_host_jobs">
-        <label for="config_host_job_label" class="text-sm">Выполнить команду</label>
+        <label for="config_host_job_select_field" class="text-sm">Добавить команду</label>
             <select id="config_host_job_select_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_host_job_select_field">
                 <option selected value="0">---</option>
                 <option value="1">ping (1 пакет)</option>
@@ -39,17 +39,17 @@
     <label id="config_host_ip_label_example" for="config_host_ip_example" class="text-sm">IP-адрес / Маска</label>
     <div class="input-group pb-2 flex-nowrap">
         <input type="text" class="form-control form-control-sm w-75" id="config_host_ip_example" name="config_host_ip_example" value=''>
-        <input type="number" class="form-control form-control-sm w-25" id="config_host_mask_example" name="config_host_mask_example" min="0" max="32" value="0">
+        <input type="number" class="px-2 form-control form-control-sm w-25" id="config_host_mask_example" name="config_host_mask_example" min="0" max="32" value="0">
     </div>
 </script>
 
 <script id="config_host_job_list_script" type="text/plain">
-    <ul class="list-group" id="config_host_job_list">
+    <ul class="list-group pt-2" id="config_host_job_list">
     </ul>
 </script>
 
 <script id="config_host_job_list_elem_script" type="text/plain">
-  <li class="list-group-item d-flex justify-content-between align-items-center">
-    <span class="badge bg-danger rounded-pill"><a href="" id="config_host_job_delete">X</a></span>
+  <li class="py-1 px-2 list-group-item d-flex justify-content-between align-items-center">
+    <span class="ms-auto"><a href="" id="config_host_job_delete"><i class="bx bx-x fs-xl align-middle"></i></a></span>
   </li>
 </script>

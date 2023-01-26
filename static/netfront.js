@@ -148,6 +148,7 @@ $('#NetworkRunButton').click(function() {
 
         $(this).text('Запустить');
         $(this).removeClass('btn-danger');
+        $(this).removeClass('btn-secondary');
         $(this).addClass('btn-success');
 
         DrawGraph(nodes, edges);
