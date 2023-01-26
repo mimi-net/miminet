@@ -2,7 +2,7 @@ import json
 import uuid
 
 from flask import render_template, redirect, url_for, request, flash
-from miminet_model import db, Network
+from miminet_model import db, Network, Simulate
 from flask_login import login_required, current_user
 
 
@@ -125,6 +125,11 @@ def save_host_config():
         if host_label:
             node['config']['label'] = host_label
             node['data']['label'] = node['config']['label']
+
+            # Remove all previous simulations
+            sims = Simulate.query.filter(Simulate.network_id == net.id).all()
+            for s in sims:
+                db.session.delete(s)
 
             net.network = json.dumps(jnet)
             db.session.commit()
