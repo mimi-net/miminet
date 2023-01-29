@@ -55,22 +55,23 @@
 
         {% if current_user.is_authenticated %}
         <ul class="navbar-nav">
-
-        </ul>
-                {% if network %}
-        <ul class="navbar-nav">
-        <!--            <li class="nav-item">
-                        <a class="nav-link active"> / </a>
-                    </li>
-        -->
-                    <li class="nav-item" >
+            <li class="nav-item" >
                         <a class="nav-link" href="{{ url_for('home') }}"> Сети</a>
+            </li>
+
+
+                {% if network %}
+
+                   <li class="nav-item">
+                        <a class="nav-link active"> / </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('web_network', guid=network.guid) }}">{{ network.title }}</a>
                     </li>
+        </ul>
+        <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="#netConfigModal" data-bs-toggle="modal" data-target="#netConfigModal">Настройки</a>
+                        <a class="btn btn-outline-primary" href="#netConfigModal" data-bs-toggle="modal" data-target="#netConfigModal">Настройки</a>
                     </li>
         </ul>
                 {% endif %}
