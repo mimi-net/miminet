@@ -4,84 +4,72 @@
 {% block content %}
 
 <main>
-    <!-- первая страница-->
-<section class="main-section">
-<div class="container">
-      <header class="header row">
-
-        <div class="col">
-          <div class="logo">
-              <img src="{{ url_for('static', filename='/images/logo.png') }}">
-          </div>
-        </div>
-
-        <div class="col text-right">
-            <!--href задает переход к идентификации -->
-          <a href="{{ url_for('login_index') }}" class="btn btn-primary" role="button" data-toggle="button" aria-pressed="true">Вход</a>
-        </div>
-
-      </header>
-</div>
-    <div class="main-section-content container">
-      <div class="row">
-      <div class="col">
-          <p style="border-radius: 5px; padding: 5px 20px; background: #404040;  width:320px", class="p"> Жми на Старт, чтобы создать свою первую сеть!</p>
-          <img src="{{ url_for('static', filename='/images/topo.png') }}">
-      </div>
-        <div class="col">
-          <a href="{{ url_for('home') }}" class="btn btn-primary btn-lg" role="button" data-toggle="button" aria-pressed="true">Старт</a>
-      </div>
-      </div>
-    </div>
-  </section>
-
-    <!-- вторая страница, шаг 1-->
-    <section class="section1">
-        <div class="container">
-            <div class="row">
-                <div class="col">
-                <img class="host" src="{{ url_for('static', filename='/images/pc.png') }}">
+    <!-- start-->
+    <section class="py-5 my-lg-5">
+        <div class="container py-5 my-lg-5">
+             <div class="row">
+                <div class="col-md-4" >
+                     <img src="{{ url_for('static', filename='/images/topo.png') }}">
                 </div>
-                <div class="col">
-                    <p style="border-radius: 5px; padding: 5px 20px; background: #404040;  width:320px", class="step1"> Шаг 1. Добавь устройство </p>
+                <div class="col-md-8">
+                    <div class="text-center">
+                        <div class="card-body">
+                            <h4 class="card-title">Жми на Старт, чтобы создать свою первую сеть!</h4>
+                             <p class="card-text"></p>
+                            <a href="{{ url_for('home') }}" class="btn btn-primary btn-lg">Старт</a>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
-    <!-- вторая страница, шаг 2-->
-        <div class="step2 container">
-             <div class="row">
-                <div class="col">
-                    <img class="line" src="{{ url_for('static', filename='/images/line.png') }}">
-                </div>
-                <div class="col">
-                    <p style="border-radius: 5px; padding: 5px 20px; background: #404040;  width:320px", class="step1"> Шаг 2. Соедини устройства </p>
-                </div>
-             </div>
-        </div>
+    </section>
 
-        <!-- вторая страница, шаг 3-->
-        <div class="step3 container">
-             <div class="row">
-                <div class="col">
-                    <img class="parameters" width="200px" height="200px" src="{{ url_for('static', filename='/images/parameters.png') }}">
+    <!-- вторая страница, шаг-->
+    <section>
+        <div class="container py-3 my-lg-5">
+            <div class="steps steps-sm steps-horizontal-md">
+  <!-- Step -->
+                <div class="step">
+                    <div class="step-number">
+                        <img class="host" src="{{ url_for('static', filename='/images/pc.png') }}">
+                    </div>
+                    <div class="step-body">
+                        <h5 class="mb-2">Шаг 1</h5>
+                        <p class="fs mb-0">Добавь устройства.</p>
+                    </div>
                 </div>
-                <div class="col">
-                    <p style="border-radius: 5px; padding: 5px 20px; background: #404040;  width:320px", class="step3param"> Шаг 3. Настрой параметры </p>
+  <!-- Step -->
+                <div class="step">
+                    <div class="step-number">
+                        <img class="line" src="{{ url_for('static', filename='/images/line.png') }}">
+                    </div>
+                    <div class="step-body">
+                        <h5 class="mb-2">Шаг 2</h5>
+                        <p class="fs mb-0">Соедини устройства.</p>
+                    </div>
                 </div>
-             </div>
-        </div>
-
-
-        <!-- вторая страница, шаг 4-->
-        <div class="step4 container">
-             <div class="row">
-                <div class="col">
-                    <img class="parameters" src="{{ url_for('static', filename='/images/topo.png') }}">
+  <!-- Step -->
+                <div class="step">
+                    <div class="step-number">
+                        <img class="parameters"  src="{{ url_for('static', filename='/images/parameters.png') }}">
+                    </div>
+                    <div class="step-body">
+                        <h5 class="mb-2">Шаг 3</h5>
+                        <p class="fs mb-0">Настрой параметры.</p>
+                    </div>
                 </div>
-                <div class="col">
-                    <p style="border-radius: 5px; padding: 5px 20px; background: #404040;  width:320px", class="step4topo"> Шаг 4. Запусти с помощью кнопки Симулировать</p>
+  <!-- Step -->
+                <div class="step">
+                    <div class="step-number">
+                        <img class="parameters" src="{{ url_for('static', filename='/images/topo.png') }}">
+                    </div>
+                    <div class="step-body">
+                        <h5 class="mb-2">Шаг 4</h5>
+                        <p class="fs mb-0">Запусти с помощью кнопки Симулировать.</p>
+                    </div>
                 </div>
-             </div>
+            </div>
         </div>
     </section>
 </main>

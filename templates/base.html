@@ -40,166 +40,51 @@
 
     <script src="{{ url_for('static', filename='icons.js') }}"></script>
     <script src="{{ url_for('static', filename='netfront_f.js') }}"></script>
-<!--Вместо style.css>
+
     <style>
 
-           main {
-           font-family: 'Inter', sans-serif;
-           font-style: italic;
-           font-weight: bold;
-           font-size: 18px;
-           }
-           .active {
-               outline: 1px solid red;
-           }
-           .header {
-                margin-top: 50px;
-                margin-bottom: 150px;
-           }
-           .logo {
-                display: inline-block;
-           }
-           img {
-                 margin-left: 50px;
-           }
-           .p {
-           margin-bottom: 150px;
-           color: #FFFFFF;
-           margin-left: 50px;
-           }
-
-           .btn{
-           float: right;
-           border-radius: 5px;
-           background: #A3D4F7;
-           padding: 5px 15px;
-           font-family: 'Inter', sans-serif;
-           font-style: italic;
-           font-weight: bold;
-           font-size: 18px;
-           }
-
-           .btn-lg{
-           border-radius: 5px;
-           background: #A3D4F7;
-           padding: 10px 40px;
-           font-family: 'Inter', sans-serif;
-           font-style: italic;
-           font-weight: bold;
-           font-size: 30px;
-           margin-right: 400px;
-
-           }
-
-           body{
-            background-color: #071726;
-           }
-
-           .section1 {
-                margin-top: 200px;
-           }
-           .host {
-           margin-left: 200px;
-           }
-           .step1 {
-           margin-bottom: 150px;
-           color: #FFFFFF;
-           margin-left: 50px;
-           }
-
-           .line {
-           margin-left: 200px;
-           }
-           .parameters {
-           margin-top: 70px;
-           margin-left: 150px;
-           }
-           .step3param {
-           margin-top: 130px;
-           margin-bottom: 150px;
-           color: #FFFFFF;
-           margin-left: 50px;
-           }
-           .step4topo {
-           margin-top: 130px;
-           margin-bottom: 150px;
-           color: #FFFFFF;
-           margin-left: 50px;
-           }
-           .col-md-8 {
-           margin-top: -607px;
-           }
-
-           form {
-           border-radius: 5px;
-           background: #A3D4F7;
-           padding: 20px 15px;
-           font-family: 'Inter', sans-serif;
-           font-style: italic;
-           font-weight: bold;
-           font-size: 18px;
-           color: #FFFFFF;
-           }
-
-           .btn-block {
-           border-radius: 5px;
-           background: #8E9597;
-           opacity:0.64;
-           padding: 5px 15px;
-           font-family: 'Inter', sans-serif;
-           font-style: italic;
-           font-size: 18px;
-           margin-right: 210px;
-           }
-
-           .login {
-            margin-left: 30px;
-           }
-           .text {
-           margin-top: 20px;
-           font-family: 'Inter', sans-serif;
-           font-style: italic;
-           font-size: 15px;
-           margin-bottom: 20px;
-           margin-left: 93px;
-           }
-
-
-
-    </style-->
+    </style>
 </head>
 <body>
-<!--
-<nav class="navbar navbar-expand-md navbar-fixed-top navbar-dark bg-dark main-nav">
-    <div class="container">
-        <ul class="nav navbar-nav text-nowrap flex-row mx-md-auto order-1 order-md-2">
-            {% if current_user.is_authenticated %}
-                <li class="nav-item ">
-                    <a class="nav-link" href="{{ url_for('home') }}"><strong>Сети</strong></a>
-                </li>
+
+<nav class="header navbar navbar-expand-lg position-absolute navbar-sticky">
+    <div class="container px-3">
+        <a class="navbar-brand pe-3">
+                    <img src="{{ url_for('static', filename='/images/logo.png') }}" width="200" alt="Silicon">
+        </a>
+
+        {% if current_user.is_authenticated %}
+        <ul class="navbar-nav">
+            <li class="nav-item" >
+                        <a class="nav-link" href="{{ url_for('home') }}"> Сети</a>
+            </li>
+
+
                 {% if network %}
-                    <li class="nav-item">
-                        <strong class="nav-link"> / </strong>
+
+                   <li class="nav-item">
+                        <a class="nav-link active"> / </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('web_network', guid=network.guid) }}"><strong>{{ network.title }}</strong></a>
+                        <a class="nav-link" href="{{ url_for('web_network', guid=network.guid) }}">{{ network.title }}</a>
                     </li>
+        </ul>
+        <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link fs-6" href="#netConfigModal" data-bs-toggle="modal" data-target="#netConfigModal">(настройки)</a>
+                        <a class="btn btn-outline-primary" href="#netConfigModal" data-bs-toggle="modal" data-target="#netConfigModal">Настройки</a>
                     </li>
+        </ul>
                 {% endif %}
 
-
          {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('login_index') }}"><strong>Вход/Регистрация</strong></a>
-                </li>
-            {% endif %}
-
-        </ul>
+                <a href="{{ url_for('login_index') }}" class="btn btn-primary">
+                    <i class="bx fs-5 lh-1 me-1"></i>
+                    Вход
+                </a>
+        {% endif %}
     </div>
 </nav>
--->
+
 
 {% if network %}
 <!-- Net configuration -->
