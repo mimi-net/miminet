@@ -106,7 +106,7 @@ def web_network():
                            edges=jnet['edges'], packets=jnet['packets'], jobs=jnet['jobs'],
                            simulating=sim)
 
-
+# Depricated?
 @login_required
 def post_nodes():
 
@@ -139,7 +139,7 @@ def post_nodes():
     ret = {'message': 'Done', 'code': 'SUCCESS'}
     return make_response(jsonify(ret), 201)
 
-
+# Depricated?
 @login_required
 def post_edges():
 
@@ -190,6 +190,25 @@ def post_nodes_edges():
         jnet = json.loads(net.network)
         jnet['edges'] = edges
         jnet['nodes'] = nodes
+
+        # If we delete host, remove all jobs without hosts
+        new_jobs = []
+        jobs = jnet['jobs']
+        for job in jobs:
+            job_host = job.get('host_id')
+
+            if not job_host:
+                continue
+
+            nn = list(filter(lambda x: x['data']["id"] == job_host, nodes))
+
+            # Good, append job and continue
+            if nn:
+                new_jobs.append(job)
+                continue
+
+        jnet['jobs'] = new_jobs
+
         net.network = json.dumps(jnet)
 
         # Remove all previous simulations

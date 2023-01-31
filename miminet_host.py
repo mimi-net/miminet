@@ -33,6 +33,12 @@ def delete_job():
     jnet['jobs'] = jj
 
     net.network = json.dumps(jnet)
+
+    # Remove all previous simulations
+    sims = Simulate.query.filter(Simulate.network_id == net.id).all()
+    for s in sims:
+        db.session.delete(s)
+
     db.session.commit()
 
     return redirect(url_for('web_network', guid=net.guid))

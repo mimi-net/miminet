@@ -1,5 +1,6 @@
 let NetworkState = 0; // 0 - not simulated yet, 1 - simulating, 2 - ready to run, 3 - animated
 let SimulationId = 0;
+let global_cy = undefined;
 
 const uid = function(){
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -215,6 +216,27 @@ const AddEdge = function(source_id, target_id){
         }
 }
 
+const DeleteJob = function(node_id){
+
+    let jobs_to_delete = [];
+
+    $.each(jobs , function(idx, job) {
+
+        if (!job){
+            return;
+        }
+
+        if (job.host_id === node_id){
+            jobs_to_delete.push(idx);
+        }
+    });
+
+    $.each(jobs_to_delete, function (idx, val){
+        jobs.splice(val, 1);
+    });
+
+}
+
 const DeleteNode = function(node_id) {
 
     // Find node in nodes
@@ -224,7 +246,7 @@ const DeleteNode = function(node_id) {
         return;
     }
 
-    edges_to_delete = []
+    let edges_to_delete = [];
 
     // Find all edges that connected to the deleted node
     $.each(edges , function(idx, edge) {
@@ -281,11 +303,8 @@ const DeleteNode = function(node_id) {
     });
 
     // Delete the node
-    let node_index = nodes.findIndex(prop => prop.data.id === node_id)
-    nodes.splice(node_index,1)
-    PostNodesEdges();
-    DrawGraph(nodes, edges);
-
+    let node_index = nodes.findIndex(prop => prop.data.id === node_id);
+    nodes.splice(node_index,1);
 }
 
 const PostNodes = function(){
@@ -479,7 +498,19 @@ const prepareStylesheet = function() {
 
 const DrawGraph = function(nodes, edges) {
 
-    const cy = cytoscape({
+    // Do we already have one?
+    let cy = undefined;
+
+    if (global_cy)
+    {
+        cy = global_cy;
+        cy.elements().remove();
+        cy.add(nodes);
+        cy.add(edges);
+        return;
+    }
+
+    cy = cytoscape({
         container: document.getElementById("network_scheme"),
         boxSelectionEnabled: true,
         autounselectify: true,
@@ -489,6 +520,8 @@ const DrawGraph = function(nodes, edges) {
         zoom: 2,
         fit: true,
     });
+
+    global_cy = cy;
 
     // the default values of each option are outlined below:
     let defaults = {
@@ -638,10 +671,14 @@ const DrawGraph = function(nodes, edges) {
 
     $(document).on('keyup', function(e){
 
-    if (e.keyCode ==  46)
+        if (e.keyCode ==  46)
         {
             DeleteNode(selecteed_node_id);
-            PostNodesEdges();
+            DeleteJob(selecteed_node_id);
+            PostNodesEdges();               // Update network on server
+            cy.elements().remove();
+            cy.add(nodes);
+            cy.add(edges);
 
             // Reset network state
             if (GetNetworkState()){
