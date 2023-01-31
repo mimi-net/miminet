@@ -505,8 +505,10 @@ const DrawGraph = function(nodes, edges) {
     {
         cy = global_cy;
         cy.elements().remove();
+        cy.autounselectify(true);
         cy.add(nodes);
         cy.add(edges);
+        cy.nodes().grabify();
         return;
     }
 
@@ -739,16 +741,27 @@ const RunPackets = function (cy, pkts){
 
 const DrawGraphStatic = function(nodes, edges, traffic) {
 
-    const cy = cytoscape({
-        container: document.getElementById("network_scheme"),
-        boxSelectionEnabled: true,
-        autounselectify: false,
-        style: prepareStylesheet(),
-        elements: [],
-        layout: 'preset',
-        zoom: 2,
-        fit: true,
-    });
+    // Do we already have one?
+    let cy = undefined;
+
+    if (global_cy)
+    {
+        cy = global_cy;
+        cy.elements().remove();
+    } else {
+        cy = cytoscape({
+            container: document.getElementById("network_scheme"),
+            boxSelectionEnabled: true,
+            autounselectify: false,
+            style: prepareStylesheet(),
+            elements: [],
+            layout: 'preset',
+            zoom: 2,
+            fit: true,
+        });
+    }
+
+    cy.autounselectify(false);
 
     cy.add(nodes);
     cy.add(edges);
