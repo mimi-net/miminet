@@ -137,6 +137,27 @@
             </div>
         </div>
     </div>
+
+    <div class="modal" id="noJobsModal" tabindex="-1" role="dialog" aria-labelledby="noJobsModalLabel" aria-hidden="true" data-focus-on="input:first">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="noJobsModalLabel">Что делать?</h5>
+                    <button id="noJobsModalCancelIcon" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Зачем симулировать сеть, если она ничего не делает?!</p>
+                    <p>В настройках хоста добавьте команду, например, вы можете выполнить команду 'ping' на определенный IP адрес или имя хоста.</p>
+                    <p>И не забывайте конфигурировать IP адрес и маску у хостов.</p>
+                </div>
+                <div class="modal-footer">
+                    <button id="noJobsModalSubmit" type="button" class="btn btn-primary">Ок</button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endif %}
 
 {% block content %}
@@ -172,6 +193,14 @@
 
         $("#networkDeleteSubmitButton").click(function(){
             $("#networkDeleteForm").submit(); // Submit the form
+        });
+
+        $("#noJobsModalCancelIcon").click(function(){
+            $('#noJobsModal').modal('hide');
+        });
+
+        $("#noJobsModalSubmit").click(function(){
+            $('#noJobsModal').modal('hide');
         });
 
         var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))

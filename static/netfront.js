@@ -98,6 +98,13 @@ $('#NetworkRunButton').click(function() {
     // Run simulating
     if (GetNetworkState() === 0)
     {
+        // Check for job. If no job - show modal and exit.
+        if (!jobs.length)
+        {
+            $('#noJobsModal').modal('toggle');
+            return;
+        }
+
         $(this).text('Симуляция');
         $(this).removeClass('btn-primary');
         $(this).addClass('btn-secondary');
