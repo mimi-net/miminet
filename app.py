@@ -6,7 +6,8 @@ from flask_migrate import Migrate
 
 from miminet_config import SQLITE_DATABASE_NAME, SECRET_KEY
 from miminet_model import db, init_db, Network
-from miminet_auth import login_manager, login_index, google_login, google_callback, user_profile
+from miminet_auth import login_manager, login_index, google_login, google_callback, user_profile,\
+    vk_callback, logout
 from miminet_network import create_network, web_network, update_network_config,\
     delete_network, post_nodes, post_edges, post_nodes_edges, move_nodes
 from miminet_simulation import run_simulation, check_simulation
@@ -35,8 +36,10 @@ login_manager.init_app(app)
 # Login
 app.add_url_rule('/login.html', methods=['GET', 'POST'], view_func=login_index)
 app.add_url_rule('/google_login', methods=['GET'], view_func=google_login)
+app.add_url_rule('/vk_callback', methods=['GET'], view_func=vk_callback)
 app.add_url_rule('/google_callback', methods=['GET'], view_func=google_callback)
 app.add_url_rule('/profile.html', methods=['GET', 'POST'], view_func=user_profile)
+app.add_url_rule('/logout', methods=['GET'], view_func=logout)
 
 # Network
 app.add_url_rule('/create_network', methods=['GET'], view_func=create_network)

@@ -1,6 +1,7 @@
 import os
 import pathlib
 import requests
+import json
 
 from google.oauth2 import id_token
 import google.auth.transport.requests
@@ -199,3 +200,74 @@ def google_callback():
 
     login_user(user, remember=True)
     return redirect_next_url(fallback=url_for('home'))
+
+
+# https://vk.com/dev/authcode_flow_user
+def vk_callback():
+
+    user_code = request.args.get('code')
+
+    if not user_code:
+        return redirect(url_for('login_index'))
+
+    # Get access token
+    response = requests.get('https://oauth.vk.com/access_token?client_id=51544060&client_secret=5G1LOaa0ty0zFDmH5cPw&redirect_uri=https://miminet.ru/vk_callback&code=' + user_code)
+    access_token_json = json.loads(response.text)
+
+    if "error" in access_token_json:
+        return redirect(url_for('login_index'))
+
+    print (access_token_json)
+
+    vk_id = access_token_json.get('user_id')
+    access_token = access_token_json.get('access_token')
+    vk_email = access_token_json.get('email')
+
+    # Get user name
+    response = requests.get('https://api.vk.com/method/users.get?user_ids=' + str(vk_id) + '&fields=photo_100&access_token=' + str(access_token) + '&v=5.130')
+    vk_user = json.loads(response.text)
+
+    if vk_email:
+        user = User.query.filter_by(email=vk_email).first()
+
+        if user:
+            user.vk_id=vk_id
+            db.session.commit()
+
+    user = User.query.filter_by(vk_id=vk_id).first()
+
+    # New user?
+    if user is None:
+        # Yes
+        try:
+            avatar_uri = os.urandom(16).hex()
+            avatar_uri = avatar_uri + ".jpg"
+
+            if 'photo_100' in vk_user['response'][0]:
+                r = requests.get(vk_user['response'][0]['photo_100'], allow_redirects=True)
+                open('static/avatar/' + avatar_uri, 'wb').write(r.content)
+
+            new_user = User(nick=vk_user['response'][0]['first_name'] + vk_user['response'][0]['last_name'],
+                             avatar_uri=avatar_uri,
+                             vk_id=vk_id,
+                             email=vk_email)
+            db.session.add(new_user)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            error = str(e.__dict__['orig'])
+            print(error)
+            print("Can't add new user to the Database")
+            flash(error, category='error')
+            return redirect(url_for('login_index'))
+
+        user = User.query.filter_by(vk_id=vk_id).first()
+
+    login_user(user, remember=True)
+    return redirect_next_url(fallback=url_for('home'))
+
+
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
