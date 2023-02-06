@@ -892,6 +892,46 @@ const DrawSharedGraph = function(nodes, edges) {
     cy.nodes().ungrabify();
 }
 
+const DrawShareGraphStatic = function(nodes, edges, traffic) {
+
+    // Do we already have one?
+    let cy = undefined;
+
+    if (global_cy)
+    {
+        cy = global_cy;
+        cy.elements().remove();
+    } else {
+        cy = cytoscape({
+            container: document.getElementById("network_scheme_shared"),
+            boxSelectionEnabled: true,
+            autounselectify: false,
+            style: prepareStylesheet(),
+            elements: [],
+            layout: 'preset',
+            zoom: 2,
+            fit: true,
+        });
+    }
+
+    cy.autounselectify(false);
+
+    cy.add(nodes);
+    cy.add(edges);
+
+    let timeout = 0;
+
+    traffic.forEach(function(pkts){
+        setTimeout(function(){RunPackets(cy, pkts)}, timeout);
+        timeout += 1500;
+    })
+
+    setTimeout(function(){$('#NetworkSharedRunButton').click();}, timeout);
+
+    cy.nodes().ungrabify();
+    return;
+}
+
 const GetNetworkState = function()
 {
     return NetworkState;

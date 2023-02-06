@@ -180,7 +180,7 @@ $('#NetworkSharedRunButton').click(function() {
         $(this).addClass('btn-danger');
 
         SetNetworkState(3);
-        DrawGraphStatic(nodes, edges, packets);
+        DrawShareGraphStatic(nodes, edges, packets);
         return;
     }
 
