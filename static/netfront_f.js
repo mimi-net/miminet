@@ -1,4 +1,5 @@
 let NetworkState = 0; // 0 - not simulated yet, 1 - simulating, 2 - ready to run, 3 - animated
+let NetworkSharedState = 0; // 0 - not simulated yet, 2 - ready to run, 3 - animated
 let SimulationId = 0;
 let global_cy = undefined;
 
@@ -779,15 +780,138 @@ const DrawGraphStatic = function(nodes, edges, traffic) {
     return;
 }
 
+const DrawSharedGraph = function(nodes, edges) {
+
+    // Do we already have one?
+    let cy = undefined;
+
+    if (global_cy)
+    {
+        cy = global_cy;
+        cy.elements().remove();
+    } else {
+        cy = cytoscape({
+            container: document.getElementById("network_scheme_shared"),
+            boxSelectionEnabled: true,
+            autounselectify: true,
+            style: prepareStylesheet(),
+            elements: [],
+            layout: 'preset',
+            zoom: 2,
+            fit: true,
+        });
+    }
+
+    cy.autounselectify(true);
+
+    cy.add(nodes);
+    cy.add(edges);
+
+    // Click on object
+    cy.on('click', 'node', function (evt) {
+        var node = evt.target;
+        let n = nodes.find(n => n.data.id === this.id());
+
+        if (!n) {
+            return;
+        }
+
+        selecteed_node_id = n.data.id;
+
+        if (n.config.type === 'host'){
+
+            let hostname = n.config.label;
+            hostname = hostname || n.data.id;
+
+            // Create form
+            SharedConfigHostForm(n.data.id);
+
+            // Add hostname
+            ConfigHostName(hostname);
+
+            // Add jobs
+            let host_jobs = [];
+
+            if (jobs){
+                host_jobs = jobs.filter(j => j.host_id === n.data.id);
+            }
+
+            ConfigHostJob(host_jobs);
+
+            // Add interfaces
+            $.each(n.interface, function (i) {
+                let iface_id = n.interface[i].id;
+
+                if (!iface_id){
+                    return;
+                }
+
+                let connect_id = n.interface[i].connect;
+
+                if (!connect_id){
+                    return;
+                }
+
+                let edge = edges.find(e => e.data.id === connect_id);
+
+                if (!edge){
+                    return;
+                }
+
+                let source_host = edge.data.source;
+                let target_host = edge.data.target;
+
+
+                if (!source_host || !target_host){
+                    return;
+                }
+
+                let connected_to = target_host;
+                if (n.data.id === target_host){
+                    connected_to = source_host;
+                }
+
+                ip_addr = n.interface[i].ip;
+
+                if (!ip_addr){
+                    ip_addr = '';
+                }
+
+                netmask = n.interface[i].netmask;
+
+                if (!netmask){
+                    netmask = '';
+                }
+
+                ConfigHostInterface(iface_id, ip_addr, netmask, connected_to);
+
+            });
+        }
+    });
+
+    cy.nodes().ungrabify();
+}
+
 const GetNetworkState = function()
 {
     return NetworkState;
+}
+
+const GetSharedNetworkState = function()
+{
+    return NetworkSharedState;
 }
 
 const SetNetworkState = function(state)
 {
     NetworkState = state;
     return NetworkState;
+}
+
+const SetNetworkSharedState = function(state)
+{
+    NetworkSharedState = state;
+    return NetworkSharedState;
 }
 
 // Check whether simulation is over and we can run packets
@@ -888,6 +1012,36 @@ const SetNetworkRunButtonState = function(id, packets)
     $('#NetworkRunButton').prop('disabled', false);
 
     $('#NetworkRunButtonLabel').text("Ожидание 10-30 сек.");
+
+    SetNetworkState(0);
+    return;
+}
+
+const SetNetworkSharedRunButtonState = function(packets)
+{
+    // If we have packets, than we're ready to run
+    if (packets)
+    {
+        $('#NetworkSharedRunButton').text('Запустить');
+        $('#NetworkSharedRunButton').removeClass('btn-primary');
+        $('#NetworkSharedRunButton').removeClass('btn-secondary');
+        $('#NetworkSharedRunButton').addClass('btn-success');
+        $('#NetworkSharedRunButton').prop('disabled', false);
+
+        const pkt_count = packets.reduce((currentCount, row) => currentCount + row.length, 0);
+
+        $('#NetworkSharedRunButtonLabel').text("Готова анимация: " + pkt_count + " пакетов");
+
+        SetNetworkState(2);
+        return;
+    }
+
+    $('#NetworkSharedRunButton').text('Симуляции нет');
+    $('#NetworkSharedRunButton').removeClass('btn-success');
+    $('#NetworkSharedRunButton').addClass('btn-secondary');
+    $('#NetworkSharedRunButton').prop('disabled', true);
+
+    $('#NetworkSharedRunButtonLabel').text("Сеть не симулировалась");
 
     SetNetworkState(0);
     return;

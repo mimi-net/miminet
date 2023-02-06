@@ -17,6 +17,21 @@ const ConfigHostForm = function(host_id){
     $('#net_guid').val( network_guid );
 }
 
+const SharedConfigHostForm = function(host_id){
+    var form = document.getElementById('config_main_form_script').innerHTML;
+
+    // Clear all child
+    $(config_content_id).empty();
+
+    // Add new form
+    $(config_content_id).append(form);
+
+    // Set host_id
+    $('#host_id').val( host_id );
+    $('#net_guid').val( network_guid );
+    $('#config_main_form_submit_button').prop('disabled', true);
+}
+
 const ConfigHostName = function(hostname){
 
     var text = document.getElementById('config_host_name_script').innerHTML;
@@ -48,7 +63,6 @@ const ConfigHostInterface = function(name, ip, netmask, connected_to){
     $('#config_host_mask_' + name).val(netmask);
 
 }
-
 
 const ConfigHostJobOnChange = function(evnt){
 

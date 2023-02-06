@@ -49,6 +49,9 @@ class Network(db.Model):
     network = db.Column(db.UnicodeText, default=make_empty_network, nullable=False)
     preview_uri = db.Column(db.String(255), default='first_network.jpg', nullable=False)
 
+    # Is this network in share mode?
+    share_mode = db.Column(db.Boolean, default=True)
+
 
 class Simulate(db.Model):
 

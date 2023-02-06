@@ -71,19 +71,70 @@ def delete_network():
 
 
 @login_required
-def web_network():
+def web_network_shared():
 
     network_guid = request.args.get('guid', type=str)
 
     if not network_guid:
         flash('Пропущен параметр GUID. И какую сеть мне открыть?!')
-        return redirect('home')
+        return redirect(url_for('home'))
+
+    net = Network.query.filter(Network.guid == network_guid).first()
+
+    if not net:
+        flash('Нет такой сети')
+        return redirect(url_for('home'))
+
+    if not net.share_mode:
+        flash ("Сеть закрыта для общего доступа")
+        return redirect(url_for('home'))
+
+    jnet = json.loads(net.network)
+
+    print (jnet)
+
+    if not 'nodes' in jnet:
+        jnet['nodes'] = []
+
+    if not 'edges' in jnet:
+        jnet['edges'] = []
+
+    if not 'packets' in jnet:
+        jnet['packets'] = 'null'
+
+    if not 'jobs' in jnet:
+        jnet['jobs'] = []
+
+    # Do we simulte this network now?
+    sim = Simulate.query.filter(Simulate.network_id == net.id).first()
+
+    return render_template("network_shared.html", network=net, nodes=jnet['nodes'],
+                           edges=jnet['edges'], packets=jnet['packets'], jobs=jnet['jobs'],
+                           simulating=sim)
+
+
+@login_required
+def web_network():
+
+    user = current_user
+    network_guid = request.args.get('guid', type=str)
+
+    if not network_guid:
+        flash('Пропущен параметр GUID. И какую сеть мне открыть?!')
+        return redirect(url_for('home'))
 
     net = Network.query.filter(Network.guid == network_guid).first()
 
     if not net:
         flash('Нет такой сети')
         return redirect('home')
+
+    # If author is not user
+    if net.author_id != user.id:
+        if net.share_mode:
+            return redirect (url_for('web_network_shared', guid=net.guid))
+        else:
+            return redirect(url_for('home'))
 
     jnet = json.loads(net.network)
 

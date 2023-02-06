@@ -83,11 +83,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <a class="nav-link" href="{{ url_for('web_network', guid=network.guid) }}">{{ network.title }}</a>
                     </li>
         </ul>
+
         <ul class="navbar-nav">
+
                     <li class="nav-item">
-                        <a class="btn btn-outline-primary" href="#netConfigModal" data-bs-toggle="modal" data-target="#netConfigModal">Настройки сети</a>
+                        <a {% if request.path != url_for('web_network_shared') %} class="btn btn-outline-primary" {% else %} class="btn btn-outline-primary disabled" {% endif %} href="#netConfigModal" data-bs-toggle="modal" data-target="#netConfigModal">Настройки сети</a>
                     </li>
+
         </ul>
+
                 {% endif %}
 
          {% else %}

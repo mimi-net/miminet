@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}{{ network.title }}{% endblock %}
+{% block description %}Симуляция компьютерной сети в вебе{% endblock %}
+{% block content %}
+
+<main>
+  <section class="py-5 my-lg-5">
+    <div class="container py-3 h-100">
+        <div class="row flex-nowrap">
+
+            <div id="side_menu" class="col-auto col-sm-6 col-xl-2 px-sm-2 px-0 bg-white" style="height: 80vh;">
+                <h5 class="py-3 ps-2">Устройства</h5>
+
+                <div class="card-columns" style="column-count: 2;">
+                    <div class="card border-0">
+                        <div class="card-body px-0 py-0 text-center">
+                            <img class="drag" id="l2_switch" src="{{ url_for('static', filename='/images/l2_switch.png') }}"/>
+                            <div class="icon-text">
+                                <span data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Свитч (коммутатор) работает на втором уровне модели OSI.">Свитч (L2)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 text-center">
+                        <div class="card-body px-0 py-0 text-center">
+                            <img class="drag" id="host" src="{{ url_for('static', filename='/images/host.png') }}"/>
+                            <div class="icon-text pt-2">
+                                <span>Хост</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-columns" style="column-count: 1;">
+                    <div class="card border-0 py-0">
+                        <div class="card-body">
+                            <img class="drag" id="l1_hub" src="{{ url_for('static', filename='/images/hub.png') }}" />
+                            <div class="icon-text">
+                                <span data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Хаб (концентратор) &mdash; простейшее сетевое устойство.">Хаб (L1)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body text-center">
+                    <button type="button" class="btn btn-secondary w-100" id="NetworkSharedRunButton" disabled>Симуляции нет</button>
+                    <small id="NetworkSharedRunButtonLabel" class="text-muted text-center">Сеть не симулировалась</small>
+                </div>
+            </div>
+
+            <div class="col py-1 px-1 bg-light">
+                <div id="network_scheme_shared" class="border bg-white border-primary h-100 w-100"></div>
+            </div>
+
+            <div id="config_content" class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 pt-2 bg-white">
+                <div class="row">
+                    <div class="col">
+                        <h4>Тут будут настройки устройств.</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+      </section>
+</main>
+
+    <div id="config_host"></div>
+{% endblock %}
+
+{% block network %}
+<script>
+
+    const network_guid = "{{ network.guid }}";
+    const nodes = {{ nodes | safe }};
+    const edges = {{ edges | safe }};
+    const jobs = {{ jobs | safe }};
+    var packets = {{ packets | safe }};
+
+    SetNetworkSharedRunButtonState(packets);
+
+    DrawSharedGraph(nodes, edges);
+</script>
+
+{% endblock %}

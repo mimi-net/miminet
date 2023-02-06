@@ -163,3 +163,54 @@ $('#NetworkRunButton').click(function() {
         return;
     }
 })
+
+$('#NetworkSharedRunButton').click(function() {
+
+    // Network in running
+    if (GetNetworkState() === 2) {
+
+        // Do we got a packets?
+        if (!packets){
+            console.log("Don't have a packets");
+            return;
+        }
+
+        $(this).text('Стоп');
+        $(this).removeClass('btn-success');
+        $(this).addClass('btn-danger');
+
+        SetNetworkState(3);
+        DrawGraphStatic(nodes, edges, packets);
+        return;
+    }
+
+    if (GetNetworkState() === 3)
+    {
+
+        let timeout_last_id = window.setTimeout(function () {
+        }, 0);
+
+        while (timeout_last_id--) {
+            window.clearTimeout(timeout_last_id); // will do nothing if no timeout with id is present
+        }
+
+        // Do we got a packets?
+        if (!packets){
+            $(this).text('Симулировать');
+            $(this).removeClass('btn-danger');
+            $(this).addClass('btn-primary');
+
+            SetNetworkState(0);
+            return;
+        }
+
+        $(this).text('Запустить');
+        $(this).removeClass('btn-danger');
+        $(this).removeClass('btn-secondary');
+        $(this).addClass('btn-success');
+
+        DrawSharedGraph(nodes, edges);
+        SetNetworkState(2);
+        return;
+    }
+})
