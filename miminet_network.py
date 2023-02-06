@@ -99,17 +99,20 @@ def web_network_shared():
     if not 'edges' in jnet:
         jnet['edges'] = []
 
-    if not 'packets' in jnet:
-        jnet['packets'] = 'null'
-
     if not 'jobs' in jnet:
         jnet['jobs'] = []
 
     # Do we simulte this network now?
     sim = Simulate.query.filter(Simulate.network_id == net.id).first()
 
+    packets = 'null'
+
+    if sim:
+        if sim.ready:
+            packets = sim.packets
+
     return render_template("network_shared.html", network=net, nodes=jnet['nodes'],
-                           edges=jnet['edges'], packets=jnet['packets'], jobs=jnet['jobs'],
+                           edges=jnet['edges'], packets=packets, jobs=jnet['jobs'],
                            simulating=sim)
 
 
