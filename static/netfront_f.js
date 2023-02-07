@@ -580,9 +580,16 @@ const DrawGraph = function(nodes, edges) {
     });
 
     // Click on object
-    cy.on('click', 'node', function (evt) {
-        var node = evt.target;
-        let n = nodes.find(n => n.data.id === this.id());
+    cy.on('click', function (evt) {
+
+        let evtTarget = evt.target;
+        if (evtTarget === cy) {
+            ClearConfigForm();
+            return;
+        }
+
+        var target_id = evt.target.id();
+        let n = nodes.find(n => n.data.id === target_id);
 
         if (!n) {
             return;
@@ -643,6 +650,13 @@ const DrawGraph = function(nodes, edges) {
                     connected_to = source_host;
                 }
 
+                let connected_to_host = nodes.find(n => n.data.id === connected_to);
+                let connected_to_host_label = "Unknown";
+
+                if (connected_to_host){
+                    connected_to_host_label = connected_to_host.data.label;
+                }
+
                 ip_addr = n.interface[i].ip;
 
                 if (!ip_addr){
@@ -655,9 +669,34 @@ const DrawGraph = function(nodes, edges) {
                     netmask = '';
                 }
 
-                ConfigHostInterface(iface_id, ip_addr, netmask, connected_to);
+                ConfigHostInterface(iface_id, ip_addr, netmask, connected_to_host_label);
 
             });
+        }
+
+        if (n.config.type === 'l1_hub'){
+
+            let hostname = n.config.label;
+            hostname = hostname || n.data.id;
+
+            // Create form
+            ConfigHubForm(n.data.id);
+
+            // Add hostname
+            ConfigHubName(hostname);
+
+        }
+
+        if (n.config.type === 'l2_switch'){
+
+            let hostname = n.config.label;
+            hostname = hostname || n.data.id;
+
+            // Create form
+            ConfigSwitchForm(n.data.id);
+
+            // Add hostname
+            ConfigSwitchName(hostname);
         }
     });
 
@@ -808,9 +847,16 @@ const DrawSharedGraph = function(nodes, edges) {
     cy.add(edges);
 
     // Click on object
-    cy.on('click', 'node', function (evt) {
-        var node = evt.target;
-        let n = nodes.find(n => n.data.id === this.id());
+    cy.on('click', function (evt) {
+
+        let evtTarget = evt.target;
+        if (evtTarget === cy) {
+            ClearConfigForm();
+            return;
+        }
+
+        var target_id = evt.target.id();
+        let n = nodes.find(n => n.data.id === target_id);
 
         if (!n) {
             return;
@@ -886,6 +932,31 @@ const DrawSharedGraph = function(nodes, edges) {
                 ConfigHostInterface(iface_id, ip_addr, netmask, connected_to);
 
             });
+        }
+
+        if (n.config.type === 'l1_hub'){
+
+            let hostname = n.config.label;
+            hostname = hostname || n.data.id;
+
+            // Create form
+            SharedConfigHubForm(n.data.id);
+
+            // Add hostname
+            ConfigHubName(hostname);
+
+        }
+
+        if (n.config.type === 'l2_switch'){
+
+            let hostname = n.config.label;
+            hostname = hostname || n.data.id;
+
+            // Create form
+            SharedConfigSwitchForm(n.data.id);
+
+            // Add hostname
+            ConfigSwitchName(hostname);
         }
     });
 

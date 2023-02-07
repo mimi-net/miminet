@@ -1,7 +1,18 @@
 $('#config_host').load( "config_host.html" );
+$('#config_hub').load( "config_hub.html" );
+$('#config_switch').load( "config_switch.html" );
 
 const config_content_id = "#config_content";
 const config_main_form_id = "#config_main_form";
+const config_hub_main_form_id = "#config_hub_main_form";
+const config_switch_main_form_id = "#config_switch_main_form";
+
+const ClearConfigForm = function(){
+
+    // Clear all child
+    $(config_content_id).empty();
+    $(config_content_id).append('<h4>Тут будут настройки устройств. Выделите любое на схеме.</h4>');
+}
 
 const ConfigHostForm = function(host_id){
     var form = document.getElementById('config_main_form_script').innerHTML;
@@ -17,6 +28,50 @@ const ConfigHostForm = function(host_id){
     $('#net_guid').val( network_guid );
 }
 
+const ConfigHubForm = function(hub_id){
+    var form = document.getElementById('config_hub_main_form_script').innerHTML;
+
+    // Clear all child
+    $(config_content_id).empty();
+
+    // Add new form
+    $(config_content_id).append(form);
+
+    // Set host_id
+    $('#hub_id').val( hub_id );
+    $('#net_guid').val( network_guid );
+}
+
+const ConfigSwitchForm = function(switch_id){
+    var form = document.getElementById('config_switch_main_form_script').innerHTML;
+
+    // Clear all child
+    $(config_content_id).empty();
+
+    // Add new form
+    $(config_content_id).append(form);
+
+    // Set host_id
+    $('#switch_id').val( switch_id );
+    $('#net_guid').val( network_guid );
+}
+
+const ConfigHubName = function(hostname){
+
+    var text = document.getElementById('config_hub_name_script').innerHTML;
+
+    $(config_hub_main_form_id).prepend((text));
+    $('#config_hub_name').val(hostname);
+}
+
+const ConfigSwitchName = function(hostname){
+
+    var text = document.getElementById('config_switch_name_script').innerHTML;
+
+    $(config_switch_main_form_id).prepend((text));
+    $('#config_switch_name').val(hostname);
+}
+
 const SharedConfigHostForm = function(host_id){
     var form = document.getElementById('config_main_form_script').innerHTML;
 
@@ -30,6 +85,28 @@ const SharedConfigHostForm = function(host_id){
     $('#host_id').val( host_id );
     $('#net_guid').val( network_guid );
     $('#config_main_form_submit_button').prop('disabled', true);
+}
+
+const SharedConfigHubForm = function(hub_id){
+    var form = document.getElementById('config_hub_main_form_script').innerHTML;
+
+    // Clear all child
+    $(config_content_id).empty();
+
+    // Add new form
+    $(config_content_id).append(form);
+    $('#config_hub_main_form_submit_button').prop('disabled', true);
+}
+
+const SharedConfigSwitchForm = function(switch_id){
+    var form = document.getElementById('config_switch_main_form_script').innerHTML;
+
+    // Clear all child
+    $(config_content_id).empty();
+
+    // Add new form
+    $(config_content_id).append(form);
+    $('#config_switch_main_form_submit_button').prop('disabled', true);
 }
 
 const ConfigHostName = function(hostname){

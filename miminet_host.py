@@ -45,6 +45,102 @@ def delete_job():
 
 
 @login_required
+def save_hub_config():
+
+    user = current_user
+
+    if request.method == "POST":
+
+        network_guid = request.form.get('net_guid', type=str)
+
+        if not network_guid:
+            flash('Пропущен параметр GUID. И какую сеть мне открыть?!')
+            return redirect('home')
+
+        net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
+
+        if not net:
+            flash('Нет такой сети')
+            return redirect('home')
+
+        hub_id = request.form.get('hub_id')
+
+        if not hub_id:
+            flash('Хаб не указан')
+            return redirect(url_for('web_network', guid=net.guid))
+
+        jnet = json.loads(net.network)
+        nodes = jnet['nodes']
+
+        nn = list(filter(lambda x: x['data']["id"] == hub_id, nodes))
+
+        if not nn:
+            flash('Хаба таким id не существует')
+            return redirect(url_for('web_network', guid=net.guid))
+
+        node = nn[0]
+        hub_label = request.form.get('config_hub_name')
+
+        if hub_label:
+            node['config']['label'] = hub_label
+            node['data']['label'] = node['config']['label']
+
+            net.network = json.dumps(jnet)
+            db.session.commit()
+
+        return redirect(url_for('web_network', guid=net.guid))
+
+    return redirect(url_for('home'))
+
+@login_required
+def save_switch_config():
+
+    user = current_user
+
+    if request.method == "POST":
+
+        network_guid = request.form.get('net_guid', type=str)
+
+        if not network_guid:
+            flash('Пропущен параметр GUID. И какую сеть мне открыть?!')
+            return redirect('home')
+
+        net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
+
+        if not net:
+            flash('Нет такой сети')
+            return redirect('home')
+
+        switch_id = request.form.get('switch_id')
+
+        if not switch_id:
+            flash('Свитч не указан')
+            return redirect(url_for('web_network', guid=net.guid))
+
+        jnet = json.loads(net.network)
+        nodes = jnet['nodes']
+
+        nn = list(filter(lambda x: x['data']["id"] == switch_id, nodes))
+
+        if not nn:
+            flash('Свитча таким id не существует')
+            return redirect(url_for('web_network', guid=net.guid))
+
+        node = nn[0]
+        switch_label = request.form.get('config_switch_name')
+
+        if switch_label:
+            node['config']['label'] = switch_label
+            node['data']['label'] = node['config']['label']
+
+            net.network = json.dumps(jnet)
+            db.session.commit()
+
+        return redirect(url_for('web_network', guid=net.guid))
+
+    return redirect(url_for('home'))
+
+@login_required
 def save_host_config():
 
     user = current_user
@@ -140,4 +236,6 @@ def save_host_config():
             net.network = json.dumps(jnet)
             db.session.commit()
 
-    return redirect(url_for('web_network', guid=net.guid))
+        return redirect(url_for('web_network', guid=net.guid))
+
+    return redirect(url_for('home'))
