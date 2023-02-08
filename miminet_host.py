@@ -1,7 +1,7 @@
 import json
 import uuid
 
-from flask import render_template, redirect, url_for, request, flash
+from flask import redirect, url_for, request, flash, make_response, jsonify
 from miminet_model import db, Network, Simulate
 from flask_login import login_required, current_user
 
@@ -43,7 +43,6 @@ def delete_job():
 
     return redirect(url_for('web_network', guid=net.guid))
 
-
 @login_required
 def save_hub_config():
 
@@ -54,20 +53,20 @@ def save_hub_config():
         network_guid = request.form.get('net_guid', type=str)
 
         if not network_guid:
-            flash('Пропущен параметр GUID. И какую сеть мне открыть?!')
-            return redirect('home')
+            ret = {'message': 'Не указан параметр net_guid'}
+            return make_response(jsonify(ret), 400)
 
         net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
 
         if not net:
-            flash('Нет такой сети')
-            return redirect('home')
+            ret = {'message': 'Такая сеть не найдена'}
+            return make_response(jsonify(ret), 400)
 
         hub_id = request.form.get('hub_id')
 
         if not hub_id:
-            flash('Хаб не указан')
-            return redirect(url_for('web_network', guid=net.guid))
+            ret = {'message': 'Не указан параметр hub_id'}
+            return make_response(jsonify(ret), 400)
 
         jnet = json.loads(net.network)
         nodes = jnet['nodes']
@@ -75,8 +74,8 @@ def save_hub_config():
         nn = list(filter(lambda x: x['data']["id"] == hub_id, nodes))
 
         if not nn:
-            flash('Хаба таким id не существует')
-            return redirect(url_for('web_network', guid=net.guid))
+            ret = {'message': 'Такого хаба не существует'}
+            return make_response(jsonify(ret), 400)
 
         node = nn[0]
         hub_label = request.form.get('config_hub_name')
@@ -88,57 +87,61 @@ def save_hub_config():
             net.network = json.dumps(jnet)
             db.session.commit()
 
-        return redirect(url_for('web_network', guid=net.guid))
+        ret = {'message': 'Конфигурация обновлена', 'nodes': nodes}
+        return make_response(jsonify(ret), 200)
 
-    return redirect(url_for('home'))
+    ret = {'message': 'Неверный запрос'}
+    return make_response(jsonify(ret), 400)
 
 @login_required
 def save_switch_config():
 
     user = current_user
 
-    if request.method == "POST":
+    if request.method != "POST":
+        ret = {'message': 'Неверный запрос'}
+        return make_response(jsonify(ret), 400)
 
-        network_guid = request.form.get('net_guid', type=str)
+    network_guid = request.form.get('net_guid', type=str)
 
-        if not network_guid:
-            flash('Пропущен параметр GUID. И какую сеть мне открыть?!')
-            return redirect('home')
+    if not network_guid:
+        ret = {'message': 'Не указан параметр net_guid'}
+        return make_response(jsonify(ret), 400)
 
-        net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
+    net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
 
-        if not net:
-            flash('Нет такой сети')
-            return redirect('home')
+    if not net:
+        ret = {'message': 'Такая сеть не найдена'}
+        return make_response(jsonify(ret), 400)
 
-        switch_id = request.form.get('switch_id')
+    switch_id = request.form.get('switch_id')
 
-        if not switch_id:
-            flash('Свитч не указан')
-            return redirect(url_for('web_network', guid=net.guid))
+    if not switch_id:
+        ret = {'message': 'Не указан параметр switch_id'}
+        return make_response(jsonify(ret), 400)
 
-        jnet = json.loads(net.network)
-        nodes = jnet['nodes']
+    jnet = json.loads(net.network)
+    nodes = jnet['nodes']
 
-        nn = list(filter(lambda x: x['data']["id"] == switch_id, nodes))
+    nn = list(filter(lambda x: x['data']["id"] == switch_id, nodes))
 
-        if not nn:
-            flash('Свитча таким id не существует')
-            return redirect(url_for('web_network', guid=net.guid))
+    if not nn:
+        ret = {'message': 'Такого свитча не существует'}
+        return make_response(jsonify(ret), 400)
 
-        node = nn[0]
-        switch_label = request.form.get('config_switch_name')
+    node = nn[0]
+    switch_label = request.form.get('config_switch_name')
 
-        if switch_label:
-            node['config']['label'] = switch_label
-            node['data']['label'] = node['config']['label']
+    if switch_label:
+        node['config']['label'] = switch_label
+        node['data']['label'] = node['config']['label']
 
-            net.network = json.dumps(jnet)
-            db.session.commit()
+        net.network = json.dumps(jnet)
+        db.session.commit()
 
-        return redirect(url_for('web_network', guid=net.guid))
+    ret = {'message': 'Конфигурация обновлена', 'nodes': nodes}
+    return make_response(jsonify(ret), 200)
 
-    return redirect(url_for('home'))
 
 @login_required
 def save_host_config():
@@ -150,20 +153,20 @@ def save_host_config():
         network_guid = request.form.get('net_guid', type=str)
 
         if not network_guid:
-            flash('Пропущен параметр GUID. И какую сеть мне открыть?!')
-            return redirect('home')
+            ret = {'message': 'Не указан параметр net_guid'}
+            return make_response(jsonify(ret), 400)
 
         net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
 
         if not net:
-            flash('Нет такой сети')
-            return redirect('home')
+            ret = {'message': 'Такая сеть не найдена'}
+            return make_response(jsonify(ret), 400)
 
         host_id = request.form.get('host_id')
 
         if not host_id:
-            flash('Хост не указан')
-            return redirect(url_for('web_network', guid=net.guid))
+            ret = {'message': 'Не указан параметр host_id'}
+            return make_response(jsonify(ret), 400)
 
         jnet = json.loads(net.network)
         nodes = jnet['nodes']
@@ -171,8 +174,8 @@ def save_host_config():
         nn = list(filter(lambda x: x['data']["id"] == host_id, nodes))
 
         if not nn:
-            flash('Хоста таким id не существует')
-            return redirect(url_for('web_network', guid=net.guid))
+            ret = {'message': 'Такого хоста не существует'}
+            return make_response(jsonify(ret), 400)
 
         node = nn[0]
 
@@ -236,6 +239,8 @@ def save_host_config():
             net.network = json.dumps(jnet)
             db.session.commit()
 
-        return redirect(url_for('web_network', guid=net.guid))
+        ret = {'message': 'Конфигурация обновлена', 'nodes' : nodes, 'jobs' : jnet['jobs']}
+        return make_response(jsonify(ret), 200)
 
-    return redirect(url_for('home'))
+    ret = {'message': 'Неверный запрос'}
+    return make_response(jsonify(ret), 400)

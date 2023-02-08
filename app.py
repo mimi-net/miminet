@@ -9,7 +9,7 @@ from miminet_model import db, init_db, Network
 from miminet_auth import login_manager, login_index, google_login, google_callback, user_profile,\
     vk_callback, logout
 from miminet_network import create_network, web_network, update_network_config,\
-    delete_network, post_nodes, post_edges, post_nodes_edges, move_nodes, web_network_shared
+    delete_network, post_nodes, post_nodes_edges, move_nodes, web_network_shared
 from miminet_simulation import run_simulation, check_simulation
 from miminet_host import save_host_config, delete_job, save_hub_config, save_switch_config
 
@@ -48,7 +48,6 @@ app.add_url_rule('/web_network_shared', methods=['GET'], view_func=web_network_s
 app.add_url_rule('/update_network_config', methods=['GET', 'POST'], view_func=update_network_config)
 app.add_url_rule('/delete_network', methods=['GET', 'POST'], view_func=delete_network)
 app.add_url_rule('/post_network_nodes', methods=['GET', 'POST'], view_func=post_nodes)
-app.add_url_rule('/post_network_edges', methods=['GET', 'POST'], view_func=post_edges)
 app.add_url_rule('/post_nodes_edges', methods=['POST'], view_func=post_nodes_edges)
 app.add_url_rule('/move_network_nodes', methods=['POST'], view_func=move_nodes)
 

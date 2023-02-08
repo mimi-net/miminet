@@ -193,33 +193,6 @@ def post_nodes():
     ret = {'message': 'Done', 'code': 'SUCCESS'}
     return make_response(jsonify(ret), 201)
 
-# Depricated?
-@login_required
-def post_edges():
-
-    user = current_user
-    network_guid = request.args.get('guid', type=str)
-
-    if not network_guid:
-        flash('Пропущен параметр GUID. И какую сеть мне открыть?!')
-        return redirect(url_for('home'))
-
-    net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
-
-    if not net:
-        flash('Нет такой сети')
-        return redirect(url_for('home'))
-
-    if request.method == "POST":
-        edges = request.json
-        jnet = json.loads(net.network)
-        jnet['edges'] = edges
-        net.network = json.dumps(jnet)
-        db.session.commit()
-
-    ret = {'message': 'Done', 'code': 'SUCCESS'}
-    return make_response(jsonify(ret), 201)
-
 
 @login_required
 def post_nodes_edges():

@@ -25,6 +25,106 @@ const HostUid = function(){
     return "host_" + uid();
 }
 
+const ShowHostConfig = function(n){
+
+    let hostname = n.config.label;
+    hostname = hostname || n.data.id;
+
+    // Create form
+    ConfigHostForm(n.data.id);
+
+    // Add hostname
+    ConfigHostName(hostname);
+
+    // Add jobs
+    let host_jobs = [];
+
+    if (jobs){
+        host_jobs = jobs.filter(j => j.host_id === n.data.id);
+    }
+
+    ConfigHostJob(host_jobs);
+
+    // Add interfaces
+    $.each(n.interface, function (i) {
+        let iface_id = n.interface[i].id;
+
+        if (!iface_id){
+            return;
+        }
+
+        let connect_id = n.interface[i].connect;
+
+        if (!connect_id){
+            return;
+        }
+
+        let edge = edges.find(e => e.data.id === connect_id);
+
+        if (!edge){
+            return;
+        }
+
+        let source_host = edge.data.source;
+        let target_host = edge.data.target;
+
+        if (!source_host || !target_host){
+            return;
+        }
+
+        let connected_to = target_host;
+        if (n.data.id === target_host){
+            connected_to = source_host;
+        }
+
+        let connected_to_host = nodes.find(n => n.data.id === connected_to);
+        let connected_to_host_label = "Unknown";
+
+        if (connected_to_host){
+            connected_to_host_label = connected_to_host.data.label;
+        }
+
+        ip_addr = n.interface[i].ip;
+
+        if (!ip_addr){
+            ip_addr = '';
+        }
+
+        netmask = n.interface[i].netmask;
+
+        if (!netmask){
+            netmask = '';
+        }
+
+        ConfigHostInterface(iface_id, ip_addr, netmask, connected_to_host_label);
+
+    });
+}
+
+const ShowHubConfig = function(n){
+
+    let hostname = n.config.label;
+    hostname = hostname || n.data.id;
+
+    // Create form
+    ConfigHubForm(n.data.id);
+
+    // Add hostname
+    ConfigHubName(hostname);
+}
+
+const ShowSwitchConfig = function(n){
+
+    let hostname = n.config.label;
+    hostname = hostname || n.data.id;
+
+    // Create form
+    ConfigSwitchForm(n.data.id);
+
+    // Add hostname
+    ConfigSwitchName(hostname);
+}
+
 const PacketUid = function(){
     return "pkt_" + uid();
 }
@@ -111,18 +211,6 @@ const EdgeUid = function(){
 
 const InterfaceUid = function(){
     return "iface_" + Math.random().toString(9).substr(12);
-}
-
-const PostEdges = function(){
-    $.ajax({
-        type: 'POST',
-        url: '/post_network_edges?guid=' + network_guid,
-        data: JSON.stringify(edges),
-        success: function(data) {},
-        error: function(err) {console.log('Cannot post edges to server')},
-        contentType: "application/json",
-        dataType: 'json'
-    });
 }
 
 const PostNodesEdges = function(){
@@ -321,6 +409,7 @@ const PostNodes = function(){
 }
 
 const MoveNodes = function(){
+
     $.ajax({
         type: 'POST',
         url: '/move_network_nodes?guid=' + network_guid,
@@ -497,7 +586,7 @@ const prepareStylesheet = function() {
     return sheet;
   };
 
-const DrawGraph = function(nodes, edges) {
+const DrawGraph = function() {
 
     // Do we already have one?
     let cy = undefined;
@@ -584,7 +673,7 @@ const DrawGraph = function(nodes, edges) {
 
         let evtTarget = evt.target;
         if (evtTarget === cy) {
-            ClearConfigForm();
+            ClearConfigForm('');
             return;
         }
 
@@ -598,105 +687,15 @@ const DrawGraph = function(nodes, edges) {
         selecteed_node_id = n.data.id;
 
         if (n.config.type === 'host'){
-
-            let hostname = n.config.label;
-            hostname = hostname || n.data.id;
-
-            // Create form
-            ConfigHostForm(n.data.id);
-
-            // Add hostname
-            ConfigHostName(hostname);
-
-            // Add jobs
-            let host_jobs = [];
-
-            if (jobs){
-                host_jobs = jobs.filter(j => j.host_id === n.data.id);
-            }
-
-            ConfigHostJob(host_jobs);
-
-            // Add interfaces
-            $.each(n.interface, function (i) {
-                let iface_id = n.interface[i].id;
-
-                if (!iface_id){
-                    return;
-                }
-
-                let connect_id = n.interface[i].connect;
-
-                if (!connect_id){
-                    return;
-                }
-
-                let edge = edges.find(e => e.data.id === connect_id);
-
-                if (!edge){
-                    return;
-                }
-
-                let source_host = edge.data.source;
-                let target_host = edge.data.target;
-
-
-                if (!source_host || !target_host){
-                    return;
-                }
-
-                let connected_to = target_host;
-                if (n.data.id === target_host){
-                    connected_to = source_host;
-                }
-
-                let connected_to_host = nodes.find(n => n.data.id === connected_to);
-                let connected_to_host_label = "Unknown";
-
-                if (connected_to_host){
-                    connected_to_host_label = connected_to_host.data.label;
-                }
-
-                ip_addr = n.interface[i].ip;
-
-                if (!ip_addr){
-                    ip_addr = '';
-                }
-
-                netmask = n.interface[i].netmask;
-
-                if (!netmask){
-                    netmask = '';
-                }
-
-                ConfigHostInterface(iface_id, ip_addr, netmask, connected_to_host_label);
-
-            });
+            ShowHostConfig(n);
         }
 
         if (n.config.type === 'l1_hub'){
-
-            let hostname = n.config.label;
-            hostname = hostname || n.data.id;
-
-            // Create form
-            ConfigHubForm(n.data.id);
-
-            // Add hostname
-            ConfigHubName(hostname);
-
+            ShowHubConfig(n);
         }
 
         if (n.config.type === 'l2_switch'){
-
-            let hostname = n.config.label;
-            hostname = hostname || n.data.id;
-
-            // Create form
-            ConfigSwitchForm(n.data.id);
-
-            // Add hostname
-            ConfigSwitchName(hostname);
+            ShowSwitchConfig(n);
         }
     });
 
@@ -728,7 +727,6 @@ const DrawGraph = function(nodes, edges) {
             }
         }
     });
-
 }
 
 const RunPackets = function (cy, pkts){
@@ -1051,6 +1049,143 @@ const CheckSimulation = function (simulation_id)
             SetNetworkRunButtonState(0, null);
         },
         contentType: "application/json",
+        dataType: 'json'
+    });
+}
+
+// Update host configuration
+const UpdateHostConfiguration = function (data, host_id)
+{
+
+    $.ajax({
+        type: 'POST',
+        url: '/host/save_config',
+        data: data,
+        success: function(data, textStatus, xhr) {
+
+            if (xhr.status === 200)
+            {
+                // Update nodes
+                nodes = data.nodes;
+
+                // Update jobs
+                jobs = data.jobs;
+
+                // Clear packets
+                packets = null;
+
+                // Set a new state to the simulation button
+                SetNetworkRunButtonState(0, packets);
+
+                // Update graph
+                DrawGraph();
+
+                // Ok, let's try to update host config form
+                let n = nodes.find(n => n.data.id === host_id);
+
+                if (!n) {
+                    ClearConfigForm('Нет такого хоста');
+                    return;
+                }
+
+                if (n.config.type === 'host'){
+                    ShowHostConfig(n);
+                } else {
+                    ClearConfigForm('Узел есть, но это не хост');
+                }
+
+            }
+        },
+        error: function(xhr) {
+            console.log('Не удалось обновить конфигурацию хоста');
+            console.log(xhr);
+        },
+        dataType: 'json'
+    });
+}
+
+// Update hub configuration
+const UpdateHubConfiguration = function (data, hub_id)
+{
+    $.ajax({
+        type: 'POST',
+        url: '/host/hub_save_config',
+        data: data,
+        success: function(data, textStatus, xhr) {
+
+            if (xhr.status === 200)
+            {
+                // Update nodes
+                nodes = data.nodes;
+
+                // We don't clear packets and RunButtonState.
+                // Hub can change only names
+
+                // Update graph
+                DrawGraph();
+
+                // Ok, let's try to update host config form
+                let n = nodes.find(n => n.data.id === hub_id);
+
+                if (!n) {
+                    ClearConfigForm('Нет такого узла');
+                    return;
+                }
+
+                if (n.config.type === 'l1_hub'){
+                    ShowHubConfig(n);
+                } else {
+                    ClearConfigForm('Нет такого хаба');
+                }
+            }
+        },
+        error: function(xhr) {
+            console.log('Cannot update host config');
+            console.log(xhr);
+        },
+        dataType: 'json'
+    });
+}
+
+// Update Switch configuration
+const UpdateSwitchConfiguration = function (data, switch_id)
+{
+    $.ajax({
+        type: 'POST',
+        url: '/host/switch_save_config',
+        data: data,
+        success: function(data, textStatus, xhr) {
+
+            if (xhr.status === 200)
+            {
+                // Update nodes
+                nodes = data.nodes;
+
+                // We don't clear packets and RunButtonState.
+                // Hub can change only names
+
+                // Update graph
+                DrawGraph();
+
+                // Ok, let's try to update host config form
+                let n = nodes.find(n => n.data.id === switch_id);
+
+                if (!n) {
+                    ClearConfigForm('Нет такого узла');
+                    return;
+                }
+
+                if (n.config.type === 'l2_switch'){
+                    ShowSwitchConfig(n);
+                } else {
+                    ClearConfigForm('Нет такого свитча');
+                }
+            }
+        },
+        error: function(xhr) {
+            console.log('Cannot update host config');
+            console.log(xhr);
+        },
         dataType: 'json'
     });
 }

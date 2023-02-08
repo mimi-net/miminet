@@ -68,14 +68,15 @@
 <script>
 
     const network_guid = "{{ network.guid }}";
-    const nodes = {{ nodes | safe }};
+    var nodes = {{ nodes | safe }};
     const edges = {{ edges | safe }};
-    const jobs = {{ jobs | safe }};
+    var jobs = {{ jobs | safe }};
     var packets = {{ packets | safe }};
+    var ns = null;
 
     SetNetworkRunButtonState({% if simulating %} {{simulating.id}} {% else %} 0 {% endif%}, packets);
 
-    DrawGraph(nodes, edges);
+    DrawGraph();
 </script>
 
 {% endblock %}
