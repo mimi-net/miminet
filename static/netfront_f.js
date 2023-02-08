@@ -323,7 +323,6 @@ const DeleteJob = function(node_id){
     $.each(jobs_to_delete, function (idx, val){
         jobs.splice(val, 1);
     });
-
 }
 
 const DeleteNode = function(node_id) {
@@ -1098,6 +1097,59 @@ const UpdateHostConfiguration = function (data, host_id)
         },
         error: function(xhr) {
             console.log('Не удалось обновить конфигурацию хоста');
+            console.log(xhr);
+        },
+        dataType: 'json'
+    });
+}
+
+// Delete job from host
+const DeleteJobFromHost = function (host_id, job_id, network_guid)
+{
+    let data = {
+      id: job_id,
+      guid: network_guid,
+    };
+
+    $.ajax({
+        type: 'POST',
+        url: '/host/delete_job',
+        data: data,
+        encode: true,
+        success: function(data, textStatus, xhr) {
+
+            if (xhr.status === 200)
+            {
+                // Update jobs
+                jobs = data.jobs;
+
+                // Clear packets
+                packets = null;
+
+                // Set a new state to the simulation button
+                SetNetworkRunButtonState(0, packets);
+
+                // Update graph
+                DrawGraph();
+
+                // Ok, let's try to update host config form
+                let n = nodes.find(n => n.data.id === host_id);
+
+                if (!n) {
+                    ClearConfigForm('Нет такого хоста');
+                    return;
+                }
+
+                if (n.config.type === 'host'){
+                    ShowHostConfig(n);
+                } else {
+                    ClearConfigForm('Узел есть, но это не хост');
+                }
+
+            }
+        },
+        error: function(xhr) {
+            console.log('Не удалось удалить команду');
             console.log(xhr);
         },
         dataType: 'json'

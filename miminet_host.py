@@ -13,18 +13,22 @@ def job_id_generator():
 @login_required
 def delete_job():
     user = current_user
-    network_guid = request.args.get('guid', type=str)
-    jid = request.args.get('id', type=str)
+    network_guid = request.form.get('guid', type=str)
+    jid = request.form.get('id', type=str)
+
+    if request.method != "POST":
+        ret = {'message': 'Неверный запрос'}
+        return make_response(jsonify(ret), 400)
 
     if not network_guid:
-        flash('Пропущен параметр GUID')
-        return redirect('home')
+        ret = {'message': 'Не указан параметр net_guid'}
+        return make_response(jsonify(ret), 400)
 
     net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id == user.id).first()
 
     if not net:
-        flash('Нет такой сети')
-        return redirect('home')
+        ret = {'message': 'Такая сеть не найдена'}
+        return make_response(jsonify(ret), 400)
 
     jnet = json.loads(net.network)
 
@@ -41,7 +45,8 @@ def delete_job():
 
     db.session.commit()
 
-    return redirect(url_for('web_network', guid=net.guid))
+    ret = {'message': 'Команда удалена', 'jobs': jnet['jobs']}
+    return make_response(jsonify(ret), 200)
 
 @login_required
 def save_hub_config():

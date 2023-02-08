@@ -57,7 +57,7 @@ app.add_url_rule('/check_simulation', methods=['GET'], view_func=check_simulatio
 
 # Hosts
 app.add_url_rule('/host/save_config', methods=['GET', 'POST'], view_func=save_host_config)
-app.add_url_rule('/host/delete_job', methods=['GET'], view_func=delete_job)
+app.add_url_rule('/host/delete_job', methods=['GET', 'POST'], view_func=delete_job)
 app.add_url_rule('/host/hub_save_config', methods=['GET', 'POST'], view_func=save_hub_config)
 app.add_url_rule('/host/switch_save_config', methods=['GET', 'POST'], view_func=save_switch_config)
 
