@@ -1,7 +1,7 @@
 from flask import request, flash, redirect, jsonify, make_response, url_for
 from flask_login import login_required, current_user
 
-from miminet_model import db, Simulate, Network
+from miminet_model import db, Simulate, Network, SimulateLog
 
 @login_required
 def run_simulation():
@@ -27,8 +27,10 @@ def run_simulation():
             db.session.delete(s)
             db.session.commit()
 
+        simlog = SimulateLog(author_id = net.author_id, network = net.network, network_guid = net.guid)
         sim = Simulate(network_id = net.id, packets = '')
         db.session.add(sim)
+        db.session.add(simlog)
         db.session.flush()
         db.session.refresh(sim)
         db.session.commit()
