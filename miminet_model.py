@@ -2,6 +2,7 @@ import shutil
 from os import urandom
 
 from pathlib import Path
+from datetime import datetime
 
 from sqlalchemy import MetaData
 from werkzeug.security import generate_password_hash
@@ -72,8 +73,8 @@ class SimulateLog(db.Model):
     network_guid = db.Column(db.String(512), nullable=False)
     network = db.Column(db.UnicodeText, default=make_empty_network, nullable=False)
 
-    simulate_start = db.Column(db.DateTime(timezone=True), server_default=db.func.now())
-    simulate_end = db.Column(db.DateTime(timezone=True), server_default=db.func.now(), server_onupdate=db.func.now())
+    simulate_start = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
+    simulate_end = db.Column(db.DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
 
     ready = db.Column(db.Boolean, default=False, nullable=False)
 
