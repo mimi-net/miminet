@@ -1,5 +1,6 @@
 import json
 import uuid
+import socket
 
 from flask import redirect, url_for, request, flash, make_response, jsonify
 from miminet_model import db, Network, Simulate
@@ -152,25 +153,26 @@ def save_switch_config():
 def save_host_config():
 
     user = current_user
+    ret = {}
 
     if request.method == "POST":
 
         network_guid = request.form.get('net_guid', type=str)
 
         if not network_guid:
-            ret = {'message': 'Не указан параметр net_guid'}
+            ret.update({'message': 'Не указан параметр net_guid'})
             return make_response(jsonify(ret), 400)
 
         net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
 
         if not net:
-            ret = {'message': 'Такая сеть не найдена'}
+            ret.update({'message': 'Такая сеть не найдена'})
             return make_response(jsonify(ret), 400)
 
         host_id = request.form.get('host_id')
 
         if not host_id:
-            ret = {'message': 'Не указан параметр host_id'}
+            ret.update({'message': 'Не указан параметр host_id'})
             return make_response(jsonify(ret), 400)
 
         jnet = json.loads(net.network)
@@ -179,7 +181,7 @@ def save_host_config():
         nn = list(filter(lambda x: x['data']["id"] == host_id, nodes))
 
         if not nn:
-            ret = {'message': 'Такого хоста не существует'}
+            ret.update({'message': 'Такого хоста не существует'})
             return make_response(jsonify(ret), 400)
 
         node = nn[0]
@@ -227,8 +229,34 @@ def save_host_config():
             host_ip_value = request.form.get('config_host_ip_' + str(iface_id))
             host_mask_value = request.form.get('config_host_mask_' + str(iface_id))
 
-            interface['ip'] = host_ip_value
-            interface['netmask'] = host_mask_value
+            # If not IP
+            if not host_ip_value:
+                continue
+
+            if not host_mask_value.isdigit():
+
+                # Check if we have 1.2.3.4/5 ?
+                ip_mask = host_ip_value.split('/')
+                if len(ip_mask) == 2:
+                    host_ip_value = ip_mask[0]
+                    host_mask_value = ip_mask[1]
+                else:
+                    ret.update({'warning': 'Не указана маска для IP адреса'})
+                    continue
+
+            host_mask_value = int(host_mask_value)
+
+            if host_mask_value < 0 or host_mask_value > 32:
+                ret.update({'warning': 'Маска подсети указана неверно'})
+                continue
+
+            try:
+                socket.inet_aton(host_ip_value)
+                interface['ip'] = host_ip_value
+                interface['netmask'] = host_mask_value
+            except:
+                ret.update({'warning': 'IP адрес указан неверно.'})
+                continue
 
         host_label = request.form.get('config_host_name')
 
@@ -244,8 +272,8 @@ def save_host_config():
             net.network = json.dumps(jnet)
             db.session.commit()
 
-        ret = {'message': 'Конфигурация обновлена', 'nodes' : nodes, 'jobs' : jnet['jobs']}
+        ret.update({'message': 'Конфигурация обновлена', 'nodes' : nodes, 'jobs' : jnet['jobs']})
         return make_response(jsonify(ret), 200)
 
-    ret = {'message': 'Неверный запрос'}
+    ret.update({'message': 'Неверный запрос'})
     return make_response(jsonify(ret), 400)

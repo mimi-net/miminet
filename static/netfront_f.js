@@ -1091,8 +1091,12 @@ const UpdateHostConfiguration = function (data, host_id)
                     ShowHostConfig(n);
                 } else {
                     ClearConfigForm('Узел есть, но это не хост');
+                    return;
                 }
 
+                if (data.warning){
+                    HostWarningMsg(data.warning);
+                }
             }
         },
         error: function(xhr) {

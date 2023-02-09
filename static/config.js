@@ -21,6 +21,14 @@ const ClearConfigForm = function(text){
     $(config_content_id).append('<h4>' + txt + '</h4>');
 }
 
+const HostWarningMsg = function(msg){
+
+    let warning_msg = '<div class="alert alert-info alert-dismissible fade show" role="alert">' +
+    msg + '<button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+
+    $(config_content_id).prepend(warning_msg);
+}
+
 const ConfigHostForm = function(host_id){
     var form = document.getElementById('config_main_form_script').innerHTML;
 
