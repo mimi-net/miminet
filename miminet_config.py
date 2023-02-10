@@ -1,5 +1,6 @@
 import os
 import pathlib
+from PIL import Image
 
 from datetime import datetime
 
@@ -22,3 +23,10 @@ SQLITE_DATABASE_BACKUP_NAME = 'backup_' + current_data + '.db'
 def make_empty_network():
     default_network = '{"nodes" : [], "edges" : [], "jobs" : []}'
     return default_network
+
+def check_image_with_pil(file):
+    try:
+        Image.open(file)
+    except IOError:
+        return False
+    return True

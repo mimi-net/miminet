@@ -663,6 +663,7 @@ const DrawGraph = function() {
             n.renderedPosition.x = rx;
             n.renderedPosition.y = ry;
             MoveNodes();
+            TakeGraphPictureAndUpdate();
             console.log("Change node position from: x=" + nx + ", y=" + ny + " to x=" + rx + ", y=" + ry);
         }
     });
@@ -702,6 +703,7 @@ const DrawGraph = function() {
     cy.on('ehcomplete', (event, sourceNode, targetNode, addedEdge) => {
         AddEdge(sourceNode._private.data.id, targetNode._private.data.id);
         PostNodesEdges();
+        TakeGraphPictureAndUpdate();
 
         // Reset network state
         if (GetNetworkState()){
@@ -719,6 +721,8 @@ const DrawGraph = function() {
             cy.elements().remove();
             cy.add(nodes);
             cy.add(edges);
+
+            TakeGraphPictureAndUpdate();
 
             // Reset network state
             if (GetNetworkState()){
@@ -1347,4 +1351,30 @@ const SetNetworkSharedRunButtonState = function(packets)
 
     SetNetworkState(0);
     return;
+}
+
+// Take a picture and update it.
+const TakeGraphPictureAndUpdate = function()
+{
+    if (!global_cy)
+    {
+        return;
+    }
+
+    let png_blob = global_cy.png({output: 'blob', maxWidth: 280, maxHeight: 172});
+
+    $.ajax({
+        type: 'POST',
+        url: '/network/upload_network_picture?guid=' + network_guid,
+        data: png_blob,
+        processData: false,
+        error: function(xhr) {
+
+            if (xhr.status != 200){
+                console.log('Cannot upload graph picture');
+            }
+
+        },
+        dataType: 'image/png'
+    });
 }

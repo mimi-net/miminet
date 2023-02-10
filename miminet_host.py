@@ -209,6 +209,8 @@ def save_host_config():
                                              'host_id': node['data']['id'],
                                              'arg_1': job_1_arg_1,
                                              'print_cmd' : 'ping -c 1 ' + job_1_arg_1})
+                    else:
+                        ret.update({'warning': 'Не указан IP адрес для команды ping'})
 
 
         # Set IP adresses

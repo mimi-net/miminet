@@ -47,6 +47,7 @@ $('#network_scheme').droppable({
           // post new nodes to the server
           PostNodes();
           DrawGraph(nodes, edges);
+          TakeGraphPictureAndUpdate();
           return;
       }
 
@@ -67,6 +68,7 @@ $('#network_scheme').droppable({
 
           PostNodes();
           DrawGraph(nodes, edges);
+          TakeGraphPictureAndUpdate();
           return;
       }
 
@@ -88,6 +90,7 @@ $('#network_scheme').droppable({
 
           PostNodes();
           DrawGraph(nodes, edges);
+          TakeGraphPictureAndUpdate();
           return;
       }
   }

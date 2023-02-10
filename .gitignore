@@ -84,3 +84,6 @@ fabric.properties
 # Do not track configs
 client_google.json
 miminet_secret.conf
+simulation.py
+migrations/
+static/avatar/

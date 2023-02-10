@@ -1,9 +1,11 @@
 import uuid
 import json
+import os
 
 from flask_login import login_required, current_user
 from flask import render_template, redirect, url_for, request, flash, make_response, jsonify
 
+from miminet_config import check_image_with_pil
 from miminet_model import db, Network, Simulate
 
 @login_required
@@ -274,3 +276,50 @@ def move_nodes():
 
     ret = {'message': 'Done', 'code': 'SUCCESS'}
     return make_response(jsonify(ret), 201)
+
+
+@login_required
+def upload_network_picture():
+
+    user = current_user
+    network_guid = request.args.get('guid', type=str)
+
+    if not network_guid:
+        ret = {'message': 'Пропущен параметр GUID. И какую сеть мне открыть?!'}
+        return make_response(jsonify(ret), 400)
+
+    net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
+
+    if not net:
+        ret = {'message': 'Нет такой сети'}
+        return make_response(jsonify(ret), 400)
+
+    if request.method == "POST":
+        picture_blob = request.get_data()
+
+        # Try to save data
+        picture_blob_uri = os.urandom(16).hex()
+        picture_blob_uri = picture_blob_uri + ".png"
+
+        try:
+            open('static/images/preview/' + picture_blob_uri, 'wb').write(picture_blob)
+        except:
+            ret = {'message': 'Не могу сохранить PNG'}
+            return make_response(jsonify(ret), 400)
+
+        if not check_image_with_pil('static/images/preview/' + picture_blob_uri):
+            ret = {'message': 'Это не PNG'}
+            return make_response(jsonify(ret), 400)
+
+        # Remove old picture
+        if net.preview_uri != 'first_network.jpg':
+            if os.path.isfile('static/images/preview' + "/" + net.preview_uri):
+                os.unlink('static/images/preview' + "/" + net.preview_uri)
+
+        net.preview_uri=picture_blob_uri
+        db.session.commit()
+        ret = {'message': 'Done'}
+        return make_response(jsonify(ret), 200)
+
+    ret = {'message': 'Неверный запрос', }
+    return make_response(jsonify(ret), 400)
