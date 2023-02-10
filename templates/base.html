@@ -55,7 +55,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <nav class="header navbar navbar-expand-lg position-absolute navbar-sticky">
     <div class="container">
         <a href="/" class="navbar-brand">
-                   <img src="{{ url_for('static', filename='/images/logo.png') }}" width="200" alt="Miminet">
+                   <img src="{{ url_for('static', filename='/images/logo.png') }}" width="170" alt="Miminet">
         </a>
 
         {% if current_user.is_authenticated %}
@@ -87,7 +87,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
          {% else %}
                 {% if request.path != url_for('login_index') %}
-                <a href="{{ url_for('login_index') }}" class="btn btn-primary">
+                <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary">
                     <i class="bx fs-5 lh-1 me-1"></i>
                     Вход
                 </a>
