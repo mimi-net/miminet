@@ -4,74 +4,106 @@
 {% block content %}
 
 <main>
-    <!-- start-->
     <section class="py-5 my-lg-5">
-        <div class="container py-5 my-lg-5">
+       <div class="container py-5 my-lg-5">
              <div class="row">
+                 <div class="col-md-1" >
+                 </div>
                 <div class="col-md-4" >
                      <img src="{{ url_for('static', filename='/images/topo.png') }}">
                 </div>
-                <div class="col-md-8">
+                <div class="col-md-6">
                     <div class="text-center">
                         <div class="card-body">
-                            <h4 class="card-title">Жми на Старт, чтобы создать свою первую сеть!</h4>
-                             <p class="card-text"></p>
-                            <a href="{{ url_for('home') }}" class="btn btn-primary btn-lg">Старт</a>
+                            <p class="fs-2">Веб-симулятор компьютерной сети для образовательных целей</p>
                         </div>
                     </div>
 
                 </div>
             </div>
         </div>
+
+        <div class="container py-5 my-lg-5">
+             <div class="row">
+                 <div class="text-center">
+                     <h4 class="card-title">Жми на СТАРТ и создай свою первую сеть</h4>
+                             <p class="card-text"></p>
+                            <a href="{{ url_for('home') }}" class="btn btn-primary btn-lg">СТАРТ</a>
+                 </div>
+             </div>
+        </div>
+
     </section>
 
+
+
+
     <!-- вторая страница, шаг-->
-    <section>
+    <section class="py-5 my-lg-5">
         <div class="container">
-            <div class="steps steps-sm steps-horizontal-md">
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 pb-xl-3">
   <!-- Step -->
-                <div class="step">
-                    <div class="step-number">
-                        <img class="host" src="{{ url_for('static', filename='/images/pc.png') }}">
+                <div class="col text-center border-end">
+                     <div class="card d-table border-0 rounded-circle shadow-sm p-3 mx-auto mb-4">
+                        <img class="host" src="{{ url_for('static', filename='/images/pc.png') }}" width="100">
                     </div>
-                    <div class="step-body">
                         <h5 class="mb-2">Шаг 1</h5>
-                        <p class="fs mb-0">Добавь устройства.</p>
-                    </div>
+                        <p class="fs mb-0">Добавь устройства</p>
                 </div>
   <!-- Step -->
-                <div class="step">
-                    <div class="step-number">
-                        <img class="line" src="{{ url_for('static', filename='/images/line.png') }}">
+                <div class="col text-center border-end">
+                     <div class="card d-table border-0 rounded-circle shadow-sm p-3 mx-auto mb-4">
+                        <img class="line" src="{{ url_for('static', filename='/images/line.png') }}" width="90">
                     </div>
-                    <div class="step-body">
                         <h5 class="mb-2">Шаг 2</h5>
-                        <p class="fs mb-0">Соедини устройства.</p>
-                    </div>
+                        <p class="fs mb-0">Соедини устройства</p>
                 </div>
   <!-- Step -->
-                <div class="step">
-                    <div class="step-number">
-                        <img class="parameters"  src="{{ url_for('static', filename='/images/parameters.png') }}">
+                <div class="col text-center border-end">
+                     <div class="card d-table border-0 rounded-circle shadow-sm p-3 mx-auto mb-4">
+                        <img class="parameters"  src="{{ url_for('static', filename='/images/parameters.png') }}" width="100">
                     </div>
-                    <div class="step-body">
                         <h5 class="mb-2">Шаг 3</h5>
-                        <p class="fs mb-0">Настрой параметры.</p>
-                    </div>
+                        <p class="fs mb-0">Настрой параметры</p>
                 </div>
   <!-- Step -->
-                <div class="step">
-                    <div class="step-number">
-                        <img class="parameters" src="{{ url_for('static', filename='/images/topo.png') }}">
-                    </div>
-                    <div class="step-body">
+                 <div class="col text-center">
+                     <div class="card d-table border-0 rounded-circle shadow-sm p-3 mx-auto mb-4">
+                        <img class="parameters" src="{{ url_for('static', filename='/images/topo.png') }}" width="150">
+                        </div>
                         <h5 class="mb-2">Шаг 4</h5>
-                        <p class="fs mb-0">Запусти с помощью кнопки Симулировать.</p>
+                        <p class="fs mb-0">Запусти с помощью кнопки Симулировать</p>
+                        </div>
                     </div>
                 </div>
+
+
             </div>
         </div>
     </section>
+
+    <section class="container ">
+        <div class="col text-center">
+    <video src="{{ url_for('static', filename='/video/video.mp4') }}" width="60%" controls></video>
+        </div>
+    </section>
+
+<section class="container py-5 mt-md-n2">
+        <div class="card border-0 bg-gradient-primary">
+            <div class="py-md-5 py-4 text-center">
+          <div class="card-body" style="background-image: url(assets/img/landing/digital-agency/contact-bg.png);">
+            <p class="lead text-light opacity-70 mb-3"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Остались вопросы?</font></font></p>
+            <h2 class="h1 text-light pb-3 pb-lg-0 mb-lg-5"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Можете связаться с нами</font></font></h2>
+
+<!-- Telegram -->
+<a href="#" class="btn btn-primary btn-secondary btn-telegram">
+  <i class="bx bxl-telegram"></i>
+</a>
+              </div>
+          </div>
+        </div>
+</section>
+
 </main>
 
     <div id="config_host"></div>
