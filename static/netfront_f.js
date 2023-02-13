@@ -2,6 +2,7 @@ let NetworkState = 0; // 0 - not simulated yet, 1 - simulating, 2 - ready to run
 let NetworkSharedState = 0; // 0 - not simulated yet, 2 - ready to run, 3 - animated
 let SimulationId = 0;
 let global_cy = undefined;
+var NetworkUpdateTimeoutId = -1;
 
 const uid = function(){
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -608,7 +609,8 @@ const DrawGraph = function() {
         style: prepareStylesheet(),
         elements: [],
         layout: 'preset',
-        zoom: 2,
+        zoom: network_zoom,
+        pan: { x: network_pan_x, y: network_pan_y },
         fit: true,
     });
 
@@ -639,33 +641,49 @@ const DrawGraph = function() {
 
     let eh = cy.edgehandles(defaults );
 
+    cy.minZoom(0.5);
+    cy.maxZoom(2);
+
     cy.add(nodes);
     cy.add(edges);
 
-    // Looking for a position changing
-    cy.on('mouseup', 'node', function (evt) {
+    // Changing zoom
+    cy.on('zoom', function(evt){
 
-        var node = evt.target;
+        if (NetworkUpdateTimeoutId >= 0){
+            clearTimeout(NetworkUpdateTimeoutId);
+            NetworkUpdateTimeoutId = -1;
+        }
+
+        NetworkUpdateTimeoutId = setTimeout(UpdateNetworkConfig, 2000);
+    });
+
+    // Changing the pan
+    cy.on('pan', function(evt){
+
+        if (NetworkUpdateTimeoutId >= 0){
+            clearTimeout(NetworkUpdateTimeoutId);
+            NetworkUpdateTimeoutId = -1;
+        }
+
+        NetworkUpdateTimeoutId = setTimeout(UpdateNetworkConfig, 2000);
+    });
+
+    // Looking for a position changing
+    cy.on('dragfree', 'node', function(evt){
+
+        //let node_id = evt.target.id();
         let n = nodes.find(n => n.data.id === this.id());
 
         if (!n) {
             return;
         }
 
-        nx = n.renderedPosition.x;
-        ny = n.renderedPosition.y;
+        n.position.x = this.position().x;
+        n.position.y = this.position().y;
 
-        pos = node.renderedPosition();
-        rx = pos.x;
-        ry = pos.y;
-
-        if ((nx != rx) || (ny != ry)) {
-            n.renderedPosition.x = rx;
-            n.renderedPosition.y = ry;
-            MoveNodes();
-            TakeGraphPictureAndUpdate();
-            console.log("Change node position from: x=" + nx + ", y=" + ny + " to x=" + rx + ", y=" + ry);
-        }
+        MoveNodes();
+        TakeGraphPictureAndUpdate();
     });
 
     // Click on object
@@ -797,7 +815,8 @@ const DrawGraphStatic = function(nodes, edges, traffic) {
             style: prepareStylesheet(),
             elements: [],
             layout: 'preset',
-            zoom: 2,
+            zoom: network_zoom,
+            pan: { x: network_pan_x, y: network_pan_y },
             fit: true,
         });
     }
@@ -837,7 +856,8 @@ const DrawSharedGraph = function(nodes, edges) {
             style: prepareStylesheet(),
             elements: [],
             layout: 'preset',
-            zoom: 2,
+            zoom: network_zoom,
+            pan: { x: network_pan_x, y: network_pan_y },
             fit: true,
         });
     }
@@ -981,7 +1001,8 @@ const DrawShareGraphStatic = function(nodes, edges, traffic) {
             style: prepareStylesheet(),
             elements: [],
             layout: 'preset',
-            zoom: 2,
+            zoom: network_zoom,
+            pan: { x: network_pan_x, y: network_pan_y },
             fit: true,
         });
     }
@@ -1377,4 +1398,56 @@ const TakeGraphPictureAndUpdate = function()
         },
         dataType: 'image/png'
     });
+}
+
+// Calculate drop offsets
+const CalculateDropOffset = function(elem_x, elem_y)
+{
+    const network_scheme = document.getElementById("network_scheme");
+    let offset_left = 0;
+    let offset_top = 0;
+    let ret = {'x' : 0, 'y' : 0};
+
+    console.log(elem_x + ", " + elem_y);
+
+    if (network_scheme){
+        ret.x += network_scheme.offsetLeft - 25;
+        ret.y += network_scheme.offsetTop - 15;
+    }
+
+    if (global_cy)
+    {
+        ret.x = ret.x + global_cy.pan().x;
+        ret.y = ret.y + global_cy.pan().y;
+
+        ret.x = (elem_x - ret.x) / global_cy.zoom();
+        ret.y = (elem_y - ret.y) / global_cy.zoom();
+    }
+
+    return ret;
+}
+
+const UpdateNetworkConfig = function()
+{
+    if (!global_cy){
+        return;
+    }
+
+    let data = {'network_title' : network_title, 'zoom' : global_cy.zoom(),
+     'pan_x' : global_cy.pan().x, 'pan_y' : global_cy.pan().y};
+
+    $.ajax({
+        type: 'POST',
+        url: '/network/update_network_config?guid=' + network_guid,
+        data: JSON.stringify(data),
+        contentType: "application/json; charset=utf-8",
+        success: function(data, textStatus, xhr) {
+        },
+        error: function(xhr) {
+            console.log('Cannot update network config');
+            console.log(xhr);
+        },
+        dataType: 'json'
+    });
+
 }

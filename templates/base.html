@@ -71,7 +71,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <a class="nav-link active"> / </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('web_network', guid=network.guid) }}">{{ network.title }}</a>
+                        <a id="network_title_head" class="nav-link" href="{{ url_for('web_network', guid=network.guid) }}">{{ network.title }}</a>
                     </li>
         </ul>
 
@@ -109,7 +109,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="networkConfigrationForm" method="POST" action="{{ url_for('update_network_config', guid=network.guid) }}">
+                    <form id="networkConfigrationForm" method="POST" action="">
                         <div class="form-group">
                             <label for="network_title" class="text-sm">Название сети</label>
                             <input type="text" class="form-control form-control-sm" id="network_title" name="network_title" value='{{ network.title }}'>
@@ -183,7 +183,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         });
 
         $("#networkConfigrationSubmit").click(function(){
-            $("#networkConfigrationForm").submit(); // Submit the form
+            network_title = $("#network_title").val();
+            UpdateNetworkConfig();
+            $('#netConfigModal').modal('hide');
+            $('#network_title_head').text(network_title);
+        });
+
+        $('#networkConfigrationForm').keypress(function (e) {
+            var key = (e.keyCode || e.which);
+            if(key == 13 || key == 3){
+                network_title = $("#network_title").val();
+                UpdateNetworkConfig();
+                $('#netConfigModal').modal('hide');
+                $('#network_title_head').text(network_title);
+                return false;
+            }
         });
 
         $("#networkDeleteButton").click(function(){

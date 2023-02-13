@@ -30,23 +30,56 @@ def update_network_config():
     network_guid = request.args.get('guid', type=str)
 
     if not network_guid:
-        flash('Пропущен параметр GUID. И какую сеть мне открыть?!')
-        return redirect('home')
+        ret = {'message': 'Пропущен параметр GUID. И какую сеть мне открыть?!'}
+        return make_response(jsonify(ret), 400)
 
     net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
 
     if not net:
-        flash('Нет такой сети')
-        return redirect('home')
+        ret = {'message': 'Нет такой сети'}
+        return make_response(jsonify(ret), 400)
 
-    if request.method == "POST":
-        title = request.form.get('network_title').strip()
+    if request.method != "POST":
+        ret = {'message': 'Неверный запрос'}
+        return make_response(jsonify(ret), 400)
 
-        if title:
-            net.title=title
-            db.session.commit()
+    net_config = request.json
+    jnet = json.loads(net.network)
 
-    return redirect(url_for('web_network', guid=net.guid))
+    title = net_config.get('network_title').strip()
+
+    if title:
+        net.title=title
+
+    zoom = net_config.get('zoom')
+
+    # Default zoom
+    if not zoom:
+        zoom = 2
+
+    zoom = float(zoom)
+
+    pan_x = net_config.get("pan_x")
+    pan_y = net_config.get("pan_y")
+
+    if not pan_x:
+        pan_x = 0
+
+    if not pan_y:
+        pan_y = 0
+
+    if not 'config' in jnet:
+        jnet['config'] = {}
+
+    jnet['config']['zoom'] = zoom
+    jnet['config']['pan_x'] = pan_x
+    jnet['config']['pan_y'] = pan_y
+
+    net.network = json.dumps(jnet)
+    db.session.commit()
+
+    ret = {'message': 'Done'}
+    return make_response(jsonify(ret), 200)
 
 
 @login_required
@@ -104,6 +137,9 @@ def web_network_shared():
     if not 'jobs' in jnet:
         jnet['jobs'] = []
 
+    if not 'config' in jnet:
+        jnet['config'] = {'zoom' : 2, 'pan_x': 0 , 'pan_y': 0}
+
     # Do we simulte this network now?
     sim = Simulate.query.filter(Simulate.network_id == net.id).first()
 
@@ -115,7 +151,7 @@ def web_network_shared():
 
     return render_template("network_shared.html", network=net, nodes=jnet['nodes'],
                            edges=jnet['edges'], packets=packets, jobs=jnet['jobs'],
-                           simulating=sim)
+                           simulating=sim, network_config=jnet['config'])
 
 
 @login_required
@@ -155,12 +191,15 @@ def web_network():
     if not 'jobs' in jnet:
         jnet['jobs'] = []
 
+    if not 'config' in jnet:
+        jnet['config'] = {'zoom' : 2, 'pan_x': 0 , 'pan_y': 0}
+
     # Do we simulte this network now?
     sim = Simulate.query.filter(Simulate.network_id == net.id).first()
 
     return render_template("network.html", network=net, nodes=jnet['nodes'],
                            edges=jnet['edges'], packets=jnet['packets'], jobs=jnet['jobs'],
-                           simulating=sim)
+                           simulating=sim, network_config=jnet['config'])
 
 # Depricated?
 @login_required

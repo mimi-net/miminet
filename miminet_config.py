@@ -21,7 +21,7 @@ current_data = datetime.today().strftime('%Y-%m-%d')
 SQLITE_DATABASE_BACKUP_NAME = 'backup_' + current_data + '.db'
 
 def make_empty_network():
-    default_network = '{"nodes" : [], "edges" : [], "jobs" : []}'
+    default_network = '{"nodes" : [], "edges" : [], "jobs" : [], "config" : {}}'
     return default_network
 
 def check_image_with_pil(file):

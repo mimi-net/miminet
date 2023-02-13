@@ -1,17 +1,10 @@
-side_menu = document.getElementById("side_menu");
-side_menu_width = 0;
 let selecteed_node_id = 0;
-
-
-// Calculate width of the side menu for a adjustment os node position
-if (side_menu){
-    side_menu_width = side_menu.offsetWidth;
-}
 
 $('.drag').draggable({
   appendTo: 'body',
   helper: 'clone'
 });
+
 
 $('#network_scheme').droppable({
   activeClass: 'active',
@@ -34,7 +27,7 @@ $('#network_scheme').droppable({
           nodes.push(
               {
                   data: {id: node_id, label: node_id},
-                  renderedPosition: {x: ui.position.left - side_menu_width, y: ui.position.top},
+                  position: {x: CalculateDropOffset(ui.position.left, ui.position.top).x, y: CalculateDropOffset(ui.position.left, ui.position.top).y},
                   classes: ['host'],
                   config: {
                       type: 'host',
@@ -56,7 +49,7 @@ $('#network_scheme').droppable({
           nodes.push(
               {
                   data: {id: node_id, label: node_id},
-                  renderedPosition: {x: ui.position.left - side_menu_width, y: ui.position.top},
+                  position: {x: CalculateDropOffset(ui.position.left, ui.position.top).x, y: CalculateDropOffset(ui.position.left, ui.position.top).y},
                   classes: ['l2_switch'],
                   config: {
                       type: 'l2_switch',
@@ -78,7 +71,7 @@ $('#network_scheme').droppable({
           nodes.push(
               {
                   data: {id: node_id, label: node_id},
-                  renderedPosition: {x: ui.position.left - side_menu_width, y: ui.position.top},
+                  position: {x: CalculateDropOffset(ui.position.left, ui.position.top).x, y: CalculateDropOffset(ui.position.left, ui.position.top).y},
                   classes: ['l1_hub'],
                   config: {
                       type: 'l1_hub',

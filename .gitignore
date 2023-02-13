@@ -87,3 +87,4 @@ miminet_secret.conf
 simulation.py
 migrations/
 static/avatar/
+static/images/preview/
