@@ -8,42 +8,30 @@
     <div class="container py-3 h-100">
         <div class="row flex-nowrap">
             <div id="side_menu" class="col-auto col-lg-2 col-md-3 col-xl-2 px-sm-2 px-0 bg-white" style="height: 80vh;">
-                <h5 class="py-3 ps-2">Устройства</h5>
-
-                <div class="card-columns" style="column-count: 2;">
-                    <div class="card border-0">
-                        <div class="card-body px-0 py-0 text-center">
-                            <img class="drag" id="l2_switch" src="{{ url_for('static', filename='/images/l2_switch.png') }}"/>
-                            <div class="icon-text">
-                                <span data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Свитч (коммутатор) работает на втором уровне модели OSI.">Свитч (L2)</span>
-                            </div>
+                <h5 class="pb-2 ps-2">Устройства</h5>
+                <div class="row">
+                    <div class="col-sm-6 mb-3 text-center">
+                        <img class="drag" id="l2_switch" src="{{ url_for('static', filename='/images/l2_switch.png') }}"/>
+                        <div class="icon-text">
+                            <span data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Свитч (коммутатор) работает на втором уровне модели OSI.">Свитч (L2)</span>
                         </div>
                     </div>
-
-                    <div class="card border-0 text-center">
-                        <div class="card-body px-0 py-0 text-center">
-                            <img class="drag" id="host" src="{{ url_for('static', filename='/images/host.png') }}"/>
+                    <div class="col-sm-6 mb-3 text-center">
+                        <img class="drag" id="host" src="{{ url_for('static', filename='/images/host.png') }}"/>
                             <div class="icon-text pt-2">
                                 <span>Хост</span>
                             </div>
+                    </div>
+                    <div class="col-sm-6 mb-3 text-center">
+                        <img class="drag" id="l1_hub" src="{{ url_for('static', filename='/images/hub.png') }}" />
+                        <div class="icon-text">
+                            <span data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Хаб (концентратор) &mdash; простейшее сетевое устойство.">Хаб (L1)</span>
                         </div>
                     </div>
-                </div>
-
-                <div class="card-columns" style="column-count: 1;">
-                    <div class="card border-0 py-0">
-                        <div class="card-body">
-                            <img class="drag" id="l1_hub" src="{{ url_for('static', filename='/images/hub.png') }}" />
-                            <div class="icon-text">
-                                <span data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Хаб (концентратор) &mdash; простейшее сетевое устойство.">Хаб (L1)</span>
-                            </div>
-                        </div>
+                    <div class="col-12 text-center">
+                        <button type="button" class="btn btn-primary w-100" id="NetworkRunButton">Симулировать</button>
+                        <small id="NetworkRunButtonLabel" class="text-muted text-center">Ожидание 10-30 сек.</small>
                     </div>
-                </div>
-
-                <div class="card-body text-center">
-                    <button type="button" class="btn btn-primary w-100" id="NetworkRunButton">Симулировать</button>
-                    <small id="NetworkRunButtonLabel" class="text-muted text-center">Ожидание 10-30 сек.</small>
                 </div>
             </div>
 

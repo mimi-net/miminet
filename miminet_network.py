@@ -197,6 +197,7 @@ def web_network():
     # Do we simulte this network now?
     sim = Simulate.query.filter(Simulate.network_id == net.id).first()
 
+    print (jnet['config'])
     return render_template("network.html", network=net, nodes=jnet['nodes'],
                            edges=jnet['edges'], packets=jnet['packets'], jobs=jnet['jobs'],
                            simulating=sim, network_config=jnet['config'])
