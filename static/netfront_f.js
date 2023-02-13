@@ -754,6 +754,9 @@ const RunPackets = function (cy, pkts){
 
     let zoom = cy.zoom();
 
+    let px = cy.pan().x;
+    let py = cy.pan().y;
+
     pkts.forEach(function(p_item){
 
         let edge = cy.edges('[id = "' + p_item['config']['path'] + '"]');
@@ -784,11 +787,11 @@ const RunPackets = function (cy, pkts){
             return;
         }
 
-        p_item['renderedPosition'] = {x: from_xy['x'] * zoom, y: from_xy['y'] * zoom};
+        p_item['renderedPosition'] = {x: from_xy['x'] + px, y: from_xy['y'] + py};
         cy.add(p_item);
 
         cy.nodes().last().animate({
-            renderedPosition: {x: to_xy['x'] * zoom, y: to_xy['y'] * zoom}
+            renderedPosition: {x: to_xy['x'] + px, y: to_xy['y'] + py}
         }, {
             duration: 1000,
             complete: function(){
