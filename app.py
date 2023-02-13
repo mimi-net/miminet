@@ -34,12 +34,12 @@ login_manager.init_app(app)
 
 # App add_url_rule
 # Login
-app.add_url_rule('/login.html', methods=['GET', 'POST'], view_func=login_index)
-app.add_url_rule('/google_login', methods=['GET'], view_func=google_login)
-app.add_url_rule('/vk_callback', methods=['GET'], view_func=vk_callback)
-app.add_url_rule('/google_callback', methods=['GET'], view_func=google_callback)
-app.add_url_rule('/profile.html', methods=['GET', 'POST'], view_func=user_profile)
-app.add_url_rule('/logout', methods=['GET'], view_func=logout)
+app.add_url_rule('/auth/login.html', methods=['GET', 'POST'], view_func=login_index)
+app.add_url_rule('/auth/google_login', methods=['GET'], view_func=google_login)
+app.add_url_rule('/auth/vk_callback', methods=['GET'], view_func=vk_callback)
+app.add_url_rule('/auth/google_callback', methods=['GET'], view_func=google_callback)
+app.add_url_rule('/user/profile.html', methods=['GET', 'POST'], view_func=user_profile)
+app.add_url_rule('/auth/logout', methods=['GET'], view_func=logout)
 
 # Network
 app.add_url_rule('/create_network', methods=['GET'], view_func=create_network)

@@ -211,7 +211,7 @@ def vk_callback():
         return redirect(url_for('login_index'))
 
     # Get access token
-    response = requests.get('https://oauth.vk.com/access_token?client_id=51544060&client_secret=5G1LOaa0ty0zFDmH5cPw&redirect_uri=https://miminet.ru/vk_callback&code=' + user_code)
+    response = requests.get('https://oauth.vk.com/access_token?client_id=51544060&client_secret=5G1LOaa0ty0zFDmH5cPw&redirect_uri=https://miminet.ru/auth/vk_callback&code=' + user_code)
     access_token_json = json.loads(response.text)
 
     if "error" in access_token_json:
