@@ -786,11 +786,11 @@ const RunPackets = function (cy, pkts){
             return;
         }
 
-        p_item['renderedPosition'] = {x: from_xy['x'], y: from_xy['y']};
+        p_item['renderedPosition'] = {x: from_xy['x'] * zoom, y: from_xy['y'] * zoom};
         cy.add(p_item);
 
         cy.nodes().last().animate({
-            renderedPosition: {x: to_xy['x'], y: to_xy['y']}
+            renderedPosition: {x: to_xy['x'] * zoom, y: to_xy['y'] * zoom}
         }, {
             duration: 1000,
             complete: function(){
