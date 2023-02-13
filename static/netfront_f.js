@@ -753,7 +753,6 @@ const DrawGraph = function() {
 const RunPackets = function (cy, pkts){
 
     let zoom = cy.zoom();
-
     let px = cy.pan().x;
     let py = cy.pan().y;
 
@@ -787,11 +786,11 @@ const RunPackets = function (cy, pkts){
             return;
         }
 
-        p_item['renderedPosition'] = {x: from_xy['x'] + px, y: from_xy['y'] + py};
+        p_item['renderedPosition'] = {x: (from_xy['x'] + px) * zoom, y: (from_xy['y'] + py) * zoom};
         cy.add(p_item);
 
         cy.nodes().last().animate({
-            renderedPosition: {x: to_xy['x'] + px, y: to_xy['y'] + py}
+            renderedPosition: {x: (to_xy['x'] + px) * zoom, y: (to_xy['y'] + py) * zoom}
         }, {
             duration: 1000,
             complete: function(){
