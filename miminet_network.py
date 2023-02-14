@@ -126,8 +126,6 @@ def web_network_shared():
 
     jnet = json.loads(net.network)
 
-    print (jnet)
-
     if not 'nodes' in jnet:
         jnet['nodes'] = []
 
@@ -138,7 +136,7 @@ def web_network_shared():
         jnet['jobs'] = []
 
     if not 'config' in jnet:
-        jnet['config'] = {'zoom' : 2, 'pan_x': 0 , 'pan_y': 0}
+        jnet['config'] = {'zoom': 2, 'pan_x': 0, 'pan_y': 0}
 
     # Do we simulte this network now?
     sim = Simulate.query.filter(Simulate.network_id == net.id).first()

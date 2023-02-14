@@ -1,6 +1,7 @@
 import sys
+from datetime import datetime
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, make_response
 from flask_login import login_required, current_user
 from flask_migrate import Migrate
 
@@ -30,6 +31,9 @@ migrate = Migrate(app, db)
 
 # Init LoginManager
 login_manager.init_app(app)
+
+# Init Sitemap
+zero_days_ago = (datetime.now()).date().isoformat()
 
 
 # App add_url_rule
@@ -75,14 +79,41 @@ def home():
     user = current_user
 
     networks = Network.query.filter(Network.author_id == user.id).all()
-
     return render_template("home.html", networks = networks)
 
 
-@app.route('/edge')
-def edge():  # put application's code here
-    return render_template("edge.html")
+@app.route('/sitemap.xml', methods=['GET'])
+@app.route('/Sitemap.xml', methods=['GET'])
+def sitemap():
 
+    """Generate sitemap.xml. Makes a list of urls and date modified."""
+    pages = []
+    skip_pages = ['/nooffer.html', '/Sitemap.xml', '/sitemap.xml', '/404.html',
+                  '/auth/google_login', '/auth/google_callback', '/auth/vk_callback',
+                  '/auth/logout', '/run_simulation', '/check_simulation',
+                  '/network/update_network_config', '/host/save_config',
+                  '/host/delete_job', '/host/hub_save_config', '/host/switch_save_config',
+                  '/user/profile.html', '/delete_network', '/post_network_nodes',
+                  '/network/upload_network_picture', '/home']
+
+    # static pages
+    for rule in app.url_map.iter_rules():
+        if rule.rule in skip_pages:
+            continue
+
+        # Skip admin URL
+        if 'admin/' in rule.rule:
+            continue
+
+        if "GET" in rule.methods and len(rule.arguments) == 0:
+            pages.append(
+                ["https://miminet.ru" + str(rule.rule), zero_days_ago]
+            )
+
+    sitemap_xml = render_template('sitemap_template.xml', pages=pages)
+    response = make_response(sitemap_xml)
+    response.headers["Content-Type"] = "application/xml"
+    return response
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
