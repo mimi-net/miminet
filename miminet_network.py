@@ -105,7 +105,6 @@ def delete_network():
     return redirect(url_for('home'))
 
 
-@login_required
 def web_network_shared():
 
     network_guid = request.args.get('guid', type=str)

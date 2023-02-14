@@ -1,4 +1,5 @@
 let selecteed_node_id = 0;
+let selected_edge_id = 0;
 
 $('.drag').draggable({
   appendTo: 'body',

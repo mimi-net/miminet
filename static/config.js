@@ -1,11 +1,13 @@
 $('#config_host').load( "config_host.html" );
 $('#config_hub').load( "config_hub.html" );
 $('#config_switch').load( "config_switch.html" );
+$('#config_edge').load( "config_edge.html" );
 
 const config_content_id = "#config_content";
 const config_main_form_id = "#config_main_form";
 const config_hub_main_form_id = "#config_hub_main_form";
 const config_switch_main_form_id = "#config_switch_main_form";
+const config_edge_main_form_id = "#config_edge_main_form";
 
 const ClearConfigForm = function(text){
 
@@ -119,6 +121,30 @@ const ConfigHubName = function(hostname){
 
     $(config_hub_main_form_id).prepend((text));
     $('#config_hub_name').val(hostname);
+}
+
+const ConfigEdgeForm = function(edge_id){
+
+    var form = document.getElementById('config_edge_main_form_script').innerHTML;
+
+    // Clear all child
+    $(config_content_id).empty();
+
+    // Add new form
+    $(config_content_id).append(form);
+
+    // Set host_id
+    $('#edge_id').val( edge_id );
+    $('#net_guid').val( network_guid );
+}
+
+const ConfigEdgeEndpoints = function(edge_source, edge_target){
+
+    var text = document.getElementById('config_edge_edpoint_script').innerHTML;
+
+    $(config_edge_main_form_id).prepend((text));
+    $('#edge_source').val(edge_source);
+    $('#edge_target').val(edge_target);
 }
 
 const ConfigSwitchName = function(hostname){

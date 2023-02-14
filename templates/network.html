@@ -19,7 +19,7 @@
                     <div class="col-sm-6 mb-3 text-center">
                         <img class="drag" id="host" src="{{ url_for('static', filename='/images/host.png') }}"/>
                             <div class="icon-text pt-2">
-                                <span>Хост</span>
+                                <span data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Хост - конечное сетевое устройство.">Хост</span>
                             </div>
                     </div>
                     <div class="col-sm-6 mb-3 text-center">
@@ -50,6 +50,7 @@
     <div id="config_host"></div>
     <div id="config_hub"></div>
     <div id="config_switch"></div>
+    <div id="config_edge"></div>
 {% endblock %}
 
 {% block network %}

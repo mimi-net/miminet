@@ -126,6 +126,24 @@ const ShowSwitchConfig = function(n){
     ConfigSwitchName(hostname);
 }
 
+const ShowEdgeConfig = function(edge_id){
+
+    let ed = edges.find(ed => ed.data.id === edge_id);
+
+    if (!ed){
+        return;
+    }
+
+    let edge_source = ed.data.source;
+    let edge_target = ed.data.target;
+
+    // Create form
+    ConfigEdgeForm(edge_id);
+
+    // Add source and target info
+    ConfigEdgeEndpoints(edge_source, edge_target);
+}
+
 const PacketUid = function(){
     return "pkt_" + uid();
 }
@@ -394,6 +412,39 @@ const DeleteNode = function(node_id) {
     // Delete the node
     let node_index = nodes.findIndex(prop => prop.data.id === node_id);
     nodes.splice(node_index,1);
+}
+
+const DeleteEdge = function (edge_id) {
+
+    let ed = edges.find(ed => ed.data.id === edge_id);
+
+    if (!ed){
+        return;
+    }
+
+    let connected_nodes = [ed.data.source, ed.data.source];
+    let iterator = connected_nodes.values();
+
+    for (let node_id of iterator){
+        let t = nodes.find(t => t.data.id === node_id);
+
+        if (!t){
+            console.log("We have an edge without target node");
+            continue;
+        }
+
+        // Iterate interface and delete one
+        let edge_node_iface = t.interface.filter(function( iface ) {
+            return iface.connect !== edge_id;
+        });
+
+        t.interface = edge_node_iface;
+    }
+
+    // Delete the edeg
+    let edge_index = edges.findIndex(prop => prop.data.id === edge_id);
+    edges.splice(edge_index,1);
+    return;
 }
 
 const PostNodes = function(){
@@ -690,11 +741,24 @@ const DrawGraph = function() {
     cy.on('click', function (evt) {
 
         let evtTarget = evt.target;
+
+        // Is this cy ?
         if (evtTarget === cy) {
             ClearConfigForm('');
+            selecteed_node_id = 0;
+            selected_edge_id = 0;
             return;
         }
 
+        // Is this edge ?
+        if (evtTarget.group() === 'edges'){
+            selected_edge_id = evtTarget.data().id;
+            ShowEdgeConfig(selected_edge_id);
+            selecteed_node_id = 0;
+            return;
+        }
+
+        // Maybe host ?
         var target_id = evt.target.id();
         let n = nodes.find(n => n.data.id === target_id);
 
@@ -703,6 +767,7 @@ const DrawGraph = function() {
         }
 
         selecteed_node_id = n.data.id;
+        selected_edge_id = 0;
 
         if (n.config.type === 'host'){
             ShowHostConfig(n);
@@ -731,10 +796,33 @@ const DrawGraph = function() {
 
     $(document).on('keyup', function(e){
 
-        if (e.keyCode ==  46)
-        {
+        if (e.keyCode ==  46 && selecteed_node_id) {
             DeleteNode(selecteed_node_id);
             DeleteJob(selecteed_node_id);
+
+            ClearConfigForm('');
+            selecteed_node_id = 0;
+            selected_edge_id = 0;
+
+            PostNodesEdges();               // Update network on server
+            cy.elements().remove();
+            cy.add(nodes);
+            cy.add(edges);
+
+            TakeGraphPictureAndUpdate();
+
+            // Reset network state
+            if (GetNetworkState()){
+                SetNetworkRunButtonState(0, null);
+            }
+        }
+        if (e.keyCode ==  46 && selected_edge_id) {
+            DeleteEdge(selected_edge_id);
+
+            ClearConfigForm('');
+            selecteed_node_id = 0;
+            selected_edge_id = 0;
+
             PostNodesEdges();               // Update network on server
             cy.elements().remove();
             cy.add(nodes);
@@ -875,6 +963,14 @@ const DrawSharedGraph = function(nodes, edges) {
         let evtTarget = evt.target;
         if (evtTarget === cy) {
             ClearConfigForm();
+            selecteed_node_id = 0;
+            return;
+        }
+
+        // Is this edge ?
+        if (evtTarget.group() === 'edges'){
+            ShowEdgeConfig(evtTarget.data().id);
+            selecteed_node_id = 0;
             return;
         }
 
