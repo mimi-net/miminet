@@ -18,6 +18,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     <title>{% block title %}{% endblock %}</title>
 
+    {% block og %}{% endblock %}
+
     <script src="{{ url_for('static', filename='/js/jquery-3.6.0.min.js') }}"></script>
     <script src="{{ url_for('static', filename='/js/jquery-ui.min.js') }}"></script>
     <script src="{{ url_for('static', filename='/js/cytoscape.min.js') }}"></script>

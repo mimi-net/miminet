@@ -151,7 +151,6 @@ def web_network_shared():
                            simulating=sim, network_config=jnet['config'])
 
 
-@login_required
 def web_network():
 
     user = current_user
@@ -166,6 +165,13 @@ def web_network():
     if not net:
         flash('Нет такой сети')
         return redirect('home')
+
+    # Anonymous? Redirect to share version.
+    if user.is_anonymous:
+        if net.share_mode:
+            return redirect(url_for('web_network_shared', guid=net.guid))
+        else:
+            return redirect(url_for('login_index'))
 
     # If author is not user
     if net.author_id != user.id:
