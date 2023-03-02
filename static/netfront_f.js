@@ -26,6 +26,24 @@ const HostUid = function(){
     return "host_" + uid();
 }
 
+const RouterUid = function(){
+
+    let host_name = "router_";
+
+    for (let host_number = 1; host_number < 100; host_number++) {
+        host = host_name + host_number;
+
+        t = nodes.find(t => t.data.id === host);
+
+        if (!t)
+        {
+            return host;
+        }
+    }
+
+    return "router_" + uid();
+}
+
 const ShowHostConfig = function(n){
 
     let hostname = n.config.label;
@@ -100,6 +118,95 @@ const ShowHostConfig = function(n){
         ConfigHostInterface(iface_id, ip_addr, netmask, connected_to_host_label);
 
     });
+
+    if(n.interface.length)
+    {
+        let default_gw = '';
+
+        if ("default_gw" in n.config){
+            default_gw = n.config.default_gw;
+        }
+
+        ConfigHostGateway(default_gw);
+    }
+}
+
+const ShowRouterConfig = function(n){
+
+    let hostname = n.config.label;
+    hostname = hostname || n.data.id;
+
+    // Create form
+    ConfigRouterForm(n.data.id);
+
+    // Add hostname
+    ConfigRouterName(hostname);
+
+    // Add interfaces
+    $.each(n.interface, function (i) {
+        let iface_id = n.interface[i].id;
+
+        if (!iface_id){
+            return;
+        }
+
+        let connect_id = n.interface[i].connect;
+
+        if (!connect_id){
+            return;
+        }
+
+        let edge = edges.find(e => e.data.id === connect_id);
+
+        if (!edge){
+            return;
+        }
+
+        let source_host = edge.data.source;
+        let target_host = edge.data.target;
+
+        if (!source_host || !target_host){
+            return;
+        }
+
+        let connected_to = target_host;
+        if (n.data.id === target_host){
+            connected_to = source_host;
+        }
+
+        let connected_to_host = nodes.find(n => n.data.id === connected_to);
+        let connected_to_host_label = "Unknown";
+
+        if (connected_to_host){
+            connected_to_host_label = connected_to_host.data.label;
+        }
+
+        ip_addr = n.interface[i].ip;
+
+        if (!ip_addr){
+            ip_addr = '';
+        }
+
+        netmask = n.interface[i].netmask;
+
+        if (!netmask){
+            netmask = '';
+        }
+
+        ConfigRouterInterface(iface_id, ip_addr, netmask, connected_to_host_label);
+
+    });
+
+    if(n.interface.length)
+    {
+        let default_gw = '';
+
+        if ("default_gw" in n.config){
+            default_gw = n.config.default_gw;
+        }
+
+        ConfigRouterGateway(default_gw);
+    }
 }
 
 const ShowHubConfig = function(n){
@@ -266,8 +373,8 @@ const AddEdge = function(source_id, target_id){
             }
         });
 
-        // Add interface If edge connects to host
-        if (source_node.config.type === 'host'){
+        // Add interface If edge connects to host or to router
+        if (source_node.config.type === 'host' || source_node.config.type === 'router'){
             let iface_id = InterfaceUid();
             source_node.interface.push({
                   id: iface_id,
@@ -276,7 +383,7 @@ const AddEdge = function(source_id, target_id){
             });
         }
 
-        if (target_node.config.type === 'host'){
+        if (target_node.config.type === 'host' || target_node.config.type === 'router'){
             let iface_id = InterfaceUid();
             target_node.interface.push({
                 id: iface_id,
@@ -771,14 +878,12 @@ const DrawGraph = function() {
 
         if (n.config.type === 'host'){
             ShowHostConfig(n);
-        }
-
-        if (n.config.type === 'l1_hub'){
+        } else if (n.config.type === 'l1_hub'){
             ShowHubConfig(n);
-        }
-
-        if (n.config.type === 'l2_switch'){
+        } else if (n.config.type === 'l2_switch'){
             ShowSwitchConfig(n);
+        } else if (n.config.type === 'router'){
+            ShowRouterConfig(n);
         }
     });
 
@@ -1277,6 +1382,58 @@ const DeleteJobFromHost = function (host_id, job_id, network_guid)
         },
         error: function(xhr) {
             console.log('Не удалось удалить команду');
+            console.log(xhr);
+        },
+        dataType: 'json'
+    });
+}
+
+// Update router configuration
+const UpdateRouterConfiguration = function (data, router_id)
+{
+
+    $.ajax({
+        type: 'POST',
+        url: '/host/router_save_config',
+        data: data,
+        success: function(data, textStatus, xhr) {
+
+            if (xhr.status === 200)
+            {
+                // Update nodes
+                nodes = data.nodes;
+
+                // Clear packets
+                packets = null;
+
+                // Set a new state to the simulation button
+                SetNetworkRunButtonState(0, packets);
+
+                // Update graph
+                DrawGraph();
+
+                // Ok, let's try to update router config form
+                let n = nodes.find(n => n.data.id === router_id);
+
+                if (!n) {
+                    ClearConfigForm('Нет такого раутера');
+                    return;
+                }
+
+                if (n.config.type === 'router'){
+                    ShowRouterConfig(n);
+                } else {
+                    ClearConfigForm('Узел есть, но это не раутер');
+                    return;
+                }
+
+                if (data.warning){
+                    HostWarningMsg(data.warning);
+                }
+            }
+        },
+        error: function(xhr) {
+            console.log('Не удалось обновить конфигурацию хоста');
             console.log(xhr);
         },
         dataType: 'json'

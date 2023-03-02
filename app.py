@@ -12,7 +12,8 @@ from miminet_auth import login_manager, login_index, google_login, google_callba
 from miminet_network import create_network, web_network, update_network_config,\
     delete_network, post_nodes, post_nodes_edges, move_nodes, web_network_shared, upload_network_picture
 from miminet_simulation import run_simulation, check_simulation
-from miminet_host import save_host_config, delete_job, save_hub_config, save_switch_config
+from miminet_host import save_host_config, delete_job, save_hub_config, save_switch_config, \
+    save_router_config
 
 app = Flask(__name__,  static_url_path='', static_folder='static', template_folder="templates")
 
@@ -63,6 +64,7 @@ app.add_url_rule('/check_simulation', methods=['GET'], view_func=check_simulatio
 
 # Hosts
 app.add_url_rule('/host/save_config', methods=['GET', 'POST'], view_func=save_host_config)
+app.add_url_rule('/host/router_save_config', methods=['GET', 'POST'], view_func=save_router_config)
 app.add_url_rule('/host/delete_job', methods=['GET', 'POST'], view_func=delete_job)
 app.add_url_rule('/host/hub_save_config', methods=['GET', 'POST'], view_func=save_hub_config)
 app.add_url_rule('/host/switch_save_config', methods=['GET', 'POST'], view_func=save_switch_config)

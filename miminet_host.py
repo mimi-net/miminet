@@ -148,7 +148,6 @@ def save_switch_config():
     ret = {'message': 'Конфигурация обновлена', 'nodes': nodes}
     return make_response(jsonify(ret), 200)
 
-
 @login_required
 def save_host_config():
 
@@ -266,15 +265,145 @@ def save_host_config():
             node['config']['label'] = host_label
             node['data']['label'] = node['config']['label']
 
-            # Remove all previous simulations
-            sims = Simulate.query.filter(Simulate.network_id == net.id).all()
-            for s in sims:
-                db.session.delete(s)
+        default_gw = request.form.get('config_host_default_gw')
 
-            net.network = json.dumps(jnet)
-            db.session.commit()
+        if default_gw:
+
+            # Check if default_gw is a valid IP address
+            try:
+                socket.inet_aton(default_gw)
+                node['config']['default_gw'] = default_gw
+            except:
+                ret.update({'warning': 'IP адрес указан неверно.'})
+                return make_response(jsonify(ret), 400)
+
+        # Remove all previous simulations
+        sims = Simulate.query.filter(Simulate.network_id == net.id).all()
+        for s in sims:
+            db.session.delete(s)
+
+        net.network = json.dumps(jnet)
+        db.session.commit()
 
         ret.update({'message': 'Конфигурация обновлена', 'nodes' : nodes, 'jobs' : jnet['jobs']})
+        return make_response(jsonify(ret), 200)
+
+    ret.update({'message': 'Неверный запрос'})
+    return make_response(jsonify(ret), 400)
+
+@login_required
+def save_router_config():
+
+    user = current_user
+    ret = {}
+
+    if request.method == "POST":
+
+        network_guid = request.form.get('net_guid', type=str)
+
+        if not network_guid:
+            ret.update({'message': 'Не указан параметр net_guid'})
+            return make_response(jsonify(ret), 400)
+
+        net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id == user.id).first()
+
+        if not net:
+            ret.update({'message': 'Такая сеть не найдена'})
+            return make_response(jsonify(ret), 400)
+
+        router_id = request.form.get('router_id')
+
+        if not router_id:
+            ret.update({'message': 'Не указан параметр host_id'})
+            return make_response(jsonify(ret), 400)
+
+        jnet = json.loads(net.network)
+        nodes = jnet['nodes']
+
+        nn = list(filter(lambda x: x['data']["id"] == router_id, nodes))
+
+        if not nn:
+            ret.update({'message': 'Такого раутера не существует'})
+            return make_response(jsonify(ret), 400)
+
+        node = nn[0]
+
+        # Set IP adresses
+        iface_ids = request.form.getlist('config_router_iface_ids[]')
+        for iface_id in iface_ids:
+
+            # Do we really have that iface?
+            if not node['interface']:
+                break
+
+            ii = list(filter(lambda x: x['id'] == iface_id, node['interface']))
+
+            if not ii:
+                continue
+
+            interface = ii[0]
+
+            router_ip_value = request.form.get('config_router_ip_' + str(iface_id))
+            router_mask_value = request.form.get('config_router_mask_' + str(iface_id))
+
+            # If not IP
+            if not router_ip_value:
+                continue
+
+            if not router_mask_value.isdigit():
+
+                # Check if we have 1.2.3.4/5 ?
+                ip_mask = router_ip_value.split('/')
+                if len(ip_mask) == 2:
+                    router_ip_value = ip_mask[0]
+                    router_mask_value = ip_mask[1]
+                else:
+                    ret.update({'warning': 'Не указана маска для IP адреса'})
+                    continue
+
+            router_mask_value = int(router_mask_value)
+
+            if router_mask_value < 0 or router_mask_value > 32:
+                ret.update({'warning': 'Маска подсети указана неверно'})
+                continue
+
+            try:
+                socket.inet_aton(router_ip_value)
+                interface['ip'] = router_ip_value
+                interface['netmask'] = router_mask_value
+            except:
+                ret.update({'warning': 'IP адрес указан неверно.'})
+                continue
+
+        router_label = request.form.get('config_router_name')
+
+        if router_label:
+            node['config']['label'] = router_label
+            node['data']['label'] = node['config']['label']
+
+        default_gw = request.form.get('config_router_default_gw')
+
+        if default_gw:
+
+            # Check if default_gw is a valid IP address
+            try:
+                socket.inet_aton(default_gw)
+                node['config']['default_gw'] = default_gw
+            except:
+                ret.update({'warning': 'IP адрес указан неверно.'})
+                return make_response(jsonify(ret), 400)
+        else:
+            node['config']['default_gw'] = ''
+
+        # Remove all previous simulations
+        sims = Simulate.query.filter(Simulate.network_id == net.id).all()
+        for s in sims:
+            db.session.delete(s)
+
+        net.network = json.dumps(jnet)
+        db.session.commit()
+
+        ret.update({'message': 'Конфигурация обновлена', 'nodes': nodes})
         return make_response(jsonify(ret), 200)
 
     ret.update({'message': 'Неверный запрос'})

@@ -2,9 +2,11 @@ $('#config_host').load( "config_host.html" );
 $('#config_hub').load( "config_hub.html" );
 $('#config_switch').load( "config_switch.html" );
 $('#config_edge').load( "config_edge.html" );
+$('#config_router').load( "config_router.html" );
 
 const config_content_id = "#config_content";
 const config_main_form_id = "#config_main_form";
+const config_router_main_form_id = "#config_router_main_form";
 const config_hub_main_form_id = "#config_hub_main_form";
 const config_switch_main_form_id = "#config_switch_main_form";
 const config_edge_main_form_id = "#config_edge_main_form";
@@ -56,6 +58,34 @@ const ConfigHostForm = function(host_id){
         $(this).append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
 
         UpdateHostConfiguration(data, host_id);
+    });
+}
+
+const ConfigRouterForm = function(router_id){
+    var form = document.getElementById('config_router_main_form_script').innerHTML;
+
+    // Clear all child
+    $(config_content_id).empty();
+
+    // Add new form
+    $(config_content_id).append(form);
+
+    // Set host_id
+    $('#router_id').val( router_id );
+    $('#net_guid').val( network_guid );
+
+    $('#config_router_main_form_submit_button').click(function(event) {
+        event.preventDefault();
+        let data = $('#config_main_form').serialize();
+
+        // Disable all input fields
+        $("#config_main_form :input").prop("disabled", true);
+
+        // Set loading spinner
+        $(this).text('');
+        $(this).append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
+
+        UpdateRouterConfiguration(data, router_id);
     });
 }
 
@@ -200,6 +230,14 @@ const ConfigHostName = function(hostname){
     $('#config_host_name').val(hostname);
 }
 
+const ConfigRouterName = function(hostname){
+
+    var text = document.getElementById('config_router_name_script').innerHTML;
+
+    $(config_main_form_id).prepend((text));
+    $('#config_router_name').val(hostname);
+}
+
 const ConfigHostInterface = function(name, ip, netmask, connected_to){
 
     let elem = document.getElementById('config_host_interface_script');
@@ -222,6 +260,29 @@ const ConfigHostInterface = function(name, ip, netmask, connected_to){
     $('#config_host_ip_' + name).val(ip);
     $('#config_host_mask_' + name).val(netmask);
 
+}
+
+const ConfigRouterInterface = function(name, ip, netmask, connected_to){
+
+    let elem = document.getElementById('config_router_interface_script');
+    let eth = jQuery.extend({}, elem);
+
+    if (!name){
+        return;
+    }
+
+    eth.innerHTML = eth.innerHTML.replace(/config_router_iface_name_label_example/g, 'config_router_iface_name_label_' + name);
+    eth.innerHTML = eth.innerHTML.replace(/config_router_iface_name_example/g, 'config_router_iface_name_' + name);
+    eth.innerHTML = eth.innerHTML.replace(/config_router_ip_example/g, 'config_router_ip_' + name);
+    eth.innerHTML = eth.innerHTML.replace(/config_router_mask_example/g, 'config_router_mask_' + name);
+
+    var text = eth.innerHTML;
+
+    $(text).insertBefore('#config_router_main_form_submit_button');
+    $('<input type="hidden" name="config_router_iface_ids[]" value="' + name + '"/>').insertBefore('#config_router_iface_name_' + name);
+    $('#config_router_iface_name_' + name).attr("placeholder", connected_to);
+    $('#config_router_ip_' + name).val(ip);
+    $('#config_router_mask_' + name).val(netmask);
 }
 
 const ConfigHostJobOnChange = function(evnt){
@@ -302,4 +363,20 @@ const ConfigHostJob = function(host_jobs){
             DeleteJobFromHost(host_id.value, jid, network_guid);
         });
     });
+}
+
+const ConfigHostGateway = function(gw){
+
+    var text = document.getElementById('config_host_default_gw_script').innerHTML;
+
+    $(text).insertBefore('#config_main_form_submit_button');
+    $('#config_host_default_gw').val(gw);
+}
+
+const ConfigRouterGateway = function(gw){
+
+    var text = document.getElementById('config_router_default_gw_script').innerHTML;
+
+    $(text).insertBefore('#config_router_main_form_submit_button');
+    $('#config_router_default_gw').val(gw);
 }
