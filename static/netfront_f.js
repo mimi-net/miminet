@@ -1034,7 +1034,12 @@ const DrawGraphStatic = function(nodes, edges, traffic) {
 
     traffic.forEach(function(pkts){
         setTimeout(function(){RunPackets(cy, pkts)}, timeout);
-        timeout += 1500;
+
+        if (pkts.length){
+            timeout = timout + 1000 + (500 * pkts.length);
+        } else {
+            timeout += 1500;
+        }
     })
 
     setTimeout(function(){$('#NetworkRunButton').click();}, timeout);
