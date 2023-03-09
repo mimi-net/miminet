@@ -380,3 +380,164 @@ const ConfigRouterGateway = function(gw){
     $(text).insertBefore('#config_router_main_form_submit_button');
     $('#config_router_default_gw').val(gw);
 }
+
+const ConfigRouterJobOnChange = function(evnt){
+
+    let elem = null;
+    let router_job_list = null;
+
+    switch(evnt.target.value)
+    {
+        case '0':
+            $('div[name="config_router_select_input"]').remove();
+            break;
+
+        case '1':
+            elem = document.getElementById('config_router_ping_c_1_script').innerHTML;
+            router_job_list = document.getElementById('config_router_job_list');
+
+            if (!elem || !router_job_list){
+                return;
+            }
+
+            $('div[name="config_router_select_input"]').remove();
+            $(elem).insertBefore(router_job_list);
+            break;
+
+        case '100':
+            elem = document.getElementById('config_router_add_ip_mask_script').innerHTML;
+            router_job_list = document.getElementById('config_router_job_list');
+
+            if (!elem || !router_job_list){
+                console.log("config_router_add_ip_mask_script или config_router_job_list не найден.");
+                return;
+            }
+
+            $('div[name="config_router_select_input"]').remove();
+            $(elem).insertBefore(router_job_list);
+
+            let router_id = $('#router_id')[0].value;
+            if (!router_id){
+                console.log("Не нашел router_id");
+                return
+            }
+
+            let n = nodes.find(n => n.data.id === router_id);
+
+            if (!n) {
+                return;
+            }
+
+            if(!n.interface.length){
+                console.log("Интерфейсов нет, нечего настраивать");
+                return;
+            }
+
+            if(n.interface.length !== 1){
+                $('#config_router_add_ip_mask_iface_select_field').append('<option selected value="0">Выберите линк</option>');
+            }
+
+            $.each(n.interface, function (i) {
+                let iface_id = n.interface[i].id;
+
+                if (!iface_id){
+                    return;
+                }
+
+                let connect_id = n.interface[i].connect;
+                if (!connect_id){
+                    return;
+                }
+
+                let edge = edges.find(e => e.data.id === connect_id);
+
+                if (!edge){
+                    return;
+                }
+
+                let source_host = edge.data.source;
+                let target_host = edge.data.target;
+
+                if (!source_host || !target_host){
+                    return;
+                }
+
+                let connected_to = target_host;
+
+                if (n.data.id === target_host){
+                    connected_to = source_host;
+                }
+
+                let connected_to_host = nodes.find(n => n.data.id === connected_to);
+                let connected_to_host_label = "Unknown";
+
+                if (connected_to_host){
+                    connected_to_host_label = connected_to_host.data.label;
+                }
+
+                $('#config_router_add_ip_mask_iface_select_field').append('<option value="' + iface_id  + '">' + connected_to_host_label + '</option>');
+
+            });
+
+            break;
+
+        default:
+            console.log("Unknown target.value");
+    }
+
+}
+
+const ConfigRouterJob = function(router_jobs){
+
+    let elem = document.getElementById('config_router_job_script').innerHTML;
+    let router_id = document.getElementById('router_id');
+
+    if (!elem || !router_id){
+        return;
+    }
+
+    $(elem).insertBefore(router_id);
+
+    // Set onchange
+    document.getElementById('config_router_job_select_field').addEventListener('change', ConfigRouterJobOnChange);
+
+    elem = document.getElementById('config_router_job_list_script').innerHTML;
+    if (!elem){
+        return;
+    }
+
+    $(elem).insertBefore(router_id);
+
+    // Print jobs if we have
+    if (!router_jobs)
+    {
+        return;
+    }
+
+    $.each(router_jobs, function (i) {
+        let jid = router_jobs[i].id;
+
+        if (i == 0){
+            $('#config_router_job_list').append('<label class="text-sm">Команды</label>');
+        }
+
+        elem = document.getElementById('config_router_job_list_elem_script');
+
+        if (!elem){
+            return;
+        }
+
+        let job_elem = jQuery.extend({}, elem);
+        job_elem.innerHTML = job_elem.innerHTML.replace(/config_router_job_delete/g, 'config_router_job_delete_' + jid);
+        job_elem.innerHTML = job_elem.innerHTML.replace(/justify-content-between align-items-center\">/, 'justify-content-between align-items-center\"><small>' + router_jobs[i].print_cmd + '</small>');
+
+        let text = job_elem.innerHTML;
+        //$(text).insertBefore(host_id);
+        $('#config_router_job_list').append(text);
+
+        $('#config_router_job_delete_' + jid).click(function(event) {
+            event.preventDefault();
+            DeleteJobFromRouter(router_id.value, jid, network_guid);
+        });
+    });
+}

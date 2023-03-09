@@ -142,6 +142,15 @@ const ShowRouterConfig = function(n){
     // Add hostname
     ConfigRouterName(hostname);
 
+    // Add jobs
+    let router_jobs = [];
+
+    if (jobs){
+        router_jobs = jobs.filter(j => j.host_id === n.data.id);
+    }
+
+    ConfigRouterJob(router_jobs);
+
     // Add interfaces
     $.each(n.interface, function (i) {
         let iface_id = n.interface[i].id;
@@ -1388,6 +1397,58 @@ const DeleteJobFromHost = function (host_id, job_id, network_guid)
     });
 }
 
+// Delete job from host
+const DeleteJobFromRouter = function (router_id, job_id, network_guid)
+{
+    let data = {
+      id: job_id,
+      guid: network_guid,
+    };
+
+    $.ajax({
+        type: 'POST',
+        url: '/host/delete_job',
+        data: data,
+        encode: true,
+        success: function(data, textStatus, xhr) {
+
+            if (xhr.status === 200)
+            {
+                // Update jobs
+                jobs = data.jobs;
+
+                // Clear packets
+                packets = null;
+
+                // Set a new state to the simulation button
+                SetNetworkRunButtonState(0, packets);
+
+                // Update graph
+                DrawGraph();
+
+                // Ok, let's try to update host config form
+                let n = nodes.find(n => n.data.id === router_id);
+
+                if (!n) {
+                    ClearConfigForm('Нет такого хоста');
+                    return;
+                }
+
+                if (n.config.type === 'router'){
+                    ShowRouterConfig(n);
+                } else {
+                    ClearConfigForm('Узел есть, но это не раутер');
+                }
+            }
+        },
+        error: function(xhr) {
+            console.log('Не удалось удалить команду');
+            console.log(xhr);
+        },
+        dataType: 'json'
+    });
+}
+
 // Update router configuration
 const UpdateRouterConfiguration = function (data, router_id)
 {
@@ -1402,6 +1463,9 @@ const UpdateRouterConfiguration = function (data, router_id)
             {
                 // Update nodes
                 nodes = data.nodes;
+
+                // Update jobs
+                jobs = data.jobs;
 
                 // Clear packets
                 packets = null;
