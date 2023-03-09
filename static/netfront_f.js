@@ -1036,7 +1036,7 @@ const DrawGraphStatic = function(nodes, edges, traffic) {
         setTimeout(function(){RunPackets(cy, pkts)}, timeout);
 
         if (pkts.length){
-            timeout = timout + 1000 + (500 * pkts.length);
+            timeout = timeout + 1000 + (500 * pkts.length);
         } else {
             timeout += 1500;
         }
