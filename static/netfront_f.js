@@ -1049,7 +1049,7 @@ const DrawGraphStatic = function(nodes, edges, traffic) {
             }
 
             if (edgeMap[el] > maxCount) {
-                maxCount = modeMap[el];
+                maxCount = edgeMap[el];
             }
         }
 
