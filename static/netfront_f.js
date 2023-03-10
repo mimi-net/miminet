@@ -958,6 +958,8 @@ const RunPackets = function (cy, pkts){
     let px = cy.pan().x;
     let py = cy.pan().y;
 
+    let edgeMap = {};
+
     pkts.forEach(function(p_item){
 
         let edge = cy.edges('[id = "' + p_item['config']['path'] + '"]');
@@ -982,17 +984,35 @@ const RunPackets = function (cy, pkts){
             return;
         }
 
-        p_item['renderedPosition'] = {x: from_xy['x'] * zoom + px, y: from_xy['y'] * zoom + py};
-        cy.add(p_item);
+        if (edgeMap[p_item.config.path]){
 
-        cy.nodes().last().animate({
-            renderedPosition: {x: to_xy['x'] * zoom + px, y: to_xy['y'] * zoom + py}
-        }, {
-            duration: 1000,
-            complete: function(){
-                cy.remove('[id = "' + pkt_id + '"]');
-            }
-        });
+            p_item['renderedPosition'] = {x: from_xy['x'] * zoom + px, y: from_xy['y'] * zoom + py};
+            cy.add(p_item);
+
+            cy.nodes().last().delay(500).animate({
+                renderedPosition: {x: to_xy['x'] * zoom + px, y: to_xy['y'] * zoom + py}
+            }, {
+                duration: 1000,
+                complete: function(){
+                    cy.remove('[id = "' + pkt_id + '"]');
+                }
+            });
+        } else {
+
+            p_item['renderedPosition'] = {x: from_xy['x'] * zoom + px, y: from_xy['y'] * zoom + py};
+            cy.add(p_item);
+
+            cy.nodes().last().animate({
+                renderedPosition: {x: to_xy['x'] * zoom + px, y: to_xy['y'] * zoom + py}
+            }, {
+                duration: 1000,
+                complete: function(){
+                    cy.remove('[id = "' + pkt_id + '"]');
+                }
+            });
+
+            edgeMap[p_item.config.path] = 1;
+        }
     })
 }
 
