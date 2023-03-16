@@ -29,18 +29,24 @@
                     <div class="col-sm-6 mb-3 text-center">
                         <img class="drag" id="host" src="{{ url_for('static', filename='/images/host.png') }}"/>
                             <div class="icon-text pt-2">
-                                <span>Хост</span>
+                                <span data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Хост - конечное сетевое устройство.">Хост</span>
                             </div>
                     </div>
-                    <div class="col-sm-6 mb-3 text-center">
+                    <div class="col-sm-6 mb-3 text-center ">
                         <img class="drag" id="l1_hub" src="{{ url_for('static', filename='/images/hub.png') }}" />
                         <div class="icon-text">
                             <span data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Хаб (концентратор) &mdash; простейшее сетевое устойство.">Хаб (L1)</span>
                         </div>
                     </div>
+                    <div class="col-sm-6 mb-3 text-center">
+                        <img class="drag" id="l3_router" src="{{ url_for('static', filename='/images/l3_router.png') }}" />
+                        <div class="icon-text">
+                            <span data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Маршрутизатор (раутер) &mdash; работает на 3-м уровне модели OSI, позволяет объединять различные сети.">Раутер (L3)</span>
+                        </div>
+                    </div>
                     <div class="col-12 text-center">
-                        <button type="button" class="btn btn-primary w-100" id="NetworkRunButton">Симулировать</button>
-                        <small id="NetworkRunButtonLabel" class="text-muted text-center">Ожидание 10-30 сек.</small>
+                        <button type="button" class="btn btn-primary w-100" id="NetworkSharedRunButton">Симулировать</button>
+                        <small id="NetworkSharedRunButtonLabel" class="text-muted text-center">Ожидание 10-30 сек.</small>
                     </div>
                 </div>
             </div>
@@ -65,6 +71,7 @@
     <div id="config_hub"></div>
     <div id="config_switch"></div>
     <div id="config_edge"></div>
+    <div id="config_router"></div>
 {% endblock %}
 
 {% block network %}

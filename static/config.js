@@ -200,6 +200,22 @@ const SharedConfigHostForm = function(host_id){
     $('#config_main_form_submit_button').prop('disabled', true);
 }
 
+const SharedConfigRouterForm = function(router_id){
+    var form = document.getElementById('config_router_main_form_script').innerHTML;
+
+    // Clear all child
+    $(config_content_id).empty();
+
+    // Add new form
+    $(config_content_id).append(form);
+
+    // Set host_id
+    $('#router_id').val( router_id );
+    $('#net_guid').val( network_guid );
+
+    $('#config_router_main_form_submit_button').prop('disabled', true);
+}
+
 const SharedConfigHubForm = function(hub_id){
     var form = document.getElementById('config_hub_main_form_script').innerHTML;
 

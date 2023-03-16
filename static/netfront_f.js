@@ -44,13 +44,17 @@ const RouterUid = function(){
     return "router_" + uid();
 }
 
-const ShowHostConfig = function(n){
+const ShowHostConfig = function(n, shared = 0){
 
     let hostname = n.config.label;
     hostname = hostname || n.data.id;
 
     // Create form
-    ConfigHostForm(n.data.id);
+    if (shared){
+        SharedConfigHostForm(n.data.id);
+    } else {
+        ConfigHostForm(n.data.id);
+    }
 
     // Add hostname
     ConfigHostName(hostname);
@@ -131,13 +135,17 @@ const ShowHostConfig = function(n){
     }
 }
 
-const ShowRouterConfig = function(n){
+const ShowRouterConfig = function(n, shared = 0){
 
     let hostname = n.config.label;
     hostname = hostname || n.data.id;
 
     // Create form
-    ConfigRouterForm(n.data.id);
+    if (shared){
+        SharedConfigRouterForm(n.data.id)
+    } else {
+        ConfigRouterForm(n.data.id);
+    }
 
     // Add hostname
     ConfigRouterName(hostname);
@@ -218,25 +226,33 @@ const ShowRouterConfig = function(n){
     }
 }
 
-const ShowHubConfig = function(n){
+const ShowHubConfig = function(n, shared = 0){
 
     let hostname = n.config.label;
     hostname = hostname || n.data.id;
 
     // Create form
-    ConfigHubForm(n.data.id);
+    if (shared){
+        SharedConfigHubForm(n.data.id);
+    } else {
+        ConfigHubForm(n.data.id);
+    }
 
     // Add hostname
     ConfigHubName(hostname);
 }
 
-const ShowSwitchConfig = function(n){
+const ShowSwitchConfig = function(n, shared = 0){
 
     let hostname = n.config.label;
     hostname = hostname || n.data.id;
 
     // Create form
-    ConfigSwitchForm(n.data.id);
+    if (shared){
+        SharedConfigSwitchForm(n.data.id);
+    } else {
+        ConfigSwitchForm(n.data.id);
+    }
 
     // Add hostname
     ConfigSwitchName(hostname);
@@ -1107,6 +1123,9 @@ const DrawSharedGraph = function(nodes, edges) {
 
     cy.autounselectify(true);
 
+    cy.minZoom(0.5);
+    cy.maxZoom(2);
+
     cy.add(nodes);
     cy.add(edges);
 
@@ -1115,14 +1134,16 @@ const DrawSharedGraph = function(nodes, edges) {
 
         let evtTarget = evt.target;
         if (evtTarget === cy) {
-            ClearConfigForm();
+            ClearConfigForm('');
             selecteed_node_id = 0;
+            selected_edge_id = 0;
             return;
         }
 
         // Is this edge ?
         if (evtTarget.group() === 'edges'){
-            ShowEdgeConfig(evtTarget.data().id);
+            selected_edge_id = evtTarget.data().id;
+            ShowEdgeConfig(selected_edge_id);
             selecteed_node_id = 0;
             return;
         }
@@ -1135,100 +1156,16 @@ const DrawSharedGraph = function(nodes, edges) {
         }
 
         selecteed_node_id = n.data.id;
+        selected_edge_id = 0;
 
         if (n.config.type === 'host'){
-
-            let hostname = n.config.label;
-            hostname = hostname || n.data.id;
-
-            // Create form
-            SharedConfigHostForm(n.data.id);
-
-            // Add hostname
-            ConfigHostName(hostname);
-
-            // Add jobs
-            let host_jobs = [];
-
-            if (jobs){
-                host_jobs = jobs.filter(j => j.host_id === n.data.id);
-            }
-
-            ConfigHostJob(host_jobs);
-
-            // Add interfaces
-            $.each(n.interface, function (i) {
-                let iface_id = n.interface[i].id;
-
-                if (!iface_id){
-                    return;
-                }
-
-                let connect_id = n.interface[i].connect;
-
-                if (!connect_id){
-                    return;
-                }
-
-                let edge = edges.find(e => e.data.id === connect_id);
-
-                if (!edge){
-                    return;
-                }
-
-                let source_host = edge.data.source;
-                let target_host = edge.data.target;
-
-
-                if (!source_host || !target_host){
-                    return;
-                }
-
-                let connected_to = target_host;
-                if (n.data.id === target_host){
-                    connected_to = source_host;
-                }
-
-                ip_addr = n.interface[i].ip;
-
-                if (!ip_addr){
-                    ip_addr = '';
-                }
-
-                netmask = n.interface[i].netmask;
-
-                if (!netmask){
-                    netmask = '';
-                }
-
-                ConfigHostInterface(iface_id, ip_addr, netmask, connected_to);
-
-            });
-        }
-
-        if (n.config.type === 'l1_hub'){
-
-            let hostname = n.config.label;
-            hostname = hostname || n.data.id;
-
-            // Create form
-            SharedConfigHubForm(n.data.id);
-
-            // Add hostname
-            ConfigHubName(hostname);
-
-        }
-
-        if (n.config.type === 'l2_switch'){
-
-            let hostname = n.config.label;
-            hostname = hostname || n.data.id;
-
-            // Create form
-            SharedConfigSwitchForm(n.data.id);
-
-            // Add hostname
-            ConfigSwitchName(hostname);
+            ShowHostConfig(n, shared=1);
+        } else if (n.config.type === 'l1_hub'){
+            ShowHubConfig(n, shared=1);
+        } else if (n.config.type === 'l2_switch'){
+            ShowSwitchConfig(n, shared=1);
+        } else if (n.config.type === 'router'){
+            ShowRouterConfig(n, shared=1);
         }
     });
 
