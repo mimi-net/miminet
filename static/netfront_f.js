@@ -1438,10 +1438,16 @@ const UpdateRouterConfiguration = function (data, router_id)
             if (xhr.status === 200)
             {
                 // Update nodes
-                nodes = data.nodes;
+                if (data.nodes)
+                {
+                    nodes = data.nodes;
+                }
 
                 // Update jobs
-                jobs = data.jobs;
+                if (data.jobs)
+                {
+                    jobs = data.jobs;
+                }
 
                 // Clear packets
                 packets = null;
@@ -1467,10 +1473,12 @@ const UpdateRouterConfiguration = function (data, router_id)
                     return;
                 }
 
-                if (data.warning){
+                if (data.warning)
+                {
                     HostWarningMsg(data.warning);
                 }
             }
+
         },
         error: function(xhr) {
             console.log('Не удалось обновить конфигурацию хоста');

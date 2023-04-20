@@ -393,6 +393,21 @@ def save_router_config():
                         except Exception:
                             ret.update({'warning': 'IP адрес для команды "Добавить IP адрес" указан неверно.'})
 
+                    # add NAT masquerade to the interface
+                    if job_id == 101:
+                        job_101_arg_1 = request.form.get('config_router_add_nat_masquerade_iface_select_field')
+
+                        if not job_101_arg_1 or job_101_arg_1 == "0":
+                            ret.update({'warning': 'Не указан интерфейс для команды "Включить NAT masquerade"'})
+                            return make_response(jsonify(ret), 200)
+
+                        jnet['jobs'].append({'id': job_id_generator(),
+                                             'level': job_level,
+                                             'job_id' : job_id,
+                                             'host_id': node['data']['id'],
+                                             'arg_1': job_101_arg_1,
+                                             'print_cmd' : 'add nat -o ' + str(job_101_arg_1) + ' -j masquerad'})
+
         # Set IP adresses
         iface_ids = request.form.getlist('config_router_iface_ids[]')
         for iface_id in iface_ids:
