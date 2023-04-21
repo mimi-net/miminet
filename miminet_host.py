@@ -364,7 +364,7 @@ def save_router_config():
 
                         if not job_100_arg_1:
                             ret.update({'warning': 'Не указан интерфейс адрес для команды "Добавить IP адрес"'})
-                            return make_response(jsonify(ret), 400)
+                            return make_response(jsonify(ret), 200)
 
                         if not job_100_arg_2:
                             ret.update({'warning': 'Не указан IP адрес для команды "Добавить IP адрес"'})
@@ -372,13 +372,13 @@ def save_router_config():
 
                         if not 'config_router_add_ip_mask_mask_input_field' in request.form:
                             ret.update({'warning': 'Не указана маска для команды "Добавить IP адрес"'})
-                            return make_response(jsonify(ret), 400)
+                            return make_response(jsonify(ret), 200)
 
                         job_100_arg_3 = int(request.form.get('config_router_add_ip_mask_mask_input_field'))
 
                         if job_100_arg_3 < 0 or job_100_arg_3 > 32:
                             ret.update({'warning': 'Маска для команды "Добавить IP адрес" указана неверно. Допустимые значения от 0 до 32.'})
-                            return make_response(jsonify(ret), 400)
+                            return make_response(jsonify(ret), 200)
 
                         try:
                             socket.inet_aton(job_100_arg_2)
@@ -407,6 +407,39 @@ def save_router_config():
                                              'host_id': node['data']['id'],
                                              'arg_1': job_101_arg_1,
                                              'print_cmd' : 'add nat -o ' + str(job_101_arg_1) + ' -j masquerad'})
+
+                    if job_id == 102:
+                        job_102_arg_1 = request.form.get('config_router_add_route_ip_input_field')
+                        job_102_arg_2 = int(request.form.get('config_router_add_route_mask_input_field'))
+                        job_102_arg_3 = request.form.get('config_router_add_route_gw_input_field')
+
+                        if not job_102_arg_1:
+                            ret.update({'warning': 'Не указан IP адрес для команды "Добавить маршрут"'})
+                            return make_response(jsonify(ret), 200)
+
+                        if job_102_arg_2 < 0 or job_102_arg_2 > 32:
+                            ret.update({'warning': 'Маска для команды "Добавить маршрут" указана неверно. Допустимые значения от 0 до 32.'})
+                            return make_response(jsonify(ret), 200)
+
+                        if not job_102_arg_3:
+                            ret.update({'warning': 'Не указан IP адрес шлюза для команды "Добавить маршрут"'})
+                            return make_response(jsonify(ret), 200)
+
+                        try:
+                            socket.inet_aton(job_102_arg_1)
+                            socket.inet_aton(job_102_arg_3)
+                            jnet['jobs'].append({'id': job_id_generator(),
+                                                 'level': job_level,
+                                                 'job_id': job_id,
+                                                 'host_id': node['data']['id'],
+                                                 'arg_1': job_102_arg_1,
+                                                 'arg_2': job_102_arg_2,
+                                                 'arg_3': job_102_arg_3,
+                                                 'print_cmd': 'ip route add ' + str(job_102_arg_1) + '/' + str(
+                                                     job_102_arg_2) + ' via ' + str(job_102_arg_3)})
+                        except Exception:
+                            ret.update({'warning': 'IP адрес для команды "Добавить маршрут" указан неверно.'})
+
 
         # Set IP adresses
         iface_ids = request.form.getlist('config_router_iface_ids[]')

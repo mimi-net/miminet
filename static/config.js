@@ -576,6 +576,18 @@ const ConfigRouterJobOnChange = function(evnt){
             });
             break;
 
+        case '102':
+            elem = document.getElementById('config_router_add_route_script').innerHTML;
+            router_job_list = document.getElementById('config_router_job_list');
+
+            if (!elem || !router_job_list){
+                return;
+            }
+
+            $('div[name="config_router_select_input"]').remove();
+            $(elem).insertBefore(router_job_list);
+            break;
+
         default:
             console.log("Unknown target.value");
     }
