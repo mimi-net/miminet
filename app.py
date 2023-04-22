@@ -80,7 +80,7 @@ def index():  # put application's code here
 def home():
     user = current_user
 
-    networks = Network.query.filter(Network.author_id == user.id).all()
+    networks = Network.query.filter(Network.author_id == user.id).order_by(Network.id.desc()).all()
     return render_template("home.html", networks = networks)
 
 
