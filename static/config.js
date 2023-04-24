@@ -303,16 +303,32 @@ const ConfigRouterInterface = function(name, ip, netmask, connected_to){
 
 const ConfigHostJobOnChange = function(evnt){
 
+    let elem = null;
+    let host_job_list = null;
+
     switch(evnt.target.value)
     {
         case '1':
-            let elem = document.getElementById('config_host_ping_c_1_script').innerHTML;
-            let host_job_list = document.getElementById('config_host_job_list');
+            elem = document.getElementById('config_host_ping_c_1_script').innerHTML;
+            host_job_list = document.getElementById('config_host_job_list');
 
             if (!elem || !host_job_list){
                 return;
             }
 
+            $('div[name="config_host_select_input"]').remove();
+            $(elem).insertBefore(host_job_list);
+            break;
+
+        case '2':
+            elem = document.getElementById('config_host_ping_with_options_script').innerHTML;
+            host_job_list = document.getElementById('config_host_job_list');
+
+            if (!elem || !host_job_list){
+                return;
+            }
+
+            $('div[name="config_host_select_input"]').remove();
             $(elem).insertBefore(host_job_list);
             break;
 
@@ -594,7 +610,8 @@ const ConfigRouterJobOnChange = function(evnt){
 
 }
 
-const ConfigRouterJob = function(router_jobs){
+const ConfigRouterJob = function(router_jobs)
+{
 
     let elem = document.getElementById('config_router_job_script').innerHTML;
     let router_id = document.getElementById('router_id');

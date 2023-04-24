@@ -2,6 +2,7 @@ import json
 import uuid
 import socket
 import traceback
+import re
 
 from flask import redirect, url_for, request, flash, make_response, jsonify
 from miminet_model import db, Network, Simulate
@@ -196,7 +197,7 @@ def save_host_config():
 
             job_level = len(jnet['jobs'])
 
-            if job_level < 10:
+            if job_level < 20:
 
                 # ping -c 1 (1 param)
                 if job_id == 1:
@@ -211,6 +212,29 @@ def save_host_config():
                                              'print_cmd' : 'ping -c 1 ' + job_1_arg_1})
                     else:
                         ret.update({'warning': 'Не указан IP адрес для команды ping'})
+
+                if job_id == 2:
+                    job_2_arg_1 = request.form.get('config_host_ping_with_options_options_input_field')
+                    job_2_arg_2 = request.form.get('config_host_ping_with_options_ip_input_field')
+
+                    if job_2_arg_1:
+                        job_2_arg_1 = re.sub(r"[~|\\/'^&%]", "", job_2_arg_1)
+
+                    if not job_2_arg_2:
+                        ret.update({'warning': 'Не указан IP адрес для команды "ping (с опциями)"'})
+                        return make_response(jsonify(ret), 200)
+
+                    try:
+                        socket.inet_aton(job_2_arg_2)
+                        jnet['jobs'].append({'id': job_id_generator(),
+                                             'level': job_level,
+                                             'job_id': job_id,
+                                             'host_id': node['data']['id'],
+                                             'arg_1': job_2_arg_1,
+                                             'arg_2': job_2_arg_2,
+                                             'print_cmd': 'ping ' + str(job_2_arg_1) + " " + str(job_2_arg_2)})
+                    except Exception:
+                        ret.update({'warning': 'IP адрес для команды "ping (с опциями)" указан неверно.'})
 
         # Set IP adresses
         iface_ids = request.form.getlist('config_host_iface_ids[]')
@@ -275,7 +299,7 @@ def save_host_config():
                 node['config']['default_gw'] = default_gw
             except:
                 ret.update({'warning': 'IP адрес указан неверно.'})
-                return make_response(jsonify(ret), 400)
+                return make_response(jsonify(ret), 200)
         else:
             node['config']['default_gw'] = ''
 
@@ -292,6 +316,7 @@ def save_host_config():
 
     ret.update({'message': 'Неверный запрос'})
     return make_response(jsonify(ret), 400)
+
 
 @login_required
 def save_router_config():
@@ -341,7 +366,7 @@ def save_router_config():
                     jnet['jobs'] = []
 
                 job_level = len(jnet['jobs'])
-                if job_level < 10:
+                if job_level < 20:
 
                     # ping -c 1 (1 param)
                     if job_id == 1:
@@ -368,7 +393,7 @@ def save_router_config():
 
                         if not job_100_arg_2:
                             ret.update({'warning': 'Не указан IP адрес для команды "Добавить IP адрес"'})
-                            return make_response(jsonify(ret), 400)
+                            return make_response(jsonify(ret), 200)
 
                         if not 'config_router_add_ip_mask_mask_input_field' in request.form:
                             ret.update({'warning': 'Не указана маска для команды "Добавить IP адрес"'})
