@@ -43,6 +43,12 @@
                             <span data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Маршрутизатор (раутер) &mdash; работает на 3-м уровне модели OSI, позволяет объединять различные сети.">Раутер (L3)</span>
                         </div>
                     </div>
+                    <div class="col-sm-6 mb-3 text-center">
+                        <img class="drag" id="server" src="{{ url_for('static', filename='/images/server.png') }}" />
+                        <div class="icon-text">
+                            <span data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Сервер &mdash; обслуживает клиентские запросы.">Сервер</span>
+                        </div>
+                    </div>
                     <div class="col-12 text-center">
                         <button type="button" class="btn btn-primary w-100" id="NetworkRunButton">Симулировать</button>
                         <small id="NetworkRunButtonLabel" class="text-muted text-center">Ожидание 10-30 сек.</small>
@@ -68,6 +74,7 @@
     <div id="config_switch"></div>
     <div id="config_edge"></div>
     <div id="config_router"></div>
+    <div id="config_server"></div>
 {% endblock %}
 
 {% block network %}

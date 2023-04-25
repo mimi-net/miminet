@@ -117,6 +117,7 @@ def sitemap():
     response.headers["Content-Type"] = "application/xml"
     return response
 
+
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         if sys.argv[1] == "init":

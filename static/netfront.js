@@ -79,6 +79,20 @@ $('#network_scheme').droppable({
                   interface: [],
               }
           );
+      } else if (type === 'server'){
+        let node_id = ServerUid();
+        nodes.push(
+              {
+                  data: {id: node_id, label: node_id},
+                  position: {x: CalculateDropOffset(ui.position.left, ui.position.top).x, y: CalculateDropOffset(ui.position.left, ui.position.top).y},
+                  classes: ['server'],
+                  config: {
+                      type: 'server',
+                      label: node_id,
+                  },
+                  interface: [],
+              }
+          );
       } else {
         return;
       }

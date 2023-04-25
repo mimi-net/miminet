@@ -44,6 +44,24 @@ const RouterUid = function(){
     return "router_" + uid();
 }
 
+const ServerUid = function(){
+
+    let host_name = "server_";
+
+    for (let host_number = 1; host_number < 100; host_number++) {
+        host = host_name + host_number;
+
+        let t = nodes.find(t => t.data.id === host);
+
+        if (!t)
+        {
+            return host;
+        }
+    }
+
+    return "server_" + uid();
+}
+
 const ShowHostConfig = function(n, shared = 0){
 
     let hostname = n.config.label;
@@ -278,6 +296,97 @@ const ShowEdgeConfig = function(edge_id){
 
 const PacketUid = function(){
     return "pkt_" + uid();
+}
+
+const ShowServerConfig = function(n, shared = 0){
+
+    let hostname = n.config.label;
+    hostname = hostname || n.data.id;
+
+    // Create form
+    if (shared){
+        SharedConfigServerForm(n.data.id);
+    } else {
+        ConfigServerForm(n.data.id);
+    }
+
+    // Add hostname
+    ConfigServerName(hostname);
+
+    // Add jobs
+    let host_jobs = [];
+
+    if (jobs){
+        host_jobs = jobs.filter(j => j.host_id === n.data.id);
+    }
+
+    ConfigServerJob(host_jobs);
+
+    // Add interfaces
+    $.each(n.interface, function (i) {
+        let iface_id = n.interface[i].id;
+
+        if (!iface_id){
+            return;
+        }
+
+        let connect_id = n.interface[i].connect;
+
+        if (!connect_id){
+            return;
+        }
+
+        let edge = edges.find(e => e.data.id === connect_id);
+
+        if (!edge){
+            return;
+        }
+
+        let source_host = edge.data.source;
+        let target_host = edge.data.target;
+
+        if (!source_host || !target_host){
+            return;
+        }
+
+        let connected_to = target_host;
+        if (n.data.id === target_host){
+            connected_to = source_host;
+        }
+
+        let connected_to_host = nodes.find(n => n.data.id === connected_to);
+        let connected_to_host_label = "Unknown";
+
+        if (connected_to_host){
+            connected_to_host_label = connected_to_host.data.label;
+        }
+
+        ip_addr = n.interface[i].ip;
+
+        if (!ip_addr){
+            ip_addr = '';
+        }
+
+        netmask = n.interface[i].netmask;
+
+        if (!netmask){
+            netmask = '';
+        }
+
+        ConfigHostInterface(iface_id, ip_addr, netmask, connected_to_host_label);
+
+    });
+
+    if(n.interface.length)
+    {
+        let default_gw = '';
+
+        if ("default_gw" in n.config){
+            default_gw = n.config.default_gw;
+        }
+
+        ConfigHostGateway(default_gw);
+    }
 }
 
 const l1HubUid = function(){
@@ -909,6 +1018,8 @@ const DrawGraph = function() {
             ShowSwitchConfig(n);
         } else if (n.config.type === 'router'){
             ShowRouterConfig(n);
+        } else if (n.config.type === 'server'){
+            ShowServerConfig(n);
         }
     });
 
@@ -1373,7 +1484,7 @@ const DeleteJobFromHost = function (host_id, job_id, network_guid)
     });
 }
 
-// Delete job from host
+// Delete job from router
 const DeleteJobFromRouter = function (router_id, job_id, network_guid)
 {
     let data = {
@@ -1414,6 +1525,58 @@ const DeleteJobFromRouter = function (router_id, job_id, network_guid)
                     ShowRouterConfig(n);
                 } else {
                     ClearConfigForm('Узел есть, но это не раутер');
+                }
+            }
+        },
+        error: function(xhr) {
+            console.log('Не удалось удалить команду');
+            console.log(xhr);
+        },
+        dataType: 'json'
+    });
+}
+
+// Delete job from server
+const DeleteJobFromServer = function (server_id, job_id, network_guid)
+{
+    let data = {
+      id: job_id,
+      guid: network_guid,
+    };
+
+    $.ajax({
+        type: 'POST',
+        url: '/host/delete_job',
+        data: data,
+        encode: true,
+        success: function(data, textStatus, xhr) {
+
+            if (xhr.status === 200)
+            {
+                // Update jobs
+                jobs = data.jobs;
+
+                // Clear packets
+                packets = null;
+
+                // Set a new state to the simulation button
+                SetNetworkRunButtonState(0, packets);
+
+                // Update graph
+                DrawGraph();
+
+                // Ok, let's try to update host config form
+                let n = nodes.find(n => n.data.id === server_id);
+
+                if (!n) {
+                    ClearConfigForm('Нет такого хоста');
+                    return;
+                }
+
+                if (n.config.type === 'server'){
+                    ShowServerConfig(n);
+                } else {
+                    ClearConfigForm('Узел есть, но это не сервер');
                 }
             }
         },
@@ -1487,6 +1650,70 @@ const UpdateRouterConfiguration = function (data, router_id)
         dataType: 'json'
     });
 }
+
+// Update server configuration
+const UpdateServerConfiguration = function (data, router_id)
+{
+
+    $.ajax({
+        type: 'POST',
+        url: '/host/server_save_config',
+        data: data,
+        success: function(data, textStatus, xhr) {
+
+            if (xhr.status === 200)
+            {
+                // Update nodes
+                if (data.nodes)
+                {
+                    nodes = data.nodes;
+                }
+
+                // Update jobs
+                if (data.jobs)
+                {
+                    jobs = data.jobs;
+                }
+
+                // Clear packets
+                packets = null;
+
+                // Set a new state to the simulation button
+                SetNetworkRunButtonState(0, packets);
+
+                // Update graph
+                DrawGraph();
+
+                // Ok, let's try to update router config form
+                let n = nodes.find(n => n.data.id === router_id);
+
+                if (!n) {
+                    ClearConfigForm('Нет такого сервера');
+                    return;
+                }
+
+                if (n.config.type === 'server'){
+                    ShowServerConfig(n);
+                } else {
+                    ClearConfigForm('Узел есть, но это не сервер');
+                    return;
+                }
+
+                if (data.warning)
+                {
+                    ServerWarningMsg(data.warning);
+                }
+            }
+
+        },
+        error: function(xhr) {
+            console.log('Не удалось обновить конфигурацию хоста');
+            console.log(xhr);
+        },
+        dataType: 'json'
+    });
+}
+
 
 // Update hub configuration
 const UpdateHubConfiguration = function (data, hub_id)
