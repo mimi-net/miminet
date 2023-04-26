@@ -35,3 +35,38 @@
     <span class="ms-auto"><a href="" id="config_server_job_delete"><i class="bx bx-x fs-xl align-middle"></i></a></span>
   </li>
 </script>
+
+<script id="config_server_ping_c_1_script" type="text/plain">
+    <div class="form-group pt-1" name="config_server_select_input">
+        <input type="text" class="form-control form-control-sm" id="config_server_ping_c_1_ip" name="config_server_ping_c_1_ip" placeholder='Введите IP/имя хоста'>
+    </div>
+</script>
+
+<script id="config_server_start_udp_server_script" type="text/plain">
+    <div class="form-group pt-1" name="config_server_select_input">
+        <label id="config_server_start_udp_server_label" for="config_server_start_udp_server_label" class="text-sm">IP-адрес / Порт</label>
+        <div class="input-group flex-nowrap">
+            <input type="text" class="form-control form-control-sm" style="width:65% !important" id="config_server_start_udp_server_ip_input_field" name="config_server_start_udp_server_ip_input_field" value=''>
+            <input type="number" class="px-2 form-control form-control-sm" style="width:35% !important" id="config_server_start_udp_server_port_input_field" name="config_server_start_udp_server_port_input_field" min="0" max="65535" value="0">
+        </div>
+    </div>
+</script>
+
+<script id="config_server_interface_script" type="text/plain">
+    <div class="form-group pb-1 pt-3">
+        <label id="config_server_iface_name_label_example" for="config_server_iface_name_example" class="text-sm">Линк к</label>
+        <input type="text" class="form-control form-control-sm" id="config_server_iface_name_example" name="config_server_iface_name_example" placeholder='' disabled>
+    </div>
+    <label id="config_server_ip_label_example" for="config_server_ip_example" class="text-sm">IP-адрес / Маска</label>
+    <div class="input-group pb-2 flex-nowrap">
+        <input type="text" class="form-control form-control-sm w-75" id="config_server_ip_example" name="config_server_ip_example" value=''>
+        <input type="number" class="px-2 form-control form-control-sm w-25" id="config_server_mask_example" name="config_server_mask_example" min="0" max="32" value="0">
+    </div>
+</script>
+
+<script id="config_server_default_gw_script" type="text/plain">
+    <div class="form-group pb-2">
+        <label for="config_server_default_gw" class="text-sm">Шлюз по умолчанию</label>
+        <input type="text" class="form-control form-control-sm" id="config_server_default_gw" name="config_server_default_gw" value=''>
+    </div>
+</script>

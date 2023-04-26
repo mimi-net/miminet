@@ -373,7 +373,7 @@ const ShowServerConfig = function(n, shared = 0){
             netmask = '';
         }
 
-        ConfigHostInterface(iface_id, ip_addr, netmask, connected_to_host_label);
+        ConfigServerInterface(iface_id, ip_addr, netmask, connected_to_host_label);
 
     });
 
@@ -385,7 +385,7 @@ const ShowServerConfig = function(n, shared = 0){
             default_gw = n.config.default_gw;
         }
 
-        ConfigHostGateway(default_gw);
+        ConfigServerGateway(default_gw);
     }
 }
 

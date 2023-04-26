@@ -363,6 +363,29 @@ const ConfigRouterInterface = function(name, ip, netmask, connected_to){
     $('#config_router_mask_' + name).val(netmask);
 }
 
+const ConfigServerInterface = function(name, ip, netmask, connected_to){
+
+    let elem = document.getElementById('config_server_interface_script');
+    let eth = jQuery.extend({}, elem);
+
+    if (!name){
+        return;
+    }
+
+    eth.innerHTML = eth.innerHTML.replace(/config_server_iface_name_label_example/g, 'config_server_iface_name_label_' + name);
+    eth.innerHTML = eth.innerHTML.replace(/config_server_iface_name_example/g, 'config_server_iface_name_' + name);
+    eth.innerHTML = eth.innerHTML.replace(/config_server_ip_example/g, 'config_server_ip_' + name);
+    eth.innerHTML = eth.innerHTML.replace(/config_server_mask_example/g, 'config_server_mask_' + name);
+
+    var text = eth.innerHTML;
+
+    $(text).insertBefore('#config_server_main_form_submit_button');
+    $('<input type="hidden" name="config_server_iface_ids[]" value="' + name + '"/>').insertBefore('#config_server_iface_name_' + name);
+    $('#config_server_iface_name_' + name).attr("placeholder", connected_to);
+    $('#config_server_ip_' + name).val(ip);
+    $('#config_server_mask_' + name).val(netmask);
+}
+
 const ConfigHostJobOnChange = function(evnt){
 
     let elem = null;
@@ -798,181 +821,27 @@ const ConfigServerJobOnChange = function(evnt){
             break;
 
         case '1':
-            elem = document.getElementById('config_router_ping_c_1_script').innerHTML;
-            router_job_list = document.getElementById('config_router_job_list');
+            elem = document.getElementById('config_server_ping_c_1_script').innerHTML;
+            server_job_list = document.getElementById('config_server_job_list');
 
-            if (!elem || !router_job_list){
+            if (!elem || !server_job_list){
                 return;
             }
 
-            $('div[name="config_router_select_input"]').remove();
-            $(elem).insertBefore(router_job_list);
+            $('div[name="config_server_select_input"]').remove();
+            $(elem).insertBefore(server_job_list);
             break;
 
-        case '100':
-            elem = document.getElementById('config_router_add_ip_mask_script').innerHTML;
-            router_job_list = document.getElementById('config_router_job_list');
+        case '200':
+            elem = document.getElementById('config_server_start_udp_server_script').innerHTML;
+            server_job_list = document.getElementById('config_server_job_list');
 
-            if (!elem || !router_job_list){
-                console.log("config_router_add_ip_mask_script или config_router_job_list не найден.");
+            if (!elem || !server_job_list){
                 return;
             }
 
-            $('div[name="config_router_select_input"]').remove();
-            $(elem).insertBefore(router_job_list);
-
-            router_id = $('#router_id')[0].value;
-            if (!router_id){
-                console.log("Не нашел router_id");
-                return
-            }
-
-            n = nodes.find(n => n.data.id === router_id);
-
-            if (!n) {
-                return;
-            }
-
-            if(!n.interface.length){
-                console.log("Интерфейсов нет, нечего настраивать");
-                return;
-            }
-
-            if(n.interface.length !== 1){
-                $('#config_router_add_ip_mask_iface_select_field').append('<option selected value="0">Выберите линк</option>');
-            }
-
-            $.each(n.interface, function (i) {
-                let iface_id = n.interface[i].id;
-
-                if (!iface_id){
-                    return;
-                }
-
-                let connect_id = n.interface[i].connect;
-                if (!connect_id){
-                    return;
-                }
-
-                let edge = edges.find(e => e.data.id === connect_id);
-
-                if (!edge){
-                    return;
-                }
-
-                let source_host = edge.data.source;
-                let target_host = edge.data.target;
-
-                if (!source_host || !target_host){
-                    return;
-                }
-
-                let connected_to = target_host;
-
-                if (n.data.id === target_host){
-                    connected_to = source_host;
-                }
-
-                let connected_to_host = nodes.find(n => n.data.id === connected_to);
-                let connected_to_host_label = "Unknown";
-
-                if (connected_to_host){
-                    connected_to_host_label = connected_to_host.data.label;
-                }
-
-                $('#config_router_add_ip_mask_iface_select_field').append('<option value="' + iface_id  + '">' + connected_to_host_label + '</option>');
-
-            });
-            break;
-
-        case '101':
-            elem = document.getElementById('config_router_add_nat_masquerade_script').innerHTML;
-            router_job_list = document.getElementById('config_router_job_list');
-
-            if (!elem || !router_job_list){
-                return;
-            }
-
-            $('div[name="config_router_select_input"]').remove();
-            $(elem).insertBefore(router_job_list);
-
-            router_id = $('#router_id')[0].value;
-            if (!router_id){
-                console.log("Не нашел router_id");
-                return
-            }
-
-            n = nodes.find(n => n.data.id === router_id);
-
-            if (!n) {
-                return;
-            }
-
-            if(!n.interface.length){
-                console.log("Нет интерфейсов, нечего настраивать.");
-                return;
-            }
-
-            if(n.interface.length === 1){
-                $('#config_router_add_nat_masquerade_iface_select_field').append('<option selected value="0">Мало интерфейсов</option>');
-                return;
-            }
-
-            $('#config_router_add_nat_masquerade_iface_select_field').append('<option selected value="0">Выберите линк</option>');
-
-            $.each(n.interface, function (i) {
-                let iface_id = n.interface[i].id;
-
-                if (!iface_id){
-                    return;
-                }
-
-                let connect_id = n.interface[i].connect;
-                if (!connect_id){
-                    return;
-                }
-
-                let edge = edges.find(e => e.data.id === connect_id);
-
-                if (!edge){
-                    return;
-                }
-
-                let source_host = edge.data.source;
-                let target_host = edge.data.target;
-
-                if (!source_host || !target_host){
-                    return;
-                }
-
-                let connected_to = target_host;
-
-                if (n.data.id === target_host){
-                    connected_to = source_host;
-                }
-
-                let connected_to_host = nodes.find(n => n.data.id === connected_to);
-                let connected_to_host_label = "Unknown";
-
-                if (connected_to_host){
-                    connected_to_host_label = connected_to_host.data.label;
-                }
-
-                $('#config_router_add_nat_masquerade_iface_select_field').append('<option value="' + iface_id  + '">' + connected_to_host_label + '</option>');
-
-            });
-            break;
-
-        case '102':
-            elem = document.getElementById('config_router_add_route_script').innerHTML;
-            router_job_list = document.getElementById('config_router_job_list');
-
-            if (!elem || !router_job_list){
-                return;
-            }
-
-            $('div[name="config_router_select_input"]').remove();
-            $(elem).insertBefore(router_job_list);
+            $('div[name="config_server_select_input"]').remove();
+            $(elem).insertBefore(server_job_list);
             break;
 
         default:
