@@ -1099,7 +1099,8 @@ const RunPackets = function (cy, pkts){
         let from_xy = undefined;
         let to_xy = undefined;
 
-        if (edge.source().id() === p_item['config']['source']){
+        if (edge.source().id() === p_item['config']['source'])
+        {
             from_xy = edge.sourceEndpoint();
             to_xy = edge.targetEndpoint();
         } else if (edge.source().id() === p_item['config']['target'])
@@ -1111,12 +1112,13 @@ const RunPackets = function (cy, pkts){
             return;
         }
 
-        if (edgeMap[p_item.config.path]){
+        if (edgeMap[p_item.config.path])
+        {
 
             p_item['renderedPosition'] = {x: from_xy['x'] * zoom + px, y: from_xy['y'] * zoom + py};
             cy.add(p_item);
 
-            cy.nodes().last().delay(500).animate({
+            cy.nodes().last().delay(edgeMap[p_item.config.path] * 500).animate({
                 renderedPosition: {x: to_xy['x'] * zoom + px, y: to_xy['y'] * zoom + py}
             }, {
                 duration: 1000,
@@ -1124,6 +1126,8 @@ const RunPackets = function (cy, pkts){
                     cy.remove('[id = "' + pkt_id + '"]');
                 }
             });
+
+            edgeMap[p_item.config.path] = edgeMap[p_item.config.path] + 1;
         } else {
 
             p_item['renderedPosition'] = {x: from_xy['x'] * zoom + px, y: from_xy['y'] * zoom + py};
