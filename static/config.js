@@ -417,6 +417,18 @@ const ConfigHostJobOnChange = function(evnt){
             $(elem).insertBefore(host_job_list);
             break;
 
+        case '3':
+            elem = document.getElementById('config_host_send_udp_data_script').innerHTML;
+            host_job_list = document.getElementById('config_host_job_list');
+
+            if (!elem || !host_job_list){
+                return;
+            }
+
+            $('div[name="config_host_select_input"]').remove();
+            $(elem).insertBefore(host_job_list);
+            break;
+
         case '0':
             $('div[name="config_host_select_input"]').remove();
             break;
@@ -496,6 +508,14 @@ const ConfigRouterGateway = function(gw){
 
     $(text).insertBefore('#config_router_main_form_submit_button');
     $('#config_router_default_gw').val(gw);
+}
+
+const ConfigServerGateway = function(gw){
+
+    var text = document.getElementById('config_server_default_gw_script').innerHTML;
+
+    $(text).insertBefore('#config_server_main_form_submit_button');
+    $('#config_server_default_gw').val(gw);
 }
 
 const ConfigRouterJobOnChange = function(evnt){

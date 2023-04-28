@@ -507,8 +507,8 @@ const AddEdge = function(source_id, target_id){
             }
         });
 
-        // Add interface If edge connects to host or to router
-        if (source_node.config.type === 'host' || source_node.config.type === 'router'){
+        // Add interface If edge connects to host or to router or to server
+        if (source_node.config.type === 'host' || source_node.config.type === 'router' || source_node.config.type === 'server'){
             let iface_id = InterfaceUid();
             source_node.interface.push({
                   id: iface_id,
@@ -517,7 +517,7 @@ const AddEdge = function(source_id, target_id){
             });
         }
 
-        if (target_node.config.type === 'host' || target_node.config.type === 'router'){
+        if (target_node.config.type === 'host' || target_node.config.type === 'router' || target_node.config.type === 'server'){
             let iface_id = InterfaceUid();
             target_node.interface.push({
                 id: iface_id,
@@ -1277,6 +1277,8 @@ const DrawSharedGraph = function(nodes, edges) {
             ShowSwitchConfig(n, shared=1);
         } else if (n.config.type === 'router'){
             ShowRouterConfig(n, shared=1);
+        } else if (n.config.type === 'server'){
+            ShowServerConfig(n, shared=1);
         }
     });
 
@@ -1707,7 +1709,7 @@ const UpdateServerConfiguration = function (data, router_id)
 
         },
         error: function(xhr) {
-            console.log('Не удалось обновить конфигурацию хоста');
+            console.log('Не удалось обновить конфигурацию сервера');
             console.log(xhr);
         },
         dataType: 'json'
