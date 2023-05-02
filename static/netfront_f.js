@@ -1856,7 +1856,7 @@ const SetNetworkRunButtonState = function(id, packets)
     // If so, we're simulating.
     if (id)
     {
-        $('#NetworkRunButton').text('Симуляция');
+        $('#NetworkRunButton').text('Эмуляция');
         $('#NetworkRunButton').removeClass('btn-primary');
         $('#NetworkRunButton').addClass('btn-secondary');
         $('#NetworkRunButton').prop('disabled', true);
@@ -1868,7 +1868,7 @@ const SetNetworkRunButtonState = function(id, packets)
         return;
     }
 
-    $('#NetworkRunButton').text('Симулировать');
+    $('#NetworkRunButton').text('Эмулировать');
     $('#NetworkRunButton').removeClass('btn-secondary');
     $('#NetworkRunButton').removeClass('btn-success');
     $('#NetworkRunButton').addClass('btn-primary');
@@ -1899,12 +1899,12 @@ const SetNetworkSharedRunButtonState = function(packets)
         return;
     }
 
-    $('#NetworkSharedRunButton').text('Симуляции нет');
+    $('#NetworkSharedRunButton').text('Эмуляции нет');
     $('#NetworkSharedRunButton').removeClass('btn-success');
     $('#NetworkSharedRunButton').addClass('btn-secondary');
     $('#NetworkSharedRunButton').prop('disabled', true);
 
-    $('#NetworkSharedRunButtonLabel').text("Сеть не симулировалась");
+    $('#NetworkSharedRunButtonLabel').text("Сеть не эмулировалась");
 
     SetNetworkState(0);
     return;

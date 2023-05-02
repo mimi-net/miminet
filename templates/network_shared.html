@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block title %}{{ network.title }}{% endblock %}
-{% block description %}Симуляция компьютерной сети в вебе{% endblock %}
+{% block description %}Эмуляция компьютерной сети в вебе{% endblock %}
 {% block og %}
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Miminet">
     <meta property="og:title" content="{{ network.title }}">
-    <meta property="og:description" content="Симуляция компьютерной сети в вебе">
+    <meta property="og:description" content="Эмуляция компьютерной сети в вебе">
     <meta property="og:url" content="https://miminet.ru{{ url_for(request.endpoint, guid=network.guid) }}">
     <meta property="og:locale" content="ru_RU">
     <meta property="og:image" content="https://miminet.ru/images/preview/{{ network.preview_uri }}">
