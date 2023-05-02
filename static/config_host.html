@@ -22,6 +22,7 @@
                 <option value="1">ping (1 пакет)</option>
                 <option value="2">ping (с опциями)</option>
                 <option value="3">Отправить данные (UDP)</option>
+                <option value="4">Отправить данные (TCP)</option>
             </select>
     </div>
 </script>
@@ -46,6 +47,17 @@
         <div class="input-group flex-nowrap">
             <input type="text" class="form-control form-control-sm" style="width:65% !important" id="config_host_send_udp_data_ip_input_field" name="config_host_send_udp_data_ip_input_field" value='' placeholder='IP адрес'>
             <input type="number" class="px-2 form-control form-control-sm" style="width:35% !important" id="config_host_send_udp_data_port_input_field" name="config_host_send_udp_data_port_input_field" min="0" max="65535" value="" placeholder='Порт'>
+        </div>
+    </div>
+</script>
+
+<script id="config_host_send_tcp_data_script" type="text/plain">
+    <div class="form-group pt-1" name="config_host_select_input">
+        <input type="number" class="form-control form-control-sm" id="config_host_send_tcp_data_size_input_field" name="config_host_send_tcp_data_size_input_field" value='' placeholder='Объём в байтах (1-65535)'>
+        <label id="config_host_send_tcp_data_label" for="config_host_send_tcp_data_label" class="text-sm">Получатель (IP / порт)</label>
+        <div class="input-group flex-nowrap">
+            <input type="text" class="form-control form-control-sm" style="width:65% !important" id="config_host_send_tcp_data_ip_input_field" name="config_host_send_tcp_data_ip_input_field" value='' placeholder='IP адрес'>
+            <input type="number" class="px-2 form-control form-control-sm" style="width:35% !important" id="config_host_send_tcp_data_port_input_field" name="config_host_send_tcp_data_port_input_field" min="0" max="65535" value="" placeholder='Порт'>
         </div>
     </div>
 </script>

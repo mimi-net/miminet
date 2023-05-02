@@ -219,6 +219,7 @@ def save_host_config():
 
                     if job_2_arg_1:
                         job_2_arg_1 = re.sub(r"[~|\\/'^&%]", "", job_2_arg_1)
+                        job_2_arg_1 = re.sub(r'[^\x00-\x7F]', '', job_2_arg_1)
 
                     if not job_2_arg_2:
                         ret.update({'warning': 'Не указан IP адрес для команды "ping (с опциями)"'})
@@ -232,7 +233,7 @@ def save_host_config():
                                              'host_id': node['data']['id'],
                                              'arg_1': job_2_arg_1,
                                              'arg_2': job_2_arg_2,
-                                             'print_cmd': 'ping ' + str(job_2_arg_1) + " " + str(job_2_arg_2)})
+                                             'print_cmd': 'ping -c 1 ' + str(job_2_arg_1) + " " + str(job_2_arg_2)})
                     except Exception:
                         ret.update({'warning': 'IP адрес для команды "ping (с опциями)" указан неверно.'})
 
@@ -271,6 +272,43 @@ def save_host_config():
                                              'print_cmd': 'send -s ' + str(job_3_arg_1) + " -p udp " + str(job_3_arg_2) + ":" + str(job_3_arg_3)})
                     except Exception:
                         ret.update({'warning': 'IP адрес для команды "Отправить данные (UDP)" указан неверно.'})
+
+                if job_id == 4:
+                    job_4_arg_1 = request.form.get('config_host_send_tcp_data_size_input_field')
+                    job_4_arg_2 = request.form.get('config_host_send_tcp_data_ip_input_field')
+                    job_4_arg_3 = request.form.get('config_host_send_tcp_data_port_input_field')
+
+                    if not job_4_arg_1:
+                        job_4_arg_1 = 1000
+
+                    if int(job_4_arg_1) < 0 or int(job_4_arg_1) > 65535:
+                        job_4_arg_1 = 1000
+
+                    if not job_4_arg_2:
+                        ret.update({'warning': 'Не указан IP адрес для команды "Отправить данные (TCP)"'})
+                        return make_response(jsonify(ret), 200)
+
+                    if not job_4_arg_3:
+                        ret.update({'warning': 'Не указан порт для команды "Отправить данные (TCP)"'})
+                        return make_response(jsonify(ret), 200)
+
+                    if int(job_4_arg_3) < 0 or int(job_4_arg_3) > 65535:
+                        ret.update({'warning': 'Неверно указан порт для команды "Отправить данные (TCP)"'})
+                        return make_response(jsonify(ret), 200)
+
+                    try:
+                        socket.inet_aton(job_4_arg_2)
+                        jnet['jobs'].append({'id': job_id_generator(),
+                                             'level': job_level,
+                                             'job_id': job_id,
+                                             'host_id': node['data']['id'],
+                                             'arg_1': int(job_4_arg_1),
+                                             'arg_2': job_4_arg_2,
+                                             'arg_3': int(job_4_arg_3),
+                                             'print_cmd': 'send -s ' + str(job_4_arg_1) + " -p tcp " + str(job_4_arg_2) + ":" + str(job_4_arg_3)})
+                    except Exception as e:
+                        print (e)
+                        ret.update({'warning': 'IP адрес для команды "Отправить данные (TCP)" указан неверно.'})
 
         # Set IP adresses
         iface_ids = request.form.getlist('config_host_iface_ids[]')
@@ -544,7 +582,8 @@ def save_router_config():
                 socket.inet_aton(router_ip_value)
                 interface['ip'] = router_ip_value
                 interface['netmask'] = router_mask_value
-            except:
+            except Exception as e:
+                print (e)
                 ret.update({'warning': 'IP адрес указан неверно.'})
                 continue
 
@@ -562,7 +601,8 @@ def save_router_config():
             try:
                 socket.inet_aton(default_gw)
                 node['config']['default_gw'] = default_gw
-            except:
+            except Exception as e:
+                print (e)
                 ret.update({'warning': 'IP адрес для маршрута по умолчанию указан неверно.'})
         else:
             node['config']['default_gw'] = ''

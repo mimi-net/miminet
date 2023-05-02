@@ -429,6 +429,18 @@ const ConfigHostJobOnChange = function(evnt){
             $(elem).insertBefore(host_job_list);
             break;
 
+        case '4':
+            elem = document.getElementById('config_host_send_tcp_data_script').innerHTML;
+            host_job_list = document.getElementById('config_host_job_list');
+
+            if (!elem || !host_job_list){
+                return;
+            }
+
+            $('div[name="config_host_select_input"]').remove();
+            $(elem).insertBefore(host_job_list);
+            break;
+
         case '0':
             $('div[name="config_host_select_input"]').remove();
             break;
