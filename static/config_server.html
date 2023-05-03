@@ -16,11 +16,12 @@
 
 <script id="config_server_job_script" type="text/plain">
     <div class="form-group" id="config_server_jobs">
-        <label for="config_server_job_select_field" class="text-sm">Добавить команду</label>
+        <label for="config_server_job_select_field" class="text-sm">Выполнить команду</label>
         <select id="config_server_job_select_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_server_job_select_field">
             <option selected value="0">---</option>
             <option value="1">ping (1 пакет)</option>
             <option value="200">Запустить UDP сервер</option>
+            <option value="201">Запустить TCP сервер</option>
         </select>
     </div>
 </script>
@@ -48,6 +49,16 @@
         <div class="input-group flex-nowrap">
             <input type="text" class="form-control form-control-sm" style="width:65% !important" id="config_server_start_udp_server_ip_input_field" name="config_server_start_udp_server_ip_input_field" value=''>
             <input type="number" class="px-2 form-control form-control-sm" style="width:35% !important" id="config_server_start_udp_server_port_input_field" name="config_server_start_udp_server_port_input_field" min="0" max="65535" value="0">
+        </div>
+    </div>
+</script>
+
+<script id="config_server_start_tcp_server_script" type="text/plain">
+    <div class="form-group pt-1" name="config_server_select_input">
+        <label id="config_server_start_tcp_server_label" for="config_server_start_tcp_server_label" class="text-sm">IP-адрес / Порт</label>
+        <div class="input-group flex-nowrap">
+            <input type="text" class="form-control form-control-sm" style="width:65% !important" id="config_server_start_tcp_server_ip_input_field" name="config_server_start_tcp_server_ip_input_field" value=''>
+            <input type="number" class="px-2 form-control form-control-sm" style="width:35% !important" id="config_server_start_tcp_server_port_input_field" name="config_server_start_tcp_server_port_input_field" min="0" max="65535" value="0">
         </div>
     </div>
 </script>

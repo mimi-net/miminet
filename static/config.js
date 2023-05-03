@@ -451,7 +451,8 @@ const ConfigHostJobOnChange = function(evnt){
 
 }
 
-const ConfigHostJob = function(host_jobs){
+const ConfigHostJob = function(host_jobs)
+{
 
     let elem = document.getElementById('config_host_job_script').innerHTML;
     let host_id = document.getElementById('host_id');
@@ -866,6 +867,18 @@ const ConfigServerJobOnChange = function(evnt){
 
         case '200':
             elem = document.getElementById('config_server_start_udp_server_script').innerHTML;
+            server_job_list = document.getElementById('config_server_job_list');
+
+            if (!elem || !server_job_list){
+                return;
+            }
+
+            $('div[name="config_server_select_input"]').remove();
+            $(elem).insertBefore(server_job_list);
+            break;
+
+        case '201':
+            elem = document.getElementById('config_server_start_tcp_server_script').innerHTML;
             server_job_list = document.getElementById('config_server_job_list');
 
             if (!elem || !server_job_list){

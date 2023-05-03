@@ -714,6 +714,36 @@ def save_server_config():
                         print (e)
                         ret.update({'warning': 'IP адрес для команды "Запустить UDP сервер" указан неверно.'})
 
+                # Start TCP server
+                if job_id == 201:
+                    job_201_arg_1 = request.form.get('config_server_start_tcp_server_ip_input_field')
+                    job_201_arg_2 = request.form.get('config_server_start_tcp_server_port_input_field')
+
+                    if not job_201_arg_1:
+                        ret.update({'warning': 'Не указан IP адрес для команды "Запустисть TCP сервер"'})
+                        return make_response(jsonify(ret), 200)
+
+                    if not job_201_arg_2:
+                        ret.update({'warning': 'Не указан порт для команды "Запустисть TCP сервер"'})
+                        return make_response(jsonify(ret), 200)
+
+                    if int(job_201_arg_2) < 0 or int(job_201_arg_2) > 65535:
+                        ret.update({'warning': 'Неверно указан порт для команды "Запустить TCP сервер"'})
+                        return make_response(jsonify(ret), 200)
+
+                    try:
+                        socket.inet_aton(job_201_arg_1)
+                        jnet['jobs'].append({'id': job_id_generator(),
+                                            'level': job_level,
+                                             'job_id' : job_id,
+                                             'host_id': node['data']['id'],
+                                             'arg_1': job_201_arg_1,
+                                             'arg_2' : int(job_201_arg_2),
+                                             'print_cmd' : 'nc ' + str(job_201_arg_1) + ' -l ' + str(job_201_arg_2)})
+                    except Exception as e:
+                        print (e)
+                        ret.update({'warning': 'IP адрес для команды "Запустить TCP сервер" указан неверно.'})
+
         # Set IP adresses
         iface_ids = request.form.getlist('config_server_iface_ids[]')
         for iface_id in iface_ids:
