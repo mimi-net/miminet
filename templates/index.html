@@ -5,25 +5,22 @@
 
 <main>
     <section class="py-5 my-lg-5">
-       <div class="container py-5 my-lg-5">
+       <div class="container my-lg-5">
              <div class="row">
-                 <div class="col-md-1" >
-                 </div>
-                <div class="col-md-4" >
-                     <img src="{{ url_for('static', filename='/images/topo.png') }}">
+                <div class="col-md-5">
+                     <!-- img src="{{ url_for('static', filename='/images/topo.png') }}" -->
+                    <div id="index_network_example" class="border border-light" style="height: 300px;cursor: pointer"></div>
                 </div>
-                <div class="col-md-6">
-                    <div class="text-center">
-                        <div class="card-body">
-                            <p class="fs-2">Веб-эмулятор компьютерной сети для образовательных целей</p>
-                        </div>
+                <div class="col-md-7">
+                    <div class="d-flex align-items-center justify-content-center text-center" style="height: 300px;">
+                        <p class="fs-2">Веб-эмулятор компьютерной сети для образовательных целей</p>
                     </div>
 
                 </div>
             </div>
         </div>
 
-        <div class="container py-5 my-lg-5">
+        <div class="container py-3 my-lg-5">
              <div class="row">
                  <div class="text-center">
                      <h4 class="card-title">Жми на СТАРТ и создай свою первую сеть</h4>
@@ -106,4 +103,28 @@
 </main>
 
     <div id="config_host"></div>
+<script>
+
+    var graph_network_zoom = 2;
+    var graph_network_pan_x = -170;
+    var graph_network_pan_y = -90;
+
+    var nodes = JSON.parse('[{"classes": ["l2_switch"], "config": {"label": "l2sw1", "type": "l2_switch"}, "data": {"id": "l2sw1", "label": "l2sw1"}, "interface": [{"connect": "edge_lhaep1dk4d654tvxhl5", "id": "l2sw1_1", "name": "l2sw1_1"}, {"connect": "edge_lhaep2k8vhx64z7cubc", "id": "l2sw1_2", "name": "l2sw1_2"}], "position": {"x": 220.05523484856238, "y": 85.46609972096313}}, {"classes": ["host"], "config": {"default_gw": "", "label": "host_1", "type": "host"}, "data": {"id": "host_1", "label": "host_1"}, "interface": [{"connect": "edge_lhaep1dk4d654tvxhl5", "id": "iface_6634026", "ip": "10.0.0.1", "name": "iface_6634026", "netmask": 24}], "position": {"x": 154.85945194154408, "y": 160.38941060646175}}, {"classes": ["host"], "config": {"default_gw": "", "label": "host_3", "type": "host"}, "data": {"id": "host_3", "label": "host_3"}, "interface": [{"connect": "edge_lhaep2k8vhx64z7cubc", "id": "iface_7628183", "ip": "10.0.0.2", "name": "iface_7628183", "netmask": 24}], "position": {"x": 282.36479340929543, "y": 160.38089132041563}}]');
+    const edges = JSON.parse('[{"data": {"id": "edge_lhaep1dk4d654tvxhl5", "source": "host_1", "target": "l2sw1"}}, {"data": {"id": "edge_lhaep2k8vhx64z7cubc", "source": "l2sw1", "target": "host_3"}}]');
+    var jobs = JSON.parse('[{"id": "5b4193eefc5e4bf5a0ec03d287f62b80", "level": 0, "job_id": 1, "host_id": "host_1", "arg_1": "10.0.0.2", "print_cmd": "ping -c 1 10.0.0.2"}]');
+    var packets = JSON.parse('[[{"data": {"id": "pkt_G09AFC4L", "label": "ARP-request", "type": "packet"}, "config": {"type": "ARP-request", "path": "edge_lhaep1dk4d654tvxhl5", "source": "host_1", "target": "l2sw1"}, "timestamp": "1683282739671808"}], [{"data": {"id": "pkt_MM7U6MQB", "label": "ARP-request", "type": "packet"}, "config": {"type": "ARP-request", "path": "edge_lhaep2k8vhx64z7cubc", "source": "l2sw1", "target": "host_3"}, "timestamp": "1683282739686887"}], [{"data": {"id": "pkt_D8TBGL1D", "label": "ARP-response", "type": "packet"}, "config": {"type": "ARP-response", "path": "edge_lhaep2k8vhx64z7cubc", "source": "host_3", "target": "l2sw1"}, "timestamp": "1683282739701950"}], [{"data": {"id": "pkt_D51CRKUA", "label": "ARP-response", "type": "packet"}, "config": {"type": "ARP-response", "path": "edge_lhaep1dk4d654tvxhl5", "source": "l2sw1", "target": "host_1"}, "timestamp": "1683282739717026"}], [{"data": {"id": "pkt_2X7HMBD9", "label": "ICMP echo-request\\n10.0.0.1 > 10.0.0.2", "type": "packet"}, "config": {"type": "ICMP echo-request\\n10.0.0.1 > 10.0.0.2", "path": "edge_lhaep1dk4d654tvxhl5", "source": "host_1", "target": "l2sw1"}, "timestamp": "1683282739732096"}], [{"data": {"id": "pkt_UPUQXZZW", "label": "ICMP echo-request\\n10.0.0.1 > 10.0.0.2", "type": "packet"}, "config": {"type": "ICMP echo-request\\n10.0.0.1 > 10.0.0.2", "path": "edge_lhaep2k8vhx64z7cubc", "source": "l2sw1", "target": "host_3"}, "timestamp": "1683282739747163"}], [{"data": {"id": "pkt_WSJOYE9F", "label": "ICMP echo-reply\\n10.0.0.2 > 10.0.0.1", "type": "packet"}, "config": {"type": "ICMP echo-reply\\n10.0.0.2 > 10.0.0.1", "path": "edge_lhaep2k8vhx64z7cubc", "source": "host_3", "target": "l2sw1"}, "timestamp": "1683282739762258"}], [{"data": {"id": "pkt_RI2K22SO", "label": "ICMP echo-reply\\n10.0.0.2 > 10.0.0.1", "type": "packet"}, "config": {"type": "ICMP echo-reply\\n10.0.0.2 > 10.0.0.1", "path": "edge_lhaep1dk4d654tvxhl5", "source": "l2sw1", "target": "host_1"}, "timestamp": "1683282739777312"}]]');
+    var ns = null;
+
+    DrawIndexGraphStatic(nodes, edges, packets, "index_network_example", graph_network_zoom, graph_network_pan_x, graph_network_pan_y);
+    //SetNetworkRunButtonState({% if simulating %} {{simulating.id}} {% else %} 0 {% endif%}, packets);
+
+    document.getElementById("index_network_example").onclick = function(){
+        // navigate to new page
+        window.open('https://miminet.ru/web_network_shared?guid=d9012b77-fd52-48b0-b618-a3c3f55caf15', '_blank');
+    }
+
+</script>
+
 {% endblock %}
+
+
