@@ -54,6 +54,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 
+{% if mimishark_nav is not defined %}
 <nav class="header navbar navbar-expand-lg position-absolute navbar-sticky">
     <div class="container">
         <a href="/" class="navbar-brand">
@@ -97,6 +98,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         {% endif %}
     </div>
 </nav>
+{% endif %}
 
 
 {% if network %}
