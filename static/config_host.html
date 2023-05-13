@@ -1,9 +1,10 @@
+
 <script id="config_main_form_script" type="text/plain">
     <form id='config_main_form' action='/host/save_config' method='POST'>
         <input type="hidden" id="host_id" name="host_id" value=""/>
         <input type="hidden" id="net_guid" name="net_guid" value=""/>
-        <div style="margin-bottom:5px;">
-            <a href="/MimiShark">Здесь можно увидеть переданные файлы</a>
+        <div style="margin-bottom:7px;">
+            <a id = "needhref" style = "text-decoration: none;" href="">Здесь можно увидеть переданные файлы</a>
         </div>
         <button id="config_main_form_submit_button" type="submit" class="btn btn-success w-100">Сохранить</button>
     </form>

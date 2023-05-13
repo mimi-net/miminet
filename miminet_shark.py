@@ -18,4 +18,4 @@ def mimishark_page():
     network_guid = request.args.get('guid', type=str)
     net = Network.query.filter(Network.guid == network_guid).first()
     data = ReadJson(path)
-    return render_template('mimishark.html',pcap_data = data, mimishark_nav = 1)
+    return render_template('mimishark.html',pcap_data = data, mimishark_nav = 1, network = net)
