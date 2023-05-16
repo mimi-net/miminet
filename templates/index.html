@@ -13,14 +13,17 @@
                 </div>
                 <div class="col-md-7">
                     <div class="d-flex align-items-center justify-content-center text-center" style="height: 300px;">
-                        <p class="fs-2">Веб-эмулятор компьютерной сети для образовательных целей</p>
+                        <p class="fs-2">Веб-эмулятор компьютерной сети для образовательных целей
+                            <br>
+                            <a href="{{ url_for('home') }}" class="btn btn-primary">Создать сеть</a>
+                        </p>
                     </div>
 
                 </div>
             </div>
         </div>
 
-        <div class="container py-3 my-lg-5">
+        <!-- div class="container py-3 my-lg-5">
              <div class="row">
                  <div class="text-center">
                      <h4 class="card-title">Жми на СТАРТ и создай свою первую сеть</h4>
@@ -28,43 +31,103 @@
                             <a href="{{ url_for('home') }}" class="btn btn-primary btn-lg">СТАРТ</a>
                  </div>
              </div>
-        </div>
+        </div -->
 
     </section>
 
-
+ <section class="container pt-4 pt-lg-0 pb-4 pb-lg-5">
+        <h2 class="h1 text-center pb-3 pb-md-0 mb-md-5">Как это работает?</h2>
+        <div class="steps">
+          <div class="step pt-0 pt-md-3 pb-3">
+            <div class="step-number">
+              <div class="step-number-inner">1</div>
+            </div>
+            <div class="step-body d-flex align-items-center ps-xl-5">
+              <div class="rellax d-none d-lg-block flex-shrink-0 mx-4 mx-xl-5" data-rellax-percentage="0.5" data-rellax-speed="-0.3" data-disable-parallax-down="lg">
+                <img src="/images/howto/how_to_1.png" width="250" alt="Нарисуйте свою сеть">
+              </div>
+              <div class="rellax ps-md-4 ps-xl-5" data-rellax-percentage="0.5" data-rellax-speed="0.4" data-disable-parallax-down="lg">
+                <h3 class="h4">Нарисуйте свою сеть</h3>
+                <p class="mb-0">С помощью мышки вы можете нарисовать компьютерную сеть, в которой будут хосты, свитчи, хабы, раутеры и сервера. А все настройки задаются в веб-формах.</p>
+              </div>
+            </div>
+          </div>
+          <div class="step pt-0 pt-md-4 pb-5">
+            <div class="step-number">
+              <div class="step-number-inner">2</div>
+            </div>
+            <div class="step-body d-flex align-items-center ps-xl-5">
+              <div class="rellax d-none d-lg-block flex-shrink-0 mx-4 mx-xl-5" data-rellax-percentage="0.5" data-rellax-speed="-0.5" data-disable-parallax-down="lg">
+                <img src="/images/howto/how_to_2.png" width="250" alt="Отправте сеть на эмуляцию">
+              </div>
+              <div class="rellax ps-md-4 ps-xl-5" data-rellax-percentage="0.5" data-rellax-speed="0.5" data-disable-parallax-down="lg">
+                <h3 class="h4">Отправте сеть на эмуляцию</h3>
+                <p class="mb-0">На нашем сервере ваша сеть будет эмулирвоаться с помощью сетевой подсистеым Linux. Для каждого устройства создается сетевой интерфейс со своим уникальным MAC адресом и другими настройками.</p>
+              </div>
+            </div>
+          </div>
+          <div class="step pt-0 pt-md-4 pb-5">
+            <div class="step-number">
+              <div class="step-number-inner">3</div>
+            </div>
+            <div class="step-body d-flex align-items-center ps-xl-5">
+              <div class="rellax d-none d-lg-block flex-shrink-0 mx-4 mx-xl-5" data-rellax-percentage="0.5" data-rellax-speed="-0.3" data-disable-parallax-down="lg">
+                <img src="/images/howto/how_to_3.png" class="d-dark-mode-none" width="250" alt="Illustration">
+              </div>
+              <div class="rellax ps-md-4 ps-xl-5" data-rellax-percentage="0.5" data-rellax-speed="0.4" data-disable-parallax-down="lg">
+                <h3 class="h4">Дождитесь эмуляции на сервере</h3>
+                <p class="mb-0">Во время эмуляции сети идет захват всего сетевого трафика, который затем обрабатывается для визуализации.</p>
+              </div>
+            </div>
+          </div>
+          <div class="step pt-0 pt-md-4 pb-5">
+            <div class="step-number">
+              <div class="step-number-inner">4</div>
+            </div>
+            <div class="step-body d-flex align-items-center ps-xl-5">
+              <div class="rellax d-none d-lg-block flex-shrink-0 mx-4 mx-xl-5" data-rellax-percentage="0.5" data-rellax-speed="-0.5" data-disable-parallax-down="lg">
+                <img src="/images/howto/how_to_4.png" class="d-dark-mode-none" width="250" alt="Illustration">
+              </div>
+              <div class="rellax ps-md-4 ps-xl-5" data-rellax-percentage="0.5" data-rellax-speed="0.6" data-disable-parallax-down="lg">
+                <h3 class="h4">Запустите анимацию</h3>
+                <p class="mb-0">Запустите анимацию сеть и наблюдайте за сетевым трафиком в удобном формате.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+  </section>
 
 
     <!-- вторая страница, шаг-->
-    <section class="py-5 my-lg-5">
+    <!-- section class="py-5 my-lg-5">
         <div class="container">
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 pb-xl-3">
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 pb-xl-3" -->
   <!-- Step -->
-                <div class="col text-center border-end">
+                <!-- div class="col text-center border-end">
                      <div class="card d-table border-0 rounded-circle shadow-sm p-3 mx-auto mb-4">
                         <img class="host" src="{{ url_for('static', filename='/images/pc.png') }}" width="100">
                     </div>
                         <h5 class="mb-2">Шаг 1</h5>
                         <p class="fs mb-0">Добавь устройства</p>
-                </div>
+                </div-->
   <!-- Step -->
-                <div class="col text-center border-end">
+                <!-- div class="col text-center border-end">
                      <div class="card d-table border-0 rounded-circle shadow-sm p-3 mx-auto mb-4">
                         <img class="line" src="{{ url_for('static', filename='/images/line.png') }}" width="90">
                     </div>
                         <h5 class="mb-2">Шаг 2</h5>
                         <p class="fs mb-0">Соедини устройства</p>
-                </div>
+                </div -->
   <!-- Step -->
-                <div class="col text-center border-end">
+                <!-- div class="col text-center border-end">
                      <div class="card d-table border-0 rounded-circle shadow-sm p-3 mx-auto mb-4">
                         <img class="parameters"  src="{{ url_for('static', filename='/images/parameters.png') }}" width="100">
                     </div>
                         <h5 class="mb-2">Шаг 3</h5>
                         <p class="fs mb-0">Настрой параметры</p>
-                </div>
+                </div-->
   <!-- Step -->
-                 <div class="col text-center">
+                 <!-- div class="col text-center">
                      <div class="card d-table border-0 rounded-circle shadow-sm p-3 mx-auto mb-4">
                         <img class="parameters" src="{{ url_for('static', filename='/images/topo.png') }}" width="150">
                         </div>
@@ -76,13 +139,14 @@
 
             </div>
         </div>
-    </section>
+    </section-->
 
-    <section class="container ">
+  <section class="container pt-4 pt-lg-0 pb-4 pb-lg-5">
+        <h2 class="h1 text-center pb-3 pb-md-0 mb-md-5">Как это работает (видео)</h2>
         <div class="col text-center">
-    <video src="{{ url_for('static', filename='/video/video.mp4') }}" width="60%" controls></video>
+            <video class="border-primary" src="{{ url_for('static', filename='/video/video.mp4') }}" width="60%" controls></video>
         </div>
-    </section>
+</section>
 
 <section class="container py-5 mt-md-n2">
         <div class="card border-0 bg-gradient-primary">
