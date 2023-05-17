@@ -470,7 +470,7 @@ const EdgeUid = function(){
 }
 
 const InterfaceUid = function(){
-    return "iface_" + Math.random().toString(9).substr(12);
+    return "iface_" + Math.random().toString(9).substring(2, 10);
 }
 
 const PostNodesEdges = function(){
