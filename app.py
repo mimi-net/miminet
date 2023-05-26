@@ -15,6 +15,7 @@ from miminet_network import create_network, web_network, update_network_config,\
 from miminet_simulation import run_simulation, check_simulation
 from miminet_host import save_host_config, delete_job, save_hub_config, save_switch_config, \
     save_router_config, save_server_config
+from miminet_shark import mimishark_page
 
 app = Flask(__name__,  static_url_path='', static_folder='static', template_folder="templates")
 
@@ -71,6 +72,8 @@ app.add_url_rule('/host/delete_job', methods=['GET', 'POST'], view_func=delete_j
 app.add_url_rule('/host/hub_save_config', methods=['GET', 'POST'], view_func=save_hub_config)
 app.add_url_rule('/host/switch_save_config', methods=['GET', 'POST'], view_func=save_switch_config)
 
+#MimiShark
+app.add_url_rule('/MimiShark',methods=['GET'],view_func=mimishark_page)
 
 @app.route('/')
 def index():  # put application's code here
@@ -118,6 +121,15 @@ def sitemap():
     response = make_response(sitemap_xml)
     response.headers["Content-Type"] = "application/xml"
     return response
+
+
+# MimiShark
+
+
+
+# @app.route('/home/MimiShark')
+
+
 
 
 if __name__ == '__main__':

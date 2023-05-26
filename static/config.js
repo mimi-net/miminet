@@ -52,6 +52,10 @@ const ConfigHostForm = function(host_id){
     // Add new form
     $(config_content_id).append(form);
 
+    // Add href for mimishark
+    var url = "/MimiShark?guid="+network_guid
+    $(needhref).attr('href',url)
+
     // Set host_id
     $('#host_id').val( host_id );
     $('#net_guid').val( network_guid );
@@ -79,6 +83,10 @@ const ConfigRouterForm = function(router_id){
 
     // Add new form
     $(config_content_id).append(form);
+
+    // Add href for mimishark
+    var url = "/MimiShark?guid="+network_guid
+    $(needhref).attr('href',url)
 
     // Set host_id
     $('#router_id').val( router_id );
@@ -108,6 +116,10 @@ const ConfigServerForm = function(server_id){
     // Add new form
     $(config_content_id).append(form);
 
+    // Add href for mimishark
+    var url = "/MimiShark?guid="+network_guid
+    $(needhref).attr('href',url)
+
     // Set host_id
     $('#server_id').val( server_id );
     $('#net_guid').val( network_guid );
@@ -136,6 +148,10 @@ const ConfigHubForm = function(hub_id){
     // Add new form
     $(config_content_id).append(form);
 
+    // Add href for mimishark
+    var url = "/MimiShark?guid="+network_guid
+    $(needhref).attr('href',url)
+
     // Set host_id
     $('#hub_id').val( hub_id );
     $('#net_guid').val( network_guid );
@@ -163,6 +179,10 @@ const ConfigSwitchForm = function(switch_id){
 
     // Add new form
     $(config_content_id).append(form);
+
+    // Add href for mimishark
+    var url = "/MimiShark?guid="+network_guid
+    $(needhref).attr('href',url)
 
     // Set host_id
     $('#switch_id').val( switch_id );

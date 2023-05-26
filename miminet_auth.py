@@ -179,8 +179,8 @@ def google_callback():
                 r = requests.get(id_info.get('picture'), allow_redirects=True)
                 open('static/avatar/' + avatar_uri, 'wb').write(r.content)
 
-            f = id_info.get('family_name')
-            n = id_info.get('given_name')
+            f = id_info.get('family_name','')
+            n = id_info.get('given_name','')
 
             new_user = User(nick=f + n,
                              avatar_uri=avatar_uri,
