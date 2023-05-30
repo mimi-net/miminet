@@ -1,5 +1,4 @@
 import sys
-import json
 from datetime import datetime
 
 from flask import Flask, render_template, make_response
@@ -72,8 +71,9 @@ app.add_url_rule('/host/delete_job', methods=['GET', 'POST'], view_func=delete_j
 app.add_url_rule('/host/hub_save_config', methods=['GET', 'POST'], view_func=save_hub_config)
 app.add_url_rule('/host/switch_save_config', methods=['GET', 'POST'], view_func=save_switch_config)
 
-#MimiShark
-app.add_url_rule('/MimiShark',methods=['GET'],view_func=mimishark_page)
+# MimiShark
+app.add_url_rule('/host/mimishark', methods=['GET'], view_func=mimishark_page)
+
 
 @app.route('/')
 def index():  # put application's code here
@@ -121,15 +121,6 @@ def sitemap():
     response = make_response(sitemap_xml)
     response.headers["Content-Type"] = "application/xml"
     return response
-
-
-# MimiShark
-
-
-
-# @app.route('/home/MimiShark')
-
-
 
 
 if __name__ == '__main__':

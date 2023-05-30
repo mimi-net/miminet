@@ -5,6 +5,8 @@ from dpkt.utils import mac_to_str, inet_to_str
 from dpkt import iteritems, Packet
 import subprocess
 
+import os.path
+
 
 def ip_protocol_prop(self, indent=1):
     try:
@@ -42,25 +44,23 @@ def ip_protocol_prop(self, indent=1):
             else:
                 add_field(field_name, getattr(self, field_name))
 
-
     ip_prot = ' %s: ' % self.__class__.__name__  
     for ii in l_:
         ip_prot += ' ' * indent + '%s' % ii
     return ip_prot
 
 
-json_file = []
+def create_mimishark_json(pcap, to_json):
 
+    json_file = []
 
-def add_packets(pcap):
-    with open("static/mimi_shark/pcap.json","w") as file:
-        for  timestamp, buf in pcap:
+    with open(to_json, "w") as file:
+        for timestamp, buf in pcap:
             pcap_file = {}
             eth = dpkt.ethernet.Ethernet(buf)
             if not isinstance(eth.data, dpkt.ip.IP):
                 continue
-            
-            
+
             pcap_file["time"] = str(datetime.datetime.utcfromtimestamp(timestamp))
 
             ip = eth.data
@@ -68,7 +68,6 @@ def add_packets(pcap):
             pcap_file["destination"] = inet_to_str(ip.dst)
             pcap_file["protocol"] = ip.get_proto(ip.p).__name__
             pcap_file["length"] = ip.len
-
 
             bytes_repr = ' '.join(mac_to_str(buf).split(':'))
             ascii = ''
@@ -85,14 +84,21 @@ def add_packets(pcap):
             pcap_file["decode_ip"] = ip_protocol_prop(ip)
             pcap_file[f"decode_{ip.data.__class__.__name__}"] = ip_protocol_prop(ip.data)
             json_file.append(pcap_file)
+
         print(json.dumps(json_file), file=file)
 
 
-def Add_Json():
-    with open('static/mimi_shark/parser_test.pcap', 'rb') as f:
+def from_pcap_to_json(from_pcap, to_json):
+
+    # Do we already have a JSON file?
+    if os.path.isfile(to_json):
+        return to_json
+
+    # No ?
+    # Is pcap file exists?
+    if not os.path.isfile(from_pcap):
+        return False
+
+    with open(from_pcap, 'rb') as f:
         pcap = dpkt.pcap.Reader(f)
-        add_packets(pcap)
-
-
-if __name__ == '__main__':
-    Add_Json()
+        create_mimishark_json(pcap, to_json)

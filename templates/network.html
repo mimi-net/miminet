@@ -92,6 +92,7 @@
     const edges = {{ edges | safe }};
     var jobs = {{ jobs | safe }};
     var packets = {{ packets | safe }};
+    var pcaps = {{ pcaps | safe }};
     var ns = null;
 
     SetNetworkRunButtonState({% if simulating %} {{simulating.id}} {% else %} 0 {% endif%}, packets);

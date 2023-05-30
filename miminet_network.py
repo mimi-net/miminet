@@ -197,13 +197,24 @@ def web_network():
     if not 'config' in jnet:
         jnet['config'] = {'zoom' : 2, 'pan_x': 0 , 'pan_y': 0}
 
+    # Check if we have a pcaps. If not, try to check for it.
+    if not 'pcap' in jnet:
+
+        pcap_dir = 'static/pcaps/' + network_guid
+        jnet['pcap'] = []
+
+        if os.path.exists(pcap_dir):
+            jnet['pcap'] = [os.path.splitext(f)[0] for f in os.listdir(pcap_dir) if os.path.isfile(os.path.join(pcap_dir, f))]
+            net.network = json.dumps(jnet)
+            db.session.commit()
+
     # Do we simulte this network now?
     sim = Simulate.query.filter(Simulate.network_id == net.id).first()
 
     print (jnet['config'])
     return render_template("network.html", network=net, nodes=jnet['nodes'],
                            edges=jnet['edges'], packets=jnet['packets'], jobs=jnet['jobs'],
-                           simulating=sim, network_config=jnet['config'])
+                           simulating=sim, network_config=jnet['config'], pcaps=jnet['pcap'])
 
 # Depricated?
 @login_required

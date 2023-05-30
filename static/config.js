@@ -52,10 +52,6 @@ const ConfigHostForm = function(host_id){
     // Add new form
     $(config_content_id).append(form);
 
-    // Add href for mimishark
-    var url = "/MimiShark?guid="+network_guid
-    $(needhref).attr('href',url)
-
     // Set host_id
     $('#host_id').val( host_id );
     $('#net_guid').val( network_guid );
@@ -357,6 +353,11 @@ const ConfigHostInterface = function(name, ip, netmask, connected_to){
     $('#config_host_iface_name_' + name).attr("placeholder", connected_to);
     $('#config_host_ip_' + name).val(ip);
     $('#config_host_mask_' + name).val(netmask);
+
+    if (pcaps.includes(name)){
+        $('#config_host_iface_name_label_' + name).html('Линк к (<a href="/host/mimishark?guid='+network_guid+'&iface='+name +'" target="_blank">pcap</a>)');
+        //$('#config_host_iface_name_label_' + name).html('Линк кrr');
+    }
 
 }
 

@@ -1,3 +1,5 @@
+import os
+
 from flask import request, flash, redirect, jsonify, make_response, url_for
 from flask_login import login_required, current_user
 
@@ -45,9 +47,14 @@ def run_simulation():
 def check_simulation():
     user = current_user
     simulation_id = request.args.get('simulation_id', type=int)
+    network_guid = request.args.get('network_guid', type=str)
 
     if not simulation_id:
         ret = {'message': 'Пропущен параметр simulation_id.'}
+        return make_response(jsonify(ret), 400)
+
+    if not network_guid:
+        ret = {'message': 'Пропущен параметр network_guid.'}
         return make_response(jsonify(ret), 400)
 
     sim = Simulate.query.filter(Simulate.id == simulation_id).first()
@@ -57,7 +64,15 @@ def check_simulation():
         return make_response(jsonify(ret), 400)
 
     if sim.ready:
-        ret = {'message': 'Симуляция завершена', 'packets' : sim.packets}
+
+        # Check for a pcaps
+        pcap_dir = 'static/pcaps/' + network_guid
+        pcaps = []
+
+        if os.path.exists(pcap_dir):
+            pcaps = [os.path.splitext(f)[0] for f in os.listdir(pcap_dir) if os.path.isfile(os.path.join(pcap_dir, f))]
+
+        ret = {'message': 'Симуляция завершена', 'packets': sim.packets, 'pcaps': pcaps}
         return make_response(jsonify(ret), 200)
 
     ret = {'message': 'Сеть в процессе симуляции'}
