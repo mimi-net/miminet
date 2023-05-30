@@ -1417,7 +1417,7 @@ const CheckSimulation = function (simulation_id)
 {
     $.ajax({
         type: 'GET',
-        url: '/check_simulation?simulation_id=' + simulation_id,
+        url: '/check_simulation?simulation_id=' + simulation_id + '&network_guid=' + network_guid,
         data: '',
         success: function(data, textStatus, xhr) {
 
