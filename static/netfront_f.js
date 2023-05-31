@@ -1430,6 +1430,7 @@ const CheckSimulation = function (simulation_id)
             if (xhr.status === 200)
             {
                 packets = JSON.parse(data.packets);
+                pcaps = JSON.parse(data.pcaps);
                 SetNetworkRunButtonState(0, packets)
             }
         },

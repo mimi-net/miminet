@@ -274,6 +274,9 @@ def post_nodes_edges():
         jnet['edges'] = edges
         jnet['nodes'] = nodes
 
+        # Remove all pcaps
+        jnet['pcap'] = []
+
         # If we delete host, remove all jobs without hosts
         new_jobs = []
         jobs = jnet['jobs']
