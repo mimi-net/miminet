@@ -1454,20 +1454,24 @@ const UpdateHostConfiguration = function (data, host_id)
 
             if (xhr.status === 200)
             {
-                // Update nodes
-                nodes = data.nodes;
+                if (!data.warning){
 
-                // Update jobs
-                jobs = data.jobs;
+                    // Update nodes
+                    nodes = data.nodes;
 
-                // Clear packets
-                packets = null;
+                    // Update jobs
+                    jobs = data.jobs;
 
-                // Set a new state to the simulation button
-                SetNetworkRunButtonState(0, packets);
+                    // Clear packets
+                    packets = null;
 
-                // Update graph
-                DrawGraph();
+                    // Set a new state to the simulation button
+                    SetNetworkRunButtonState(0, packets);
+
+                    // Update graph
+                    DrawGraph();
+                }
+
 
                 // Ok, let's try to update host config form
                 let n = nodes.find(n => n.data.id === host_id);

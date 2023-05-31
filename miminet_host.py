@@ -213,6 +213,7 @@ def save_host_config():
                     else:
                         ret.update({'warning': 'Не указан IP адрес для команды ping'})
 
+                # ping -c 1 (with options)
                 if job_id == 2:
                     job_2_arg_1 = request.form.get('config_host_ping_with_options_options_input_field')
                     job_2_arg_2 = request.form.get('config_host_ping_with_options_ip_input_field')
@@ -237,6 +238,7 @@ def save_host_config():
                     except Exception:
                         ret.update({'warning': 'IP адрес для команды "ping (с опциями)" указан неверно.'})
 
+                # send UDP data
                 if job_id == 3:
                     job_3_arg_1 = request.form.get('config_host_send_udp_data_size_input_field')
                     job_3_arg_2 = request.form.get('config_host_send_udp_data_ip_input_field')
@@ -273,6 +275,7 @@ def save_host_config():
                     except Exception:
                         ret.update({'warning': 'IP адрес для команды "Отправить данные (UDP)" указан неверно.'})
 
+                # send TCP data
                 if job_id == 4:
                     job_4_arg_1 = request.form.get('config_host_send_tcp_data_size_input_field')
                     job_4_arg_2 = request.form.get('config_host_send_tcp_data_ip_input_field')
@@ -309,6 +312,30 @@ def save_host_config():
                     except Exception as e:
                         print (e)
                         ret.update({'warning': 'IP адрес для команды "Отправить данные (TCP)" указан неверно.'})
+
+                # arp -s ip hw_addr
+                if job_id == 103:
+                    job_103_arg_1 = request.form.get('config_host_add_arp_cache_ip_input_field')
+                    job_103_arg_2 = request.form.get('config_host_add_arp_cache_mac_input_field')
+
+                    if not re.match("[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", job_103_arg_2.lower()):
+                        ret.update({'warning': 'MAC адрес для команды "Добавить запись в ARP-cache" указан неверно.'})
+                        return make_response(jsonify(ret), 200)
+
+                    try:
+                        socket.inet_aton(job_103_arg_1)
+                        jnet['jobs'].append({'id': job_id_generator(),
+                                             'level': job_level,
+                                             'job_id': job_id,
+                                             'host_id': node['data']['id'],
+                                             'arg_1': job_103_arg_1,
+                                             'arg_2': job_103_arg_2,
+                                             'print_cmd': 'arp -s ' + str(job_103_arg_1) + " " + str(job_103_arg_2)})
+
+                    except Exception as e:
+                        print (e)
+                        ret.update({'warning': 'IP адрес для команды "Добавить запись в ARP-cache" указан неверно.'})
+                        return make_response(jsonify(ret), 200)
 
         # Set IP adresses
         iface_ids = request.form.getlist('config_host_iface_ids[]')
