@@ -462,6 +462,18 @@ const ConfigHostJobOnChange = function(evnt){
             $(elem).insertBefore(host_job_list);
             break;
 
+        case '102':
+            elem = document.getElementById('config_host_add_route_script').innerHTML;
+            host_job_list = document.getElementById('config_host_job_list');
+
+            if (!elem || !host_job_list){
+                return;
+            }
+
+            $('div[name="config_host_select_input"]').remove();
+            $(elem).insertBefore(host_job_list);
+            break;
+
         case '103':
             elem = document.getElementById('config_host_add_arp_cache_script').innerHTML;
             host_job_list = document.getElementById('config_host_job_list');

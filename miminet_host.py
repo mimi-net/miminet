@@ -313,6 +313,42 @@ def save_host_config():
                         print (e)
                         ret.update({'warning': 'IP адрес для команды "Отправить данные (TCP)" указан неверно.'})
 
+                # Add route
+                if job_id == 102:
+                    job_102_arg_1 = request.form.get('config_host_add_route_ip_input_field')
+                    job_102_arg_2 = int(request.form.get('config_host_add_route_mask_input_field'))
+                    job_102_arg_3 = request.form.get('config_host_add_route_gw_input_field')
+
+                    if not job_102_arg_1:
+                        ret.update({'warning': 'Не указан IP адрес для команды "Добавить маршрут"'})
+                        return make_response(jsonify(ret), 200)
+
+                    if job_102_arg_2 < 0 or job_102_arg_2 > 32:
+                        ret.update({
+                            'warning': 'Маска для команды "Добавить маршрут" указана неверно. Допустимые значения от 0 до 32.'
+                        })
+                        return make_response(jsonify(ret), 200)
+
+                    if not job_102_arg_3:
+                        ret.update({'warning': 'Не указан IP адрес шлюза для команды "Добавить маршрут"'})
+                        return make_response(jsonify(ret), 200)
+
+                    try:
+                        socket.inet_aton(job_102_arg_1)
+                        socket.inet_aton(job_102_arg_3)
+                        jnet['jobs'].append({'id': job_id_generator(),
+                                             'level': job_level,
+                                             'job_id': job_id,
+                                             'host_id': node['data']['id'],
+                                             'arg_1': job_102_arg_1,
+                                             'arg_2': job_102_arg_2,
+                                             'arg_3': job_102_arg_3,
+                                             'print_cmd': 'ip route add ' + str(job_102_arg_1) + '/' + str(
+                                                 job_102_arg_2) + ' via ' + str(job_102_arg_3)})
+                    except Exception as e:
+                        print (e)
+                        ret.update({'warning': 'IP адрес для команды "Добавить маршрут" указан неверно.'})
+
                 # arp -s ip hw_addr
                 if job_id == 103:
                     job_103_arg_1 = request.form.get('config_host_add_arp_cache_ip_input_field')
@@ -533,6 +569,7 @@ def save_router_config():
                                              'arg_1': job_101_arg_1,
                                              'print_cmd' : 'add nat -o ' + str(job_101_arg_1) + ' -j masquerad'})
 
+                    # Add route
                     if job_id == 102:
                         job_102_arg_1 = request.form.get('config_router_add_route_ip_input_field')
                         job_102_arg_2 = int(request.form.get('config_router_add_route_mask_input_field'))
