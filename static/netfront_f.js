@@ -752,6 +752,11 @@ const prepareStylesheet = function() {
         }
         );
 
+        if (n.config.default_gw)
+        {
+            label = label + '\n' + 'gw:' + n.config.default_gw;
+        }
+
         $.each(jobs, function (i) {
             let j = jobs[i];
 
