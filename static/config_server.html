@@ -2,9 +2,6 @@
     <form id='config_main_form' action='/host/server_save_config' method='POST'>
         <input type="hidden" id="server_id" name="server_id" value=""/>
         <input type="hidden" id="net_guid" name="net_guid" value=""/>
-        <div style="margin-bottom:7px;">
-            <a id = "needhref" style = "text-decoration: none;" href="">Здесь можно увидеть переданные файлы</a>
-        </div>
         <button id="config_server_main_form_submit_button" type="submit" class="btn btn-success w-100">Сохранить</button>
     </form>
 </script>
@@ -24,6 +21,7 @@
             <option value="1">ping (1 пакет)</option>
             <option value="200">Запустить UDP сервер</option>
             <option value="201">Запустить TCP сервер</option>
+            <option value="202">Блокировать TCP/UDP порт</option>
         </select>
     </div>
 </script>
@@ -64,6 +62,16 @@
         </div>
     </div>
 </script>
+
+<script id="config_server_block_tcp_udp_port_script" type="text/plain">
+    <div class="form-group pt-1" name="config_server_select_input">
+        <label id="config_server_block_tcp_udp_port_label" for="config_server_block_tcp_udp_port_label" class="text-sm">TCP/UDP порт</label>
+        <div class="input-group flex-nowrap">
+            <input type="number" class="form-control form-control-sm" id="config_server_block_tcp_udp_port_input_field" name="config_server_block_tcp_udp_port_input_field" min="0" max="65535" value="0">
+        </div>
+    </div>
+</script>
+
 
 <script id="config_server_interface_script" type="text/plain">
     <div class="form-group pb-1 pt-3">

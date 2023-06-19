@@ -808,6 +808,29 @@ def save_server_config():
                         print (e)
                         ret.update({'warning': 'IP адрес для команды "Запустить TCP сервер" указан неверно.'})
 
+                # Block TCP/UDP port
+                if job_id == 202:
+                    job_202_arg_1 = request.form.get('config_server_block_tcp_udp_port_input_field')
+
+                    if not job_202_arg_1:
+                        ret.update({'warning': 'Не указан порт для команды "Блокировать TCP/UDP порт"'})
+                        return make_response(jsonify(ret), 200)
+
+                    if int(job_202_arg_1) < 0 or int(job_202_arg_1) > 65535:
+                        ret.update({'warning': 'Неверно указан порт для команды "Блокировать TCP/UDP порт"'})
+                        return make_response(jsonify(ret), 200)
+
+                    try:
+                        jnet['jobs'].append({'id': job_id_generator(),
+                                            'level': job_level,
+                                             'job_id' : job_id,
+                                             'host_id': node['data']['id'],
+                                             'arg_1': job_202_arg_1,
+                                             'print_cmd' : 'drop tcp/udp port ' + str(job_202_arg_1)})
+                    except Exception as e:
+                        print (e)
+                        ret.update({'warning': 'Ошибка при добавлении job "Блокировать TCP/UDP порт'})
+
         # Set IP adresses
         iface_ids = request.form.getlist('config_server_iface_ids[]')
         for iface_id in iface_ids:

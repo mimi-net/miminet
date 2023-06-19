@@ -80,10 +80,6 @@ const ConfigRouterForm = function(router_id){
     // Add new form
     $(config_content_id).append(form);
 
-    // Add href for mimishark
-    var url = "/MimiShark?guid="+network_guid
-    $(needhref).attr('href',url)
-
     // Set host_id
     $('#router_id').val( router_id );
     $('#net_guid').val( network_guid );
@@ -111,10 +107,6 @@ const ConfigServerForm = function(server_id){
 
     // Add new form
     $(config_content_id).append(form);
-
-    // Add href for mimishark
-    var url = "/MimiShark?guid="+network_guid
-    $(needhref).attr('href',url)
 
     // Set host_id
     $('#server_id').val( server_id );
@@ -924,6 +916,18 @@ const ConfigServerJobOnChange = function(evnt){
 
         case '201':
             elem = document.getElementById('config_server_start_tcp_server_script').innerHTML;
+            server_job_list = document.getElementById('config_server_job_list');
+
+            if (!elem || !server_job_list){
+                return;
+            }
+
+            $('div[name="config_server_select_input"]').remove();
+            $(elem).insertBefore(server_job_list);
+            break;
+
+        case '202':
+            elem = document.getElementById('config_server_block_tcp_udp_port_script').innerHTML;
             server_job_list = document.getElementById('config_server_job_list');
 
             if (!elem || !server_job_list){
