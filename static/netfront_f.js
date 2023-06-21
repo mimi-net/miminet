@@ -1471,13 +1471,15 @@ const UpdateHostConfiguration = function (data, host_id)
                     // Clear packets
                     packets = null;
 
+                    // Clear pcaps
+                    pcaps = null;
+
                     // Set a new state to the simulation button
                     SetNetworkRunButtonState(0, packets);
 
                     // Update graph
                     DrawGraph();
                 }
-
 
                 // Ok, let's try to update host config form
                 let n = nodes.find(n => n.data.id === host_id);
@@ -1739,26 +1741,29 @@ const UpdateServerConfiguration = function (data, router_id)
 
             if (xhr.status === 200)
             {
-                // Update nodes
-                if (data.nodes)
-                {
-                    nodes = data.nodes;
+
+                if (!data.warning){
+
+                    if (data.nodes){
+                        nodes = data.nodes;
+                    }
+
+                    if (data.jobs){
+                        jobs = data.jobs;
+                    }
+
+                    // Clear packets
+                    packets = null;
+
+                    // Clear pcaps
+                    pcaps = null;
+
+                    // Set a new state to the simulation button
+                    SetNetworkRunButtonState(0, packets);
+
+                    // Update graph
+                    DrawGraph();
                 }
-
-                // Update jobs
-                if (data.jobs)
-                {
-                    jobs = data.jobs;
-                }
-
-                // Clear packets
-                packets = null;
-
-                // Set a new state to the simulation button
-                SetNetworkRunButtonState(0, packets);
-
-                // Update graph
-                DrawGraph();
 
                 // Ok, let's try to update router config form
                 let n = nodes.find(n => n.data.id === router_id);

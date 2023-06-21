@@ -348,9 +348,7 @@ const ConfigHostInterface = function(name, ip, netmask, connected_to){
 
     if (pcaps.includes(name)){
         $('#config_host_iface_name_label_' + name).html('Линк к (<a href="/host/mimishark?guid='+network_guid+'&iface='+name +'" target="_blank">pcap</a>)');
-        //$('#config_host_iface_name_label_' + name).html('Линк кrr');
     }
-
 }
 
 const ConfigRouterInterface = function(name, ip, netmask, connected_to){
@@ -397,6 +395,10 @@ const ConfigServerInterface = function(name, ip, netmask, connected_to){
     $('#config_server_iface_name_' + name).attr("placeholder", connected_to);
     $('#config_server_ip_' + name).val(ip);
     $('#config_server_mask_' + name).val(netmask);
+
+    if (pcaps.includes(name)){
+        $('#config_server_iface_name_label_' + name).html('Линк к (<a href="/host/mimishark?guid='+network_guid+'&iface='+name +'" target="_blank">pcap</a>)');
+    }
 }
 
 const ConfigHostJobOnChange = function(evnt){
