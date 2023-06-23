@@ -1472,7 +1472,7 @@ const UpdateHostConfiguration = function (data, host_id)
                     packets = null;
 
                     // Clear pcaps
-                    pcaps = null;
+                    pcaps = [];
 
                     // Set a new state to the simulation button
                     SetNetworkRunButtonState(0, packets);
@@ -1756,7 +1756,7 @@ const UpdateServerConfiguration = function (data, router_id)
                     packets = null;
 
                     // Clear pcaps
-                    pcaps = null;
+                    pcaps = [];
 
                     // Set a new state to the simulation button
                     SetNetworkRunButtonState(0, packets);
