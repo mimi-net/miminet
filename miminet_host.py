@@ -313,6 +313,31 @@ def save_host_config():
                         print (e)
                         ret.update({'warning': 'IP адрес для команды "Отправить данные (TCP)" указан неверно.'})
 
+                # traceroute -n (with options)
+                if job_id == 5:
+                    job_5_arg_1 = request.form.get('config_host_traceroute_with_options_options_input_field')
+                    job_5_arg_2 = request.form.get('config_host_traceroute_with_options_ip_input_field')
+
+                    if job_5_arg_1:
+                        job_5_arg_1 = re.sub(r"[~|\\/'^&%]", "", job_5_arg_1)
+                        job_5_arg_1 = re.sub(r'[^\x00-\x7F]', '', job_5_arg_1)
+
+                    if not job_5_arg_2:
+                        ret.update({'warning': 'Не указан IP адрес для команды "traceroute -n (с опциями)"'})
+                        return make_response(jsonify(ret), 200)
+
+                    try:
+                        socket.inet_aton(job_5_arg_2)
+                        jnet['jobs'].append({'id': job_id_generator(),
+                                             'level': job_level,
+                                             'job_id': job_id,
+                                             'host_id': node['data']['id'],
+                                             'arg_1': job_5_arg_1,
+                                             'arg_2': job_5_arg_2,
+                                             'print_cmd': 'traceroute -n ' + str(job_5_arg_1) + " " + str(job_5_arg_2)})
+                    except Exception:
+                        ret.update({'warning': 'IP адрес для команды "traceroute -n (с опциями)" указан неверно.'})
+
                 # Add route
                 if job_id == 102:
                     job_102_arg_1 = request.form.get('config_host_add_route_ip_input_field')

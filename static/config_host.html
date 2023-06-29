@@ -21,6 +21,7 @@
                 <option selected value="0">---</option>
                 <option value="1">ping (1 пакет)</option>
                 <option value="2">ping (с опциями)</option>
+                <option value="5">traceroute (с опциями)</option>
                 <option value="3">Отправить данные (UDP)</option>
                 <option value="4">Отправить данные (TCP)</option>
                 <option value="102">Добавить маршрут</option>
@@ -39,6 +40,13 @@
     <div class="form-group pt-1" name="config_host_select_input">
         <input type="text" class="form-control form-control-sm" id="config_host_ping_with_options_options_input_field" name="config_host_ping_with_options_options_input_field" value='' placeholder='пример: -c 1 -t 5'>
         <input type="text" class="form-control form-control-sm" id="config_host_ping_with_options_ip_input_field" name="config_host_ping_with_options_ip_input_field" value="" placeholder='192.168.1.1'>
+    </div>
+</script>
+
+<script id="config_host_traceroute_with_options_script" type="text/plain">
+    <div class="form-group pt-1" name="config_host_select_input">
+        <input type="text" class="form-control form-control-sm" id="config_host_traceroute_with_options_options_input_field" name="config_host_traceroute_with_options_options_input_field" value='' placeholder='пример: -n'>
+        <input type="text" class="form-control form-control-sm" id="config_host_traceroute_with_options_ip_input_field" name="config_host_traceroute_with_options_ip_input_field" value="" placeholder='192.168.1.1'>
     </div>
 </script>
 
