@@ -151,6 +151,11 @@ def save_switch_config():
     if (switch_stp == 'on'):
         node['config']['stp'] = 1
 
+    # Remove all previous simulations
+    sims = Simulate.query.filter(Simulate.network_id == net.id).all()
+    for s in sims:
+        db.session.delete(s)
+
     net.network = json.dumps(jnet)
     db.session.commit()
 
