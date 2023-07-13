@@ -47,6 +47,7 @@ $('#network_scheme').droppable({
                   config: {
                       type: 'l2_switch',
                       label: node_id,
+                      stp: 0,
                   },
                   interface: [],
               }

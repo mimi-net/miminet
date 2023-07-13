@@ -51,6 +51,7 @@ def delete_job():
     ret = {'message': 'Команда удалена', 'jobs': jnet['jobs']}
     return make_response(jsonify(ret), 200)
 
+
 @login_required
 def save_hub_config():
 
@@ -64,7 +65,7 @@ def save_hub_config():
             ret = {'message': 'Не указан параметр net_guid'}
             return make_response(jsonify(ret), 400)
 
-        net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
+        net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id == user.id).first()
 
         if not net:
             ret = {'message': 'Такая сеть не найдена'}
@@ -101,6 +102,7 @@ def save_hub_config():
     ret = {'message': 'Неверный запрос'}
     return make_response(jsonify(ret), 400)
 
+
 @login_required
 def save_switch_config():
 
@@ -116,7 +118,7 @@ def save_switch_config():
         ret = {'message': 'Не указан параметр net_guid'}
         return make_response(jsonify(ret), 400)
 
-    net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
+    net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id == user.id).first()
 
     if not net:
         ret = {'message': 'Такая сеть не найдена'}
@@ -139,16 +141,22 @@ def save_switch_config():
 
     node = nn[0]
     switch_label = request.form.get('config_switch_name')
+    switch_stp = request.form.get('config_switch_stp')
 
     if switch_label:
         node['config']['label'] = switch_label
         node['data']['label'] = node['config']['label']
 
-        net.network = json.dumps(jnet)
-        db.session.commit()
+    node['config']['stp'] = 0
+    if (switch_stp == 'on'):
+        node['config']['stp'] = 1
+
+    net.network = json.dumps(jnet)
+    db.session.commit()
 
     ret = {'message': 'Конфигурация обновлена', 'nodes': nodes}
     return make_response(jsonify(ret), 200)
+
 
 @login_required
 def save_host_config():
@@ -164,7 +172,7 @@ def save_host_config():
             ret.update({'message': 'Не указан параметр net_guid'})
             return make_response(jsonify(ret), 400)
 
-        net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
+        net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id == user.id).first()
 
         if not net:
             ret.update({'message': 'Такая сеть не найдена'})
@@ -206,10 +214,10 @@ def save_host_config():
                     if job_1_arg_1:
                         jnet['jobs'].append({'id': job_id_generator(),
                                             'level': job_level,
-                                             'job_id' : job_id,
+                                             'job_id': job_id,
                                              'host_id': node['data']['id'],
                                              'arg_1': job_1_arg_1,
-                                             'print_cmd' : 'ping -c 1 ' + job_1_arg_1})
+                                             'print_cmd': 'ping -c 1 ' + job_1_arg_1})
                     else:
                         ret.update({'warning': 'Не указан IP адрес для команды ping'})
 
@@ -310,7 +318,7 @@ def save_host_config():
                                              'arg_3': int(job_4_arg_3),
                                              'print_cmd': 'send -s ' + str(job_4_arg_1) + " -p tcp " + str(job_4_arg_2) + ":" + str(job_4_arg_3)})
                     except Exception as e:
-                        print (e)
+                        print(e)
                         ret.update({'warning': 'IP адрес для команды "Отправить данные (TCP)" указан неверно.'})
 
                 # traceroute -n (with options)
@@ -371,7 +379,7 @@ def save_host_config():
                                              'print_cmd': 'ip route add ' + str(job_102_arg_1) + '/' + str(
                                                  job_102_arg_2) + ' via ' + str(job_102_arg_3)})
                     except Exception as e:
-                        print (e)
+                        print(e)
                         ret.update({'warning': 'IP адрес для команды "Добавить маршрут" указан неверно.'})
 
                 # arp -s ip hw_addr
@@ -394,7 +402,7 @@ def save_host_config():
                                              'print_cmd': 'arp -s ' + str(job_103_arg_1) + " " + str(job_103_arg_2)})
 
                     except Exception as e:
-                        print (e)
+                        print(e)
                         ret.update({'warning': 'IP адрес для команды "Добавить запись в ARP-cache" указан неверно.'})
                         return make_response(jsonify(ret), 200)
 
@@ -473,11 +481,12 @@ def save_host_config():
         net.network = json.dumps(jnet)
         db.session.commit()
 
-        ret.update({'message': 'Конфигурация обновлена', 'nodes' : nodes, 'jobs' : jnet['jobs']})
+        ret.update({'message': 'Конфигурация обновлена', 'nodes': nodes, 'jobs': jnet['jobs']})
         return make_response(jsonify(ret), 200)
 
     ret.update({'message': 'Неверный запрос'})
     return make_response(jsonify(ret), 400)
+
 
 @login_required
 def save_router_config():
@@ -536,10 +545,10 @@ def save_router_config():
                         if job_1_arg_1:
                             jnet['jobs'].append({'id': job_id_generator(),
                                                  'level': job_level,
-                                                 'job_id' : job_id,
+                                                 'job_id': job_id,
                                                  'host_id': node['data']['id'],
                                                  'arg_1': job_1_arg_1,
-                                                 'print_cmd' : 'ping -c 1 ' + job_1_arg_1})
+                                                 'print_cmd': 'ping -c 1 ' + job_1_arg_1})
                         else:
                             ret.update({'warning': 'Не указан IP адрес для команды ping'})
 
@@ -563,19 +572,20 @@ def save_router_config():
                         job_100_arg_3 = int(request.form.get('config_router_add_ip_mask_mask_input_field'))
 
                         if job_100_arg_3 < 0 or job_100_arg_3 > 32:
-                            ret.update({'warning': 'Маска для команды "Добавить IP адрес" указана неверно. Допустимые значения от 0 до 32.'})
+                            ret.update(
+                                {'warning': 'Маска для команды "Добавить IP адрес" указана неверно. Допустимые значения от 0 до 32.'})
                             return make_response(jsonify(ret), 200)
 
                         try:
                             socket.inet_aton(job_100_arg_2)
                             jnet['jobs'].append({'id': job_id_generator(),
                                                  'level': job_level,
-                                                 'job_id' : job_id,
+                                                 'job_id': job_id,
                                                  'host_id': node['data']['id'],
                                                  'arg_1': job_100_arg_1,
                                                  'arg_2': job_100_arg_2,
                                                  'arg_3': job_100_arg_3,
-                                                 'print_cmd' : 'ip addess add ' + str(job_100_arg_2) + '/' + str(job_100_arg_3) + ' dev ' + str(job_100_arg_1)})
+                                                 'print_cmd': 'ip addess add ' + str(job_100_arg_2) + '/' + str(job_100_arg_3) + ' dev ' + str(job_100_arg_1)})
                         except Exception:
                             ret.update({'warning': 'IP адрес для команды "Добавить IP адрес" указан неверно.'})
 
@@ -589,10 +599,10 @@ def save_router_config():
 
                         jnet['jobs'].append({'id': job_id_generator(),
                                              'level': job_level,
-                                             'job_id' : job_id,
+                                             'job_id': job_id,
                                              'host_id': node['data']['id'],
                                              'arg_1': job_101_arg_1,
-                                             'print_cmd' : 'add nat -o ' + str(job_101_arg_1) + ' -j masquerad'})
+                                             'print_cmd': 'add nat -o ' + str(job_101_arg_1) + ' -j masquerad'})
 
                     # Add route
                     if job_id == 102:
@@ -605,7 +615,8 @@ def save_router_config():
                             return make_response(jsonify(ret), 200)
 
                         if job_102_arg_2 < 0 or job_102_arg_2 > 32:
-                            ret.update({'warning': 'Маска для команды "Добавить маршрут" указана неверно. Допустимые значения от 0 до 32.'})
+                            ret.update(
+                                {'warning': 'Маска для команды "Добавить маршрут" указана неверно. Допустимые значения от 0 до 32.'})
                             return make_response(jsonify(ret), 200)
 
                         if not job_102_arg_3:
@@ -626,7 +637,6 @@ def save_router_config():
                                                      job_102_arg_2) + ' via ' + str(job_102_arg_3)})
                         except Exception:
                             ret.update({'warning': 'IP адрес для команды "Добавить маршрут" указан неверно.'})
-
 
         # Set IP adresses
         iface_ids = request.form.getlist('config_router_iface_ids[]')
@@ -672,7 +682,7 @@ def save_router_config():
                 interface['ip'] = router_ip_value
                 interface['netmask'] = router_mask_value
             except Exception as e:
-                print (e)
+                print(e)
                 ret.update({'warning': 'IP адрес указан неверно.'})
                 continue
 
@@ -691,7 +701,7 @@ def save_router_config():
                 socket.inet_aton(default_gw)
                 node['config']['default_gw'] = default_gw
             except Exception as e:
-                print (e)
+                print(e)
                 ret.update({'warning': 'IP адрес для маршрута по умолчанию указан неверно.'})
         else:
             node['config']['default_gw'] = ''
@@ -704,11 +714,12 @@ def save_router_config():
         net.network = json.dumps(jnet)
         db.session.commit()
 
-        ret.update({'message': 'Конфигурация обновлена', 'nodes': nodes, 'jobs' : jnet['jobs']})
+        ret.update({'message': 'Конфигурация обновлена', 'nodes': nodes, 'jobs': jnet['jobs']})
         return make_response(jsonify(ret), 200)
 
     ret.update({'message': 'Неверный запрос'})
     return make_response(jsonify(ret), 400)
+
 
 @login_required
 def save_server_config():
@@ -724,7 +735,7 @@ def save_server_config():
             ret.update({'message': 'Не указан параметр net_guid'})
             return make_response(jsonify(ret), 400)
 
-        net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id==user.id).first()
+        net = Network.query.filter(Network.guid == network_guid).filter(Network.author_id == user.id).first()
 
         if not net:
             ret.update({'message': 'Такая сеть не найдена'})
@@ -766,10 +777,10 @@ def save_server_config():
                     if job_1_arg_1:
                         jnet['jobs'].append({'id': job_id_generator(),
                                             'level': job_level,
-                                             'job_id' : job_id,
+                                             'job_id': job_id,
                                              'host_id': node['data']['id'],
                                              'arg_1': job_1_arg_1,
-                                             'print_cmd' : 'ping -c 1 ' + job_1_arg_1})
+                                             'print_cmd': 'ping -c 1 ' + job_1_arg_1})
                     else:
                         ret.update({'warning': 'Не указан IP адрес для команды ping'})
 
@@ -794,13 +805,13 @@ def save_server_config():
                         socket.inet_aton(job_200_arg_1)
                         jnet['jobs'].append({'id': job_id_generator(),
                                             'level': job_level,
-                                             'job_id' : job_id,
+                                             'job_id': job_id,
                                              'host_id': node['data']['id'],
                                              'arg_1': job_200_arg_1,
-                                             'arg_2' : int(job_200_arg_2),
-                                             'print_cmd' : 'nc -u ' + str(job_200_arg_1) + ' -l ' + str(job_200_arg_2)})
+                                             'arg_2': int(job_200_arg_2),
+                                             'print_cmd': 'nc -u ' + str(job_200_arg_1) + ' -l ' + str(job_200_arg_2)})
                     except Exception as e:
-                        print (e)
+                        print(e)
                         ret.update({'warning': 'IP адрес для команды "Запустить UDP сервер" указан неверно.'})
 
                 # Start TCP server
@@ -824,13 +835,13 @@ def save_server_config():
                         socket.inet_aton(job_201_arg_1)
                         jnet['jobs'].append({'id': job_id_generator(),
                                             'level': job_level,
-                                             'job_id' : job_id,
+                                             'job_id': job_id,
                                              'host_id': node['data']['id'],
                                              'arg_1': job_201_arg_1,
-                                             'arg_2' : int(job_201_arg_2),
-                                             'print_cmd' : 'nc ' + str(job_201_arg_1) + ' -l ' + str(job_201_arg_2)})
+                                             'arg_2': int(job_201_arg_2),
+                                             'print_cmd': 'nc ' + str(job_201_arg_1) + ' -l ' + str(job_201_arg_2)})
                     except Exception as e:
-                        print (e)
+                        print(e)
                         ret.update({'warning': 'IP адрес для команды "Запустить TCP сервер" указан неверно.'})
 
                 # Block TCP/UDP port
@@ -848,12 +859,12 @@ def save_server_config():
                     try:
                         jnet['jobs'].append({'id': job_id_generator(),
                                             'level': job_level,
-                                             'job_id' : job_id,
+                                             'job_id': job_id,
                                              'host_id': node['data']['id'],
                                              'arg_1': job_202_arg_1,
-                                             'print_cmd' : 'drop tcp/udp port ' + str(job_202_arg_1)})
+                                             'print_cmd': 'drop tcp/udp port ' + str(job_202_arg_1)})
                     except Exception as e:
-                        print (e)
+                        print(e)
                         ret.update({'warning': 'Ошибка при добавлении job "Блокировать TCP/UDP порт'})
 
         # Set IP adresses
@@ -931,7 +942,7 @@ def save_server_config():
         net.network = json.dumps(jnet)
         db.session.commit()
 
-        ret.update({'message': 'Конфигурация обновлена', 'nodes' : nodes, 'jobs' : jnet['jobs']})
+        ret.update({'message': 'Конфигурация обновлена', 'nodes': nodes, 'jobs': jnet['jobs']})
         return make_response(jsonify(ret), 200)
 
     ret.update({'message': 'Неверный запрос'})

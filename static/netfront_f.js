@@ -274,6 +274,9 @@ const ShowSwitchConfig = function(n, shared = 0){
 
     // Add hostname
     ConfigSwitchName(hostname);
+
+    //Add checkbox STP
+    ConfigSwtichSTP(n.config.stp);
 }
 
 const ShowEdgeConfig = function(edge_id){
