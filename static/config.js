@@ -169,8 +169,8 @@ const ConfigSwitchForm = function(switch_id){
     $(config_content_id).append(form);
 
     // Add href for mimishark
-    var url = "/MimiShark?guid="+network_guid
-    $(needhref).attr('href',url)
+    // var url = "/MimiShark?guid="+network_guid
+    // $(needhref).attr('href',url)
 
     // Set host_id
     $('#switch_id').val( switch_id );
@@ -229,6 +229,17 @@ const ConfigSwitchName = function(hostname){
 
     $(config_switch_main_form_id).prepend((text));
     $('#config_switch_name').val(hostname);
+}
+
+const ConfigSwtichSTP = function(stp){
+    var elem = document.getElementById('config_switch_checkbox_stp_script');
+
+    $(elem.innerHTML).insertBefore('#config_switch_main_form_submit_button');
+
+    if (stp === 1) 
+    {
+        $('#config_switch_stp').attr('checked', 'checked');
+    }
 }
 
 const SharedConfigHostForm = function(host_id){
