@@ -82,25 +82,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <ul class="navbar-nav">
 
 
-            <div class="btn-group" role="group" aria-label="Settings group">
 
                     <li class="nav-item">
-                        <a class="btn btn-success btn-icon" data-toggle="tooltip" data-bs-placement="bottom" title="Ссылка на сеть скопирована" onclick="urlCopyButton()">
-                            <i class='bx bx-share-alt' ></i>
+                        <a class="btn btn-success btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" title="Ссылка на сеть скопирована" onclick="urlCopyButton()">
+                            <i class='bx bx-share-alt fs-4 mx-1' ></i>
                         </a>
                     </li>
 
                      <li class="nav-item">
-                        <a class="btn btn-outline-primary btn-icon" data-toggle="tooltip" data-bs-placement="bottom" title="Скопировать к себе сеть">
-                            <i class='bx bx-copy'></i>
+                        <a class="btn btn-outline-primary btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" title="Скопировать к себе сеть">
+                            <i class='bx bx-copy fs-4 mx-1'></i>
                         </a>
                     </li>
 
-
                     <li class="nav-item">
-                        <a {% if request.path != url_for('web_network_shared') %} class="btn btn-outline-primary btn-icon" {% else %} class="btn btn-outline-primary btn-icon disabled" {% endif %} href="#netConfigModal" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети"><i class='bx bx-cog'></i></a>
+                        <a {% if request.path != url_for('web_network_shared') %} class="btn btn-outline-primary btn-icon" {% else %} class="btn btn-outline-primary btn-icon disabled" {% endif %} href="#netConfigModal" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети"><i class='bx bx-cog fs-4 mx-1'></i></a>
                     </li>
-            </div>
 
         </ul>
 
