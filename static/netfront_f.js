@@ -2065,3 +2065,23 @@ const UpdateNetworkConfig = function()
     });
 
 }
+
+const CopyNetwork = function ()
+{
+    $.ajax({
+        type: 'POST',
+        url: '/network/copy_network',
+        data: '',
+        success: function(data, textStatus, xhr) {
+            if (xhr.status === 200)
+            {
+                console.log("Copy is made!");
+            }
+        },
+        error: function(err) {
+            console.log('Copy has not been made.');
+        },
+        contentType: "application/json",
+        dataType: 'json'
+    });
+}
