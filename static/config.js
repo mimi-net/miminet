@@ -236,10 +236,18 @@ const ConfigSwtichSTP = function(stp){
 
     $(elem.innerHTML).insertBefore('#config_switch_main_form_submit_button');
 
-    if (stp === 1) 
-    {
+    if (stp === 1) {
         $('#config_switch_stp').attr('checked', 'checked');
     }
+
+    var warning_text = document.getElementById('config_switch_warning_stp_script').innerHTML;
+    $('#config_switch_stp').on('click', function(){
+        if ($(this).is(':checked')){
+            $(warning_text).insertBefore('#config_switch_main_form_submit_button');
+        } else {
+            $('#config_warning_stp').remove();
+        }
+    }); 
 }
 
 const SharedConfigHostForm = function(host_id){
