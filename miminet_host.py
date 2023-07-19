@@ -1,8 +1,8 @@
 import json
 import uuid
 import socket
-import traceback
 import re
+import ipaddress
 
 from flask import redirect, url_for, request, flash, make_response, jsonify
 from miminet_model import db, Network, Simulate
@@ -470,10 +470,10 @@ def save_host_config():
 
             # Check if default_gw is a valid IP address
             try:
-                socket.inet_aton(default_gw)
+                ip = ipaddress.ip_address(default_gw)
                 node['config']['default_gw'] = default_gw
-            except:
-                ret.update({'warning': 'IP адрес указан неверно.'})
+            except ValueError:
+                ret.update({'warning': 'IP адрес маршрута по умолчанию указан неверно.'})
                 return make_response(jsonify(ret), 200)
         else:
             node['config']['default_gw'] = ''
@@ -703,11 +703,11 @@ def save_router_config():
 
             # Check if default_gw is a valid IP address
             try:
-                socket.inet_aton(default_gw)
+                ip = ipaddress.ip_address(default_gw)
                 node['config']['default_gw'] = default_gw
-            except Exception as e:
-                print(e)
-                ret.update({'warning': 'IP адрес для маршрута по умолчанию указан неверно.'})
+            except ValueError:
+                ret.update({'warning': 'IP адрес маршрута по умолчанию указан неверно.'})
+                return make_response(jsonify(ret), 200)
         else:
             node['config']['default_gw'] = ''
 
@@ -931,10 +931,10 @@ def save_server_config():
 
             # Check if default_gw is a valid IP address
             try:
-                socket.inet_aton(default_gw)
+                ip = ipaddress.ip_address(default_gw)
                 node['config']['default_gw'] = default_gw
-            except:
-                ret.update({'warning': 'IP адрес указан неверно.'})
+            except ValueError:
+                ret.update({'warning': 'IP адрес маршрута по умолчанию указан неверно.'})
                 return make_response(jsonify(ret), 200)
         else:
             node['config']['default_gw'] = ''

@@ -513,7 +513,7 @@ const ConfigHostJobOnChange = function(evnt){
 
 }
 
-const ConfigHostJob = function(host_jobs)
+const ConfigHostJob = function(host_jobs, shared=0)
 {
 
     let elem = document.getElementById('config_host_job_script').innerHTML;
@@ -564,8 +564,11 @@ const ConfigHostJob = function(host_jobs)
 
         $('#config_host_job_delete_' + jid).click(function(event) {
             event.preventDefault();
-            DeleteJobFromHost(host_id.value, jid, network_guid);
+            if (!shared){
+                DeleteJobFromHost(host_id.value, jid, network_guid);
+            }
         });
+
     });
 }
 
@@ -790,7 +793,7 @@ const ConfigRouterJobOnChange = function(evnt){
 
 }
 
-const ConfigRouterJob = function(router_jobs)
+const ConfigRouterJob = function(router_jobs, shared=0)
 {
 
     let elem = document.getElementById('config_router_job_script').innerHTML;
@@ -841,12 +844,14 @@ const ConfigRouterJob = function(router_jobs)
 
         $('#config_router_job_delete_' + jid).click(function(event) {
             event.preventDefault();
-            DeleteJobFromRouter(router_id.value, jid, network_guid);
+            if (!shared){
+                DeleteJobFromRouter(router_id.value, jid, network_guid);
+            }
         });
     });
 }
 
-const ConfigServerJob = function(server_jobs)
+const ConfigServerJob = function(server_jobs, shared = 0)
 {
 
     let elem = document.getElementById('config_server_job_script').innerHTML;
@@ -897,7 +902,11 @@ const ConfigServerJob = function(server_jobs)
 
         $('#config_server_job_delete_' + jid).click(function(event) {
             event.preventDefault();
-            DeleteJobFromServer(server_id.value, jid, network_guid);
+
+            if (!shared){
+                DeleteJobFromServer(server_id.value, jid, network_guid);
+            }
+
         });
     });
 }

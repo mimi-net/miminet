@@ -29,8 +29,8 @@ def run_simulation():
             db.session.delete(s)
             db.session.commit()
 
-        simlog = SimulateLog(author_id = net.author_id, network = net.network, network_guid = net.guid)
-        sim = Simulate(network_id = net.id, packets = '')
+        simlog = SimulateLog(author_id=net.author_id, network=net.network, network_guid=net.guid)
+        sim = Simulate(network_id=net.id, packets='')
         db.session.add(sim)
         db.session.add(simlog)
         db.session.flush()

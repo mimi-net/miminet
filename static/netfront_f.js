@@ -1,7 +1,7 @@
-let NetworkState = 0; // 0 - not simulated yet, 1 - simulating, 2 - ready to run, 3 - animated
 let NetworkSharedState = 0; // 0 - not simulated yet, 2 - ready to run, 3 - animated
 let SimulationId = 0;
 let global_cy = undefined;
+let global_eh = undefined;
 var NetworkUpdateTimeoutId = -1;
 
 const uid = function(){
@@ -84,7 +84,7 @@ const ShowHostConfig = function(n, shared = 0){
         host_jobs = jobs.filter(j => j.host_id === n.data.id);
     }
 
-    ConfigHostJob(host_jobs);
+    ConfigHostJob(host_jobs, shared);
 
     // Add interfaces
     $.each(n.interface, function (i) {
@@ -175,7 +175,7 @@ const ShowRouterConfig = function(n, shared = 0){
         router_jobs = jobs.filter(j => j.host_id === n.data.id);
     }
 
-    ConfigRouterJob(router_jobs);
+    ConfigRouterJob(router_jobs, shared);
 
     // Add interfaces
     $.each(n.interface, function (i) {
@@ -323,7 +323,7 @@ const ShowServerConfig = function(n, shared = 0){
         host_jobs = jobs.filter(j => j.host_id === n.data.id);
     }
 
-    ConfigServerJob(host_jobs);
+    ConfigServerJob(host_jobs, shared);
 
     // Add interfaces
     $.each(n.interface, function (i) {
@@ -861,6 +861,11 @@ const prepareStylesheet = function() {
             'text-wrap': 'wrap'
         })
 
+        .selector('.hidden')
+        .css({
+            'display': 'none'
+        })
+
         .selector('.eh-ghost-edge.eh-preview-active')
         .css({
             'opacity': 0
@@ -894,11 +899,14 @@ const DrawGraph = function() {
     if (global_cy)
     {
         cy = global_cy;
-        cy.elements().remove();
+
+        var collection = cy.elements();
+        cy.remove(collection);
         cy.autounselectify(true);
         cy.add(nodes);
         cy.add(edges);
         cy.nodes().grabify();
+        global_eh.enable();
         return;
     }
 
@@ -939,7 +947,7 @@ const DrawGraph = function() {
         disableBrowserGestures: true // during an edge drawing gesture, disable browser gestures such as two-finger trackpad swipe and pinch-to-zoom
     };
 
-    let eh = cy.edgehandles(defaults );
+    global_eh = cy.edgehandles(defaults);
 
     cy.minZoom(0.5);
     cy.maxZoom(2);
@@ -1037,10 +1045,7 @@ const DrawGraph = function() {
         PostNodesEdges();
         TakeGraphPictureAndUpdate();
 
-        // Reset network state
-        if (GetNetworkState()){
-            SetNetworkRunButtonState(0, null);
-        }
+        SetNetworkPlayerState(-1);
     });
 
     $(document).on('keyup', function(e){
@@ -1061,9 +1066,7 @@ const DrawGraph = function() {
             TakeGraphPictureAndUpdate();
 
             // Reset network state
-            if (GetNetworkState()){
-                SetNetworkRunButtonState(0, null);
-            }
+            SetNetworkPlayerState(-1);
         }
         if (e.keyCode ==  46 && selected_edge_id) {
             DeleteEdge(selected_edge_id);
@@ -1080,85 +1083,21 @@ const DrawGraph = function() {
             TakeGraphPictureAndUpdate();
 
             // Reset network state
-            if (GetNetworkState()){
-                SetNetworkRunButtonState(0, null);
-            }
+            SetNetworkPlayerState(-1);
         }
     });
 }
 
-const RunPackets = function (cy, pkts){
-
-    let zoom = cy.zoom();
-    let px = cy.pan().x;
-    let py = cy.pan().y;
-
-    let edgeMap = {};
-
-    pkts.forEach(function(p_item){
-
-        let edge = cy.edges('[id = "' + p_item['config']['path'] + '"]');
-
-        if (!edge.source()) {
-            return;
-        }
-
-        let pkt_id = p_item['data']['id'];
-        let from_xy = undefined;
-        let to_xy = undefined;
-
-        if (edge.source().id() === p_item['config']['source'])
-        {
-            from_xy = edge.sourceEndpoint();
-            to_xy = edge.targetEndpoint();
-        } else if (edge.source().id() === p_item['config']['target'])
-        {
-            from_xy = edge.targetEndpoint();
-            to_xy = edge.sourceEndpoint();
-        } else {
-            console.log('Got edge but source and target id is not equal');
-            return;
-        }
-
-        if (edgeMap[p_item.config.path])
-        {
-
-            p_item['renderedPosition'] = {x: from_xy['x'] * zoom + px, y: from_xy['y'] * zoom + py};
-            cy.add(p_item);
-
-            cy.nodes().last().delay(edgeMap[p_item.config.path] * 500).animate({
-                renderedPosition: {x: to_xy['x'] * zoom + px, y: to_xy['y'] * zoom + py}
-            }, {
-                duration: 1000,
-                complete: function(){
-                    cy.remove('[id = "' + pkt_id + '"]');
-                }
-            });
-
-            edgeMap[p_item.config.path] = edgeMap[p_item.config.path] + 1;
-        } else {
-
-            p_item['renderedPosition'] = {x: from_xy['x'] * zoom + px, y: from_xy['y'] * zoom + py};
-            cy.add(p_item);
-
-            cy.nodes().last().animate({
-                renderedPosition: {x: to_xy['x'] * zoom + px, y: to_xy['y'] * zoom + py}
-            }, {
-                duration: 1000,
-                complete: function(){
-                    cy.remove('[id = "' + pkt_id + '"]');
-                }
-            });
-
-            edgeMap[p_item.config.path] = 1;
-        }
-    })
-}
-
-const DrawGraphStatic = function(nodes, edges, traffic) {
+const DrawGraphStatic = function(nodes, edges, shared=0) {
 
     // Do we already have one?
     let cy = undefined;
+
+    let network_scheme_id = "network_scheme";
+
+    if (shared){
+        network_scheme_id = "network_scheme_shared";
+    }
 
     if (global_cy)
     {
@@ -1166,7 +1105,7 @@ const DrawGraphStatic = function(nodes, edges, traffic) {
         cy.elements().remove();
     } else {
         cy = cytoscape({
-            container: document.getElementById("network_scheme"),
+            container: document.getElementById(network_scheme_id),
             boxSelectionEnabled: true,
             autounselectify: false,
             style: prepareStylesheet(),
@@ -1176,47 +1115,18 @@ const DrawGraphStatic = function(nodes, edges, traffic) {
             pan: { x: network_pan_x, y: network_pan_y },
             fit: true,
         });
+
+         global_cy = cy;
+    }
+
+    // Turn off edges creation.
+    if (global_eh){
+        global_eh.disable();
     }
 
     cy.autounselectify(false);
-
     cy.add(nodes);
     cy.add(edges);
-
-    let timeout = 0;
-
-    traffic.forEach(function(pkts){
-        setTimeout(function(){RunPackets(cy, pkts)}, timeout);
-
-           // Calculate the new timeout (2+ packets on the same edge should increase it)
-        if (pkts.length == 0)
-        {
-            timeout += 1500;
-            return true;
-        }
-
-        let edgeMap = {};
-        let maxCount = 1;
-
-        for (var i = 0; i < pkts.length; i++) {
-            let el = pkts[i].config.path;
-
-            if (edgeMap[el] == null){
-                edgeMap[el] = 1;
-            } else {
-                edgeMap[el]++;
-            }
-
-            if (edgeMap[el] > maxCount) {
-                maxCount = edgeMap[el];
-            }
-        }
-
-        timeout = timeout + 1000 + (500 * maxCount);
-    })
-
-    setTimeout(function(){$('#NetworkRunButton').click();}, timeout);
-
     cy.nodes().ungrabify();
     return;
 }
@@ -1242,6 +1152,8 @@ const DrawSharedGraph = function(nodes, edges) {
             pan: { x: network_pan_x, y: network_pan_y },
             fit: true,
         });
+
+        global_cy = cy;
     }
 
     cy.autounselectify(true);
@@ -1293,49 +1205,6 @@ const DrawSharedGraph = function(nodes, edges) {
             ShowServerConfig(n, shared=1);
         }
     });
-
-    cy.nodes().ungrabify();
-}
-
-const DrawShareGraphStatic = function(nodes, edges, traffic) {
-
-    // Do we already have one?
-    let cy = undefined;
-
-    if (global_cy)
-    {
-        cy = global_cy;
-        cy.elements().remove();
-    } else {
-        cy = cytoscape({
-            container: document.getElementById("network_scheme_shared"),
-            boxSelectionEnabled: true,
-            autounselectify: false,
-            style: prepareStylesheet(),
-            elements: [],
-            layout: 'preset',
-            zoom: network_zoom,
-            pan: { x: network_pan_x, y: network_pan_y },
-            fit: true,
-        });
-    }
-
-    cy.autounselectify(false);
-
-    cy.add(nodes);
-    cy.add(edges);
-
-    let timeout = 0;
-
-    traffic.forEach(function(pkts){
-        setTimeout(function(){RunPackets(cy, pkts)}, timeout);
-        timeout += 1500;
-    })
-
-    setTimeout(function(){$('#NetworkSharedRunButton').click();}, timeout);
-
-    cy.nodes().ungrabify();
-    return;
 }
 
 const DrawIndexGraphStatic = function(nodes, edges, traffic, container_id, graph_network_zoom,
@@ -1398,28 +1267,6 @@ const DrawIndexGraphStatic = function(nodes, edges, traffic, container_id, graph
     return;
 }
 
-const GetNetworkState = function()
-{
-    return NetworkState;
-}
-
-const GetSharedNetworkState = function()
-{
-    return NetworkSharedState;
-}
-
-const SetNetworkState = function(state)
-{
-    NetworkState = state;
-    return NetworkState;
-}
-
-const SetNetworkSharedState = function(state)
-{
-    NetworkSharedState = state;
-    return NetworkSharedState;
-}
-
 // Check whether simulation is over and we can run packets
 const CheckSimulation = function (simulation_id)
 {
@@ -1435,16 +1282,17 @@ const CheckSimulation = function (simulation_id)
                 setTimeout(CheckSimulation, 2000, simulation_id);
             }
 
+            // Simulation is ended up and we can grab the packets
             if (xhr.status === 200)
             {
                 packets = JSON.parse(data.packets);
                 pcaps = data.pcaps;
-                SetNetworkRunButtonState(0, packets)
+                SetNetworkPlayerState(0);
             }
         },
         error: function(xhr) {
             console.log('Cannot check simulation id = ' + simulation_id);
-            SetNetworkRunButtonState(0, null);
+            SetNetworkPlayerState(-1);
         },
         contentType: "application/json",
         dataType: 'json'
@@ -1454,6 +1302,8 @@ const CheckSimulation = function (simulation_id)
 // Update host configuration
 const UpdateHostConfiguration = function (data, host_id)
 {
+    // Reset network player
+    SetNetworkPlayerState(-1);
 
     $.ajax({
         type: 'POST',
@@ -1470,15 +1320,6 @@ const UpdateHostConfiguration = function (data, host_id)
 
                     // Update jobs
                     jobs = data.jobs;
-
-                    // Clear packets
-                    packets = null;
-
-                    // Clear pcaps
-                    pcaps = [];
-
-                    // Set a new state to the simulation button
-                    SetNetworkRunButtonState(0, packets);
 
                     // Update graph
                     DrawGraph();
@@ -1515,6 +1356,9 @@ const UpdateHostConfiguration = function (data, host_id)
 // Delete job from host
 const DeleteJobFromHost = function (host_id, job_id, network_guid)
 {
+    // Reset network player
+    SetNetworkPlayerState(-1);
+
     let data = {
       id: job_id,
       guid: network_guid,
@@ -1531,12 +1375,6 @@ const DeleteJobFromHost = function (host_id, job_id, network_guid)
             {
                 // Update jobs
                 jobs = data.jobs;
-
-                // Clear packets
-                packets = null;
-
-                // Set a new state to the simulation button
-                SetNetworkRunButtonState(0, packets);
 
                 // Update graph
                 DrawGraph();
@@ -1568,6 +1406,9 @@ const DeleteJobFromHost = function (host_id, job_id, network_guid)
 // Delete job from router
 const DeleteJobFromRouter = function (router_id, job_id, network_guid)
 {
+    // Reset network player
+    SetNetworkPlayerState(-1);
+
     let data = {
       id: job_id,
       guid: network_guid,
@@ -1584,12 +1425,6 @@ const DeleteJobFromRouter = function (router_id, job_id, network_guid)
             {
                 // Update jobs
                 jobs = data.jobs;
-
-                // Clear packets
-                packets = null;
-
-                // Set a new state to the simulation button
-                SetNetworkRunButtonState(0, packets);
 
                 // Update graph
                 DrawGraph();
@@ -1620,6 +1455,9 @@ const DeleteJobFromRouter = function (router_id, job_id, network_guid)
 // Delete job from server
 const DeleteJobFromServer = function (server_id, job_id, network_guid)
 {
+    // Reset network player
+    SetNetworkPlayerState(-1);
+
     let data = {
       id: job_id,
       guid: network_guid,
@@ -1636,12 +1474,6 @@ const DeleteJobFromServer = function (server_id, job_id, network_guid)
             {
                 // Update jobs
                 jobs = data.jobs;
-
-                // Clear packets
-                packets = null;
-
-                // Set a new state to the simulation button
-                SetNetworkRunButtonState(0, packets);
 
                 // Update graph
                 DrawGraph();
@@ -1672,6 +1504,8 @@ const DeleteJobFromServer = function (server_id, job_id, network_guid)
 // Update router configuration
 const UpdateRouterConfiguration = function (data, router_id)
 {
+    // Reset network player
+    SetNetworkPlayerState(-1);
 
     $.ajax({
         type: 'POST',
@@ -1692,12 +1526,6 @@ const UpdateRouterConfiguration = function (data, router_id)
                 {
                     jobs = data.jobs;
                 }
-
-                // Clear packets
-                packets = null;
-
-                // Set a new state to the simulation button
-                SetNetworkRunButtonState(0, packets);
 
                 // Update graph
                 DrawGraph();
@@ -1735,6 +1563,8 @@ const UpdateRouterConfiguration = function (data, router_id)
 // Update server configuration
 const UpdateServerConfiguration = function (data, router_id)
 {
+    // Reset network player
+    SetNetworkPlayerState(-1);
 
     $.ajax({
         type: 'POST',
@@ -1754,15 +1584,6 @@ const UpdateServerConfiguration = function (data, router_id)
                     if (data.jobs){
                         jobs = data.jobs;
                     }
-
-                    // Clear packets
-                    packets = null;
-
-                    // Clear pcaps
-                    pcaps = [];
-
-                    // Set a new state to the simulation button
-                    SetNetworkRunButtonState(0, packets);
 
                     // Update graph
                     DrawGraph();
@@ -1797,7 +1618,6 @@ const UpdateServerConfiguration = function (data, router_id)
         dataType: 'json'
     });
 }
-
 
 // Update hub configuration
 const UpdateHubConfiguration = function (data, hub_id)
@@ -1845,6 +1665,9 @@ const UpdateHubConfiguration = function (data, hub_id)
 // Update Switch configuration
 const UpdateSwitchConfiguration = function (data, switch_id)
 {
+    // Reset network player
+    SetNetworkPlayerState(-1);
+
     $.ajax({
         type: 'POST',
         url: '/host/switch_save_config',
@@ -1904,87 +1727,196 @@ const RunSimulation = function (network_guid)
         },
         error: function(err) {
             console.log('Cannot run simulation guid = ' + network_guid);
+            SetNetworkPlayerState(-1);
         },
         contentType: "application/json",
         dataType: 'json'
     });
-
 }
 
-const SetNetworkRunButtonState = function(id, packets)
+// 2 states:
+// Do we need emulation
+// We have a packets and ready to play packets
+const SetNetworkPlayerState = function(simultaion_id)
 {
+
+    // Reset?
+    if (simultaion_id === -1){
+        packets = null;
+        pcaps = [];
+        SetNetworkPlayerState(0);
+        return;
+    }
+
     // If we have packets, than we're ready to run
     if (packets)
     {
-        $('#NetworkRunButton').text('Запустить');
-        $('#NetworkRunButton').removeClass('btn-primary');
-        $('#NetworkRunButton').removeClass('btn-secondary');
-        $('#NetworkRunButton').addClass('btn-success');
-        $('#NetworkRunButton').prop('disabled', false);
+        $('#NetworkPlayer').empty();
+        $('#NetworkPlayer').append('<button type="button" class="btn btn-danger me-2" id="NetworkStopButton"><i class="bx bx-stop fs-xl"></i></button>');
+        $('#NetworkPlayer').append('<button type="button" class="btn btn-success" id="NetworkPlayPauseButton"><i class="bx bx-play fs-xl"></i></button>');
 
         const pkt_count = packets.reduce((currentCount, row) => currentCount + row.length, 0);
+        $('#NetworkPlayerLabel').text('Готова анимация: ' + pkt_count + ' пакетов');
 
-        $('#NetworkRunButtonLabel').text("Готова анимация: " + pkt_count + " пакетов");
+        // Init player
+        PacketPlayer.getInstance().InitPlayer(packets);
 
-        SetNetworkState(2);
+        // Set click handlers
+        $('#NetworkPlayPauseButton').click(function() {
+
+            // If btn-success then start to play
+            if ($(this).hasClass("btn-success")){
+                $(this).removeClass('btn-success');
+                $(this).addClass('btn-warning');
+
+                $(this).empty();
+                $(this).append('<i class="bx bx-pause fs-xl"></i>');
+
+                // If not in pause. Draw a new layout and go.
+                if (!PacketPlayer.getInstance().getPlayerPause())
+                {
+                    DrawGraphStatic(nodes, edges);
+                }
+
+                PacketPlayer.getInstance().StartPlayer(global_cy);
+                return;
+            } else {
+
+                $(this).removeClass('btn-warning');
+                $(this).addClass('btn-success');
+                $(this).empty();
+                $(this).append('<i class="bx bx-play fs-xl"></i>');
+
+                PacketPlayer.getInstance().PausePlayer();
+                return;
+            }
+        });
+
+        $('#NetworkStopButton').click(function() {
+
+            PacketPlayer.getInstance().StopPlayer();
+            DrawGraph(nodes, edges);
+
+            $('#NetworkPlayPauseButton').removeClass('btn-success');
+            $('#NetworkPlayPauseButton').removeClass('btn-warning');
+            $('#NetworkPlayPauseButton').empty();
+            $('#NetworkPlayPauseButton').addClass('btn-success');
+            $('#NetworkPlayPauseButton').append('<i class="bx bx-play fs-xl"></i>');
+            return;
+        });
+
         return;
     }
 
-    // Don't have a packets (not simulated yet). Do we have simulation id?
-    // If so, we're simulating.
-    if (id)
+    // No packets.
+    // The network is simulating?
+    if (simultaion_id)
     {
-        $('#NetworkRunButton').text('Эмуляция');
-        $('#NetworkRunButton').removeClass('btn-primary');
-        $('#NetworkRunButton').addClass('btn-secondary');
-        $('#NetworkRunButton').prop('disabled', true);
-
-        $('#NetworkRunButtonLabel').text("Ожидание 10-30 сек.");
-
-        CheckSimulation(id);
-        SetNetworkState(1);
+        $('#NetworkPlayer').empty();
+        $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" disabled>Эмулируется...</button>');
+        $('#NetworkPlayerLabel').text("Ожидание 10-20 сек.");
+        CheckSimulation(simultaion_id);
         return;
     }
 
-    $('#NetworkRunButton').text('Эмулировать');
-    $('#NetworkRunButton').removeClass('btn-secondary');
-    $('#NetworkRunButton').removeClass('btn-success');
-    $('#NetworkRunButton').addClass('btn-primary');
-    $('#NetworkRunButton').prop('disabled', false);
+    // No packets and no simulation.
+    // Add emulation button.
+    $('#NetworkPlayer').empty();
+    $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton">Эмулировать</button>');
+    $('#NetworkPlayerLabel').text("Ожидание 10-20 сек.");
 
-    $('#NetworkRunButtonLabel').text("Ожидание 10-30 сек.");
+    $('#NetworkEmulateButton').click(function() {
 
-    SetNetworkState(0);
+        // Check for job. If no job - show modal and exit.
+        if (!jobs.length)
+        {
+            $('#noJobsModal').modal('toggle');
+            return;
+        }
+
+        RunSimulation(network_guid);
+
+        $('#NetworkPlayer').empty();
+        $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" disabled>Эмулируется...</button>');
+        $('#NetworkPlayerLabel').text("Ожидание 10-20 сек.");
+        return;
+    });
+
     return;
+
 }
 
-const SetNetworkSharedRunButtonState = function(packets)
+// 2 states:
+// No packets - disable button.
+// We have a packets and ready to play packets
+const SetSharedNetworkPlayerState = function()
 {
+
     // If we have packets, than we're ready to run
     if (packets)
     {
-        $('#NetworkSharedRunButton').text('Запустить');
-        $('#NetworkSharedRunButton').removeClass('btn-primary');
-        $('#NetworkSharedRunButton').removeClass('btn-secondary');
-        $('#NetworkSharedRunButton').addClass('btn-success');
-        $('#NetworkSharedRunButton').prop('disabled', false);
+        $('#NetworkPlayer').empty();
+        $('#NetworkPlayer').append('<button type="button" class="btn btn-danger me-2" id="NetworkStopButton"><i class="bx bx-stop fs-xl"></i></button>');
+        $('#NetworkPlayer').append('<button type="button" class="btn btn-success" id="NetworkPlayPauseButton"><i class="bx bx-play fs-xl"></i></button>');
 
         const pkt_count = packets.reduce((currentCount, row) => currentCount + row.length, 0);
+        $('#NetworkPlayerLabel').text('Готова анимация: ' + pkt_count + ' пакетов');
 
-        $('#NetworkSharedRunButtonLabel').text("Готова анимация: " + pkt_count + " пакетов");
+        // Init player
+        PacketPlayer.getInstance().InitPlayer(packets);
 
-        SetNetworkState(2);
+        // Set click handlers
+        $('#NetworkPlayPauseButton').click(function() {
+
+            // If btn-success then start to play
+            if ($(this).hasClass("btn-success")){
+                $(this).removeClass('btn-success');
+                $(this).addClass('btn-warning');
+
+                $(this).empty();
+                $(this).append('<i class="bx bx-pause fs-xl"></i>');
+
+                // If not in pause. Draw a new layout and go.
+                if (!PacketPlayer.getInstance().getPlayerPause())
+                {
+                    // Pass argument 1, as for shared Graph
+                    DrawGraphStatic(nodes, edges, 1);
+                }
+
+                PacketPlayer.getInstance().StartPlayer(global_cy);
+                return;
+            } else {
+
+                $(this).removeClass('btn-warning');
+                $(this).addClass('btn-success');
+                $(this).empty();
+                $(this).append('<i class="bx bx-play fs-xl"></i>');
+
+                PacketPlayer.getInstance().PausePlayer();
+                return;
+            }
+        });
+
+        $('#NetworkStopButton').click(function() {
+
+            PacketPlayer.getInstance().StopPlayer();
+            DrawSharedGraph(nodes, edges);
+
+            $('#NetworkPlayPauseButton').removeClass('btn-success');
+            $('#NetworkPlayPauseButton').removeClass('btn-warning');
+            $('#NetworkPlayPauseButton').empty();
+            $('#NetworkPlayPauseButton').addClass('btn-success');
+            $('#NetworkPlayPauseButton').append('<i class="bx bx-play fs-xl"></i>');
+            return;
+        });
+
         return;
     }
 
-    $('#NetworkSharedRunButton').text('Эмуляции нет');
-    $('#NetworkSharedRunButton').removeClass('btn-success');
-    $('#NetworkSharedRunButton').addClass('btn-secondary');
-    $('#NetworkSharedRunButton').prop('disabled', true);
-
-    $('#NetworkSharedRunButtonLabel').text("Сеть не эмулировалась");
-
-    SetNetworkState(0);
+    // No packets
+    // Add info button
+    $('#NetworkPlayer').empty();
+    $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" disabled>Нет эмуляции</button>');
     return;
 }
 

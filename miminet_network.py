@@ -125,6 +125,14 @@ def web_network_shared():
 
     jnet = json.loads(net.network)
 
+    # Do we simulated this network already
+    sim = Simulate.query.filter(Simulate.network_id == net.id).order_by(Simulate.id.desc()).first()
+    jnet['packets'] = 'null'
+
+    if sim:
+        if sim.ready:
+            jnet['packets'] = sim.packets
+
     if not 'nodes' in jnet:
         jnet['nodes'] = []
 
@@ -137,18 +145,20 @@ def web_network_shared():
     if not 'config' in jnet:
         jnet['config'] = {'zoom': 2, 'pan_x': 0, 'pan_y': 0}
 
-    # Do we simulte this network now?
-    sim = Simulate.query.filter(Simulate.network_id == net.id).first()
+    # Check if we have a pcaps. If not, try to check for it.
+    if not 'pcap' in jnet:
 
-    packets = 'null'
+        pcap_dir = 'static/pcaps/' + network_guid
+        jnet['pcap'] = []
 
-    if sim:
-        if sim.ready:
-            packets = sim.packets
+        if os.path.exists(pcap_dir):
+            jnet['pcap'] = [os.path.splitext(f)[0] for f in os.listdir(pcap_dir) if os.path.isfile(os.path.join(pcap_dir, f))]
+            net.network = json.dumps(jnet)
+            db.session.commit()
 
     return render_template("network_shared.html", network=net, nodes=jnet['nodes'],
-                           edges=jnet['edges'], packets=packets, jobs=jnet['jobs'],
-                           simulating=sim, network_config=jnet['config'])
+                           edges=jnet['edges'], packets=jnet['packets'], jobs=jnet['jobs'],
+                           network_config=jnet['config'], pcaps=jnet['pcap'])
 
 
 def web_network():
@@ -182,14 +192,19 @@ def web_network():
 
     jnet = json.loads(net.network)
 
+    # Do we simulated this network already
+    sim = Simulate.query.filter(Simulate.network_id == net.id).order_by(Simulate.id.desc()).first()
+    jnet['packets'] = 'null'
+
+    if sim:
+        if sim.ready:
+            jnet['packets'] = sim.packets
+
     if not 'nodes' in jnet:
         jnet['nodes'] = []
 
     if not 'edges' in jnet:
         jnet['edges'] = []
-
-    if not 'packets' in jnet:
-        jnet['packets'] = 'null'
 
     if not 'jobs' in jnet:
         jnet['jobs'] = []
@@ -208,10 +223,6 @@ def web_network():
             net.network = json.dumps(jnet)
             db.session.commit()
 
-    # Do we simulte this network now?
-    sim = Simulate.query.filter(Simulate.network_id == net.id).first()
-
-    print (jnet['config'])
     return render_template("network.html", network=net, nodes=jnet['nodes'],
                            edges=jnet['edges'], packets=jnet['packets'], jobs=jnet['jobs'],
                            simulating=sim, network_config=jnet['config'], pcaps=jnet['pcap'])
