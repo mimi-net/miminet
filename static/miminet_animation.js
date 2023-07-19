@@ -207,7 +207,7 @@ var PacketPlayer = (function () {
             let a_pkt = network_cy.nodes().last().animation({
                 renderedPosition: {x: from_xy['x'] * zoom + px, y: from_xy['y'] * zoom + py}
             }, {
-                duration: getAnimationTrafficStep() ? 500 + edge_wait: 0,
+                duration: getAnimationTrafficStep() ? 500 + edge_wait: 0 + edge_wait,
                 complete: function(){
                     let pkt = network_cy.elements().filter('[id = "' + pkt_id + '"]')[0];
 

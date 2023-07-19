@@ -136,10 +136,6 @@ const ConfigHubForm = function(hub_id){
     // Add new form
     $(config_content_id).append(form);
 
-    // Add href for mimishark
-    var url = "/MimiShark?guid="+network_guid
-    $(needhref).attr('href',url)
-
     // Set host_id
     $('#hub_id').val( hub_id );
     $('#net_guid').val( network_guid );
