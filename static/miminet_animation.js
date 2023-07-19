@@ -202,6 +202,8 @@ var PacketPlayer = (function () {
             {
                 edge_wait = edgeMap[p_item.config.path] * 500;
                 edgeMap[p_item.config.path] = edgeMap[p_item.config.path] + 1;
+            } else {
+                edgeMap[p_item.config.path] = 1;
             }
 
             let a_pkt = network_cy.nodes().last().animation({
@@ -235,9 +237,7 @@ var PacketPlayer = (function () {
                 }
             });
 
-            edgeMap[p_item.config.path] = 1;
             addAnimationPackets(a_pkt);
-
         });
     }
 
