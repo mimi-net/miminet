@@ -2070,7 +2070,7 @@ const CopyNetwork = function ()
 {
     $.ajax({
         type: 'POST',
-        url: '/network/copy_network',
+        url: '/network/copy_network?guid=' + network_guid,
         data: '',
         success: function(data, textStatus, xhr) {
             if (xhr.status === 200)

@@ -81,13 +81,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="btn btn-success btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" title="Ссылка на сеть скопирована" onclick="urlCopyButton()">
+                        <a class="btn btn-success btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" title="Скопировать ссылку на сеть" onclick="urlCopyButton()">
                             <i class='bx bx-share-alt fs-4 mx-1' ></i>
                         </a>
                     </li>
 
                      <li class="nav-item">
-                        <a class="btn btn-outline-primary btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" title="Скопировать к себе сеть" onclick="CopyNet()">
+                        <a class="btn btn-outline-primary btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" title="Скопировать к себе сеть" onclick="CopyNetwork()">
                             <i class='bx bx-copy fs-4 mx-1'></i>
                         </a>
                     </li>
@@ -291,15 +291,6 @@ function urlCopyButton(){
     $(function() {
         $('[data-toggle="tooltip"]').tooltip();
 });
-</script>
-
-<script>
-function CopyNet(){
-    addEventListener("click", function() {
-    CopyNetwork();
-    console.log("Копирование сети");
-  });
-}
 </script>
 
 {% block network %}
