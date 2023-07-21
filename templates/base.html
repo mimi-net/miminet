@@ -20,36 +20,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     {% block og %}{% endblock %}
 
-    <script src="{{ url_for('static', filename='/js/jquery-3.6.0.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='/js/jquery-ui.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='/js/cytoscape.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='/js/ace.js') }}"></script>
-    <script src="{{ url_for('static', filename='/js/lodash.js') }}"></script>
-    <script src="{{ url_for('static', filename='/js/cytoscape-edgehandles.min.js') }}"></script>
+
 
     <!-- Vendor Styles -->
     <link rel="stylesheet" media="screen" href="/assets/vendor/boxicons/css/boxicons.min.css"/>
+    <link rel="stylesheet" media="screen" href="/assets/vendor/nouislider/dist/nouislider.min.css"/>
+
 
     <!-- Main Theme Styles + Bootstrap -->
     <link rel="stylesheet" media="screen" href="/assets/css/theme.min.css">
 
-    <!-- Vendor Scripts -->
-    <script src="/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/assets/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
-    <script src="/assets/vendor/parallax-js/dist/parallax.min.js"></script>
-    <script src="/assets/vendor/rellax/rellax.min.js"></script>
-
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.0/css/bootstrap-slider.min.css" rel="stylesheet"/>
-
-    <!-- Main Theme Script -->
-    <script src="/assets/js/theme.min.js"></script>
-    <script src="{{ url_for('static', filename='/icons.js') }}"></script>
-    <script src="{{ url_for('static', filename='/netfront_f.js') }}"></script>
-    <script src="{{ url_for('static', filename='/miminet_animation.js') }}"></script>
-
-    <style>
-
-    </style>
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -211,6 +191,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </footer -->
 </body>
+
+<script src="{{ url_for('static', filename='/js/jquery-3.6.0.min.js') }}"></script>
+<script src="{{ url_for('static', filename='/js/jquery-ui.min.js') }}"></script>
+<script src="{{ url_for('static', filename='/js/cytoscape.min.js') }}"></script>
+<script src="{{ url_for('static', filename='/js/ace.js') }}"></script>
+<script src="{{ url_for('static', filename='/js/lodash.js') }}"></script>
+<script src="{{ url_for('static', filename='/js/cytoscape-edgehandles.min.js') }}"></script>
+
+<!-- Vendor Scripts -->
+<script src="/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="/assets/vendor/parallax-js/dist/parallax.min.js"></script>
+<script src="/assets/vendor/rellax/rellax.min.js"></script>
+<script src="/assets/vendor/nouislider/dist/nouislider.min.js"></script>
+
+
+<!-- Main Theme Script -->
+<script src="/assets/js/theme.min.js"></script>
+<script src="{{ url_for('static', filename='/icons.js') }}"></script>
+<script src="{{ url_for('static', filename='/netfront_f.js') }}"></script>
+<script src="{{ url_for('static', filename='/miminet_animation.js') }}"></script>
 
 <script>
     $(document).ready(function() {

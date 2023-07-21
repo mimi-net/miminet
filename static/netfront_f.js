@@ -1755,11 +1755,15 @@ const SetNetworkPlayerState = function(simultaion_id)
         $('#NetworkPlayer').append('<button type="button" class="btn btn-danger me-2" id="NetworkStopButton"><i class="bx bx-stop fs-xl"></i></button>');
         $('#NetworkPlayer').append('<button type="button" class="btn btn-success" id="NetworkPlayPauseButton"><i class="bx bx-play fs-xl"></i></button>');
 
-        //$('#PacketSliderInput').attr({"max" : packets.length, "min" : 0});
+        $('#PacketSliderInput').attr({"max" : packets.length, "min" : 0});
 
-        //$('#PacketSliderInput').slider().on('change', function (e) {
-        //    console.log($(this).val());
-        //});
+        $('#PacketSliderInput').slider().on('slide', function (e) {
+            $('#NetworkPlayerLabel').text($(this).val());
+        });
+
+        $('#PacketSliderInput').slider().on('change', function (e) {
+            console.log($(this).val());
+        });
 
         const pkt_count = packets.reduce((currentCount, row) => currentCount + row.length, 0);
         $('#NetworkPlayerLabel').text(packets.length + ' ' + NumWord(packets.length, ['шаг', 'шага', 'шагов']) + ' / ' + pkt_count + ' ' + NumWord(pkt_count, ['пакет', 'пакета', 'пакетов']));
