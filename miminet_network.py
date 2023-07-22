@@ -151,10 +151,10 @@ def web_network_shared():
         pcap_dir = 'static/pcaps/' + network_guid
         jnet['pcap'] = []
 
-        if os.path.exists(pcap_dir):
-            jnet['pcap'] = [os.path.splitext(f)[0] for f in os.listdir(pcap_dir) if os.path.isfile(os.path.join(pcap_dir, f))]
-            net.network = json.dumps(jnet)
-            db.session.commit()
+    if os.path.exists(pcap_dir):
+        jnet['pcap'] = [os.path.splitext(f)[0] for f in os.listdir(pcap_dir) if os.path.isfile(os.path.join(pcap_dir, f))]
+        net.network = json.dumps(jnet)
+        db.session.commit()
 
     return render_template("network_shared.html", network=net, nodes=jnet['nodes'],
                            edges=jnet['edges'], packets=jnet['packets'], jobs=jnet['jobs'],
