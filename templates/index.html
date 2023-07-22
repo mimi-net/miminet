@@ -137,24 +137,27 @@
 </section>
 
 <section class="container py-5 mt-md-n2">
-        <div class="card border-0 bg-gradient-primary">
-            <div class="py-md-5 py-4 text-center">
-          <div class="card-body" style="background-image: url(assets/img/landing/digital-agency/contact-bg.png);">
-            <p class="lead text-light opacity-70 mb-3"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Остались вопросы?</font></font></p>
-            <h2 class="h1 text-light pb-3 pb-lg-0 mb-lg-5"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Можете связаться с нами</font></font></h2>
+    <div class="card border-0 bg-gradient-primary">
+        <div class="py-md-5 py-4 text-center">
+            <div class="card-body" style="background-image: url(/images/contact-bg.png);">
+                <p class="lead text-light opacity-70 mb-3"><font style="vertical-align: inherit;">Остались вопросы?</font></p>
+                <h2 class="h1 text-light pb-3 pb-lg-0 mb-lg-5"><font style="vertical-align: inherit;">Можете связаться с нами</font></h2>
 
-<!-- Telegram -->
-<a href="https://t.me/MimiNetCommunity" class="btn btn-primary btn-secondary btn-telegram">
-  <i class="bx bxl-telegram"></i>
-</a>
-              </div>
-          </div>
+                <!-- Telegram -->
+                <a href="https://t.me/MimiNetCommunity" class="btn btn-primary btn-secondary btn-telegram">
+                    <i class="bx bxl-telegram"></i>
+                </a>
+            </div>
         </div>
+    </div>
 </section>
 
 </main>
-
     <div id="config_host"></div>
+
+{% endblock %}
+
+{% block network %}
 <script>
 
     var graph_network_zoom = 2;
@@ -167,16 +170,14 @@
     var packets = JSON.parse('[[{"data": {"id": "pkt_G09AFC4L", "label": "ARP-request", "type": "packet"}, "config": {"type": "ARP-request", "path": "edge_lhaep1dk4d654tvxhl5", "source": "host_1", "target": "l2sw1"}, "timestamp": "1683282739671808"}], [{"data": {"id": "pkt_MM7U6MQB", "label": "ARP-request", "type": "packet"}, "config": {"type": "ARP-request", "path": "edge_lhaep2k8vhx64z7cubc", "source": "l2sw1", "target": "host_3"}, "timestamp": "1683282739686887"}], [{"data": {"id": "pkt_D8TBGL1D", "label": "ARP-response", "type": "packet"}, "config": {"type": "ARP-response", "path": "edge_lhaep2k8vhx64z7cubc", "source": "host_3", "target": "l2sw1"}, "timestamp": "1683282739701950"}], [{"data": {"id": "pkt_D51CRKUA", "label": "ARP-response", "type": "packet"}, "config": {"type": "ARP-response", "path": "edge_lhaep1dk4d654tvxhl5", "source": "l2sw1", "target": "host_1"}, "timestamp": "1683282739717026"}], [{"data": {"id": "pkt_2X7HMBD9", "label": "ICMP echo-request\\n10.0.0.1 > 10.0.0.2", "type": "packet"}, "config": {"type": "ICMP echo-request\\n10.0.0.1 > 10.0.0.2", "path": "edge_lhaep1dk4d654tvxhl5", "source": "host_1", "target": "l2sw1"}, "timestamp": "1683282739732096"}], [{"data": {"id": "pkt_UPUQXZZW", "label": "ICMP echo-request\\n10.0.0.1 > 10.0.0.2", "type": "packet"}, "config": {"type": "ICMP echo-request\\n10.0.0.1 > 10.0.0.2", "path": "edge_lhaep2k8vhx64z7cubc", "source": "l2sw1", "target": "host_3"}, "timestamp": "1683282739747163"}], [{"data": {"id": "pkt_WSJOYE9F", "label": "ICMP echo-reply\\n10.0.0.2 > 10.0.0.1", "type": "packet"}, "config": {"type": "ICMP echo-reply\\n10.0.0.2 > 10.0.0.1", "path": "edge_lhaep2k8vhx64z7cubc", "source": "host_3", "target": "l2sw1"}, "timestamp": "1683282739762258"}], [{"data": {"id": "pkt_RI2K22SO", "label": "ICMP echo-reply\\n10.0.0.2 > 10.0.0.1", "type": "packet"}, "config": {"type": "ICMP echo-reply\\n10.0.0.2 > 10.0.0.1", "path": "edge_lhaep1dk4d654tvxhl5", "source": "l2sw1", "target": "host_1"}, "timestamp": "1683282739777312"}]]');
     var ns = null;
 
-    DrawIndexGraphStatic(nodes, edges, packets, "index_network_example", graph_network_zoom, graph_network_pan_x, graph_network_pan_y);
-    //SetNetworkRunButtonState({% if simulating %} {{simulating.id}} {% else %} 0 {% endif%}, packets);
+    PacketPlayer.getInstance().InitPlayer(packets);
+    global_cy = DrawIndexGraphStatic(nodes, edges, "index_network_example", graph_network_zoom, graph_network_pan_x, graph_network_pan_y);
+    PacketPlayer.getInstance().StartPlayer(global_cy);
 
     document.getElementById("index_network_example").onclick = function(){
-        // navigate to new page
         window.open('https://miminet.ru/web_network_shared?guid=d9012b77-fd52-48b0-b618-a3c3f55caf15', '_blank');
     }
 
 </script>
-
 {% endblock %}
-
 

@@ -1207,7 +1207,7 @@ const DrawSharedGraph = function(nodes, edges) {
     });
 }
 
-const DrawIndexGraphStatic = function(nodes, edges, traffic, container_id, graph_network_zoom,
+const DrawIndexGraphStatic = function(nodes, edges, container_id, graph_network_zoom,
                                     graph_network_pan_x, graph_network_pan_y)
 {
 
@@ -1229,42 +1229,8 @@ const DrawIndexGraphStatic = function(nodes, edges, traffic, container_id, graph
     index_cy.add(edges);
     index_cy.panningEnabled(false);
 
-    let timeout = 0;
-
-    traffic.forEach(function(pkts){
-        setTimeout(function(){RunPackets(index_cy, pkts)}, timeout);
-
-           // Calculate the new timeout (2+ packets on the same edge should increase it)
-        if (pkts.length == 0)
-        {
-            timeout += 1500;
-            return true;
-        }
-
-        let edgeMap = {};
-        let maxCount = 1;
-
-        for (var i = 0; i < pkts.length; i++) {
-            let el = pkts[i].config.path;
-
-            if (edgeMap[el] == null){
-                edgeMap[el] = 1;
-            } else {
-                edgeMap[el]++;
-            }
-
-            if (edgeMap[el] > maxCount) {
-                maxCount = edgeMap[el];
-            }
-        }
-
-        timeout = timeout + 1000 + (500 * maxCount);
-    })
-
-    setTimeout(function(){$('#NetworkSharedRunButton').click();}, timeout);
-
     index_cy.nodes().ungrabify();
-    return;
+    return index_cy;
 }
 
 // Check whether simulation is over and we can run packets
