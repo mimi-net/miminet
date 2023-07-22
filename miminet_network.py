@@ -147,9 +147,9 @@ def web_network_shared():
 
     # Check if we have a pcaps. If not, try to check for it.
     if not 'pcap' in jnet:
-
-        pcap_dir = 'static/pcaps/' + network_guid
         jnet['pcap'] = []
+
+    pcap_dir = 'static/pcaps/' + network_guid
 
     if os.path.exists(pcap_dir):
         jnet['pcap'] = [os.path.splitext(f)[0] for f in os.listdir(pcap_dir) if os.path.isfile(os.path.join(pcap_dir, f))]
@@ -214,9 +214,9 @@ def web_network():
 
     # Check if we have a pcaps. If not, try to check for it.
     if not 'pcap' in jnet:
-
-        pcap_dir = 'static/pcaps/' + network_guid
         jnet['pcap'] = []
+
+    pcap_dir = 'static/pcaps/' + network_guid
 
     if os.path.exists(pcap_dir):
         jnet['pcap'] = [os.path.splitext(f)[0] for f in os.listdir(pcap_dir) if os.path.isfile(os.path.join(pcap_dir, f))]
