@@ -10,6 +10,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-KT5XZVF');</script>
 <!-- End Google Tag Manager -->
 
+
     <link rel="icon" href="{{ url_for('static', filename='/images/favlogo.ico') }}" type="image/x-icon">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -62,11 +63,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </ul>
 
         <ul class="navbar-nav">
-
                     <li class="nav-item">
-                        <a {% if request.path != url_for('web_network_shared') %} class="btn btn-outline-primary" {% else %} class="btn btn-outline-primary disabled" {% endif %} href="#netConfigModal" data-bs-toggle="modal" data-target="#netConfigModal">Настройки сети</a>
+                        <a class="btn btn-success btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" title="Скопировать ссылку на сеть" onclick="urlCopyButton()">
+                            <i class='bx bx-share-alt fs-4 mx-1' ></i>
+                        </a>
                     </li>
 
+                     <li class="nav-item">
+                        <a class="btn btn-outline-primary btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" title="Скопировать к себе сеть" onclick="CopyNetwork()">
+                            <i class='bx bx-copy fs-4 mx-1'></i>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a {% if request.path != url_for('web_network_shared') %} class="btn btn-outline-primary btn-icon" {% else %} class="btn btn-outline-primary btn-icon disabled" {% endif %} href="#netConfigModal" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети"><i class='bx bx-cog fs-4 mx-1'></i></a>
+                    </li>
         </ul>
 
                 {% endif %}
@@ -273,6 +284,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         })
 
     });
+</script>
+
+<script type="text/javascript">
+function urlCopyButton(){
+    var record_url = document.URL;
+    navigator.clipboard.writeText(record_url);
+}
+</script>
+<script>
+    $(function() {
+        $('[data-toggle="tooltip"]').tooltip();
+});
 </script>
 
 {% block network %}

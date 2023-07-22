@@ -2029,6 +2029,27 @@ const UpdateNetworkConfig = function()
 
 }
 
+const CopyNetwork = function ()
+{
+    $.ajax({
+        type: 'POST',
+        url: '/network/copy_network?guid=' + network_guid,
+        data: '',
+        success: function(data, textStatus, xhr) {
+            if (xhr.status === 200)
+            {
+                console.log("Copy is made!");
+            }
+        },
+        error: function(err) {
+            console.log('Copy has not been made.');
+        },
+        contentType: "application/json",
+        dataType: 'json'
+    });
+}
+
+
 const NumWord = function (value, words){
 	value = Math.abs(value) % 100;
 	var num = value % 10;

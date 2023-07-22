@@ -391,3 +391,29 @@ def upload_network_picture():
 
     ret = {'message': 'Неверный запрос', }
     return make_response(jsonify(ret), 400)
+
+@login_required
+def copy_network():
+
+    user = current_user
+    network_guid = request.args.get('guid', type=str)
+
+    if not network_guid:
+        ret = {'message': 'Пропущен параметр GUID. И какую сеть мне открыть?!'}
+        return make_response(jsonify(ret), 400)
+
+    net = Network.query.filter(Network.guid == network_guid).first()
+
+    if not net:
+        ret = {'message': 'Нет такой сети.'}
+        return make_response(jsonify(ret), 400)
+
+    if request.method == "POST":
+        u = uuid.uuid4()
+        n = Network(author_id=user.id, guid=str(u))
+        n.network = net.network
+        n.title = net.title + str (" - копия")
+        db.session.add(n)
+        db.session.commit()
+        ret = {'message': 'Сделана копия.'}
+        return make_response(jsonify(ret), 200)
