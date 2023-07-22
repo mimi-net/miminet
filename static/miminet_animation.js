@@ -51,6 +51,10 @@ var PacketPlayer = (function () {
             p.stop();
         });
 
+        if (!network_cy){
+            return;
+        }
+
         // Remove all packets
         let pkts = network_cy.elements().filter('[type = "packet"]');
 

@@ -1755,21 +1755,37 @@ const SetNetworkPlayerState = function(simultaion_id)
         $('#NetworkPlayer').append('<button type="button" class="btn btn-danger me-2" id="NetworkStopButton"><i class="bx bx-stop fs-xl"></i></button>');
         $('#NetworkPlayer').append('<button type="button" class="btn btn-success" id="NetworkPlayPauseButton"><i class="bx bx-play fs-xl"></i></button>');
 
-        $('#PacketSliderInput').attr({"max" : packets.length, "min" : 0});
-
-        $('#PacketSliderInput').slider().on('slide', function (e) {
-            $('#NetworkPlayerLabel').text($(this).val());
+        // Configure the slider
+        /*
+        $('#PacketSliderInput')[0].noUiSlider.updateOptions({
+            start: [1],
+            range: {
+                'min': 1,
+                'max': packets.length,
+            },
+            format: {
+                to: function (val){return '' + val},
+                from: function (val){return '' + val},
+            },
+            tooltips: false,
         });
 
-        $('#PacketSliderInput').slider().on('change', function (e) {
-            console.log($(this).val());
-        });
+        // Show Slider on
+        $('#PacketSliderInput').removeAttr('hidden');
 
         const pkt_count = packets.reduce((currentCount, row) => currentCount + row.length, 0);
         $('#NetworkPlayerLabel').text(packets.length + ' ' + NumWord(packets.length, ['шаг', 'шага', 'шагов']) + ' / ' + pkt_count + ' ' + NumWord(pkt_count, ['пакет', 'пакета', 'пакетов']));
 
+        $('#PacketSliderInput')[0].noUiSlider.on('update', function (e) {
+            $('#NetworkPlayerLabel').text('Шаг: ' + e[0] + ' (' +  packets[e[0]-1].length + ' ' + NumWord(packets[e[0]-1].length, ['пакет', 'пакета', 'пакетов']) + ')');
+            console.log(e[0]);
+        });
+        */
         // Init player
         PacketPlayer.getInstance().InitPlayer(packets);
+
+        const pkt_count = packets.reduce((currentCount, row) => currentCount + row.length, 0);
+        $('#NetworkPlayerLabel').text(packets.length + ' ' + NumWord(packets.length, ['шаг', 'шага', 'шагов']) + ' / ' + pkt_count + ' ' + NumWord(pkt_count, ['пакет', 'пакета', 'пакетов']));
 
         // Set click handlers
         $('#NetworkPlayPauseButton').click(function() {
@@ -1804,6 +1820,9 @@ const SetNetworkPlayerState = function(simultaion_id)
 
         $('#NetworkStopButton').click(function() {
 
+            // Reset slider.
+            // $('#PacketSliderInput')[0].noUiSlider.reset();
+
             PacketPlayer.getInstance().StopPlayer();
             DrawGraph(nodes, edges);
 
@@ -1823,6 +1842,7 @@ const SetNetworkPlayerState = function(simultaion_id)
     if (simultaion_id)
     {
         $('#NetworkPlayer').empty();
+        // $('#PacketSlider').addAttr('hidden');
         $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" disabled>Эмулируется...</button>');
         $('#NetworkPlayerLabel').text("Ожидание 10-20 сек.");
         CheckSimulation(simultaion_id);
@@ -1832,6 +1852,7 @@ const SetNetworkPlayerState = function(simultaion_id)
     // No packets and no simulation.
     // Add emulation button.
     $('#NetworkPlayer').empty();
+    // $('#PacketSlider').hide();
     $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton">Эмулировать</button>');
     $('#NetworkPlayerLabel').text("Ожидание 10-20 сек.");
 
