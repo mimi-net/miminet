@@ -49,10 +49,19 @@
                             <span data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Сервер &mdash; обслуживает клиентские запросы.">Сервер</span>
                         </div>
                     </div>
+                    <hr class="mb-4">
                     <div class="col-12 text-center">
-                        <button type="button" class="btn btn-primary w-100" id="NetworkRunButton">Эмулировать</button>
-                        <small id="NetworkRunButtonLabel" class="text-muted text-center">Ожидание 10-30 сек.</small>
-                        <br><br>
+                        <div class="d-flex justify-content-center" id="NetworkPlayer">
+                            <button type="button" class="btn btn-primary w-100" id="NetworkRunButton" disabled>Проверка эмуляции</button>
+                        </div>
+                        <div class="pb-4" id="PacketSlider">
+                            <!-- div class="range-slider pt-3" data-start-min="0" data-min="0" data-max="100" data-step="1">
+                                <div class="range-slider-ui mt-0 mb-2" id="PacketSliderInput" hidden></div>
+                                <input class="form-control range-slider-value-min" type="hidden">
+                            </div-->
+                            <small id="NetworkPlayerLabel" class="text-muted text-center">Ожидание 10-30 сек.</small>
+                        </div>
+
                         <small id="NetworkRunButtonHelpLabel" class="text-muted text-center">В случае ошибок или вопросов пишите нам в Телеграм <a href="https://t.me/MimiNetCommunity" parent="_blank">t.me/MimiNetCommunity</a></small>
                     </div>
                 </div>
@@ -95,8 +104,7 @@
     var pcaps = {{ pcaps | safe }};
     var ns = null;
 
-    SetNetworkRunButtonState({% if simulating %} {{simulating.id}} {% else %} 0 {% endif%}, packets);
-
+    SetNetworkPlayerState({% if simulating %} {% if simulating.ready %} 0 {% else %} {{simulating.id}} {% endif%} {% else %} 0 {% endif%})
     DrawGraph();
 </script>
 

@@ -136,10 +136,6 @@ const ConfigHubForm = function(hub_id){
     // Add new form
     $(config_content_id).append(form);
 
-    // Add href for mimishark
-    var url = "/MimiShark?guid="+network_guid
-    $(needhref).attr('href',url)
-
     // Set host_id
     $('#hub_id').val( hub_id );
     $('#net_guid').val( network_guid );
@@ -236,10 +232,18 @@ const ConfigSwtichSTP = function(stp){
 
     $(elem.innerHTML).insertBefore('#config_switch_main_form_submit_button');
 
-    if (stp === 1) 
-    {
+    if (stp === 1) {
         $('#config_switch_stp').attr('checked', 'checked');
     }
+
+    var warning_text = document.getElementById('config_switch_warning_stp_script').innerHTML;
+    $('#config_switch_stp').on('click', function(){
+        if ($(this).is(':checked')){
+            $(warning_text).insertBefore('#config_switch_main_form_submit_button');
+        } else {
+            $('#config_warning_stp').remove();
+        }
+    }); 
 }
 
 const SharedConfigHostForm = function(host_id){
@@ -513,7 +517,7 @@ const ConfigHostJobOnChange = function(evnt){
 
 }
 
-const ConfigHostJob = function(host_jobs)
+const ConfigHostJob = function(host_jobs, shared=0)
 {
 
     let elem = document.getElementById('config_host_job_script').innerHTML;
@@ -564,8 +568,11 @@ const ConfigHostJob = function(host_jobs)
 
         $('#config_host_job_delete_' + jid).click(function(event) {
             event.preventDefault();
-            DeleteJobFromHost(host_id.value, jid, network_guid);
+            if (!shared){
+                DeleteJobFromHost(host_id.value, jid, network_guid);
+            }
         });
+
     });
 }
 
@@ -790,7 +797,7 @@ const ConfigRouterJobOnChange = function(evnt){
 
 }
 
-const ConfigRouterJob = function(router_jobs)
+const ConfigRouterJob = function(router_jobs, shared=0)
 {
 
     let elem = document.getElementById('config_router_job_script').innerHTML;
@@ -841,12 +848,14 @@ const ConfigRouterJob = function(router_jobs)
 
         $('#config_router_job_delete_' + jid).click(function(event) {
             event.preventDefault();
-            DeleteJobFromRouter(router_id.value, jid, network_guid);
+            if (!shared){
+                DeleteJobFromRouter(router_id.value, jid, network_guid);
+            }
         });
     });
 }
 
-const ConfigServerJob = function(server_jobs)
+const ConfigServerJob = function(server_jobs, shared = 0)
 {
 
     let elem = document.getElementById('config_server_job_script').innerHTML;
@@ -897,7 +906,11 @@ const ConfigServerJob = function(server_jobs)
 
         $('#config_server_job_delete_' + jid).click(function(event) {
             event.preventDefault();
-            DeleteJobFromServer(server_id.value, jid, network_guid);
+
+            if (!shared){
+                DeleteJobFromServer(server_id.value, jid, network_guid);
+            }
+
         });
     });
 }
