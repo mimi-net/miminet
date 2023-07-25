@@ -1748,7 +1748,9 @@ const SetNetworkPlayerState = function(simultaion_id)
         });
 
         $('#PacketSliderInput')[0].noUiSlider.on('update', function (e) {
-            $('#NetworkPlayerLabel').text('Шаг: ' + e[0] + ' (' +  packets[e[0]-1].length + ' ' + NumWord(packets[e[0]-1].length, ['пакет', 'пакета', 'пакетов']) + ')');
+            if (!e) return;
+            let x =  Math.round(e[0]);
+            $('#NetworkPlayerLabel').text('Шаг: ' + x + ' (' +  packets[x-1].length + ' ' + NumWord(packets[x-1].length, ['пакет', 'пакета', 'пакетов']) + ')');
         });
 
         // Set click handlers
@@ -1888,7 +1890,9 @@ const SetSharedNetworkPlayerState = function()
         });
 
         $('#PacketSliderInput')[0].noUiSlider.on('update', function (e) {
-            $('#NetworkPlayerLabel').text('Шаг: ' + e[0] + ' (' +  packets[e[0]-1].length + ' ' + NumWord(packets[e[0]-1].length, ['пакет', 'пакета', 'пакетов']) + ')');
+            if (!e) return;
+            let x =  Math.round(e[0]);
+            $('#NetworkPlayerLabel').text('Шаг: ' + x + ' (' +  packets[x-1].length + ' ' + NumWord(packets[x-1].length, ['пакет', 'пакета', 'пакетов']) + ')');
         });
 
         // Set click handlers
