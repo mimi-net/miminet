@@ -1744,7 +1744,9 @@ const SetNetworkPlayerState = function(simultaion_id)
         $('#NetworkPlayerLabel').text(packets.length + ' ' + NumWord(packets.length, ['шаг', 'шага', 'шагов']) + ' / ' + pkt_count + ' ' + NumWord(pkt_count, ['пакет', 'пакета', 'пакетов']));
 
         $('#PacketSliderInput')[0].noUiSlider.on('slide', function (e) {
-            PacketPlayer.getInstance().setAnimationTrafficStep(e[0]-1);
+            if (!e) return;
+            let x =  Math.round(e[0]);
+            PacketPlayer.getInstance().setAnimationTrafficStep(x-1);
         });
 
         $('#PacketSliderInput')[0].noUiSlider.on('update', function (e) {
@@ -1886,6 +1888,8 @@ const SetSharedNetworkPlayerState = function()
         $('#NetworkPlayerLabel').text(packets.length + ' ' + NumWord(packets.length, ['шаг', 'шага', 'шагов']) + ' / ' + pkt_count + ' ' + NumWord(pkt_count, ['пакет', 'пакета', 'пакетов']));
 
         $('#PacketSliderInput')[0].noUiSlider.on('slide', function (e) {
+            if (!e) return;
+            let x =  Math.round(e[0]);
             PacketPlayer.getInstance().setAnimationTrafficStep(e[0]-1);
         });
 
