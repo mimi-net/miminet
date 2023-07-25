@@ -7,6 +7,9 @@ var PacketPlayer = (function () {
     var network_cy = null;
     var player_pause = 0;
     var player_play = 0;
+    var pkts_on_the_fly = 0;
+
+    var animation_traffic_step_callback = function(){};
 
     var instance;
 
@@ -17,6 +20,7 @@ var PacketPlayer = (function () {
         clearAnimationPackets();
         setPlayerPause(0);
         setPlayerPlay(0);
+        pkts_on_the_fly = 0;
     }
 
     const StartPlayer = function(cy){
@@ -66,6 +70,7 @@ var PacketPlayer = (function () {
         clearAnimationPackets();
         setPlayerPause(0);
         setPlayerPlay(0);
+        pkts_on_the_fly = 0;
         return;
     }
 
@@ -97,6 +102,7 @@ var PacketPlayer = (function () {
 
         PlayStep();
         increaseAnimationTrafficStep();
+        getAnimationTrafficStepCallback().call();
         return;
     }
 
@@ -128,7 +134,7 @@ var PacketPlayer = (function () {
             return;
         }
 
-        let pkts = traffic[animation_traffic_step];
+        let pkts = traffic[getAnimationTrafficStep()];
 
         if (pkts.length == 0)
         {
@@ -161,27 +167,22 @@ var PacketPlayer = (function () {
 
         pkts.forEach(function(p_item, idx, array){
 
-            let edge = network_cy.edges('[id = "' + p_item['config']['path'] + '"]');
+            let pp_item = jQuery.extend(true, {}, p_item);
+            pp_item['data']['id'] = uid();
 
-            if (!edge.source()) {
-                return;
-            }
+            let edge = network_cy.edges('[id = "' + pp_item['config']['path'] + '"]');
 
-            let pkt_id = p_item['data']['id'];
+            if (!edge.source()) return;
+
+            let pkt_id = pp_item['data']['id'];
             let from_xy = undefined;
             let to_xy = undefined;
-            let last_p_item = 0;
 
-            // Is this is last packet?
-            if (idx === array.length - 1){
-                last_p_item = 1;
-            }
-
-            if (edge.source().id() === p_item['config']['source'])
+            if (edge.source().id() === pp_item['config']['source'])
             {
                 from_xy = edge.sourceEndpoint();
                 to_xy = edge.targetEndpoint();
-            } else if (edge.source().id() === p_item['config']['target'])
+            } else if (edge.source().id() === pp_item['config']['target'])
             {
                 from_xy = edge.targetEndpoint();
                 to_xy = edge.sourceEndpoint();
@@ -191,13 +192,14 @@ var PacketPlayer = (function () {
             }
 
             // Start coordinates
-            p_item['renderedPosition'] = {x: from_xy['x'] * zoom + px, y: from_xy['y'] * zoom + py};
+            pp_item['renderedPosition'] = {x: from_xy['x'] * zoom + px, y: from_xy['y'] * zoom + py};
 
             // User can't grab nor select
-            p_item['grabbable'] = false;
-            p_item['selectable'] = false;
+            pp_item['grabbable'] = false;
+            pp_item['selectable'] = false;
 
-            network_cy.add(p_item);
+            network_cy.add(pp_item);
+            pkts_on_the_fly++;
             network_cy.elements().last().addClass("hidden");
 
             let edge_wait = 0;
@@ -217,10 +219,7 @@ var PacketPlayer = (function () {
                 complete: function(){
                     let pkt = network_cy.elements().filter('[id = "' + pkt_id + '"]')[0];
 
-                    if (!pkt)
-                    {
-                        return;
-                    }
+                    if (!pkt) return;
 
                     pkt.removeClass('hidden');
 
@@ -230,7 +229,10 @@ var PacketPlayer = (function () {
                         duration: 1000,
                         complete: function() {
                             network_cy.remove('[id = "' + pkt_id + '"]');
-                            if (last_p_item){
+                            pkts_on_the_fly--;
+
+                            // If it's the last packet
+                            if (!pkts_on_the_fly){
                                 PlayNextStep();
                             }
                         }
@@ -273,6 +275,12 @@ var PacketPlayer = (function () {
     }
 
     const clearAnimationPackets = function () {
+
+        // Stop all animations
+        animation_packets.forEach(function(p, idx, array){
+            p.stop();
+        });
+
         animation_packets = [];
         return;
     }
@@ -293,11 +301,25 @@ var PacketPlayer = (function () {
 
     const setPlayerPlay = function (s){
         player_play = s;
-        return
+        return;
     }
 
     const getPlayerPlay = function (){
         return player_play;
+    }
+
+    const setAnimationTrafficStepCallback = function (s){
+        animation_traffic_step_callback = s;
+        return;
+    }
+
+    const resetAnimationTrafficStepCallback = function (){
+        animation_traffic_step_callback = function(){};
+        return;
+    }
+
+    const getAnimationTrafficStepCallback = function (){
+        return animation_traffic_step_callback;
     }
 
     const createInstance = function () {
@@ -305,10 +327,14 @@ var PacketPlayer = (function () {
         return {
             InitPlayer: InitPlayer,
             StopPlayer: StopPlayer,
-            StartPlayer : StartPlayer,
-            PausePlayer : PausePlayer,
-            getPlayerPause : getPlayerPause,
-            getPlayerPlay : getPlayerPlay
+            StartPlayer: StartPlayer,
+            PausePlayer: PausePlayer,
+            getPlayerPause: getPlayerPause,
+            getPlayerPlay: getPlayerPlay,
+            setAnimationTrafficStepCallback: setAnimationTrafficStepCallback,
+            resetAnimationTrafficStepCallback: resetAnimationTrafficStepCallback,
+            getAnimationTrafficStep: getAnimationTrafficStep,
+            setAnimationTrafficStep: setAnimationTrafficStep
         }
     }
 

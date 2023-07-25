@@ -55,7 +55,13 @@
                         <div class="d-flex justify-content-center" id="NetworkPlayer">
                             <button type="button" class="btn btn-primary w-100" id="NetworkRunButton" disabled>Проверка эмуляции</button>
                         </div>
-                        <small id="NetworkPlayerLabel" class="text-muted text-center"></small>
+                        <div class="pb-4" id="PacketSlider">
+                            <div class="range-slider pt-3" data-start-min="0" data-min="0" data-max="100" data-step="1">
+                                <div class="range-slider-ui mt-0 mb-2" id="PacketSliderInput"></div>
+                                <input class="form-control range-slider-value-min" type="hidden">
+                            </div>
+                            <small id="NetworkPlayerLabel" class="text-muted text-center">Ожидание 10-30 сек.</small>
+                        </div>
                         <br><br>
                         <small id="NetworkRunButtonHelpLabel" class="text-muted text-center">В случае ошибок или вопросов пишите нам в Телеграм <a href="https://t.me/MimiNetCommunity" parent="_blank">t.me/MimiNetCommunity</a></small>
                     </div>
