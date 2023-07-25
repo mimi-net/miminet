@@ -1890,7 +1890,7 @@ const SetSharedNetworkPlayerState = function()
         $('#PacketSliderInput')[0].noUiSlider.on('slide', function (e) {
             if (!e) return;
             let x =  Math.round(e[0]);
-            PacketPlayer.getInstance().setAnimationTrafficStep(e[0]-1);
+            PacketPlayer.getInstance().setAnimationTrafficStep(x-1);
         });
 
         $('#PacketSliderInput')[0].noUiSlider.on('update', function (e) {
