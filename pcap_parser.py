@@ -58,6 +58,8 @@ def create_mimishark_json(pcap, to_json):
         for timestamp, buf in pcap:
             pcap_file = {}
             eth = dpkt.ethernet.Ethernet(buf)
+            if isinstance(eth.data, dpkt.arp.ARP):
+                print(eth.data.pprint, file = "test_for_arp.txt")
             if not isinstance(eth.data, dpkt.ip.IP):
                 continue
 

@@ -41,7 +41,7 @@
 
         </thead>
 
-        <tbody>
+        <tbody id="height_changer">
 
             {% for el in pcap_data %}
             <tr id="{{loop.index}}">
@@ -58,13 +58,13 @@
       </table>
     </div>
     <div class="row">
-        <div class="col-7 border" style="overflow: auto;">
+        <div class="col-6 border" style="overflow: auto;">
             <div style="height: 282px;">
                 <div id="decode" class="info">
                 </div>
             </div>
         </div>
-      <div class="col-5 text-center border" style="overflow: auto;">
+      <div class="col-6 text-center border" style="overflow: auto;">
         <div style="display: flex; justify-content: space-between;  align-items: flex-start; padding: 10px; height: 282px;">
           <div class="d-flex">
             <div style="text-align: left;" id="rows">
