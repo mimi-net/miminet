@@ -130,8 +130,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <div class="modal-body">
                     <form id="networkDeleteForm" method="POST" action="{{ url_for('delete_network', guid=network.guid) }}">
                     </form>
-                </div>
-                <div class="modal-footer">
                     <button type="button" class="btn btn-danger" style="float: left;" id="networkDeleteSubmitButton">Да, удалить!</button>
                     <button type="button" data-dismiss="modal" class="btn btn-secondary" style="float: right;" id="networkDeleteCancel">Нет</button>
                 </div>
