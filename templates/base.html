@@ -62,13 +62,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="btn btn-success btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" title="Скопировать ссылку на сеть" onclick="urlCopyButton()">
+                        <a class="btn btn-success btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" title="Сеть доступна по URL" onclick="urlCopyButton()">
                             <i class='bx bx-share-alt fs-4 mx-1' ></i>
                         </a>
                     </li>
 
                      <li class="nav-item">
-                        <a class="btn btn-outline-primary btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" title="Скопировать к себе сеть" onclick="CopyNetwork()">
+                        <a class="btn btn-outline-primary btn-icon me-4" data-target="#ModalCopy" data-toggle="tooltip" data-bs-placement="bottom" title="Сохранить копию" onclick="CopyNetwork()">
                             <i class='bx bx-copy fs-4 mx-1'></i>
                         </a>
                     </li>
@@ -100,8 +100,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="netConfigModalLabel">Настройки сети</h5>
-                    <button id="networkConfigrationCancelIcon" type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                    <button id="networkConfigrationCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть">
                     </button>
                 </div>
                 <div class="modal-body">
@@ -126,17 +125,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="netDeleteModalLabel">Вы точно хотите удалить эту сеть?</h5>
-                    <button id="networkDeleteCancelIcon" type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button id="networkDeleteCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть"/>
                 </div>
                 <div class="modal-body">
                     <form id="networkDeleteForm" method="POST" action="{{ url_for('delete_network', guid=network.guid) }}">
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" data-dismiss="modal" class="btn" id="networkDeleteCancel">Нет</button>
-                    <button type="button" class="btn btn-danger" id="networkDeleteSubmitButton">Да, удалить!</button>
+                    <button type="button" class="btn btn-danger" style="float: left;" id="networkDeleteSubmitButton">Да, удалить!</button>
+                    <button type="button" data-dismiss="modal" class="btn btn-secondary" style="float: right;" id="networkDeleteCancel">Нет</button>
                 </div>
             </div>
         </div>
@@ -147,9 +144,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="noJobsModalLabel">Что делать?</h5>
-                    <button id="noJobsModalCancelIcon" type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button id="noJobsModalCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть"/>
                 </div>
                 <div class="modal-body">
                     <p>Зачем симулировать сеть, если она ничего не делает?!</p>
@@ -162,6 +157,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </div>
         </div>
     </div>
+
+<div class="modal" id="ModalCopy" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Вы успешно сохранили сеть к себе</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"/>
+                </div>
+                <div class="modal-body">
+                    <button class="btn btn-primary shadow-primary modal-option" data-option="edit">Перейти к редактированию</button>
+                    <button class="btn btn-secondary shadow-secondary modal-option" data-option="continue">Продолжить здесь</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertContainer"></div>
 {% endif %}
 
 {% block content %}
@@ -285,15 +297,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </script>
 
 <script type="text/javascript">
-function urlCopyButton(){
-    var record_url = document.URL;
-    navigator.clipboard.writeText(record_url);
+    function urlCopyButton(){
+        var record_url = document.URL;
+        navigator.clipboard.writeText(record_url);
+        console.log('Copy url is made!');
+
+        var alertElement = document.createElement("div");
+        alertElement.classList.add("alert", "alert-success", "fixed-top");
+        alertElement.style.textAlign = "center";
+        alertElement.style.width = "50%";
+        alertElement.style.marginLeft = "auto";
+        alertElement.style.marginRight = "auto";
+        alertElement.innerHTML = "Ссылка на сеть скопирована";
+        var alertContainer = document.getElementById("alertContainer");
+        alertContainer.appendChild(alertElement);
+        setTimeout(function() {
+            alertContainer.removeChild(alertElement);
+        }, 1000);
 }
-</script>
-<script>
+
     $(function() {
         $('[data-toggle="tooltip"]').tooltip();
-});
+    });
 </script>
 
 {% block network %}

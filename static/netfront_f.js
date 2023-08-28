@@ -2056,7 +2056,19 @@ const CopyNetwork = function ()
         success: function(data, textStatus, xhr) {
             if (xhr.status === 200)
             {
-                console.log("Copy is made!");
+                console.log("Copy network is made.");
+                $('#ModalCopy').modal('show');
+                $('.modal-option').click(function() {
+                var selectedOption = $(this).attr('data-option');
+                    if (selectedOption === 'edit') {
+                        var newUrl = data.new_url;
+                        window.location.href = newUrl;
+                        console.log('Go to editing');
+                    } else if (selectedOption === 'continue') {
+                        console.log('Continue here');
+                    }
+                $('#ModalCopy').modal('hide');
+                });
             }
         },
         error: function(err) {

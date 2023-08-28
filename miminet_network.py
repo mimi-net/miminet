@@ -415,5 +415,5 @@ def copy_network():
         n.title = net.title + str (" - копия")
         db.session.add(n)
         db.session.commit()
-        ret = {'message': 'Сделана копия.'}
+        ret = {'message': 'Сделана копия.', 'new_url': '/web_network?guid=' + str(u)}
         return make_response(jsonify(ret), 200)
