@@ -981,3 +981,8 @@ const ConfigServerJobOnChange = function(evnt){
     }
 
 }
+
+const DisableFormInputs = function(){
+    let s = config_content_id + ' :input';
+    $(s).prop("disabled", true);
+}

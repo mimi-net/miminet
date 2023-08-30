@@ -150,6 +150,10 @@ const ShowHostConfig = function(n, shared = 0){
 
         ConfigHostGateway(default_gw);
     }
+
+    if (shared){
+        DisableFormInputs();
+    }
 }
 
 const ShowRouterConfig = function(n, shared = 0){
@@ -241,6 +245,10 @@ const ShowRouterConfig = function(n, shared = 0){
 
         ConfigRouterGateway(default_gw);
     }
+
+    if (shared){
+        DisableFormInputs();
+    }
 }
 
 const ShowHubConfig = function(n, shared = 0){
@@ -257,6 +265,10 @@ const ShowHubConfig = function(n, shared = 0){
 
     // Add hostname
     ConfigHubName(hostname);
+
+    if (shared){
+        DisableFormInputs();
+    }
 }
 
 const ShowSwitchConfig = function(n, shared = 0){
@@ -276,6 +288,10 @@ const ShowSwitchConfig = function(n, shared = 0){
 
     //Add checkbox STP
     ConfigSwtichSTP(n.config.stp);
+
+    if (shared){
+        DisableFormInputs();
+    }
 }
 
 const ShowEdgeConfig = function(edge_id){
@@ -294,6 +310,10 @@ const ShowEdgeConfig = function(edge_id){
 
     // Add source and target info
     ConfigEdgeEndpoints(edge_source, edge_target);
+
+    if (shared){
+        DisableFormInputs();
+    }
 }
 
 const PacketUid = function(){
@@ -388,6 +408,10 @@ const ShowServerConfig = function(n, shared = 0){
         }
 
         ConfigServerGateway(default_gw);
+    }
+
+    if (shared){
+        DisableFormInputs();
     }
 }
 
