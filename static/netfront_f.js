@@ -1977,7 +1977,7 @@ const TakeGraphPictureAndUpdate = function()
         return;
     }
 
-    let png_blob = global_cy.png({output: 'blob', maxWidth: 280, maxHeight: 172});
+    let png_blob = global_cy.png({output: 'blob', maxWidth: 512, maxHeight: 512});
 
     $.ajax({
         type: 'POST',
@@ -2028,8 +2028,8 @@ const UpdateNetworkConfig = function()
         return;
     }
 
-    let data = {'network_title' : network_title, 'zoom' : global_cy.zoom(),
-     'pan_x' : global_cy.pan().x, 'pan_y' : global_cy.pan().y};
+    let data = {'network_title' : network_title, 'network_description' : network_description,
+    'zoom' : global_cy.zoom(),'pan_x' : global_cy.pan().x, 'pan_y' : global_cy.pan().y};
 
     $.ajax({
         type: 'POST',

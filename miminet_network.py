@@ -51,6 +51,11 @@ def update_network_config():
     if title:
         net.title=title
 
+    description = net_config.get('network_description').strip()
+
+    if description:
+        net.description = description
+
     zoom = net_config.get('zoom')
 
     # Default zoom
@@ -391,6 +396,7 @@ def upload_network_picture():
 
     ret = {'message': 'Неверный запрос', }
     return make_response(jsonify(ret), 400)
+
 
 @login_required
 def copy_network():

@@ -47,6 +47,8 @@ class Network(db.Model):
     guid = db.Column(db.String(512), nullable=False)
     title = db.Column(db.String(1024), default='Новая сеть', nullable=False)
 
+    description = db.Column(db.String(4096), default='', nullable=True)
+
     network = db.Column(db.UnicodeText, default=make_empty_network, nullable=False)
     preview_uri = db.Column(db.String(255), default='first_network.jpg', nullable=False)
 
