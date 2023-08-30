@@ -96,7 +96,7 @@ def examples():
              '19e7c6b6-9541-4602-8c78-d0c64c069b41', '076f1ae4-1a6d-42fd-b8f5-9c09cdc4f930',
              'd35bcad2-b2be-4c2a-9902-26d4edd0bb1d', '4fc0fafb-2a16-4244-a664-3f1e8f788a63',
              '6994b921-cc0f-4cbd-b209-7f30784027d7', '1646e111-1a47-4d98-a253-c396904e5351']
-    networks = Network.query.filter(Network.guid.in_(guids)).order_by(Network.id.desc()).all()
+    networks = Network.query.filter(Network.guid.in_(guids)).order_by(Network.id.asc()).all()
     return render_template("examples.html", networks = networks)
 
 
