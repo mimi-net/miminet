@@ -23,6 +23,9 @@ $('#network_scheme').droppable({
         // We add new device. Drop the network state.
         SetNetworkPlayerState(-1);
 
+        // Save the network state if we gonna CTRL+Z.
+        SaveNetworkObject();
+
         if (type === 'host'){
 
             let node_id = HostUid();

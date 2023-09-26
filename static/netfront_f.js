@@ -2,6 +2,7 @@ let SimulationId = 0;
 let global_cy = undefined;
 let global_eh = undefined;
 var NetworkUpdateTimeoutId = -1;
+let NetworkCache = [];
 
 const uid = function(){
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -294,7 +295,7 @@ const ShowSwitchConfig = function(n, shared = 0){
     }
 }
 
-const ShowEdgeConfig = function(edge_id){
+const ShowEdgeConfig = function(edge_id, shared = 0){
 
     let ed = edges.find(ed => ed.data.id === edge_id);
 
@@ -521,6 +522,9 @@ const AddEdge = function(source_id, target_id){
         {
             return;
         }
+
+        // Save the network state.
+        SaveNetworkObject();
 
         // Add edge
         let edge_id = EdgeUid();
@@ -1073,7 +1077,11 @@ const DrawGraph = function() {
 
     $(document).on('keyup', function(e){
 
-        if (e.keyCode ==  46 && selecteed_node_id) {
+        if (e.keyCode == 46 && selecteed_node_id) {
+
+            // Save the network state.
+            SaveNetworkObject();
+
             DeleteNode(selecteed_node_id);
             DeleteJob(selecteed_node_id);
 
@@ -1092,6 +1100,10 @@ const DrawGraph = function() {
             SetNetworkPlayerState(-1);
         }
         if (e.keyCode ==  46 && selected_edge_id) {
+
+            // Save the network state.
+            SaveNetworkObject();
+
             DeleteEdge(selected_edge_id);
 
             ClearConfigForm('');
@@ -1108,6 +1120,26 @@ const DrawGraph = function() {
             // Reset network state
             SetNetworkPlayerState(-1);
         }
+
+        if (e.keyCode == 90 && e.ctrlKey){
+
+            ClearConfigForm('');
+            selecteed_node_id = 0;
+            selected_edge_id = 0;
+
+            RestoreNetworkObject();
+
+            PostNodesEdges();               // Update network on server
+            cy.elements().remove();
+            cy.add(nodes);
+            cy.add(edges);
+
+            TakeGraphPictureAndUpdate();
+
+            // Reset network state
+            SetNetworkPlayerState(-1);
+        }
+
     });
 }
 
@@ -2111,4 +2143,29 @@ const NumWord = function (value, words){
 	if(num > 1 && num < 5) return words[1];
 	if(num == 1) return words[0];
 	return words[2];
+}
+
+const SaveNetworkObject = function (){
+    let n = JSON.parse(JSON.stringify(nodes));
+    let e = JSON.parse(JSON.stringify(edges));
+
+    NetworkCache.push({
+        nodes: n,
+        edges: e,
+    });
+
+    return 0;
+}
+
+const RestoreNetworkObject = function (){
+    let x = NetworkCache.pop();
+
+    if (!x){
+        return;
+    }
+
+    nodes=x.nodes;
+    edges=x.edges;
+
+    return 0;
 }
