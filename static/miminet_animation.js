@@ -1,3 +1,4 @@
+
 var PacketPlayer = (function () {
 
     var animation_traffic_step = 0;
@@ -191,6 +192,8 @@ var PacketPlayer = (function () {
                 return;
             }
 
+            let curve = edge.rscratch();
+
             // Start coordinates
             pp_item['renderedPosition'] = {x: from_xy['x'] * zoom + px, y: from_xy['y'] * zoom + py};
 
@@ -235,6 +238,18 @@ var PacketPlayer = (function () {
                             if (!pkts_on_the_fly){
                                 PlayNextStep();
                             }
+                        },
+                        step: function () {
+                            this.easingImpl = (() => {
+                                return (start, end, percent) => {
+                                    if (curve.ctrlpts) {
+                                        let middle = (start == curve.startX || start == curve.endX) ? curve.ctrlpts[0] : curve.ctrlpts[1];
+                                        return (1 - percent) * (1 - percent) * start + 2 * (percent) * (1 - percent) * (middle) + percent * percent * end
+                                    } else {
+                                        return start + (end - start) * percent;
+                                    }
+                                }
+                            })();
                         }
                     });
 
