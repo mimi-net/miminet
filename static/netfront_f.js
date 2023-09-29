@@ -693,7 +693,7 @@ const DeleteEdge = function (edge_id) {
         return;
     }
 
-    let connected_nodes = [ed.data.source, ed.data.source];
+    let connected_nodes = [ed.data.source, ed.data.target];
     let iterator = connected_nodes.values();
 
     for (let node_id of iterator){
