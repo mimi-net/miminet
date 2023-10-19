@@ -385,7 +385,7 @@ def upload_network_picture():
             return make_response(jsonify(ret), 400)
 
         # Remove old picture
-        if net.preview_uri != 'first_network.jpg':
+        if net.preview_uri != 'first_network.jpg' and net.preview_uri != 'switch_and_hub.png':
             if os.path.isfile('static/images/preview' + "/" + net.preview_uri):
                 os.unlink('static/images/preview' + "/" + net.preview_uri)
 

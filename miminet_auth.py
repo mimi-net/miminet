@@ -2,6 +2,7 @@ import os
 import pathlib
 import requests
 import json
+import uuid
 
 from google.oauth2 import id_token
 import google.auth.transport.requests
@@ -14,7 +15,8 @@ from flask_login import login_user, login_required, logout_user, current_user, L
 from flask import session, request, flash, render_template, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from miminet_model import User, db
+from miminet_model import User, Network, db
+from miminet_config import make_example_net_switch_and_hub
 
 # Global variables
 UPLOAD_FOLDER = 'static/avatar/'
@@ -140,6 +142,7 @@ def google_callback():
 
     state = session["state"]
     print(request.args.get('state'), session)
+    user_is_new = False
 
     if not state:
         redirect(url_for('login_index'))
@@ -188,6 +191,7 @@ def google_callback():
                              email=id_info.get('email'))
             db.session.add(new_user)
             db.session.commit()
+            user_is_new = True
         except SQLAlchemyError as e:
             db.session.rollback()
             error = str(e.__dict__['orig'])
@@ -199,6 +203,13 @@ def google_callback():
         user = User.query.filter_by(google_id=id_info.get('sub')).first()
 
     login_user(user, remember=True)
+
+    if user_is_new:
+        u = uuid.uuid4()
+        n = Network(author_id=user.id, network=make_example_net_switch_and_hub(), title='Свитч и хаб (пример сети)', guid=str(u), preview_uri='switch_and_hub.png')
+        db.session.add(n)
+        db.session.commit()
+
     return redirect_next_url(fallback=url_for('home'))
 
 
@@ -206,6 +217,7 @@ def google_callback():
 def vk_callback():
 
     user_code = request.args.get('code')
+    user_is_new = False
 
     if not user_code:
         return redirect(url_for('login_index'))
@@ -253,6 +265,9 @@ def vk_callback():
                              email=vk_email)
             db.session.add(new_user)
             db.session.commit()
+
+            user_is_new = True
+
         except SQLAlchemyError as e:
             db.session.rollback()
             error = str(e.__dict__['orig'])
@@ -264,6 +279,13 @@ def vk_callback():
         user = User.query.filter_by(vk_id=vk_id).first()
 
     login_user(user, remember=True)
+
+    if user_is_new:
+        u = uuid.uuid4()
+        n = Network(author_id=user.id, network=make_example_net_switch_and_hub(), title='Свитч и хаб (пример сети)', guid=str(u), preview_uri='switch_and_hub.png')
+        db.session.add(n)
+        db.session.commit()
+
     return redirect_next_url(fallback=url_for('home'))
 
 
