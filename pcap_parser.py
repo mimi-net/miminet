@@ -185,12 +185,9 @@ def create_mimishark_json(pcap, to_json):
 
 
 def from_pcap_to_json(from_pcap, to_json):
-    #delete this 2 strings and delete # from next ones
-    from_pcap = 'static/pcaps/9dd18dc0-0a37-48d5-b205-6292ec59be18/iface_72841107.pcap'
-    to_json = 'static/pcaps/9dd18dc0-0a37-48d5-b205-6292ec59be18/iface_72841107.json'
     # Do we already have a JSON file?
-    #if os.path.isfile(to_json):
-    #   return to_json
+    if os.path.isfile(to_json):
+        return to_json
 
     # No ?
     # Is pcap file exists?
@@ -200,6 +197,3 @@ def from_pcap_to_json(from_pcap, to_json):
     with open(from_pcap, 'rb') as f:
         pcap = dpkt.pcap.Reader(f)
         create_mimishark_json(pcap, to_json)
-
-from_pcap_to_json('','')
-#Delete this too
