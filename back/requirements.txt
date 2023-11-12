@@ -1,0 +1,5 @@
+celery==5.3.4
+dpkt==1.9.8
+mininet==2.3.0.dev6
+redis==5.0.1
+python-dotenv==1.0.0

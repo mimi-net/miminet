@@ -1,0 +1,63 @@
+- hosts: all
+  vars_files:
+    - ../.env.yml
+  environment:
+  
+  tasks:
+    - name: Install packages required for mininet to work
+      ansible.builtin.apt:
+        pkg:
+          - python3-dev
+          - bridge-utils
+          - curl
+          - dnsutils
+          - ifupdown
+          - iproute2
+          - iptables
+          - iputils-ping
+          - openvswitch-switch
+          - openvswitch-testcontroller
+          - mininet
+          - tcpdump
+          - git
+          - python3-pip
+          - python3-setuptools
+          - python3-venv
+        force_apt_get: true
+        update_cache: true
+        install_recommends: false
+        state: latest
+      become: true
+      become_method: sudo
+      
+    - name: Start openvswitch-switch
+      ansible.builtin.shell: |
+        sudo service openvswitch-switch start
+        
+    - name: Create env
+      ansible.builtin.shell:
+        python3 -m venv venv
+      args:
+        chdir: /vagrant/
+        
+    - name: Install requirements
+      ansible.builtin.pip:
+        requirements: requirements.txt
+        virtualenv: venv
+        chdir: /vagrant/
+        
+        
+    - name: Install ipmininet
+      ansible.builtin.shell: |
+        . venv/bin/activate
+        . vagrant/ipmininet_install.sh
+      args:
+        chdir: /vagrant/
+        
+           
+    - name: Start celery
+      ansible.builtin.shell: |
+        . venv/bin/activate
+        sudo python3 -m celery -A celery_app worker --loglevel=info --concurrency={{ celery_concurrency }} -Q {{ queue_names }}
+      args:
+        chdir: /vagrant/
