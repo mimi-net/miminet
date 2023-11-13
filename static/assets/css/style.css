@@ -133,3 +133,6 @@ tbody tr:not(.no-hover):hover {
     width: 450px;
 }
 
+#height_changer tr {
+    height: 50px;
+}
