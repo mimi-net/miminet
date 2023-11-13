@@ -1,0 +1,42 @@
+name: Python package
+
+on: [push, pull_request]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ['back', 'front']
+        python-version: ["3.11"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          pip install flake8 mypy black isort wheel
+          pip install -r ${{matrix.node}}/requirements.txt
+          
+          if [ ! -d /opt/mininet_dependencies ]; then
+            mkdir /opt/mininet_dependencies
+          fi
+          
+          if [ ${{matrix.node}} == "back" ]; then
+            pip install git+https://github.com/mimi-net/ipmininet.git
+          fi
+      - name: Lint with mypy
+        run: |
+          mypy ${{matrix.node}}
+      - name: Lint with flake8
+        run: |
+          flake8 ${{matrix.node}} --count --verbose --max-complexity=10 --max-line-length=88 --extend-ignore=E501,W391  --statistics
+      - name: Lint with black
+        run: |
+          black ${{matrix.node}} --check --verbose --diff
+      - name: Lint with isort
+        run: |
+          isort ${{matrix.node}} --check --profile="black" -l 88
