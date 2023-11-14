@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Вход/Регистрация в веб-эмулятор{% endblock %}
+{% block description %}Эмулятор компьютерной сети для образовательных целей на базе ОС Linux{% endblock %}
+{% block content %}
+
+<section class="vh-100">
+    <div class="container py-3 h-100">
+        <div class="row d-flex align-items-center justify-content-center h-100">
+            <div class="col-md-7 col-lg-5 col-xl-5 offset-xl-1">
+            <h1 class="text-center">Добро пожаловать!</h1>
+
+                <!--
+                <p class="text-center">Не зарегистрированы?<a href="!#">Создайте аккаунт.</a></p>
+
+
+                <form  class="needs-validation mb-2" novalidate="">
+
+          <div class="position-relative mb-4">
+                <label for="email" class="form-label fs-base">Электронная почта</label>
+                <input type="email" id="email" class="form-control form-control-lg" required="">
+                <div class="invalid-feedback position-absolute start-0 top-100">Please enter a valid email address!</div>
+          </div>
+
+
+          <div class="mb-4">
+                <label for="password" class="form-label fs-base">Пароль</label>
+                <div class="password-toggle">
+                  <input type="password" id="password" class="form-control form-control-lg" required="">
+                  <label class="password-toggle-btn" aria-label="Show/hide password">
+                    <input class="password-toggle-check" type="checkbox">
+                    <span class="password-toggle-indicator"></span>
+                  </label>
+                  <div class="invalid-feedback position-absolute start-0 top-100">Please enter your password!</div>
+                </div>
+          </div>
+
+
+          <div class="mb-4">
+                <div class="form-check">
+                  <input type="checkbox" id="remember" class="form-check-input">
+                  <label for="remember" class="form-check-label fs-base">Запомните меня</label>
+                </div>
+          </div>
+
+
+            <div class="butt container">
+             <div class="row">
+                <button type="submit" class="btn btn-primary shadow-primary btn-lg w-100">Вход</button>
+             </div>
+            </div>
+    </form>
+                <a href="#" class="btn btn-link btn-lg w-100">Забыли пароль?</a>
+                -->
+                <hr class="my-4">
+                 <h6 class="text-center mb-4">Вход с помощью</h6>
+            <div class="row row-cols-1 row-cols-sm-2">
+              <div class="col mb-3">
+                    <!-- Google -->
+                    <a href="{{ url_for('google_login') }}" class="btn btn-icon btn-secondary btn-google btn-lg w-100">
+                        <i class="bx bxl-google"></i>
+                    </a>
+                </div>
+                <div class="col mb-3">
+                    <!-- VKontakte -->
+                    <a href="https://oauth.vk.com/authorize?client_id=51544060&display=page&redirect_uri=https://miminet.ru/auth/vk_callback&scope=friends,email&response_type=code&v=5.130" class="btn btn-icon btn-secondary btn-vk btn-lg w-100">
+                        <i class="bx bxl-vk"></i>
+                    </a>
+                </div>
+             </div>
+          </div>
+    </div>
+  </div>
+</div>
+
+</section>
+
+{% endblock %}

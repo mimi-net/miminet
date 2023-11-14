@@ -1,0 +1,27 @@
+<script id="config_switch_main_form_script" type="text/plain">
+    <form id='config_switch_main_form' action='/host/switch_save_config' method='POST'>
+        <input type="hidden" id="switch_id" name="switch_id" value=""/>
+        <input type="hidden" id="net_guid" name="net_guid" value=""/>
+        <button id="config_switch_main_form_submit_button" type="submit" class="btn btn-success w-100">Сохранить</button>
+    </form>
+</script>
+
+<script id="config_switch_name_script" type="text/plain">
+    <div class="form-group pb-2">
+        <label for="config_switch_name" class="text-sm">Имя Свитча</label>
+        <input type="text" class="form-control form-control-sm" id="config_switch_name" name="config_switch_name" value=''>
+    </div>
+</script>
+
+<script id="config_switch_checkbox_stp_script" type="text/plain">
+    <div class="form-group form-switch">
+        <input id="config_switch_stp" name="config_switch_stp" type="checkbox" class="form-check-input">
+        <label class="form-check-label" for="customSwitch1">STP</label>
+    </div>
+</script>
+
+<script id="config_switch_warning_stp_script" type="text/plain">
+    <div id="config_warning_stp" class="form-group pb-2">
+        <label class="text-sm" style="font-size:0.85em">Включение протокола STP увеличивает эмуляцию на <b>30 секунд</b>.</label>
+    </div>
+</script>
