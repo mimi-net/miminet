@@ -155,6 +155,7 @@ def create_mimishark_json(pcap, to_json):
                 pcap_file["decode_eth"] = f" Ethernet Frame:  Destination: {mac_to_str(eth.dst)}  Sourse: {mac_to_str(eth.src)}  Type: ARP (0x{bytes_repr[36:41].replace(' ','')})"
                 pcap_file["decode_arp"] = ip_protocol_prop(arp_pkt).replace("SenderMac", str(utils.mac_to_str(arp_pkt.sha))).replace("SenderIP", str(utils.inet_to_str(arp_pkt.spa))).replace('TargerMac', str(utils.mac_to_str(eth.dst))).replace('TargetIP', str(utils.inet_to_str(arp_pkt.tpa)))
                 #.replace('"','doublePrime').replace("'",'singlePrime').replace('\\','doubleslash')
+                json_file.append(pcap_file)
             if isinstance(eth.data, dpkt.ip.IP):
 
                 pcap_file["time"] = str(datetime.datetime.utcfromtimestamp(timestamp))
@@ -179,7 +180,7 @@ def create_mimishark_json(pcap, to_json):
                 pcap_file["decode_eth"] = f" Ethernet Frame:  Destination: {mac_to_str(eth.dst)}  Sourse: {mac_to_str(eth.src)}  Type: IPv{ip.v} (0x{bytes_repr[36:41].replace(' ','')})"
                 pcap_file["decode_ip"] = ip_protocol_prop(ip) + " Source Address: " + inet_to_str(ip.src) + ", Destination Address: " + inet_to_str(ip.dst)
                 pcap_file[f"decode_{ip.data.__class__.__name__}"] = ip_protocol_prop(ip.data)
-            json_file.append(pcap_file)
+                json_file.append(pcap_file)
 
         print(json.dumps(json_file), file=file)
 
