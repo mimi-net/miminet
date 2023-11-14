@@ -34,10 +34,10 @@ def ip_protocol_prop(self, indent=1):
             flag = f'({str(flags_str)})'
         if not("src" == field_name or "dst" == field_name or "urp" == field_name or "group" == field_name):
             if("sport" == field_name):
-                add_field("sourceport", getattr(self, field_name))
+                add_field("Source port", getattr(self, field_name))
                 continue
             if("dport" == field_name):
-                add_field("destinationport", getattr(self, field_name))
+                add_field("Destination port", getattr(self, field_name))
                 continue
             if("flags" == field_name):
                 add_field(field_name, flag)
@@ -153,7 +153,7 @@ def create_mimishark_json(pcap, to_json):
                 pcap_file["bytes"] = bytes_repr
 
                 pcap_file["decode_eth"] = f" Ethernet Frame:  Destination: {mac_to_str(eth.dst)}  Sourse: {mac_to_str(eth.src)}  Type: ARP (0x{bytes_repr[36:41].replace(' ','')})"
-                pcap_file["decode_arp"] = ip_protocol_prop(arp_pkt).replace('SenderMac', str(utils.mac_to_str(arp_pkt.sha))).replace('SenderIP', str(utils.mac_to_str(arp_pkt.spa))).replace('TargerMac', str(utils.mac_to_str(eth.dst))).replace('TargetIP', str(utils.mac_to_str(arp_pkt.tpa)))
+                pcap_file["decode_arp"] = ip_protocol_prop(arp_pkt).replace("SenderMac", str(utils.mac_to_str(arp_pkt.sha))).replace("SenderIP", str(utils.inet_to_str(arp_pkt.spa))).replace('TargerMac', str(utils.mac_to_str(eth.dst))).replace('TargetIP', str(utils.inet_to_str(arp_pkt.tpa)))
                 #.replace('"','doublePrime').replace("'",'singlePrime').replace('\\','doubleslash')
             if isinstance(eth.data, dpkt.ip.IP):
 
@@ -177,7 +177,7 @@ def create_mimishark_json(pcap, to_json):
                 pcap_file["ascii"] = ascii.replace('"','doublePrime').replace("'",'singlePrime')
                 pcap_file["bytes"] = bytes_repr
                 pcap_file["decode_eth"] = f" Ethernet Frame:  Destination: {mac_to_str(eth.dst)}  Sourse: {mac_to_str(eth.src)}  Type: IPv{ip.v} (0x{bytes_repr[36:41].replace(' ','')})"
-                pcap_file["decode_ip"] = ip_protocol_prop(ip)
+                pcap_file["decode_ip"] = ip_protocol_prop(ip) + " Source Address: " + inet_to_str(ip.src) + ", Destination Address: " + inet_to_str(ip.dst)
                 pcap_file[f"decode_{ip.data.__class__.__name__}"] = ip_protocol_prop(ip.data)
             json_file.append(pcap_file)
 
