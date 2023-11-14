@@ -23,7 +23,9 @@ RUN apt-get update \
 RUN pip3 install --upgrade git+https://github.com/mimi-net/ipmininet.git@v1.0.0
 
 WORKDIR /app
+ADD ./ENTRYPOINT.sh /app/ENTRYPOINT.sh
+RUN chmod +x ENTRYPOINT.sh
+ADD ./requirements.txt /app/requirements.txt
+RUN pip3 install -r requirements.txt
 ADD . /app
-RUN chmod +x /app/ENTRYPOINT.sh
-RUN pip3 install -r /app/requirements.txt
 ENTRYPOINT ["/app/ENTRYPOINT.sh"]
