@@ -12,14 +12,3 @@ services:
       - celery_concurrency=${celery_concurrency}
       - queue_names=${queue_names}
     privileged: true
-    networks:
-      - redis-network
-      - rabbitmq-network
-    
-networks:
-  redis-network:
-    name: redis-network
-    external: true
-  rabbitmq-network:
-    name: rabbitmq-network
-    external: true
