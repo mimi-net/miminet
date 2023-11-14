@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  miminet:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: miminet
+    restart: always
+    expose:
+      - 80
+    volumes:
+      - databases:/app/instance
+      - ./flask/static/images:/app/static/images
+      - ./flask/static:/svg:/app/static/svg
+      - ./flask/static/video:/app/static/video
+      - ./flask/static/pcaps:/app/static/pcaps
+    networks:
+      - nginx_network
+  nginx:
+    container_name: nginx
+    image: nginx
+    restart: always
+    volumes:
+      - ./default.conf.template:/etc/nginx/templates/default.conf.template
+    ports:
+      - "80:80"
+    networks:
+      - nginx_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+           
+volumes:
+  databases:
+  
+networks:
+  nginx_network:
+    driver: bridge
