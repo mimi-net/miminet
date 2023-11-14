@@ -60,7 +60,7 @@ class Simulate(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
-
+    task_guid = db.Column(db.String(512), nullable=False)
     # Do we finish? (False - new, True - simulation is finished)
     ready = db.Column(db.Boolean, default=False)
     packets = db.Column(db.UnicodeText, nullable=True, default='')
