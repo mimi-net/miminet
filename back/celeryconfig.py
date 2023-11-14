@@ -14,14 +14,3 @@ imports = ['tasks']
 redis_backend_health_check_interval = 30
 
 redis_retry_on_timeout = True
-
-
-# random broker strategy
-def get_amqp(urls):
-    urls_list = list(urls)
-    while True:
-        shuffle(urls_list)
-        yield urls_list[0]
-
-
-broker_failover_strategy = get_amqp
