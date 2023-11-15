@@ -399,7 +399,7 @@ def do_job(job, job_host):
         job_host.cmd('iptables -A INPUT -p udp --dport ' + str(arg_port) + ' -j DROP')
 
 
-def run_mininet(net, net_guid):
+def run_mininet(net):
     global jnet
     global time_to_wait_before_emulation
 
@@ -513,14 +513,6 @@ def run_mininet(net, net_guid):
     time.sleep(2)
     net.stop()
 
-    # Create directory for a PCAP files
-    net_directory = 'static/pcaps/' + str(net_guid)
-
-    if not os.path.exists(net_directory):
-        os.makedirs(net_directory)
-    else:
-        shutil.rmtree(net_directory)
-        os.makedirs(net_directory)
 
     pcap_list = []
     # Parsing packets
@@ -555,7 +547,6 @@ def run_mininet(net, net_guid):
         # We don't wanna use this files in future
         os.remove(pcap_file1)
         os.remove(pcap_file2)
-        os.system('chown -R ilya:ilya ' + net_directory)
         # print (pkts)
 
     animation_s = sorted(animation, key=lambda k: k.get('timestamp', 0))
