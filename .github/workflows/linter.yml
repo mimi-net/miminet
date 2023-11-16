@@ -1,0 +1,44 @@
+name: Linter
+
+on: [push, pull_request]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['back', 'front']
+        python-version: ["3.11"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: ${{matrix.node}}/requirements.txt
+            
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          pip install flake8 mypy black isort wheel
+          pip install -r ${{matrix.node}}/requirements.txt
+          mkdir -p /opt/mininet_dependencies
+          
+      - name: Lint with mypy
+        run: |
+          mypy ${{matrix.node}}
+          
+      - name: Lint with flake8
+        run: |
+          flake8 ${{matrix.node}} --count --verbose --max-complexity=10 --max-line-length=88 --extend-ignore=E501,W391  --statistics
+          
+      - name: Lint with black
+        run: |
+          black ${{matrix.node}} --check --verbose --diff
+          
+      - name: Lint with isort
+        run: |
+          isort ${{matrix.node}} --check --profile="black" -l 88
