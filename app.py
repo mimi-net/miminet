@@ -1,8 +1,7 @@
 import sys
 from datetime import datetime
-from random import randint
 
-from flask import Flask, render_template, make_response
+from flask import Flask, render_template, make_response, request
 from flask_login import login_required, current_user
 from flask_migrate import Migrate
 
@@ -14,8 +13,10 @@ from miminet_host import save_host_config, delete_job, save_hub_config, save_swi
 from miminet_model import db, init_db, Network
 from miminet_network import create_network, web_network, update_network_config, \
     delete_network, post_nodes, post_nodes_edges, move_nodes, web_network_shared, upload_network_picture, copy_network
+from miminet_quiz import quiz_section
 from miminet_shark import mimishark_page
 from miminet_simulation import run_simulation, check_simulation
+from temporary_models import Quiz, Section
 
 app = Flask(__name__, static_url_path='', static_folder='static', template_folder="templates")
 
@@ -76,7 +77,7 @@ app.add_url_rule('/host/mimishark', methods=['GET'], view_func=mimishark_page)
 
 
 # Quiz
-
+# app.add_url_rule('/quiz', methods=['GET'], view_func=quiz_section)
 
 @app.route('/')
 def index():  # put application's code here
@@ -102,31 +103,23 @@ def examples():
     return (render_template("examples.html", networks=networks))
 
 
-# Temporary
-class Quizzes:
-    def __init__(self, id):
-        self.id = id
-        self.guid = id
-        self.title = f'Название теста номер {id}'
-        self.description = f'Описание теста номер {id}'
-        self.sections = randint(0, 9)
-        self.passed = randint(0, self.sections)
-
-
 @app.route('/quizzes')
 @login_required
 def quizzes():
     # Get all quizzes
     # Pass them as parameter
-    quizzes = [Quizzes(i) for i in range(3)]
+    quizzes = [Quiz(i) for i in range(3)]
     return render_template("quiz/quizzes.html", quizzes=quizzes)
 
 
-@app.route('/quiz')
+@app.route('/quiz', methods=['GET'])
 @login_required
 def quiz():
-    # Get quiz and pass
-    return render_template("")
+    # Get quiz sections and pass
+    quiz = [Section(i) for i in range(10)]
+    # Pass here guid, in quizzes.html pass quiz.guid
+    return render_template("quiz/quiz.html", guid=request.args.get('guid', type=str), quiz=quiz)
+
 
 @app.route('/sitemap.xml', methods=['GET'])
 @app.route('/Sitemap.xml', methods=['GET'])

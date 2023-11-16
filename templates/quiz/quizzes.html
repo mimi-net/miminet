@@ -6,7 +6,7 @@
 
     <section class="container py-5 my-lg-5">
         <div class="align-items-center justify-content-between py-4">
-            <h1 class="me-3">Практикум по компьютерным сетям</h1>
+            <h1 class="me-3">Тренажер по компьютерным сетям</h1>
         </div>
 
         <!-- Item -->
@@ -16,14 +16,32 @@
                     <div class="col-sm-8">
                         <div class="card-body">
                             <h4 class="h4" style="margin-top: 20px;margin-left: 20px">
-                                <a href="{{ url_for('quiz', guid=quiz.guid) }}">{{ quiz.title }}</a>
+                                <a href="{{ url_for('quiz', guid=quiz.title) }}">{{ quiz.title }}</a>
                             </h4>
                             <p style="margin-left: 40px;">{{ quiz.description }}</p>
                         </div>
                     </div>
+                    <div class="col-sm-4">
+                        <div class="card-body">
+                            <p id="{{ quiz.id }}"
+                               style="text-align: right; margin-right: 40px; margin-top: 20px;"></p>
+                            <p style="text-align: right; margin-right: 40px;">
+                                {{ quiz.passed }}/{{ quiz.sections }} пройдено
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </article>
+
+            <script>
+                function morph(int, array) {
+                    return (array = array || ['раздел', 'раздела', 'разделов']) && array[(int % 100 > 4 && int % 100 < 20) ? 2 : [2, 0, 1, 1, 1, 2][(int % 10 < 5) ? int % 10 : 5]];
+                }
+
+                document.getElementById('{{quiz.id}}').innerHTML = {{ quiz.sections }} +' ' + morph({{ quiz.sections}});
+            </script>
         {% endfor %}
 
     </section>
 {% endblock %}
+
