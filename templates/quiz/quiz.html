@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %} {{quiz.title}} {% endblock %}
+{% block description %}Сетевой тренажер для обучения компьютерным сетям{% endblock %}
+
+{% block content %}
+
+    <section class="container py-5 my-lg-5">
+        <div class="align-items-center justify-content-between py-4">
+            <h1 class="me-3">Практикум по компьютерным сетям</h1>
+        </div>
+
+        <!-- Item -->
+        {% for quiz in quizzes %}
+            <article class="card border-0 shadow-sm overflow-hidden mb-4">
+                <div class="row g-0">
+                    <div class="col-sm-8">
+                        <div class="card-body">
+                            <h4 class="h4" style="margin-top: 20px;margin-left: 20px">
+                                <a href="{{ url_for('web_network', guid=quiz.guid) }}">{{ quiz.title }}</a>
+                            </h4>
+                            <p style="margin-left: 40px;">{{ quiz.description }}</p>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        {% endfor %}
+
+    </section>
+{% endblock %}

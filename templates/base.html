@@ -74,6 +74,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             {% if current_user.is_authenticated %}
                 <div class="navbar-nav">
                     <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('quiz') }}">Тренажер</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
                     </li>
                     <li class="nav-item">

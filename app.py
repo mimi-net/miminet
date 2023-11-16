@@ -1,24 +1,25 @@
 import sys
 from datetime import datetime
+from random import randint
 
 from flask import Flask, render_template, make_response
 from flask_login import login_required, current_user
 from flask_migrate import Migrate
 
-from miminet_config import SQLITE_DATABASE_NAME, SECRET_KEY
-from miminet_model import db, init_db, Network
-from miminet_auth import login_manager, login_index, google_login, google_callback, user_profile,\
+from miminet_auth import login_manager, login_index, google_login, google_callback, user_profile, \
     vk_callback, logout
-from miminet_network import create_network, web_network, update_network_config, \
-    delete_network, post_nodes, post_nodes_edges, move_nodes, web_network_shared, upload_network_picture, copy_network
-from miminet_simulation import run_simulation, check_simulation
+from miminet_config import SQLITE_DATABASE_NAME, SECRET_KEY
 from miminet_host import save_host_config, delete_job, save_hub_config, save_switch_config, \
     save_router_config, save_server_config
+from miminet_model import db, init_db, Network
+from miminet_network import create_network, web_network, update_network_config, \
+    delete_network, post_nodes, post_nodes_edges, move_nodes, web_network_shared, upload_network_picture, copy_network
 from miminet_shark import mimishark_page
+from miminet_simulation import run_simulation, check_simulation
 
-app = Flask(__name__,  static_url_path='', static_folder='static', template_folder="templates")
+app = Flask(__name__, static_url_path='', static_folder='static', template_folder="templates")
 
-# SQLAlchimy config
+# SQLAlchemy config
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + SQLITE_DATABASE_NAME
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['SECRET_KEY'] = SECRET_KEY
@@ -36,7 +37,6 @@ login_manager.init_app(app)
 
 # Init Sitemap
 zero_days_ago = (datetime.now()).date().isoformat()
-
 
 # App add_url_rule
 # Login
@@ -59,7 +59,6 @@ app.add_url_rule('/move_network_nodes', methods=['POST'], view_func=move_nodes)
 app.add_url_rule('/network/upload_network_picture', methods=['GET', 'POST'], view_func=upload_network_picture)
 app.add_url_rule('/network/copy_network', methods=['POST'], view_func=copy_network)
 
-
 # Simulation
 app.add_url_rule('/run_simulation', methods=['POST'], view_func=run_simulation)
 app.add_url_rule('/check_simulation', methods=['GET'], view_func=check_simulation)
@@ -76,6 +75,9 @@ app.add_url_rule('/host/switch_save_config', methods=['GET', 'POST'], view_func=
 app.add_url_rule('/host/mimishark', methods=['GET'], view_func=mimishark_page)
 
 
+# Quiz
+
+
 @app.route('/')
 def index():  # put application's code here
     return render_template("index.html")
@@ -86,7 +88,7 @@ def index():  # put application's code here
 def home():
     user = current_user
     networks = Network.query.filter(Network.author_id == user.id).order_by(Network.id.desc()).all()
-    return render_template("home.html", networks = networks)
+    return render_template("home.html", networks=networks)
 
 
 @app.route('/examples')
@@ -97,13 +99,38 @@ def examples():
              'd35bcad2-b2be-4c2a-9902-26d4edd0bb1d', '4fc0fafb-2a16-4244-a664-3f1e8f788a63',
              '6994b921-cc0f-4cbd-b209-7f30784027d7', '1646e111-1a47-4d98-a253-c396904e5351']
     networks = Network.query.filter(Network.guid.in_(guids)).order_by(Network.id.asc()).all()
-    return render_template("examples.html", networks = networks)
+    return (render_template("examples.html", networks=networks))
 
+
+# Temporary
+class Quizzes:
+    def __init__(self, id):
+        self.id = id
+        self.guid = id
+        self.title = f'Название теста номер {id}'
+        self.description = f'Описание теста номер {id}'
+        self.sections = randint(0, 9)
+        self.passed = randint(0, self.sections)
+
+
+@app.route('/quizzes')
+@login_required
+def quizzes():
+    # Get all quizzes
+    # Pass them as parameter
+    quizzes = [Quizzes(i) for i in range(3)]
+    return render_template("quiz/quizzes.html", quizzes=quizzes)
+
+
+@app.route('/quiz')
+@login_required
+def quiz():
+    # Get quiz and pass
+    return render_template("")
 
 @app.route('/sitemap.xml', methods=['GET'])
 @app.route('/Sitemap.xml', methods=['GET'])
 def sitemap():
-
     """Generate sitemap.xml. Makes a list of urls and date modified."""
     pages = []
     skip_pages = ['/nooffer.html', '/Sitemap.xml', '/sitemap.xml', '/404.html',
