@@ -11,12 +11,12 @@ services:
       - 80
     volumes:
       - databases:/app/instance
-      - ./flask/static/images:/app/static/images
-      - ./flask/static:/svg:/app/static/svg
-      - ./flask/static/video:/app/static/video
-      - ./flask/static/pcaps:/app/static/pcaps
+      - ./static/images:/app/static/images
+      - ./static:/svg:/app/static/svg
+      - ./static/video:/app/static/video
+      - ./static/pcaps:/app/static/pcaps
     networks:
-      - nginx_network
+      - miminet_network
   nginx:
     container_name: nginx
     image: nginx
@@ -26,7 +26,7 @@ services:
     ports:
       - "80:80"
     networks:
-      - nginx_network
+      - miminet_network
     logging:
       driver: "json-file"
       options:
@@ -36,5 +36,5 @@ volumes:
   databases:
   
 networks:
-  nginx_network:
+  miminet_network:
     driver: bridge

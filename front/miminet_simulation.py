@@ -44,7 +44,7 @@ def run_simulation():
         db.session.refresh(sim)
         db.session.commit()
 
-        app.send_task('tasks.mininet_worker', (net.network, net.guid),
+        app.send_task('tasks.mininet_worker', (net.network,),
                       routing_key=str(uuid.uuid4()),
                       exchange=DEFAULT_APP_EXCHANGE,
                       exchange_type=EXCHANGE_TYPE,
@@ -61,7 +61,6 @@ def check_simulation():
     user = current_user
     simulation_id = request.args.get('simulation_id', type=int)
     network_guid = request.args.get('network_guid', type=str)
-
     if not simulation_id:
         ret = {'message': 'Пропущен параметр simulation_id.'}
         return make_response(jsonify(ret), 400)
@@ -86,8 +85,6 @@ def check_simulation():
 
         ret = {'message': 'Симуляция завершена', 'packets': sim.packets, 'pcaps': pcaps}
         return make_response(jsonify(ret), 200)
-
-    ret = {'message': 'Сеть в процессе симуляции'}
 
     try:
         task_id = sim.task_guid
