@@ -7,8 +7,38 @@
 
     <section class="container py-5 my-lg-5">
         <div class="align-items-center justify-content-between py-4">
-            <h1 class="me-3">Тест {{ guid }}</h1>
+            <h1 class="me-3"> {{ guid }}</h1>
         </div>
+
+        {% for section in quiz %}
+            <article class="card border-0 shadow-sm overflow-hidden mb-4">
+                <div class="row g-0">
+                    <div class="col-sm-8">
+                        <div class="card-body">
+                            <h4 class="h4" style="margin-top: 20px;margin-left: 20px">
+                                <a href="{{ url_for('section', guid=section.guid) }}">{{ section.title }}</a>
+                            </h4>
+                            <p style="margin-left: 40px;">{{ section.description }}</p>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="card-body">
+                            <p id="{{ section.id }}"
+                               style="text-align: right; margin-right: 40px; margin-top: 20px;"></p>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <script>
+                function morph(int, array) {
+                    return (array = array || ['раздел', 'раздела', 'разделов']) && array[(int % 100 > 4 && int % 100 < 20) ? 2 : [2, 0, 1, 1, 1, 2][(int % 10 < 5) ? int % 10 : 5]];
+                }
+
+                questions = Math.floor(Math.random() * 10) + 1
+                document.getElementById('{{section.id}}').innerHTML = questions + ' ' + morph(questions, ['вопрос', 'вопроса', 'вопросов']);
+            </script>
+        {% endfor %}
 
     </section>
 {% endblock %}

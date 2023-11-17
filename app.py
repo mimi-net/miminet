@@ -13,7 +13,6 @@ from miminet_host import save_host_config, delete_job, save_hub_config, save_swi
 from miminet_model import db, init_db, Network
 from miminet_network import create_network, web_network, update_network_config, \
     delete_network, post_nodes, post_nodes_edges, move_nodes, web_network_shared, upload_network_picture, copy_network
-from miminet_quiz import quiz_section
 from miminet_shark import mimishark_page
 from miminet_simulation import run_simulation, check_simulation
 from temporary_models import Quiz, Section
@@ -118,7 +117,16 @@ def quiz():
     # Get quiz sections and pass
     quiz = [Section(i) for i in range(10)]
     # Pass here guid, in quizzes.html pass quiz.guid
-    return render_template("quiz/quiz.html", guid=request.args.get('guid', type=str), quiz=quiz)
+    return (render_template("quiz/quiz.html", guid=request.args.get('guid', type=str), quiz=quiz))
+
+
+@app.route('/section', methods=['GET'])
+@login_required
+def section():
+    # Get quiz sections and pass
+    quiz = [Section(i) for i in range(10)]
+    # Pass here guid, in quizzes.html pass quiz.guid
+    return render_template("quiz/section.html", guid=request.args.get('guid', type=str), quiz=quiz)
 
 
 @app.route('/sitemap.xml', methods=['GET'])
