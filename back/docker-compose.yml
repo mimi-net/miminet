@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-    container_name: celery_l
+    container_name: celery
     restart: always
     env_file:
       - .env

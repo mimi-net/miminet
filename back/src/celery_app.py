@@ -21,7 +21,7 @@ ROUTING_KEY = "1"
 QUEUES_NAMES = [""]
 
 if (QUESES_NAMES_ENV := os.getenv("queue_names")) is not None:
-    QUEUES_NAMES = QUESES_NAMES_ENV .split(",")
+    QUEUES_NAMES = QUESES_NAMES_ENV.split(",")
 
 NUMBER_OF_QUEUES_FOR_NODE = len(QUEUES_NAMES)
 
