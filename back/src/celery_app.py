@@ -10,14 +10,20 @@ import celeryconfig
 
 from celery import Celery
 from kombu import Exchange, Queue
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Celery(__name__)
 
 ROUTING_KEY = "1"
 
-QUESES_NAMES = os.getenv("queue_names").split(",")
+QUEUES_NAMES = [""]
 
-NUMBER_OF_QUEUES_FOR_NODE = len(QUESES_NAMES)
+if (QUESES_NAMES_ENV := os.getenv("queue_names")) is not None:
+    QUEUES_NAMES = QUESES_NAMES_ENV .split(",")
+
+NUMBER_OF_QUEUES_FOR_NODE = len(QUEUES_NAMES)
 
 EXCHANGE_TYPE = "x-consistent-hash"
 
@@ -25,7 +31,7 @@ EXCHANGE_NAME = os.getenv("exchange_name")
 
 DEFAULT_APP_EXCHANGE = Exchange(EXCHANGE_NAME, type=EXCHANGE_TYPE)
 
-QUEUES = (Queue(name) for name in QUESES_NAMES)
+QUEUES = (Queue(name) for name in QUEUES_NAMES)
 
 app.conf.task_default_exchange = "default"
 app.conf.task_queues = QUEUES
