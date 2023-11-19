@@ -5,10 +5,11 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-    container_name: celery
+    container_name: celery_l
     restart: always
+    env_file:
+      - .env
     environment:
-      - exchange_name=${exchange_name}
       - celery_concurrency=${celery_concurrency}
       - queue_names=${queue_names}
     privileged: true
