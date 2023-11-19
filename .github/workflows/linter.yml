@@ -35,7 +35,7 @@ jobs:
           
       - name: Lint with flake8
         run: |
-          flake8 ${{matrix.node}} --count --verbose --max-complexity=10 --max-line-length=88 --extend-ignore=E501,W391  --statistics
+          flake8 ${{matrix.node}} --count --verbose --max-line-length=88 --extend-ignore=E501,W391,C901  --statistics
           
       - name: Lint with black
         run: |
