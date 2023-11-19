@@ -6,11 +6,11 @@
 # 'retry_errors': None,
 
 import os
-import celeryconfig
 
+import celeryconfig
 from celery import Celery
-from kombu import Exchange, Queue
 from dotenv import load_dotenv
+from kombu import Exchange, Queue
 
 load_dotenv()
 

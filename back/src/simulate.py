@@ -1,16 +1,16 @@
-import time
-import os.path
-import string
-import random
 import os
+import os.path
+import random
+import string
+import time
 
-from ipmininet.iptopo import IPTopo
 from ipmininet.ipnet import IPNet
 from ipmininet.ipswitch import IPSwitch
+from ipmininet.iptopo import IPTopo
 from ipmininet.router.config import RouterConfig
-from network import Network, Job, Node, NodeConfig, NodeData, NodeInterface
-from pkt_parser import create_pkt_animation, is_ipv4_address
 from jobs import Jobs
+from network import Job, Network, Node, NodeConfig, NodeData, NodeInterface
+from pkt_parser import create_pkt_animation, is_ipv4_address
 
 
 class MyTopology(IPTopo):

@@ -1,9 +1,9 @@
 import os
-import string
 import random
+import string
+
 import dpkt
 from dpkt.pcap import Reader
-
 from dpkt.utils import inet_to_str
 
 
