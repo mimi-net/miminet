@@ -1,7 +1,7 @@
 - hosts: all
+
   vars_files:
-    - ../.env.yml
-  environment:
+    - example_env.yml
   
   tasks:
     - name: Install packages required for mininet to work
@@ -10,6 +10,7 @@
           - python3-dev
           - bridge-utils
           - curl
+          - netcat
           - dnsutils
           - ifupdown
           - iproute2
@@ -40,24 +41,23 @@
       args:
         chdir: /vagrant/
         
+    - name: Create mininet_dependencies directory
+      ansible.builtin.shell: |
+        sudo mkdir -p /opt/mininet_dependencies
+      args:
+        chdir: /vagrant/
+        
     - name: Install requirements
       ansible.builtin.pip:
         requirements: requirements.txt
         virtualenv: venv
         chdir: /vagrant/
-        
-        
-    - name: Install ipmininet
-      ansible.builtin.shell: |
-        . venv/bin/activate
-        . vagrant/ipmininet_install.sh
-      args:
-        chdir: /vagrant/
-        
+        version: 23.3.1
            
     - name: Start celery
       ansible.builtin.shell: |
         . venv/bin/activate
-        sudo python3 -m celery -A celery_app worker --loglevel=info --concurrency={{ celery_concurrency }} -Q {{ queue_names }}
+        cd src
+        nohup sudo python3 -m celery -A celery_app worker --loglevel=info --concurrency={{ celery_concurrency }} -Q {{ queue_names }} >/dev/null 2>&1 &
       args:
         chdir: /vagrant/
