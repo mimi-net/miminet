@@ -22,6 +22,8 @@ jobs:
             
       - name: Install dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends mininet
           python -m pip install -U pip
           pip install flake8 mypy black isort wheel
           mkdir -p /opt/mininet_dependencies
