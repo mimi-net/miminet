@@ -112,18 +112,16 @@ def packet_parser(pcap1: Reader, edge_id: str, e_source: str, e_target: str):
             ts = ts.replace(".", "").ljust(16, "0")
 
             pkt_type = arp_packet_type(eth)
-            pkts.append(
-                {
-                    "data": {"id": packet_uuid(), "label": pkt_type, "type": "packet"},
-                    "config": {
-                        "type": pkt_type,
-                        "path": edge_id,
-                        "source": e_source,
-                        "target": e_target,
-                    },
-                    "timestamp": ts,
-                }
-            )
+            pkts.append({
+                "data": {"id": packet_uuid(), "label": pkt_type, "type": "packet"},
+                "config": {
+                    "type": pkt_type,
+                    "path": edge_id,
+                    "source": e_source,
+                    "target": e_target,
+                },
+                "timestamp": ts,
+            })
 
         if isinstance(eth.data, dpkt.llc.LLC):
             llc = eth.data
@@ -136,18 +134,16 @@ def packet_parser(pcap1: Reader, edge_id: str, e_source: str, e_target: str):
             if llc.dsap == 0x42:
                 llc_label = "STP"
 
-            pkts.append(
-                {
-                    "data": {"id": packet_uuid(), "label": llc_label, "type": "packet"},
-                    "config": {
-                        "type": llc_label,
-                        "path": edge_id,
-                        "source": e_source,
-                        "target": e_target,
-                    },
-                    "timestamp": ts,
-                }
-            )
+            pkts.append({
+                "data": {"id": packet_uuid(), "label": llc_label, "type": "packet"},
+                "config": {
+                    "type": llc_label,
+                    "path": edge_id,
+                    "source": e_source,
+                    "target": e_target,
+                },
+                "timestamp": ts,
+            })
 
         # Skip IPv6
         if isinstance(eth.data, dpkt.ip6.IP6):
@@ -169,18 +165,16 @@ def packet_parser(pcap1: Reader, edge_id: str, e_source: str, e_target: str):
                 pkt_type + "\n" + inet_to_str(ip.src) + " > " + inet_to_str(ip.dst)
             )
 
-            pkts.append(
-                {
-                    "data": {"id": packet_uuid(), "label": pkt_type, "type": "packet"},
-                    "config": {
-                        "type": pkt_type,
-                        "path": edge_id,
-                        "source": e_source,
-                        "target": e_target,
-                    },
-                    "timestamp": ts,
-                }
-            )
+            pkts.append({
+                "data": {"id": packet_uuid(), "label": pkt_type, "type": "packet"},
+                "config": {
+                    "type": pkt_type,
+                    "path": edge_id,
+                    "source": e_source,
+                    "target": e_target,
+                },
+                "timestamp": ts,
+            })
 
     return pkts
 
