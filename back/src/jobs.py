@@ -15,9 +15,8 @@ def ping_with_options_handler(job: Job, job_host) -> None:
 
     arg_opt = job.arg_1
     arg_ip = job.arg_2
-    if arg_ip is None:
-        return
-    if arg_opt is not None:
+
+    if len(arg_opt) > 0:
         arg_opt = re.sub(r"[^\x00-\x7F]", "", str(arg_opt))
     job_host.cmd("ping -c 1 " + str(arg_opt) + " " + str(arg_ip))
 
@@ -29,12 +28,6 @@ def get_sending_data_argument(job: Job) -> tuple[str | int, str | int, str | int
     arg_ip = job.arg_2
     arg_port = job.arg_3
 
-    if arg_size is None:
-        arg_size = 1000
-
-    if int(arg_size) <= 0 or int(arg_size) > 65535:
-        arg_size = 1000
-
     return arg_size, arg_ip, arg_port
 
 
@@ -42,9 +35,6 @@ def sending_udp_data_handler(job: Job, job_host) -> None:
     """Method for sending UDP data"""
 
     arg_size, arg_ip, arg_port = get_sending_data_argument(job)
-
-    if arg_ip is None or arg_port is None:
-        return
 
     job_host.cmd(
         "dd if=/dev/urandom bs="
@@ -60,9 +50,6 @@ def sending_tcp_data_handler(job: Job, job_host) -> None:
     """Method for sending TCP data sending"""
 
     arg_size, arg_ip, arg_port = get_sending_data_argument(job)
-
-    if arg_ip is None or arg_port is None:
-        return
 
     job_host.cmd(
         "dd if=/dev/urandom bs="
@@ -80,11 +67,8 @@ def traceroute_handler(job: Job, job_host) -> None:
     arg_opt = job.arg_1
     arg_ip = job.arg_2
 
-    if arg_opt is not None:
+    if len(arg_opt) > 0:
         arg_opt = re.sub(r"[^\x00-\x7F]", "", str(arg_opt))
-
-    if not arg_ip:
-        return
 
     job_host.cmd("traceroute -n " + str(arg_opt) + " " + str(arg_ip))
 
@@ -97,9 +81,6 @@ def ip_addr_add_handler(job: Job, job_host) -> None:
     arg_dev = job.arg_1
 
     if arg_ip is None or arg_dev is None:
-        return
-
-    if int(arg_mask) < 0 or int(arg_mask) > 32:
         return
 
     job_host.cmd(
@@ -124,15 +105,6 @@ def ip_route_add_handler(job: Job, job_host) -> None:
     arg_mask = job.arg_2
     arg_router = job.arg_3
 
-    if not arg_ip:
-        return
-
-    if int(arg_mask) < 0 or int(arg_mask) > 32:
-        return
-
-    if arg_router is None:
-        return
-
     job_host.cmd(
         "ip route add " + str(arg_ip) + "/" + str(arg_mask) + " via " + str(arg_router)
     )
@@ -142,12 +114,6 @@ def block_tcp_udp_port(job: Job, job_host) -> None:
     """ "Method for executing Block TCP/UDP port"""
     arg_port = job.arg_1
 
-    if arg_port is None:
-        return
-
-    if int(arg_port) < 0 or int(arg_port) > 65535:
-        return
-
     job_host.cmd("iptables -A INPUT -p tcp --dport " + str(arg_port) + " -j DROP")
     job_host.cmd("iptables -A INPUT -p udp --dport " + str(arg_port) + " -j DROP")
 
@@ -156,12 +122,6 @@ def open_tcp_server_handler(job: Job, job_host) -> None:
     """ "Method for open tcp server"""
     arg_ip = job.arg_1
     arg_port = job.arg_2
-
-    if arg_ip is None or arg_port is None:
-        return
-
-    if int(arg_port) < 0 or int(arg_port) > 65535:
-        return
 
     job_host.cmd(
         "nohup nc -k -d "
@@ -177,15 +137,6 @@ def open_udp_server_handler(job: Job, job_host) -> None:
     arg_ip = job.arg_1
     arg_port = job.arg_2
 
-    if arg_ip is None:
-        return
-
-    if arg_port is None:
-        return
-
-    if int(arg_port) < 0 or int(arg_port) > 65535:
-        return
-
     job_host.cmd(
         "nohup nc -d -u "
         + str(arg_ip)
@@ -199,9 +150,6 @@ def arp_handler(job: Job, job_host):
     """ "Method for executing arp -s"""
     arg_ip = job.arg_1
     arg_mac = job.arg_2
-
-    if arg_ip is None or arg_mac is None:
-        return
 
     job_host.cmd("arp -s " + str(arg_ip) + " " + str(arg_mac))
 
