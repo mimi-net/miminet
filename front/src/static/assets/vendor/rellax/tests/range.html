@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title></title>
+
+	<style>
+		html, body {
+			margin: 0; padding: 0;
+			font-family: monospace;
+			font-weight: bold;
+		}
+
+		.flex {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 100vh; width: 100%;
+			padding: 60vh 0;
+		}
+
+		.rellax-container {
+			height: 25vmin; width: 25vmin;
+			position: relative;
+			background: #ccc;
+			margin: 0 3vmin;
+			box-shadow: inset 0 .5rem 4rem -1rem rgba(0,0,0,.8),
+						0 -119px 0 #fff,
+						0 -120px 0 #888,
+						0 119px 0 #fff,
+						0 120px 0 #888;
+		}
+
+		.rellax {
+			background: #123;
+			color: #fff;
+			position: absolute;
+			top: 0; left: 0;
+			height: 100%; width: 100%;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			box-shadow: 0 .5rem 2rem -1rem rgba(0,0,0,1);
+			will-change: transform;
+		}
+	</style>
+
+</head>
+<body>
+
+	<div class="flex">
+		<div class="rellax-container">
+			<div class="rellax" data-rellax-speed="-5"> null </div>
+		</div>
+		<div class="rellax-container">
+			<div class="rellax" data-rellax-speed="-5" data-rellax-min="0">min: 0</div>
+		</div>
+		<div class="rellax-container">
+			<div class="rellax" data-rellax-speed="-5" data-rellax-min="-120" data-rellax-max="120">min: -120 | max: 120</div>
+		</div>
+		<div class="rellax-container">
+			<div class="rellax" data-rellax-speed="-5" data-rellax-max="120">max: 120</div>
+		</div>
+	</div>
+
+	<!-- Scripts -->
+	<script src="../rellax.js"></script>
+	<script>
+		var rellax = new Rellax('.rellax', {center: true});
+	</script>
+</body>
+</html>

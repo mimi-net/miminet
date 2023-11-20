@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}{{ network.title }}{% endblock %}
+{% block description %}Эмуляция компьютерной сети в вебе{% endblock %}
+{% block og %}
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Miminet">
+    <meta property="og:title" content="{{ network.title }}">
+    <meta property="og:description" content="Эмуляция компьютерной сети в вебе">
+    <meta property="og:url" content="https://miminet.ru{{ url_for(request.endpoint, guid=network.guid) }}">
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:image" content="https://miminet.ru/images/preview/{{ network.preview_uri }}">
+{% endblock %}
+
+{% block content %}
+<main>
+  <section class="py-5 my-lg-5">
+    <div class="container py-3 h-100">
+        <div class="row flex-nowrap">
+            <div id="side_menu" class="col-auto col-lg-2 col-md-3 col-xl-2 px-sm-2 px-0 bg-white" style="height: 80vh;">
+                <h5 class="pb-2 ps-2 ">Устройства</h5>
+                <div class="row">
+                    <div class="col-sm-6 mb-3 text-center">
+                        <img class="drag" id="l2_switch" src="{{ url_for('static', filename='/images/l2_switch.png') }}"/>
+                        <div class="icon-text">
+                            <span data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Свитч (коммутатор) работает на втором уровне модели OSI.">Свитч (L2)</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 mb-3 text-center">
+                        <img class="drag" id="host" src="{{ url_for('static', filename='/images/host.png') }}"/>
+                            <div class="icon-text pt-2">
+                                <span data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Хост - конечное сетевое устройство.">Хост</span>
+                            </div>
+                    </div>
+                    <div class="col-sm-6 mb-3 text-center ">
+                        <img class="drag" id="l1_hub" src="{{ url_for('static', filename='/images/hub.png') }}" />
+                        <div class="icon-text">
+                            <span data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Хаб (концентратор) &mdash; простейшее сетевое устойство.">Хаб (L1)</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 mb-3 text-center">
+                        <img class="drag" id="l3_router" src="{{ url_for('static', filename='/images/l3_router.png') }}" />
+                        <div class="icon-text">
+                            <span data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Маршрутизатор (роутер, раутер) &mdash; работает на 3-м уровне модели OSI, позволяет объединять различные сети.">Роутер (L3)</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 mb-3 text-center">
+                        <img class="drag" id="server" src="{{ url_for('static', filename='/images/server.png') }}" />
+                        <div class="icon-text">
+                            <span data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Сервер &mdash; обслуживает клиентские запросы.">Сервер</span>
+                        </div>
+                    </div>
+                    <hr class="mb-4">
+                    <div class="col-12 text-center">
+                        <div class="d-flex justify-content-center" id="NetworkPlayer">
+                            <button type="button" class="btn btn-primary w-100" id="NetworkRunButton" disabled>Проверка эмуляции</button>
+                        </div>
+                        <div class="pb-4" id="PacketSlider">
+                            <div class="range-slider pt-3" data-start-min="0" data-min="0" data-max="100" data-step="1">
+                                <div class="range-slider-ui mt-0 mb-2" id="PacketSliderInput"></div>
+                                <input class="form-control range-slider-value-min" type="hidden">
+                            </div>
+                            <small id="NetworkPlayerLabel" class="text-muted text-center">Ожидание 10-30 сек.</small>
+                        </div>
+
+                        <small id="NetworkRunButtonHelpLabel" class="text-muted text-center">В случае ошибок или вопросов пишите нам в Телеграм <a href="https://t.me/MimiNetCommunity" parent="_blank">t.me/MimiNetCommunity</a></small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col py-1 px-1 bg-light">
+                <div id="network_scheme" class="border bg-white border-primary h-100 w-100"></div>
+            </div>
+
+            <div id="config_content" class="col-auto col-lg-2 col-md-3 col-xl-2 px-sm-2 px-0 pt-2 bg-white">
+                <p class="fs-5">Тут будут настройки устройств.</p>
+                <p class="fs-5">Выделите любое на схеме.</p>
+            </div>
+        </div>
+    </div>
+      </section>
+</main>
+
+    <div id="config_host"></div>
+    <div id="config_hub"></div>
+    <div id="config_switch"></div>
+    <div id="config_edge"></div>
+    <div id="config_router"></div>
+    <div id="config_server"></div>
+{% endblock %}
+
+{% block network %}
+<script>
+
+    const network_guid = "{{ network.guid }}";
+    var network_title = "{{ network.title }}";
+    var network_description = "{{ network.description }}";
+    var network_zoom = {{ network_config.zoom}};
+    var network_pan_x = {{ network_config.pan_x}};
+    var network_pan_y = {{ network_config.pan_y}};
+
+    var nodes = {{ nodes | safe }};
+    var edges = {{ edges | safe }};
+    var jobs = {{ jobs | safe }};
+    var packets = {{ packets | safe }};
+    var pcaps = {{ pcaps | safe }};
+    var ns = null;
+
+    SetNetworkPlayerState({% if simulating %} {% if simulating.ready %} 0 {% else %} {{simulating.id}} {% endif%} {% else %} 0 {% endif%})
+    DrawGraph();
+</script>
+
+{% endblock %}

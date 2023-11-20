@@ -1,0 +1,86 @@
+
+{% extends "base.html" %}
+{% block title %}MimiShark{% endblock %}
+{% block description %}Эмуляция компьютерной сети в вебе{% endblock %}
+{% block og %}
+<link rel="stylesheet" href="{{url_for('static',filename='assets/css/style.css')}}">
+{% endblock %}
+{% block content %}
+<header>
+    <nav class="navbar bg-body-tertiary">
+      <div class="d-flex" style="margin-left: 30px;  flex-wrap: wrap; align-items: center;">
+        <a class="navbar-brand" style="position: relative; bottom: 3px;" href="/home">
+          <img src="{{url_for('static',filename='images/logo.png')}}" width="150" alt="Miminet">
+        </a>
+      </div>
+      <div class="d-flex" style="justify-content: end; width: 500px; margin-right: 50px; margin-left: 50px;">
+        <div class="nav-item ">
+          <a style = "text-decoration: none;" href="{{ url_for('web_network', guid=network.guid) }}">Return</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+  <div style="margin-right: 12px; margin-left: 5px;">
+    <div class="row text-center border cont" style="overflow: auto; height: 350px;">
+      <table class="table table-striped" id="tab">
+        <col width="1%">
+        <col width="25%">
+        <col width="21%">
+        <col width="21%">
+        <col width="16%">
+        <col width="16%">
+        <thead style="position: sticky;top: 0; box-shadow: inset 0 -1px 0 #000000;" class="bg-light thead_bord">
+          <tr>
+            <th>#</th>
+            <th>Time</th>
+            <th>Source</th>
+            <th>Destination</th>
+            <th>Protocol</th>
+            <th>Length</th>
+          </tr>
+
+        </thead>
+
+        <tbody id="height_changer">
+
+            {% for el in pcap_data %}
+            <tr id="{{loop.index}}">
+                <th scope="row">{{loop.index}}</th>
+                <td>{{el.time}}</td>
+                <td>{{el.source}}</td>
+                <td>{{el.destination}}</td>
+                <td>{{el.protocol}}</td>
+                <td>{{el.length}}</td>
+            </tr>
+            {%endfor%}
+
+        </tbody>
+      </table>
+    </div>
+    <div class="row">
+        <div class="col-6 border" style="overflow: auto;">
+            <div style="height: 282px;">
+                <div id="decode" class="info">
+                </div>
+            </div>
+        </div>
+      <div class="col-6 text-center border" style="overflow: auto;">
+        <div style="display: flex; justify-content: space-between;  align-items: flex-start; padding: 10px; height: 282px;">
+          <div class="d-flex">
+            <div style="text-align: left;  line-height: 1.2;" id="rows">
+            </div>
+            <div style="text-align: left; margin-left: 50px; font-variant-numeric: tabular-nums;  line-height: 1.2;" id="bytes">
+            </div>
+          </div>
+          <div style="width: 105px; text-align: left; margin-right: 40px;  line-height: 1.2;" id="ascii">
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    var data = '{{pcap_data}}';
+  </script>
+  <script src="{{url_for('static',filename='shark_script.js')}}"></script>
+
+{% endblock %}

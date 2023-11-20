@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KT5XZVF');</script>
+<!-- End Google Tag Manager -->
+
+
+    <link rel="icon" href="{{ url_for('static', filename='/images/favlogo.ico') }}" type="image/x-icon">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="{% block description %}{% endblock %}">
+    <meta name="author" content="Илья Зеленчук, Зинаида Романова">
+
+    <title>{% block title %}{% endblock %}</title>
+
+    {% block og %}{% endblock %}
+
+    <!-- Vendor Styles -->
+    <link rel="stylesheet" media="screen" href="/assets/vendor/boxicons/css/boxicons.min.css"/>
+    <link rel="stylesheet" media="screen" href="/assets/vendor/nouislider/dist/nouislider.min.css"/>
+
+
+    <!-- Main Theme Styles + Bootstrap -->
+    <link rel="stylesheet" media="screen" href="/assets/css/theme.min.css">
+
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KT5XZVF"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+{% if mimishark_nav is not defined %}
+<nav class="header navbar navbar-expand-lg position-absolute navbar-sticky">
+    <div class="container">
+        <a href="/" class="navbar-brand">
+            <img src="{{ url_for('static', filename='/images/logo.png') }}" width="170" alt="Miminet">
+        </a>
+
+        {% if network %}
+            {% if current_user.is_authenticated %}
+                <div class="mx-auto navbar-nav">
+                    {% if request.path != url_for('web_network_shared') %}
+                    <a class="d-inline nav-link" href="{{ url_for('home') }}">Мои сети</a>
+                    <a class="d-inline nav-link" href="#"> / </a>
+                    {% endif %}
+                    <a class="d-inline nav-link" id="network_title_head" href="{{ url_for('web_network', guid=network.guid) }}">{{ network.title }}</a>
+                </div>
+
+                <div class="form-check pe-lg-1">
+                    <a class="btn btn-success btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" title="Сеть доступна по URL" onclick="urlCopyButton()">
+                        <i class='bx bx-share-alt fs-4 mx-1' ></i>
+                    </a>
+                    <a class="btn btn-outline-primary btn-icon me-4" data-target="#ModalCopy" data-toggle="tooltip" data-bs-placement="bottom" title="Сохранить копию" onclick="CopyNetwork()">
+                        <i class='bx bx-copy fs-4 mx-1'></i>
+                    </a>
+                    <a {% if request.path != url_for('web_network_shared') %} class="btn btn-outline-primary btn-icon" {% else %} class="btn btn-outline-primary btn-icon disabled" {% endif %} href="#netConfigModal" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети"><i class='bx bx-cog fs-4 mx-1'></i></a>
+                </div>
+            {% else %}
+                <div class="mx-auto navbar-nav">
+                    <a class="d-inline nav-link" id="network_title_head" href="#">{{ network.title }}</a>
+                </div>
+                <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary">
+                    <i class="bx fs-5 lh-1 me-1"></i>Вход
+                </a>
+            {% endif %}
+        {% else %}
+            {% if current_user.is_authenticated %}
+                <div class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('home') }}">Мои сети</a>
+                    </li>
+                </div>
+            {% else %}
+                {% if request.path != url_for('login_index') %}
+                    <div class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary">
+                                <i class="bx fs-5 lh-1 me-1"></i>Вход
+                            </a>
+                        </li>
+                    </div>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+
+    </div>
+</nav>
+{% endif %}
+
+
+{% if network %}
+<!-- Net configuration -->
+    <div class="modal" id="netConfigModal" tabindex="-1" role="dialog" aria-labelledby="netConfigModalLabel" aria-hidden="true" data-focus-on="input:first">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="netConfigModalLabel">Настройки сети</h5>
+                    <button id="networkConfigrationCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="networkConfigrationForm" method="POST" action="">
+                        <div class="form-group">
+                            <label for="network_title" class="text-sm">Название сети</label>
+                            <input type="text" class="form-control form-control-sm" id="network_title" name="network_title" value='{{ network.title }}'>
+
+                            <label for="network_description" class="text-sm pt-2">Описание сети</label>
+                            <textarea rows="3" class="form-control form-control-sm" id="network_description" name="network_description">{{ network.description }}</textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button id="networkDeleteButton" type="button" data-toggle="modal" class="btn btn-danger" href="#deleteNetConfirmModal">Удалить сеть</button>
+                    <button id="networkConfigrationCancel" type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    <button id="networkConfigrationSubmit" type="button" class="btn btn-primary">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteNetConfirmModal" class="modal hide fade" tabindex="-1" role="dialog" data-focus-on="input:first">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="netDeleteModalLabel">Вы точно хотите удалить эту сеть?</h5>
+                    <button id="networkDeleteCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть"/>
+                </div>
+                <div class="modal-body">
+                    <form id="networkDeleteForm" method="POST" action="{{ url_for('delete_network', guid=network.guid) }}">
+                    </form>
+                    <button type="button" class="btn btn-danger" style="float: left;" id="networkDeleteSubmitButton">Да, удалить!</button>
+                    <button type="button" data-dismiss="modal" class="btn btn-secondary" style="float: right;" id="networkDeleteCancel">Нет</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="noJobsModal" tabindex="-1" role="dialog" aria-labelledby="noJobsModalLabel" aria-hidden="true" data-focus-on="input:first">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="noJobsModalLabel">Что делать?</h5>
+                    <button id="noJobsModalCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть"/>
+                </div>
+                <div class="modal-body">
+                    <p>Зачем симулировать сеть, если она ничего не делает?!</p>
+                    <p>В настройках хоста добавьте команду, например, вы можете выполнить команду 'ping' на определенный IP адрес или имя хоста.</p>
+                    <p>И не забывайте конфигурировать IP адрес и маску у хостов.</p>
+                </div>
+                <div class="modal-footer">
+                    <button id="noJobsModalSubmit" type="button" class="btn btn-primary">Ок</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="modal" id="ModalCopy" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Вы успешно сохранили сеть к себе</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"/>
+                </div>
+                <div class="modal-body">
+                    <button class="btn btn-primary shadow-primary modal-option" data-option="edit">Перейти к редактированию</button>
+                    <button class="btn btn-secondary shadow-secondary modal-option" data-option="continue">Продолжить здесь</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertContainer"></div>
+{% endif %}
+
+{% block content %}
+{% endblock %}
+
+<!-- Footer -->
+<!-- footer class="footer dark-mode bg-dark border-top border-light pt-5 pb-4 pb-lg-5">
+    <div class="container pt-lg-4">
+        <div class="row pb-5">
+          <div class="col-lg-4 col-md-6">
+            <div class="navbar-brand text-dark p-0 me-0 mb-3 mb-lg-4">
+              <img src="{{ url_for('static', filename='/images/logo.png') }}" width="170" alt="Miminet">
+              Miminet
+            </div>
+            <p class="fs-sm text-light opacity-70 pb-lg-3 mb-4">Веб-эмулятор компьютерной сети для образовательных целей.</p>
+          </div>
+          <div class="col-xl-6 col-lg-7 col-md-5 offset-xl-2 offset-md-1 pt-4 pt-md-1 pt-lg-0">
+            <div id="footer-links" class="row">
+              <div class="col-lg-4">
+                <h6 class="mb-2">
+                  <a href="#useful-links" class="d-block text-dark dropdown-toggle d-lg-none py-2" data-bs-toggle="collapse">Useful Links</a>
+                </h6>
+                <div id="useful-links" class="collapse d-lg-block" data-bs-parent="#footer-links">
+                  <ul class="nav flex-column pb-lg-1 mb-lg-3">
+                    <li class="nav-item"><a href="/" class="nav-link d-inline-block px-0 pt-1 pb-2">Miminet</a></li>
+                  </ul>
+                </div>
+              </div>
+              <div class="col-xl-4 col-lg-5 pt-2 pt-lg-0">
+                <h6 class="mb-2">Наше компьюнити</h6>
+                <a href="https://t.me/MimiNetCommunity" class="fw-medium">t.me/MimiNetCommunity</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer -->
+</body>
+
+<script src="{{ url_for('static', filename='/js/jquery-3.6.0.min.js') }}"></script>
+<script src="{{ url_for('static', filename='/js/jquery-ui.min.js') }}"></script>
+<script src="{{ url_for('static', filename='/js/cytoscape.min.js') }}"></script>
+<script src="{{ url_for('static', filename='/js/ace.js') }}"></script>
+<script src="{{ url_for('static', filename='/js/lodash.js') }}"></script>
+<script src="{{ url_for('static', filename='/js/cytoscape-edgehandles.min.js') }}"></script>
+
+<!-- Vendor Scripts -->
+<script src="/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="/assets/vendor/parallax-js/dist/parallax.min.js"></script>
+<script src="/assets/vendor/rellax/rellax.min.js"></script>
+<script src="/assets/vendor/nouislider/dist/nouislider.min.js"></script>
+<!--script type="module" src="/assets/js/range-slider.mjs"></script-->
+
+
+<!-- Main Theme Script -->
+<script src="/assets/js/theme.min.js"></script>
+<script src="{{ url_for('static', filename='/icons.js') }}"></script>
+<script src="{{ url_for('static', filename='/netfront_f.js') }}"></script>
+<script src="{{ url_for('static', filename='/miminet_animation.js') }}"></script>
+
+<script>
+    $(document).ready(function() {
+        $("#networkConfigrationCancel").click(function(){
+            $('#netConfigModal').modal('hide');
+        });
+
+        $("#networkConfigrationCancelIcon").click(function(){
+            $('#netConfigModal').modal('hide');
+        });
+
+        $("#networkConfigrationSubmit").click(function(){
+            network_title = $("#network_title").val();
+            network_description = $("#network_description").val();
+            UpdateNetworkConfig();
+            $('#netConfigModal').modal('hide');
+            $('#network_title_head').text(network_title);
+        });
+
+        $('#networkConfigrationForm').keypress(function (e) {
+            var key = (e.keyCode || e.which);
+            if(key == 13 || key == 3){
+                network_title = $("#network_title").val();
+                network_description = $("#network_description").val();
+                UpdateNetworkConfig();
+                $('#netConfigModal').modal('hide');
+                $('#network_title_head').text(network_title);
+                return false;
+            }
+        });
+
+        $("#networkDeleteButton").click(function(){
+            $('#netConfigModal').modal('hide');
+            $('#deleteNetConfirmModal').modal('toggle');
+        });
+
+        $("#networkDeleteCancelIcon").click(function(){
+            $('#deleteNetConfirmModal').modal('hide');
+        });
+
+        $("#networkDeleteCancel").click(function(){
+            $('#deleteNetConfirmModal').modal('hide');
+        });
+
+        $("#networkDeleteSubmitButton").click(function(){
+            $("#networkDeleteForm").submit(); // Submit the form
+        });
+
+        $("#noJobsModalCancelIcon").click(function(){
+            $('#noJobsModal').modal('hide');
+        });
+
+        $("#noJobsModalSubmit").click(function(){
+            $('#noJobsModal').modal('hide');
+        });
+
+        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+            return new bootstrap.Popover(popoverTriggerEl)
+        })
+
+    });
+</script>
+
+<script type="text/javascript">
+    function urlCopyButton(){
+        var record_url = document.URL;
+        navigator.clipboard.writeText(record_url);
+        console.log('Copy url is made!');
+
+        var alertElement = document.createElement("div");
+        alertElement.classList.add("alert", "alert-success", "fixed-top");
+        alertElement.style.textAlign = "center";
+        alertElement.style.width = "50%";
+        alertElement.style.marginLeft = "auto";
+        alertElement.style.marginRight = "auto";
+        alertElement.innerHTML = "Ссылка на сеть скопирована";
+        var alertContainer = document.getElementById("alertContainer");
+        alertContainer.appendChild(alertElement);
+        setTimeout(function() {
+            alertContainer.removeChild(alertElement);
+        }, 1000);
+}
+
+    $(function() {
+        $('[data-toggle="tooltip"]').tooltip({trigger : 'hover'});
+    });
+</script>
+
+{% block network %}
+{% endblock %}
+
+<script src="{{ url_for('static', filename='netfront.js') }}"></script>
+<script src="{{ url_for('static', filename='config.js') }}"></script>
+</html>

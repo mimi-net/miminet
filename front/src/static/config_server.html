@@ -1,0 +1,93 @@
+<script id="config_server_main_form_script" type="text/plain">
+    <form id='config_main_form' action='/host/server_save_config' method='POST'>
+        <input type="hidden" id="server_id" name="server_id" value=""/>
+        <input type="hidden" id="net_guid" name="net_guid" value=""/>
+        <button id="config_server_main_form_submit_button" type="submit" class="btn btn-success w-100">Сохранить</button>
+    </form>
+</script>
+
+<script id="config_server_name_script" type="text/plain">
+    <div class="form-group pb-2">
+        <label for="config_server_name" class="text-sm">Имя сервера</label>
+        <input type="text" class="form-control form-control-sm" id="config_server_name" name="config_server_name" value=''>
+    </div>
+</script>
+
+<script id="config_server_job_script" type="text/plain">
+    <div class="form-group" id="config_server_jobs">
+        <label for="config_server_job_select_field" class="text-sm">Выполнить команду</label>
+        <select id="config_server_job_select_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_server_job_select_field">
+            <option selected value="0">---</option>
+            <option value="1">ping (1 пакет)</option>
+            <option value="200">Запустить UDP сервер</option>
+            <option value="201">Запустить TCP сервер</option>
+            <option value="202">Блокировать TCP/UDP порт</option>
+        </select>
+    </div>
+</script>
+
+<script id="config_server_job_list_script" type="text/plain">
+    <ul class="list-group pt-2" id="config_server_job_list">
+    </ul>
+</script>
+
+<script id="config_server_job_list_elem_script" type="text/plain">
+  <li class="py-1 px-2 list-group-item d-flex justify-content-between align-items-center">
+    <span class="ms-auto"><a href="" id="config_server_job_delete"><i class="bx bx-x fs-xl align-middle"></i></a></span>
+  </li>
+</script>
+
+<script id="config_server_ping_c_1_script" type="text/plain">
+    <div class="form-group pt-1" name="config_server_select_input">
+        <input type="text" class="form-control form-control-sm" id="config_server_ping_c_1_ip" name="config_server_ping_c_1_ip" placeholder='Введите IP/имя хоста'>
+    </div>
+</script>
+
+<script id="config_server_start_udp_server_script" type="text/plain">
+    <div class="form-group pt-1" name="config_server_select_input">
+        <label id="config_server_start_udp_server_label" for="config_server_start_udp_server_label" class="text-sm">IP-адрес / Порт</label>
+        <div class="input-group flex-nowrap">
+            <input type="text" class="form-control form-control-sm" style="width:65% !important" id="config_server_start_udp_server_ip_input_field" name="config_server_start_udp_server_ip_input_field" value=''>
+            <input type="number" class="px-2 form-control form-control-sm" style="width:35% !important" id="config_server_start_udp_server_port_input_field" name="config_server_start_udp_server_port_input_field" min="0" max="65535" value="0">
+        </div>
+    </div>
+</script>
+
+<script id="config_server_start_tcp_server_script" type="text/plain">
+    <div class="form-group pt-1" name="config_server_select_input">
+        <label id="config_server_start_tcp_server_label" for="config_server_start_tcp_server_label" class="text-sm">IP-адрес / Порт</label>
+        <div class="input-group flex-nowrap">
+            <input type="text" class="form-control form-control-sm" style="width:65% !important" id="config_server_start_tcp_server_ip_input_field" name="config_server_start_tcp_server_ip_input_field" value=''>
+            <input type="number" class="px-2 form-control form-control-sm" style="width:35% !important" id="config_server_start_tcp_server_port_input_field" name="config_server_start_tcp_server_port_input_field" min="0" max="65535" value="0">
+        </div>
+    </div>
+</script>
+
+<script id="config_server_block_tcp_udp_port_script" type="text/plain">
+    <div class="form-group pt-1" name="config_server_select_input">
+        <label id="config_server_block_tcp_udp_port_label" for="config_server_block_tcp_udp_port_label" class="text-sm">TCP/UDP порт</label>
+        <div class="input-group flex-nowrap">
+            <input type="number" class="form-control form-control-sm" id="config_server_block_tcp_udp_port_input_field" name="config_server_block_tcp_udp_port_input_field" min="0" max="65535" value="0">
+        </div>
+    </div>
+</script>
+
+
+<script id="config_server_interface_script" type="text/plain">
+    <div class="form-group pb-1 pt-3">
+        <label id="config_server_iface_name_label_example" for="config_server_iface_name_example" class="text-sm">Линк к</label>
+        <input type="text" class="form-control form-control-sm" id="config_server_iface_name_example" name="config_server_iface_name_example" placeholder='' disabled>
+    </div>
+    <label id="config_server_ip_label_example" for="config_server_ip_example" class="text-sm">IP-адрес / Маска</label>
+    <div class="input-group pb-2 flex-nowrap">
+        <input type="text" class="form-control form-control-sm w-75" id="config_server_ip_example" name="config_server_ip_example" value=''>
+        <input type="number" class="px-2 form-control form-control-sm w-25" id="config_server_mask_example" name="config_server_mask_example" min="0" max="32" value="0">
+    </div>
+</script>
+
+<script id="config_server_default_gw_script" type="text/plain">
+    <div class="form-group pb-2">
+        <label for="config_server_default_gw" class="text-sm">Шлюз по умолчанию</label>
+        <input type="text" class="form-control form-control-sm" id="config_server_default_gw" name="config_server_default_gw" value=''>
+    </div>
+</script>
