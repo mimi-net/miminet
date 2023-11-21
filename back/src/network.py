@@ -1,4 +1,5 @@
 # Classes for deserialize miminet network
+# Classes for deserialize miminet network
 
 from dataclasses import dataclass
 
