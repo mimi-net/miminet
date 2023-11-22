@@ -7,7 +7,7 @@ from pathlib import Path
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship, declared_attr
 from sqlalchemy.types import TypeDecorator, CHAR
-from sqlalchemy import MetaData, types, Column, ForeignKey
+from sqlalchemy import MetaData, types
 from werkzeug.security import generate_password_hash
 from flask_sqlalchemy import SQLAlchemy
 
@@ -163,7 +163,7 @@ class CreatedByMixin(object):
 
     @declared_attr
     def created_by_id(cls):
-        return Column('created_by_id', ForeignKey('user.id'))
+        return db.Column('created_by_id', db.ForeignKey('user.id'))
 
     @declared_attr
     def created_by_user(cls):
