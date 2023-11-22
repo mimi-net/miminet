@@ -197,21 +197,30 @@ class Question(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
     __tablename__ = "question"
 
     question_text = db.Column(db.String(512), default="")
-    type = db.Column(db.String(32), default="")
-    section_id = db.Column(GUID(), db.ForeignKey("section.id"))
+    question_type = db.Column(db.String(32), default="")
+    section_id = db.Column(GUID(), db.ForeignKey(Section.id))
 
     section = relationship("Section", back_populates="questions")
-    text_question = relationship("QuestionTextQuestion", back_populates="question")
+
+    text_question = relationship(
+        'TextQuestion',
+        uselist=False,
+        backref=db.backref('question', uselist=False)
+    )
 
 
 class TextQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
 
     __tablename__ = "text_question"
 
-    id = db.Column(GUID(), db.ForeignKey('question.id'), primary_key=True)
+    id = db.Column(GUID(), db.ForeignKey(Question.id), primary_key=True)
     text_type = db.Column(db.String(32), default="")
 
-    question = relationship("TextQuestionQuestion", back_populates="text_question")
+    question = relationship(
+        'Question',
+        uselist=False,
+        backref=db.backref('text_question', uselist=False)
+    )
 
 
 class SortingQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
