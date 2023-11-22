@@ -15,7 +15,7 @@ from miminet_network import create_network, web_network, update_network_config, 
     delete_network, post_nodes, post_nodes_edges, move_nodes, web_network_shared, upload_network_picture, copy_network
 from miminet_shark import mimishark_page
 from miminet_simulation import run_simulation, check_simulation
-from temporary_models import Quiz, Section
+from temporary_models import Quiz, Section, Question
 
 app = Flask(__name__, static_url_path='', static_folder='static', template_folder="templates")
 
@@ -116,7 +116,7 @@ def quizzes():
 def quiz():
     # Get quiz sections and pass
     quiz = [Section(i) for i in range(10)]
-    # Pass here guid, in quizzes.html pass quiz.guid
+    # Pass here quiz guid, in quizzes.html pass quiz.guid
     return (render_template("quiz/quiz.html", guid=request.args.get('guid', type=str), quiz=quiz))
 
 
@@ -124,9 +124,9 @@ def quiz():
 @login_required
 def section():
     # Get quiz sections and pass
-    quiz = [Section(i) for i in range(10)]
-    # Pass here guid, in quizzes.html pass quiz.guid
-    return render_template("quiz/section.html", guid=request.args.get('guid', type=str), quiz=quiz)
+    questions = [Question(i) for i in range(10)]
+    # guid --- section guid
+    return render_template("quiz/section.html", guid=request.args.get('guid', type=str), quiz_title=quiz)
 
 
 @app.route('/sitemap.xml', methods=['GET'])
