@@ -1,9 +1,7 @@
 import dataclasses
-import time
-
-import pytest
 import re
 
+import pytest
 from tasks import mininet_worker
 
 
@@ -13,24 +11,24 @@ class Case:
     json_answer: str
 
 
-DEFAULT_JSON_TEST_DIRECTORY = 'test_json/'
+DEFAULT_JSON_TEST_DIRECTORY = "test_json/"
 
 
 def read_files(network_filename: str, answer_filename: str):
     with open(DEFAULT_JSON_TEST_DIRECTORY + network_filename, "r") as file1, open(
-            DEFAULT_JSON_TEST_DIRECTORY + answer_filename, "r") as file2:
+        DEFAULT_JSON_TEST_DIRECTORY + answer_filename, "r"
+    ) as file2:
         return file1.read(), file2.read().rstrip()
 
 
-FILE_NAMES = [("switch_and_hub_network.json", "switch_and_hub_answer.json"),
-              ("router_network.json", "router_answer.json")]
+FILE_NAMES = [
+    ("switch_and_hub_network.json", "switch_and_hub_answer.json"),
+    ("router_network.json", "router_answer.json"),
+]
 
 TEST_CASES = [
     Case(network, answer)
-    for (network, answer) in [
-        read_files(file[0], file[1])
-        for file in FILE_NAMES
-    ]
+    for (network, answer) in [read_files(file[0], file[1]) for file in FILE_NAMES]
 ]
 
 
