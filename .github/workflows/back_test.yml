@@ -19,13 +19,31 @@ jobs:
           cache: 'pip'
           cache-dependency-path: back/requirements.txt
             
+      - name: Install apt package
+        run: |
+          apt-get update \
+          && apt-get install -y --no-install-recommends \
+          ifupdown \
+          iproute2 \
+          iptables \
+          traceroute \
+          curl \
+          dnsutils \
+          netcat \
+          openssh-client \
+          iputils-ping \
+          mininet \
+          net-tools \
+          bridge-utils \
+          tcpdump \
+          git
+          touch /etc/network/interfaces \
+          mkdir -p /opt/mininet_dependencies
+
       - name: Install dependencies
         run: |
           sudo python -m pip install -U pip
           sudo python -m pip install wheel
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends mininet
-          mkdir -p /opt/mininet_dependencies
           sudo python -m pip install -r back/requirements.txt
           
       - name: Test with pytest
