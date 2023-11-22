@@ -37,8 +37,8 @@ jobs:
           bridge-utils \
           tcpdump \
           git
-          touch /etc/network/interfaces
-          mkdir -p /opt/mininet_dependencies
+          sudo touch /etc/network/interfaces
+          sudo mkdir -p /opt/mininet_dependencies
 
       - name: Install dependencies
         run: |
