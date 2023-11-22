@@ -22,6 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip
+          pip install wheel
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends mininet
           mkdir -p /opt/mininet_dependencies
