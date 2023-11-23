@@ -1,9 +1,11 @@
 version: "3.9"
 services:
   rabbitmq:
-    image: rabbitmq:3.10.7-management
+    image: rabbitmq:latest
     hostname: rabbitmq
     restart: always
+    networks:
+      - rabbitmq_network
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
@@ -16,3 +18,7 @@ services:
       - 4369:4369
       - 25672:25672
       - 35197:35197
+
+networks:
+  rabbitmq_network:
+    name: rabbitmq_network
