@@ -7,6 +7,10 @@ services:
       dockerfile: ./Dockerfile
     container_name: miminet
     restart: always
+    networks:
+      - rabbitmq_network
+      - redis_network
+      - miminet_network
     env_file:
       - .env
     expose:
@@ -18,8 +22,6 @@ services:
       - ./src/static/video:/app/static/video
       - ./src/static/pcaps:/app/static/pcaps
       - ./src/static/assets:/app/static/assets
-    networks:
-      - miminet_network
   nginx:
     container_name: nginx
     image: nginx
@@ -37,3 +39,9 @@ volumes:
 networks:
   miminet_network:
     driver: bridge
+  rabbitmq_network:
+    name: rabbitmq_network
+    external: true
+  redis_network:
+    name: redis_network
+    external: true
