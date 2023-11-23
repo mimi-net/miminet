@@ -1,0 +1,2 @@
+celery_concurrency: 1
+queue_names: test1,test2,test3

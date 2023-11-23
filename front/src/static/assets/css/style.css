@@ -1,0 +1,138 @@
+.cont {
+    height: 300px;
+}
+
+.tableFixHead {
+    overflow: auto;
+    height: 100px;
+}
+
+.tableFixHead thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.header {
+    position: sticky;
+    top: 0;
+}
+
+.inputWidth {
+    width: 500px;
+}
+
+p {
+    margin-bottom: 0px;
+}
+
+div.info__body>li {
+    list-style-type: none;
+    margin-left: 30px;
+}
+
+div.info__body>li:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.info {
+    padding: 10px;
+}
+
+.info__switch {
+    display: none;
+}
+
+.info__body {
+    max-height: 0;
+    overflow: hidden;
+    transition: 0.1s;
+}
+
+.info__switch:checked~.info__body {
+    max-height: 1000px;
+}
+
+.info__headline::before {
+    content: "";
+    position: absolute;
+    left: -18px;
+    top: 8px;
+    border: 5px solid black;
+    border-bottom-color: transparent;
+    border-right-color: transparent;
+    border-top-color: transparent;
+}
+
+.info__switch:checked~.info__headline::before {
+    transform: rotate(90deg) translateY(0px);
+}
+
+.info__headline {
+    display: block;
+    position: relative;
+    /* margin-bottom: 10px; */
+    user-select: none;
+    font-weight: normal;
+    cursor: pointer;
+}
+
+tbody tr:not(.no-hover):hover {
+    background: #d0f2fb; /* Цвет фона при наведении */
+    color: #000000; /* Цвет текста при наведении */
+   }
+
+.selected{
+    background: #87CEEB;
+}
+
+
+.decode_body{
+    text-align: left; 
+    width: 840px; 
+    transition: 0.15s;
+    margin-left: 30px;
+}
+
+.decode_head{
+    text-align: left; 
+    text-decoration: none;
+    color: black;
+}
+
+.dropdown-t {
+    white-space: nowrap
+}
+
+.dropdown-t::before {
+    display: inline-block;
+    margin-left: .255em;
+    margin-right: 2px;
+    vertical-align: .255em;
+    content: "";
+    border-top: .3em solid;
+    border-right: .3em solid transparent;
+    border-bottom: 0;
+    border-left: .3em solid transparent
+}
+
+.dropdown-t:empty::after {
+    margin-left: 0
+}
+
+.dropdown-t::before{
+    transform: rotate(-90deg);
+    transition: 0.15s;
+}
+
+.dropdown-t[aria-expanded="true"]::before {
+    transform: rotate(0deg);
+}
+
+.decode_width{
+    width: 450px;
+}
+
+#height_changer tr {
+    height: 50px;
+}

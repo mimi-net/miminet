@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Примеры компьютерных сетей{% endblock %}
+{% block description %}Примеры эмуляций компьютерных сетей на базе ОС Linux{% endblock %}
+{% block content %}
+
+<section class="container py-5 my-lg-5">
+    <div class="align-items-center justify-content-between py-4">
+          <h1 class="me-3">Примеры компьютерных сетей</h1>
+    </div>
+
+    <!-- Item -->
+    {% for net in networks %}
+        <article class="card border-0 shadow-sm overflow-hidden mb-4">
+          <div class="row g-0">
+            <div class="col-sm-4 position-relative bg-position-center bg-repeat-0 bg-size-cover" style="background-image: url({{ url_for('static', filename='/images/preview/' + net.preview_uri) }} ); min-height: 15rem;">
+              <a href="{{ url_for('web_network', guid=net.guid) }}" class="position-absolute top-0 start-0 w-100 h-100" aria-label="Открыть сеть"></a>
+            </div>
+            <div class="col-sm-8">
+              <div class="card-body">
+                <h3 class="h4">
+                  <a href="{{ url_for('web_network', guid=net.guid) }}">{{ net.title }}</a>
+                </h3>
+                <p>{{ net.description }}</p>
+              </div>
+            </div>
+          </div>
+        </article>
+    {% endfor %}
+
+</section>
+
+{% endblock %}

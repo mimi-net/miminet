@@ -1,0 +1,122 @@
+
+<script id="config_main_form_script" type="text/plain">
+    <form id='config_main_form' action='/host/save_config' method='POST'>
+        <input type="hidden" id="host_id" name="host_id" value=""/>
+        <input type="hidden" id="net_guid" name="net_guid" value=""/>
+        <button id="config_main_form_submit_button" type="submit" class="btn btn-success w-100">Сохранить</button>
+    </form>
+</script>
+
+<script id="config_host_name_script" type="text/plain">
+    <div class="form-group pb-2">
+        <label for="config_host_name" class="text-sm">Имя хоста</label>
+        <input type="text" class="form-control form-control-sm" id="config_host_name" name="config_host_name" value=''>
+    </div>
+</script>
+
+<script id="config_host_job_script" type="text/plain">
+    <div class="form-group" id="config_host_jobs">
+        <label for="config_host_job_select_field" class="text-sm">Выполнить команду</label>
+            <select id="config_host_job_select_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_host_job_select_field">
+                <option selected value="0">---</option>
+                <option value="1">ping (1 пакет)</option>
+                <option value="2">ping (с опциями)</option>
+                <option value="5">traceroute (с опциями)</option>
+                <option value="3">Отправить данные (UDP)</option>
+                <option value="4">Отправить данные (TCP)</option>
+                <option value="102">Добавить маршрут</option>
+                <option value="103">Добавить запись в ARP-cache</option>
+            </select>
+    </div>
+</script>
+
+<script id="config_host_ping_c_1_script" type="text/plain">
+    <div class="form-group pt-1" name="config_host_select_input">
+        <input type="text" class="form-control form-control-sm" id="config_host_ping_c_1_ip" name="config_host_ping_c_1_ip" placeholder='Введите IP хоста'>
+    </div>
+</script>
+
+<script id="config_host_ping_with_options_script" type="text/plain">
+    <div class="form-group pt-1" name="config_host_select_input">
+        <input type="text" class="form-control form-control-sm" id="config_host_ping_with_options_options_input_field" name="config_host_ping_with_options_options_input_field" value='' placeholder='пример: -c 1 -t 5'>
+        <input type="text" class="form-control form-control-sm" id="config_host_ping_with_options_ip_input_field" name="config_host_ping_with_options_ip_input_field" value="" placeholder='192.168.1.1'>
+    </div>
+</script>
+
+<script id="config_host_traceroute_with_options_script" type="text/plain">
+    <div class="form-group pt-1" name="config_host_select_input">
+        <input type="text" class="form-control form-control-sm" id="config_host_traceroute_with_options_options_input_field" name="config_host_traceroute_with_options_options_input_field" value='' placeholder='пример: -n'>
+        <input type="text" class="form-control form-control-sm" id="config_host_traceroute_with_options_ip_input_field" name="config_host_traceroute_with_options_ip_input_field" value="" placeholder='192.168.1.1'>
+    </div>
+</script>
+
+<script id="config_host_send_udp_data_script" type="text/plain">
+    <div class="form-group pt-1" name="config_host_select_input">
+        <input type="number" class="form-control form-control-sm" id="config_host_send_udp_data_size_input_field" name="config_host_send_udp_data_size_input_field" value='' placeholder='Объём в байтах (1-65535)'>
+        <label id="config_host_send_udp_data_label" for="config_host_send_udp_data_label" class="text-sm">Получатель (IP / порт)</label>
+        <div class="input-group flex-nowrap">
+            <input type="text" class="form-control form-control-sm" style="width:65% !important" id="config_host_send_udp_data_ip_input_field" name="config_host_send_udp_data_ip_input_field" value='' placeholder='IP адрес'>
+            <input type="number" class="px-2 form-control form-control-sm" style="width:35% !important" id="config_host_send_udp_data_port_input_field" name="config_host_send_udp_data_port_input_field" min="0" max="65535" value="" placeholder='Порт'>
+        </div>
+    </div>
+</script>
+
+<script id="config_host_send_tcp_data_script" type="text/plain">
+    <div class="form-group pt-1" name="config_host_select_input">
+        <input type="number" class="form-control form-control-sm" id="config_host_send_tcp_data_size_input_field" name="config_host_send_tcp_data_size_input_field" value='' placeholder='Объём в байтах (1-65535)'>
+        <label id="config_host_send_tcp_data_label" for="config_host_send_tcp_data_label" class="text-sm">Получатель (IP / порт)</label>
+        <div class="input-group flex-nowrap">
+            <input type="text" class="form-control form-control-sm" style="width:65% !important" id="config_host_send_tcp_data_ip_input_field" name="config_host_send_tcp_data_ip_input_field" value='' placeholder='IP адрес'>
+            <input type="number" class="px-2 form-control form-control-sm" style="width:35% !important" id="config_host_send_tcp_data_port_input_field" name="config_host_send_tcp_data_port_input_field" min="0" max="65535" value="" placeholder='Порт'>
+        </div>
+    </div>
+</script>
+
+<script id="config_host_add_arp_cache_script" type="text/plain">
+    <div class="form-group pt-1" name="config_host_select_input">
+        <input type="text" class="form-control form-control-sm" id="config_host_add_arp_cache_ip_input_field" name="config_host_add_arp_cache_ip_input_field" value='' placeholder='192.168.1.1'>
+        <input type="text" class="form-control form-control-sm" id="config_host_add_arp_cache_mac_input_field" name="config_host_add_arp_cache_mac_input_field" value="" placeholder='01:02:03:04:05:06'>
+    </div>
+</script>
+
+<script id="config_host_add_route_script" type="text/plain">
+    <div class="form-group pt-1" name="config_host_select_input">
+        <label id="config_host_add_route_label" for="config_host_add_route_label" class="text-sm">IP-адрес / Маска</label>
+        <div class="input-group flex-nowrap">
+            <input type="text" class="form-control form-control-sm w-75" id="config_host_add_route_ip_input_field" name="config_host_add_route_ip_input_field" value=''>
+            <input type="number" class="px-2 form-control form-control-sm w-25" id="config_host_add_route_mask_input_field" name="config_host_add_route_mask_input_field" min="0" max="32" value="0">
+        </div>
+        <input type="text" class="form-control form-control-sm" id="config_host_add_route_gw_input_field" name="config_host_add_route_gw_input_field" value='' placeholder='IP адрес шлюза'>
+    </div>
+</script>
+
+
+<script id="config_host_interface_script" type="text/plain">
+    <div class="form-group pb-1 pt-3">
+        <label id="config_host_iface_name_label_example" for="config_host_iface_name_example" class="text-sm">Линк к</label>
+        <input type="text" class="form-control form-control-sm" id="config_host_iface_name_example" name="config_host_iface_name_example" placeholder='' disabled>
+    </div>
+    <label id="config_host_ip_label_example" for="config_host_ip_example" class="text-sm">IP-адрес / Маска</label>
+    <div class="input-group pb-2 flex-nowrap">
+        <input type="text" class="form-control form-control-sm w-75" id="config_host_ip_example" name="config_host_ip_example" value=''>
+        <input type="number" class="px-2 form-control form-control-sm w-25" id="config_host_mask_example" name="config_host_mask_example" min="0" max="32" value="0">
+    </div>
+</script>
+
+<script id="config_host_job_list_script" type="text/plain">
+    <ul class="list-group pt-2" id="config_host_job_list">
+    </ul>
+</script>
+
+<script id="config_host_job_list_elem_script" type="text/plain">
+  <li class="py-1 px-2 list-group-item d-flex justify-content-between align-items-center">
+    <span class="ms-auto"><a href="" id="config_host_job_delete"><i class="bx bx-x fs-xl align-middle"></i></a></span>
+  </li>
+</script>
+
+<script id="config_host_default_gw_script" type="text/plain">
+    <div class="form-group pb-2">
+        <label for="config_host_default_gw" class="text-sm">Шлюз по умолчанию</label>
+        <input type="text" class="form-control form-control-sm" id="config_host_default_gw" name="config_host_default_gw" value=''>
+    </div>
+</script>

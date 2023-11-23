@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %} Веб-эмулятор {% endblock %}
+{% block description %}Эмулятор компьютерной сети для образовательных целей на базе ОС Linux{% endblock %}
+{% block content %}
+
+<section class="py-5 my-lg-5">
+    <div class="container pt-5">
+        <div class="row row-cols-4 row-cols-md-4 g-4">
+            <div class="card bg-primary mb-3 px-1" style="max-width: 18rem; height: 18rem; border: none;">
+                <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                    <h2 class="text-white">+</h2>
+                    <a class="stretched-link text-decoration-none" href="{{ url_for('create_network') }}">
+                        <h5 class="text-white">Новая сеть</h5>
+                    </a>
+                </div>
+            </div>
+
+            {% for net in networks %}
+            <div class="card mb-3 px-1 hover-overlay ripple shadow-1-strong rounded" style="max-width: 18rem; height: 18rem; border: none;">
+                <img src="{{ url_for('static', filename='/images/preview/' + net.preview_uri) }}" class="card-img-top" alt="{{ net.title }}">
+                <div class="card-footer mt-auto">
+                    <a class="stretched-link text-decoration-none text-center" href="{{ url_for('web_network', guid=net.guid) }}">
+                        <h5>{{ net.title }}</h5>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{% endblock %}
