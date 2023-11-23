@@ -1,0 +1,94 @@
+<script id="config_router_main_form_script" type="text/plain">
+    <form id='config_main_form' action='/host/router_save_config' method='POST'>
+        <input type="hidden" id="router_id" name="router_id" value=""/>
+        <input type="hidden" id="net_guid" name="net_guid" value=""/>
+        <button id="config_router_main_form_submit_button" type="submit" class="btn btn-success w-100">Сохранить</button>
+    </form>
+</script>
+
+<script id="config_router_name_script" type="text/plain">
+    <div class="form-group pb-2">
+        <label for="config_router_name" class="text-sm">Имя роутера</label>
+        <input type="text" class="form-control form-control-sm" id="config_router_name" name="config_router_name" value=''>
+    </div>
+</script>
+
+<script id="config_router_interface_script" type="text/plain">
+    <div class="form-group pb-1 pt-3">
+        <label id="config_router_iface_name_label_example" for="config_router_iface_name_example" class="text-sm">Линк к</label>
+        <input type="text" class="form-control form-control-sm" id="config_router_iface_name_example" name="config_router_iface_name_example" placeholder='' disabled>
+    </div>
+    <label id="config_router_ip_label_example" for="config_router_ip_example" class="text-sm">IP-адрес / Маска</label>
+    <div class="input-group pb-2 flex-nowrap">
+        <input type="text" class="form-control form-control-sm w-75" id="config_router_ip_example" name="config_router_ip_example" value=''>
+        <input type="number" class="px-2 form-control form-control-sm w-25" id="config_router_mask_example" name="config_router_mask_example" min="0" max="32" value="0">
+    </div>
+</script>
+
+<script id="config_router_default_gw_script" type="text/plain">
+    <div class="form-group pb-2">
+        <label for="config_router_default_gw" class="text-sm">Шлюз по умолчанию</label>
+        <input type="text" class="form-control form-control-sm" id="config_router_default_gw" name="config_router_default_gw" value=''>
+    </div>
+</script>
+
+<script id="config_router_job_script" type="text/plain">
+    <div class="form-group" id="config_router_jobs">
+        <label for="config_router_job_select_field" class="text-sm">Выполнить команду</label>
+        <select id="config_router_job_select_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_router_job_select_field">
+            <option selected value="0">---</option>
+            <option value="1">ping (1 пакет)</option>
+            <option value="100">Добавить IP адрес</option>
+            <option value="101">Включить NAT на интерфейсе</option>
+            <option value="102">Добавить маршрут</option>
+        </select>
+    </div>
+</script>
+
+<script id="config_router_ping_c_1_script" type="text/plain">
+    <div class="form-group pt-1" name="config_router_select_input">
+        <input type="text" class="form-control form-control-sm" id="config_router_ping_c_1_ip" name="config_router_ping_c_1_ip" placeholder='Введите IP/имя хоста'>
+    </div>
+</script>
+
+<script id="config_router_add_ip_mask_script" type="text/plain">
+    <div class="form-group pt-1" name="config_router_select_input">
+        <select id="config_router_add_ip_mask_iface_select_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_router_add_ip_mask_iface_select_field">
+        </select>
+        <label id="config_router_add_ip_mask_label_example" for="config_router_add_ip_mask_label_example" class="text-sm">IP-адрес / Маска</label>
+        <div class="input-group pb-2 flex-nowrap">
+            <input type="text" class="form-control form-control-sm w-75" id="config_router_add_ip_mask_ip_input_field" name="config_router_add_ip_mask_ip_input_field" value=''>
+            <input type="number" class="px-2 form-control form-control-sm w-25" id="config_router_add_ip_mask_mask_input_field" name="config_router_add_ip_mask_mask_input_field" min="0" max="32" value="0">
+        </div>
+    </div>
+</script>
+
+<script id="config_router_add_nat_masquerade_script" type="text/plain">
+    <div class="form-group pt-1" name="config_router_select_input">
+        <select id="config_router_add_nat_masquerade_iface_select_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_router_add_nat_masquerade_iface_select_field">
+        </select>
+    </div>
+</script>
+
+<script id="config_router_add_route_script" type="text/plain">
+    <div class="form-group pt-1" name="config_router_select_input">
+        <label id="config_router_add_route_label" for="config_router_add_route_label" class="text-sm">IP-адрес / Маска</label>
+        <div class="input-group flex-nowrap">
+            <input type="text" class="form-control form-control-sm w-75" id="config_router_add_route_ip_input_field" name="config_router_add_route_ip_input_field" value=''>
+            <input type="number" class="px-2 form-control form-control-sm w-25" id="config_router_add_route_mask_input_field" name="config_router_add_route_mask_input_field" min="0" max="32" value="0">
+        </div>
+        <input type="text" class="form-control form-control-sm" id="config_router_add_route_gw_input_field" name="config_router_add_route_gw_input_field" value='' placeholder='IP адрес шлюза'>
+    </div>
+</script>
+
+
+<script id="config_router_job_list_script" type="text/plain">
+    <ul class="list-group pt-2" id="config_router_job_list">
+    </ul>
+</script>
+
+<script id="config_router_job_list_elem_script" type="text/plain">
+  <li class="py-1 px-2 list-group-item d-flex justify-content-between align-items-center">
+    <span class="ms-auto"><a href="" id="config_router_job_delete"><i class="bx bx-x fs-xl align-middle"></i></a></span>
+  </li>
+</script>

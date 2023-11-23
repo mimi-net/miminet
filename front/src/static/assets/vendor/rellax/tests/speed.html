@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title></title>
+	<style>
+		html, body{
+			color: #223;
+			font-size: 21pt;
+			margin: 0; padding: 0;
+		}
+		nav{
+			font-size: 21pt;
+			line-height: 1.5em;
+			position: fixed;
+			bottom: 0; left: 0;
+		}
+		nav a{ color: inherit; }
+
+		.col{
+			text-align: center;
+			width: 50%;
+			float: left;
+			box-sizing: border-box;
+		}
+
+		h4{ text-align: center;}
+
+		.container{
+			outline: 1px solid #eed;
+			font-size: 42pt;
+			padding: 37.5vh 12.5vw;
+		}
+		.block{
+			background: #223;
+			color: #eed;
+			line-height: 25vh;
+			text-align: right;
+			padding: 0 42pt;
+			position: relative;
+		}
+		span{
+			background: #eed;
+			color: #223;
+			line-height: 25vh;
+			text-align: left;
+			padding: 0 42pt;
+			display: block;
+			width: 50%;
+			position: absolute;
+			top: 0; left: 0;
+			box-sizing: border-box;
+		}
+	</style>
+</head>
+<body>
+	<h4>speed = -1000 / speed = -10</h4>
+	<section>
+		<div class="col">
+			<div class="container"><div class="block">#1<span class="rellax" data-rellax-speed="-1000">#1</span></div></div>
+		</div>
+		<div class="col">
+			<div class="container"><div class="block">#1<span class="rellax" data-rellax-speed="-10">#1</span></div></div>
+		</div>
+	</section>
+
+	<h4>speed = 1000 / speed = 10</h4>
+	<section>
+		<div class="col">
+			<div class="container"><div class="block">#2<span class="rellax" data-rellax-speed="1000">#2</span></div></div>
+		</div>
+		<div class="col">
+			<div class="container"><div class="block">#2<span class="rellax" data-rellax-speed="10">#2</span></div></div>
+		</div>
+	</section>
+
+	<h4>percentage = 0.5</h4>
+	<h4>speed = -1000 / speed = -5</h4>
+	<section>
+		<div class="col">
+			<div class="container"><div class="block">#3<span class="rellax" data-rellax-speed="-1000" data-rellax-percentage="0.5">#3</span></div></div>
+		</div>
+		<div class="col">
+			<div class="container"><div class="block">#3<span class="rellax" data-rellax-speed="-5" data-rellax-percentage="0.5">#3</span></div></div>
+		</div>
+	</section>
+
+	<h4>percentage = 0.5</h4>
+	<h4>speed = 1000 / speed = 5</h4>
+	<section>
+		<div class="col">
+			<div class="container"><div class="block">#4<span class="rellax" data-rellax-speed="1000" data-rellax-percentage="0.5">#4</span></div></div>
+		</div>
+		<div class="col">
+			<div class="container"><div class="block">#4<span class="rellax" data-rellax-speed="5" data-rellax-percentage="0.5">#4</span></div></div>
+		</div>
+	</section>
+
+	<!-- Scripts -->
+	<script src="../rellax.js"></script>
+	<script>
+		var rellax = new Rellax();
+	</script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+{
+  "name": "boxicons",
+  "version": "2.1.4",
+  "description": "High Quality Web Icons",
+  "scripts": {
+    "start": "webpack-dev-server --history-api-fallback --hot --open",
+    "build": "webpack -p ",
+    "optimize-svg": "svgo --config=svgo.config.js -f svg/regular && svgo --config=svgo.config.js -f svg/logos && svgo --config=svgo.config.js -f svg/solid"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/atisawd/boxicons.git"
+  },
+  "author": {
+    "name": "Atisa",
+    "email": "atisawd@gmail.com",
+    "url": "https://github.com/atisawd"
+  },
+  "bugs": {
+    "url": "https://github.com/atisawd/boxicons/issues"
+  },
+  "dependencies": {
+    "@webcomponents/webcomponentsjs": "^2.0.2",
+    "prop-types": "^15.6.0",
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0",
+    "react-interactive": "^0.8.1",
+    "react-router-dom": "^4.2.2"
+  },
+  "resolutions": {
+    "eslint-scope": "3.7.1"
+  },
+  "devDependencies": {
+    "ajv": "^6.10.2",
+    "babel-core": "^6.26.0",
+    "babel-eslint": "^7.2.3",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-transform-builtin-classes": "^0.6.1",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-1": "^6.24.1",
+    "css-loader": "^0.28.11",
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb": "^14.1.0",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^4.0.0",
+    "eslint-plugin-react": "^6.10.3",
+    "svgo": "^2.3.1",
+    "to-string-loader": "^1.1.5",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.9",
+    "webpack-dev-server": "^3.9.0",
+    "wrapper-webpack-plugin": "^1.0.0"
+  },
+  "bundleDependencies": false,
+  "license": "(CC-BY-4.0 OR OFL-1.1 OR MIT)",
+  "main": "./dist/boxicons.js",
+  "style": "./css/boxicons.css"
+}
