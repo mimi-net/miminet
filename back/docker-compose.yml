@@ -16,11 +16,48 @@ services:
       - celery_concurrency=${celery_concurrency}
       - queue_names=${queue_names}
     privileged: true
-
+    
+  rabbitmq:
+    image: rabbitmq:latest
+    hostname: rabbitmq
+    container_name: rabbitmq
+    restart: always
+    networks:
+      - rabbitmq_network
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+      - ./rabbitmq/rabbitmq:/var/lib/rabbitmq
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./rabbitmq/metrics_collector.conf:/etc/rabbitmq/conf.d/20-management_agent.disable_metrics_collector.conf
+    ports:
+      - 15672:15672
+      - 5672:5672
+      - 4369:4369
+      - 25672:25672
+      - 35197:35197
+        
+  redis:
+    image: redis:latest
+    container_name: redis
+    hostname: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/dаta:/data
+    networks:
+      - redis_network
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_PORT=6379
+      - REDIS_DATABASES=16
+    command: /bin/sh -c 'redis-server --appendonly yes --requirepass $${REDIS_PASSWORD}'
+    
 networks:
   rabbitmq_network:
     name: rabbitmq_network
-    external: true
   redis_network:
     name: redis_network
-    external: true
