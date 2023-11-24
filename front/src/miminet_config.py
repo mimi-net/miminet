@@ -1,6 +1,7 @@
 import os
 import pathlib
 from datetime import datetime
+
 from PIL import Image
 
 SECRET_KEY_FILE = os.path.join(pathlib.Path(__file__).parent, "miminet_secret.conf")
