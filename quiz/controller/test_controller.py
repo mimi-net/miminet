@@ -12,8 +12,8 @@ from quiz.util.encoder import UUIDEncoder
 @login_required
 def create_test_endpoint():
     user = current_user
-    res_id = create_test(name=request.args.get('name', type=str),
-                         description=request.args.get('description', type=str),
+    res_id = create_test(name=request.form.get('name', type=str),
+                         description=request.form.get('description', type=str),
                          user=user)
     ret = {'message': 'Тест добавлен', 'id': res_id}
 
@@ -43,7 +43,7 @@ def get_deleted_tests_by_owner_endpoint():
 
 @login_required
 def delete_test_endpoint():
-    test_id = request.args.get('id', type=str)
+    test_id = request.form.get('id', type=str)
     deleted = delete_test(current_user, test_id)
     if deleted == 404:
         ret = {'message': 'Тест не существует', 'id': test_id}

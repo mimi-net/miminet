@@ -9,7 +9,7 @@ from quiz.util.encoder import UUIDEncoder
 
 @login_required
 def get_questions_by_section_endpoint():
-    res = get_questions_by_section(request.args.get('section_id', type=str))
+    res = get_questions_by_section(request.form.get('section_id', type=str))
     if res[1] == 404 or res[1] == 405:
         abort(res[1])
     else:

@@ -13,11 +13,11 @@ from quiz.util.encoder import UUIDEncoder
 @login_required
 def create_section_endpoint():
     user = current_user
-    res = create_section(name=request.args.get('name', type=str),
-                         description=request.args.get('description', type=str),
+    res = create_section(name=request.form.get('name', type=str),
+                         description=request.form.get('description', type=str),
                          user=user,
-                         test_id=request.args.get('test_id', type=str),
-                         timer=datetime.strptime(request.args.get('timer', type=str), '%H:%M:%S')
+                         test_id=request.form.get('test_id', type=str),
+                         timer=datetime.strptime(request.form.get('timer', type=str), '%H:%M:%S')
                          )
     if res[1] == 404 or res[1] == 405:
         abort(res[1])
@@ -29,7 +29,7 @@ def create_section_endpoint():
 
 @login_required
 def get_sections_by_test_endpoint():
-    res = get_sections_by_test(request.args.get('test_id', type=str))
+    res = get_sections_by_test(request.form.get('test_id', type=str))
     if res[1] == 404 or res[1] == 405:
         abort(res[1])
     else:
@@ -38,7 +38,7 @@ def get_sections_by_test_endpoint():
 
 @login_required
 def get_deleted_sections_by_test_endpoint():
-    res = get_deleted_sections_by_test(request.args.get('test_id', type=str), current_user)
+    res = get_deleted_sections_by_test(request.form.get('test_id', type=str), current_user)
     if res[1] == 404 or res[1] == 405:
         abort(res[1])
     else:
@@ -47,7 +47,7 @@ def get_deleted_sections_by_test_endpoint():
 
 @login_required
 def delete_section_endpoint():
-    section_id = request.args.get('id', type=str)
+    section_id = request.form.get('id', type=str)
     deleted = delete_section(current_user, section_id)
     if deleted == 404:
         ret = {'message': 'Секция не существует', 'id': section_id}
@@ -66,7 +66,7 @@ def edit_section_endpoint():
                           name=request.form.get('name', type=str),
                           section_id=section_id,
                           description=request.form.get('description', type=str),
-                          timer=datetime.strptime(request.args.get('timer', type=str), '%H:%M:%S')
+                          timer=datetime.strptime(request.form.get('timer', type=str), '%H:%M:%S')
                           )
     if edited == 404:
         ret = {'message': 'Секции не существует', 'id': section_id}
