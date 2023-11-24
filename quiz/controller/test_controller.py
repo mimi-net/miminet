@@ -6,14 +6,7 @@ from flask import request, make_response, jsonify
 
 from quiz.service.test_service import create_test, get_tests_by_owner, get_all_tests, delete_test, \
     get_deleted_tests_by_owner, edit_test, get_tests_by_author_name
-
-
-class UUIDEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, UUID):
-            return obj.hex
-
-        return json.JSONEncoder.default(self, obj)
+from quiz.util.encoder import UUIDEncoder
 
 
 @login_required

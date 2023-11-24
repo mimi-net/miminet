@@ -129,11 +129,7 @@ class Question(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
 
     section = db.relationship("Section", back_populates="questions")
 
-    text_question = db.relationship(
-        'TextQuestion',
-        uselist=False,
-        back_populates='question'
-    )
+    text_question = db.relationship('TextQuestion', back_populates='question')
 
     sessions = db.relationship("SessionQuestion", back_populates="session_question")
 
@@ -168,11 +164,10 @@ class TextQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model
     id = db.Column(GUID(), db.ForeignKey(Question.id), primary_key=True)
     text_type = db.Column(db.String(32), default="")
 
-    question = db.relationship(
-        'Question',
-        uselist=False,
-        back_populates='text_question'
-    )
+    question = db.relationship('Question', back_populates='text_question')
+    sorting_question = db.relationship('SortingQuestion', back_populates='text_question')
+    variable_question = db.relationship('VariableQuestion', back_populates='text_question')
+    matching_question = db.relationship('MatchingQuestion', back_populates='text_question')
 
 
 class SortingQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
@@ -183,6 +178,8 @@ class SortingQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Mo
     right_sequence = db.Column(db.UnicodeText, default="")
     explanation = db.Column(db.String(512), default="")
 
+    text_question = db.relationship('TextQuestion', back_populates='sorting_question')
+
 
 class MatchingQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
 
@@ -192,6 +189,8 @@ class MatchingQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.M
     map = db.Column(Json(), default="")
     explanation = db.Column(db.String(512), default="")
 
+    text_question = db.relationship('TextQuestion', back_populates='matching_question')
+
 
 class VariableQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
 
@@ -200,6 +199,7 @@ class VariableQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.M
     id = db.Column(GUID(), db.ForeignKey('text_question.id'), primary_key=True)
 
     answers = db.relationship("Answer", back_populates="variable_question")
+    text_question = db.relationship('TextQuestion', back_populates='variable_question')
 
 
 class Answer(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):

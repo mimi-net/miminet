@@ -7,13 +7,7 @@ from flask import request, make_response, jsonify, abort
 
 from quiz.service.section_service import create_section, get_sections_by_test, get_deleted_sections_by_test, \
     delete_section, edit_section
-
-
-class UUIDEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, UUID):
-            return obj.hex
-        return json.JSONEncoder.default(self, obj)
+from quiz.util.encoder import UUIDEncoder
 
 
 @login_required
