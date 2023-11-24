@@ -6,7 +6,7 @@ from sqlalchemy import MetaData
 from werkzeug.security import generate_password_hash
 from flask_sqlalchemy import SQLAlchemy
 
-from flask_login import UserMixin, current_user
+from flask_login import UserMixin
 
 from miminet_config import SQLITE_DATABASE_NAME, SQLITE_DATABASE_BACKUP_NAME, make_empty_network
 

@@ -116,6 +116,7 @@ class Section(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
 
     test = db.relationship("Test", back_populates="sections")
     questions = db.relationship("Question", back_populates="section")
+    quiz_sessions = db.relationship("QuizQuestion", back_populates="section")
 
 
 class Question(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
@@ -133,6 +134,31 @@ class Question(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
         uselist=False,
         back_populates='question'
     )
+
+    sessions = db.relationship("SessionQuestion", back_populates="session_question")
+
+
+class QuizSession(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
+
+    __tablename__ = "quiz_session"
+
+    section_id = db.Column(GUID(), db.ForeignKey(Section.id))
+    finished_at = db.Column(db.DateTime)
+
+    section = db.relationship("Section", back_populates="quiz_sessions")
+    sessions = db.relationship("SessionQuestion", back_populates="quiz_session")
+
+
+class SessionQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
+
+    __tablename__ = "session_question"
+
+    quiz_session_id = db.Column(GUID(), db.ForeignKey(QuizSession.id))
+    question_id = db.Column(GUID(), db.ForeignKey(Question.id))
+    answer = db.Column(db.String(8192))
+
+    quiz_session = db.relationship("QuizSession", back_populates="sessions")
+    session_question = db.relationship("Question", back_populates="session_questions")
 
 
 class TextQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
