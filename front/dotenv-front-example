@@ -1,0 +1,3 @@
+amqp_urls=amqp://user:password@rabbitmq/
+backend_urls=redis://:password@redis/1
+exchange_name=default_exchange
