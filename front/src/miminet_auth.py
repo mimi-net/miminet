@@ -15,11 +15,12 @@ from flask_login import (
 )
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
-from miminet_config import make_example_net_switch_and_hub
-from miminet_model import Network, User, db
 from pip._vendor import cachecontrol
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import check_password_hash
+
+from miminet_config import make_example_net_switch_and_hub
+from miminet_model import Network, User, db
 
 # Global variables
 UPLOAD_FOLDER = "static/avatar/"

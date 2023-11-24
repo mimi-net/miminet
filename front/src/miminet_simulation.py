@@ -3,11 +3,12 @@ import shutil
 import uuid
 
 from celery.result import AsyncResult
-from celery_app import DEFAULT_APP_EXCHANGE, EXCHANGE_TYPE, app
 from flask import jsonify, make_response, redirect, request, url_for
 from flask_login import current_user, login_required
-from miminet_model import Network, Simulate, SimulateLog, db
 from redis import RedisError
+
+from celery_app import DEFAULT_APP_EXCHANGE, EXCHANGE_TYPE, app
+from miminet_model import Network, Simulate, SimulateLog, db
 
 
 @login_required

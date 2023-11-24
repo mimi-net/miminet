@@ -4,6 +4,7 @@ from datetime import datetime
 from flask import Flask, make_response, render_template
 from flask_login import current_user, login_required
 from flask_migrate import Migrate
+
 from miminet_auth import (
     google_callback,
     google_login,

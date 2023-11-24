@@ -4,13 +4,14 @@ from pathlib import Path
 
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import MetaData
+from werkzeug.security import generate_password_hash
+
 from miminet_config import (
     SQLITE_DATABASE_BACKUP_NAME,
     SQLITE_DATABASE_NAME,
     make_empty_network,
 )
-from sqlalchemy import MetaData
-from werkzeug.security import generate_password_hash
 
 convention = {
     "ix": "ix_%(column_0_label)s",

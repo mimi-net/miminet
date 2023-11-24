@@ -7,10 +7,11 @@
 
 import os
 
-import celeryconfig
 from celery import Celery
 from dotenv import load_dotenv
 from kombu import Exchange
+
+import celeryconfig
 
 load_dotenv()
 
