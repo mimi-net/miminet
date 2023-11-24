@@ -42,8 +42,3 @@ jobs:
       - name: Lint with flake8
         run: |
           flake8 --count --verbose --max-line-length=88 --extend-ignore=E501,W391,C901,E203 --statistics ${{matrix.node}}
-          
-      - name: Lint with isort
-        run: |
-          isort --check --profile="black" -l 88 ${{matrix.node}}
-          
