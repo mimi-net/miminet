@@ -15,7 +15,7 @@ def create_test(name: str, description: str, user: User):
 
 
 def get_tests_by_owner(user: User):
-    tests = Test.query.filter_by(created_by_id=user.id, deleted=False).all()
+    tests = Test.query.filter_by(created_by_id=user.id, is_deleted=False).all()
     test_dtos = to_test_dto_list(tests)
 
     return test_dtos
@@ -29,7 +29,7 @@ def get_all_tests():
 
 
 def get_deleted_tests_by_owner(user: User):
-    tests = Test.query.filter_by(created_by_id=user.id, deleted=True).all()
+    tests = Test.query.filter_by(created_by_id=user.id, is_deleted=True).all()
     test_dtos = to_test_dto_list(tests)
 
     return test_dtos
