@@ -9,7 +9,7 @@ def to_section_dto_list(sections: List[Section]):
 
     for i in range(len(sections)):
         section = sections[i]
-        dto_list.append(SectionDto(section.name, section.timer, section.description))
+        dto_list.append(SectionDto(section.id, section.name, section.timer, section.description))
 
     return dto_list
 
@@ -25,7 +25,8 @@ def to_test_dto_list(tests: List[Test]):
 
 
 class SectionDto:
-    def __init__(self, section_name: str, timer: datetime, description: str) -> None:
+    def __init__(self, section_id: str, section_name: str, timer: datetime, description: str) -> None:
+        self.section_id = section_id
         self.section_name = section_name
         self.timer = timer
         self.description = description

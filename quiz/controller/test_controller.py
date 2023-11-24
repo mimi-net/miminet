@@ -2,16 +2,17 @@ import json
 from uuid import UUID
 
 from flask_login import login_required, current_user
-from flask import redirect, url_for, request, flash, make_response, jsonify
+from flask import request, make_response, jsonify
 
-from quiz.service.TestService import create_test, get_tests_by_owner, get_all_tests, delete_test, \
-    get_deleted_tests_by_owner
+from quiz.service.test_service import create_test, get_tests_by_owner, get_all_tests, delete_test, \
+    get_deleted_tests_by_owner, edit_test, get_tests_by_author_name
 
 
 class UUIDEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, UUID):
             return obj.hex
+
         return json.JSONEncoder.default(self, obj)
 
 
@@ -22,6 +23,7 @@ def create_test_endpoint():
                          description=request.args.get('description', type=str),
                          user=user)
     ret = {'message': 'Тест добавлен', 'id': res_id}
+
     return make_response(jsonify(ret), 201)
 
 
@@ -42,12 +44,13 @@ def get_all_tests_endpoint():
 def get_deleted_tests_by_owner_endpoint():
     user = current_user
     res = get_deleted_tests_by_owner(user)
+
     return make_response(json.dumps([obj.__dict__ for obj in res], cls=UUIDEncoder), 200)
 
 
 @login_required
 def delete_test_endpoint():
-    test_id = request.args.get('id', type=int)
+    test_id = request.args.get('id', type=str)
     deleted = delete_test(current_user, test_id)
     if deleted == 404:
         ret = {'message': 'Тест не существует', 'id': test_id}
@@ -55,4 +58,30 @@ def delete_test_endpoint():
         ret = {'message': 'Попытка удалить чужой тест', 'id': test_id}
     else:
         ret = {'message': 'Тест удалён', 'id': test_id}
+
     return make_response(jsonify(ret), deleted)
+
+
+@login_required
+def edit_test_endpoint():
+    test_id = request.form.get('id', type=str)
+    edited = edit_test(user=current_user,
+                    name=request.form.get('name', type=str),
+                    test_id=test_id,
+                    description=request.form.get('description', type=str)
+                    )
+    if edited == 404:
+        ret = {'message': 'Тест не существует', 'id': test_id}
+    elif edited == 405:
+        ret = {'message': 'Попытка редактировать чужой тест', 'id': test_id}
+    else:
+        ret = {'message': 'Тест редактирован', 'id': test_id}
+
+    return make_response(jsonify(ret), edited)
+
+
+@login_required
+def get_tests_by_author_name_endpoint():
+    tests = get_tests_by_author_name(request.form.get('author_name', type=str))
+
+    return make_response(json.dumps([obj.__dict__ for obj in tests], cls=UUIDEncoder), 200)
