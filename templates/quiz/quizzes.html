@@ -15,15 +15,16 @@
                 <div class="row g-0">
                     <div class="col-sm-8">
                         <div class="card-body">
-                            <h4 class="h4" style="margin-top: 20px;margin-left: 20px">
-                                <a href="{{ url_for('quiz', guid=quiz.title) }}">{{ quiz.title }}</a>
+                            <h4 class="h4" style="margin-top: 20px;margin-left: 20px;margin-bottom: 4px">
+                                <a href="{{ url_for('quiz', guid=quiz.test_id) }}">{{ quiz.test_name }}</a>
                             </h4>
-                            <p style="margin-left: 40px;">{{ quiz.description }}</p>
+                            <p style="margin-left: 40px;margin-bottom: 4px">{{ quiz.description }}</p>
+                            <p style="margin-left: 40px;opacity: 50%">{{ quiz.author_name }}</p>
                         </div>
                     </div>
                     <div class="col-sm-4">
                         <div class="card-body">
-                            <p id="{{ quiz.id }}"
+                            <p id="{{ quiz.test_id }}"
                                style="text-align: right; margin-right: 40px; margin-top: 20px;"></p>
                             <p style="text-align: right; margin-right: 40px;">
                                 {{ quiz.passed }}/{{ quiz.sections }} пройдено

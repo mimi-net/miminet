@@ -17,7 +17,7 @@ from miminet_shark import mimishark_page
 from miminet_simulation import run_simulation, check_simulation
 from quiz.controller.test_controller import create_test_endpoint, get_all_tests_endpoint, get_tests_by_owner_endpoint, \
     get_deleted_tests_by_owner_endpoint, delete_test_endpoint, edit_test_endpoint
-from temporary_models import Quiz, Section, Question
+from temporary_models import Section, Question
 
 app = Flask(__name__, static_url_path='', static_folder='static', template_folder="templates")
 
@@ -76,7 +76,6 @@ app.add_url_rule('/host/switch_save_config', methods=['GET', 'POST'], view_func=
 # MimiShark
 app.add_url_rule('/host/mimishark', methods=['GET'], view_func=mimishark_page)
 
-
 # Quiz
 app.add_url_rule('/quiz/test/create', methods=['POST'], view_func=create_test_endpoint)
 app.add_url_rule('/quiz/test/owner', methods=['GET'], view_func=get_tests_by_owner_endpoint)
@@ -84,6 +83,24 @@ app.add_url_rule('/quiz/test/all', methods=['GET'], view_func=get_all_tests_endp
 app.add_url_rule('/quiz/test/owner/deleted', methods=['GET'], view_func=get_deleted_tests_by_owner_endpoint)
 app.add_url_rule('/quiz/test/delete', methods=['DELETE'], view_func=delete_test_endpoint)
 app.add_url_rule('/quiz/test/edit', methods=['PUT'], view_func=edit_test_endpoint)
+
+
+@app.route('/quiz', methods=['GET'])
+@login_required
+def quiz():
+    # Get quiz sections and pass
+    quiz = [Section(i) for i in range(10)]
+    # Pass here quiz guid, in quizzes.html pass quiz.guid
+    return (render_template("quiz/quiz.html", guid=request.args.get('guid', type=str), quiz=quiz))
+
+
+@app.route('/section', methods=['GET'])
+@login_required
+def section():
+    # Get quiz sections and pass
+    questions = [Question(i) for i in range(10)]
+    # guid --- section guid
+    return render_template("quiz/section.html", guid=request.args.get('guid', type=str), quiz_title=quiz)
 
 
 @app.route('/')
@@ -108,33 +125,6 @@ def examples():
              '6994b921-cc0f-4cbd-b209-7f30784027d7', '1646e111-1a47-4d98-a253-c396904e5351']
     networks = Network.query.filter(Network.guid.in_(guids)).order_by(Network.id.asc()).all()
     return (render_template("examples.html", networks=networks))
-
-
-@app.route('/quizzes')
-@login_required
-def quizzes():
-    # Get all quizzes
-    # Pass them as parameter
-    quizzes = [Quiz(i) for i in range(3)]
-    return render_template("quiz/quizzes.html", quizzes=quizzes)
-
-
-@app.route('/quiz', methods=['GET'])
-@login_required
-def quiz():
-    # Get quiz sections and pass
-    quiz = [Section(i) for i in range(10)]
-    # Pass here quiz guid, in quizzes.html pass quiz.guid
-    return (render_template("quiz/quiz.html", guid=request.args.get('guid', type=str), quiz=quiz))
-
-
-@app.route('/section', methods=['GET'])
-@login_required
-def section():
-    # Get quiz sections and pass
-    questions = [Question(i) for i in range(10)]
-    # guid --- section guid
-    return render_template("quiz/section.html", guid=request.args.get('guid', type=str), quiz_title=quiz)
 
 
 @app.route('/sitemap.xml', methods=['GET'])

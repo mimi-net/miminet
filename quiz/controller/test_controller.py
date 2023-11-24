@@ -1,7 +1,7 @@
 import json
 
 from flask_login import login_required, current_user
-from flask import request, make_response, jsonify
+from flask import request, make_response, jsonify, render_template
 
 from quiz.service.test_service import create_test, get_tests_by_owner, get_all_tests, delete_test, \
     get_deleted_tests_by_owner, edit_test, get_tests_by_author_name
@@ -29,7 +29,8 @@ def get_tests_by_owner_endpoint():
 
 @login_required
 def get_all_tests_endpoint():
-    return make_response(json.dumps([obj.__dict__ for obj in get_all_tests()], cls=UUIDEncoder), 200)
+    quizzes = get_all_tests()
+    return make_response( render_template("quiz/quizzes.html", quizzes=quizzes), 200)
 
 
 @login_required
