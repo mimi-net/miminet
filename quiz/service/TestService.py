@@ -1,5 +1,3 @@
-from flask_login import login_required, current_user
-
 from miminet_model import db, User
 from quiz.entity.entity import Test
 from quiz.util.dto import to_test_dto_list
@@ -16,8 +14,15 @@ def create_test(name: str, description: str, user: User):
     return test.id
 
 
-def get_tests(user: User):
-    tests = Test.query.filter_by(created_by_id=user.id)
+def get_tests_by_owner(user: User):
+    tests = Test.query.filter_by(created_by_id=user.id).all()
+    test_dtos = to_test_dto_list(tests)
+
+    return test_dtos
+
+
+def get_all_tests():
+    tests = Test.query.all()
     test_dtos = to_test_dto_list(tests)
 
     return test_dtos

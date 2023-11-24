@@ -11,6 +11,7 @@ from miminet_model import db
 
 class GUID(TypeDecorator):
     impl = CHAR
+    __cache_ok__ = True
 
     def load_dialect_impl(self, dialect):
         if dialect.name == 'postgresql':
