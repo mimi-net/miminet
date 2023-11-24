@@ -15,6 +15,8 @@ from miminet_network import create_network, web_network, update_network_config, 
     delete_network, post_nodes, post_nodes_edges, move_nodes, web_network_shared, upload_network_picture, copy_network
 from miminet_shark import mimishark_page
 from miminet_simulation import run_simulation, check_simulation
+from quiz.controller.TestController import create_test_endpoint, get_all_tests_endpoint, get_tests_by_owner_endpoint, \
+    get_deleted_tests_by_owner_endpoint, delete_test_endpoint
 from temporary_models import Quiz, Section, Question
 
 app = Flask(__name__, static_url_path='', static_folder='static', template_folder="templates")
@@ -76,7 +78,12 @@ app.add_url_rule('/host/mimishark', methods=['GET'], view_func=mimishark_page)
 
 
 # Quiz
-# app.add_url_rule('/quiz', methods=['GET'], view_func=quiz_section)
+app.add_url_rule('/quiz/test/create', methods=['POST'], view_func=create_test_endpoint)
+app.add_url_rule('/quiz/test/owner', methods=['GET'], view_func=get_tests_by_owner_endpoint)
+app.add_url_rule('/quiz/test/all', methods=['GET'], view_func=get_all_tests_endpoint)
+app.add_url_rule('/quiz/test/owner/deleted', methods=['GET'], view_func=get_deleted_tests_by_owner_endpoint)
+app.add_url_rule('/quiz/test/delete', methods=['DELETE'], view_func=delete_test_endpoint)
+
 
 @app.route('/')
 def index():  # put application's code here
