@@ -116,7 +116,7 @@ class Section(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
 
     test = db.relationship("Test", back_populates="sections")
     questions = db.relationship("Question", back_populates="section")
-    quiz_sessions = db.relationship("QuizQuestion", back_populates="section")
+    quiz_sessions = db.relationship("QuizSession", back_populates="section")
 
 
 class Question(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
@@ -131,7 +131,7 @@ class Question(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
 
     text_question = db.relationship('TextQuestion', back_populates='question')
 
-    sessions = db.relationship("SessionQuestion", back_populates="session_question")
+    session_questions = db.relationship("SessionQuestion", back_populates="session_question")
 
 
 class QuizSession(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
