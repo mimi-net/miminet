@@ -7,9 +7,20 @@ services:
       dockerfile: ./Dockerfile
     container_name: celery
     restart: always
+    networks:
+      - rabbitmq_network
+      - redis_network
     env_file:
       - .env
     environment:
       - celery_concurrency=${celery_concurrency}
       - queue_names=${queue_names}
     privileged: true
+
+networks:
+  rabbitmq_network:
+    name: rabbitmq_network
+    external: true
+  redis_network:
+    name: redis_network
+    external: true
