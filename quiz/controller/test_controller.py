@@ -1,5 +1,4 @@
 import json
-from uuid import UUID
 
 from flask_login import login_required, current_user
 from flask import request, make_response, jsonify
@@ -12,8 +11,8 @@ from quiz.util.encoder import UUIDEncoder
 @login_required
 def create_test_endpoint():
     user = current_user
-    res_id = create_test(name=request.form.get('name', type=str),
-                         description=request.form.get('description', type=str),
+    res_id = create_test(name=request.json['name'],
+                         description=request.json['description'],
                          user=user)
     ret = {'message': 'Тест добавлен', 'id': res_id}
 
@@ -43,7 +42,7 @@ def get_deleted_tests_by_owner_endpoint():
 
 @login_required
 def delete_test_endpoint():
-    test_id = request.form.get('id', type=str)
+    test_id = request.json['id']
     deleted = delete_test(current_user, test_id)
     if deleted == 404:
         ret = {'message': 'Тест не существует', 'id': test_id}
@@ -57,12 +56,12 @@ def delete_test_endpoint():
 
 @login_required
 def edit_test_endpoint():
-    test_id = request.form.get('id', type=str)
+    test_id = request.json['id']
     edited = edit_test(user=current_user,
-                    name=request.form.get('name', type=str),
-                    test_id=test_id,
-                    description=request.form.get('description', type=str)
-                    )
+                       name=request.json['name'],
+                       test_id=test_id,
+                       description=request.json['description']
+                       )
     if edited == 404:
         ret = {'message': 'Тест не существует', 'id': test_id}
     elif edited == 405:
@@ -75,6 +74,6 @@ def edit_test_endpoint():
 
 @login_required
 def get_tests_by_author_name_endpoint():
-    tests = get_tests_by_author_name(request.form.get('author_name', type=str))
+    tests = get_tests_by_author_name(request.json['author_name'])
 
     return make_response(json.dumps([obj.__dict__ for obj in tests], cls=UUIDEncoder), 200)
