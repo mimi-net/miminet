@@ -3,6 +3,7 @@ services:
   rabbitmq:
     image: rabbitmq:latest
     hostname: rabbitmq
+    container_name: rabbitmq
     restart: always
     networks:
       - rabbitmq_network
@@ -10,6 +11,7 @@ services:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
     volumes:
+      - ./enabled_plugins:/etc/rabbitmq/enabled_plugins
       - ./rabbitmq:/var/lib/rabbitmq
       - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
     ports:
