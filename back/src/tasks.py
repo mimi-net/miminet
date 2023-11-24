@@ -2,10 +2,11 @@ import json
 import typing
 
 import marshmallow_dataclass
-import redis
 from celery import shared_task
 from network import Network
 from simulate import run_mininet
+
+import redis
 
 
 @shared_task(
