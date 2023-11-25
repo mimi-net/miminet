@@ -1,0 +1,126 @@
+{
+    "nodes": [
+        {
+            "classes": [
+                "host"
+            ],
+            "config": {
+                "default_gw": "192.168.1.100",
+                "label": "host_1",
+                "type": "host"
+            },
+            "data": {
+                "id": "host_1",
+                "label": "host_1"
+            },
+            "interface": [
+                {
+                    "connect": "edge_lpcrcot949xfvva444q",
+                    "id": "iface_80604750",
+                    "ip": "192.168.1.1",
+                    "name": "iface_80604750",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 30.206882500646255,
+                "y": 164.99866708584565
+            }
+        },
+        {
+            "classes": [
+                "host"
+            ],
+            "config": {
+                "default_gw": "172.16.12.1.100",
+                "label": "host_2",
+                "type": "host"
+            },
+            "data": {
+                "id": "host_2",
+                "label": "host_2"
+            },
+            "interface": [
+                {
+                    "connect": "edge_lpcrcmmpd396igta3ct",
+                    "id": "iface_12082268",
+                    "ip": "172.16.12.1",
+                    "name": "iface_12082268",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 152.17755838925038,
+                "y": 166.5
+            }
+        },
+        {
+            "classes": [
+                "l3_router"
+            ],
+            "config": {
+                "default_gw": "",
+                "label": "router_1",
+                "type": "router"
+            },
+            "data": {
+                "id": "router_1",
+                "label": "router_1"
+            },
+            "interface": [
+                {
+                    "connect": "edge_lpcrcmmpd396igta3ct",
+                    "id": "iface_26006038",
+                    "ip": "172.16.12.100",
+                    "name": "iface_26006038",
+                    "netmask": 24
+                },
+                {
+                    "connect": "edge_lpcrcot949xfvva444q",
+                    "id": "iface_53117446",
+                    "ip": "192.168.1.100",
+                    "name": "iface_53117446",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 90.68333435058594,
+                "y": 57.80000305175781
+            }
+        }
+    ],
+    "edges": [
+        {
+            "data": {
+                "id": "edge_lpcrcmmpd396igta3ct",
+                "source": "router_1",
+                "target": "host_2"
+            }
+        },
+        {
+            "data": {
+                "id": "edge_lpcrcot949xfvva444q",
+                "source": "router_1",
+                "target": "host_1"
+            }
+        }
+    ],
+    "jobs": [
+        {
+            "id": "320b040c9b82423cbb763528e498fbdf",
+            "level": 0,
+            "job_id": 4,
+            "host_id": "host_1",
+            "arg_1": 1000,
+            "arg_2": "172.16.12.22",
+            "arg_3": 5555,
+            "print_cmd": "send -s 1000 -p tcp 172.16.12.22:5555"
+        }
+    ],
+    "config": {
+        "zoom": 2,
+        "pan_x": 0,
+        "pan_y": 0
+    },
+    "pcap": []
+}

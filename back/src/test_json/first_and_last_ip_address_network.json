@@ -1,0 +1,168 @@
+{
+    "nodes": [
+        {
+            "data": {
+                "id": "host_1",
+                "label": "host_1"
+            },
+            "position": {
+                "x": 31.199329320438224,
+                "y": 205.4560138329062
+            },
+            "classes": [
+                "host"
+            ],
+            "config": {
+                "type": "host",
+                "label": "host_1",
+                "default_gw": ""
+            },
+            "interface": [
+                {
+                    "id": "iface_42616860",
+                    "name": "iface_42616860",
+                    "connect": "edge_lpcmdbysi3nchn5c4co",
+                    "ip": "192.168.1.0",
+                    "netmask": 24
+                }
+            ]
+        },
+        {
+            "data": {
+                "id": "host_2",
+                "label": "host_2"
+            },
+            "position": {
+                "x": 163.168672294888,
+                "y": 53.53198993970457
+            },
+            "classes": [
+                "host"
+            ],
+            "config": {
+                "type": "host",
+                "label": "host_2",
+                "default_gw": ""
+            },
+            "interface": [
+                {
+                    "id": "iface_72084755",
+                    "name": "iface_72084755",
+                    "connect": "edge_lpcmdd31mral0mfcbc",
+                    "ip": "192.168.1.50",
+                    "netmask": 24
+                }
+            ]
+        },
+        {
+            "data": {
+                "id": "host_3",
+                "label": "host_3"
+            },
+            "position": {
+                "x": 169.6735596467873,
+                "y": 209.97778476409403
+            },
+            "classes": [
+                "host"
+            ],
+            "config": {
+                "type": "host",
+                "label": "host_3",
+                "default_gw": ""
+            },
+            "interface": [
+                {
+                    "id": "iface_50855153",
+                    "name": "iface_50855153",
+                    "connect": "edge_lpcmdeirza434jdhoj",
+                    "ip": "192.168.1.255",
+                    "netmask": 24
+                }
+            ]
+        },
+        {
+            "data": {
+                "id": "l2sw1",
+                "label": "l2sw1"
+            },
+            "position": {
+                "x": 109.76667022705078,
+                "y": 128
+            },
+            "classes": [
+                "l2_switch"
+            ],
+            "config": {
+                "type": "l2_switch",
+                "label": "l2sw1",
+                "stp": 0
+            },
+            "interface": [
+                {
+                    "id": "l2sw1_1",
+                    "name": "l2sw1_1",
+                    "connect": "edge_lpcmdbysi3nchn5c4co"
+                },
+                {
+                    "id": "l2sw1_2",
+                    "name": "l2sw1_2",
+                    "connect": "edge_lpcmdd31mral0mfcbc"
+                },
+                {
+                    "id": "l2sw1_3",
+                    "name": "l2sw1_3",
+                    "connect": "edge_lpcmdeirza434jdhoj"
+                }
+            ]
+        }
+    ],
+    "edges": [
+        {
+            "data": {
+                "id": "edge_lpcmdbysi3nchn5c4co",
+                "source": "host_1",
+                "target": "l2sw1"
+            }
+        },
+        {
+            "data": {
+                "id": "edge_lpcmdd31mral0mfcbc",
+                "source": "host_2",
+                "target": "l2sw1"
+            }
+        },
+        {
+            "data": {
+                "id": "edge_lpcmdeirza434jdhoj",
+                "source": "host_3",
+                "target": "l2sw1"
+            }
+        }
+    ],
+    "jobs": [
+        {
+            "id": "c1a99ec62e3a4fe18d64c767e67fb78a",
+            "level": 0,
+            "job_id": 2,
+            "host_id": "host_1",
+            "arg_1": "-b",
+            "arg_2": "192.168.1.255",
+            "print_cmd": "ping -c 1 -b 192.168.1.255"
+        },
+        {
+            "id": "2c09d8afe1844b9a9d3d356a04417205",
+            "level": 1,
+            "job_id": 1,
+            "host_id": "host_1",
+            "arg_1": "192.168.1.50",
+            "print_cmd": "ping -c 1 192.168.1.50"
+        }
+    ],
+    "config": {
+        "zoom": 2,
+        "pan_x": 0,
+        "pan_y": 0
+    },
+    "pcap": []
+}
