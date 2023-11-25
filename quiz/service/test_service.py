@@ -23,6 +23,13 @@ def get_tests_by_owner(user: User):
     return test_dtos
 
 
+def get_retakeable_tests():
+    tests = Test.query.filter_by(is_deleted=False, is_retakeable=True).all()
+    test_dtos = to_test_dto_list(tests)
+
+    return test_dtos
+
+
 def get_all_tests():
     tests = Test.query.filter_by(is_deleted=False, is_ready=True).all()
     test_dtos = to_test_dto_list(tests)

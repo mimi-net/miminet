@@ -4,7 +4,7 @@ from flask_login import login_required, current_user
 from flask import request, make_response, jsonify, render_template
 
 from quiz.service.test_service import create_test, get_tests_by_owner, get_all_tests, delete_test, \
-    get_deleted_tests_by_owner, edit_test, get_tests_by_author_name, publish_or_unpublish_test
+    get_deleted_tests_by_owner, edit_test, get_tests_by_author_name, publish_or_unpublish_test, get_retakeable_tests
 from quiz.util.encoder import UUIDEncoder
 
 
@@ -33,6 +33,12 @@ def get_all_tests_endpoint():
     quizzes = get_all_tests()
     return make_response(render_template("quiz/quizzes.html", quizzes=quizzes), 200)
 
+
+@login_required
+def get_retakeable_tests_endpoint():
+    tests = get_retakeable_tests()
+
+    return make_response(tests, 200)
 
 @login_required
 def get_deleted_tests_by_owner_endpoint():
