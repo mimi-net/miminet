@@ -23,7 +23,7 @@ def create_test_endpoint():
 
 @login_required
 def get_test_endpoint():
-    res = get_test(request.json['id'])
+    res = get_test(request.args['id'])
     if res[1] == 404:
         abort(404)
 

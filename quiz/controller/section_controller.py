@@ -29,7 +29,7 @@ def create_section_endpoint():
 
 @login_required
 def get_section_endpoint():
-    res = get_section(request.json['id'])
+    res = get_section(request.args['id'])
     if res[1] == 404:
         abort(404)
 
@@ -47,7 +47,7 @@ def get_sections_by_test_endpoint():
 
 @login_required
 def get_deleted_sections_by_test_endpoint():
-    res = get_deleted_sections_by_test(request.json['test_id'], current_user)
+    res = get_deleted_sections_by_test(request.args['test_id'], current_user)
     if res[1] == 404 or res[1] == 405:
         abort(res[1])
     else:
@@ -56,7 +56,7 @@ def get_deleted_sections_by_test_endpoint():
 
 @login_required
 def delete_section_endpoint():
-    section_id = request.json['id']
+    section_id = request.args['id']
     deleted = delete_section(current_user, section_id)
     if deleted == 404:
         ret = {'message': 'Раздел не существует', 'id': section_id}
@@ -70,7 +70,7 @@ def delete_section_endpoint():
 
 @login_required
 def edit_section_endpoint():
-    section_id = request.form.get('id', type=str)
+    section_id = request.json['id']
     edited = edit_section(user=current_user,
                           name=request.json['name'],
                           section_id=section_id,
