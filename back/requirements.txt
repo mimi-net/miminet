@@ -1,4 +1,4 @@
-celery==5.3.4
+celery==5.3.6
 dpkt==1.9.8
 redis==5.0.1
 python-dotenv==1.0.0
