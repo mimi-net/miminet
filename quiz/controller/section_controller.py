@@ -42,7 +42,7 @@ def get_sections_by_test_endpoint():
     if res[1] == 404 or res[1] == 405:
         abort(res[1])
     else:
-        return make_response(json.dumps([obj.__dict__ for obj in res[0]], cls=UUIDEncoder), res[1])
+        return make_response(json.dumps([obj.__dict__ for obj in res[0]], cls=UUIDEncoder, default=str), 200)
 
 
 @login_required
