@@ -69,10 +69,10 @@ def edit_section_endpoint():
                           timer=datetime.strptime(request.json['timer'], '%H:%M:%S')
                           )
     if edited == 404:
-        ret = {'message': 'Секции не существует', 'id': section_id}
+        ret = {'message': 'Раздел не существует', 'id': section_id}
     elif edited == 405:
-        ret = {'message': 'Попытка редактировать чужую секцию', 'id': section_id}
+        ret = {'message': 'Попытка редактировать чужой раздел', 'id': section_id}
     else:
-        ret = {'message': 'Секция редактирована', 'id': section_id}
+        ret = {'message': 'Раздел редактирован', 'id': section_id}
 
     return make_response(jsonify(ret), edited)

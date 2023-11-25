@@ -40,6 +40,7 @@ def get_retakeable_tests_endpoint():
 
     return make_response(tests, 200)
 
+
 @login_required
 def get_deleted_tests_by_owner_endpoint():
     user = current_user

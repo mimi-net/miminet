@@ -27,7 +27,8 @@ def to_test_dto_list(tests: List[Test]):
                     author_name=test.created_by_user.email,
                     description=test.description,
                     is_retakeable=test.is_retakeable,
-                    is_ready=test.is_ready)
+                    is_ready=test.is_ready,
+                    section_count=len(test.sections))
                     )
 
     return dto_list
@@ -73,10 +74,11 @@ class SectionDto:
 
 
 class TestDto:
-    def __init__(self, test_id: str, test_name: str, author_name: str, description: str, is_retakeable: bool, is_ready: bool):
+    def __init__(self, test_id: str, test_name: str, author_name: str, description: str, is_retakeable: bool, is_ready: bool, section_count: int):
         self.test_id = test_id
         self.test_name = test_name
         self.author_name = author_name
         self.description = description
         self.is_retakeable = is_retakeable
         self.is_ready = is_ready
+        self.section_count = section_count
