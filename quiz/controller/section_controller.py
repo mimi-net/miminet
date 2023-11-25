@@ -6,7 +6,7 @@ from flask_login import login_required, current_user
 from flask import request, make_response, jsonify, abort
 
 from quiz.service.section_service import create_section, get_sections_by_test, get_deleted_sections_by_test, \
-    delete_section, edit_section
+    delete_section, edit_section, get_section
 from quiz.util.encoder import UUIDEncoder
 
 
@@ -25,6 +25,15 @@ def create_section_endpoint():
         ret = {'message': 'Секция добавлена', 'id': res[0]}
 
         return make_response(jsonify(ret), 201)
+
+
+@login_required
+def get_section_endpoint():
+    res = get_section(request.json['id'])
+    if res[1] == 404:
+        abort(404)
+
+    return make_response(jsonify(res), res[0])
 
 
 @login_required

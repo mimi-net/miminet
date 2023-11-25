@@ -1,10 +1,11 @@
 import json
 
 from flask_login import login_required, current_user
-from flask import request, make_response, jsonify, render_template
+from flask import request, make_response, jsonify, render_template, abort
 
 from quiz.service.test_service import create_test, get_tests_by_owner, get_all_tests, delete_test, \
-    get_deleted_tests_by_owner, edit_test, get_tests_by_author_name, publish_or_unpublish_test, get_retakeable_tests
+    get_deleted_tests_by_owner, edit_test, get_tests_by_author_name, publish_or_unpublish_test, get_retakeable_tests, \
+    get_test
 from quiz.util.encoder import UUIDEncoder
 
 
@@ -18,6 +19,15 @@ def create_test_endpoint():
     ret = {'message': 'Тест добавлен', 'id': res_id}
 
     return make_response(jsonify(ret), 201)
+
+
+@login_required
+def get_test_endpoint():
+    res = get_test(request.json['id'])
+    if res[1] == 404:
+        abort(404)
+
+    return make_response(jsonify(res), res[0])
 
 
 @login_required

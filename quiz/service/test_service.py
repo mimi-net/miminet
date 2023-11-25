@@ -16,6 +16,14 @@ def create_test(name: str, description: str, user: User, is_retakeable: bool):
     return test.id
 
 
+def get_test(test_id: str):
+    test = Test.query.filter_by(id=test_id).first()
+    if test is None:
+        return "", 404
+
+    return test, 200
+
+
 def get_tests_by_owner(user: User):
     tests = Test.query.filter_by(created_by_id=user.id, is_deleted=False).all()
     test_dtos = to_test_dto_list(tests)

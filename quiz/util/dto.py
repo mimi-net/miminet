@@ -41,6 +41,15 @@ class AnswerDto:
         self.is_correct = is_correct
 
 
+    @classmethod
+    def from_dict(cls, dict):
+        return cls(
+            answer_text=dict["answer_text"],
+            explanation=dict["explanation"],
+            is_correct=dict["is_correct"]
+            )
+
+
 class QuestionDto:
     def __init__(self, question: Question) -> None:
         self.question_type = question.question_type

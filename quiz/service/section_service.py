@@ -23,6 +23,14 @@ def create_section(test_id: str, name: str, description: str, timer: datetime, u
         return section.id, 200
 
 
+def get_section(section_id: str):
+    section = Section.query.filter_by(id=section_id).first()
+    if section is None:
+        return "", 404
+
+    return section, 200
+
+
 def get_sections_by_test(test_id: str):
     test = Test.query.filter_by(id=test_id, is_deleted=False).first()
     if test is None:
