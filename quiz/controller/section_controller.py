@@ -38,7 +38,7 @@ def get_section_endpoint():
 
 @login_required
 def get_sections_by_test_endpoint():
-    res = get_sections_by_test(request.json['test_id'])
+    res = get_sections_by_test(request.args['test_id'])
     if res[1] == 404 or res[1] == 405:
         abort(res[1])
     else:
