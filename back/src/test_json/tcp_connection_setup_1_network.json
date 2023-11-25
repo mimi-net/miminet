@@ -1,0 +1,94 @@
+{
+    "nodes": [
+        {
+            "classes": [
+                "server"
+            ],
+            "config": {
+                "default_gw": "",
+                "label": "server_1",
+                "type": "server"
+            },
+            "data": {
+                "id": "server_1",
+                "label": "server_1"
+            },
+            "interface": [
+                {
+                    "connect": "edge_lpcnptovr9fnlgbuape",
+                    "id": "iface_43603830",
+                    "ip": "192.168.1.100",
+                    "name": "iface_43603830",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 163.26667022705078,
+                "y": 72.10000610351562
+            }
+        },
+        {
+            "classes": [
+                "host"
+            ],
+            "config": {
+                "default_gw": "",
+                "label": "host_1",
+                "type": "host"
+            },
+            "data": {
+                "id": "host_1",
+                "label": "host_1"
+            },
+            "interface": [
+                {
+                    "connect": "edge_lpcnptovr9fnlgbuape",
+                    "id": "iface_24112138",
+                    "ip": "192.168.1.1",
+                    "name": "iface_24112138",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 89.19783334570509,
+                "y": 166.50315819695663
+            }
+        }
+    ],
+    "edges": [
+        {
+            "data": {
+                "id": "edge_lpcnptovr9fnlgbuape",
+                "source": "host_1",
+                "target": "server_1"
+            }
+        }
+    ],
+    "jobs": [
+        {
+            "id": "50c03947f99a4feea8928b5df4a341e7",
+            "level": 0,
+            "job_id": 201,
+            "host_id": "server_1",
+            "arg_1": "192.168.1.100",
+            "arg_2": 5555,
+            "print_cmd": "nc 192.168.1.100 -l 5555"
+        },
+        {
+            "id": "f67b92256bd84c80a527ed2d94ab88e8",
+            "level": 1,
+            "job_id": 4,
+            "host_id": "host_1",
+            "arg_1": 1000,
+            "arg_2": "192.168.1.100",
+            "arg_3": 5555,
+            "print_cmd": "send -s 1000 -p tcp 192.168.1.100:5555"
+        }
+    ],
+    "config": {
+        "zoom": 2,
+        "pan_x": 0,
+        "pan_y": 0
+    },
+    "pcap": []
+}
