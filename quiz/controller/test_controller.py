@@ -4,7 +4,7 @@ from flask_login import login_required, current_user
 from flask import request, make_response, jsonify, render_template
 
 from quiz.service.test_service import create_test, get_tests_by_owner, get_all_tests, delete_test, \
-    get_deleted_tests_by_owner, edit_test, get_tests_by_author_name
+    get_deleted_tests_by_owner, edit_test, get_tests_by_author_name, publish_or_unpublish_test
 from quiz.util.encoder import UUIDEncoder
 
 
@@ -13,7 +13,8 @@ def create_test_endpoint():
     user = current_user
     res_id = create_test(name=request.json['name'],
                          description=request.json['description'],
-                         user=user)
+                         user=user,
+                         is_retakeable=request.json['is_retakeable'])
     ret = {'message': 'Тест добавлен', 'id': res_id}
 
     return make_response(jsonify(ret), 201)
@@ -30,7 +31,7 @@ def get_tests_by_owner_endpoint():
 @login_required
 def get_all_tests_endpoint():
     quizzes = get_all_tests()
-    return make_response( render_template("quiz/quizzes.html", quizzes=quizzes), 200)
+    return make_response(render_template("quiz/quizzes.html", quizzes=quizzes), 200)
 
 
 @login_required
@@ -61,7 +62,8 @@ def edit_test_endpoint():
     edited = edit_test(user=current_user,
                        name=request.json['name'],
                        test_id=test_id,
-                       description=request.json['description']
+                       description=request.json['description'],
+                       is_retakeable=request.json['is_retakeable']
                        )
     if edited == 404:
         ret = {'message': 'Тест не существует', 'id': test_id}
@@ -78,3 +80,20 @@ def get_tests_by_author_name_endpoint():
     tests = get_tests_by_author_name(request.json['author_name'])
 
     return make_response(json.dumps([obj.__dict__ for obj in tests], cls=UUIDEncoder), 200)
+
+
+@login_required
+def publish_or_unpublish_test_endpoint(is_to_publish: bool):
+    test_id = request.json['id']
+    published = publish_or_unpublish_test(user=current_user,
+                                          test_id=test_id,
+                                          is_to_publish=is_to_publish
+                                          )
+    if published == 404:
+        ret = {'message': 'Тест не существует', 'id': test_id}
+    elif published == 405:
+        ret = {'message': 'Попытка опубликовать чужой тест', 'id': test_id}
+    else:
+        ret = {'message': 'Тест опубликован', 'id': test_id}
+
+    return make_response(jsonify(ret), published)

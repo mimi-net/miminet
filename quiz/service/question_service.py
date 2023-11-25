@@ -10,3 +10,5 @@ def get_questions_by_section(section_id: str):
                                      filter(lambda question: question.is_deleted is False, section.questions)))
 
     return not_deleted_questions, 200
+
+

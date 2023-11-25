@@ -14,3 +14,4 @@ def get_questions_by_section_endpoint():
         abort(res[1])
     else:
         return make_response(json.dumps([obj.__dict__ for obj in res[0]], cls=UUIDEncoder), res[1])
+

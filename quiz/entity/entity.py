@@ -99,8 +99,10 @@ class Test(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
 
     __tablename__ = "test"
 
-    name = db.Column(db.String(512), default="")
-    description = db.Column(db.String(512), default="")
+    name = db.Column(db.String(511), default="")
+    description = db.Column(db.String(511), default="")
+    is_ready = db.Column(db.Boolean, default=False)
+    is_retakeable = db.Column(db.Boolean, default=False)
 
     sections = db.relationship("Section", back_populates="test")
 
@@ -109,8 +111,8 @@ class Section(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
 
     __tablename__ = "section"
 
-    name = db.Column(db.String(512), default="")
-    description = db.Column(db.String(512), default="")
+    name = db.Column(db.String(511), default="")
+    description = db.Column(db.String(511), default="")
     timer = db.Column(db.DateTime, default=db.func.now())
     test_id = db.Column(db.ForeignKey("test.id"))
 
@@ -123,8 +125,8 @@ class Question(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
 
     __tablename__ = "question"
 
-    question_text = db.Column(db.String(512), default="")
-    question_type = db.Column(db.String(32), default="")
+    question_text = db.Column(db.String(511), default="")
+    question_type = db.Column(db.String(31), default="")
     section_id = db.Column(GUID(), db.ForeignKey(Section.id))
 
     section = db.relationship("Section", back_populates="questions")
@@ -151,7 +153,7 @@ class SessionQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Mo
 
     quiz_session_id = db.Column(GUID(), db.ForeignKey(QuizSession.id))
     question_id = db.Column(GUID(), db.ForeignKey(Question.id))
-    answer = db.Column(db.String(8192))
+    answer = db.Column(db.String(8191))
 
     quiz_session = db.relationship("QuizSession", back_populates="sessions")
     session_question = db.relationship("Question", back_populates="session_questions")
@@ -162,7 +164,7 @@ class TextQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model
     __tablename__ = "text_question"
 
     id = db.Column(GUID(), db.ForeignKey(Question.id), primary_key=True)
-    text_type = db.Column(db.String(32), default="")
+    text_type = db.Column(db.String(31), default="")
 
     question = db.relationship('Question', back_populates='text_question')
     sorting_question = db.relationship('SortingQuestion', back_populates='text_question')
@@ -176,7 +178,7 @@ class SortingQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Mo
 
     id = db.Column(GUID(), db.ForeignKey('text_question.id'), primary_key=True)
     right_sequence = db.Column(db.UnicodeText, default="")
-    explanation = db.Column(db.String(512), default="")
+    explanation = db.Column(db.String(511), default="")
 
     text_question = db.relationship('TextQuestion', back_populates='sorting_question')
 
@@ -187,7 +189,7 @@ class MatchingQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.M
 
     id = db.Column(GUID(), db.ForeignKey('text_question.id'), primary_key=True)
     map = db.Column(Json(), default="")
-    explanation = db.Column(db.String(512), default="")
+    explanation = db.Column(db.String(511), default="")
 
     text_question = db.relationship('TextQuestion', back_populates='matching_question')
 
@@ -206,9 +208,9 @@ class Answer(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
 
     __tablename__ = "answer"
 
-    answer_text = db.Column(db.String(512), default="")
-    explanation = db.Column(db.String(512), default="")
-    is_correct = db.Column(db.Boolean, default="")
+    answer_text = db.Column(db.String(511), default="")
+    explanation = db.Column(db.String(511), default="")
+    is_correct = db.Column(db.Boolean, default=False)
 
     variable_question_id = db.Column(GUID(), db.ForeignKey("variable_question.id"))
     variable_question = db.relationship("VariableQuestion", back_populates="answers")

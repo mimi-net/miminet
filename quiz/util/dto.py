@@ -21,13 +21,20 @@ def to_test_dto_list(tests: List[Test]):
 
     for i in range(len(tests)):
         test = tests[i]
-        dto_list.append(TestDto(test.id, test.name, test.created_by_user.email, test.description))
+        dto_list.append(
+            TestDto(test_id=test.id,
+                    test_name=test.name,
+                    author_name=test.created_by_user.email,
+                    description=test.description,
+                    is_retakeable=test.is_retakeable,
+                    is_ready=test.is_ready)
+                    )
 
     return dto_list
 
 
 class AnswerDto:
-    def __init__(self, answer_text: str, explanation: str, is_correct: bool):
+    def __init__(self, answer_text: str, explanation: str, is_correct: bool) -> None:
         self.answer_text = answer_text
         self.explanation = explanation
         self.is_correct = is_correct
@@ -58,7 +65,7 @@ class QuestionDto:
 
 
 class SectionDto:
-    def __init__(self, section_id: str, section_name: str, timer: datetime, description: str) -> None:
+    def __init__(self, section_id: str, section_name: str, timer: datetime, description: str):
         self.section_id = section_id
         self.section_name = section_name
         self.timer = timer
@@ -66,8 +73,10 @@ class SectionDto:
 
 
 class TestDto:
-    def __init__(self, test_id: str, test_name: str, author_name: str, description: str) -> None:
+    def __init__(self, test_id: str, test_name: str, author_name: str, description: str, is_retakeable: bool, is_ready: bool):
         self.test_id = test_id
         self.test_name = test_name
         self.author_name = author_name
         self.description = description
+        self.is_retakeable = is_retakeable
+        self.is_ready = is_ready
