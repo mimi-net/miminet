@@ -61,7 +61,7 @@ def get_deleted_tests_by_owner_endpoint():
 
 @login_required
 def delete_test_endpoint():
-    test_id = request.json['id']
+    test_id = request.args['id']
     deleted = delete_test(current_user, test_id)
     if deleted == 404:
         ret = {'message': 'Тест не существует', 'id': test_id}
