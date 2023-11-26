@@ -45,17 +45,19 @@ def to_test_dto_list(tests: List[Test]):
     return dto_list
 
 
-class AnswerDto:
-    def __init__(self, answer_text: str, explanation: str, is_correct: bool) -> None:
-        self.answer_text = answer_text
+class AnswerResultDto:
+    def __init__(self, explanation: str | list, is_correct: bool) -> None:
         self.explanation = explanation
         self.is_correct = is_correct
 
+
+class AnswerDto:
+    def __init__(self, answer_text: str) -> None:
+        self.answer_text = answer_text
+
     def to_dict(self):
         return {
-            "answer_text": self.answer_text,
-            "explanation": self.explanation,
-            "is_correct": self.is_correct
+            "answer_text": self.answer_text
         }
 
 
@@ -69,10 +71,7 @@ class QuestionDto:
             if text_question.text_type == "variable":
                 variable_question = VariableQuestion.query.filter_by(id=text_question.id).first()
                 self.answers = [
-                    AnswerDto(answer_text=i.answer_text,
-                              explanation=i.explanation,
-                              is_correct=i.is_correct).to_dict() for i in
-                    Answer.query.filter_by(variable_question_id=variable_question.id).all()]
+                    AnswerDto(answer_text=i.answer_text).to_dict() for i in Answer.query.filter_by(variable_question_id=variable_question.id).all()]
             elif text_question.text_type == "matching":
                 matching_question = MatchingQuestion.query.filter_by(id=text_question.id).first()
 
@@ -82,13 +81,11 @@ class QuestionDto:
                 random.shuffle(keys)
                 res = {keys[i]: values[i] for i in range(len(keys))}
 
-                self.explanation = matching_question.explanation
                 self.answers = json.dumps(res)
             elif text_question.text_type == "sorting":
                 sorting_question = SortingQuestion.query.filter_by(id=text_question.id).first()
                 words = sorting_question.right_sequence.split()
                 random.shuffle(words)
-                self.explanation = sorting_question.explanation
                 self.answers = " ".join(words)
 
 

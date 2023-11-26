@@ -16,6 +16,7 @@ from miminet_network import create_network, web_network, update_network_config, 
 from miminet_shark import mimishark_page
 from miminet_simulation import run_simulation, check_simulation
 from quiz.controller.question_controller import create_question_endpoint, get_questions_by_section_endpoint
+from quiz.controller.quiz_session_controller import start_session_endpoint, get_question_by_session_question_id_endpoint
 from quiz.controller.section_controller import create_section_endpoint, get_sections_by_test_endpoint
 from quiz.controller.test_controller import create_test_endpoint, get_all_tests_endpoint, get_tests_by_owner_endpoint, \
     get_deleted_tests_by_owner_endpoint, delete_test_endpoint, edit_test_endpoint
@@ -90,6 +91,9 @@ app.add_url_rule('/quiz/section/test/all', methods=['GET'], view_func=get_sectio
 
 app.add_url_rule('/quiz/question/create', methods=['POST'], view_func=create_question_endpoint)
 app.add_url_rule('/quiz/question/all', methods=['GET'], view_func=get_questions_by_section_endpoint)
+app.add_url_rule('/quiz/session/start', methods=['POST'], view_func=start_session_endpoint)
+app.add_url_rule('/quiz/session', methods=['GET'], view_func=get_question_by_session_question_id_endpoint)
+
 
 
 @app.route('/')

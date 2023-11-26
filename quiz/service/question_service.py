@@ -1,4 +1,4 @@
-from quiz.entity.entity import Section
+from quiz.entity.entity import Section, Question
 from quiz.util.dto import QuestionDto
 
 
@@ -12,3 +12,9 @@ def get_questions_by_section(section_id: str):
     return not_deleted_questions, 200
 
 
+def get_question(question_id: str):
+    question = Question.query.filter_by(id=question_id).first()
+    if question is None:
+        return None, 404
+
+    return question, 200
