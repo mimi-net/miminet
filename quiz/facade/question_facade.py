@@ -34,7 +34,7 @@ def create_matching_question(explanation: str, matching_str: str, user: User):
 def create_sorting_question(explanation: str, sorting_str: str, user: User):
     sorting_question = SortingQuestion()
     sorting_question.explanation = explanation
-    sorting_question.map = sorting_str
+    sorting_question.right_sequence = sorting_str
     sorting_question.created_by_id = user.id
     db.session.add(sorting_question)
     return sorting_question
