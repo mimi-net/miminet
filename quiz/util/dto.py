@@ -50,6 +50,17 @@ class AnswerResultDto:
         self.explanation = explanation
         self.is_correct = is_correct
 
+    def to_dict(self):
+        if isinstance(self.explanation, list):
+            return {
+                "explanation": [self.explanation],
+                "is_correct": self.is_correct
+            }
+        else:
+            return {
+                "explanation": self.explanation,
+                "is_correct": self.is_correct
+            }
 
 class AnswerDto:
     def __init__(self, answer_text: str) -> None:
