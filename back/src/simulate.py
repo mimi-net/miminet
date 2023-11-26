@@ -11,6 +11,7 @@ from ipmininet.router.config import RouterConfig
 from jobs import Jobs
 from network import Job, Network, Node, NodeConfig, NodeData, NodeInterface
 from pkt_parser import create_pkt_animation, is_ipv4_address
+from net_utils.vlan import setup_vlans, clean_bridges
 
 
 class MyTopology(IPTopo):
@@ -333,6 +334,8 @@ def run_mininet(
     enable_source_route(net)
 
     net.start()
+
+    setup_vlans(net, network.nodes)
     time.sleep(topo.time_to_wait_before_emulation)
 
     # Don only 100+ jobs
@@ -359,6 +362,7 @@ def run_mininet(
         except Exception:
             continue
 
+    clean_bridges(net)
     time.sleep(2)
     net.stop()
 
