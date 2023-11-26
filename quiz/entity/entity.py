@@ -11,7 +11,7 @@ from miminet_model import db
 
 class GUID(TypeDecorator):
     impl = CHAR
-    __cache_ok__ = True
+    cache_ok = True
 
     def load_dialect_impl(self, dialect):
         if dialect.name == 'postgresql':
@@ -64,7 +64,7 @@ class IdMixin(object):
 
     __table_args__ = {'extend_existing': True}
 
-    id = db.Column(GUID(), primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = db.Column(db.String(512), primary_key=True, default=lambda: str(uuid.uuid4()))
 
 
 class SoftDeleteMixin(object):
@@ -127,7 +127,7 @@ class Question(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
 
     question_text = db.Column(db.String(511), default="")
     question_type = db.Column(db.String(31), default="")
-    section_id = db.Column(GUID(), db.ForeignKey(Section.id))
+    section_id = db.Column(db.String(512), db.ForeignKey(Section.id))
 
     section = db.relationship("Section", back_populates="questions")
 
@@ -140,7 +140,7 @@ class QuizSession(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model)
 
     __tablename__ = "quiz_session"
 
-    section_id = db.Column(GUID(), db.ForeignKey(Section.id))
+    section_id = db.Column(db.String(512), db.ForeignKey(Section.id))
     finished_at = db.Column(db.DateTime)
 
     section = db.relationship("Section", back_populates="quiz_sessions")
@@ -151,8 +151,8 @@ class SessionQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Mo
 
     __tablename__ = "session_question"
 
-    quiz_session_id = db.Column(GUID(), db.ForeignKey(QuizSession.id))
-    question_id = db.Column(GUID(), db.ForeignKey(Question.id))
+    quiz_session_id = db.Column(db.String(512), db.ForeignKey(QuizSession.id))
+    question_id = db.Column(db.String(512), db.ForeignKey(Question.id))
     answer = db.Column(db.String(8191))
 
     quiz_session = db.relationship("QuizSession", back_populates="sessions")
@@ -163,7 +163,7 @@ class TextQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model
 
     __tablename__ = "text_question"
 
-    id = db.Column(GUID(), db.ForeignKey(Question.id), primary_key=True)
+    id = db.Column(db.String(512), db.ForeignKey(Question.id), primary_key=True)
     text_type = db.Column(db.String(31), default="")
 
     question = db.relationship('Question', back_populates='text_question')
@@ -176,7 +176,7 @@ class SortingQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Mo
 
     __tablename__ = "sorting_question"
 
-    id = db.Column(GUID(), db.ForeignKey('text_question.id'), primary_key=True)
+    id = db.Column(db.String(512), db.ForeignKey('text_question.id'), primary_key=True)
     right_sequence = db.Column(db.UnicodeText, default="")
     explanation = db.Column(db.String(511), default="")
 
@@ -187,7 +187,7 @@ class MatchingQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.M
 
     __tablename__ = "matching_question"
 
-    id = db.Column(GUID(), db.ForeignKey('text_question.id'), primary_key=True)
+    id = db.Column(db.String(512), db.ForeignKey('text_question.id'), primary_key=True)
     map = db.Column(Json(), default="")
     explanation = db.Column(db.String(511), default="")
 
@@ -198,7 +198,7 @@ class VariableQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.M
 
     __tablename__ = "variable_question"
 
-    id = db.Column(GUID(), db.ForeignKey('text_question.id'), primary_key=True)
+    id = db.Column(db.String(512), db.ForeignKey('text_question.id'), primary_key=True)
 
     answers = db.relationship("Answer", back_populates="variable_question")
     text_question = db.relationship('TextQuestion', back_populates='variable_question')
@@ -212,5 +212,5 @@ class Answer(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
     explanation = db.Column(db.String(511), default="")
     is_correct = db.Column(db.Boolean, default=False)
 
-    variable_question_id = db.Column(GUID(), db.ForeignKey("variable_question.id"))
+    variable_question_id = db.Column(db.String(512), db.ForeignKey("variable_question.id"))
     variable_question = db.relationship("VariableQuestion", back_populates="answers")

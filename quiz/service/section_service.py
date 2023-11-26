@@ -8,9 +8,9 @@ from quiz.util.dto import to_section_dto_list
 def create_section(test_id: str, name: str, description: str, timer: datetime, user: User):
     test = Test.query.filter_by(id=test_id, is_deleted=False).first()
     if test is None:
-        return "", 404
+        return 0, 404
     elif test.created_by_id != user.id:
-        return "", 405
+        return 0, 405
     else:
         section = Section()
         section.test_id = test_id
@@ -20,7 +20,7 @@ def create_section(test_id: str, name: str, description: str, timer: datetime, u
         section.created_by_id = user.id
         db.session.add(section)
         db.session.commit()
-        return section.id, 200
+        return section.id, 201
 
 
 def get_section(section_id: str):

@@ -24,7 +24,7 @@ def create_section_endpoint():
     else:
         ret = {'message': 'Секция добавлена', 'id': res[0]}
 
-        return make_response(jsonify(ret), 201)
+        return make_response(jsonify(ret), res[1])
 
 
 @login_required

@@ -3,7 +3,8 @@ import json
 import random
 from typing import List
 
-from quiz.entity.entity import Section, Test, Question
+from quiz.entity.entity import Section, Test, Question, TextQuestion, VariableQuestion, Answer, MatchingQuestion, \
+    SortingQuestion
 
 
 def to_section_dto_list(sections: List[Section]):
@@ -40,14 +41,12 @@ class AnswerDto:
         self.explanation = explanation
         self.is_correct = is_correct
 
-
-    @classmethod
-    def from_dict(cls, dict):
-        return cls(
-            answer_text=dict["answer_text"],
-            explanation=dict["explanation"],
-            is_correct=dict["is_correct"]
-            )
+    def to_dict(self):
+        return {
+            "answer_text": self.answer_text,
+            "explanation": self.explanation,
+            "is_correct": self.is_correct
+        }
 
 
 class QuestionDto:
@@ -55,22 +54,25 @@ class QuestionDto:
         self.question_type = question.question_type
         self.question_text = question.question_text
         if self.question_type == "text":
-            text_question = question.text_question
+            text_question = TextQuestion.query.filter_by(id=question.id).first()
             self.text_type = text_question.text_type
             if text_question.text_type == "variable":
+                variable_question = VariableQuestion.query.filter_by(id=text_question.id).first()
                 self.answers = [
                     AnswerDto(answer_text=i.answer_text,
                               explanation=i.explanation,
-                              is_correct=i.is_correct) for i in text_question.variable_question.answers]
+                              is_correct=i.is_correct).to_dict() for i in Answer.query.filter_by(variable_question_id=variable_question.id).all()]
             elif text_question.text_type == "matching":
-                data = json.load(text_question.matching_question.map)
+                matching_question = MatchingQuestion.query.filter_by(id=text_question.id).first()
+                data = json.load(matching_question.map)
                 random.shuffle(data)
-                self.explanation = text_question.matching_question.explanation
+                self.explanation = matching_question.explanation
                 self.answers = json.dumps(data)
             elif text_question.text_type == "sorting":
-                words = text_question.sorting_question.right_sequence.split()
+                sorting_question = SortingQuestion.query.filter_by(id=text_question.id).first()
+                words = sorting_question.right_sequence.split()
                 random.shuffle(words)
-                self.explanation = text_question.sorting_question.explanation
+                self.explanation = sorting_question.explanation
                 self.answers = " ".join(words)
 
 
