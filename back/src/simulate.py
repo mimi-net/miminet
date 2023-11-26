@@ -209,6 +209,35 @@ class MyTopology(IPTopo):
             h_source, s, intfName1=interface_name_1, **opts1
         ), super().addLink(s, h_target, intfName2=interface_name_2, **opts2)
 
+    def post_build(self, net: IPNet):
+
+        for node in self._id_node_map.values():
+            config = node.config
+            if config.type == "router":
+                net[config.label].cmd(f"route add default gw {config.default_gw}")
+
+        for h in net.hosts:
+            # print ("disable ipv6 on " + h.name)
+            h.cmd("sysctl -w net.ipv6.conf.all.disable_ipv6=1")
+            h.cmd("sysctl -w net.ipv6.conf.default.disable_ipv6=1")
+            h.cmd("sysctl -w net.ipv6.conf.lo.disable_ipv6=1")
+            h.cmd("sysctl -w net.ipv4.tcp_min_tso_segs=1")
+            h.cmd("sysctl -w net.ipv4.conf.all.accept_source_route=1")
+            h.cmd("sysctl -w net.ipv4.conf.all.log_martians=1")
+
+        # Enable source route
+        for r in net.routers:
+            r.cmd("sysctl -w net.ipv4.conf.all.accept_source_route=1")
+            r.cmd("sysctl -w net.ipv4.conf.all.log_martians=1")
+
+        for sw in net.switches:
+            # print ("disable ipv6 on " + sw.name)
+            sw.cmd("sysctl -w net.ipv6.conf.all.disable_ipv6=1")
+            sw.cmd("sysctl -w net.ipv6.conf.default.disable_ipv6=1")
+            sw.cmd("sysctl -w net.ipv6.conf.lo.disable_ipv6=1")
+
+        super().post_build(net)
+
 
 def packet_uuid(size=8, chars: str = string.ascii_uppercase + string.digits) -> str:
     """Function for generate packet uid
@@ -224,34 +253,6 @@ def packet_uuid(size=8, chars: str = string.ascii_uppercase + string.digits) -> 
 
     uid = "".join(random.choice(chars) for _ in range(size))
     return "pkt_" + uid
-
-
-def enable_source_route(net: IPNet) -> None:
-    """Function for disable IPv6 and TSO and enable source route
-
-    Args:
-        net (IPNet): ipmininet IPNet
-    """
-
-    for h in net.hosts:
-        # print ("disable ipv6 on " + h.name)
-        h.cmd("sysctl -w net.ipv6.conf.all.disable_ipv6=1")
-        h.cmd("sysctl -w net.ipv6.conf.default.disable_ipv6=1")
-        h.cmd("sysctl -w net.ipv6.conf.lo.disable_ipv6=1")
-        h.cmd("sysctl -w net.ipv4.tcp_min_tso_segs=1")
-        h.cmd("sysctl -w net.ipv4.conf.all.accept_source_route=1")
-        h.cmd("sysctl -w net.ipv4.conf.all.log_martians=1")
-
-    # Enable source route
-    for r in net.routers:
-        r.cmd("sysctl -w net.ipv4.conf.all.accept_source_route=1")
-        r.cmd("sysctl -w net.ipv4.conf.all.log_martians=1")
-
-    for sw in net.switches:
-        # print ("disable ipv6 on " + sw.name)
-        sw.cmd("sysctl -w net.ipv6.conf.all.disable_ipv6=1")
-        sw.cmd("sysctl -w net.ipv6.conf.default.disable_ipv6=1")
-        sw.cmd("sysctl -w net.ipv6.conf.lo.disable_ipv6=1")
 
 
 def create_animation(
@@ -329,8 +330,6 @@ def run_mininet(
 
     topo = MyTopology(network=network, time_to_wait_before_emulation=2)
     net = IPNet(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
-
-    enable_source_route(net)
 
     net.start()
     time.sleep(topo.time_to_wait_before_emulation)
