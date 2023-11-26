@@ -21,7 +21,7 @@
                     <div class="col-sm-8">
                         <div class="card-body">
                             <h4 class="h4" style="margin-top: 20px;margin-left: 20px;margin-bottom: 4px">
-                                <a href="{{ url_for('quiz', guid=quiz.test_id) }}">{{ quiz.test_name }}</a>
+                                <a href="{{ url_for('get_sections_by_test_endpoint', test_id=quiz.test_id) }}">{{ quiz.test_name }}</a>
                             </h4>
                             <p style="margin-left: 40px;margin-bottom: 4px">{{ quiz.description }}</p>
                             <p style="margin-left: 40px;opacity: 50%">{{ quiz.author_name }}</p>
@@ -31,9 +31,9 @@
                         <div class="card-body">
                             <p id="{{ quiz.test_id }}"
                                style="text-align: right; margin-right: 40px; margin-top: 20px;"></p>
-                            <p style="text-align: right; margin-right: 40px;">
-                                {{ quiz.passed }}/{{ quiz.sections }} пройдено
-                            </p>
+                            {#                            <p style="text-align: right; margin-right: 40px;">#}
+                            {#                                {{ quiz.passed }}/{{ quiz.section_count }} пройдено#}
+                            {#                            </p>#}
                         </div>
                     </div>
                 </div>
@@ -44,7 +44,7 @@
                     return (array = array || ['раздел', 'раздела', 'разделов']) && array[(int % 100 > 4 && int % 100 < 20) ? 2 : [2, 0, 1, 1, 1, 2][(int % 10 < 5) ? int % 10 : 5]];
                 }
 
-                document.getElementById('{{quiz.test_id}}').innerHTML = {{ quiz.sections }} +' ' + morph({{ quiz.sections}});
+                document.getElementById('{{quiz.test_id}}').innerHTML = {{ quiz.section_count }} +' ' + morph({{ quiz.section_count}});
             </script>
         {% endfor %}
 

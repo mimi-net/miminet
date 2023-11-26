@@ -85,8 +85,10 @@ app.add_url_rule('/quiz/test/all', methods=['GET'], view_func=get_all_tests_endp
 app.add_url_rule('/quiz/test/owner/deleted', methods=['GET'], view_func=get_deleted_tests_by_owner_endpoint)
 app.add_url_rule('/quiz/test/delete', methods=['DELETE'], view_func=delete_test_endpoint)
 app.add_url_rule('/quiz/test/edit', methods=['PUT'], view_func=edit_test_endpoint)
+
 app.add_url_rule('/quiz/question/create', methods=['POST'], view_func=create_question_endpoint)
 app.add_url_rule('/quiz/question/all', methods=['GET'], view_func=get_questions_by_section_endpoint)
+
 app.add_url_rule('/quiz/section/create', methods=['POST'], view_func=create_section_endpoint)
 app.add_url_rule('/quiz/section/test/all', methods=['GET'], view_func=get_sections_by_test_endpoint)
 
