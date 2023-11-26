@@ -64,10 +64,15 @@ class QuestionDto:
                               is_correct=i.is_correct).to_dict() for i in Answer.query.filter_by(variable_question_id=variable_question.id).all()]
             elif text_question.text_type == "matching":
                 matching_question = MatchingQuestion.query.filter_by(id=text_question.id).first()
-                data = json.load(matching_question.map)
-                random.shuffle(data)
+
+                data = matching_question.map
+                keys = list(data.keys())
+                values = list(data.values())
+                random.shuffle(keys)
+                res = {keys[i]: values[i] for i in range(len(keys))}
+
                 self.explanation = matching_question.explanation
-                self.answers = json.dumps(data)
+                self.answers = json.dumps(res)
             elif text_question.text_type == "sorting":
                 sorting_question = SortingQuestion.query.filter_by(id=text_question.id).first()
                 words = sorting_question.right_sequence.split()

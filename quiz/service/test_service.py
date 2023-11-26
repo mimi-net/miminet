@@ -19,7 +19,7 @@ def create_test(name: str, description: str, user: User, is_retakeable: bool):
 def get_test(test_id: str):
     test = Test.query.filter_by(id=test_id).first()
     if test is None:
-        return "", 404
+        return None, 404
 
     return test, 200
 
