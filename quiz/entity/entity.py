@@ -1,5 +1,6 @@
 import json
 import uuid
+from datetime import datetime
 
 from sqlalchemy import types
 from sqlalchemy.dialects.postgresql import UUID
@@ -78,8 +79,8 @@ class TimeMixin(object):
 
     __table_args__ = {'extend_existing': True}
 
-    created_on = db.Column(db.DateTime, default=db.func.now())
-    updated_on = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+    created_on = db.Column(db.DateTime, default=datetime.now())
+    updated_on = db.Column(db.DateTime, default=db.func.now(), onupdate=datetime.now())
 
 
 class CreatedByMixin(object):
@@ -153,7 +154,7 @@ class SessionQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Mo
 
     quiz_session_id = db.Column(db.String(512), db.ForeignKey(QuizSession.id))
     question_id = db.Column(db.String(512), db.ForeignKey(Question.id))
-    is_correct = db.Column(db.Boolean, default=False)
+    is_correct = db.Column(db.Boolean)
 
     quiz_session = db.relationship("QuizSession", back_populates="sessions")
     question = db.relationship("Question", back_populates="session_questions")
