@@ -6,6 +6,11 @@ services:
       context: .
       dockerfile: ./Dockerfile
     container_name: celery
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     restart: always
     networks:
       - rabbitmq_network
@@ -38,7 +43,13 @@ services:
       - 4369:4369
       - 25672:25672
       - 35197:35197
-        
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
   redis:
     image: redis:latest
     container_name: redis
@@ -55,7 +66,13 @@ services:
       - REDIS_PORT=6379
       - REDIS_DATABASES=16
     command: /bin/sh -c 'redis-server --appendonly yes --requirepass $${REDIS_PASSWORD}'
-    
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
 networks:
   rabbitmq_network:
     name: rabbitmq_network
