@@ -46,7 +46,7 @@ def to_test_dto_list(tests: List[Test]):
 
 
 class AnswerResultDto:
-    def __init__(self, explanation: str | list, is_correct: bool) -> None:
+    def __init__(self, explanation, is_correct: bool) -> None:
         self.explanation = explanation
         self.is_correct = is_correct
 
@@ -61,6 +61,7 @@ class AnswerResultDto:
                 "explanation": self.explanation,
                 "is_correct": self.is_correct
             }
+
 
 class AnswerDto:
     def __init__(self, answer_text: str) -> None:
