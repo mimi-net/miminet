@@ -71,7 +71,8 @@ class QuestionDto:
                 self.answers = [
                     AnswerDto(answer_text=i.answer_text,
                               explanation=i.explanation,
-                              is_correct=i.is_correct).to_dict() for i in Answer.query.filter_by(variable_question_id=variable_question.id).all()]
+                              is_correct=i.is_correct).to_dict() for i in
+                    Answer.query.filter_by(variable_question_id=variable_question.id).all()]
             elif text_question.text_type == "matching":
                 matching_question = MatchingQuestion.query.filter_by(id=text_question.id).first()
 
@@ -97,10 +98,12 @@ class SectionDto:
         self.section_name = section_name
         self.timer = timer
         self.description = description
+        self.question_count = question_count
 
 
 class TestDto:
-    def __init__(self, test_id: str, test_name: str, author_name: str, description: str, is_retakeable: bool, is_ready: bool, section_count: int):
+    def __init__(self, test_id: str, test_name: str, author_name: str, description: str, is_retakeable: bool,
+                 is_ready: bool, section_count: int):
         self.test_id = test_id
         self.test_name = test_name
         self.author_name = author_name

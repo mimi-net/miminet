@@ -35,7 +35,7 @@
                     return (array = array || ['раздел', 'раздела', 'разделов']) && array[(int % 100 > 4 && int % 100 < 20) ? 2 : [2, 0, 1, 1, 1, 2][(int % 10 < 5) ? int % 10 : 5]];
                 }
 
-                questions = Math.floor(Math.random() * 10) + 1
+                questions = {{section.question_count}}
                 document.getElementById('{{section.section_id}}').innerHTML = questions + ' ' + morph(questions, ['вопрос', 'вопроса', 'вопросов']);
             </script>
         {% endfor %}
