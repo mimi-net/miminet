@@ -1,6 +1,5 @@
 import json
 from datetime import datetime
-from uuid import UUID
 
 from flask_login import login_required, current_user
 from flask import request, make_response, jsonify, abort, render_template

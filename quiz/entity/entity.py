@@ -133,7 +133,7 @@ class Question(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
 
     text_question = db.relationship('TextQuestion', back_populates='question')
 
-    session_questions = db.relationship("SessionQuestion", back_populates="session_question")
+    session_questions = db.relationship("SessionQuestion", back_populates="question")
 
 
 class QuizSession(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
@@ -153,10 +153,10 @@ class SessionQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Mo
 
     quiz_session_id = db.Column(db.String(512), db.ForeignKey(QuizSession.id))
     question_id = db.Column(db.String(512), db.ForeignKey(Question.id))
-    answer = db.Column(db.String(8191))
+    is_correct = db.Column(db.Boolean, default=False)
 
     quiz_session = db.relationship("QuizSession", back_populates="sessions")
-    session_question = db.relationship("Question", back_populates="session_questions")
+    question = db.relationship("Question", back_populates="session_questions")
 
 
 class TextQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
