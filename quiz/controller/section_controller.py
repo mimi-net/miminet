@@ -22,10 +22,10 @@ def create_section_endpoint():
                          )
     if res[1] == 404 or res[1] == 405:
         abort(res[1])
-    else:
-        ret = {'message': 'Секция добавлена', 'id': res[0]}
 
-        return make_response(jsonify(ret), res[1])
+    ret = {'message': 'Секция добавлена', 'id': res[0]}
+
+    return make_response(jsonify(ret), res[1])
 
 
 @login_required

@@ -12,7 +12,15 @@ def to_section_dto_list(sections: List[Section]):
 
     for i in range(len(sections)):
         section = sections[i]
-        dto_list.append(SectionDto(section.id, section.name, section.timer, section.description))
+        dto_list.append(
+            SectionDto(
+                section_id=section.id,
+                section_name=section.name,
+                timer=section.timer,
+                description=section.description,
+                question_count=len(section.questions)
+            )
+        )
 
     return dto_list
 
@@ -23,14 +31,16 @@ def to_test_dto_list(tests: List[Test]):
     for i in range(len(tests)):
         test = tests[i]
         dto_list.append(
-            TestDto(test_id=test.id,
-                    test_name=test.name,
-                    author_name=test.created_by_user.email,
-                    description=test.description,
-                    is_retakeable=test.is_retakeable,
-                    is_ready=test.is_ready,
-                    section_count=len(test.sections))
-                    )
+            TestDto(
+                test_id=test.id,
+                test_name=test.name,
+                author_name=test.created_by_user.email,
+                description=test.description,
+                is_retakeable=test.is_retakeable,
+                is_ready=test.is_ready,
+                section_count=len(test.sections)
+            )
+        )
 
     return dto_list
 
@@ -82,7 +92,7 @@ class QuestionDto:
 
 
 class SectionDto:
-    def __init__(self, section_id: str, section_name: str, timer: datetime, description: str):
+    def __init__(self, section_id: str, section_name: str, timer: datetime, description: str, question_count: int):
         self.section_id = section_id
         self.section_name = section_name
         self.timer = timer
