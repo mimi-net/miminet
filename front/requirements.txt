@@ -34,7 +34,7 @@ soupsieve==2.3.2.post1
 SQLAlchemy==1.4.42
 urllib3==1.26.18
 uuid==1.30
-Werkzeug==2.2.2
+Werkzeug==2.3.8
 zipp==3.9.0
 celery==5.3.4
 redis==5.0.1
