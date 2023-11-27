@@ -33,7 +33,6 @@ def finish_session(quiz_session_id: str, user: User):
 
     quiz_session.finished_at = datetime.now()
 
-    db.session.add(quiz_session)
     db.session.commit()
 
     return 200
