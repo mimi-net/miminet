@@ -256,8 +256,6 @@ def vk_callback():
     if "error" in access_token_json:
         return redirect(url_for("login_index"))
 
-    print(access_token_json)
-
     vk_id = access_token_json.get("user_id")
     access_token = access_token_json.get("access_token")
     vk_email = access_token_json.get("email")
