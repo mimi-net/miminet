@@ -1,8 +1,9 @@
 import json
+import requests
 from datetime import datetime
 
 from flask_login import login_required, current_user
-from flask import request, make_response, jsonify, abort, render_template
+from flask import request, make_response, jsonify, abort, render_template, url_for
 
 from quiz.service.section_service import create_section, get_sections_by_test, get_deleted_sections_by_test, \
     delete_section, edit_section, get_section, publish_or_unpublish_test_by_section
@@ -44,8 +45,8 @@ def get_sections_by_test_endpoint():
         abort(res[1])
     else:
         sections = res[0]
-        test_name = get_test(test_id)[0].name
-        return make_response(render_template("quiz/quiz.html", test_name=test_name, sections=sections), 200)
+        test = get_test(test_id)[0]
+        return make_response(render_template("quiz/quiz.html", test=test, sections=sections), 200)
 
 
 @login_required

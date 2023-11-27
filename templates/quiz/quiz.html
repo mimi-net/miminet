@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% block title %}{{ test_name }}{% endblock %}
+{% block title %}{{ test.name }}{% endblock %}
 {% block description %}Сетевой тренажер для обучения компьютерным сетям{% endblock %}
 
 
 {% block content %}
 
     <section class="container py-5 my-lg-5">
-        <div class="align-items-center justify-content-between py-4">
-            <h1 class="me-3"> {{ test_name }}</h1>
+        <div class="align-items-center justify-content-between">
+            <h1 class="me-3"> {{ test.name }}</h1>
         </div>
 
         {% for section in sections %}
@@ -23,9 +23,15 @@
                     </div>
                     <div class="col-sm-4">
                         <div class="card-body">
-                            <p id="{{ section.section_id }}"
+                            <p id="{{ section.section_id }}question"
                                style="text-align: right; margin-right: 40px; margin-top: 20px;"></p>
+
+                            {% if section.timer %}
+                                <p id="{{ section.section_id }}timer"
+                                   style="text-align: right; margin-right: 40px; margin-top: 20px;"></p>
+                            {% endif %}
                         </div>
+
                     </div>
                 </div>
             </article>
@@ -35,8 +41,29 @@
                     return (array = array || ['раздел', 'раздела', 'разделов']) && array[(int % 100 > 4 && int % 100 < 20) ? 2 : [2, 0, 1, 1, 1, 2][(int % 10 < 5) ? int % 10 : 5]];
                 }
 
-                questions = {{section.question_count}}
-                document.getElementById('{{section.section_id}}').innerHTML = questions + ' ' + morph(questions, ['вопрос', 'вопроса', 'вопросов']);
+                function extractTime(datetimeString) {
+                    return new Date(datetimeString).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+                }
+
+                function timeToMinutes(timeString) {
+                    const [hours, minutes, seconds] = timeString.split(':');
+                    const totalSeconds = parseInt(hours, 10) * 3600 + parseInt(minutes, 10) * 60 + parseInt(seconds, 10);
+                    return Math.ceil(totalSeconds / 60);
+                };
+
+                function extractMinutes(dateTimeString){
+                    const time = extractTime(dateTimeString);
+                    return timeToMinutes(time);
+                };
+
+                questions = '{{section.question_count}}';
+                document.getElementById('{{ section.section_id }}question').innerHTML = questions + ' ' + morph(questions, ['вопрос', 'вопроса', 'вопросов']);
+                timer = extractMinutes('{{section.timer}}');
+                document.getElementById('{{ section.section_id }}timer').innerHTML = '&#8776;' + timer + ' ' + morph(timer, ['минута', 'минуты', 'минут']);
             </script>
         {% endfor %}
 
