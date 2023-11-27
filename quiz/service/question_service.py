@@ -1,15 +1,13 @@
-from quiz.entity.entity import Section, Question
-from quiz.util.dto import QuestionDto
+from quiz.entity.entity import Question
+from quiz.util.dto import to_question_for_editor_dto_list
 
 
 def get_questions_by_section(section_id: str):
-    section = Section.query.filter_by(id=section_id, is_deleted=False).first()
-    if section is None:
+    questions = Question.query.filter_by(section_id=section_id, is_deleted=False).all()
+    if questions is None:
         return None, 404
-    not_deleted_questions = list(map(lambda question: QuestionDto(question),
-                                     filter(lambda question: question.is_deleted is False, section.questions)))
 
-    return not_deleted_questions, 200
+    return to_question_for_editor_dto_list(questions), 200
 
 
 def get_question(question_id: str):

@@ -32,13 +32,11 @@ def get_section(section_id: str):
 
 
 def get_sections_by_test(test_id: str):
-    test = Test.query.filter_by(id=test_id, is_deleted=False).first()
-    if test is None:
+    sections = Section.query.filter_by(test_id=test_id, is_deleted=False).all()
+    if sections is None:
         return None, 404
-    not_deleted_sections = list(filter(lambda section: section.is_deleted is False, test.sections))
-    section_dtos = to_section_dto_list(not_deleted_sections)
 
-    return section_dtos, 200
+    return to_section_dto_list(sections), 200
 
 
 def get_deleted_sections_by_test(test_id: str, user: User):
@@ -75,5 +73,18 @@ def edit_section(user: User, section_id: str, name: str, description: str, timer
         section.name = name
         section.description = description
         section.timer = timer
+        db.session.commit()
+        return 200
+
+
+def publish_or_unpublish_test_by_section(user: User, section_id: str, is_to_publish: bool):
+    section = Section.query.filter_by(id=section_id).first()
+    test = section.test
+    if test is None or test.is_deleted is True:
+        return 404
+    elif test.created_by_id != user.id:
+        return 405
+    else:
+        test.is_ready = is_to_publish
         db.session.commit()
         return 200

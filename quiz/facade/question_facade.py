@@ -5,7 +5,6 @@ from quiz.entity.entity import Section, VariableQuestion, Answer, MatchingQuesti
     Question
 
 
-# {section_id: 1, question_type: 'text', question_text: 'some text', text_type: 'variable', variants: [{answer_text: 'text1', explanation:'explanation', is_correct: true}]}
 def create_variable_question(variants: list, user: User):
     variable_question = VariableQuestion()
     variable_question.created_by_id = user.id
@@ -73,3 +72,6 @@ def create_question(section_id: str, question_dict: dict, user: User):
     db.session.commit()
 
     return question.id, 201
+
+
+# def edit_question(question_id: str):

@@ -8,39 +8,39 @@ from quiz.entity.entity import Section, Test, Question, TextQuestion, VariableQu
 
 
 def to_section_dto_list(sections: List[Section]):
-    dto_list: List[SectionDto] = []
-
-    for i in range(len(sections)):
-        section = sections[i]
-        dto_list.append(
+    dto_list: List[SectionDto] = list(
+        map(lambda our_section:
             SectionDto(
-                section_id=section.id,
-                section_name=section.name,
-                timer=section.timer,
-                description=section.description,
-                question_count=len(section.questions)
-            )
-        )
+                section_id=our_section.id,
+                section_name=our_section.name,
+                timer=our_section.timer,
+                description=our_section.description,
+                question_count=len(our_section.questions)
+            ), sections))
 
     return dto_list
 
 
 def to_test_dto_list(tests: List[Test]):
-    dto_list: List[TestDto] = []
-
-    for i in range(len(tests)):
-        test = tests[i]
-        dto_list.append(
+    dto_list: List[TestDto] = list(
+        map(lambda our_test:
             TestDto(
-                test_id=test.id,
-                test_name=test.name,
-                author_name=test.created_by_user.email,
-                description=test.description,
-                is_retakeable=test.is_retakeable,
-                is_ready=test.is_ready,
-                section_count=len(test.sections)
-            )
-        )
+                test_id=our_test.id,
+                test_name=our_test.name,
+                author_name=our_test.created_by_user.email,
+                description=our_test.description,
+                is_retakeable=our_test.is_retakeable,
+                is_ready=our_test.is_ready,
+                section_count=len(our_test.sections)
+            ), tests))
+
+    return dto_list
+
+
+def to_question_for_editor_dto_list(questions: List[Question]):
+    dto_list: List[QuestionForEditorDto] = list(
+        map(lambda question: QuestionForEditorDto(question_id=question.id, question_text=question.question_text),
+            questions))
 
     return dto_list
 
@@ -83,7 +83,8 @@ class QuestionDto:
             if text_question.text_type == "variable":
                 variable_question = VariableQuestion.query.filter_by(id=text_question.id).first()
                 self.answers = [
-                    AnswerDto(answer_text=i.answer_text).to_dict() for i in Answer.query.filter_by(variable_question_id=variable_question.id).all()]
+                    AnswerDto(answer_text=i.answer_text).to_dict() for i in
+                    Answer.query.filter_by(variable_question_id=variable_question.id).all()]
             elif text_question.text_type == "matching":
                 matching_question = MatchingQuestion.query.filter_by(id=text_question.id).first()
 
@@ -120,3 +121,9 @@ class TestDto:
         self.is_retakeable = is_retakeable
         self.is_ready = is_ready
         self.section_count = section_count
+
+
+class QuestionForEditorDto:
+    def __init__(self, question_id: str, question_text: str):
+        self.question_id = question_id
+        self.question_text = question_text

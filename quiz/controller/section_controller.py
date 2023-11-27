@@ -5,7 +5,7 @@ from flask_login import login_required, current_user
 from flask import request, make_response, jsonify, abort, render_template
 
 from quiz.service.section_service import create_section, get_sections_by_test, get_deleted_sections_by_test, \
-    delete_section, edit_section, get_section
+    delete_section, edit_section, get_section, publish_or_unpublish_test_by_section
 from quiz.service.test_service import get_test
 from quiz.util.encoder import UUIDEncoder
 
@@ -88,3 +88,24 @@ def edit_section_endpoint():
         ret = {'message': 'Раздел редактирован', 'id': section_id}
 
     return make_response(jsonify(ret), edited)
+
+
+@login_required
+def publish_or_unpublish_test_by_section_endpoint():
+    is_to_publish = request.json['to_publish']
+    section_id = request.args['id']
+    published = publish_or_unpublish_test_by_section(user=current_user,
+                                                     section_id=section_id,
+                                                     is_to_publish=is_to_publish
+                                                     )
+    if published == 404:
+        ret = {'message': 'Тест по данной секции не существует', 'id': section_id}
+    elif published == 405:
+        ret = {'message': 'Попытка опубликовать чужой тест по данной секции ', 'id': section_id}
+    else:
+        if is_to_publish:
+            ret = {'message': 'Тест по данной секции опубликован', 'id': section_id}
+        else:
+            ret = {'message': 'В данный момент тест по данной секции невозможно пройти', 'id': section_id}
+
+    return make_response(jsonify(ret), published)

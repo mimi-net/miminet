@@ -97,5 +97,6 @@ def publish_or_unpublish_test(user: User, test_id: str, is_to_publish: bool):
         return 405
     else:
         test.is_ready = is_to_publish
+        db.session.commit()
         return 200
 

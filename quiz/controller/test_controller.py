@@ -100,8 +100,9 @@ def get_tests_by_author_name_endpoint():
 
 
 @login_required
-def publish_or_unpublish_test_endpoint(is_to_publish: bool):
-    test_id = request.json['id']
+def publish_or_unpublish_test_endpoint():
+    is_to_publish = request.json['to_publish']
+    test_id = request.args['id']
     published = publish_or_unpublish_test(user=current_user,
                                           test_id=test_id,
                                           is_to_publish=is_to_publish
@@ -111,6 +112,9 @@ def publish_or_unpublish_test_endpoint(is_to_publish: bool):
     elif published == 405:
         ret = {'message': 'Попытка опубликовать чужой тест', 'id': test_id}
     else:
-        ret = {'message': 'Тест опубликован', 'id': test_id}
+        if is_to_publish:
+            ret = {'message': 'Тест опубликован', 'id': test_id}
+        else:
+            ret = {'message': 'В данный момент тест невозможно пройти', 'id': test_id}
 
     return make_response(jsonify(ret), published)
