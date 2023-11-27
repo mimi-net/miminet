@@ -35,10 +35,21 @@ login_required = login_required
 # Google auth (https://github.com/code-specialist/flask_google_login/blob/main/app.py)
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
-GOOGLE_CLIENT_ID = (
-    "698442891298-ursgc8b93lrr09i38vphoqnpg89urpcg.apps.googleusercontent.com"
-)
 client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_google.json")
+
+with open(client_secrets_file, "r") as file:
+    google_json = json.loads(file.read())
+
+GOOGLE_CLIENT_ID = google_json["web"]["client_id"]
+
+vk_secrets_file = os.path.join(pathlib.Path(__file__).parent, "vk_auth.json")
+
+with open(vk_secrets_file, "r") as file:
+    vk_json = json.loads(file.read())
+
+VK_CLIENT_ID = vk_json["web"]["client_id"]
+VK_CLIENT_SECRET = vk_json["web"]["client_secret"]
+VK_REDIRECT_URI = vk_json["web"]["redirect_uri"]
 
 
 @login_manager.user_loader
@@ -237,15 +248,13 @@ def vk_callback():
 
     # Get access token
     response = requests.get(
-        "https://oauth.vk.com/access_token?client_id=51544060&client_secret=5G1LOaa0ty0zFDmH5cPw&redirect_uri=http://127.0.0.1/auth/vk_callback&code="
+        f"https://oauth.vk.com/access_token?client_id={VK_CLIENT_ID}&client_secret={VK_CLIENT_SECRET}&redirect_uri={VK_REDIRECT_URI}&code="
         + user_code
     )
     access_token_json = json.loads(response.text)
 
     if "error" in access_token_json:
         return redirect(url_for("login_index"))
-
-    print(access_token_json)
 
     vk_id = access_token_json.get("user_id")
     access_token = access_token_json.get("access_token")
