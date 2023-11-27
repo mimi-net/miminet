@@ -248,7 +248,7 @@ def vk_callback():
 
     # Get access token
     response = requests.get(
-        f"https://oauth.vk.com/access_token?client_id={VK_CLIENT_ID}client_secret={VK_CLIENT_SECRET}&redirect_uri={VK_REDIRECT_URI}&code="
+        f"https://oauth.vk.com/access_token?client_id={VK_CLIENT_ID}&client_secret={VK_CLIENT_SECRET}&redirect_uri={VK_REDIRECT_URI}&code="
         + user_code
     )
     access_token_json = json.loads(response.text)
