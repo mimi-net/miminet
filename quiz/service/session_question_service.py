@@ -35,8 +35,8 @@ def answer_on_session_question(session_question_id: str, answer_string: dict, us
                 answer_count += 1
                 if not answer.is_correct:
                     is_correct = False
-                else:
-                    correct_count += 1
+            for _ in Answer.query.filter_by(variable_question_id=text_question.id, is_correct=True).all():
+                correct_count += 1
             correct = is_correct and answer_count == correct_count
             session_question.is_correct = correct
             db.session.add(session_question)

@@ -64,5 +64,5 @@ def get_results_by_user(user: User):
     dto_list = []
     for quiz_session in quiz_sessions:
         result = session_result(quiz_session.id)
-        dto_list.append(SessionResultDto(quiz_session.section.test.name, quiz_session.section.name, result[0], result[1], quiz_session.created_on, result[2]))
+        dto_list.append(SessionResultDto(quiz_session.section.test.name, quiz_session.section.name, result[0], result[1], quiz_session.created_on.strftime("%m/%d/%Y, %H:%M:%S"), result[2]))
     return dto_list

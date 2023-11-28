@@ -54,7 +54,7 @@ def get_deleted_sections_by_test(test_id: str, user: User):
 def delete_section(user: User, section_id: str):
     section = Section.query.filter_by(id=section_id).first()
     if section is None or section.is_deleted is True:
-        return 404
+        return 409
     elif section.created_by_id != user.id:
         return 403
     else:

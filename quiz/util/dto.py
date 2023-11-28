@@ -13,7 +13,7 @@ def to_section_dto_list(sections: List[Section]):
             SectionDto(
                 section_id=our_section.id,
                 section_name=our_section.name,
-                timer=our_section.timer,
+                timer=our_section.timer.strftime("%H:%M:%S"),
                 description=our_section.description,
                 question_count=len(our_section.questions)
             ), sections))
@@ -103,7 +103,7 @@ class QuestionDto:
 
 
 class SectionDto:
-    def __init__(self, section_id: str, section_name: str, timer: datetime, description: str, question_count: int):
+    def __init__(self, section_id: str, section_name: str, timer: str, description: str, question_count: int):
         self.section_id = section_id
         self.section_name = section_name
         self.timer = timer
@@ -135,4 +135,5 @@ class SessionResultDto:
         self.section_name = section_name
         self.correct_answers = correct_answers
         self.answers_count = answers_count
+        self.start_time = start_time
         self.time_spent = time_spent
