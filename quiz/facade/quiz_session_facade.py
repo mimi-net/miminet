@@ -7,6 +7,8 @@ from quiz.entity.entity import Question, QuizSession, SessionQuestion, Section
 def start_session(section_id: str, user: User):
     section = Section.query.filter_by(id=section_id).first()
     test = section.test
+    if section is None:
+        return None, None, 404
     if not test.is_retakeable and QuizSession.query.filter_by(section_id=section_id, created_by_id=user.id).first() is not None:
         return None, None, 403
     quiz_session = QuizSession()

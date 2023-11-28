@@ -26,6 +26,9 @@ def get_question_by_session_question_id_endpoint():
 @login_required
 def start_session_endpoint():
     res = start_session(request.args['section_id'], current_user)
+
+    if res[2] == 404:
+        abort(res[2])
     if res[2] == 403:
         ret = {'message': 'Данный раздел уже пройден вами'}
     else:
