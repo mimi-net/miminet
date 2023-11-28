@@ -29,7 +29,7 @@ def answer_on_session_question(session_question_id: str, answer_string: dict, us
             is_correct = True
             correct_count = 0
             answer_count = 0
-            for check in answers:  # redo
+            for check in answers:
                 answer = Answer.query.filter_by(variable_question_id=text_question.id, answer_text=check['answer_text']).first()
                 explanation_list.append(answer.explanation)
                 answer_count += 1
