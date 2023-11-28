@@ -16,17 +16,22 @@
                     <div class="col-sm-8">
                         <div class="card-body">
                             <h4 class="h4" style="margin-left: 20px;margin-bottom: 4px">
-                                <a href="{{ url_for('get_questions_by_section_endpoint', id=section.section_id) }}">{{ section.section_name }}</a>
+                                {{ section.section_name }}
                             </h4>
                             <p style="margin-left: 40px;margin-bottom: 4px">{{ section.description }}</p>
                         </div>
+                        <a class="btn btn-outline-primary"
+                           href="{{ url_for('get_questions_by_section_endpoint', id=section.section_id) }}"
+                           style="margin: 40px; margin-top: 0px">
+                            Начать прохождение
+                        </a>
                     </div>
                     <div class="col-sm-4">
                         <div class="card-body">
                             <p id="{{ section.section_id }}question"
                                style="text-align: right; margin-right: 40px; margin-top: 20px;"></p>
 
-                            {% if section.timer %}
+                            {% if section.timer != "00:00:00" %}
                                 <p id="{{ section.section_id }}timer"
                                    style="text-align: right; margin-right: 40px; margin-top: 20px;"></p>
                             {% endif %}
@@ -41,28 +46,15 @@
                     return (array = array || ['раздел', 'раздела', 'разделов']) && array[(int % 100 > 4 && int % 100 < 20) ? 2 : [2, 0, 1, 1, 1, 2][(int % 10 < 5) ? int % 10 : 5]];
                 }
 
-                function extractTime(datetimeString) {
-                    return new Date(datetimeString).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit'
-                    });
-                }
-
                 function timeToMinutes(timeString) {
                     const [hours, minutes, seconds] = timeString.split(':');
                     const totalSeconds = parseInt(hours, 10) * 3600 + parseInt(minutes, 10) * 60 + parseInt(seconds, 10);
                     return Math.ceil(totalSeconds / 60);
-                };
-
-                function extractMinutes(dateTimeString){
-                    const time = extractTime(dateTimeString);
-                    return timeToMinutes(time);
-                };
+                }
 
                 questions = '{{section.question_count}}';
                 document.getElementById('{{ section.section_id }}question').innerHTML = questions + ' ' + morph(questions, ['вопрос', 'вопроса', 'вопросов']);
-                timer = extractMinutes('{{section.timer}}');
+                timer = timeToMinutes('{{section.timer}}');
                 document.getElementById('{{ section.section_id }}timer').innerHTML = '&#8776;' + timer + ' ' + morph(timer, ['минута', 'минуты', 'минут']);
             </script>
         {% endfor %}

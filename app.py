@@ -21,8 +21,7 @@ from quiz.controller.quiz_session_controller import start_session_endpoint, \
     session_result_endpoint, get_results_by_user_endpoint
 from quiz.controller.section_controller import create_section_endpoint, get_sections_by_test_endpoint
 from quiz.controller.test_controller import create_test_endpoint, get_all_tests_endpoint, get_tests_by_owner_endpoint, \
-    get_deleted_tests_by_owner_endpoint, delete_test_endpoint, edit_test_endpoint, get_test_endpoint, \
-    publish_or_unpublish_test_endpoint
+    get_deleted_tests_by_owner_endpoint, delete_test_endpoint, edit_test_endpoint, get_test_endpoint
 
 app = Flask(__name__, static_url_path='', static_folder='static', template_folder="templates")
 
@@ -98,12 +97,10 @@ app.add_url_rule('/quiz/question/all', methods=['GET'], view_func=get_questions_
 
 app.add_url_rule('/quiz/session/start', methods=['POST'], view_func=start_session_endpoint)
 app.add_url_rule('/quiz/session/question', methods=['GET'], view_func=get_question_by_session_question_id_endpoint)
-
 app.add_url_rule('/quiz/session/answer', methods=['POST'], view_func=answer_on_session_question_endpoint)
 app.add_url_rule('/quiz/session/finish', methods=['PUT'], view_func=finish_session_endpoint)
 app.add_url_rule('/quiz/session/result', methods=['GET'], view_func=session_result_endpoint)
 app.add_url_rule('/quiz/session/results', methods=['GET'], view_func=get_results_by_user_endpoint)
-
 
 
 @app.route('/')
