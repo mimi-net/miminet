@@ -1,7 +1,7 @@
 import sys
 from datetime import datetime
 
-from flask import Flask, render_template, make_response, request
+from flask import Flask, render_template, make_response
 from flask_login import login_required, current_user
 from flask_migrate import Migrate
 
@@ -21,7 +21,7 @@ from quiz.controller.quiz_session_controller import start_session_endpoint, \
     session_result_endpoint
 from quiz.controller.section_controller import create_section_endpoint, get_sections_by_test_endpoint
 from quiz.controller.test_controller import create_test_endpoint, get_all_tests_endpoint, get_tests_by_owner_endpoint, \
-    get_deleted_tests_by_owner_endpoint, delete_test_endpoint, edit_test_endpoint
+    get_deleted_tests_by_owner_endpoint, delete_test_endpoint, edit_test_endpoint, get_test_endpoint
 
 app = Flask(__name__, static_url_path='', static_folder='static', template_folder="templates")
 
@@ -87,6 +87,7 @@ app.add_url_rule('/quiz/test/all', methods=['GET'], view_func=get_all_tests_endp
 app.add_url_rule('/quiz/test/owner/deleted', methods=['GET'], view_func=get_deleted_tests_by_owner_endpoint)
 app.add_url_rule('/quiz/test/delete', methods=['DELETE'], view_func=delete_test_endpoint)
 app.add_url_rule('/quiz/test/edit', methods=['PUT'], view_func=edit_test_endpoint)
+app.add_url_rule('/quiz/test/get', methods=['GET'], view_func=get_test_endpoint)
 
 app.add_url_rule('/quiz/section/create', methods=['POST'], view_func=create_section_endpoint)
 app.add_url_rule('/quiz/section/test/all', methods=['GET'], view_func=get_sections_by_test_endpoint)
@@ -100,7 +101,6 @@ app.add_url_rule('/quiz/session/question', methods=['GET'], view_func=get_questi
 app.add_url_rule('/quiz/session/answer', methods=['POST'], view_func=answer_on_session_question_endpoint)
 app.add_url_rule('/quiz/session/finish', methods=['PUT'], view_func=finish_session_endpoint)
 app.add_url_rule('/quiz/session/result', methods=['GET'], view_func=session_result_endpoint)
-
 
 
 @app.route('/')
