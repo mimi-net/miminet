@@ -10,7 +10,7 @@ def create_section(test_id: str, name: str, description: str, timer: datetime, u
     if test is None:
         return None, 404
     elif test.created_by_id != user.id:
-        return None, 405
+        return None, 403
     else:
         section = Section()
         section.test_id = test_id
@@ -44,7 +44,7 @@ def get_deleted_sections_by_test(test_id: str, user: User):
     if test is None:
         return None, 404
     elif test.created_by_id != user.id:
-        return None, 405
+        return None, 403
     deleted_sections = list(filter(lambda section: section.is_deleted is True, test.sections))
     section_dtos = to_section_dto_list(deleted_sections)
 
@@ -56,7 +56,7 @@ def delete_section(user: User, section_id: str):
     if section is None or section.is_deleted is True:
         return 404
     elif section.created_by_id != user.id:
-        return 405
+        return 403
     else:
         section.is_deleted = True
         db.session.commit()
@@ -68,7 +68,7 @@ def edit_section(user: User, section_id: str, name: str, description: str, timer
     if section is None or section.is_deleted is True:
         return 404
     elif section.created_by_id != user.id:
-        return 405
+        return 403
     else:
         section.name = name
         section.description = description
@@ -83,7 +83,7 @@ def publish_or_unpublish_test_by_section(user: User, section_id: str, is_to_publ
     if test is None or test.is_deleted is True:
         return 404
     elif test.created_by_id != user.id:
-        return 405
+        return 403
     else:
         test.is_ready = is_to_publish
         db.session.commit()

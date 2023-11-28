@@ -57,7 +57,7 @@ def delete_test(user: User, test_id: str):
     if test is None or test.is_deleted is True:
         return 404
     elif test.created_by_id != user.id:
-        return 405
+        return 403
     else:
         test.is_deleted = True
         db.session.commit()
@@ -69,7 +69,7 @@ def edit_test(user: User, test_id: str, name: str, description: str, is_retakeab
     if test is None or test.is_deleted is True:
         return 404
     elif test.created_by_id != user.id:
-        return 405
+        return 403
     else:
         test.name = name
         test.description = description
@@ -94,7 +94,7 @@ def publish_or_unpublish_test(user: User, test_id: str, is_to_publish: bool):
     if test is None or test.is_deleted is True:
         return 404
     elif test.created_by_id != user.id:
-        return 405
+        return 403
     else:
         test.is_ready = is_to_publish
         db.session.commit()

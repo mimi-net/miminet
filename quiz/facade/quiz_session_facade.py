@@ -31,7 +31,7 @@ def finish_session(quiz_session_id: str, user: User):
     quiz_session = QuizSession.query.filter_by(id=quiz_session_id).first()
 
     if quiz_session.created_by_id != user.id:
-        return 405
+        return 403
     elif quiz_session is None:
         return 404
 

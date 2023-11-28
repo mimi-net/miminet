@@ -20,7 +20,7 @@ def create_section_endpoint():
                          test_id=request.json['test_id'],
                          timer=datetime.strptime(request.json['timer'], '%H:%M:%S') # нужен ли таймер
                          )
-    if res[1] == 404 or res[1] == 405:
+    if res[1] == 404 or res[1] == 403:
         abort(res[1])
 
     ret = {'message': 'Раздел добавлен', 'id': res[0]}
@@ -41,7 +41,7 @@ def get_section_endpoint():
 def get_sections_by_test_endpoint():
     test_id = request.args['test_id']
     res = get_sections_by_test(test_id)
-    if res[1] == 404 or res[1] == 405:
+    if res[1] == 404 or res[1] == 403:
         abort(res[1])
     else:
         sections = res[0]
@@ -52,7 +52,7 @@ def get_sections_by_test_endpoint():
 @login_required
 def get_deleted_sections_by_test_endpoint():
     res = get_deleted_sections_by_test(request.args['test_id'], current_user)
-    if res[1] == 404 or res[1] == 405:
+    if res[1] == 404 or res[1] == 403:
         abort(res[1])
     else:
         return make_response(json.dumps([obj.__dict__ for obj in res[0]], cls=UUIDEncoder), res[1])
@@ -64,7 +64,7 @@ def delete_section_endpoint():
     deleted = delete_section(current_user, section_id)
     if deleted == 404:
         ret = {'message': 'Раздел не существует', 'id': section_id}
-    elif deleted == 405:
+    elif deleted == 403:
         ret = {'message': 'Попытка удалить чужой раздел', 'id': section_id}
     else:
         ret = {'message': 'Раздел удалён', 'id': section_id}
@@ -83,7 +83,7 @@ def edit_section_endpoint():
                           )
     if edited == 404:
         ret = {'message': 'Раздел не существует', 'id': section_id}
-    elif edited == 405:
+    elif edited == 403:
         ret = {'message': 'Попытка редактировать чужой раздел', 'id': section_id}
     else:
         ret = {'message': 'Раздел редактирован', 'id': section_id}
@@ -101,7 +101,7 @@ def publish_or_unpublish_test_by_section_endpoint():
                                                      )
     if published == 404:
         ret = {'message': 'Тест по данной секции не существует', 'id': section_id}
-    elif published == 405:
+    elif published == 403:
         ret = {'message': 'Попытка опубликовать чужой тест по данной секции ', 'id': section_id}
     else:
         if is_to_publish:

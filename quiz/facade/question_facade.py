@@ -44,7 +44,7 @@ def create_question(section_id: str, question_dict: dict, user: User):
     if section is None:
         return None, 404
     elif section.created_by_id != user.id:
-        return None, 405
+        return None, 403
     question = Question()
     question.section_id = section_id
     question.created_by_id = user.id

@@ -18,7 +18,7 @@ def get_question_by_session_question_id(session_question_id: str):
 def answer_on_session_question(session_question_id: str, answer_string: dict, user: User):
     session_question = SessionQuestion.query.filter_by(id=session_question_id).first()
     if session_question.created_by_id != user.id:
-        return None, 405
+        return None, 403
     question = session_question.question
     if question.question_type == "text":
         text_question = TextQuestion.query.filter_by(id=question.id).first()

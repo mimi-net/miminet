@@ -65,7 +65,7 @@ def delete_test_endpoint():
     deleted = delete_test(current_user, test_id)
     if deleted == 404:
         ret = {'message': 'Тест не существует', 'id': test_id}
-    elif deleted == 405:
+    elif deleted == 403:
         ret = {'message': 'Попытка удалить чужой тест', 'id': test_id}
     else:
         ret = {'message': 'Тест удалён', 'id': test_id}
@@ -84,7 +84,7 @@ def edit_test_endpoint():
                        )
     if edited == 404:
         ret = {'message': 'Тест не существует', 'id': test_id}
-    elif edited == 405:
+    elif edited == 403:
         ret = {'message': 'Попытка редактировать чужой тест', 'id': test_id}
     else:
         ret = {'message': 'Тест редактирован', 'id': test_id}
@@ -109,7 +109,7 @@ def publish_or_unpublish_test_endpoint():
                                           )
     if published == 404:
         ret = {'message': 'Тест не существует', 'id': test_id}
-    elif published == 405:
+    elif published == 403:
         ret = {'message': 'Попытка опубликовать чужой тест', 'id': test_id}
     else:
         if is_to_publish:
