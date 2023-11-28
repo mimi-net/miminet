@@ -17,12 +17,12 @@ def create_section_endpoint():
                          description=request.json['description'],
                          user=user,
                          test_id=request.json['test_id'],
-                         timer=datetime.strptime(request.json['timer'], '%H:%M:%S')
+                         timer=datetime.strptime(request.json['timer'], '%H:%M:%S') # нужен ли таймер
                          )
     if res[1] == 404 or res[1] == 405:
         abort(res[1])
 
-    ret = {'message': 'Секция добавлена', 'id': res[0]}
+    ret = {'message': 'Раздел добавлен', 'id': res[0]}
 
     return make_response(jsonify(ret), res[1])
 

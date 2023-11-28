@@ -80,7 +80,7 @@ def edit_test(user: User, test_id: str, name: str, description: str, is_retakeab
 
 def get_tests_by_author_name(author_name: str):
     tests = (db.session.query(User, Test)
-             .filter(User.email == author_name)
+             .filter(User.nick == author_name)
              .filter(User.id == Test.created_by_id)
              .filter(Test.is_deleted is False)
              .filter(Test.is_ready is True))

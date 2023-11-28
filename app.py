@@ -95,7 +95,7 @@ app.add_url_rule('/quiz/question/create', methods=['POST'], view_func=create_que
 app.add_url_rule('/quiz/question/all', methods=['GET'], view_func=get_questions_by_section_endpoint)
 
 app.add_url_rule('/quiz/session/start', methods=['POST'], view_func=start_session_endpoint)
-app.add_url_rule('/quiz/session', methods=['GET'], view_func=get_question_by_session_question_id_endpoint)
+app.add_url_rule('/quiz/session/question', methods=['GET'], view_func=get_question_by_session_question_id_endpoint)
 
 app.add_url_rule('/quiz/session/answer', methods=['POST'], view_func=answer_on_session_question_endpoint)
 app.add_url_rule('/quiz/session/finish', methods=['PUT'], view_func=finish_session_endpoint)

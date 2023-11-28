@@ -21,10 +21,12 @@ def get_questions_by_section_endpoint():
 
 @login_required
 def create_question_endpoint():
-    res = create_question(request.json['id'], request.json, current_user)
+    res = create_question(request.args['id'], request.json, current_user)
     if res[1] == 404 or res[1] == 405:
         abort(res[1])
 
     ret = {'message': 'Вопрос добавлен', 'id': res[0]}
 
     return make_response(jsonify(ret), res[1])
+
+
