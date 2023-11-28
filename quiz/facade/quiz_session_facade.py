@@ -2,6 +2,7 @@ from datetime import datetime
 
 from miminet_model import User, db
 from quiz.entity.entity import Question, QuizSession, SessionQuestion, Section
+from quiz.util.dto import SessionResultDto
 
 
 def start_session(section_id: str, user: User):
@@ -47,10 +48,21 @@ def finish_session(quiz_session_id: str, user: User):
 def session_result(quiz_session_id: str):
     quiz_session = QuizSession.query.filter_by(id=quiz_session_id).first()
     correct = 0
+    if quiz_session.finished_at is None:
+        return None, None, None, 403
     question_count = len(quiz_session.sessions)
     for question in quiz_session.sessions:
         if question.is_correct is None:
-            return None, None, 403
+            return None, None, None, 403
         elif question.is_correct:
             correct += 1
     return correct, question_count, str(quiz_session.finished_at - quiz_session.created_on).split(".")[0], 200
+
+
+def get_results_by_user(user: User):
+    quiz_sessions = QuizSession.query.filter_by(created_by_id=user.id).order_by(QuizSession.created_on.desc()).all()
+    dto_list = []
+    for quiz_session in quiz_sessions:
+        result = session_result(quiz_session.id)
+        dto_list.append(SessionResultDto(quiz_session.section.test.name, quiz_session.section.name, result[0], result[1], quiz_session.created_on, result[2]))
+    return dto_list

@@ -3,7 +3,7 @@ import json
 from flask import request, make_response, jsonify, abort
 from flask_login import login_required, current_user
 
-from quiz.facade.quiz_session_facade import start_session, finish_session, session_result
+from quiz.facade.quiz_session_facade import start_session, finish_session, session_result, get_results_by_user
 from quiz.service.session_question_service import answer_on_session_question, get_question_by_session_question_id
 
 
@@ -54,3 +54,9 @@ def session_result_endpoint():
         'answer_count': res[1]
     }
     return make_response(json.dumps(ret, default=str), res[3])
+
+
+@login_required
+def get_results_by_user_endpoint():
+    res = get_results_by_user(current_user)
+    return make_response(json.dumps([obj.__dict__ for obj in res], default=str), 200)

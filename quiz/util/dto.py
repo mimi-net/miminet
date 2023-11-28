@@ -127,3 +127,12 @@ class QuestionForEditorDto:
     def __init__(self, question_id: str, question_text: str):
         self.question_id = question_id
         self.question_text = question_text
+
+
+class SessionResultDto:
+    def __init__(self, test_name: str, section_name: str, correct_answers: int, answers_count: int, start_time: str, time_spent: str):
+        self.test_name = test_name
+        self.section_name = section_name
+        self.correct_answers = correct_answers
+        self.answers_count = answers_count
+        self.time_spent = time_spent
