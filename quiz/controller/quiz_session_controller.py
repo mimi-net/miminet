@@ -26,7 +26,7 @@ def get_question_by_session_question_id_endpoint():
 @login_required
 def start_session_endpoint():
     res = start_session(request.args['section_id'], current_user)
-    if res[2] == 409:
+    if res[2] == 403:
         ret = {'message': 'Данный раздел уже пройден вами'}
     else:
         ret = {'quiz_session_id' : res[0], 'session_question_ids': res[1]}

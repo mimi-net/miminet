@@ -27,7 +27,7 @@ def to_test_dto_list(tests: List[Test]):
             TestDto(
                 test_id=our_test.id,
                 test_name=our_test.name,
-                author_name=our_test.created_by_user.email,
+                author_name=our_test.created_by_user.nick,
                 description=our_test.description,
                 is_retakeable=our_test.is_retakeable,
                 is_ready=our_test.is_ready,
