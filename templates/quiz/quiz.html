@@ -31,11 +31,15 @@
                                    style="text-align: right; margin-right: 40px; "></p>
                             {% endif %}
 
-                            <a class="btn btn-outline-primary align-self-end"
-                               href="{{ url_for('get_questions_by_section_endpoint', id=section.section_id) }}"
-                               style="margin-right: 40px">
-                                Начать прохождение
-                            </a>
+                            <form id="postStartSession" method="post"
+                                  action="{{ url_for('start_session_endpoint', section_id=section.section_id) }}">
+                                <a class="btn btn-outline-primary align-self-end"
+                                   style="margin-right: 8px"
+                                   onclick="submitForm();">
+                                    Начать прохождение
+                                </a>
+                            </form>
+
                         </div>
                     </div>
                 </div>
@@ -54,8 +58,27 @@
 
                 questions = '{{section.question_count}}';
                 document.getElementById('{{ section.section_id }}question').innerHTML = questions + ' ' + morph(questions, ['вопрос', 'вопроса', 'вопросов']);
+
                 timer = timeToMinutes('{{section.timer}}');
                 document.getElementById('{{ section.section_id }}timer').innerHTML = '&#8776;' + timer + ' ' + morph(timer, ['минута', 'минуты', 'минут']);
+
+                function submitForm() {
+                    var form = document.getElementById('postStartSession');
+
+                    fetch(form.action, {
+                        method: form.method,
+                        body: new FormData(form)
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log(data);
+                            console.log(data['session_question_ids'][0]);
+
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                }
             </script>
         {% endfor %}
 
