@@ -117,6 +117,6 @@ def publish_or_unpublish_test_endpoint():
         if is_to_publish:
             ret = {'message': 'Тест опубликован', 'id': test_id}
         else:
-            ret = {'message': 'В данный момент тест невозможно пройти', 'id': test_id}
+            ret = {'message': 'Теперь тест невозможно пройти', 'id': test_id}
 
     return make_response(jsonify(ret), published)
