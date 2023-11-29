@@ -8,16 +8,16 @@ from quiz.util.dto import SessionResultDto
 def start_session(section_id: str, user: User):
     section = Section.query.filter_by(id=section_id).first()
     test = section.test
-    if section is None:
+    if section is None or section.is_deleted:
         return None, None, 404
-    if not test.is_retakeable and QuizSession.query.filter_by(section_id=section_id, created_by_id=user.id).first() is not None:
+    if not test.is_retakeable and QuizSession.query.filter_by(section_id=section_id, created_by_id=user.id, is_deleted=False).first() is not None:
         return None, None, 403
     quiz_session = QuizSession()
     quiz_session.created_by_id = user.id
     quiz_session.section_id = section_id
     db.session.add(quiz_session)
 
-    questions = Question.query.filter_by(section_id=section_id).all()
+    questions = Question.query.filter_by(section_id=section_id, is_deleted=False).all()
 
     for question in questions:
         session_question = SessionQuestion()

@@ -1,4 +1,3 @@
-import datetime
 import json
 import random
 from typing import List
@@ -78,15 +77,17 @@ class QuestionDto:
         self.question_type = question.question_type
         self.question_text = question.question_text
         if self.question_type == "text":
-            text_question = TextQuestion.query.filter_by(id=question.id).first()
+            text_question = question.text_question
             self.text_type = text_question.text_type
+
             if text_question.text_type == "variable":
-                variable_question = VariableQuestion.query.filter_by(id=text_question.id).first()
+                variable_question = text_question.variable_question
                 self.answers = [
                     AnswerDto(answer_text=i.answer_text).to_dict() for i in
-                    Answer.query.filter_by(variable_question_id=variable_question.id).all()]
+                    Answer.query.filter_by(variable_question_id=variable_question.id, is_deleted=False).all()]
+
             elif text_question.text_type == "matching":
-                matching_question = MatchingQuestion.query.filter_by(id=text_question.id).first()
+                matching_question = text_question.matching_question
 
                 data = matching_question.map
                 keys = list(data.keys())
@@ -95,8 +96,9 @@ class QuestionDto:
                 res = {keys[i]: values[i] for i in range(len(keys))}
 
                 self.answers = json.dumps(res)
+
             elif text_question.text_type == "sorting":
-                sorting_question = SortingQuestion.query.filter_by(id=text_question.id).first()
+                sorting_question = text_question.sorting_question
                 words = sorting_question.right_sequence.split()
                 random.shuffle(words)
                 self.answers = " ".join(words)

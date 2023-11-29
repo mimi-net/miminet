@@ -1,3 +1,4 @@
+import json
 import sys
 from datetime import datetime
 
@@ -15,7 +16,8 @@ from miminet_network import create_network, web_network, update_network_config, 
     delete_network, post_nodes, post_nodes_edges, move_nodes, web_network_shared, upload_network_picture, copy_network
 from miminet_shark import mimishark_page
 from miminet_simulation import run_simulation, check_simulation
-from quiz.controller.question_controller import create_question_endpoint, get_questions_by_section_endpoint
+from quiz.controller.question_controller import create_question_endpoint, get_questions_by_section_endpoint, \
+    delete_question_endpoint
 from quiz.controller.quiz_session_controller import start_session_endpoint, \
     get_question_by_session_question_id_endpoint, finish_session_endpoint, answer_on_session_question_endpoint, \
     session_result_endpoint, get_results_by_user_endpoint
@@ -96,6 +98,7 @@ app.add_url_rule('/quiz/section/create', methods=['POST'], view_func=create_sect
 app.add_url_rule('/quiz/section/test/all', methods=['GET'], view_func=get_sections_by_test_endpoint)
 
 app.add_url_rule('/quiz/question/create', methods=['POST'], view_func=create_question_endpoint)
+app.add_url_rule('/quiz/question/delete', methods=['DELETE'], view_func=delete_question_endpoint)
 app.add_url_rule('/quiz/question/all', methods=['GET'], view_func=get_questions_by_section_endpoint)
 
 app.add_url_rule('/quiz/session/start', methods=['POST'], view_func=start_session_endpoint)

@@ -130,11 +130,11 @@ class Question(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
     question_type = db.Column(db.String(31), default="")
     section_id = db.Column(db.String(512), db.ForeignKey(Section.id))
 
-    section = db.relationship("Section", back_populates="questions")
+    section = db.relationship("Section", uselist=False, back_populates="questions")
 
-    text_question = db.relationship('TextQuestion', back_populates='question')
+    text_question = db.relationship('TextQuestion', uselist=False, back_populates='question')
 
-    session_questions = db.relationship("SessionQuestion", back_populates="question")
+    session_questions = db.relationship("SessionQuestion", uselist=False, back_populates="question")
 
 
 class QuizSession(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
@@ -168,9 +168,9 @@ class TextQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model
     text_type = db.Column(db.String(31), default="")
 
     question = db.relationship('Question', back_populates='text_question')
-    sorting_question = db.relationship('SortingQuestion', back_populates='text_question')
-    variable_question = db.relationship('VariableQuestion', back_populates='text_question')
-    matching_question = db.relationship('MatchingQuestion', back_populates='text_question')
+    sorting_question = db.relationship('SortingQuestion', uselist=False, back_populates='text_question')
+    variable_question = db.relationship('VariableQuestion', uselist=False, back_populates='text_question')
+    matching_question = db.relationship('MatchingQuestion', uselist=False, back_populates='text_question')
 
 
 class SortingQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
