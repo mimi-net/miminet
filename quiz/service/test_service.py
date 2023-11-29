@@ -54,7 +54,9 @@ def get_deleted_tests_by_owner(user: User):
 
 def delete_test(user: User, test_id: str):
     test = Test.query.filter_by(id=test_id).first()
-    if test is None or test.is_deleted is True:
+    if test is None:
+        return 404
+    elif test.is_deleted is True:
         return 409
     elif test.created_by_id != user.id:
         return 403

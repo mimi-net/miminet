@@ -40,9 +40,9 @@ def delete_question_endpoint():
     if res == 404:
         ret = {'message': 'Вопрос не существует', 'id': question_id}
     elif res == 403:
-        ret = {'message': 'Пользователь не имеет права удалить данный вопрос', 'id': question_id}
+        ret = {'message': 'Попытка удалить чужой вопрос', 'id': question_id}
     elif res == 409:
-        ret = {'message': 'Невозможно удалить удалённый вопрос', 'id': question_id}
+        ret = {'message': 'Попытка удалить удалённый вопрос', 'id': question_id}
     else:
         ret = {'message': 'Вопрос удалён', 'id': question_id}
 

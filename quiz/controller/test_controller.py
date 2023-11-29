@@ -67,6 +67,8 @@ def delete_test_endpoint():
         ret = {'message': 'Тест не существует', 'id': test_id}
     elif deleted == 403:
         ret = {'message': 'Попытка удалить чужой тест', 'id': test_id}
+    elif deleted == 409:
+        ret = {'message': 'Попытка удалить удалённый тест', 'id': test_id}
     else:
         ret = {'message': 'Тест удалён', 'id': test_id}
 
