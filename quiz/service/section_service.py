@@ -45,7 +45,7 @@ def get_deleted_sections_by_test(test_id: str, user: User):
         return None, 404
     elif test.created_by_id != user.id:
         return None, 403
-    deleted_sections = list(filter(lambda section: section.is_deleted is True, test.sections))
+    deleted_sections = Section.query.filter_by(test_id=test_id, is_deleted=True).all()
     section_dtos = to_section_dto_list(deleted_sections)
 
     return section_dtos, 200
