@@ -40,7 +40,7 @@
                                 <input type="hidden" name="timer" value="{{ section.timer }}">
                                 <a class="btn btn-outline-primary"
                                    style="margin-right: 8px"
-                                   onclick="submitForm(event);">
+                                   id="startSession">
                                     Начать прохождение
                                 </a>
                             </form>
@@ -52,6 +52,8 @@
 
             <script src="/quiz/quiz_scripts.js"></script>
             <script>
+                document.getElementById('startSession').addEventListener('click', submitForm);
+
                 questions = '{{section.question_count}}';
                 document.getElementById('{{ section.section_id }}question').innerHTML =
                     questions + ' ' + morph(questions, ['вопрос', 'вопроса', 'вопросов']);

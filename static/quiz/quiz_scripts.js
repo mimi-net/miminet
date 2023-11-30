@@ -35,7 +35,7 @@ function submitForm(event) {
             localStorage.setItem("section_name", sectionName)
             localStorage.setItem("session_id", data.quiz_session_id)
             localStorage.setItem("question_ids", JSON.stringify(data.session_question_ids))
-            localStorage.setItem("question_index", (questionIndex+1).toString())
+            localStorage.setItem("question_index", (questionIndex + 1).toString())
             localStorage.setItem("timer", timer)
 
             if (questionIndex < data.session_question_ids.length) {
