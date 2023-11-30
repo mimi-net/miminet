@@ -10,7 +10,6 @@
             <h1 class="me-3"> {{ test_name }}</h1>
         </div>
 
-
         {% for section in sections %}
             <article class="card border-0 shadow-sm overflow-hidden mb-4">
                 <div class="row g-0">
@@ -33,12 +32,12 @@
                             {% endif %}
 
                             <form id="postStartSession"
-{#                                  name="{{ section.section_id }}" #}
                                   method="post"
                                   action="{{ url_for('start_session_endpoint', section_id=section.section_id) }}"
                                   style="align-self: flex-end">
                                 <input type="hidden" name="question_index" value="0">
                                 <input type="hidden" name="section_name" value="{{ section.section_name }}">
+                                <input type="hidden" name="timer" value="{{ section.timer }}">
                                 <a class="btn btn-outline-primary"
                                    style="margin-right: 8px"
                                    onclick="submitForm(event);">
@@ -51,7 +50,7 @@
                 </div>
             </article>
 
-            <script src="/quiz_scripts.js"></script>
+            <script src="/quiz/quiz_scripts.js"></script>
             <script>
                 questions = '{{section.question_count}}';
                 document.getElementById('{{ section.section_id }}question').innerHTML =
@@ -64,7 +63,7 @@
         {% endfor %}
         <script>
             const endpointUrl = '{{ url_for('get_question_by_session_question_id_endpoint') }}'
-            sessionStorage.setItem('test_name', '{{ test_name }}')
+            localStorage.setItem('test_name', '{{ test_name }}')
         </script>
     </section>
 {% endblock %}
