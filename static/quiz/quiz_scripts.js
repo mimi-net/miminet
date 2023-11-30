@@ -18,9 +18,9 @@ function findParent(element) {
 
 function submitForm(event) {
     const form = findParent(event.target);
-    // const sectionId = form.getAttribute('name');
     const questionIndex = parseInt(form.querySelector('[name="question_index"]').value);
     const sectionName = form.querySelector(`[name="section_name"]`).value
+    const timer = form.querySelector(`[name="timer"]`).value
 
     fetch(form.action, {
         method: form.method,
@@ -32,10 +32,11 @@ function submitForm(event) {
             console.log(data.session_question_ids);
             console.log(data.session_question_ids.type);
 
-            sessionStorage.setItem("section_name", sectionName)
-            sessionStorage.setItem("session_id", data.quiz_session_id)
-            sessionStorage.setItem("question_ids", JSON.stringify(data.session_question_ids))
-            sessionStorage.setItem("question_index", (questionIndex+1).toString())
+            localStorage.setItem("section_name", sectionName)
+            localStorage.setItem("session_id", data.quiz_session_id)
+            localStorage.setItem("question_ids", JSON.stringify(data.session_question_ids))
+            localStorage.setItem("question_index", (questionIndex+1).toString())
+            localStorage.setItem("timer", timer)
 
             if (questionIndex < data.session_question_ids.length) {
                 window.location.href = endpointUrl + `?question_id=` + data.session_question_ids[questionIndex];

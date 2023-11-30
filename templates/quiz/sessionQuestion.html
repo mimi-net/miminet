@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{% endblock %}
+{% block description %}Сетевой тренажер для обучения компьютерным сетям{% endblock %}
+
+{% block content %}
+    <section class="container py-5 my-lg-5">
+        <div class="row align-items-baseline">
+            <div class="col-auto">
+                <h1 class="mb-0" id="test_name">{{ test_name }}</h1>
+            </div>
+            <div class="col-auto text-center">
+                <h3 class="mb-0" style="font-weight: normal" id="section_name">{{ section_name }}</h3>
+            </div>
+        </div>
+
+        <div class="row align-items-baseline" style="margin: 8px 0 0 0; font-size: 24px; opacity: 85%">
+            <div class="col-auto">
+                <p id="counter"></p>
+            </div>
+            <div class="col-auto text-center">
+                <p id="timer"></p>
+            </div>
+        </div>
+    </section>
+
+    <script src="/quiz/session_scripts.js"></script>
+{% endblock %}
