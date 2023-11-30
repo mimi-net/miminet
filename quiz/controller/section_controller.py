@@ -45,8 +45,8 @@ def get_sections_by_test_endpoint():
         abort(res[1])
     else:
         sections = res[0]
-        test = get_test(test_id)[0]
-        return make_response(render_template("quiz/quiz.html", test=test, sections=sections), 200)
+        test_name = get_test(test_id)[0].name
+        return make_response(render_template("quiz/quiz.html", test_name=test_name, sections=sections), 200)
 
 
 @login_required

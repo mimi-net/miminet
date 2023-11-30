@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ test.name }}{% endblock %}
+{% block title %}{{ test_name }}{% endblock %}
 {% block description %}Сетевой тренажер для обучения компьютерным сетям{% endblock %}
 
 
@@ -7,8 +7,9 @@
 
     <section class="container py-5 my-lg-5">
         <div class="align-items-center justify-content-between">
-            <h1 class="me-3"> {{ test.name }}</h1>
+            <h1 class="me-3"> {{ test_name }}</h1>
         </div>
+
 
         {% for section in sections %}
             <article class="card border-0 shadow-sm overflow-hidden mb-4">
@@ -31,11 +32,16 @@
                                    style="text-align: right; margin-right: 40px; "></p>
                             {% endif %}
 
-                            <form id="postStartSession" method="post"
-                                  action="{{ url_for('start_session_endpoint', section_id=section.section_id) }}">
-                                <a class="btn btn-outline-primary align-self-end"
+                            <form id="postStartSession"
+{#                                  name="{{ section.section_id }}" #}
+                                  method="post"
+                                  action="{{ url_for('start_session_endpoint', section_id=section.section_id) }}"
+                                  style="align-self: flex-end">
+                                <input type="hidden" name="question_index" value="0">
+                                <input type="hidden" name="section_name" value="{{ section.section_name }}">
+                                <a class="btn btn-outline-primary"
                                    style="margin-right: 8px"
-                                   onclick="submitForm();">
+                                   onclick="submitForm(event);">
                                     Начать прохождение
                                 </a>
                             </form>
@@ -45,42 +51,20 @@
                 </div>
             </article>
 
+            <script src="/quiz_scripts.js"></script>
             <script>
-                function morph(int, array) {
-                    return (array = array || ['раздел', 'раздела', 'разделов']) && array[(int % 100 > 4 && int % 100 < 20) ? 2 : [2, 0, 1, 1, 1, 2][(int % 10 < 5) ? int % 10 : 5]];
-                }
-
-                function timeToMinutes(timeString) {
-                    const [hours, minutes, seconds] = timeString.split(':');
-                    const totalSeconds = parseInt(hours, 10) * 3600 + parseInt(minutes, 10) * 60 + parseInt(seconds, 10);
-                    return Math.ceil(totalSeconds / 60);
-                }
-
                 questions = '{{section.question_count}}';
-                document.getElementById('{{ section.section_id }}question').innerHTML = questions + ' ' + morph(questions, ['вопрос', 'вопроса', 'вопросов']);
+                document.getElementById('{{ section.section_id }}question').innerHTML =
+                    questions + ' ' + morph(questions, ['вопрос', 'вопроса', 'вопросов']);
 
                 timer = timeToMinutes('{{section.timer}}');
-                document.getElementById('{{ section.section_id }}timer').innerHTML = '&#8776;' + timer + ' ' + morph(timer, ['минута', 'минуты', 'минут']);
-
-                function submitForm() {
-                    var form = document.getElementById('postStartSession');
-
-                    fetch(form.action, {
-                        method: form.method,
-                        body: new FormData(form)
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            console.log(data);
-                            console.log(data['session_question_ids'][0]);
-
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                        });
-                }
+                document.getElementById('{{ section.section_id }}timer').innerHTML =
+                    '&#8776;' + timer + ' ' + morph(timer, ['минута', 'минуты', 'минут']);
             </script>
         {% endfor %}
-
+        <script>
+            const endpointUrl = '{{ url_for('get_question_by_session_question_id_endpoint') }}'
+            sessionStorage.setItem('test_name', '{{ test_name }}')
+        </script>
     </section>
 {% endblock %}
