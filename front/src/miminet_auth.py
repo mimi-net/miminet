@@ -37,19 +37,25 @@ os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_google.json")
 
-with open(client_secrets_file, "r") as file:
-    google_json = json.loads(file.read())
+GOOGLE_CLIENT_ID = ""
+VK_CLIENT_ID = ""
+VK_CLIENT_SECRET = ""
+VK_REDIRECT_URI = ""
 
-GOOGLE_CLIENT_ID = google_json["web"]["client_id"]
+if os.path.exists(client_secrets_file):
+    with open(client_secrets_file, "r") as file:
+        google_json = json.loads(file.read())
+
+    GOOGLE_CLIENT_ID = google_json["web"]["client_id"]
 
 vk_secrets_file = os.path.join(pathlib.Path(__file__).parent, "vk_auth.json")
 
-with open(vk_secrets_file, "r") as file:
-    vk_json = json.loads(file.read())
-
-VK_CLIENT_ID = vk_json["web"]["client_id"]
-VK_CLIENT_SECRET = vk_json["web"]["client_secret"]
-VK_REDIRECT_URI = vk_json["web"]["redirect_uri"]
+if os.path.exists(vk_secrets_file):
+    with open(vk_secrets_file, "r") as file:
+        vk_json = json.loads(file.read())
+    VK_CLIENT_ID = vk_json["web"]["client_id"]
+    VK_CLIENT_SECRET = vk_json["web"]["client_secret"]
+    VK_REDIRECT_URI = vk_json["web"]["redirect_uri"]
 
 
 @login_manager.user_loader

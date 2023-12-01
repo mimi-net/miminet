@@ -215,7 +215,7 @@ class MyTopology(IPTopo):
         for node in self._id_node_map.values():
             config = node.config
             if config.type == "router":
-                net[config.label].cmd(f"route add default gw {config.default_gw}")
+                net[node.data.id].cmd(f"route add default gw {config.default_gw}")
 
         for h in net.hosts:
             # print ("disable ipv6 on " + h.name)
