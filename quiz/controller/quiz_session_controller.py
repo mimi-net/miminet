@@ -1,6 +1,6 @@
 import json
 
-from flask import request, make_response, jsonify, abort
+from flask import request, make_response, jsonify, abort, render_template
 from flask_login import login_required, current_user
 
 from quiz.facade.quiz_session_facade import start_session, finish_session, session_result, get_results_by_user
@@ -17,10 +17,10 @@ def answer_on_session_question_endpoint():
 
 @login_required
 def get_question_by_session_question_id_endpoint():
-    res = get_question_by_session_question_id(request.args['id'])
+    res = get_question_by_session_question_id(request.args['question_id'])
     if res[1] == 404:
         abort(res[1])
-    return make_response(json.dumps(res[0].__dict__, default=str), res[1])
+    return make_response(render_template("quiz/sessionQuestion.html"), res[1])
 
 
 @login_required
