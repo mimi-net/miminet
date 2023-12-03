@@ -5,7 +5,7 @@ function morph(int, array) {
 function timeToMinutes(timeString) {
     const [hours, minutes, seconds] = timeString.split(':');
     const totalSeconds = parseInt(hours, 10) * 3600 + parseInt(minutes, 10) * 60 + parseInt(seconds, 10);
-    return Math.ceil(totalSeconds / 60);
+    return Math.round(totalSeconds / 60);
 }
 
 function findParent(element) {
@@ -29,8 +29,8 @@ function submitForm(event) {
         .then(response => response.json())
         .then(data => {
             console.log(data);
-            console.log(data.session_question_ids);
-            console.log(data.session_question_ids.type);
+            /*console.log(data.session_question_ids);
+            console.log(data.session_question_ids.type);*/
 
             localStorage.setItem("section_name", sectionName)
             localStorage.setItem("session_id", data.quiz_session_id)
@@ -41,7 +41,8 @@ function submitForm(event) {
             if (questionIndex < data.session_question_ids.length) {
                 window.location.href = endpointUrl + `?question_id=` + data.session_question_ids[questionIndex];
             } else {
-                window.location.href = "/quiz/session/finish?id=" + data.quiz_session_id;
+                // TODO: make PUT request and redirect to finish page
+                window.location.href = finishSessionUrl + "?id=" + data.quiz_session_id;
             }
         })
         .catch(error => {

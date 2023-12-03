@@ -26,7 +26,7 @@
                             <p id="{{ section.section_id }}question"
                                style="text-align: right; margin: 0 40px 8px 0"></p>
 
-                            {% if section.timer != "00:00:00" %}
+                            {% if section.timer != null %}
                                 <p id="{{ section.section_id }}timer"
                                    style="text-align: right; margin-right: 40px; "></p>
                             {% endif %}
@@ -40,7 +40,7 @@
                                 <input type="hidden" name="timer" value="{{ section.timer }}">
                                 <a class="btn btn-outline-primary"
                                    style="margin-right: 8px"
-                                   id="startSession">
+                                   id="startSession{{ section.section_id }}">
                                     Начать прохождение
                                 </a>
                             </form>
@@ -52,7 +52,7 @@
 
             <script src="/quiz/quiz_scripts.js"></script>
             <script>
-                document.getElementById('startSession').addEventListener('click', submitForm);
+                document.getElementById('startSession{{ section.section_id }}').addEventListener('click', submitForm);
 
                 questions = '{{section.question_count}}';
                 document.getElementById('{{ section.section_id }}question').innerHTML =
@@ -64,7 +64,8 @@
             </script>
         {% endfor %}
         <script>
-            const endpointUrl = '{{ url_for('get_question_by_session_question_id_endpoint') }}'
+            let endpointUrl = '{{ url_for('get_question_by_session_question_id_endpoint') }}'
+            let finishSessionUrl = '{{ url_for('finish_session_endpoint') }}'
             localStorage.setItem('test_name', '{{ test_name }}')
         </script>
     </section>

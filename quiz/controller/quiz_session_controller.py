@@ -20,7 +20,9 @@ def get_question_by_session_question_id_endpoint():
     res = get_question_by_session_question_id(request.args['question_id'])
     if res[1] == 404:
         abort(res[1])
-    return make_response(render_template("quiz/sessionQuestion.html"), res[1])
+    # question = json.dumps(res[0].__dict__, default=str)
+    # question = res[0].__dict__
+    return make_response(render_template("quiz/sessionQuestion.html", question=res[0]), res[1])
 
 
 @login_required
