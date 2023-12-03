@@ -1,5 +1,3 @@
-import json
-
 from miminet_model import User, db
 from quiz.entity.entity import SessionQuestion, TextQuestion, MatchingQuestion, SortingQuestion, \
     Answer

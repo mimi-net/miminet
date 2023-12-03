@@ -18,7 +18,7 @@ def create_section_endpoint():
                          description=request.json['description'],
                          user=user,
                          test_id=request.json['test_id'],
-                         timer=datetime.strptime(request.json['timer'], '%H:%M:%S') # нужен ли таймер
+                         timer=datetime.strptime(request.json['timer'], '%H:%M:%S')
                          )
     if res[1] == 404 or res[1] == 403:
         abort(res[1])

@@ -51,12 +51,11 @@ def session_result(quiz_session_id: str):
     if quiz_session.finished_at is None:
         return None, None, None, 403
     question_count = len(quiz_session.sessions)
-    for question in quiz_session.sessions:
-        if question.is_correct is None:
-            return None, None, None, 403
-        elif question.is_correct:
+    time_spent = str(quiz_session.finished_at - quiz_session.created_on).split(".")[0]
+    for question in list(filter(lambda x: x.is_correct is not None, quiz_session.sessions)):
+        if question.is_correct:
             correct += 1
-    return correct, question_count, str(quiz_session.finished_at - quiz_session.created_on).split(".")[0], 200
+    return correct, question_count, time_spent, 200
 
 
 def get_results_by_user(user: User):
