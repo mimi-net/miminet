@@ -1,4 +1,4 @@
-﻿alembic==1.12.1
+﻿alembic==1.13.0
 beautifulsoup4==4.12.2
 cachetools==5.3.2
 certifi==2023.11.17
@@ -11,11 +11,11 @@ Flask-Login==0.6.3
 Flask-Migrate==4.0.5
 Flask-SQLAlchemy==3.1.1
 google==3.0.0
-google-auth==2.23.4
+google-auth==2.24.0
 google-auth-oauthlib==1.1.0
 greenlet==3.0.1
 idna==3.6
-importlib-metadata==6.8.0
+importlib-metadata==7.0.0
 importlib-resources==6.1.1
 ipaddress==1.0.23
 itsdangerous==2.1.2
