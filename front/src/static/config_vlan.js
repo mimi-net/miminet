@@ -33,6 +33,11 @@ const ConfigVLAN = function (currentDevice) {
                 resetInterfaceFields(currentDevice);
             }
             $('#VlanModal').modal('hide');
+
+            // Reset network state
+            SetNetworkPlayerState(-1);
+            DrawGraph();
+            PostNodesEdges()
         });
 
         $('#config_button_vlan').off('click').on('click', function () {
