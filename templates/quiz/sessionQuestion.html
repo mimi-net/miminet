@@ -2,6 +2,8 @@
 {% block title %}{% endblock %}
 {% block description %}Сетевой тренажер для обучения компьютерным сетям{% endblock %}
 
+{#TODO: при закрытии вкладки завершать сессию и показывать warning #}
+
 {% block content %}
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/jquery-ui.min.js"></script>
@@ -28,45 +30,16 @@
     </section>
 
     <article class="container card border-0 shadow-sm" style="padding: 12px 24px 12px 18px">
-        {#        <input type="hidden" name="question" value="{{ question }}">#}
         <div class="card-body p-1">
             <p class="text-black m-0 px-4 py-3" id="question_text"
                style="font-size: 20px">{{ question.question_text }}</p>
 
             <div class=" border border-1 border-success-subtle"></div>
 
+            {#TODO: add style#}
             {% if question.question_type == "text" %}
-                {% if question.text_type == "variable" %}
-                    <div></div>
-                {% elif question.text_type == "matching" %}
-                    <div class="container" style="display: flex">
-                        <div class="keys" id="sortContainer" style="flex: 1"></div>
-                        <div class="values" style="flex: 1"></div>
-                    </div>
-                {% elif question.text_type == "sorting" %}
-                    <div></div>
-                {% endif %}
+                <div class="container" id="variants"></div>
             {% endif %}
-            {#
-            <div>
-                <div class="left-0 top-0 ">
-                    <div class="left-0  bg-success-subtle rounded-circle col-1">
-                    </div>
-                    <p class="top-0  text-center text-black fs-6 fw-normal font-family-Inter col-10 m-0 px-3 py-2">
-                        Вариант 1
-                    </p>
-                </div>
-            </div>#}
-
-            {#<div>
-                <div class="left-0 top-0  bg-success-subtle col-12">
-                </div>
-                <p class=" text-black fs-6 fw-normal font-family-Inter col-5 m-0 px-3 py-2">
-                    Верно!
-                    <br>
-                    И пояснение к ответу
-                </p>
-            </div>#}
         </div>
 
         {#TODO: set style#}
@@ -78,34 +51,36 @@
 
     <script src="/quiz/session_scripts.js"></script>
     <script>
-        let finishSessionUrl = '{{ url_for('finish_session_endpoint') }}'
-        $(function () {
+        let finishSessionUrl = '{{ url_for('finish_session_endpoint') }}';
+        let answerQuestionURL = '{{ url_for('answer_on_session_question_endpoint') }}';
+        let getQuestionUrl = '{{ url_for('get_question_by_session_question_id_endpoint') }}';
 
-            $('#sortContainer').sortable();
+        {# Make divs with id="sortContainer" sortable#}
+        $(() => $('#sortContainer').sortable());
 
-        });
-
-        if ('{{ question.question_type }}' === 'text' && '{{ question.text_type }}' === "matching") {
-            const answersString = '{{ question.answers | safe }}';
-            const answers = JSON.parse(answersString);
-            for (const key in answers) {
-                if (answers.hasOwnProperty(key)) {
-                    console.log(`${key}: ${answers[key]}`);
-                    let keysDiv = document.createElement("div");
-                    keysDiv.id = key;
-                    keysDiv.classList.add("sortable");
-                    keysDiv.textContent = key;
-
-                    let keys = document.querySelector(".keys")
-                    keys.appendChild(keysDiv);
-
-                    let valuesDiv = document.createElement("div");
-                    valuesDiv.id = answers[key];
-                    valuesDiv.textContent = answers[key];
-
-                    let values = document.querySelector(".values")
-                    values.appendChild(valuesDiv);
+        const answers = '{{ question.answers | replace("'", '"') | safe }}';
+        if ('{{ question.text_type }}' === 'variable') {
+            const answersParsed = JSON.parse(answers);
+            for (let i = 0; i < answersParsed.length; i++) {
+                displayVariable(answersParsed[i]['answer_text'], i);
+            }
+        } else if ('{{ question.text_type }}' === 'matching') {
+            $('#variants.container')
+                .css({display: "flex"})
+                .append(`<div class=keys id=sortContainer style=flex:1></div><div class=values id=rightSide style=flex:1></div>`)
+            const answersParsed = JSON.parse(answers);
+            for (const item in answersParsed) {
+                if (answersParsed.hasOwnProperty(item)) {
+                    displayMatching(item, answersParsed[item]);
                 }
+            }
+        } else if ('{{ question.text_type }}' === 'sorting') {
+            $('#variants.container')
+                .css({display: "flex"})
+                .append(`<div class=keys id=sortContainer style=flex:1></div>`)
+            const answersParsed = answers.split(' ');
+            for (let i = 0; i < answersParsed.length; i++) {
+                displaySorting(answersParsed[i]);
             }
         }
     </script>

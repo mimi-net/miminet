@@ -64,9 +64,9 @@
             </script>
         {% endfor %}
         <script>
-            let endpointUrl = '{{ url_for('get_question_by_session_question_id_endpoint') }}'
-            let finishSessionUrl = '{{ url_for('finish_session_endpoint') }}'
-            localStorage.setItem('test_name', '{{ test_name }}')
+            let getQuestionUrl = '{{ url_for('get_question_by_session_question_id_endpoint') }}';
+            let finishSessionUrl = '{{ url_for('finish_session_endpoint') }}';
+            localStorage.setItem('test_name', '{{ test_name }}');
         </script>
     </section>
 {% endblock %}
