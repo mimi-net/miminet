@@ -34,6 +34,8 @@ const ConfigVLAN = function (currentDevice) {
             }
             $('#VlanModal').modal('hide');
 
+            updateVlanButtonStyle(currentDevice);
+
             // Reset network state
             SetNetworkPlayerState(-1);
             DrawGraph();
@@ -53,6 +55,8 @@ const ConfigVLAN = function (currentDevice) {
                 $('#config_table_vlan').remove();
             }
         });
+
+        updateVlanButtonStyle(currentDevice)
     });
 }
 
@@ -161,6 +165,25 @@ function restoreFormData(currentDevice) {
             row.find('select').val(interface.type_connection === 0 ? 'Access' : 'Trunk');
         }
     });
+}
+
+function updateVlanButtonStyle(currentDevice) {
+    var primaryColor = getComputedStyle(document.querySelector('.btn-primary')).backgroundColor;
+    var isVlanEnabled = areInterfaceFieldsFilled(currentDevice);
+
+    if (isVlanEnabled) {
+        $('#config_button_vlan').css({
+            'color': primaryColor,
+            'border-color': primaryColor
+        });
+        $('#config_button_vlan .bx').css('color', primaryColor);
+    } else {
+        $('#config_button_vlan').css({
+            'color': '',
+            'border-color': ''
+        });
+        $('#config_button_vlan .bx').css('color', '');
+    }
 }
 
 function areInterfaceFieldsFilled(device) {
