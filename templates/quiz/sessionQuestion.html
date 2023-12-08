@@ -7,7 +7,6 @@
 {% block content %}
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/jquery-ui.min.js"></script>
-    <link rel="stylesheet" href="http://ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/themes/sunny/jquery-ui.css">
 
     <section class="container" style="margin-top: 48px; padding-top: 48px">
         <div class="row align-items-baseline">
@@ -29,8 +28,8 @@
         </div>
     </section>
 
-    <article class="container card border-0 shadow-sm" style="padding: 12px 24px 12px 18px">
-        <div class="card-body p-1">
+    <article class="container card border-0 shadow-sm" style="padding: 12px 40px 12px 18px">
+        <div class="card-body p-1" style="margin-right: 40px">
             <p class="text-black m-0 px-4 py-3" id="question_text"
                style="font-size: 20px">{{ question.question_text }}</p>
 
@@ -38,13 +37,13 @@
 
             {#TODO: add style#}
             {% if question.question_type == "text" %}
-                <div class="container" id="variants"></div>
+                <div class="container m-3" id="variants"></div>
             {% endif %}
         </div>
 
         {#TODO: set style#}
         <div class="card-body">
-            <button name="nextQuestion" class="btn btn-success">Ответить</button>
+            <button name="nextQuestion" class="btn btn-success">Следующий вопрос</button>
             <button name="finishQuiz" class="btn btn-danger">Завершить тест</button>
         </div>
     </article>
@@ -56,7 +55,7 @@
         let getQuestionUrl = '{{ url_for('get_question_by_session_question_id_endpoint') }}';
 
         {# Make divs with id="sortContainer" sortable#}
-        $(() => $('#sortContainer').sortable());
+        $(() => $('#sortContainer').sortable({placeholder: 'emptySpace'}));
 
         const answers = '{{ question.answers | replace("'", '"') | safe }}';
         if ('{{ question.text_type }}' === 'variable') {
@@ -67,7 +66,7 @@
         } else if ('{{ question.text_type }}' === 'matching') {
             $('#variants.container')
                 .css({display: "flex"})
-                .append(`<div class=keys id=sortContainer style=flex:1></div><div class=values id=rightSide style=flex:1></div>`)
+                .append(`<div class=keys id=sortContainer></div><div class=values id=rightSide></div>`)
             const answersParsed = JSON.parse(answers);
             for (const item in answersParsed) {
                 if (answersParsed.hasOwnProperty(item)) {
@@ -77,7 +76,7 @@
         } else if ('{{ question.text_type }}' === 'sorting') {
             $('#variants.container')
                 .css({display: "flex"})
-                .append(`<div class=keys id=sortContainer style=flex:1></div>`)
+                .append(`<div class=keys id=sortContainer></div>`)
             const answersParsed = answers.split(' ');
             for (let i = 0; i < answersParsed.length; i++) {
                 displaySorting(answersParsed[i]);

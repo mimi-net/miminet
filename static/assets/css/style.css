@@ -23,15 +23,15 @@
 }
 
 p {
-    margin-bottom: 0px;
+    margin-bottom: 0;
 }
 
-div.info__body>li {
+div.info__body > li {
     list-style-type: none;
     margin-left: 30px;
 }
 
-div.info__body>li:nth-of-type(odd) {
+div.info__body > li:nth-of-type(odd) {
     background-color: rgba(0, 0, 0, 0.05);
 }
 
@@ -49,7 +49,7 @@ div.info__body>li:nth-of-type(odd) {
     transition: 0.1s;
 }
 
-.info__switch:checked~.info__body {
+.info__switch:checked ~ .info__body {
     max-height: 1000px;
 }
 
@@ -64,7 +64,7 @@ div.info__body>li:nth-of-type(odd) {
     border-top-color: transparent;
 }
 
-.info__switch:checked~.info__headline::before {
+.info__switch:checked ~ .info__headline::before {
     transform: rotate(90deg) translateY(0px);
 }
 
@@ -80,22 +80,22 @@ div.info__body>li:nth-of-type(odd) {
 tbody tr:not(.no-hover):hover {
     background: #d0f2fb; /* Цвет фона при наведении */
     color: #000000; /* Цвет текста при наведении */
-   }
+}
 
-.selected{
+.selected {
     background: #87CEEB;
 }
 
 
-.decode_body{
-    text-align: left; 
-    width: 840px; 
+.decode_body {
+    text-align: left;
+    width: 840px;
     transition: 0.15s;
     margin-left: 30px;
 }
 
-.decode_head{
-    text-align: left; 
+.decode_head {
+    text-align: left;
     text-decoration: none;
     color: black;
 }
@@ -120,7 +120,7 @@ tbody tr:not(.no-hover):hover {
     margin-left: 0
 }
 
-.dropdown-t::before{
+.dropdown-t::before {
     transform: rotate(-90deg);
     transition: 0.15s;
 }
@@ -129,7 +129,45 @@ tbody tr:not(.no-hover):hover {
     transform: rotate(0deg);
 }
 
-.decode_width{
+.decode_width {
     width: 450px;
 }
 
+div.keys#sortContainer {
+    flex-shrink: 1;
+    flex-grow: 1;
+    flex-basis: 50%;
+}
+
+div.values#rightSide {
+    flex-shrink: 1;
+    flex-grow: 1;
+    flex-basis: 50%;
+}
+
+div.sortable,
+div.matching {
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid #e2e5f1;
+    border-radius: 6px;
+    margin: 8px;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: normal;
+}
+
+.emptySpace {
+    border: medium dotted #e2e5f1;
+    height: 40px;
+    margin: 8px;
+}
+
+div.form-check {
+    margin-left: 8px;
+}
+
+label.form-check-label {
+    margin-left: 8px;
+    font-size: 16px;
+    font-weight: normal;
+}

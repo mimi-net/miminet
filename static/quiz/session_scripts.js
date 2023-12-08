@@ -93,7 +93,7 @@ function displayVariable(variant, index) {
 
 function displayMatching(key, value) {
     $('#sortContainer.keys').append(`<div id=${key} class=sortable>${key}</div>`);
-    $('#rightSide.values').append(`<div id=${value}>${value}</div>`);
+    $('#rightSide.values').append(`<div id=${value} class=matching>${value}</div>`);
 }
 
 function displaySorting(value) {
