@@ -54,15 +54,20 @@ function finishQuiz(event) {
 function getAnswer() {
     switch (textType) {
         case 'variable':
-            break;
+            return $('input.form-check-input:checked').map(function () {
+                return {'answer_text': this.value};
+            }).get();
         case 'matching':
             const leftSide = $('#sortContainer').sortable("toArray");
             const rightSide = $('#rightSide div').map(function () {
                 return this.id
             }).get();
-            return
+            return leftSide.reduce((acc, current, index) => {
+                acc[current] = rightSide[index];
+                return acc;
+            }, {});
         case 'sorting':
-            break;
+            return $('#sortContainer').sortable("toArray");
     }
 
 
@@ -76,32 +81,46 @@ function nextQuestion(event) {
 }
 
 function answerQuestion(event) {
-    // TODO: make answerQuestion request
-    // redirect to next question
     const questionId = questionIds[questionIndex];
 
-    getAnswer();
+    document.querySelector('button[name="answerQuestion"]').hidden = true;
+    document.querySelector('button[name="nextQuestion"]').hidden = (questionIndex + 1 >= questionsCount);
 
-    // fetch(answerQuestionURL + '?id=' + questionId, {
-    //     method: 'POST',
-    //     // body:
-    // })
-    //     .then(response => response.json())
-    //     .then(data => {
-    //         console.log(data);
-    //
-    //         localStorage.clear();
-    //         window.location.href = '/'
-    //     })
-    //     .catch(error => {
-    //         console.error('Error:', error);
-    //     });
+    if (questionIndex + 1 >= questionsCount) {
+        document.querySelector('button[name="seeResults"]').hidden = false;
+        document.querySelector('button[name="finishQuiz"]').hidden = true;
+    }
+
+    const answer = getAnswer();
+    console.log(JSON.stringify(answer));
+
+    fetch(answerQuestionURL + '?id=' + questionId, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({'answer': answer})
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+
+            displayExplanation(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
+function displayExplanation(data) {
+
 }
 
 function displayVariable(answersParsed) {
     for (let i = 0; i < answersParsed.length; i++) {
+        const value = answersParsed[i]['answer_text']
         $('#variants.container')
-            .append(`<div class=form-check><input class=form-check-input type=checkbox value=${i} id=flexCheckDefault><label class=form-check-label for=flexCheckDefault>${answersParsed[i]['answer_text']}</label></div>`);
+            .append(`<div class=form-check><input class=form-check-input type=checkbox value=${value} id=flexCheckDefault><label class=form-check-label for=flexCheckDefault>${value}</label></div>`);
     }
 }
 
@@ -130,21 +149,32 @@ function displaySorting(answersParsed) {
     }
 }
 
-setInterval(updateTimer, 1000);
-
-// Add event listener for finishQuiz and nextQuestion buttons
-document.querySelector('button[name="finishQuiz"]').addEventListener('click', finishQuiz);
-document.querySelector('button[name="nextQuestion"]').addEventListener('click', nextQuestion);
-document.querySelector('button[name="answerQuestion"]').addEventListener('click', answerQuestion);
-
 // Saving data about session
 const testName = localStorage.getItem('test_name');
 const sectionName = localStorage.getItem('section_name');
 const questionsCount = JSON.parse(localStorage.getItem('question_ids')).length;
 timer = localStorage.getItem('timer');
 
+if (timer !== null) {
+    setInterval(updateTimer, 1000);
+
+    document.getElementById("timer").innerHTML = timer;
+
+    // Set start time for the session
+    if (questionIndex === 0 && localStorage.getItem('quizStartTime') == null) {
+        localStorage.setItem('quizStartTime', new Date().getTime().toString());
+    }
+}
+
+// Add event listener for finishQuiz and nextQuestion buttons
+document.querySelector('button[name="finishQuiz"]').addEventListener('click', finishQuiz);
+document.querySelector('button[name="seeResults"]').addEventListener('click', finishQuiz);
+document.querySelector('button[name="answerQuestion"]').addEventListener('click', answerQuestion);
+document.querySelector('button[name="nextQuestion"]').addEventListener('click', nextQuestion);
+
 if (questionIndex + 1 >= questionsCount) {
     document.querySelector('button[name="nextQuestion"]').hidden = true;
+    document.querySelector('button[name="finishQuiz"]').hidden = true;
 }
 
 // Display data
@@ -152,12 +182,3 @@ document.title = testName;
 document.getElementById("test_name").innerHTML = testName;
 document.getElementById("section_name").innerHTML = sectionName;
 document.getElementById("counter").innerHTML = (questionIndex + 1) + '/' + questionsCount;
-
-if (timer !== null) {
-    document.getElementById("timer").innerHTML = timer;
-}
-
-// Set start time for the session
-if (questionIndex === 0 && localStorage.getItem('quizStartTime') == null) {
-    localStorage.setItem('quizStartTime', new Date().getTime().toString());
-}

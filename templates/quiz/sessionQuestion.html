@@ -26,7 +26,7 @@
                 <span id="timer">00:00:00</span>
             </div>
             <div class="col-auto ms-auto" style="margin-bottom: 8px">
-                <button name="finishQuiz" class="btn btn-danger">Завершить тест</button>
+                <button name="finishQuiz" class="btn btn-danger" style="background-color: #fc2b2b">Завершить тест</button>
             </div>
         </div>
     </section>
@@ -36,16 +36,19 @@
             <p class="text-black m-0 px-4 py-3" id="question_text"
                style="font-size: 20px">{{ question.question_text }}</p>
 
+            {# Divider #}
             <div class=" border border-1 border-success-subtle"></div>
 
+            {# Answer area #}
             {% if question.question_type == "text" %}
                 <div class="container m-3" id="variants"></div>
             {% endif %}
         </div>
 
         <div class="card-body d-flex justify-content-end">
-            <button name="answerQuestion" class="btn btn-success">Ответить</button>
-            <button name="nextQuestion" class="btn btn-success" hidden>Следующий вопрос</button>
+            <button name="answerQuestion" class="btn btn-primary">Ответить</button>
+            <button name="nextQuestion" class="btn btn-primary" hidden>Следующий вопрос</button>
+            <button name="seeResults" class="btn btn-primary" hidden>Посмотреть результаты</button>
         </div>
     </article>
 
