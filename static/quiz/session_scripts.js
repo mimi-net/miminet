@@ -26,8 +26,9 @@ function updateTimer() {
 
     document.getElementById('timer').textContent = hours + ":" + minutes + ":" + seconds;
 
-    if (remainingTime <= 0 || questionIndex + 1 >= questionsCount) {
+    if (remainingTime <= 0) {
         document.querySelector('button[name="nextQuestion"]').disabled = true;
+        document.querySelector('button[name="answerQuestion"]').disabled = true;
     }
 }
 
@@ -51,25 +52,35 @@ function finishQuiz(event) {
 }
 
 function getAnswer() {
-    const leftSide = $('#sortContainer').sortable("toArray");
-    const rightSide = $('#rightSide div').map(function () {
-        return this.id
-    }).get();
-    console.log(leftSide);
-    console.log(rightSide);
+    switch (textType) {
+        case 'variable':
+            break;
+        case 'matching':
+            const leftSide = $('#sortContainer').sortable("toArray");
+            const rightSide = $('#rightSide div').map(function () {
+                return this.id
+            }).get();
+            return
+        case 'sorting':
+            break;
+    }
+
+
 }
 
 function nextQuestion(event) {
+    // redirect to next question
+    localStorage.setItem('question_index', (questionIndex + 1).toString());
+
+    window.location.href = getQuestionUrl + `?question_id=` + questionIds[questionIndex + 1];
+}
+
+function answerQuestion(event) {
     // TODO: make answerQuestion request
     // redirect to next question
     const questionId = questionIds[questionIndex];
 
     getAnswer();
-
-    localStorage.setItem('question_index', (questionIndex + 1).toString());
-
-    window.location.href = getQuestionUrl + `?question_id=` + questionIds[questionIndex + 1];
-
 
     // fetch(answerQuestionURL + '?id=' + questionId, {
     //     method: 'POST',
@@ -87,17 +98,36 @@ function nextQuestion(event) {
     //     });
 }
 
-function displayVariable(variant, index) {
-    $('#variants.container').append(`<div class=form-check><input class=form-check-input type=checkbox value=${index} id=flexCheckDefault><label class=form-check-label for=flexCheckDefault>${variant}</label></div>`);
+function displayVariable(answersParsed) {
+    for (let i = 0; i < answersParsed.length; i++) {
+        $('#variants.container')
+            .append(`<div class=form-check><input class=form-check-input type=checkbox value=${i} id=flexCheckDefault><label class=form-check-label for=flexCheckDefault>${answersParsed[i]['answer_text']}</label></div>`);
+    }
 }
 
-function displayMatching(key, value) {
-    $('#sortContainer.keys').append(`<div id=${key} class=sortable>${key}</div>`);
-    $('#rightSide.values').append(`<div id=${value} class=matching>${value}</div>`);
+function displayMatching(answersParsed) {
+    $('#variants.container')
+        .css({display: "flex"})
+        .append(`<div class=keys id=sortContainer></div><div class=values id=rightSide></div>`);
+
+    for (const item in answersParsed) {
+        if (answersParsed.hasOwnProperty(item)) {
+            const value = answersParsed[item];
+            $('#sortContainer.keys').append(`<div id=${item} class=sortable>${item}</div>`);
+            $('#rightSide.values').append(`<div id=${value} class=matching>${value}</div>`);
+        }
+    }
 }
 
-function displaySorting(value) {
-    $('#sortContainer.keys').append(`<div id=${value} class=sortable>${value}</div>`);
+function displaySorting(answersParsed) {
+    $('#variants.container')
+        .css({display: "flex"})
+        .append(`<div class=keys id=sortContainer></div>`)
+
+    for (let i = 0; i < answersParsed.length; i++) {
+        const value = answersParsed[i];
+        $('#sortContainer.keys').append(`<div id=${value} class=sortable>${value}</div>`);
+    }
 }
 
 setInterval(updateTimer, 1000);
@@ -105,12 +135,17 @@ setInterval(updateTimer, 1000);
 // Add event listener for finishQuiz and nextQuestion buttons
 document.querySelector('button[name="finishQuiz"]').addEventListener('click', finishQuiz);
 document.querySelector('button[name="nextQuestion"]').addEventListener('click', nextQuestion);
+document.querySelector('button[name="answerQuestion"]').addEventListener('click', answerQuestion);
 
 // Saving data about session
 const testName = localStorage.getItem('test_name');
 const sectionName = localStorage.getItem('section_name');
 const questionsCount = JSON.parse(localStorage.getItem('question_ids')).length;
 timer = localStorage.getItem('timer');
+
+if (questionIndex + 1 >= questionsCount) {
+    document.querySelector('button[name="nextQuestion"]').hidden = true;
+}
 
 // Display data
 document.title = testName;

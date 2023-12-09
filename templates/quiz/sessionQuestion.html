@@ -25,6 +25,9 @@
             <div class="col-auto text-center">
                 <span id="timer">00:00:00</span>
             </div>
+            <div class="col-auto ms-auto" style="margin-bottom: 8px">
+                <button name="finishQuiz" class="btn btn-danger">Завершить тест</button>
+            </div>
         </div>
     </section>
 
@@ -35,16 +38,14 @@
 
             <div class=" border border-1 border-success-subtle"></div>
 
-            {#TODO: add style#}
             {% if question.question_type == "text" %}
                 <div class="container m-3" id="variants"></div>
             {% endif %}
         </div>
 
-        {#TODO: set style#}
-        <div class="card-body">
-            <button name="nextQuestion" class="btn btn-success">Следующий вопрос</button>
-            <button name="finishQuiz" class="btn btn-danger">Завершить тест</button>
+        <div class="card-body d-flex justify-content-end">
+            <button name="answerQuestion" class="btn btn-success">Ответить</button>
+            <button name="nextQuestion" class="btn btn-success" hidden>Следующий вопрос</button>
         </div>
     </article>
 
@@ -57,30 +58,13 @@
         {# Make divs with id="sortContainer" sortable#}
         $(() => $('#sortContainer').sortable({placeholder: 'emptySpace'}));
 
+        const displayFunctions = {
+            'variable': displayVariable,
+            'matching': displayMatching,
+            'sorting': displaySorting
+        };
         const answers = '{{ question.answers | replace("'", '"') | safe }}';
-        if ('{{ question.text_type }}' === 'variable') {
-            const answersParsed = JSON.parse(answers);
-            for (let i = 0; i < answersParsed.length; i++) {
-                displayVariable(answersParsed[i]['answer_text'], i);
-            }
-        } else if ('{{ question.text_type }}' === 'matching') {
-            $('#variants.container')
-                .css({display: "flex"})
-                .append(`<div class=keys id=sortContainer></div><div class=values id=rightSide></div>`)
-            const answersParsed = JSON.parse(answers);
-            for (const item in answersParsed) {
-                if (answersParsed.hasOwnProperty(item)) {
-                    displayMatching(item, answersParsed[item]);
-                }
-            }
-        } else if ('{{ question.text_type }}' === 'sorting') {
-            $('#variants.container')
-                .css({display: "flex"})
-                .append(`<div class=keys id=sortContainer></div>`)
-            const answersParsed = answers.split(' ');
-            for (let i = 0; i < answersParsed.length; i++) {
-                displaySorting(answersParsed[i]);
-            }
-        }
+        const textType = '{{ question.text_type }}';
+        displayFunctions[textType](textType === 'sorting' ? answers.split(' ') : JSON.parse(answers));
     </script>
 {% endblock %}
