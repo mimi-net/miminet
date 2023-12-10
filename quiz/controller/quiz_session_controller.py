@@ -20,8 +20,6 @@ def get_question_by_session_question_id_endpoint():
     res = get_question_by_session_question_id(request.args['question_id'])
     if res[1] == 404:
         abort(res[1])
-    # question = json.dumps(res[0].__dict__, default=str)
-    # question = res[0].__dict__
     return make_response(render_template("quiz/sessionQuestion.html", question=res[0]), res[1])
 
 
@@ -34,7 +32,7 @@ def start_session_endpoint():
     if res[2] == 403:
         ret = {'message': 'Данный раздел уже пройден вами'}
     else:
-        ret = {'quiz_session_id' : res[0], 'session_question_ids': res[1]}
+        ret = {'quiz_session_id': res[0], 'session_question_ids': res[1]}
     return make_response(jsonify(ret), res[2])
 
 

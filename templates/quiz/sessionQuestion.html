@@ -26,7 +26,8 @@
                 <span id="timer">00:00:00</span>
             </div>
             <div class="col-auto ms-auto" style="margin-bottom: 8px">
-                <button name="finishQuiz" class="btn btn-danger" style="background-color: #fc2b2b">Завершить тест</button>
+                <button name="finishQuiz" class="btn btn-danger" style="background-color: #fc2b2b">Завершить тест
+                </button>
             </div>
         </div>
     </section>
@@ -42,6 +43,8 @@
             {# Answer area #}
             {% if question.question_type == "text" %}
                 <div class="container m-3" id="variants"></div>
+                <div class="container" id="explanation"
+                     style="box-sizing: content-box; max-width: 400px; min-height: 85px; padding: 16px; margin-left: 36px" hidden></div>
             {% endif %}
         </div>
 

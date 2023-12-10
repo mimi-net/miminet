@@ -27,6 +27,10 @@ function updateTimer() {
     document.getElementById('timer').textContent = hours + ":" + minutes + ":" + seconds;
 
     if (remainingTime <= 0) {
+        if (questionIndex + 1 >= questionsCount) {
+            document.querySelector('button[name="seeResults"]').hidden = false;
+            document.querySelector('button[name="answerQuestion"]').hidden = true;
+        }
         document.querySelector('button[name="nextQuestion"]').disabled = true;
         document.querySelector('button[name="answerQuestion"]').disabled = true;
     }
@@ -113,7 +117,12 @@ function answerQuestion(event) {
 }
 
 function displayExplanation(data) {
-
+    bgColor = data['is_correct'] ? '#63F297' : '#F26963'
+    phrase = data['is_correct'] ? 'Верно!\n' : 'Неверно!\n'
+    $('#explanation.container')
+        .removeAttr('hidden')
+        .css({backgroundColor: bgColor})
+        .append(`<text style="font-size: 16px; color: black">${phrase}</text><br><text style="font-size: 16px; color: black">${data['explanation']}</text>`);
 }
 
 function displayVariable(answersParsed) {
