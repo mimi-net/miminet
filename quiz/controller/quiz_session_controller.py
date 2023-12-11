@@ -53,7 +53,7 @@ def session_result_endpoint():
         'correct_answers': res[0],
         'answer_count': res[1]
     }
-    return make_response(json.dumps(ret, default=str), res[3])
+    return make_response(render_template("quiz/sessionResult.html", data=ret), res[3])
 
 
 @login_required

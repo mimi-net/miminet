@@ -42,7 +42,6 @@ function submitForm(event) {
                 console.log(data);
                 window.location.href = getQuestionUrl + `?question_id=` + data.session_question_ids[questionIndex];
             } else {
-                // TODO: make PUT request and redirect to finish page
                 window.location.href = finishSessionUrl + "?id=" + data.quiz_session_id;
             }
         })

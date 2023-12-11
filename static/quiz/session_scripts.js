@@ -36,7 +36,7 @@ function updateTimer() {
     }
 }
 
-function finishQuiz(event) {
+function finishQuiz() {
     const sessionId = localStorage.getItem('session_id');
 
     fetch(finishSessionUrl + '?id=' + sessionId, {
@@ -46,9 +46,7 @@ function finishQuiz(event) {
         .then(data => {
             console.log(data);
 
-            localStorage.clear();
-            // TODO: show results
-            window.location.href = '/'
+            window.location.href = sessionResultUrl + '?id=' + sessionId
         })
         .catch(error => {
             console.error('Error:', error);
@@ -71,20 +69,20 @@ function getAnswer() {
                 return acc;
             }, {});
         case 'sorting':
-            return $('#sortContainer').sortable("toArray");
+            return $('#sortContainer').sortable("toArray").join(' ');
     }
 
 
 }
 
-function nextQuestion(event) {
+function nextQuestion() {
     // redirect to next question
     localStorage.setItem('question_index', (questionIndex + 1).toString());
 
     window.location.href = getQuestionUrl + `?question_id=` + questionIds[questionIndex + 1];
 }
 
-function answerQuestion(event) {
+function answerQuestion() {
     const questionId = questionIds[questionIndex];
 
     document.querySelector('button[name="answerQuestion"]').hidden = true;
@@ -117,8 +115,8 @@ function answerQuestion(event) {
 }
 
 function displayExplanation(data) {
-    bgColor = data['is_correct'] ? '#63F297' : '#F26963'
-    phrase = data['is_correct'] ? 'Верно!\n' : 'Неверно!\n'
+    const bgColor = data['is_correct'] ? '#63F297' : '#F26963'
+    const phrase = data['is_correct'] ? 'Верно!\n' : 'Неверно!\n'
     $('#explanation.container')
         .removeAttr('hidden')
         .css({backgroundColor: bgColor})
