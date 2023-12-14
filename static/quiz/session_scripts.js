@@ -115,12 +115,12 @@ function answerQuestion() {
 }
 
 function displayExplanation(data) {
-    const bgColor = data['is_correct'] ? '#63F297' : '#F26963'
+    const borderColor = data['is_correct'] ? '#63F297' : '#F26963'
     const phrase = data['is_correct'] ? 'Верно!\n' : 'Неверно!\n'
     $('#explanation.container')
         .removeAttr('hidden')
-        .css({backgroundColor: bgColor})
-        .append(`<text style="font-size: 16px; color: black">${phrase}</text><br><text style="font-size: 16px; color: black">${data['explanation']}</text>`);
+        .css({borderColor: borderColor})
+        .append(`<text style="font-size: 16px">${phrase}</text><br><text style="font-size: 16px">${data['explanation']}</text>`);
 }
 
 function displayVariable(answersParsed) {
