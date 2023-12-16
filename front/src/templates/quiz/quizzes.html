@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %} Тренажер {% endblock %}
+{% block description %}Сетевой тренажер для обучения компьютерным сетям{% endblock %}
+
+{% block content %}
+
+    <section class="container py-5 my-lg-5">
+        <div class="row" style="align-content: center; justify-content: space-between">
+            <div class="col-auto">
+                <h1 class="me-3">Тренажер по компьютерным сетям</h1>
+            </div>
+            <div class="col">
+                <a href="/" class="btn btn-primary">Добавить тест</a>
+            </div>
+        </div>
+
+        <!-- Item -->
+        {% for quiz in quizzes %}
+            <article class="card border-0 shadow-sm overflow-hidden mb-4">
+                <div class="row g-0">
+                    <div class="col-sm-8">
+                        <div class="card-body">
+                            <h4 class="h4" style="margin-top: 20px;margin-left: 20px;margin-bottom: 4px">
+                                <a href="{{ url_for('get_sections_by_test_endpoint', test_id=quiz.test_id) }}">{{ quiz.test_name }}</a>
+                            </h4>
+                            <p style="margin-left: 40px;margin-bottom: 4px">{{ quiz.description }}</p>
+                            <p style="margin-left: 40px;opacity: 50%">{{ quiz.author_name }}</p>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="card-body">
+                            <p id="{{ quiz.test_id }}"
+                               style="text-align: right; margin-right: 40px; margin-top: 20px;"></p>
+                            {#                            <p style="text-align: right; margin-right: 40px;">#}
+                            {#                                {{ quiz.passed }}/{{ quiz.section_count }} пройдено#}
+                            {#                            </p>#}
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <script>
+                function morph(int, array) {
+                    return (array = array || ['раздел', 'раздела', 'разделов']) && array[(int % 100 > 4 && int % 100 < 20) ? 2 : [2, 0, 1, 1, 1, 2][(int % 10 < 5) ? int % 10 : 5]];
+                }
+
+                document.getElementById('{{quiz.test_id}}').innerHTML = {{ quiz.section_count }} +' ' + morph({{ quiz.section_count}});
+            </script>
+        {% endfor %}
+
+    </section>
+{% endblock %}
+
