@@ -141,7 +141,6 @@ function saveCurrentFormData(currentDevice) {
                 return value >= 1 && value <= 4094;
             });
 
-
             if (validVlanValues) {
                 interface.vlan = type_connection === 1 ? vlanValues : vlanValues[0];
             }
