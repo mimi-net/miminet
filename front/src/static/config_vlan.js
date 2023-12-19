@@ -117,7 +117,7 @@ function generateTableContent(currentDevice, tableSelector) {
         var typeConnection = $(this).val();
         var vlanInput = $(this).closest('tr').find('.vlan-input');
 
-        // Number from 1 to 4096
+        // Number from 1 to 4094
         var vlanPattern = '^(?:[1-9]|[1-9]\\d{1,2}|[1-3]\\d{3}|40[0-9]{2}|409[0-4])';
 
         // List of VLANs, separated by spaces or commas
@@ -126,9 +126,9 @@ function generateTableContent(currentDevice, tableSelector) {
         if (typeConnection === 'Trunk') {
             vlanInput.attr('pattern', vlanListPattern);
         } else {
-            vlanInput.attr('pattern', vlanPattern);
+            var currentVlanValues = vlanInput.val().split(/[\s,]+/).map(Number);
+            vlanInput.val(currentVlanValues[0] || 1).attr('pattern', vlanPattern);
         }
-
     });
 }
 
