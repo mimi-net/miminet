@@ -18,6 +18,7 @@ const ConfigVLAN = function (currentDevice) {
     var tableElem = $(tableHTML).appendTo('#' + modalId + ' .modal-body').hide();
 
     $(document).ready(function () {
+        $('[data-bs-toggle="tooltip"]').tooltip();
         setupEventHandlers(currentDevice, modalId, tableId);
     });
 };
