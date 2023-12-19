@@ -180,21 +180,12 @@ function restoreFormData(currentDevice, tableSelector) {
 }
 
 function updateVlanButtonStyle(currentDevice) {
-    var primaryColor = getComputedStyle(document.querySelector('.btn-primary')).backgroundColor;
     var isVlanEnabled = areInterfaceFieldsFilled(currentDevice);
 
     if (isVlanEnabled) {
-        $('#config_button_vlan').css({
-            'color': primaryColor,
-            'border-color': primaryColor
-        });
-        $('#config_button_vlan .bx').css('color', primaryColor);
+        $('#config_button_vlan').addClass('btn-outline-primary').removeClass('btn-outline-secondary');
     } else {
-        $('#config_button_vlan').css({
-            'color': '',
-            'border-color': ''
-        });
-        $('#config_button_vlan .bx').css('color', '');
+        $('#config_button_vlan').removeClass('btn-outline-primary').addClass('btn-outline-secondary');
     }
 }
 
