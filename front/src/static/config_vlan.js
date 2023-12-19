@@ -109,10 +109,13 @@ function generateTableContent(currentDevice) {
         var vlanInput = $(this).closest('tr').find('.vlan-input');
 
         // Number from 1 to 4096
-        var vlanPattern = '^(?:[1-9]|[1-9]\\d{1,2}|[1-3]\\d{3}|40[0-9]{2}|409[0-4])$';
+        var vlanPattern = '^(?:[1-9]|[1-9]\\d{1,2}|[1-3]\\d{3}|40[0-9]{2}|409[0-4])';
+
+        // List of VLANs, separated by spaces or commas
+        var vlanListPattern = '^' + basicVlanNumber + '(\\s*(,|\\s)\\s*' + basicVlanNumber + ')*$';
 
         if (typeConnection === 'Trunk') {
-            vlanInput.attr('pattern', vlanPattern + '(\\s*,\\s*' + vlanPattern + ')*$');
+            vlanInput.attr('pattern', vlanListPattern);
         } else {
             vlanInput.attr('pattern', vlanPattern);
         }
@@ -132,10 +135,12 @@ function saveCurrentFormData(currentDevice) {
         });
 
         if (interface) {
-            var vlanValues = type_connection === 1 ? vlanInput.split(',').map(Number) : [Number(vlanInput)];
+            var vlanSplit = /[\s,]+/;
+            var vlanValues = type_connection === 1 ? vlanInput.split(vlanSplit).map(Number) : [Number(vlanInput)];
             var validVlanValues = vlanValues.every(function (value) {
                 return value >= 1 && value <= 4094;
             });
+
 
             if (validVlanValues) {
                 interface.vlan = type_connection === 1 ? vlanValues : vlanValues[0];
