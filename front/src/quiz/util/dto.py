@@ -103,6 +103,10 @@ class QuestionDto:
                 random.shuffle(words)
                 self.answers = " ".join(words)
 
+        elif self.question_type == "practice":
+            practice_question = question.practice_question
+
+
 
 class SectionDto:
     def __init__(self, section_id: str, section_name: str, timer: str, description: str, question_count: int):

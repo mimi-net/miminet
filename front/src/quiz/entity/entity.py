@@ -140,6 +140,7 @@ class Question(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
     section = db.relationship("Section", uselist=False, back_populates="questions")
 
     text_question = db.relationship('TextQuestion', uselist=False, back_populates='question')
+    practice_question = db.relationship('PracticeQuestion', uselist=False, back_populates='question')
 
     session_questions = db.relationship("SessionQuestion", back_populates="question")
 
@@ -229,3 +230,33 @@ class Answer(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
         db.Index('answer_variable_question_id_answer_text_ind', "variable_question_id", "answer_text"),
         db.Index('answer_variable_question_id_is_correct_ind', "variable_question_id", "is_correct")
     )
+
+
+class PracticeQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
+
+    __tablename__ = "practice_question"
+
+    id = db.Column(db.String(511), db.ForeignKey("question.id"), primary_key=True)
+    start_configuration = db.Column(db.String(511), db.ForeignKey("network.guid"))
+
+    description = db.Column(db.String(511), default="")
+    explanation = db.Column(db.String(511), default="")
+    available_hosts = db.Column(db.Integer, default=0)
+    available_switches = db.Column(db.Integer, default=0)
+    available_hubs = db.Column(db.Integer, default=0)
+    available_routers = db.Column(db.Integer, default=0)
+    available_servers = db.Column(db.Integer, default=0)
+
+    question = db.relationship('Question', uselist=False, back_populates='practice_question')
+    # network = db.relationship('Network', uselist=False, back_populates='practice_question')
+    practice_tasks = db.relationship("PracticeTask", back_populates="practice_question")
+
+
+class PracticeTask(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
+
+    __tablename__ = "practice_task"
+
+    task = db.Column(db.String(511), default="")
+
+    practice_question_id = db.Column(db.String(511), db.ForeignKey("practice_question.id"))
+    practice_question = db.relationship("PracticeQuestion", back_populates="practice_tasks")

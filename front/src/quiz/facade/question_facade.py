@@ -2,7 +2,7 @@ import json
 
 from miminet_model import db, User
 from quiz.entity.entity import Section, VariableQuestion, Answer, MatchingQuestion, SortingQuestion, TextQuestion, \
-    Question
+    Question, PracticeQuestion, PracticeTask
 
 
 def create_variable_question(variants: list, user: User):
@@ -40,6 +40,15 @@ def create_sorting_question(explanation: str, sorting_str: str, user: User):
     return sorting_question
 
 
+def create_practice_task(task: str, user: User):
+    practice_task = PracticeTask()
+    practice_task.task = task
+    practice_task.created_by_id = user.id
+    db.session.add(practice_task)
+
+    return practice_task
+
+
 def create_question(section_id: str, question_dict: dict, user: User):
     section = Section.query.filter_by(id=section_id).first()
     if section is None or section.is_deleted:
@@ -56,7 +65,8 @@ def create_question(section_id: str, question_dict: dict, user: User):
         text_question.text_type = question_dict['text_type']
 
         if question_dict['text_type'] == "sorting":
-            sorting_question = create_sorting_question(question_dict['explanation'], question_dict['right_sequence'], user)
+            sorting_question = create_sorting_question(question_dict['explanation'], question_dict['right_sequence'],
+                                                       user)
             text_question.sorting_question = sorting_question
 
         elif question_dict['text_type'] == "matching":
@@ -73,6 +83,21 @@ def create_question(section_id: str, question_dict: dict, user: User):
         text_question.created_by_id = user.id
         question.text_question = text_question
         db.session.add(text_question)
+        question.question_text = question_dict['question_text']
+    elif question_dict['question_type'] == "practice":
+        practice_question = PracticeQuestion()
+
+        attributes = ['description', 'explanation', 'available_hosts', 'available_switches', 'available_hubs',
+                      'available_routers', 'available_servers']
+
+        for attribute in attributes:
+            setattr(practice_question, attribute, question_dict[attribute])
+
+        practice_question.created_by_id = user.id
+        # practice_question.practice_question = create_practice_task(question_dict['task'], user)
+        # practice_question.network = question_dict['network']
+        question.practice_question = practice_question
+        db.session.add(practice_question)
         question.question_text = question_dict['question_text']
     else:
         return None, 400
