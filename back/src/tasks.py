@@ -28,9 +28,9 @@ def mininet_worker(
         tuple: Tuple (json emulation results, List[pcap, pcap name])
 
     """
-    setLogLevel('info')
+    setLogLevel("info")
 
-    if os.name == 'posix':
+    if os.name == "posix":
         print("Set default handler to SIGCHLD")
         signal.signal(signal.SIGCHLD, signal.SIG_IGN)
 

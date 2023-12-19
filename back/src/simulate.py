@@ -210,7 +210,6 @@ class MyTopology(IPTopo):
         ), super().addLink(s, h_target, intfName2=interface_name_2, **opts2)
 
     def post_build(self, net: IPNet):
-
         for node in self._id_node_map.values():
             config = node.config
             if config.type == "router":
