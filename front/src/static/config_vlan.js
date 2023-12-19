@@ -1,68 +1,76 @@
 const ConfigVLAN = function (currentDevice) {
-    var buttonElem = document.getElementById('config_button_vlan_script');
-    var modalElem = document.getElementById('config_modal_vlan_script');
-    var table = document.getElementById('config_table_vlan_script');
+    var modalId = 'VlanModal_' + currentDevice.data.id;
+    var tableId = 'config_table_vlan_' + currentDevice.data.id;
 
-    $(buttonElem.innerHTML).appendTo('#config_switch_name');
-    $(modalElem.innerHTML).appendTo('body');
+    $('#' + modalId).remove();
+
+    var buttonHTML = document.getElementById('config_button_vlan_script').innerHTML;
+    var modalHTML = document.getElementById('config_modal_vlan_script').innerHTML;
+    var tableHTML = document.getElementById('config_table_vlan_script').innerHTML;
+
+    modalHTML = modalHTML.replace('id="VlanModal"', 'id="' + modalId + '"');
+    tableHTML = tableHTML.replace('id="config_table_vlan"', 'id="' + tableId + '"');
+
+    var buttonElem = $(buttonHTML).appendTo('#config_switch_name');
+    buttonElem.attr('data-bs-target', '#' + modalId);
+
+    var modalElem = $(modalHTML).appendTo('body');
+    var tableElem = $(tableHTML).appendTo('#' + modalId + ' .modal-body').hide();
 
     $(document).ready(function () {
-        $('#config_switch_vlan').off('click').on('click', function () {
-            if ($(this).is(':checked')) {
-                $('#switch_vlan').after(table.innerHTML);
-                generateTableContent(currentDevice);
-            } else {
-                $('#config_table_vlan').remove();
-            }
-        });
-
-        $('#vlanConfigrationCancelIcon').on('click', function () {
-            restoreFormData(currentDevice);
-            $('#VlanModal').modal('hide');
-        });
-
-        $('#vlanConfigrationCancel').on('click', function () {
-            restoreFormData(currentDevice);
-            $('#VlanModal').modal('hide');
-        });
-
-        $('#vlanConfigrationSubmit').on('click', function () {
-            if ($('#config_switch_vlan').is(':checked')) {
-                saveCurrentFormData(currentDevice);
-            } else {
-                resetInterfaceFields(currentDevice);
-            }
-            $('#VlanModal').modal('hide');
-
-            updateVlanButtonStyle(currentDevice);
-
-            // Reset network state
-            SetNetworkPlayerState(-1);
-            DrawGraph();
-            PostNodesEdges()
-        });
-
-        $('#config_button_vlan').off('click').on('click', function () {
-            if (areInterfaceFieldsFilled(currentDevice)) {
-                $('#config_switch_vlan').prop('checked', true);
-                if (!$('#config_table_vlan').is(':visible')) {
-                    $('#switch_vlan').after(table.innerHTML);
-                }
-                generateTableContent(currentDevice);
-            }
-            else {
-                $('#config_switch_vlan').prop('checked', false);
-                $('#config_table_vlan').remove();
-            }
-        });
-
-        updateVlanButtonStyle(currentDevice)
+        setupEventHandlers(currentDevice, modalId, tableId);
     });
+};
+
+function setupEventHandlers(currentDevice, modalId, tableId) {
+    $('#' + modalId).find('#config_switch_vlan').off('click').on('click', function () {
+        if ($(this).is(':checked')) {
+            $('#' + tableId).show();
+            generateTableContent(currentDevice, '#' + tableId);
+        } else {
+            $('#' + tableId).hide();
+        }
+    });
+
+    $('#' + modalId).find('#vlanConfigrationCancelIcon, #vlanConfigrationCancel').on('click', function () {
+        restoreFormData(currentDevice, '#' + tableId);
+        $('#' + modalId).modal('hide');
+    });
+
+    $('#' + modalId).find('#vlanConfigrationSubmit').on('click', function () {
+        if ($('#' + modalId).find('#config_switch_vlan').is(':checked')) {
+            saveCurrentFormData(currentDevice, '#' + tableId);
+        } else {
+            resetInterfaceFields(currentDevice);
+        }
+        $('#' + modalId).modal('hide');
+        updateVlanButtonStyle(currentDevice);
+
+        // Reset network state
+        SetNetworkPlayerState(-1);
+        DrawGraph();
+        PostNodesEdges();
+    });
+
+    $('#config_button_vlan').off('click').on('click', function () {
+        if (areInterfaceFieldsFilled(currentDevice)) {
+            $('#' + modalId).find('#config_switch_vlan').prop('checked', true);
+            $('#' + tableId).show();
+            generateTableContent(currentDevice, '#' + tableId);
+        } else {
+            $('#' + modalId).find('#config_switch_vlan').prop('checked', false);
+            $('#' + tableId).hide();
+        }
+        $('#' + modalId).modal('show');
+    });
+
+    updateVlanButtonStyle(currentDevice);
 }
 
-function generateTableContent(currentDevice) {
+
+function generateTableContent(currentDevice, tableSelector) {
     // Clearing previous lines in tbody
-    $('#config_table_vlan tbody').empty();
+    $(tableSelector + ' tbody').empty();
 
     var edgesMap = new Map();
     for (var i = 0; i < edges.length; i++) {
@@ -100,7 +108,7 @@ function generateTableContent(currentDevice) {
                 '</td>' +
                 '</tr>';
 
-            $('#config_table_vlan tbody').append(row);
+            $(tableSelector + ' tbody').append(row);
         }
     }
 
@@ -112,7 +120,7 @@ function generateTableContent(currentDevice) {
         var vlanPattern = '^(?:[1-9]|[1-9]\\d{1,2}|[1-3]\\d{3}|40[0-9]{2}|409[0-4])';
 
         // List of VLANs, separated by spaces or commas
-        var vlanListPattern = '^' + basicVlanNumber + '(\\s*(,|\\s)\\s*' + basicVlanNumber + ')*$';
+        var vlanListPattern = '^' + vlanPattern + '(\\s*(,|\\s)\\s*' + vlanPattern + ')*$';
 
         if (typeConnection === 'Trunk') {
             vlanInput.attr('pattern', vlanListPattern);
@@ -123,8 +131,8 @@ function generateTableContent(currentDevice) {
     });
 }
 
-function saveCurrentFormData(currentDevice) {
-    $('#config_table_vlan tbody tr').each(function (index, row) {
+function saveCurrentFormData(currentDevice, tableSelector) {
+    $(tableSelector + ' tbody tr').each(function (index, row) {
         var row = $(row);
         var interfaceId = row.data('id');
         var vlanInput = row.find('input').val();
@@ -149,8 +157,8 @@ function saveCurrentFormData(currentDevice) {
     });
 }
 
-function restoreFormData(currentDevice) {
-    $('#config_table_vlan tbody tr').each(function (index, row) {
+function restoreFormData(currentDevice, tableSelector) {
+    $(tableSelector + ' tbody tr').each(function (index, row) {
         var row = $(row);
         var interfaceId = row.data('id');
 
