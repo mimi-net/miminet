@@ -127,13 +127,15 @@ class MyTopology(IPTopo):
             if not interface_name_source or not interface_name_target:
                 continue
 
-            self.link_pair.append((
-                interface_name_source,
-                interface_name_target,
-                edge_id,
-                edge_source,
-                edge_target,
-            ))
+            self.link_pair.append(
+                (
+                    interface_name_source,
+                    interface_name_target,
+                    edge_id,
+                    edge_source,
+                    edge_target,
+                )
+            )
 
             l1, l2 = self.addLink(
                 host_source,
