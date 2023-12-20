@@ -6,11 +6,15 @@ services:
       context: .
       dockerfile: ./Dockerfile
     container_name: celery
+    network_mode: "host"
     depends_on:
       redis:
         condition: service_healthy
+        required: false
       rabbitmq:
         condition: service_healthy
+        required: false
+    profiles: ["celery"]
     restart: always
     networks:
       - rabbitmq_network
@@ -29,6 +33,7 @@ services:
     restart: always
     networks:
       - rabbitmq_network
+    profiles: ["rabbitmq"]
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
@@ -54,6 +59,7 @@ services:
     image: redis:latest
     container_name: redis
     hostname: redis
+    profiles: ["redis"]
     restart: always
     ports:
       - "6379:6379"
