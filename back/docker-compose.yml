@@ -25,7 +25,7 @@ services:
       - celery_concurrency=${celery_concurrency}
       - queue_names=${queue_names}
     privileged: true
-    
+
   rabbitmq:
     image: rabbitmq:latest
     hostname: rabbitmq
@@ -43,11 +43,11 @@ services:
       - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
       - ./rabbitmq/metrics_collector.conf:/etc/rabbitmq/conf.d/20-management_agent.disable_metrics_collector.conf
     ports:
-      - 15672:15672
-      - 5672:5672
-      - 4369:4369
-      - 25672:25672
-      - 35197:35197
+      - "15672:15672"
+      - "5672:5672"
+      - "4369:4369"
+      - "25672:25672"
+      - "35197:35197"
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
       interval: 10s
