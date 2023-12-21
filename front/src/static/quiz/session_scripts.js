@@ -120,7 +120,7 @@ function displayExplanation(data) {
     $('#explanation.container')
         .removeAttr('hidden')
         .css({borderColor: borderColor})
-        .append(`<text style="font-size: 16px">${phrase}</text><br><text style="font-size: 16px">${data['explanation']}</text>`);
+        .append(`<text>${phrase}</text><br><text>${data['explanation']}</text>`);
 }
 
 function displayVariable(answersParsed) {
@@ -181,7 +181,7 @@ document.querySelector('button[name="nextQuestion"]').addEventListener('click', 
 
 if (questionIndex + 1 >= questionsCount) {
     document.querySelector('button[name="nextQuestion"]').hidden = true;
-    document.querySelector('button[name="finishQuiz"]').hidden = true;
+    // document.querySelector('button[name="finishQuiz"]').hidden = true;
 }
 
 // Display data
