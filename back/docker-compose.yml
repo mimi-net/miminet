@@ -6,7 +6,6 @@ services:
       context: .
       dockerfile: ./Dockerfile
     container_name: celery
-    network_mode: "host"
     depends_on:
       redis:
         condition: service_healthy
