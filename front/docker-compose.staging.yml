@@ -8,8 +8,6 @@ services:
     container_name: miminet
     restart: always
     networks:
-      - rabbitmq_network
-      - redis_network
       - miminet_network
     env_file:
       - .env
@@ -39,9 +37,3 @@ volumes:
 networks:
   miminet_network:
     driver: bridge
-  rabbitmq_network:
-    name: rabbitmq_network
-    external: true
-  redis_network:
-    name: redis_network
-    external: true
