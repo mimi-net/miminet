@@ -1,6 +1,3 @@
-const questionIds = JSON.parse(localStorage.getItem('question_ids'));
-const questionIndex = parseInt(localStorage.getItem('question_index'));
-
 function timeToMilliseconds(timeString) {
     const [hours, minutes, seconds] = timeString.split(':');
     const totalSeconds = parseInt(hours, 10) * 3600 + parseInt(minutes, 10) * 60 + parseInt(seconds, 10);
@@ -27,9 +24,10 @@ function updateTimer() {
     document.getElementById('timer').textContent = hours + ":" + minutes + ":" + seconds;
 
     if (remainingTime <= 0) {
-        if (questionIndex + 1 >= questionsCount) {
+        if (isLastQuestion) {
             document.querySelector('button[name="seeResults"]').hidden = false;
             document.querySelector('button[name="answerQuestion"]').hidden = true;
+            document.querySelector('button[name="finishQuiz"]').hidden = true;
         }
         document.querySelector('button[name="nextQuestion"]').disabled = true;
         document.querySelector('button[name="answerQuestion"]').disabled = true;
@@ -54,25 +52,25 @@ function finishQuiz() {
 }
 
 function getAnswer() {
-    switch (textType) {
-        case 'variable':
-            return $('input.form-check-input:checked').map(function () {
-                return {'answer_text': this.value};
-            }).get();
-        case 'matching':
-            const leftSide = $('#sortContainer').sortable("toArray");
-            const rightSide = $('#rightSide div').map(function () {
-                return this.id
-            }).get();
-            return leftSide.reduce((acc, current, index) => {
-                acc[current] = rightSide[index];
-                return acc;
-            }, {});
-        case 'sorting':
-            return $('#sortContainer').sortable("toArray").join(' ');
+    if (questionType) {
+        switch (textType) {
+            case 'variable':
+                return $('input.form-check-input:checked').map(function () {
+                    return {'answer_text': this.value};
+                }).get();
+            case 'matching':
+                const leftSide = $('#sortContainer').sortable("toArray");
+                const rightSide = $('#rightSide div').map(function () {
+                    return this.id
+                }).get();
+                return leftSide.reduce((acc, current, index) => {
+                    acc[current] = rightSide[index];
+                    return acc;
+                }, {});
+            case 'sorting':
+                return $('#sortContainer').sortable("toArray").join(' ');
+        }
     }
-
-
 }
 
 function nextQuestion() {
@@ -86,9 +84,9 @@ function answerQuestion() {
     const questionId = questionIds[questionIndex];
 
     document.querySelector('button[name="answerQuestion"]').hidden = true;
-    document.querySelector('button[name="nextQuestion"]').hidden = (questionIndex + 1 >= questionsCount);
+    document.querySelector('button[name="nextQuestion"]').hidden = isLastQuestion;
 
-    if (questionIndex + 1 >= questionsCount) {
+    if (isLastQuestion) {
         document.querySelector('button[name="seeResults"]').hidden = false;
         document.querySelector('button[name="finishQuiz"]').hidden = true;
     }
@@ -123,44 +121,14 @@ function displayExplanation(data) {
         .append(`<text>${phrase}</text><br><text>${data['explanation']}</text>`);
 }
 
-function displayVariable(answersParsed) {
-    for (let i = 0; i < answersParsed.length; i++) {
-        const value = answersParsed[i]['answer_text']
-        $('#variants.container')
-            .append(`<div class=form-check><input class=form-check-input type=checkbox value=${value} id=flexCheckDefault><label class=form-check-label for=flexCheckDefault>${value}</label></div>`);
-    }
-}
-
-function displayMatching(answersParsed) {
-    $('#variants.container')
-        .css({display: "flex"})
-        .append(`<div class=keys id=sortContainer></div><div class=values id=rightSide></div>`);
-
-    for (const item in answersParsed) {
-        if (answersParsed.hasOwnProperty(item)) {
-            const value = answersParsed[item];
-            $('#sortContainer.keys').append(`<div id=${item} class=sortable>${item}</div>`);
-            $('#rightSide.values').append(`<div id=${value} class=matching>${value}</div>`);
-        }
-    }
-}
-
-function displaySorting(answersParsed) {
-    $('#variants.container')
-        .css({display: "flex"})
-        .append(`<div class=keys id=sortContainer></div>`)
-
-    for (let i = 0; i < answersParsed.length; i++) {
-        const value = answersParsed[i];
-        $('#sortContainer.keys').append(`<div id=${value} class=sortable>${value}</div>`);
-    }
-}
-
 // Saving data about session
 const testName = localStorage.getItem('test_name');
 const sectionName = localStorage.getItem('section_name');
 const questionsCount = JSON.parse(localStorage.getItem('question_ids')).length;
 timer = localStorage.getItem('timer');
+const questionIds = JSON.parse(localStorage.getItem('question_ids'));
+const questionIndex = parseInt(localStorage.getItem('question_index'));
+const isLastQuestion = questionIndex + 1 >= questionsCount;
 
 if (timer !== null) {
     setInterval(updateTimer, 1000);
@@ -174,15 +142,15 @@ if (timer !== null) {
 }
 
 // Add event listener for finishQuiz and nextQuestion buttons
-document.querySelector('button[name="finishQuiz"]').addEventListener('click', finishQuiz);
-document.querySelector('button[name="seeResults"]').addEventListener('click', finishQuiz);
-document.querySelector('button[name="answerQuestion"]').addEventListener('click', answerQuestion);
-document.querySelector('button[name="nextQuestion"]').addEventListener('click', nextQuestion);
+document.querySelector('button[name="finishQuiz"]')?.addEventListener('click', finishQuiz);
+document.querySelector('button[name="seeResults"]')?.addEventListener('click', finishQuiz);
+document.querySelector('button[name="answerQuestion"]')?.addEventListener('click', answerQuestion);
+document.querySelector('button[name="nextQuestion"]')?.addEventListener('click', nextQuestion);
 
-if (questionIndex + 1 >= questionsCount) {
-    document.querySelector('button[name="nextQuestion"]').hidden = true;
-    // document.querySelector('button[name="finishQuiz"]').hidden = true;
-}
+// On the last question don't show next question button (may be redundant)
+// if (questionIndex + 1 >= questionsCount) {
+//     document.querySelector('button[name="nextQuestion"]').hidden = true;
+// }
 
 // Display data
 document.title = testName;
