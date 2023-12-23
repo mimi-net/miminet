@@ -25,12 +25,13 @@ function updateTimer() {
 
     if (remainingTime <= 0) {
         if (isLastQuestion) {
-            document.querySelector('button[name="seeResults"]').hidden = false;
-            document.querySelector('button[name="answerQuestion"]').hidden = true;
-            document.querySelector('button[name="finishQuiz"]').hidden = true;
+            $('button[name="seeResults"]')?.prop('hidden', false);
+            $('button[name="answerQuestion"]')?.prop('hidden', true);
+            $('button[name="finishQuiz"]')?.prop('hidden', true);
         }
-        document.querySelector('button[name="nextQuestion"]').disabled = true;
-        document.querySelector('button[name="answerQuestion"]').disabled = true;
+
+        $('button[name="nextQuestion"]')?.prop('disabled', true);
+        $('button[name="answerQuestion"]')?.prop('disabled', true);
     }
 }
 
