@@ -23,8 +23,3 @@ EXCHANGE_NAME = os.getenv("exchange_name")
 DEFAULT_APP_EXCHANGE = Exchange(EXCHANGE_NAME, type=EXCHANGE_TYPE)
 
 app.config_from_object(celeryconfig)
-
-with app.connection() as conn:
-    # Create queues and exchange
-    ch = conn.channel()
-    DEFAULT_APP_EXCHANGE.declare(channel=ch)
