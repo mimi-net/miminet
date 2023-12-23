@@ -30,7 +30,10 @@ EXCHANGE_NAME = os.getenv("exchange_name")
 
 DEFAULT_APP_EXCHANGE = Exchange(EXCHANGE_NAME, type=EXCHANGE_TYPE)
 
-QUEUES = (Queue(name, exchange=DEFAULT_APP_EXCHANGE, routing_key=ROUTING_KEY) for name in QUEUES_NAMES)
+QUEUES = (
+    Queue(name, exchange=DEFAULT_APP_EXCHANGE, routing_key=ROUTING_KEY)
+    for name in QUEUES_NAMES
+)
 
 app.conf.task_default_exchange = DEFAULT_APP_EXCHANGE
 app.conf.task_queues = QUEUES
