@@ -13,7 +13,6 @@ else:
     print("There is no SECRET_KEY_FILE, generate random SECRET_KEY")
     SECRET_KEY = os.urandom(16).hex()
 
-
 SQLITE_DATABASE_NAME = "miminet.db"
 
 current_data = datetime.today().strftime("%Y-%m-%d")
@@ -22,7 +21,7 @@ SQLITE_DATABASE_BACKUP_NAME = "backup_" + current_data + ".db"
 
 def make_empty_network():
     return (
-        '{"nodes" : [], "edges" : [], "jobs" : [], "config" : {"zoom" : 2, "pan_x": 0 ,'
+        '{"nodes" : [], "edges" : [], "jobs" : [], "config" : {"zoom" : 2, "pan_x" : 0,'
         ' "pan_y": 0}}'
     )
 
@@ -80,7 +79,6 @@ def check_image_with_pil(file):
     except IOError:
         return False
     return True
-
 
 # def add_examples_network_to_profile(user_id):
 #     u = uuid.uuid4()

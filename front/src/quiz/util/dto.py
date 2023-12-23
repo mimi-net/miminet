@@ -2,8 +2,8 @@ import json
 import random
 from typing import List
 
-from quiz.entity.entity import Section, Test, Question, TextQuestion, VariableQuestion, Answer, MatchingQuestion, \
-    SortingQuestion
+from miminet_model import Network
+from quiz.entity.entity import Section, Test, Question, Answer, PracticeQuestion
 
 
 def to_section_dto_list(sections: List[Section]):
@@ -72,6 +72,30 @@ class AnswerDto:
         }
 
 
+class PracticeQuestionDto:
+    def __init__(self, practice_question: PracticeQuestion) -> None:
+        self.description = practice_question.description
+        self.available_hosts = practice_question.available_hosts
+        self.available_hubs = practice_question.available_hubs
+        self.available_servers = practice_question.available_servers
+        self.available_switches = practice_question.available_switches
+        self.available_routers = practice_question.available_routers
+
+        net = Network.query.filter(Network.guid == practice_question.start_configuration).first().network
+        escaped_string = net.replace('\\"', '"').replace('"', '\\"')
+
+        self.start_configuration = escaped_string
+
+    def to_dict(self):
+        attributes = [
+            "description", "available_hosts", "available_hubs",
+            "available_servers", "available_switches", "available_routers",
+            "start_configuration"
+        ]
+
+        return {attribute: str(getattr(self, attribute)) for attribute in attributes}
+
+
 class QuestionDto:
     def __init__(self, question: Question) -> None:
         self.question_type = question.question_type
@@ -104,8 +128,7 @@ class QuestionDto:
                 self.answers = " ".join(words)
 
         elif self.question_type == "practice":
-            practice_question = question.practice_question
-
+            self.practice_question = PracticeQuestionDto(question.practice_question).to_dict()
 
 
 class SectionDto:
@@ -136,7 +159,8 @@ class QuestionForEditorDto:
 
 
 class SessionResultDto:
-    def __init__(self, test_name: str, section_name: str, correct_answers: int, answers_count: int, start_time: str, time_spent: str):
+    def __init__(self, test_name: str, section_name: str, correct_answers: int, answers_count: int, start_time: str,
+                 time_spent: str):
         self.test_name = test_name
         self.section_name = section_name
         self.correct_answers = correct_answers
