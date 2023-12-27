@@ -14,7 +14,7 @@ def setup_vlans(net: IPNet, nodes: list[Node]) -> None:
     """
 
     for node in nodes:
-        if node.config.type == 'l2_switch':
+        if node.config.type == "l2_switch":
             switch = net.get(node.data.id)
             add_bridge(switch)
 
@@ -43,16 +43,16 @@ def clean_bridges(net: IPNet) -> None:
 
 def configure_access(switch: IPSwitch, intf: str, vlan: int) -> None:
     switch.cmd(f'ip link set {intf} master {f"br-{switch.name}"}')
-    switch.cmd(f'bridge vlan del dev {intf} vid 1')
-    switch.cmd(f'bridge vlan add dev {intf} vid {vlan} pvid untagged')
+    switch.cmd(f"bridge vlan del dev {intf} vid 1")
+    switch.cmd(f"bridge vlan add dev {intf} vid {vlan} pvid untagged")
 
 
 def configure_trunk(switch: IPSwitch, intf: str, vlans: list[int]) -> None:
     switch.cmd(f'ip link set {intf} master {f"br-{switch.name}"}')
-    switch.cmd(f'bridge vlan del dev {intf} vid 1')
+    switch.cmd(f"bridge vlan del dev {intf} vid 1")
 
     for vlan in vlans:
-        switch.cmd(f'bridge vlan add dev {intf} vid {vlan}')
+        switch.cmd(f"bridge vlan add dev {intf} vid {vlan}")
 
 
 def add_bridge(switch: IPSwitch) -> None:
