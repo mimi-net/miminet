@@ -2,6 +2,7 @@
 # Classes for deserialize miminet network
 
 from dataclasses import dataclass
+from typing import Union, Optional
 
 
 @dataclass
@@ -46,6 +47,8 @@ class NodeInterface:
         name (str): interface name (for example, l2sw1_1)
         ip (str): ip (for example, 10.0.0.1)
         netmask (str): netmask
+        vlan (Union[int, List[int], None]): VLAN ID or list of VLAN
+        type_connection (Optional[int]): Connection type (0 - Access, 1 - Trunk)
 
     """
 
@@ -54,6 +57,8 @@ class NodeInterface:
     name: str = ""
     ip: str = ""
     netmask: int = 0
+    vlan: Union[int, list[int], None] = None
+    type_connection: Optional[int] = None
 
 
 @dataclass

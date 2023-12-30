@@ -39,3 +39,4 @@ volumes:
 networks:
   miminet_network:
     driver: bridge
+    
