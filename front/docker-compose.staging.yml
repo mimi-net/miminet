@@ -16,7 +16,8 @@ services:
     volumes:
       - databases:/app/instance
       - ./src/static/images:/app/static/images
-      - ./src/static:/svg:/app/static/svg
+      - ./src/static/svg:/app/static/svg
+      - ./src/static/avatar:/app/static/avatar
       - ./src/static/video:/app/static/video
       - ./src/static/pcaps:/app/static/pcaps
       - ./src/static/assets:/app/static/assets
@@ -28,6 +29,7 @@ services:
       - ./default.conf.template:/etc/nginx/templates/default.conf.template
     ports:
       - "80:80"
+      - "443:443"
     networks:
       - miminet_network
 
@@ -37,3 +39,4 @@ volumes:
 networks:
   miminet_network:
     driver: bridge
+    

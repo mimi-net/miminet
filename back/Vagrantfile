@@ -27,9 +27,9 @@ Vagrant.configure("2") do |config|
     # box.vm.provision "ansible_local" do |ansible|
     #  ansible.playbook = "vagrant/playbook.yml"
     # end
-
-    box.vm.provision :docker
-    box.vm.provision :docker_compose, yml: "/vagrant/back/docker-compose.yml", run: "always"
+    # box.vm.provision :docker
+    # box.vm.provision :docker_compose, yml: "/vagrant/back/docker-compose.yml", run: "always"
+    box.vm.provision "shell", path: "install_docker.sh"
   end
 
   N = ENV["numberOfBoxes"].to_i
