@@ -181,5 +181,5 @@ class Network:
     edges: list[Edge]
     jobs: list[Job]
     config: NetworkConfig
-    pcap: list[str]
+    pcap: list[str] | None
     packets: str = ""
