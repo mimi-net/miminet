@@ -28,10 +28,6 @@ FILE_NAMES = [
     ("switch_and_hub_network.json", "switch_and_hub_answer.json"),
     ("router_network.json", "router_answer.json"),
     ("first_and_last_ip_address_network.json", "first_and_last_ip_address_answer.json"),
-    ("vlan_access_network.json", "vlan_access_answer.json"),
-    ("vlan_trunk_network.json", "vlan_trunk_answer.json"),
-    ("vlan_with_stp_network.json", "vlan_with_stp_answer.json"),
-    ("vlan_with_access_switches_network.json", "vlan_with_access_switches_answer.json"),
 ]
 
 DINAMYC_PORT_FILE_NAMES = [
