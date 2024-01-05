@@ -1,7 +1,10 @@
 name: Тесты DHCP
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
   
 jobs:
   test:
@@ -14,9 +17,10 @@ jobs:
     - name: Установка зависимостей
       run: |
         sudo apt-get update
-        sudo apt-get install -y dnsmasq dhclient
-        pip3 install miminet
+        sudo apt-get install -y dnsmasq isc-dhcp-client
+        sudo apt-get install -y mininet
+        pip3 install mininet
 
     - name: Запуск тестов
       run: |
-        python3 -m unittest discover back/src/test_dhcp/
+        sudo python3 -m unittest discover back/src/test_dhcp/
