@@ -1,0 +1,22 @@
+name: Тесты Яндекс и Telegram аутентификации
+
+on:
+  workflow_dispatch:
+  
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout репозитория
+      uses: actions/checkout@v2
+
+    - name: Установка зависимостей
+      run: |
+        sudo apt-get update
+        pip3 install -r front/requirements.txt
+        export CLIENT_YANDEX_PATH=front/src/client_yandex.json
+        python3 -m unittest discover front/src/test_auth
+    - name: Запуск тестов
+      run: |
+        python3 -m unittest discover front/src/test_auth
