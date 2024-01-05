@@ -1,55 +1,97 @@
-# Miminet
-Эмулятор компьютерной сети для образовательных целей на базе ОС Linux.
+# README.md
 
-![diagram drawio](https://github.com/mimi-net/miminet/assets/89993880/9f6ddcc2-afeb-43bd-9abf-fc34cb102e8b)<?xml version="1.0" encoding="UTF-8"?>
+## Модуль аутентификации Miminet
 
+Этот Python-модуль, `miminet_auth.py`, предоставляет функции аутентификации для интеграции с сервисами Yandex и Telegram в приложении Miminet. В данном файле рассмотрены ключевые функции, а также подробно описана работа функции `check_tg_authorization(auth_data)`.
 
-## Local Deployment
-В директориях back и front находятся .env examples, которые используются в docker-compose и ansible. 
+### Аутентификация через Yandex
 
-Если Вы используете Docker для backend и frontend, не меняйте имена хостов для url в .env.
+#### `yandex_login()`
 
-Если Вы используете virtualbox/vmware с Vagrant для backend, и разворачиваете Redis и Rabbitmq на хосте, укажите ip хоста в back/.env. (в virtual box по умолчанию 192.168.56.1)
+Эта функция инициирует процесс аутентификации через Yandex. Она генерирует URL авторизации и перенаправляет пользователя на Yandex для входа. После успешной аутентификации пользователь перенаправляется на обратный вызов от Yandex.
 
-## Backend
+#### `yandex_callback()`
 
-### Docker
-```
-cd back
-COMPOSE_PROFILES=celery,rabbitmq,redis docker compose up -d --build
-```
-Celery, Rabbitmq и Redis будут доступны после этого шага. В завимости от того, где разворачивается Rabbitmq и Redis, вам потребуется указать имена сервисов.
+Эта функция обрабатывает обратный вызов от Yandex после успешной аутентификации пользователя. Она извлекает информацию о пользователе, проверяет срок действия токена и создает или обновляет пользователя в базе данных Miminet. Затем пользователь входит в систему, и приложение перенаправляет его на домашнюю страницу.
 
-Например, если у Вас уже развернуты Rabbitmq и Redis на другом сервере и нужен только ipmininet worker:
-```
-cd back
-COMPOSE_PROFILES=celery docker compose up -d --build
-```
+### Аутентификация через Telegram
 
-### Vagrant
-NFS(для полной автоматизации vagrant up):
-```
-# /etc/sudoers.d/vagrant-syncedfolders
-Cmnd_Alias VAGRANT_EXPORTS_CHOWN = /bin/chown 0\:0 /tmp/vagrant-exports
-Cmnd_Alias VAGRANT_EXPORTS_MV = /bin/mv -f /tmp/vagrant-exports /etc/exports
-Cmnd_Alias VAGRANT_NFSD_CHECK = /etc/init.d/nfs-kernel-server status
-Cmnd_Alias VAGRANT_NFSD_START = /etc/init.d/nfs-kernel-server start
-Cmnd_Alias VAGRANT_NFSD_APPLY = /usr/sbin/exportfs -ar
-%sudo ALL=(root) NOPASSWD: VAGRANT_EXPORTS_CHOWN, VAGRANT_EXPORTS_MV, VAGRANT_NFSD_CHECK, VAGRANT_NFSD_START, VAGRANT_NFSD_APPLY
+#### `check_tg_authorization(auth_data)`
+
+Эта функция предназначена для проверки подлинности и валидности данных аутентификации от Telegram. Ниже разъяснено, как работает каждая часть функции.
+
+1. **Получение данных**
+
+```python
+check_hash = auth_data['hash']
+del auth_data['hash']
 ```
 
-```
-cd back
-export numberOfBoxes=N
-export provider=vbox/vmware
-. vagrant_vms.sh
-```
-N - количество экземпляров vagrant(Miminet на данный момент не поддерживает мультипроцессинг, выходом является запуск нескольких вм).
+- Извлекается хеш из данных аутентификации, а затем сам хеш удаляется из словаря `auth_data`. Хеш используется для проверки подлинности данных.
 
-## Frontend
+2. **Подготовка данных для проверки**
 
-### Docker
-Поднимаем после Rabbitmq и Redis.
+```python
+data_check_arr = [f"{key}={value}" for key, value in auth_data.items()]
+data_check_arr.sort()
+data_check_string = "\n".join(data_check_arr)
 ```
-cd front && docker compose up -d --build
+
+- Создается отсортированный массив строк, содержащих ключи и значения данных аутентификации. Этот массив строк сортируется, и затем строки объединяются в одну строку с символом новой строки между ними. Этот текст будет использован для проверки целостности данных.
+
+3. **Подготовка ожидаемого хеша**
+
+```python
+secret_key = hashlib.sha256(BOT_TOKEN.encode()).digest()
+hash_result = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
 ```
+
+- Создается секретный ключ из токена Telegram бота (`BOT_TOKEN`).
+- Вычисляется хеш данных аутентификации с использованием созданного секретного ключа.
+
+4. **Проверка хеша**
+
+```python
+if hash_result != check_hash:
+    raise Exception('Data is NOT from Telegram')
+```
+
+- Сравнивается вычисленный хеш с полученным хешем. Если они не совпадают, возбуждается исключение, указывающее на то, что данные не являются от Telegram.
+
+5. **Проверка срока действия данных**
+
+```python
+if (time.time() - int(auth_data['auth_date'])) > 86400:
+    raise Exception('Data is outdated')
+```
+
+- Проверяется, не устарели ли данные. Если прошло более 86400 секунд (24 часа) с момента аутентификации, возбуждается исключение о том, что данные устарели.
+
+6. **Успешная аутентификация**
+
+```python
+print("Authorization successful")
+return auth_data
+```
+
+- Если все проверки успешны, функция завершает свою работу, возвращая исходные данные аутентификации.
+
+7. **Обработка ошибок**
+
+```python
+except Exception as e:
+    print(f"Authorization failed: {str(e)}")
+    raise
+```
+
+- В случае возникновения любой ошибки в процессе аутентификации, функция выведет сообщение об ошибке и повторно возбудит исключение, чтобы уведомить вызывающий код.
+
+### Обработка обратного вызова от Telegram
+
+#### `tg_callback()`
+
+Эта функция обрабатывает обратный вызов от Telegram после успешной аутентификации пользователя. Она проверяет данные Telegram пользователя, создает или обновляет пользователя в базе данных Miminet и входит в систему пользователя. Приложение затем перенаправляет пользователя на домашнюю страницу.
+
+### Интеграция с Yandex и Telegram в HTML
+
+Файл `login.html` содержит кнопки для аутентификации через Yandex и Telegram. Аутентификация через Yandex запускается нажатием кнопки Yandex, а аутентификация через Telegram осуществляется с использованием виджета Telegram. Виджет вызывает функцию JavaScript `onTelegramAuth`, которая обрабатывает аутентификацию и перенаправляет пользователя на обратный вызов Telegram.
