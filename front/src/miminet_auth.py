@@ -282,9 +282,14 @@ def vk_callback():
 
 
 # Чтение данных из файла конфигурации
-config_path = pathlib.Path(__file__).parent / 'client_yandex.json'
+config_path = os.environ.get('CLIENT_YANDEX_PATH', 'front/src/client_yandex.json')
 with open(config_path) as config_file:
     config_data = json.load(config_file)
+
+# Чтение данных из файла конфигурации
+# config_path = pathlib.Path(__file__).parent / 'client_yandex.json'
+# with open(config_path) as config_file:
+# config_data = json.load(config_file)
 
 # Определение переменных
 oauthQueryParams = {
