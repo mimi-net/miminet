@@ -32,7 +32,3 @@ app.get('/auth/login.html', (req, res) => {
     </html>
   `);
 });
-
-app.listen(5000, () => {
-  console.log('Сервер работает на порту 5000');
-});

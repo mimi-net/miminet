@@ -396,27 +396,7 @@ def yandex_callback():
         flash(
             f"Unexpected error occurred during callback processing: {e}", category='error')
         return redirect(url_for('login_index'))
-
-# def check_telegram_authorization(auth_data):
-#     
-#     check_hash = auth_data['hash']
-#     del auth_data['hash']
-
-#     data_check_arr = [f"{key}={value}" for key, value in auth_data.items()]
-#     data_check_arr.sort()
     
-#     data_check_string = "\n".join(data_check_arr)
-
-#     secret_key = hashlib.sha256(BOT_TOKEN.encode()).digest()
-#     hash_result = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
-
-#     if hash_result != check_hash:
-#         raise Exception('Data is NOT from Telegram')
-
-#     if (time() - int(auth_data['auth_date'])) > 86400:
-#         raise Exception('Data is outdated')
-
-#     return auth_data
 
 def check_tg_authorization(auth_data):
     BOT_TOKEN = '6039516169:AAGg9G9rhZpUJAyAe_dG21vMb6wnnLhwHvA'
