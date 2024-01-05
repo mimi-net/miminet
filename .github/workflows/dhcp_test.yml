@@ -1,0 +1,22 @@
+name: Тесты DHCP
+
+on:
+  workflow_dispatch:
+  
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout репозитория
+      uses: actions/checkout@v2
+
+    - name: Установка зависимостей
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y dnsmasq dhclient
+        pip3 install miminet
+
+    - name: Запуск тестов
+      run: |
+        python3 -m unittest discover back/src/test_dhcp/
