@@ -12,13 +12,8 @@ from ipmininet.cli import IPCLI
 from jobs import Jobs, parse_ip_route_show_output
 from network import Job, Network, Node, NodeConfig, NodeData, NodeInterface
 from pkt_parser import create_pkt_animation, is_ipv4_address
-import pdb
-from mininet.log import setLogLevel
-import ipaddress
-from ipaddress import IPv4Address, IPv4Network
 from operator import attrgetter
 
-setLogLevel('info')
 
 
 class MyTopology(IPTopo):
@@ -350,11 +345,9 @@ def run_mininet(
     net = IPNet(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
 
     net.start()
-    # pdb.set_trace()
     time.sleep(topo.time_to_wait_before_emulation)
 
     # Don only 100+ jobs
-    print(sort_jobs_by_level(network.jobs))
     for job in sort_jobs_by_level(network.jobs):
         job_id = job.job_id
 
@@ -367,7 +360,7 @@ def run_mininet(
             continue
 
     # Do only job_id < 100
-    for job in network.jobs:
+    for job in sort_jobs_by_level(network.jobs):
         job_id = job.job_id
 
         if int(job_id) >= 100:
@@ -378,10 +371,10 @@ def run_mininet(
         except Exception:
             continue
     
+    #Stopping DHCP
     for host in net.hosts:
         host.cmd('service dnsmasq stop')
     
-    # IPCLI(net)
     host_ip = get_host_ip_dict(net)
     time.sleep(2)
     net.stop()

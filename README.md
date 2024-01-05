@@ -15,13 +15,15 @@
 
 ### Docker
 ```
-cd back && docker compose up -d --build
+cd back
+COMPOSE_PROFILES=celery,rabbitmq,redis docker compose up -d --build
 ```
 Celery, Rabbitmq и Redis будут доступны после этого шага. В завимости от того, где разворачивается Rabbitmq и Redis, вам потребуется указать имена сервисов.
 
 Например, если у Вас уже развернуты Rabbitmq и Redis на другом сервере и нужен только ipmininet worker:
 ```
-cd back && docker compose up -d --build celery
+cd back
+COMPOSE_PROFILES=celery docker compose up -d --build
 ```
 
 ### Vagrant

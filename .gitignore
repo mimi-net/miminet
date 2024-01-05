@@ -82,6 +82,7 @@ fabric.properties
 
 # Do not track configs
 client_google.json
+vk_auth.json
 miminet_secret.conf
 simulation.py
 migrations/

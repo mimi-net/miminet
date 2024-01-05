@@ -346,12 +346,13 @@ const ConfigHostCheckbox = function(name, checkbox) {
     
     $("#auto-ip").prop('checked', (checkbox == 1) ? true : false);
     const disableInputs = [$('#config_host_ip_' + name), $('#config_host_mask_' + name), $('#config_host_default_gw')]
-    
+    const holderInputs = [$('#config_host_ip_example'), $('#config_host_mask_example'), $('#config_host_default_gw_holder')]
+
     $("#auto-ip").on("change", function () {
         if ($(this).is(':checked')) {
-            $('#config_host_ip_example').removeAttr("hidden");
-            $('#config_host_mask_example').removeAttr("hidden");
-            $('#config_host_default_gw_holder').removeAttr("hidden");
+            holderInputs.forEach(input => {
+                input.removeAttr("hidden");
+            });
             disableInputs.forEach(input => {
                 input.attr('hidden', 'true');
             });
@@ -360,9 +361,9 @@ const ConfigHostCheckbox = function(name, checkbox) {
             disableInputs.forEach(input => {
                 input.removeAttr('hidden');
             });
-            $('#config_host_default_gw_holder').attr("hidden", true);
-            $('#config_host_ip_example').attr("hidden", true);
-            $('#config_host_mask_example').attr("hidden", true);
+            holderInputs.forEach(input => {
+                input.attr("hidden", true);
+            });
         }
 
     });
@@ -388,14 +389,13 @@ const ConfigHostInterface = function (name, ip, netmask, checkbox, connected_to)
     $('<input type="hidden" name="config_host_iface_ids[]" value="' + name + '"/>').insertBefore('#config_host_iface_name_' + name);
     $('#config_host_iface_name_' + name).attr("placeholder", connected_to);
 
-    const disableInputs = [$('#config_host_ip_' + name), $('#config_host_mask_' + name), $('#config_host_default_gw')]
-
     var ip_holder = $('<input>', {
         type: 'text',
         class: 'form-control form-control-sm w-75',
         id: 'config_host_ip_example',
         name: 'config_host_ip_example',
         placeholder: ip,
+        hidden: true,
         disabled: true
     });
 
@@ -405,22 +405,17 @@ const ConfigHostInterface = function (name, ip, netmask, checkbox, connected_to)
         id: 'config_host_mask_example',
         name: 'config_host_mask_example',
         placeholder: netmask,
+        hidden: true,
         disabled: true
     });
     ip_holder.insertBefore($('#config_host_ip_' + name));
     mask_holder.insertBefore($('#config_host_mask_' + name));
-    $('#config_host_ip_example').attr("hidden", true);
-    $('#config_host_mask_example').attr("hidden", true);
 
     if (checkbox == 1) {
-        $('#config_host_ip_' + name).val(ip);
-        $('#config_host_ip_' + name).attr('hidden', true);
-        $('#config_host_mask_' + name).val(netmask);
-        $('#config_host_mask_' + name).attr('hidden', true);
-        $('#config_host_ip_example').attr("placeholder", ip);
-        $('#config_host_mask_example').attr("placeholder", netmask);
-        $('#config_host_ip_example').removeAttr("hidden");
-        $('#config_host_mask_example').removeAttr("hidden");
+        $('#config_host_ip_' + name).val(ip).attr('hidden', true);
+        $('#config_host_mask_' + name).val(netmask).attr('hidden', true);
+        $('#config_host_ip_example').attr("placeholder", ip).removeAttr("hidden");
+        $('#config_host_mask_example').attr("placeholder", netmask).removeAttr("hidden");
     } else {
         $('#config_host_ip_example').attr("hidden", true);
         $('#config_host_mask_example').attr("hidden", true);
@@ -685,21 +680,18 @@ const ConfigHostGateway = function (gw, checkbox = 0) {
         id: 'config_host_default_gw_holder',
         name: 'config_host_default_gw_holder',
         placeholder: gw,
+        hidden: true,
         disabled: true
     });
     gw_holder.insertBefore($('#config_host_default_gw'));
-    $('#config_host_default_gw_holder').attr('hidden',true);
 
     if (checkbox == 1) {
-        $('#config_host_default_gw_holder').attr("placeholder", gw);
-        $('#config_host_default_gw_holder').removeAttr('hidden');
-        $('#config_host_default_gw').val(gw);
-        $('#config_host_default_gw').attr('hidden',true);
+        $('#config_host_default_gw_holder').attr("placeholder", gw).removeAttr('hidden');
+        $('#config_host_default_gw').val(gw).attr('hidden',true);
     }
     else{
         $('#config_host_default_gw_holder').attr('hidden',true);
-        $('#config_host_default_gw').val(gw);
-        $('#config_host_default_gw').removeAttr('hidden');
+        $('#config_host_default_gw').val(gw).removeAttr('hidden');
     }
 
 }

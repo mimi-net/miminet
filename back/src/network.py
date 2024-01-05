@@ -141,7 +141,7 @@ class Job:
     job_id: int
     host_id: str
     print_cmd: str
-    arg_1: str | int | tuple = ""
+    arg_1: str | int = ""
     arg_2: str | int = ""
     arg_3: str | int = ""
 

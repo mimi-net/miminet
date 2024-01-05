@@ -5,7 +5,6 @@ import marshmallow_dataclass
 from celery import shared_task
 from network import Network
 from simulate import run_mininet
-from mininet.log import setLogLevel
 
 import redis
 
@@ -26,10 +25,8 @@ def mininet_worker(
         tuple: Tuple (json emulation results, List[pcap, pcap name])
 
     """
-    setLogLevel('info')
 
     jnet = json.loads(network)
-    print(network)
     network_schema = marshmallow_dataclass.class_schema(Network)()
     animation = ""
     pcaps = []
