@@ -1,15 +1,12 @@
 import json
-import os
-import signal
 import typing
 
 import marshmallow_dataclass
-import redis
 from celery import shared_task
-from mininet.log import setLogLevel
-
 from network import Network
 from simulate import run_mininet
+
+import redis
 
 
 @shared_task(
@@ -28,24 +25,20 @@ def mininet_worker(
         tuple: Tuple (json emulation results, List[pcap, pcap name])
 
     """
-    setLogLevel("info")
-
-    if os.name == "posix":
-        print("Set default handler to SIGCHLD")
-        signal.signal(signal.SIGCHLD, signal.SIG_IGN)
 
     jnet = json.loads(network)
     network_schema = marshmallow_dataclass.class_schema(Network)()
     animation = ""
     pcaps = []
+    host_ip = {}
 
     for i in range(3):
         try:
-            animation, pcaps = run_mininet(network_schema.load(jnet))
+            animation, pcaps, host_ip = run_mininet(network_schema.load(jnet))
         except ValueError:
             continue
         except Exception:
             break
         else:
             break
-    return json.dumps(animation), pcaps
+    return json.dumps(animation), pcaps, host_ip

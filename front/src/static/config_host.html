@@ -26,6 +26,7 @@
                 <option value="4">Отправить данные (TCP)</option>
                 <option value="102">Добавить маршрут</option>
                 <option value="103">Добавить запись в ARP-cache</option>
+                <option value="104">Добавить DHCP сервер</option>
             </select>
     </div>
 </script>
@@ -79,6 +80,8 @@
     </div>
 </script>
 
+
+
 <script id="config_host_add_route_script" type="text/plain">
     <div class="form-group pt-1" name="config_host_select_input">
         <label id="config_host_add_route_label" for="config_host_add_route_label" class="text-sm">IP-адрес / Маска</label>
@@ -91,8 +94,30 @@
 </script>
 
 
+<script id="config_host_add_dhcp_script" type="text/plain">
+    <div class="form-group pt-1" name="config_host_select_input">
+        <label id="config_host_add_dhcp_label" for="config_host_add_dhcp_label" class="text-sm">Диапазон IP адресов</label>
+        <div class="input-group flex-nowrap">
+            <input type="text" class="form-control form-control-sm w-50" id="config_host_add_dhcp_ip_range_1_input_field" name="config_host_add_dhcp_ip_range_1_input_field" value=''>
+            <input type="text" class="px-2 form-control form-control-sm w-50" id="config_host_add_dhcp_ip_range_2_input_field" name="config_host_add_dhcp_ip_range_2_input_field" value="">
+        </div>
+        <div class="pt-1">
+            <input type="number" class="form-control form-control-sm" id="config_host_add_dhcp_mask_input_field" name="config_host_add_dhcp_mask_input_field" min="0" max="32" value="" placeholder='Маска IP адреса'>
+            <input type="text" class="form-control form-control-sm" id="config_host_add_dhcp_gateway_input_field" name="config_host_add_dhcp_gateway_input_field" value='' placeholder='IP адрес шлюза'>
+        </div>
+    </div>
+</script>
+
+<script id="config_host_checkbox_script" type="text/plain">
+    <div class="pb-2" style="display: flex; align-items: center; justify-content: space-between;">
+        <label for="auto-ip" class="text-sm">Выдать IP адрес автоматически</label>
+        <input type="checkbox" id="auto-ip" name="auto-ip" value='1'>
+    </div>
+</script>
+
+
 <script id="config_host_interface_script" type="text/plain">
-    <div class="form-group pb-1 pt-3">
+    <div class="form-group pb-2 pt-3">
         <label id="config_host_iface_name_label_example" for="config_host_iface_name_example" class="text-sm">Линк к</label>
         <input type="text" class="form-control form-control-sm" id="config_host_iface_name_example" name="config_host_iface_name_example" placeholder='' disabled>
     </div>
@@ -115,8 +140,9 @@
 </script>
 
 <script id="config_host_default_gw_script" type="text/plain">
-    <div class="form-group pb-2">
+    <div id="gw_div" class="form-group pb-2">
         <label for="config_host_default_gw" class="text-sm">Шлюз по умолчанию</label>
         <input type="text" class="form-control form-control-sm" id="config_host_default_gw" name="config_host_default_gw" value=''>
     </div>
 </script>
+

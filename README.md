@@ -1,55 +1,57 @@
-# Miminet
-Эмулятор компьютерной сети для образовательных целей на базе ОС Linux.
+# DHCP for Miminet
+Добавление DHCP реализованно на хосте, чтобы запустить DHCP серврер выбирете соответствующую команду в разделе "Добавить команду" в конфигурации хоста.
+Введите параметры: диапазон IP-адресов (второе значение обязательно должно быть больше первого, например: 10.0.0.10, 10.0.0.20)
+укажите маску подсети и шлюз, которые DHCP сервер будет выдавать запросившим хостам.
 
-![diagram drawio](https://github.com/mimi-net/miminet/assets/89993880/9f6ddcc2-afeb-43bd-9abf-fc34cb102e8b)<?xml version="1.0" encoding="UTF-8"?>
+После добавления команды у всех хостов появится чекбокс "ВыдатьIP-адрес автоматически". При нажатии на чекбокс параметры хоста ip, netmask, gateway станут недоступными для редактирования.
+После нажатия на кнопку "Эмулировать" на backend части серера построится сеть, и DHCP сервер (если он добавлен) раздаст IP-адреса тем хостам, которые его запросили.
+По завершении эмуляции конфигурации хостов обновятся и они получат IP-адреса (шлюз и маску). 
+
+Заметьте, если вы удалить команду добавления DHCP сервера, то чекбоксы на хостах пропадут.
 
 
-## Local Deployment
-В директориях back и front находятся .env examples, которые используются в docker-compose и ansible. 
 
-Если Вы используете Docker для backend и frontend, не меняйте имена хостов для url в .env.
+# For developers
 
-Если Вы используете virtualbox/vmware с Vagrant для backend, и разворачиваете Redis и Rabbitmq на хосте, укажите ip хоста в back/.env. (в virtual box по умолчанию 192.168.56.1)
+## Реализация DHCP-сервера и клиента
 
-## Backend
+Этот репозиторий содержит код на Python для реализации базового DHCP-сервера и клиента. DHCP-сервер отвечает за динамическое присвоение IP-адресов хостам в определенном диапазоне.
 
-### Docker
+## Использование
+
+### DHCP-сервер
+
+Чтобы запустить DHCP-сервер, вы можете использовать следующую функцию:
+
+```python
+from job import dhcp_server
+
+# Предоставьте необходимую информацию о задании
+job_info = {
+    'arg_1': '10.0.0.10,10.0.0.20',  # Диапазон IP-адресов
+    'arg_2': 16,                       # Маска подсети
+    'arg_3': '10.0.0.1'                # Шлюз по умолчанию
+}
+
+# Замените следующее на вашу фактическую информацию о хосте и задании
+dhcp_server(job_info, ваш_хост_задания)
 ```
-cd back
-COMPOSE_PROFILES=celery,rabbitmq,redis docker compose up -d --build
-```
-Celery, Rabbitmq и Redis будут доступны после этого шага. В завимости от того, где разворачивается Rabbitmq и Redis, вам потребуется указать имена сервисов.
 
-Например, если у Вас уже развернуты Rabbitmq и Redis на другом сервере и нужен только ipmininet worker:
-```
-cd back
-COMPOSE_PROFILES=celery docker compose up -d --build
-```
+### DHCP-клиент
 
-### Vagrant
-NFS(для полной автоматизации vagrant up):
-```
-# /etc/sudoers.d/vagrant-syncedfolders
-Cmnd_Alias VAGRANT_EXPORTS_CHOWN = /bin/chown 0\:0 /tmp/vagrant-exports
-Cmnd_Alias VAGRANT_EXPORTS_MV = /bin/mv -f /tmp/vagrant-exports /etc/exports
-Cmnd_Alias VAGRANT_NFSD_CHECK = /etc/init.d/nfs-kernel-server status
-Cmnd_Alias VAGRANT_NFSD_START = /etc/init.d/nfs-kernel-server start
-Cmnd_Alias VAGRANT_NFSD_APPLY = /usr/sbin/exportfs -ar
-%sudo ALL=(root) NOPASSWD: VAGRANT_EXPORTS_CHOWN, VAGRANT_EXPORTS_MV, VAGRANT_NFSD_CHECK, VAGRANT_NFSD_START, VAGRANT_NFSD_APPLY
+Чтобы настроить хост в качестве DHCP-клиента, используйте следующую функцию:
+
+```python
+from job import dhcp_client
+
+# Замените следующее на вашу фактическую информацию о задании и хосте
+dhcp_client(ваша_информация_о_задании, ваш_хост_задания)
 ```
 
-```
-cd back
-export numberOfBoxes=N
-export provider=vbox/vmware
-. vagrant_vms.sh
-```
-N - количество экземпляров vagrant(Miminet на данный момент не поддерживает мультипроцессинг, выходом является запуск нескольких вм).
+Убедитесь, что функции `mask_to_byte` и `parse_ip_route_show_output` правильно определены и импортированы для DHCP-сервера и клиента соответственно.
 
-## Frontend
+## Важные замечания
 
-### Docker
-Поднимаем после Rabbitmq и Redis.
-```
-cd front && docker compose up -d --build
-```
+- DHCP-сервер требует службы `dnsmasq`. Убедитесь, что она установлена и запущена на хосте.
+- Конфигурация DHCP-клиента включает в себя установку сетевого интерфейса (`ifconfig`), получение IP-адреса (`dhclient`) и обновление информации о маршрутизации.
+

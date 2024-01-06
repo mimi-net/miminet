@@ -1,0 +1,26 @@
+name: Тесты DHCP
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout репозитория
+      uses: actions/checkout@v2
+
+    - name: Установка зависимостей
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y dnsmasq isc-dhcp-client
+        sudo apt-get install -y mininet
+        pip3 install mininet
+
+    - name: Запуск тестов
+      run: |
+        sudo python3 -m unittest discover back/src/test_dhcp/

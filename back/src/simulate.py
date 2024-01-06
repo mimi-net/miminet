@@ -7,11 +7,13 @@ import time
 from ipmininet.ipnet import IPNet
 from ipmininet.ipswitch import IPSwitch
 from ipmininet.iptopo import IPTopo
-from ipmininet.router.config import RouterConfig
-from jobs import Jobs
+from ipmininet.router.config import RouterConfig    
+from ipmininet.cli import IPCLI
+from jobs import Jobs, parse_ip_route_show_output
 from network import Job, Network, Node, NodeConfig, NodeData, NodeInterface
 from pkt_parser import create_pkt_animation, is_ipv4_address
-from net_utils.vlan import setup_vlans, clean_bridges
+from operator import attrgetter
+
 
 
 class MyTopology(IPTopo):
@@ -211,6 +213,7 @@ class MyTopology(IPTopo):
         ), super().addLink(s, h_target, intfName2=interface_name_2, **opts2)
 
     def post_build(self, net: IPNet):
+
         for node in self._id_node_map.values():
             config = node.config
             if config.type == "router":
@@ -312,10 +315,20 @@ def do_job(job: Job, net: IPNet) -> None:
     current_job = Jobs(job, job_host)
     current_job.handler()
 
+def get_host_ip_dict(net: IPNet) -> dict:
+    host_ip_dict = {}
+    for host in net.hosts:
+        output = parse_ip_route_show_output(host.cmd('ip route show'))
+        host_ip_dict[host.name] = output 
+    return host_ip_dict
+
+def sort_jobs_by_level(jobs):
+    sorted_jobs = sorted(jobs, key=attrgetter('level'))
+    return sorted_jobs
 
 def run_mininet(
     network: Network,
-) -> tuple[list[list] | list, list | list[tuple[bytes, str]]]:
+) -> tuple[list[list] | list, list | list[tuple[bytes, str]], dict]:
     """Function for start mininet emulation
 
     Args:
@@ -332,12 +345,10 @@ def run_mininet(
     net = IPNet(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
 
     net.start()
-
-    setup_vlans(net, network.nodes)
     time.sleep(topo.time_to_wait_before_emulation)
 
     # Don only 100+ jobs
-    for job in network.jobs:
+    for job in sort_jobs_by_level(network.jobs):
         job_id = job.job_id
 
         if int(job_id) < 100:
@@ -349,7 +360,7 @@ def run_mininet(
             continue
 
     # Do only job_id < 100
-    for job in network.jobs:
+    for job in sort_jobs_by_level(network.jobs):
         job_id = job.job_id
 
         if int(job_id) >= 100:
@@ -359,8 +370,12 @@ def run_mininet(
             do_job(job, net)
         except Exception:
             continue
-
-    clean_bridges(net)
+    
+    #Stopping DHCP
+    for host in net.hosts:
+        host.cmd('service dnsmasq stop')
+    
+    host_ip = get_host_ip_dict(net)
     time.sleep(2)
     net.stop()
 
@@ -404,4 +419,4 @@ def run_mininet(
     os.system("ps -C nc -o pid=|xargs kill -9")
 
     # Return animation
-    return animation, pcap_list
+    return animation, pcap_list, host_ip

@@ -17,10 +17,15 @@ RUN apt-get update \
     tcpdump \
     git\
     python3-pip \
+    dnsmasq\
+    isc-dhcp-client\
     python3-setuptools \
  && rm -rf /var/lib/apt/lists/* \
  && touch /etc/network/interfaces \
  && mkdir /opt/mininet_dependencies
+
+
+
  
 
 WORKDIR /app

@@ -153,6 +153,42 @@ def arp_handler(job: Job, job_host):
 
     job_host.cmd("arp -s " + str(arg_ip) + " " + str(arg_mac))
 
+def dhcp_server(job: Job, job_host):
+    job_host.cmd('service dnsmasq stop')
+    ip_range = job.arg_1
+    mask = job.arg_2
+    gw = job.arg_3
+    mask = mask_to_byte(mask)
+    job_host.cmd(f"dnsmasq --dhcp-range={ip_range},{mask} --dhcp-option=3,{gw}")
+
+def dhcp_client(job: Job, job_host):
+    job_host.cmd(f'ifconfig {job_host.intf().name} 0')
+    job_host.cmd(f'timeout -k 0 30 dhclient -v -4 {job_host.intf().name}')
+    ip, netmask, gateway = parse_ip_route_show_output(job_host.cmd('ip route show'))
+    job_host.setIP(f'{ip}/{netmask}')
+    job_host.cmd(f'route add default gw {gateway}')
+
+def parse_ip_route_show_output(output):
+    ip_match = re.search(r'src (\d+\.\d+\.\d+\.\d+)', output)
+    netmask_match = re.search(r'(\d+\.\d+\.\d+\.\d+)/(\d+)', output)
+    gateway_match = re.search(r'default via (\d+\.\d+\.\d+\.\d+)', output)
+
+    ip = ip_match.group(1) if ip_match else None
+    netmask = netmask_match.group(2) if netmask_match else None
+    gateway = gateway_match.group(1) if gateway_match else None
+
+    return ip, netmask, gateway
+
+def mask_to_byte(cidr):
+    try:
+        cidr = int(cidr)
+        if 0 <= cidr <= 32:
+            netmask = (0xFFFFFFFF << (32 - cidr)) & 0xFFFFFFFF
+            return f"{(netmask >> 24) & 0xFF}.{(netmask >> 16) & 0xFF}.{(netmask >> 8) & 0xFF}.{netmask & 0xFF}"
+        else:
+            return "Invalid CIDR"
+    except ValueError:
+        return "Invalid CIDR"
 
 class Jobs:
     """Class for representing various commands for working with miminet network"""
@@ -170,6 +206,8 @@ class Jobs:
             101: iptables_handler,
             102: ip_route_add_handler,
             103: arp_handler,
+            104: dhcp_server,
+            105: dhcp_client,
             200: open_udp_server_handler,
             201: open_tcp_server_handler,
             202: block_tcp_udp_port,

@@ -292,11 +292,11 @@ def vk_callback():
             avatar_uri = os.urandom(16).hex()
             avatar_uri = avatar_uri + ".jpg"
 
-            if "photo_100" in vk_user["response"][0]:
-                r = requests.get(
-                    vk_user["response"][0]["photo_100"], allow_redirects=True
-                )
-            open("static/avatar/" + avatar_uri, "wb").write(r.content)
+            # if "photo_100" in vk_user["response"][0]:
+            # r = requests.get(
+            #   vk_user["response"][0]["photo_100"], allow_redirects=True
+            # )
+            # open('static/avatar/' + avatar_uri, 'wb').write(r.content)
 
             new_user = User(
                 nick=vk_user["response"][0]["first_name"]

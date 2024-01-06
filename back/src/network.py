@@ -2,7 +2,6 @@
 # Classes for deserialize miminet network
 
 from dataclasses import dataclass
-from typing import Union, Optional
 
 
 @dataclass
@@ -28,6 +27,8 @@ class NodeConfig:
         type (str): node type (for example, l2_switch)
         stp (int): 1 if need stp
         default_gw (str): default gateway
+        checkbox (bool): if true give ip
+        dhcp (int) if host is dhcp server 1
 
     """
 
@@ -35,6 +36,8 @@ class NodeConfig:
     type: str = ""
     stp: int = 0
     default_gw: str = ""
+    checkbox: int = 0
+    dhcp: int = 0
 
 
 @dataclass
@@ -47,8 +50,6 @@ class NodeInterface:
         name (str): interface name (for example, l2sw1_1)
         ip (str): ip (for example, 10.0.0.1)
         netmask (str): netmask
-        vlan (Union[int, List[int], None]): VLAN ID or list of VLAN
-        type_connection (Optional[int]): Connection type (0 - Access, 1 - Trunk)
 
     """
 
@@ -57,8 +58,6 @@ class NodeInterface:
     name: str = ""
     ip: str = ""
     netmask: int = 0
-    vlan: Union[int, list[int], None] = None
-    type_connection: Optional[int] = None
 
 
 @dataclass
@@ -181,5 +180,5 @@ class Network:
     edges: list[Edge]
     jobs: list[Job]
     config: NetworkConfig
-    pcap: list[str] | None
+    pcap: list[str]
     packets: str = ""
