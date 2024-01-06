@@ -1,0 +1,11 @@
+{
+  "web": {
+    "client_id": "8a444254bd924731be51ae0e4729d4fc",
+    "client_secret": "8b57183cdd044744a5a9b8ad0532dc4e",
+    "auth_uri": "https://oauth.yandex.ru/authorize",
+    "token_uri": "https://oauth.yandex.ru/token",
+    "auth_provider_x509_cert_url": "https://oauth.yandex.ru/cert",
+    "redirect_uris": ["http://127.0.0.1/auth/yandex_callback"]
+  }
+}
+  
