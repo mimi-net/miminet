@@ -120,6 +120,13 @@ def delete_network():
         db.session.delete(net)
         db.session.commit()
 
+        sims = Simulate.query.filter(Simulate.network_id == net.id).all()
+
+        # Remove all previous simulations
+        for s in sims:
+            db.session.delete(s)
+            db.session.commit()
+
     return redirect(url_for("home"))
 
 
