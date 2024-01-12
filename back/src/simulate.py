@@ -331,38 +331,39 @@ def run_mininet(
     topo = MyTopology(network=network, time_to_wait_before_emulation=2)
     net = IPNet(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
 
-    net.start()
+    try:
+        net.start()
+        setup_vlans(net, network.nodes)
+        time.sleep(topo.time_to_wait_before_emulation)
 
-    setup_vlans(net, network.nodes)
-    time.sleep(topo.time_to_wait_before_emulation)
+        # Don only 100+ jobs
+        for job in network.jobs:
+            job_id = job.job_id
 
-    # Don only 100+ jobs
-    for job in network.jobs:
-        job_id = job.job_id
+            if int(job_id) < 100:
+                continue
 
-        if int(job_id) < 100:
-            continue
+            try:
+                do_job(job, net)
+            except Exception:
+                continue
 
-        try:
-            do_job(job, net)
-        except Exception:
-            continue
+        # Do only job_id < 100
+        for job in network.jobs:
+            job_id = job.job_id
 
-    # Do only job_id < 100
-    for job in network.jobs:
-        job_id = job.job_id
+            if int(job_id) >= 100:
+                continue
 
-        if int(job_id) >= 100:
-            continue
+            try:
+                do_job(job, net)
+            except Exception:
+                continue
 
-        try:
-            do_job(job, net)
-        except Exception:
-            continue
-
-    clean_bridges(net)
-    time.sleep(2)
-    net.stop()
+    finally:
+        clean_bridges(net)
+        time.sleep(2)
+        net.stop()
 
     animation, pcap_list = create_animation(topo)
     animation_s = sorted(animation, key=lambda k: k.get("timestamp", 0))
