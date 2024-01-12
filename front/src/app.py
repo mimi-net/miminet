@@ -12,6 +12,7 @@ from miminet_auth import (
     logout,
     user_profile,
     vk_callback,
+    vk_login,
 )
 from miminet_config import SECRET_KEY, SQLITE_DATABASE_NAME
 from miminet_host import (
@@ -65,6 +66,7 @@ zero_days_ago = (datetime.now()).date().isoformat()
 # Login
 app.add_url_rule("/auth/login.html", methods=["GET", "POST"], view_func=login_index)
 app.add_url_rule("/auth/google_login", methods=["GET"], view_func=google_login)
+app.add_url_rule("/auth/vk_login", methods=["GET"], view_func=vk_login)
 app.add_url_rule("/auth/vk_callback", methods=["GET"], view_func=vk_callback)
 app.add_url_rule("/auth/google_callback", methods=["GET"], view_func=google_callback)
 app.add_url_rule("/user/profile.html", methods=["GET", "POST"], view_func=user_profile)
