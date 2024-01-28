@@ -2,7 +2,7 @@ import dataclasses
 import re
 
 import pytest
-from tasks import mininet_worker
+from tasks import simulate
 
 
 @dataclasses.dataclass
@@ -75,7 +75,7 @@ DINAMYC_PORT_TEST_CASES = [
 
 @pytest.mark.parametrize("test", TEST_CASES)
 def test_miminet_work(test: Case) -> None:
-    animation, pcaps = mininet_worker(test.json_network)
+    animation, pcaps = simulate(test.json_network)
     animation = re.sub(r'"timestamp": "\d+"', r'"timestamp": ""', animation)
     animation = re.sub(r'"id": "\w+"', r'"id": ""', animation)
     assert animation == test.json_answer
@@ -83,7 +83,7 @@ def test_miminet_work(test: Case) -> None:
 
 @pytest.mark.parametrize("test", DINAMYC_PORT_TEST_CASES)
 def test_miminet_work_for_dinamyc_port_test_cases(test: Case) -> None:
-    animation, pcaps = mininet_worker(test.json_network)
+    animation, pcaps = simulate(test.json_network)
     animation = re.sub(r'"timestamp": "\d+"', r'"timestamp": ""', animation)
     animation = re.sub(r'"id": "\w+"', r'"id": ""', animation)
     port_string = re.search(test.pattern_in_network, animation)

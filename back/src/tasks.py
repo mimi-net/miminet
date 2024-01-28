@@ -13,8 +13,7 @@ from network import Network
 from simulate import run_mininet
 
 
-@app.task(bind=True)
-def mininet_worker(self, network: str):
+def simulate(network: str):
     """Worker for start mininet simulation
 
     Args:
@@ -24,6 +23,7 @@ def mininet_worker(self, network: str):
         tuple: Tuple (json emulation results, List[pcap, pcap name])
 
     """
+
     setLogLevel("info")
 
     if os.name == "posix":
@@ -45,13 +45,30 @@ def mininet_worker(self, network: str):
         else:
             break
 
+    return json.dumps(animation), pcaps
+
+
+@app.task(bind=True)
+def mininet_worker(self, network: str):
+    """Worker for start mininet simulation
+
+    Args:
+        network (str): str network from queue
+
+    Returns:
+        tuple: Tuple (json emulation results, List[pcap, pcap name])
+
+    """
+
+    animation, pcaps = simulate(network)
+
     network_task = self.request.headers["network_task_name"]
     task_id = self.request.id
 
     app.send_task(
         network_task,
         (
-            json.dumps(animation),
+            animation,
             pcaps,
         ),
         routing_key=SEND_NETWORK_RESPONSE_ROUTING_KEY,
