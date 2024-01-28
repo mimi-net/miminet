@@ -59,3 +59,5 @@ def mininet_worker(self, network: str):
         exchange_type=SEND_NETWORK_RESPONSE_EXCHANGE.type,
         task_id=task_id,
     )
+
+    return json.dumps(animation), pcaps
