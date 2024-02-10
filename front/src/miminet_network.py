@@ -120,6 +120,13 @@ def delete_network():
         db.session.delete(net)
         db.session.commit()
 
+        sims = Simulate.query.filter(Simulate.network_id == net.id).all()
+
+        # Remove all previous simulations
+        for s in sims:
+            db.session.delete(s)
+            db.session.commit()
+
     return redirect(url_for("home"))
 
 
@@ -181,10 +188,12 @@ def web_network_shared():
         net.network = json.dumps(jnet)
         db.session.commit()
 
+    json_nodes = json.dumps(jnet["nodes"])
+
     return render_template(
         "network_shared.html",
         network=net,
-        nodes=jnet["nodes"],
+        nodes=json_nodes,
         edges=jnet["edges"],
         packets=jnet["packets"],
         jobs=jnet["jobs"],
@@ -262,10 +271,12 @@ def web_network():
         net.network = json.dumps(jnet)
         db.session.commit()
 
+    json_nodes = json.dumps(jnet["nodes"])
+
     return render_template(
         "network.html",
         network=net,
-        nodes=jnet["nodes"],
+        nodes=json_nodes,
         edges=jnet["edges"],
         packets=jnet["packets"],
         jobs=jnet["jobs"],

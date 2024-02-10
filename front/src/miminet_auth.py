@@ -145,6 +145,12 @@ def google_login():
     return redirect(authorization_url)
 
 
+def vk_login():
+    authorization_link = "https://oauth.vk.com/authorize"
+    authorization_url = f"{authorization_link}?client_id={VK_CLIENT_ID}&display=page&redirect_uri={VK_REDIRECT_URI}&scope=friends,email&response_type=code&v=5.130"
+    return redirect(authorization_url)
+
+
 def google_callback():
 
     state = session["state"]
