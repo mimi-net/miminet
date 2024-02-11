@@ -6,31 +6,43 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/jquery-ui.min.js"></script>
 
-    <section class="container" style="margin-top: 48px; padding-top: 48px">
-        {# Test name and section name #}
-        <div class="row align-items-baseline">
-            <div class="col-auto">
-                <h1 class="mb-0" id="test_name">{{ test_name }}</h1>
+    <section class="container" style="display: flex;flex-direction: row; margin-top: 48px; padding-top: 48px">
+        {# Test name and section name, timer, questions counter #}
+        <div class="row align-items-baseline" style=" flex: 1; display: flex;flex-direction: column;justify-content: space-evenly;">
+            <div class="row align-items-baseline" style="display: flex;">
+                <div class="col-auto">
+                    <h1 class="mb-0" id="test_name">{{ test_name }}</h1>
+                </div>
+                <div class="col-auto text-center">
+                    <h3 class="mb-0" style="font-weight: normal" id="section_name">{{ section_name }}</h3>
+                </div>
             </div>
-            <div class="col-auto text-center">
-                <h3 class="mb-0" style="font-weight: normal" id="section_name">{{ section_name }}</h3>
+
+            <div class="row align-items-baseline" style="margin: 8px 0 0 0; font-size: 24px; opacity: 85%; display: flex;">
+                <div class="col-auto">
+                    <p id="counter"></p>
+                </div>
+                <div class="col-auto text-center">
+                    <span id="timer">00:00:00</span>
+                </div>
             </div>
         </div>
 
-        {# Timer, questions counter, finishQuiz button #}
-        <div class="row align-items-baseline" style="margin: 8px 0 0 0; font-size: 24px; opacity: 85%">
-            <div class="col-auto">
-                <p id="counter"></p>
+        {% if question.question_type == "practice" %}
+            <div style="flex: 2;display: flex;justify-content: center;align-items: flex-end;">
+                <div class="matching">
+                    <p class="text-black m-0"
+                   style="font-size: 20px">{{ question.question_text }}</p>
+                </div>
             </div>
-            <div class="col-auto text-center">
-                <span id="timer">00:00:00</span>
-            </div>
-            <div class="col-auto ms-auto" style="margin-bottom: 8px">
-                <button name="finishQuiz" aria-label="Завершить тест" class="btn btn-outline-danger btn-icon me-5"
-                        data-toggle="tooltip" data-bs-placement="right" title="Завершить тест">
-                    <i class="bx bx-x fs-4 mx-1"></i>
-                </button>
-            </div>
+        {% endif %}
+
+        {# finishQuiz button #}
+        <div class="col-auto ms-auto" style="flex: 1;display: flex;justify-content: flex-end;align-items: flex-end;margin: 8px 0 8px 0; font-size: 24px; opacity: 85%">
+            <button name="finishQuiz" aria-label="Завершить тест" class="btn btn-outline-danger btn-icon me-5"
+                    data-toggle="tooltip" data-bs-placement="right" title="Завершить тест">
+                <i class="bx bx-x fs-4 mx-1"></i>
+            </button>
         </div>
     </section>
 
