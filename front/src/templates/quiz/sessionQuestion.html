@@ -176,30 +176,6 @@
         </script>
         <script src="/quiz/practice_question_scripts.js"></script>
 
-        {#{% block network %}
-            <script>
-                #}{#const practiceQuestion = JSON.parse('{{ question.practice_question | replace("'", '"') | safe }}')#}{#
-                let start_configuration = JSON.parse(practiceQuestion["start_configuration"])
-                #}{#const network_guid = "{{ network.guid }}";
-                var network_title = "{{ network.title }}";
-                var network_description = "{{ network.description }}";#}{#
-                let network_zoom = start_configuration["config"]["zoom"];
-                let network_pan_x = start_configuration["config"]["pan_x"];
-                let network_pan_y = start_configuration["config"]["pan_y"];
-
-                let nodes = start_configuration["nodes"];
-                let edges = start_configuration["edges"];
-                let jobs = start_configuration["jobs"];
-                let packets = start_configuration["packets"];
-                let pcaps = start_configuration["pcap"];
-                let ns = null;
-
-                #}{#SetNetworkPlayerState({% if simulating %} {% if simulating.ready %} 0 {% else %} {{simulating.id}}#}{#
-                #}{#{% endif%} {% else %} 0 {% endif%})#}{#
-                DrawGraph();
-            </script>
-
-        {% endblock %}#}
     {% endif %}
 
     <script src="/quiz/session_scripts.js"></script>
@@ -217,7 +193,7 @@
     {% if question.question_type == "practice" %}
         <script>
             let start_configuration = JSON.parse(practiceQuestion["start_configuration"])
-            const network_guid = "e9ea26fc-ecd7-46f9-9f6b-dde7e4f43bd6";
+            const network_guid = practiceQuestion["network_guid"];
             {#var network_title = "{{ network.title }}";
             var network_description = "{{ network.description }}";#}
             let network_zoom = start_configuration["config"]["zoom"];

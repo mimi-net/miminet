@@ -85,12 +85,13 @@ class PracticeQuestionDto:
         escaped_string = net.replace('\\"', '"').replace('"', '\\"')
 
         self.start_configuration = escaped_string
+        self.network_guid = practice_question.start_configuration
 
     def to_dict(self):
         attributes = [
             "description", "available_hosts", "available_hubs",
             "available_servers", "available_switches", "available_routers",
-            "start_configuration"
+            "start_configuration", "network_guid"
         ]
 
         return {attribute: str(getattr(self, attribute)) for attribute in attributes}
