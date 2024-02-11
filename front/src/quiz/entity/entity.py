@@ -237,7 +237,7 @@ class PracticeQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.M
     __tablename__ = "practice_question"
 
     id = db.Column(db.String(511), db.ForeignKey("question.id"), primary_key=True)
-    start_configuration = db.Column(db.String(511), db.ForeignKey("network.guid"))
+    start_configuration = db.Column(db.String(511), db.ForeignKey("network.guid"), unique=True)
 
     description = db.Column(db.String(511), default="")
     explanation = db.Column(db.String(511), default="")
