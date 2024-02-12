@@ -1,4 +1,4 @@
-alembic==1.13.1
+﻿alembic==1.13.1
 beautifulsoup4==4.12.3
 cachetools==5.3.2
 certifi==2023.11.17

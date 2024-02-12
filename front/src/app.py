@@ -12,11 +12,9 @@ from miminet_auth import (
     logout,
     user_profile,
     vk_callback,
-    yandex_login,
-    yandex_callback,
-    tg_callback,
     vk_login,
 )
+from miminet_auth import yandex_login, yandex_callback, tg_callback
 from miminet_config import SECRET_KEY, SQLITE_DATABASE_NAME
 from miminet_host import (
     delete_job,
