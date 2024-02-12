@@ -18,8 +18,16 @@ jobs:
       run: |
         sudo apt-get update
         pip3 install -r front/requirements.txt
-        export CLIENT_YANDEX_PATH=front/src/client_yandex.json
-        python3 -m unittest discover front/src/test_auth
+      env:
+        CLIENT_YANDEX: ${{ secrets.CLIENT_YANDEX }}
+        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+        PYTHONPATH: "../miminet/front/src"
+
     - name: Запуск тестов
       run: |
+        export PYTHONPATH="../miminet/front/src"
         python3 -m unittest discover front/src/test_auth
+      env:
+          CLIENT_YANDEX: ${{ secrets.CLIENT_YANDEX }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+  

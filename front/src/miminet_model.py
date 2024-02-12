@@ -39,6 +39,7 @@ class User(db.Model, UserMixin):  # type:ignore[name-defined]
     yandex_id = db.Column(db.String(255), nullable=True)
     telegram_id = db.Column(db.String(255), nullable=True)
 
+
 class Network(db.Model):  # type:ignore[name-defined]
     id = db.Column(db.Integer, primary_key=True)
     author_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
