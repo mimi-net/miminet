@@ -241,11 +241,11 @@ class PracticeQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.M
 
     description = db.Column(db.String(511), default="")
     explanation = db.Column(db.String(511), default="")
-    available_hosts = db.Column(db.Integer, default=0)
-    available_switches = db.Column(db.Integer, default=0)
-    available_hubs = db.Column(db.Integer, default=0)
-    available_routers = db.Column(db.Integer, default=0)
-    available_servers = db.Column(db.Integer, default=0)
+    available_host = db.Column(db.Integer, default=0)
+    available_l2_switch = db.Column(db.Integer, default=0)
+    available_l1_hub = db.Column(db.Integer, default=0)
+    available_l3_router = db.Column(db.Integer, default=0)
+    available_server = db.Column(db.Integer, default=0)
 
     question = db.relationship('Question', uselist=False, back_populates='practice_question')
     # network = db.relationship('Network', uselist=False, back_populates='practice_question')

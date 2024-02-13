@@ -87,8 +87,8 @@ def create_question(section_id: str, question_dict: dict, user: User):
     elif question_dict['question_type'] == "practice":
         practice_question = PracticeQuestion()
 
-        attributes = ['description', 'explanation', 'available_hosts', 'available_switches', 'available_hubs',
-                      'available_routers', 'available_servers']
+        attributes = ['description', 'explanation', 'available_host', 'available_l2_switch', 'available_l1_hub',
+                      'available_l3_router', 'available_server']
 
         for attribute in attributes:
             setattr(practice_question, attribute, question_dict[attribute])

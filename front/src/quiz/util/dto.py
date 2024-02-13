@@ -74,12 +74,13 @@ class AnswerDto:
 
 class PracticeQuestionDto:
     def __init__(self, practice_question: PracticeQuestion) -> None:
-        self.description = practice_question.description
-        self.available_hosts = practice_question.available_hosts
-        self.available_hubs = practice_question.available_hubs
-        self.available_servers = practice_question.available_servers
-        self.available_switches = practice_question.available_switches
-        self.available_routers = practice_question.available_routers
+        attributes = [
+            "description", "available_host", "available_l1_hub",
+            "available_server", "available_l2_switch", "available_l3_router"
+        ]
+
+        for attribute in attributes:
+            setattr(self, attribute, getattr(practice_question, attribute))
 
         net = Network.query.filter(Network.guid == practice_question.start_configuration).first().network
         escaped_string = net.replace('\\"', '"').replace('"', '\\"')
@@ -89,8 +90,8 @@ class PracticeQuestionDto:
 
     def to_dict(self):
         attributes = [
-            "description", "available_hosts", "available_hubs",
-            "available_servers", "available_switches", "available_routers",
+            "description", "available_host", "available_l1_hub",
+            "available_server", "available_l2_switch", "available_l3_router",
             "start_configuration", "network_guid"
         ]
 

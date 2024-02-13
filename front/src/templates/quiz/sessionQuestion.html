@@ -7,8 +7,8 @@
     <script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/jquery-ui.min.js"></script>
 
     <section class="container" style="display: flex;flex-direction: row; margin-top: 48px; padding-top: 48px">
-        {# Test name and section name, timer, questions counter #}
         <div class="row align-items-baseline" style=" flex: 1; display: flex;flex-direction: column;justify-content: space-evenly;">
+            {# Test name and section name #}
             <div class="row align-items-baseline" style="display: flex;">
                 <div class="col-auto">
                     <h1 class="mb-0" id="test_name">{{ test_name }}</h1>
@@ -18,6 +18,7 @@
                 </div>
             </div>
 
+            {# Timer, questions counter #}
             <div class="row align-items-baseline" style="margin: 8px 0 0 0; font-size: 24px; opacity: 85%; display: flex;">
                 <div class="col-auto">
                     <p id="counter"></p>
@@ -28,6 +29,7 @@
             </div>
         </div>
 
+        {# Task text #}
         {% if question.question_type == "practice" %}
             <div style="flex: 2;display: flex;justify-content: center;align-items: flex-end;">
                 <div class="matching">
@@ -99,7 +101,7 @@
                                         <span data-bs-toggle="popover" data-bs-trigger="hover"
                                               data-bs-content="Свитч (коммутатор) работает на втором уровне модели OSI.">Свитч (L2)</span>
                                     </div>
-                                    <div id="switches_counter"></div>
+                                    <div id="l2_switch_counter"></div>
                                 </div>
                                 <div class="col-sm-6 mb-3 text-center">
                                     <img class="drag" id="host"
@@ -108,7 +110,7 @@
                                         <span data-bs-toggle="popover" data-bs-trigger="hover"
                                               data-bs-content="Хост - конечное сетевое устройство.">Хост</span>
                                     </div>
-                                    <div id="hosts_counter"></div>
+                                    <div id="host_counter"></div>
                                 </div>
                                 <div class="col-sm-6 mb-3 text-center ">
                                     <img class="drag" id="l1_hub"
@@ -117,7 +119,7 @@
                                         <span data-bs-toggle="popover" data-bs-trigger="hover"
                                               data-bs-content="Хаб (концентратор) &mdash; простейшее сетевое устойство.">Хаб (L1)</span>
                                     </div>
-                                    <div id="hubs_counter"></div>
+                                    <div id="l1_hub_counter"></div>
                                 </div>
                                 <div class="col-sm-6 mb-3 text-center">
                                     <img class="drag" id="l3_router"
@@ -126,7 +128,7 @@
                                         <span data-bs-toggle="popover" data-bs-trigger="hover"
                                               data-bs-content="Маршрутизатор (роутер, раутер) &mdash; работает на 3-м уровне модели OSI, позволяет объединять различные сети.">Роутер (L3)</span>
                                     </div>
-                                    <div id="routers_counter"></div>
+                                    <div id="l3_router_counter"></div>
                                 </div>
                                 <div class="col-sm-6 mb-3 text-center">
                                     <img class="drag" id="server"
@@ -135,7 +137,7 @@
                                         <span data-bs-toggle="popover" data-bs-trigger="hover"
                                               data-bs-content="Сервер &mdash; обслуживает клиентские запросы.">Сервер</span>
                                     </div>
-                                    <div id="servers_counter"></div>
+                                    <div id="server_counter"></div>
                                 </div>
 
                                 <hr class="mb-4">
@@ -157,6 +159,14 @@
                                         <small id="NetworkPlayerLabel" class="text-muted text-center">Ожидание 10-30
                                             сек.</small>
                                     </div>
+                                </div>
+
+
+                                {# Control buttons #}
+                                <div class="card-body d-flex justify-content-end" style="padding: 0 12px 0 12px">
+                                    <button name="answerQuestion" class="btn btn-primary">Ответить</button>
+                                    <button name="nextQuestion" class="btn btn-primary w-100" hidden>Следующий вопрос</button>
+                                    <button name="seeResults" class="btn btn-primary w-100" hidden>Посмотреть результаты</button>
                                 </div>
                             </div>
                         </div>

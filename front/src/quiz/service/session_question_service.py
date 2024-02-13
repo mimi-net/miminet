@@ -68,3 +68,6 @@ def answer_on_session_question(session_question_id: str, answer_string: dict, us
                 sorting_question.explanation,
                 correct
             ), 200
+
+    elif question.question_type == "text":
+        return

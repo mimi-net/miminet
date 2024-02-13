@@ -53,7 +53,7 @@ function finishQuiz() {
 }
 
 function getAnswer() {
-    if (questionType) {
+    if (questionType == "text") {
         switch (textType) {
             case 'variable':
                 return $('input.form-check-input:checked').map(function () {
@@ -72,6 +72,8 @@ function getAnswer() {
                 return $('#sortContainer').sortable("toArray").join(' ');
         }
     }
+
+    // Else check practice question
 }
 
 function nextQuestion() {
