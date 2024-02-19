@@ -53,7 +53,7 @@ function finishQuiz() {
 }
 
 function getAnswer() {
-    if (questionType == "text") {
+    if (questionType === "text") {
         switch (textType) {
             case 'variable':
                 return $('input.form-check-input:checked').map(function () {
@@ -72,8 +72,18 @@ function getAnswer() {
                 return $('#sortContainer').sortable("toArray").join(' ');
         }
     }
+    if (questionType === "practice") {
+        if (packets === "null") {
+            // simulate and get packets
+            if (!jobs.length) {
+                $('#noJobsModal').modal('toggle');
+                return;
+            }
 
-    // Else check practice question
+            RunSimulation(network_guid);
+        }
+        return {'nodes': nodes, 'edges': edges, 'packets': packets}
+    }
 }
 
 function nextQuestion() {
@@ -86,6 +96,12 @@ function nextQuestion() {
 function answerQuestion() {
     const questionId = questionIds[questionIndex];
 
+    const answer = getAnswer();
+    console.log(JSON.stringify(answer));
+    if (answer === undefined) {
+        return;
+    }
+
     document.querySelector('button[name="answerQuestion"]').hidden = true;
     document.querySelector('button[name="nextQuestion"]').hidden = isLastQuestion;
 
@@ -93,9 +109,6 @@ function answerQuestion() {
         document.querySelector('button[name="seeResults"]').hidden = false;
         document.querySelector('button[name="finishQuiz"]').hidden = true;
     }
-
-    const answer = getAnswer();
-    console.log(JSON.stringify(answer));
 
     fetch(answerQuestionURL + '?id=' + questionId, {
         method: 'POST',
@@ -149,11 +162,6 @@ document.querySelector('button[name="finishQuiz"]')?.addEventListener('click', f
 document.querySelector('button[name="seeResults"]')?.addEventListener('click', finishQuiz);
 document.querySelector('button[name="answerQuestion"]')?.addEventListener('click', answerQuestion);
 document.querySelector('button[name="nextQuestion"]')?.addEventListener('click', nextQuestion);
-
-// On the last question don't show next question button (may be redundant)
-// if (questionIndex + 1 >= questionsCount) {
-//     document.querySelector('button[name="nextQuestion"]').hidden = true;
-// }
 
 // Display data
 document.title = testName;
