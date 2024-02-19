@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "quiz/networkBase.html" %}
 {% block title %}{% endblock %}
 {% block description %}Сетевой тренажер для обучения компьютерным сетям{% endblock %}
 
@@ -215,8 +215,8 @@
         <script>
             let start_configuration = JSON.parse(practiceQuestion["start_configuration"])
             const network_guid = practiceQuestion["network_guid"];
-            {#var network_title = "{{ network.title }}";
-            var network_description = "{{ network.description }}";#}
+            let network_title = "Practice Task Net";
+            let network_description = ""
             let network_zoom = start_configuration["config"]["zoom"];
             let network_pan_x = start_configuration["config"]["pan_x"];
             let network_pan_y = start_configuration["config"]["pan_y"];
@@ -228,8 +228,6 @@
             let pcaps = start_configuration["pcap"];
             let ns = null;
 
-            {#SetNetworkPlayerState({% if simulating %} {% if simulating.ready %} 0 {% else %} {{simulating.id}}#}
-            {#{% endif%} {% else %} 0 {% endif%})#}
             DrawGraph();
         </script>
     {% endif %}
