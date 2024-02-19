@@ -2,7 +2,7 @@ const units = ["l2_switch", "l1_hub", "host", "l3_router", "server"];
 const counters = {};
 
 units.forEach(function (item) {
-    counters[item] = practiceQuestion[`available_${item}`];
+    counters[item] = parseInt(practiceQuestion[`available_${item}`]);
     document.getElementById(`${item}_counter`).innerHTML = `Доступно: ${counters[item]}`;
 
     if (counters[item] <= 0) {
