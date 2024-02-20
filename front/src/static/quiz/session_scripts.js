@@ -52,7 +52,28 @@ function finishQuiz() {
         });
 }
 
-function getAnswer() {
+function RunAndWaitSimulation(network_guid) {
+    RunSimulation(network_guid);
+
+    return new Promise(function (resolve, reject){
+        function checkReady(hop){
+            if (packets !== "null" && packets !== undefined) {
+                resolve(packets)
+            } else {
+                if (hop > 15){
+                    reject(new Error("Exceeded simulation wait time"))
+                }
+                setTimeout(function () {
+                    checkReady(hop + 1)
+                }, 2000)
+            }
+        }
+
+        checkReady(0)
+    })
+}
+
+async function getAnswer() {
     if (questionType === "text") {
         switch (textType) {
             case 'variable':
@@ -73,16 +94,18 @@ function getAnswer() {
         }
     }
     if (questionType === "practice") {
-        if (packets === "null") {
+        if (packets === "null" || packets === undefined) {
             // simulate and get packets
             if (!jobs.length) {
                 $('#noJobsModal').modal('toggle');
                 return;
             }
 
-            RunSimulation(network_guid);
+            await RunAndWaitSimulation(network_guid).catch((error) => console.log(error))
+            return {'nodes': nodes, 'edges': edges, 'packets': packets}
+        } else {
+            return {'nodes': nodes, 'edges': edges, 'packets': packets}
         }
-        return {'nodes': nodes, 'edges': edges, 'packets': packets}
     }
 }
 
@@ -93,10 +116,13 @@ function nextQuestion() {
     window.location.href = getQuestionUrl + `?question_id=` + questionIds[questionIndex + 1];
 }
 
-function answerQuestion() {
+async function answerQuestion() {
     const questionId = questionIds[questionIndex];
 
-    const answer = getAnswer();
+    document.querySelector('button[name="answerQuestion"]').textContent = "Проверка..."
+    document.querySelector('button[name="answerQuestion"]').disabled = true
+
+    const answer = await getAnswer();
     console.log(JSON.stringify(answer));
     if (answer === undefined) {
         return;
