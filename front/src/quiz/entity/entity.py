@@ -96,7 +96,7 @@ class CreatedByMixin(object):
         return db.relationship("User")
 
 
-class Test(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
+class Test(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model): # type:ignore[name-defined]
 
     __tablename__ = "test"
 
@@ -113,7 +113,7 @@ class Test(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
     )
 
 
-class Section(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
+class Section(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model): # type:ignore[name-defined]
 
     __tablename__ = "section"
 
@@ -129,7 +129,7 @@ class Section(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
     __table_args__ = (db.Index("section_test_id_is_deleted", "test_id", "is_deleted"),)
 
 
-class Question(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
+class Question(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model): # type:ignore[name-defined]
 
     __tablename__ = "question"
 
@@ -153,7 +153,7 @@ class Question(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
     )
 
 
-class QuizSession(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
+class QuizSession(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model): # type:ignore[name-defined]
 
     __tablename__ = "quiz_session"
 
@@ -164,7 +164,7 @@ class QuizSession(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model)
     sessions = db.relationship("SessionQuestion", back_populates="quiz_session")
 
 
-class SessionQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
+class SessionQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model): # type:ignore[name-defined]
 
     __tablename__ = "session_question"
 
@@ -176,7 +176,7 @@ class SessionQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Mo
     question = db.relationship("Question", back_populates="session_questions")
 
 
-class TextQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
+class TextQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model): # type:ignore[name-defined]
 
     __tablename__ = "text_question"
 
@@ -195,7 +195,7 @@ class TextQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model
     )
 
 
-class SortingQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
+class SortingQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model): # type:ignore[name-defined]
 
     __tablename__ = "sorting_question"
 
@@ -206,7 +206,7 @@ class SortingQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Mo
     text_question = db.relationship("TextQuestion", back_populates="sorting_question")
 
 
-class MatchingQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
+class MatchingQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model): # type:ignore[name-defined]
 
     __tablename__ = "matching_question"
 
@@ -217,7 +217,7 @@ class MatchingQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.M
     text_question = db.relationship("TextQuestion", back_populates="matching_question")
 
 
-class VariableQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
+class VariableQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model): # type:ignore[name-defined]
 
     __tablename__ = "variable_question"
 
@@ -227,7 +227,7 @@ class VariableQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.M
     text_question = db.relationship("TextQuestion", back_populates="variable_question")
 
 
-class Answer(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
+class Answer(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model): # type:ignore[name-defined]
 
     __tablename__ = "answer"
 
@@ -254,7 +254,7 @@ class Answer(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
     )
 
 
-class PracticeQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
+class PracticeQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model): # type:ignore[name-defined]
 
     __tablename__ = "practice_question"
 
@@ -278,7 +278,7 @@ class PracticeQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.M
     practice_tasks = db.relationship("PracticeTask", back_populates="practice_question")
 
 
-class PracticeTask(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):
+class PracticeTask(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model): # type:ignore[name-defined]
 
     __tablename__ = "practice_task"
 
