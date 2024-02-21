@@ -36,6 +36,9 @@ class User(db.Model, UserMixin):  # type:ignore[name-defined]
     vk_id = db.Column(db.String(255), nullable=True)
     google_id = db.Column(db.String(255), nullable=True)
 
+    yandex_id = db.Column(db.String(255), nullable=True)
+    telegram_id = db.Column(db.String(255), nullable=True)
+
 
 class Network(db.Model):  # type:ignore[name-defined]
     id = db.Column(db.Integer, primary_key=True)

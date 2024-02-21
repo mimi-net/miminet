@@ -66,6 +66,32 @@
                         <i class="bx bxl-vk"></i>
                     </a>
                 </div>
+                <div class="col mb-3">
+                  <!-- Yandex -->
+                  <a href="{{ url_for('yandex_login') }}" class="btn btn-icon btn-secondary btn-yandex btn-lg w-100">
+                    <img src="{{ url_for('static', filename='images/yandex_icon.png') }}"
+                      style="width: 30px; height: 30px;" />
+                  </a>
+                </div>
+                <div class="col mb-3">
+                  <!-- Telegram -->
+                  <script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="Miminet_bot"
+                  data-size="large" data-radius="10" data-onauth="onTelegramAuth(user)" data-request-access="write">
+                  </script>
+                  <script type="text/javascript">
+                  function onTelegramAuth(user) {
+                    var fullName = user.first_name;
+      
+                    if (user.last_name) {
+                      fullName += ' ' + user.last_name;
+                    }
+      
+                    var message = 'Вы авторизовались в приложении как ' + fullName + ' (' + user.id + (user.username ? ', @' + user.username : '') + ')';
+                    alert(message);
+                    window.location.href = "{{ url_for('tg_callback') }}?user=" + encodeURIComponent(JSON.stringify(user));
+                  }
+                  </script>
+                </div>
              </div>
           </div>
     </div>

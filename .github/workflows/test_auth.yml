@@ -1,0 +1,33 @@
+name: Тесты Яндекс и Telegram аутентификации
+
+on: 
+  push: 
+    branches: 
+      - main 
+  pull_request:
+  
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout репозитория
+      uses: actions/checkout@v2
+
+    - name: Установка зависимостей
+      run: |
+        sudo apt-get update
+        pip3 install -r front/requirements.txt
+      env:
+        CLIENT_YANDEX: ${{ secrets.CLIENT_YANDEX }}
+        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+        PYTHONPATH: "../miminet/front/src"
+
+    - name: Запуск тестов
+      run: |
+        export PYTHONPATH="../miminet/front/src"
+        python3 -m unittest discover front/src/test_auth
+      env:
+          CLIENT_YANDEX: ${{ secrets.CLIENT_YANDEX }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+  

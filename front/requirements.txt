@@ -15,7 +15,7 @@ google-auth==2.27.0
 google-auth-oauthlib==1.2.0
 greenlet==3.0.3
 idna==3.6
-importlib-metadata==7.0.1
+importlib-metadata==7.0.0
 importlib-resources==6.1.1
 ipaddress==1.0.23
 itsdangerous==2.1.2
