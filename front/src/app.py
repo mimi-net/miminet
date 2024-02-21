@@ -37,15 +37,33 @@ from miminet_network import (
 )
 from miminet_shark import mimishark_page
 from miminet_simulation import check_simulation, run_simulation
-from quiz.controller.question_controller import create_question_endpoint, get_questions_by_section_endpoint, \
-    delete_question_endpoint
-from quiz.controller.quiz_session_controller import start_session_endpoint, \
-    get_question_by_session_question_id_endpoint, finish_session_endpoint, answer_on_session_question_endpoint, \
-    session_result_endpoint, get_results_by_user_endpoint
-from quiz.controller.section_controller import create_section_endpoint, get_sections_by_test_endpoint
-from quiz.controller.test_controller import create_test_endpoint, get_all_tests_endpoint, get_tests_by_owner_endpoint, \
-    get_deleted_tests_by_owner_endpoint, delete_test_endpoint, edit_test_endpoint, get_test_endpoint, \
-    publish_or_unpublish_test_endpoint
+from quiz.controller.question_controller import (
+    create_question_endpoint,
+    get_questions_by_section_endpoint,
+    delete_question_endpoint,
+)
+from quiz.controller.quiz_session_controller import (
+    start_session_endpoint,
+    get_question_by_session_question_id_endpoint,
+    finish_session_endpoint,
+    answer_on_session_question_endpoint,
+    session_result_endpoint,
+    get_results_by_user_endpoint,
+)
+from quiz.controller.section_controller import (
+    create_section_endpoint,
+    get_sections_by_test_endpoint,
+)
+from quiz.controller.test_controller import (
+    create_test_endpoint,
+    get_all_tests_endpoint,
+    get_tests_by_owner_endpoint,
+    get_deleted_tests_by_owner_endpoint,
+    delete_test_endpoint,
+    edit_test_endpoint,
+    get_test_endpoint,
+    publish_or_unpublish_test_endpoint,
+)
 
 app = Flask(
     __name__, static_url_path="", static_folder="static", template_folder="templates"
@@ -71,63 +89,117 @@ zero_days_ago = (datetime.now()).date().isoformat()
 
 # App add_url_rule
 # Login
-app.add_url_rule('/auth/login.html', methods=['GET', 'POST'], view_func=login_index)
-app.add_url_rule('/auth/google_login', methods=['GET'], view_func=google_login)
-app.add_url_rule('/auth/vk_callback', methods=['GET'], view_func=vk_callback)
-app.add_url_rule('/auth/google_callback', methods=['GET'], view_func=google_callback)
-app.add_url_rule('/user/profile.html', methods=['GET', 'POST'], view_func=user_profile)
-app.add_url_rule('/auth/logout', methods=['GET'], view_func=logout)
+app.add_url_rule("/auth/login.html", methods=["GET", "POST"], view_func=login_index)
+app.add_url_rule("/auth/google_login", methods=["GET"], view_func=google_login)
+app.add_url_rule("/auth/vk_callback", methods=["GET"], view_func=vk_callback)
+app.add_url_rule("/auth/google_callback", methods=["GET"], view_func=google_callback)
+app.add_url_rule("/user/profile.html", methods=["GET", "POST"], view_func=user_profile)
+app.add_url_rule("/auth/logout", methods=["GET"], view_func=logout)
 
 # Network
-app.add_url_rule('/create_network', methods=['GET'], view_func=create_network)
-app.add_url_rule('/web_network', methods=['GET'], view_func=web_network)
-app.add_url_rule('/web_network_shared', methods=['GET'], view_func=web_network_shared)
-app.add_url_rule('/network/update_network_config', methods=['GET', 'POST'], view_func=update_network_config)
-app.add_url_rule('/delete_network', methods=['GET', 'POST'], view_func=delete_network)
-app.add_url_rule('/post_network_nodes', methods=['GET', 'POST'], view_func=post_nodes)
-app.add_url_rule('/post_nodes_edges', methods=['POST'], view_func=post_nodes_edges)
-app.add_url_rule('/move_network_nodes', methods=['POST'], view_func=move_nodes)
-app.add_url_rule('/network/upload_network_picture', methods=['GET', 'POST'], view_func=upload_network_picture)
-app.add_url_rule('/network/copy_network', methods=['POST'], view_func=copy_network)
+app.add_url_rule("/create_network", methods=["GET"], view_func=create_network)
+app.add_url_rule("/web_network", methods=["GET"], view_func=web_network)
+app.add_url_rule("/web_network_shared", methods=["GET"], view_func=web_network_shared)
+app.add_url_rule(
+    "/network/update_network_config",
+    methods=["GET", "POST"],
+    view_func=update_network_config,
+)
+app.add_url_rule("/delete_network", methods=["GET", "POST"], view_func=delete_network)
+app.add_url_rule("/post_network_nodes", methods=["GET", "POST"], view_func=post_nodes)
+app.add_url_rule("/post_nodes_edges", methods=["POST"], view_func=post_nodes_edges)
+app.add_url_rule("/move_network_nodes", methods=["POST"], view_func=move_nodes)
+app.add_url_rule(
+    "/network/upload_network_picture",
+    methods=["GET", "POST"],
+    view_func=upload_network_picture,
+)
+app.add_url_rule("/network/copy_network", methods=["POST"], view_func=copy_network)
 
 # Simulation
-app.add_url_rule('/run_simulation', methods=['POST'], view_func=run_simulation)
-app.add_url_rule('/check_simulation', methods=['GET'], view_func=check_simulation)
+app.add_url_rule("/run_simulation", methods=["POST"], view_func=run_simulation)
+app.add_url_rule("/check_simulation", methods=["GET"], view_func=check_simulation)
 
 # Hosts
-app.add_url_rule('/host/save_config', methods=['GET', 'POST'], view_func=save_host_config)
-app.add_url_rule('/host/router_save_config', methods=['GET', 'POST'], view_func=save_router_config)
-app.add_url_rule('/host/server_save_config', methods=['GET', 'POST'], view_func=save_server_config)
-app.add_url_rule('/host/delete_job', methods=['GET', 'POST'], view_func=delete_job)
-app.add_url_rule('/host/hub_save_config', methods=['GET', 'POST'], view_func=save_hub_config)
-app.add_url_rule('/host/switch_save_config', methods=['GET', 'POST'], view_func=save_switch_config)
+app.add_url_rule(
+    "/host/save_config", methods=["GET", "POST"], view_func=save_host_config
+)
+app.add_url_rule(
+    "/host/router_save_config", methods=["GET", "POST"], view_func=save_router_config
+)
+app.add_url_rule(
+    "/host/server_save_config", methods=["GET", "POST"], view_func=save_server_config
+)
+app.add_url_rule("/host/delete_job", methods=["GET", "POST"], view_func=delete_job)
+app.add_url_rule(
+    "/host/hub_save_config", methods=["GET", "POST"], view_func=save_hub_config
+)
+app.add_url_rule(
+    "/host/switch_save_config", methods=["GET", "POST"], view_func=save_switch_config
+)
 
 # MimiShark
-app.add_url_rule('/host/mimishark', methods=['GET'], view_func=mimishark_page)
+app.add_url_rule("/host/mimishark", methods=["GET"], view_func=mimishark_page)
 
 # Quiz
-app.add_url_rule('/quiz/test/create', methods=['POST'], view_func=create_test_endpoint)
-app.add_url_rule('/quiz/test/owner', methods=['GET'], view_func=get_tests_by_owner_endpoint)
-app.add_url_rule('/quiz/test/all', methods=['GET'], view_func=get_all_tests_endpoint)
-app.add_url_rule('/quiz/test/owner/deleted', methods=['GET'], view_func=get_deleted_tests_by_owner_endpoint)
-app.add_url_rule('/quiz/test/delete', methods=['DELETE'], view_func=delete_test_endpoint)
-app.add_url_rule('/quiz/test/edit', methods=['PUT'], view_func=edit_test_endpoint)
-app.add_url_rule('/quiz/test/get', methods=['GET'], view_func=get_test_endpoint)
-app.add_url_rule('/quiz/test/publish', methods=['PUT'], view_func=publish_or_unpublish_test_endpoint)
+app.add_url_rule("/quiz/test/create", methods=["POST"], view_func=create_test_endpoint)
+app.add_url_rule(
+    "/quiz/test/owner", methods=["GET"], view_func=get_tests_by_owner_endpoint
+)
+app.add_url_rule("/quiz/test/all", methods=["GET"], view_func=get_all_tests_endpoint)
+app.add_url_rule(
+    "/quiz/test/owner/deleted",
+    methods=["GET"],
+    view_func=get_deleted_tests_by_owner_endpoint,
+)
+app.add_url_rule(
+    "/quiz/test/delete", methods=["DELETE"], view_func=delete_test_endpoint
+)
+app.add_url_rule("/quiz/test/edit", methods=["PUT"], view_func=edit_test_endpoint)
+app.add_url_rule("/quiz/test/get", methods=["GET"], view_func=get_test_endpoint)
+app.add_url_rule(
+    "/quiz/test/publish", methods=["PUT"], view_func=publish_or_unpublish_test_endpoint
+)
 
-app.add_url_rule('/quiz/section/create', methods=['POST'], view_func=create_section_endpoint)
-app.add_url_rule('/quiz/section/test/all', methods=['GET'], view_func=get_sections_by_test_endpoint)
+app.add_url_rule(
+    "/quiz/section/create", methods=["POST"], view_func=create_section_endpoint
+)
+app.add_url_rule(
+    "/quiz/section/test/all", methods=["GET"], view_func=get_sections_by_test_endpoint
+)
 
-app.add_url_rule('/quiz/question/create', methods=['POST'], view_func=create_question_endpoint)
-app.add_url_rule('/quiz/question/delete', methods=['DELETE'], view_func=delete_question_endpoint)
-app.add_url_rule('/quiz/question/all', methods=['GET'], view_func=get_questions_by_section_endpoint)
+app.add_url_rule(
+    "/quiz/question/create", methods=["POST"], view_func=create_question_endpoint
+)
+app.add_url_rule(
+    "/quiz/question/delete", methods=["DELETE"], view_func=delete_question_endpoint
+)
+app.add_url_rule(
+    "/quiz/question/all", methods=["GET"], view_func=get_questions_by_section_endpoint
+)
 
-app.add_url_rule('/quiz/session/start', methods=['POST'], view_func=start_session_endpoint)
-app.add_url_rule('/quiz/session/question', methods=['GET'], view_func=get_question_by_session_question_id_endpoint)
-app.add_url_rule('/quiz/session/answer', methods=['POST'], view_func=answer_on_session_question_endpoint)
-app.add_url_rule('/quiz/session/finish', methods=['PUT'], view_func=finish_session_endpoint)
-app.add_url_rule('/quiz/session/result', methods=['GET'], view_func=session_result_endpoint)
-app.add_url_rule('/quiz/session/results', methods=['GET'], view_func=get_results_by_user_endpoint)
+app.add_url_rule(
+    "/quiz/session/start", methods=["POST"], view_func=start_session_endpoint
+)
+app.add_url_rule(
+    "/quiz/session/question",
+    methods=["GET"],
+    view_func=get_question_by_session_question_id_endpoint,
+)
+app.add_url_rule(
+    "/quiz/session/answer",
+    methods=["POST"],
+    view_func=answer_on_session_question_endpoint,
+)
+app.add_url_rule(
+    "/quiz/session/finish", methods=["PUT"], view_func=finish_session_endpoint
+)
+app.add_url_rule(
+    "/quiz/session/result", methods=["GET"], view_func=session_result_endpoint
+)
+app.add_url_rule(
+    "/quiz/session/results", methods=["GET"], view_func=get_results_by_user_endpoint
+)
 
 
 @app.route("/")

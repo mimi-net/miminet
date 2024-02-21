@@ -10,7 +10,13 @@ def start_session(section_id: str, user: User):
     test = section.test
     if section is None or section.is_deleted:
         return None, None, 404
-    if not test.is_retakeable and QuizSession.query.filter_by(section_id=section_id, created_by_id=user.id, is_deleted=False).first() is not None:
+    if (
+        not test.is_retakeable
+        and QuizSession.query.filter_by(
+            section_id=section_id, created_by_id=user.id, is_deleted=False
+        ).first()
+        is not None
+    ):
         return None, None, 403
     quiz_session = QuizSession()
     quiz_session.created_by_id = user.id
@@ -52,16 +58,31 @@ def session_result(quiz_session_id: str):
         return None, None, None, 403
     question_count = len(quiz_session.sessions)
     time_spent = str(quiz_session.finished_at - quiz_session.created_on).split(".")[0]
-    for question in list(filter(lambda x: x.is_correct is not None, quiz_session.sessions)):
+    for question in list(
+        filter(lambda x: x.is_correct is not None, quiz_session.sessions)
+    ):
         if question.is_correct:
             correct += 1
     return correct, question_count, time_spent, 200
 
 
 def get_results_by_user(user: User):
-    quiz_sessions = QuizSession.query.filter_by(created_by_id=user.id).order_by(QuizSession.created_on.desc()).all()
+    quiz_sessions = (
+        QuizSession.query.filter_by(created_by_id=user.id)
+        .order_by(QuizSession.created_on.desc())
+        .all()
+    )
     dto_list = []
     for quiz_session in quiz_sessions:
         result = session_result(quiz_session.id)
-        dto_list.append(SessionResultDto(quiz_session.section.test.name, quiz_session.section.name, result[0], result[1], quiz_session.created_on.strftime("%m/%d/%Y, %H:%M:%S"), result[2]))
+        dto_list.append(
+            SessionResultDto(
+                quiz_session.section.test.name,
+                quiz_session.section.name,
+                result[0],
+                result[1],
+                quiz_session.created_on.strftime("%m/%d/%Y, %H:%M:%S"),
+                result[2],
+            )
+        )
     return dto_list

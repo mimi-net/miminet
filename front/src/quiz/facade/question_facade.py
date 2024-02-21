@@ -1,8 +1,17 @@
 import json
 
 from miminet_model import db, User
-from quiz.entity.entity import Section, VariableQuestion, Answer, MatchingQuestion, SortingQuestion, TextQuestion, \
-    Question, PracticeQuestion, PracticeTask
+from quiz.entity.entity import (
+    Section,
+    VariableQuestion,
+    Answer,
+    MatchingQuestion,
+    SortingQuestion,
+    TextQuestion,
+    Question,
+    PracticeQuestion,
+    PracticeTask,
+)
 
 
 def create_variable_question(variants: list, user: User):
@@ -10,9 +19,9 @@ def create_variable_question(variants: list, user: User):
     variable_question.created_by_id = user.id
     for answer_json in variants:
         answer = Answer()
-        answer.answer_text = answer_json['answer_text']
-        answer.explanation = answer_json['explanation']
-        answer.is_correct = answer_json['is_correct']
+        answer.answer_text = answer_json["answer_text"]
+        answer.explanation = answer_json["explanation"]
+        answer.is_correct = answer_json["is_correct"]
         variable_question.answers.append(answer)
         answer.created_by_id = user.id
         db.session.add(answer)
@@ -48,6 +57,7 @@ def create_practice_task(task: str, user: User):
 
     return practice_task
 
+
 def create_question(section_id: str, question_dict: dict, user: User):
     section = Section.query.filter_by(id=section_id).first()
     if section is None or section.is_deleted:
@@ -58,23 +68,28 @@ def create_question(section_id: str, question_dict: dict, user: User):
     question = Question()
     question.section_id = section_id
     question.created_by_id = user.id
-    question.question_type = question_dict['question_type']
+    question.question_type = question_dict["question_type"]
 
-    if question_dict['question_type'] == "text":
+    if question_dict["question_type"] == "text":
         text_question = TextQuestion()
-        text_question.text_type = question_dict['text_type']
+        text_question.text_type = question_dict["text_type"]
 
-        if question_dict['text_type'] == "sorting":
-            sorting_question = create_sorting_question(question_dict['explanation'], question_dict['right_sequence'],
-                                                       user)
+        if question_dict["text_type"] == "sorting":
+            sorting_question = create_sorting_question(
+                question_dict["explanation"], question_dict["right_sequence"], user
+            )
             text_question.sorting_question = sorting_question
 
-        elif question_dict['text_type'] == "matching":
-            matching_question = create_matching_question(question_dict['explanation'], question_dict['map'], user)
+        elif question_dict["text_type"] == "matching":
+            matching_question = create_matching_question(
+                question_dict["explanation"], question_dict["map"], user
+            )
             text_question.matching_question = matching_question
 
-        elif question_dict['text_type'] == "variable":
-            variable_question = create_variable_question(question_dict['variants'], user)
+        elif question_dict["text_type"] == "variable":
+            variable_question = create_variable_question(
+                question_dict["variants"], user
+            )
             text_question.variable_question = variable_question
 
         else:
@@ -83,23 +98,33 @@ def create_question(section_id: str, question_dict: dict, user: User):
         text_question.created_by_id = user.id
         question.text_question = text_question
         db.session.add(text_question)
-        question.question_text = question_dict['question_text']
+        question.question_text = question_dict["question_text"]
 
-    elif question_dict['question_type'] == "practice":
+    elif question_dict["question_type"] == "practice":
         practice_question = PracticeQuestion()
 
-        attributes = ['description', 'explanation', 'start_configuration', 'available_host', 'available_l2_switch', 'available_l1_hub',
-                      'available_l3_router', 'available_server']
+        attributes = [
+            "description",
+            "explanation",
+            "start_configuration",
+            "available_host",
+            "available_l2_switch",
+            "available_l1_hub",
+            "available_l3_router",
+            "available_server",
+        ]
 
         for attribute in attributes:
             setattr(practice_question, attribute, question_dict[attribute])
 
         practice_question.created_by_id = user.id
-        practice_question.practice_tasks = [create_practice_task(question_dict['tasks'], user)]
+        practice_question.practice_tasks = [
+            create_practice_task(question_dict["tasks"], user)
+        ]
         # practice_question.network = question_dict['network']
         question.practice_question = practice_question
         db.session.add(practice_question)
-        question.question_text = question_dict['question_text']
+        question.question_text = question_dict["question_text"]
     else:
         return None, 400
     db.session.commit()

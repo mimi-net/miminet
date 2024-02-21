@@ -80,6 +80,7 @@ def check_image_with_pil(file):
         return False
     return True
 
+
 # def add_examples_network_to_profile(user_id):
 #     u = uuid.uuid4()
 #

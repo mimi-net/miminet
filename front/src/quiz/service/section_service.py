@@ -5,7 +5,9 @@ from quiz.entity.entity import Section, Test
 from quiz.util.dto import to_section_dto_list
 
 
-def create_section(test_id: str, name: str, description: str, timer: datetime, user: User):
+def create_section(
+    test_id: str, name: str, description: str, timer: datetime, user: User
+):
     test = Test.query.filter_by(id=test_id, is_deleted=False).first()
     if test is None:
         return None, 404
@@ -65,7 +67,9 @@ def delete_section(user: User, section_id: str):
         return 200
 
 
-def edit_section(user: User, section_id: str, name: str, description: str, timer: datetime):
+def edit_section(
+    user: User, section_id: str, name: str, description: str, timer: datetime
+):
     section = Section.query.filter_by(id=section_id).first()
     if section is None or section.is_deleted is True:
         return 404
@@ -79,7 +83,9 @@ def edit_section(user: User, section_id: str, name: str, description: str, timer
         return 200
 
 
-def publish_or_unpublish_test_by_section(user: User, section_id: str, is_to_publish: bool):
+def publish_or_unpublish_test_by_section(
+    user: User, section_id: str, is_to_publish: bool
+):
     section = Section.query.filter_by(id=section_id).first()
     test = section.test
     if test is None or test.is_deleted is True:
