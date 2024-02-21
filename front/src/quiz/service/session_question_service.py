@@ -1,6 +1,8 @@
+import json
+
 from miminet_model import User, db
 from quiz.entity.entity import SessionQuestion, TextQuestion, MatchingQuestion, SortingQuestion, \
-    Answer
+    Answer, PracticeQuestion, PracticeTask
 from quiz.util.dto import QuestionDto, AnswerResultDto
 
 
@@ -12,6 +14,23 @@ def get_question_by_session_question_id(session_question_id: str):
 
     return QuestionDto(question), 200
 
+def check_task(task_dict, answer):
+    # print("-----------------------------------------------------")
+    # print(task_dict)
+    # print("-----------------------------------------------------")
+    # print(answer)
+    # print("-----------------------------------------------------")
+
+    nodes = answer['nodes']
+    edges = answer['edges']
+    packets = answer['packets']
+
+    task = task_dict['task']
+    if task == "ping 1 host":
+        from_node = task_dict['from']
+        to_node = task_dict['to']
+
+        return True
 
 def answer_on_session_question(session_question_id: str, answer_string: dict, user: User):
     session_question = SessionQuestion.query.filter_by(id=session_question_id).first()
@@ -69,5 +88,23 @@ def answer_on_session_question(session_question_id: str, answer_string: dict, us
                 correct
             ), 200
 
-    elif question.question_type == "text":
-        return
+    elif question.question_type == "practice":
+        practice_question = PracticeQuestion.query.filter_by(id=question.id).first()
+        tasks = practice_question.practice_tasks
+        is_correct = True
+        correct_count = 0
+        for task in tasks:
+            result = check_task(json.loads(task.task), answer_string['answer'])
+            is_correct &= result
+            correct_count += 1 if result else 0
+
+        is_correct &= correct_count == len(tasks)
+
+        session_question.is_correct = is_correct
+        db.session.add(session_question)
+        db.session.commit()
+
+        return AnswerResultDto(
+            practice_question.explanation,
+            is_correct
+        ), 200

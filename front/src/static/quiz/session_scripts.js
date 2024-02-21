@@ -123,7 +123,7 @@ async function answerQuestion() {
     document.querySelector('button[name="answerQuestion"]').disabled = true
 
     const answer = await getAnswer();
-    console.log(JSON.stringify(answer));
+    // console.log(JSON.stringify(answer));
     if (answer === undefined) {
         return;
     }
