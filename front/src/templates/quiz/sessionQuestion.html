@@ -85,6 +85,7 @@
             displayFunctions[textType](textType === 'sorting' ? answers.split(' ') : JSON.parse(answers));
         </script>
     {% endif %}
+
     {% if question.question_type == "practice" %}
         <main>
             <section class="pb-5 mb-5">
@@ -142,7 +143,7 @@
 
                                 <hr class="mb-4">
 
-                                <div class="col-12 text-center">
+                                <div class="col-12 text-center" id="NetworkPlayerDiv">
                                     <div class="d-flex justify-content-center" id="NetworkPlayer">
                                         <button type="button" class="btn btn-primary w-100" id="NetworkRunButton"
                                                 disabled>
@@ -166,6 +167,14 @@
                                     <button name="answerQuestion" class="btn btn-primary">Ответить</button>
                                     <button name="nextQuestion" class="btn btn-primary w-100" hidden>Следующий вопрос</button>
                                     <button name="seeResults" class="btn btn-primary w-100" hidden>Посмотреть результаты</button>
+
+                                </div>
+
+                                {# Explanation #}
+                                <div class="card-body d-flex">
+                                    <div class="container" id="explanation"
+                                         style="margin: 24px 8px 24px 0; display: flex"
+                                         hidden></div>
                                 </div>
                             </div>
                         </div>

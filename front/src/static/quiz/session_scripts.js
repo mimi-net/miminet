@@ -57,7 +57,7 @@ function RunAndWaitSimulation(network_guid) {
 
     return new Promise(function (resolve, reject){
         function checkReady(hop){
-            if (packets !== "null" && packets !== undefined) {
+            if (packets !== "null" && packets !== undefined && packets !== null) {
                 resolve(packets)
             } else {
                 if (hop > 15){
@@ -94,7 +94,7 @@ async function getAnswer() {
         }
     }
     if (questionType === "practice") {
-        if (packets === "null" || packets === undefined) {
+        if (packets === "null" || packets === undefined || packets === null) {
             // simulate and get packets
             if (!jobs.length) {
                 $('#noJobsModal').modal('toggle');
@@ -119,12 +119,16 @@ function nextQuestion() {
 async function answerQuestion() {
     const questionId = questionIds[questionIndex];
 
+    document.getElementById("NetworkPlayerDiv").hidden = true;
     document.querySelector('button[name="answerQuestion"]').textContent = "Проверка..."
     document.querySelector('button[name="answerQuestion"]').disabled = true
 
     const answer = await getAnswer();
     // console.log(JSON.stringify(answer));
     if (answer === undefined) {
+        document.getElementById("NetworkPlayerDiv").hidden = false;
+        document.querySelector('button[name="answerQuestion"]').textContent = "Ответить"
+        document.querySelector('button[name="answerQuestion"]').disabled = false
         return;
     }
 
