@@ -213,6 +213,7 @@ def home():
     user = current_user
     networks = (
         Network.query.filter(Network.author_id == user.id)
+        .filter(Network.is_task == False)
         .order_by(Network.id.desc())
         .all()
     )

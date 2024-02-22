@@ -52,6 +52,9 @@ class Network(db.Model):  # type:ignore[name-defined]
     # Is this network in share mode?
     share_mode = db.Column(db.Boolean, default=True)
 
+    # Don't show networks for tasks
+    is_task = db.Column(db.Boolean, default=False, nullable=True)
+
 
 class Simulate(db.Model):  # type:ignore[name-defined]
     id = db.Column(db.Integer, primary_key=True)
