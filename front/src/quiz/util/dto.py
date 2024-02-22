@@ -1,8 +1,9 @@
 import json
 import random
+import uuid
 from typing import List
 
-from miminet_model import Network
+from miminet_model import Network, db
 from quiz.entity.entity import Section, Test, Question, Answer, PracticeQuestion
 
 
@@ -76,7 +77,7 @@ class AnswerDto:
 
 
 class PracticeQuestionDto:
-    def __init__(self, practice_question: PracticeQuestion) -> None:
+    def __init__(self, user_id, practice_question: PracticeQuestion) -> None:
         attributes = [
             "description",
             "available_host",
@@ -92,12 +93,24 @@ class PracticeQuestionDto:
         net = (
             Network.query.filter(Network.guid == practice_question.start_configuration)
             .first()
-            .network
         )
-        escaped_string = net.replace('\\"', '"').replace('"', '\\"')
+        escaped_string = net.network.replace('\\"', '"').replace('"', '\\"')
+
+        u = uuid.uuid4()
+        net_copy = Network(
+            guid = str(u),
+            author_id=user_id,
+            network = net.network,
+            title = net.title,
+            description = net.description,
+            preview_uri = net.preview_uri,
+            is_task = True
+        )
+        db.session.add(net_copy)
+        db.session.commit()
 
         self.start_configuration = escaped_string
-        self.network_guid = practice_question.start_configuration
+        self.network_guid = net_copy.guid
 
     def to_dict(self):
         attributes = [
@@ -115,7 +128,7 @@ class PracticeQuestionDto:
 
 
 class QuestionDto:
-    def __init__(self, question: Question) -> None:
+    def __init__(self, user_id, question: Question) -> None:
         self.question_type = question.question_type
         self.question_text = question.question_text
         if self.question_type == "text":
@@ -149,9 +162,9 @@ class QuestionDto:
                 self.answers = " ".join(words)
 
         elif self.question_type == "practice":
-            self.practice_question = PracticeQuestionDto(
-                question.practice_question
-            ).to_dict()
+            self.practice_question = PracticeQuestionDto(user_id,
+                                                         question.practice_question
+                                                         ).to_dict()
 
 
 class SectionDto:

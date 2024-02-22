@@ -16,19 +16,14 @@ from quiz.util.dto import QuestionDto, AnswerResultDto
 def get_question_by_session_question_id(session_question_id: str):
     session_question = SessionQuestion.query.filter_by(id=session_question_id).first()
     question = session_question.question
+    user_id = session_question.created_by_id
     if question is None or question.is_deleted is True:
         return None, 404
 
-    return QuestionDto(question), 200
+    return QuestionDto(user_id, question), 200
 
 
 def check_task(task_dict, answer):
-    # print("-----------------------------------------------------")
-    # print(task_dict)
-    # print("-----------------------------------------------------")
-    # print(answer)
-    # print("-----------------------------------------------------")
-
     nodes = answer["nodes"]
     edges = answer["edges"]
     packets = answer["packets"]
