@@ -12,7 +12,7 @@ units.forEach(function (item) {
 
 // Function to update counter value
 function updateCounter(unit, value) {
-    counters[unit] += value;
+    counters[unit] -= value;
     document.getElementById(`${unit}_counter`).innerText = `Доступно: ${counters[unit]}`;
 
     // Disable unit dragging when counter reaches zero
