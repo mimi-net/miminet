@@ -55,12 +55,12 @@ function finishQuiz() {
 function RunAndWaitSimulation(network_guid) {
     RunSimulation(network_guid);
 
-    return new Promise(function (resolve, reject){
-        function checkReady(hop){
+    return new Promise(function (resolve, reject) {
+        function checkReady(hop) {
             if (packets !== "null" && packets !== undefined && packets !== null) {
                 resolve(packets)
             } else {
-                if (hop > 15){
+                if (hop > 15) {
                     reject(new Error("Exceeded simulation wait time"))
                 }
                 setTimeout(function () {
@@ -119,14 +119,21 @@ function nextQuestion() {
 async function answerQuestion() {
     const questionId = questionIds[questionIndex];
 
-    document.getElementById("NetworkPlayerDiv").hidden = true;
+    let playerDiv = document.getElementById("NetworkPlayerDiv")
+
+    if (playerDiv) {
+        playerDiv.hidden = true;
+    }
+
     document.querySelector('button[name="answerQuestion"]').textContent = "Проверка..."
     document.querySelector('button[name="answerQuestion"]').disabled = true
 
     const answer = await getAnswer();
     // console.log(JSON.stringify(answer));
     if (answer === undefined) {
-        document.getElementById("NetworkPlayerDiv").hidden = false;
+        if (playerDiv) {
+            playerDiv.hidden = false;
+        }
         document.querySelector('button[name="answerQuestion"]').textContent = "Ответить"
         document.querySelector('button[name="answerQuestion"]').disabled = false
         return;
