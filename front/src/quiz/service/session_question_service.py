@@ -33,7 +33,43 @@ def check_task(task_dict, answer):
         from_node = task_dict["from"]
         to_node = task_dict["to"]
 
-        return True
+        request = []
+        reply = []
+
+        for packet in packets:
+            type = packet["config"]["type"]
+            source = packet["config"]["source"]
+            target = packet["config"]["target"]
+
+            if "ICMP echo-request" in type:
+                if not request:
+                    request.append(source)
+                    request.append(target)
+
+                if request[-1] != source:
+                    request.append(source)
+
+                if request[-1] != target:
+                    request.append(target)
+
+            elif "ICMP echo-reply" in type:
+                if not reply:
+                    reply.append(source)
+                    reply.append(target)
+
+                if reply[-1] != source:
+                    reply.append(source)
+
+                if reply[-1] != target:
+                    reply.append(target)
+
+            else:
+                continue
+
+        if request[0] == source and request[-1] == target and reply[0] == target and reply[-1] == source:
+            return True
+        else:
+            return False
 
 
 def answer_on_session_question(

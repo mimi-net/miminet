@@ -102,7 +102,7 @@ class PracticeQuestionDto:
             author_id=user_id,
             network = net.network,
             title = net.title,
-            description = net.description,
+            description = "Network copy",
             preview_uri = net.preview_uri,
             is_task = True
         )
