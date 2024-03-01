@@ -201,6 +201,9 @@ app.add_url_rule(
     "/quiz/session/results", methods=["GET"], view_func=get_results_by_user_endpoint
 )
 
+# Init Flask-admin
+admin = Admin(app, index_view=SeAdminIndexView(), template_mode="bootstrap4")
+
 
 @app.route("/")
 def index():  # put application's code here
