@@ -37,9 +37,10 @@ def check_task(task_dict, answer):
         reply = []
 
         for packet in packets:
-            type = packet["config"]["type"]
-            source = packet["config"]["source"]
-            target = packet["config"]["target"]
+
+            type = packet[0]["config"]["type"]
+            source = packet[0]["config"]["source"]
+            target = packet[0]["config"]["target"]
 
             if "ICMP echo-request" in type:
                 if not request:
@@ -66,7 +67,7 @@ def check_task(task_dict, answer):
             else:
                 continue
 
-        if request[0] == source and request[-1] == target and reply[0] == target and reply[-1] == source:
+        if request and reply and request[0] == from_node and request[-1] == to_node and reply[0] == to_node and reply[-1] == from_node:
             return True
         else:
             return False
