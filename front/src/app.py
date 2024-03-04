@@ -2,8 +2,11 @@ import sys
 from datetime import datetime
 
 from flask import Flask, make_response, render_template
+from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user, login_required
 from flask_migrate import Migrate
+
+from miminet_admin import MiminetAdminIndexView, TestView
 from miminet_auth import (
     google_callback,
     google_login,
@@ -13,6 +16,7 @@ from miminet_auth import (
     user_profile,
     vk_callback,
 )
+from flask_admin import Admin
 from miminet_config import SECRET_KEY, SQLITE_DATABASE_NAME
 from miminet_host import (
     delete_job,
@@ -64,6 +68,7 @@ from quiz.controller.test_controller import (
     get_test_endpoint,
     publish_or_unpublish_test_endpoint,
 )
+from quiz.entity.entity import Section, Test
 
 app = Flask(
     __name__, static_url_path="", static_folder="static", template_folder="templates"
@@ -202,7 +207,11 @@ app.add_url_rule(
 )
 
 # Init Flask-admin
-admin = Admin(app, index_view=SeAdminIndexView(), template_mode="bootstrap4")
+admin = Admin(app, index_view=MiminetAdminIndexView(), name="Miminet Admin", template_mode="bootstrap4")
+
+admin.add_view(TestView(Test, db.session))
+admin.add_view(ModelView(Section, db.session))
+
 
 
 @app.route("/")
