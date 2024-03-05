@@ -6,7 +6,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user, login_required
 from flask_migrate import Migrate
 
-from miminet_admin import MiminetAdminIndexView, TestView
+from miminet_admin import MiminetAdminIndexView, TestView, SectionView
 from miminet_auth import (
     google_callback,
     google_login,
@@ -210,8 +210,7 @@ app.add_url_rule(
 admin = Admin(app, index_view=MiminetAdminIndexView(), name="Miminet Admin", template_mode="bootstrap4")
 
 admin.add_view(TestView(Test, db.session))
-admin.add_view(ModelView(Section, db.session))
-
+admin.add_view(SectionView(Section, db.session))
 
 
 @app.route("/")
