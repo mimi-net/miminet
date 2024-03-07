@@ -5,11 +5,11 @@ from flask_admin import AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.fields import QuerySelectField
 from flask_admin.form import TimeField
-from flask_admin.model import typefmt
+from flask_admin.model import typefmt, InlineFormAdmin
 from flask_login import current_user
 
 from miminet_model import User
-from quiz.entity.entity import Test
+from quiz.entity.entity import Test, Section
 
 ADMIN_ROLE_LEVEL = 1
 
@@ -30,7 +30,7 @@ class MiminetAdminIndexView(AdminIndexView):
         return redirect(url_for("login_index"))
 
 
-# Base model view with access and inaccess methods
+# Base model view
 class MiminetAdminModelView(ModelView):
     can_set_page_size = True
 
@@ -71,8 +71,6 @@ class TestView(MiminetAdminModelView):
     column_exclude_list = ["is_deleted", "updated_on"]
     # Remove fields
     form_excluded_columns = ["is_deleted", "updated_on"]
-    # column_display_pk = False
-    # can_delete = False
 
     column_list = ("name", "description", "is_ready", "is_retakeable", "created_on", "created_by_id")
     column_sortable_list = ("name", "created_on", "created_by_id")
@@ -128,7 +126,7 @@ class SectionView(MiminetAdminModelView):
 
     form_extra_fields = {"test_id": QuerySelectField(
         "Раздел теста",
-        query_factory=lambda: Test.query.all(),
+        query_factory=lambda: Test.query.filter(Test.created_by_id == current_user.id).all(),
         get_pk=lambda test: test.id,
         get_label=lambda test: test.name
                                + (", " + test.description if test.description else "")
@@ -147,8 +145,45 @@ class SectionView(MiminetAdminModelView):
     pass
 
 
+def get_section_name(view, context, model, name, **kwargs):
+    section = Section.query.get(model.test_id)
+    if section and section.name:
+        return section.name
+    raise Exception("Error occurred while retrieving section name")
+
+
 class QuestionView(MiminetAdminModelView):
     column_exclude_list = ["is_deleted", "updated_on"]
     form_excluded_columns = ["is_deleted", "updated_on"]
+
+    column_list = ("section_id", "question_text", "created_on", "created_by_id")
+    column_sortable_list = ("created_on", "created_by_id")
+
+    column_labels = {
+        "section_id": "Вопрос раздела",
+        "question_text": "Текст вопроса",
+        "created_on": "Дата создания",
+        "created_by_id": "Автор"
+    }
+
+    column_formatters = {
+        "created_by_id": created_by_formatter,
+        "section_id": get_section_name
+    }
+
+    form_extra_fields = {"section_id": QuerySelectField(
+        "Вопрос раздела",
+        query_factory=lambda: Section.query.filter(Section.created_by_id == current_user.id).all(),
+        get_pk=lambda section: section.id,
+        get_label=lambda section: section.name +
+                                  (", " + User.query.get(section.created_by_id).nick) if section.created_by_id else "")
+    }
+
+    def on_model_change(self, form, model, is_created, **kwargs):
+        # Call base class functionality
+        super().on_model_change(form, model, is_created)
+
+        model.section_id = str(model.section_id).removeprefix("<Section ")
+        model.section_id = str(model.section_id).removesuffix(">")
 
     pass

@@ -211,7 +211,7 @@ admin = Admin(app, index_view=MiminetAdminIndexView(), name="Miminet Admin", tem
 
 admin.add_view(TestView(Test, db.session))
 admin.add_view(SectionView(Section, db.session))
-admin.add_view(QuestionView(TextQuestion, db.session))
+admin.add_view(QuestionView(Question, db.session))
 
 
 @app.route("/")
