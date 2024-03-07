@@ -1,13 +1,14 @@
-from datetime import date
+from datetime import date, datetime
 
-from flask import redirect, url_for, session
+from flask import redirect, url_for
 from flask_admin import AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.fields import QuerySelectField
+from flask_admin.form import TimeField
 from flask_admin.model import typefmt
 from flask_login import current_user
 
-from miminet_model import User, db
+from miminet_model import User
 from quiz.entity.entity import Test
 
 ADMIN_ROLE_LEVEL = 1
@@ -46,14 +47,13 @@ class MiminetAdminModelView(ModelView):
     def on_model_change(self, form, model, is_created, **kwargs):
         if not is_created and model.created_by_id != current_user.id:
             raise Exception("You are not allowed to edit this record.")
-
-    def date_format(view, value):
-        return value.strftime('%d.%m.%Y')
+        if is_created:
+            model.created_by_id = current_user.id
 
     MY_DEFAULT_FORMATTERS = dict(typefmt.BASE_FORMATTERS)
     MY_DEFAULT_FORMATTERS.update({
         type(None): typefmt.null_formatter,
-        date: date_format
+        date: lambda view, value: value.strftime('%d.%m.%Y')
     })
 
     column_type_formatters = MY_DEFAULT_FORMATTERS
@@ -90,9 +90,6 @@ class TestView(MiminetAdminModelView):
         "created_by_id": created_by_formatter
     }
 
-    # def get_query(self):
-    #     return self.session.query(self.model).filter(self.model.created_by_id == current_user.id)
-
     pass
 
 
@@ -121,7 +118,12 @@ class SectionView(MiminetAdminModelView):
 
     column_formatters = {
         "created_by_id": created_by_formatter,
-        "test_id": get_test_name
+        "test_id": get_test_name,
+        "timer": lambda v, c, model, n, **kwargs: model.timer.strftime("%H:%M")
+    }
+
+    form_overrides = {
+        "timer": TimeField
     }
 
     form_extra_fields = {"test_id": QuerySelectField(
@@ -132,5 +134,21 @@ class SectionView(MiminetAdminModelView):
                                + (", " + test.description if test.description else "")
                                + (", " + User.query.get(test.created_by_id).nick) if test.created_by_id else "")
     }
+
+    def on_model_change(self, form, model, is_created, **kwargs):
+        # Call base class functionality
+        super().on_model_change(form, model, is_created)
+
+        model.test_id = str(model.test_id).removeprefix("<Test ")
+        model.test_id = str(model.test_id).removesuffix(">")
+
+        model.timer = datetime.strptime(str(model.timer), "%H:%M:%S")
+
+    pass
+
+
+class QuestionView(MiminetAdminModelView):
+    column_exclude_list = ["is_deleted", "updated_on"]
+    form_excluded_columns = ["is_deleted", "updated_on"]
 
     pass

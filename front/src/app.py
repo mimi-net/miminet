@@ -6,7 +6,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user, login_required
 from flask_migrate import Migrate
 
-from miminet_admin import MiminetAdminIndexView, TestView, SectionView
+from miminet_admin import MiminetAdminIndexView, TestView, SectionView, QuestionView
 from miminet_auth import (
     google_callback,
     google_login,
@@ -68,7 +68,7 @@ from quiz.controller.test_controller import (
     get_test_endpoint,
     publish_or_unpublish_test_endpoint,
 )
-from quiz.entity.entity import Section, Test
+from quiz.entity.entity import Section, Test, Question, TextQuestion
 
 app = Flask(
     __name__, static_url_path="", static_folder="static", template_folder="templates"
@@ -211,6 +211,7 @@ admin = Admin(app, index_view=MiminetAdminIndexView(), name="Miminet Admin", tem
 
 admin.add_view(TestView(Test, db.session))
 admin.add_view(SectionView(Section, db.session))
+admin.add_view(QuestionView(TextQuestion, db.session))
 
 
 @app.route("/")
