@@ -78,6 +78,11 @@ function generateTableContent(currentDevice, tableSelector) {
         edgesMap.set(edges[i].data.id, edges[i]);
     }
 
+    var nodesMap = new Map();
+    for (var i = 0; i < nodes.length; i++) {
+        nodesMap.set(nodes[i].data.id, nodes[i].data.label);
+    }
+
     for (var i = 0; i < currentDevice.interface.length; i++) {
         var interface = currentDevice.interface[i];
         var connectedEdge = edgesMap.get(interface.connect);
@@ -99,7 +104,7 @@ function generateTableContent(currentDevice, tableSelector) {
             var selectedTrunk = type_connection === 1 ? 'selected' : '';
 
             var row = '<tr data-id="' + interface.id + '">' +
-                '<td>' + targetDeviceId + '</td>' +
+                '<td>' + nodesMap.get(targetDeviceId) + '</td>' +
                 '<td><input type="text" value="' + vlan + '" class="form-control vlan-input" /></td>' +
                 '<td>' +
                 '<select class="form-select type-connection-select">' +
