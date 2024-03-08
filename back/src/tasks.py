@@ -1,24 +1,19 @@
 import json
 import os
 import signal
-import typing
-
 import marshmallow_dataclass
-import redis
-from celery import shared_task
+from celery_app import (
+    app,
+    SEND_NETWORK_RESPONSE_EXCHANGE,
+    SEND_NETWORK_RESPONSE_ROUTING_KEY,
+)
 from mininet.log import setLogLevel
 
 from network import Network
 from simulate import run_mininet
 
 
-@shared_task(
-    autoretry_for=(redis.exceptions.ConnectionError,),
-    retry_kwargs={"max_retries": 3, "countdown": 5},
-)
-def mininet_worker(
-    network: str,
-) -> tuple[str, list[typing.Any] | list[tuple[str, bytes]]]:
+def simulate(network: str):
     """Worker for start mininet simulation
 
     Args:
@@ -28,6 +23,7 @@ def mininet_worker(
         tuple: Tuple (json emulation results, List[pcap, pcap name])
 
     """
+
     setLogLevel("info")
 
     if os.name == "posix":
@@ -48,4 +44,37 @@ def mininet_worker(
             break
         else:
             break
+
+    return json.dumps(animation), pcaps
+
+
+@app.task(bind=True)
+def mininet_worker(self, network: str):
+    """Worker for start mininet simulation
+
+    Args:
+        network (str): str network from queue
+
+    Returns:
+        tuple: Tuple (json emulation results, List[pcap, pcap name])
+
+    """
+
+    animation, pcaps = simulate(network)
+
+    network_task = self.request.headers["network_task_name"]
+    task_id = self.request.id
+
+    app.send_task(
+        network_task,
+        (
+            animation,
+            pcaps,
+        ),
+        routing_key=SEND_NETWORK_RESPONSE_ROUTING_KEY,
+        exchange=SEND_NETWORK_RESPONSE_EXCHANGE.name,
+        exchange_type=SEND_NETWORK_RESPONSE_EXCHANGE.type,
+        task_id=task_id,
+    )
+
     return json.dumps(animation), pcaps

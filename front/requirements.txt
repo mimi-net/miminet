@@ -37,6 +37,5 @@ uuid==1.30
 Werkzeug==3.0.1
 zipp==3.17.0
 celery==5.3.6
-redis==5.0.1
-kombu==5.3.5
-python-dotenv==1.0.1
+kombu==5.3.4
+python-dotenv==1.0.0

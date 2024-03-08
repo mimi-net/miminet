@@ -1,3 +1,6 @@
 amqp_urls=amqp://user:password@rabbitmq/
-backend_urls=redis://:password@redis/1
+celery_concurrency=2
+result_queue_name=common-results-queue
 exchange_name=default_exchange
+RABBITMQ_DEFAULT_USER=user
+RABBITMQ_DEFAULT_PASS=password
