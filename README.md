@@ -1,9 +1,6 @@
 # Miminet
 Эмулятор компьютерной сети для образовательных целей на базе ОС Linux.
 
-![diagram drawio](https://github.com/mimi-net/miminet/assets/89993880/9f6ddcc2-afeb-43bd-9abf-fc34cb102e8b)<?xml version="1.0" encoding="UTF-8"?>
-
-
 ## Local Deployment
 В директориях back и front находятся .env examples, которые используются в docker-compose и ansible. 
 
@@ -16,7 +13,7 @@
 ### Docker
 ```
 cd back
-COMPOSE_PROFILES=celery,rabbitmq,redis docker compose up -d --build
+COMPOSE_PROFILES=celery,rabbitmq docker compose up -d --build
 ```
 Celery, Rabbitmq будут доступны после этого шага. В завимости от того, где разворачивается Rabbitmq, вам потребуется указать имена сервисов.
 
@@ -52,4 +49,15 @@ N - количество экземпляров vagrant(Miminet на данны�
 Поднимаем после Rabbitmq.
 ```
 cd front && docker compose up -d --build
+```
+
+## Authorization
+Для возможности авторизации необходимо создать свое Google/Vk приложение и поместить client_google.json/vk_auth.json в front/src. Можно обратиться к разработчикам для получения общих credentials, но это не является безопасным решением.
+
+## Database migrations
+```
+docker exec -it miminet bash
+flask db init
+flask db migrate
+flask db upgrade
 ```
