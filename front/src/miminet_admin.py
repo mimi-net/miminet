@@ -9,7 +9,7 @@ from flask_admin.model import typefmt, InlineFormAdmin
 from flask_login import current_user
 
 from miminet_model import User
-from quiz.entity.entity import Test, Section
+from quiz.entity.entity import Test, Section, TextQuestion
 
 ADMIN_ROLE_LEVEL = 1
 
@@ -146,24 +146,36 @@ class SectionView(MiminetAdminModelView):
 
 
 def get_section_name(view, context, model, name, **kwargs):
-    section = Section.query.get(model.test_id)
+    section = Section.query.get(model.section_id)
     if section and section.name:
         return section.name
     raise Exception("Error occurred while retrieving section name")
 
 
+class TextQuestionInline(InlineFormAdmin):
+    form_columns = ('id', 'text_type')
+    form_choices = {
+        "text_type": [
+            ("matching", "matching"),
+            ("sorting", "sorting"),
+            ("variable", "variable"),
+        ]
+    }
+
+
 class QuestionView(MiminetAdminModelView):
     column_exclude_list = ["is_deleted", "updated_on"]
-    form_excluded_columns = ["is_deleted", "updated_on"]
+    form_excluded_columns = ["is_deleted", "updated_on", "practice_question", "session_questions", "created_by_user",
+                             "section", "question_type"]
 
-    column_list = ("section_id", "question_text", "created_on", "created_by_id")
+    column_list = ("section_id", "text_question", "question_text", "created_on", "created_by_id")
     column_sortable_list = ("created_on", "created_by_id")
 
     column_labels = {
         "section_id": "Вопрос раздела",
-        "question_text": "Текст вопроса",
         "created_on": "Дата создания",
-        "created_by_id": "Автор"
+        "created_by_id": "Автор",
+        "question_text": "Текст вопроса"
     }
 
     column_formatters = {
@@ -179,6 +191,8 @@ class QuestionView(MiminetAdminModelView):
                                   (", " + User.query.get(section.created_by_id).nick) if section.created_by_id else "")
     }
 
+    inline_models = (TextQuestionInline(TextQuestion),)
+
     def on_model_change(self, form, model, is_created, **kwargs):
         # Call base class functionality
         super().on_model_change(form, model, is_created)
@@ -186,4 +200,5 @@ class QuestionView(MiminetAdminModelView):
         model.section_id = str(model.section_id).removeprefix("<Section ")
         model.section_id = str(model.section_id).removesuffix(">")
 
+        model.question_type = "text"
     pass
