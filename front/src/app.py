@@ -6,7 +6,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user, login_required
 from flask_migrate import Migrate
 
-from miminet_admin import MiminetAdminIndexView, TestView, SectionView, QuestionView
+from miminet_admin import MiminetAdminIndexView, TestView, SectionView, QuestionView, AnswerView
 from miminet_auth import (
     google_callback,
     google_login,
@@ -41,11 +41,7 @@ from miminet_network import (
 )
 from miminet_shark import mimishark_page
 from miminet_simulation import check_simulation, run_simulation
-from quiz.controller.question_controller import (
-    create_question_endpoint,
-    get_questions_by_section_endpoint,
-    delete_question_endpoint,
-)
+from quiz.controller.question_controller import (get_questions_by_section_endpoint)
 from quiz.controller.quiz_session_controller import (
     start_session_endpoint,
     get_question_by_session_question_id_endpoint,
@@ -68,7 +64,7 @@ from quiz.controller.test_controller import (
     get_test_endpoint,
     publish_or_unpublish_test_endpoint,
 )
-from quiz.entity.entity import Section, Test, Question, TextQuestion
+from quiz.entity.entity import Section, Test, Question, Answer
 
 app = Flask(
     __name__, static_url_path="", static_folder="static", template_folder="templates"
@@ -173,12 +169,12 @@ app.add_url_rule(
     "/quiz/section/test/all", methods=["GET"], view_func=get_sections_by_test_endpoint
 )
 
-app.add_url_rule(
-    "/quiz/question/create", methods=["POST"], view_func=create_question_endpoint
-)
-app.add_url_rule(
-    "/quiz/question/delete", methods=["DELETE"], view_func=delete_question_endpoint
-)
+# app.add_url_rule(
+#     "/quiz/question/create", methods=["POST"], view_func=create_question_endpoint
+# )
+# app.add_url_rule(
+#     "/quiz/question/delete", methods=["DELETE"], view_func=delete_question_endpoint
+# )
 app.add_url_rule(
     "/quiz/question/all", methods=["GET"], view_func=get_questions_by_section_endpoint
 )
@@ -212,6 +208,7 @@ admin = Admin(app, index_view=MiminetAdminIndexView(), name="Miminet Admin", tem
 admin.add_view(TestView(Test, db.session))
 admin.add_view(SectionView(Section, db.session))
 admin.add_view(QuestionView(Question, db.session))
+admin.add_view(AnswerView(Answer, db.session))
 
 
 @app.route("/")

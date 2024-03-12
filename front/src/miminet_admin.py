@@ -9,7 +9,7 @@ from flask_admin.model import typefmt, InlineFormAdmin
 from flask_login import current_user
 
 from miminet_model import User
-from quiz.entity.entity import Test, Section, TextQuestion
+from quiz.entity.entity import Test, Section, Question
 
 ADMIN_ROLE_LEVEL = 1
 
@@ -70,7 +70,7 @@ class TestView(MiminetAdminModelView):
     # Remove columns from list view
     column_exclude_list = ["is_deleted", "updated_on"]
     # Remove fields
-    form_excluded_columns = ["is_deleted", "updated_on"]
+    form_excluded_columns = ["is_deleted", "updated_on", "created_on"]
 
     column_list = ("name", "description", "is_ready", "is_retakeable", "created_on", "created_by_id")
     column_sortable_list = ("name", "created_on", "created_by_id")
@@ -100,7 +100,7 @@ def get_test_name(view, context, model, name, **kwargs):
 
 class SectionView(MiminetAdminModelView):
     column_exclude_list = ["is_deleted", "updated_on"]
-    form_excluded_columns = ["is_deleted", "updated_on"]
+    form_excluded_columns = ["is_deleted", "updated_on", "created_on"]
 
     column_list = ("test_id", "name", "description", "timer", "created_on", "created_by_id")
     column_sortable_list = ("name", "created_on", "created_by_id")
@@ -108,7 +108,7 @@ class SectionView(MiminetAdminModelView):
     column_labels = {
         "name": "Название",
         "description": "Описание",
-        "timer": "Время на прохождение",
+        "timer": "Время на прохождение (в минутах)",
         "test_id": "Раздел теста",
         "created_on": "Дата создания",
         "created_by_id": "Автор"
@@ -117,12 +117,11 @@ class SectionView(MiminetAdminModelView):
     column_formatters = {
         "created_by_id": created_by_formatter,
         "test_id": get_test_name,
-        "timer": lambda v, c, model, n, **kwargs: model.timer.strftime("%H:%M")
     }
 
-    form_overrides = {
-        "timer": TimeField
-    }
+    # form_overrides = {
+    #     "timer": TimeField
+    # }
 
     form_extra_fields = {"test_id": QuerySelectField(
         "Раздел теста",
@@ -130,7 +129,7 @@ class SectionView(MiminetAdminModelView):
         get_pk=lambda test: test.id,
         get_label=lambda test: test.name
                                + (", " + test.description if test.description else "")
-                               + (", " + User.query.get(test.created_by_id).nick) if test.created_by_id else "")
+                               + (" (" + User.query.get(test.created_by_id).nick) + ")" if test.created_by_id else "")
     }
 
     def on_model_change(self, form, model, is_created, **kwargs):
@@ -139,8 +138,8 @@ class SectionView(MiminetAdminModelView):
 
         model.test_id = str(model.test_id).removeprefix("<Test ")
         model.test_id = str(model.test_id).removesuffix(">")
-
-        model.timer = datetime.strptime(str(model.timer), "%H:%M:%S")
+        #
+        # model.timer = datetime.strptime(str(model.timer), "%H:%M:%S")
 
     pass
 
@@ -152,15 +151,15 @@ def get_section_name(view, context, model, name, **kwargs):
     raise Exception("Error occurred while retrieving section name")
 
 
-class TextQuestionInline(InlineFormAdmin):
-    form_columns = ('id', 'text_type')
-    form_choices = {
-        "text_type": [
-            ("matching", "matching"),
-            ("sorting", "sorting"),
-            ("variable", "variable"),
-        ]
-    }
+# class TextQuestionInline(InlineFormAdmin):
+#     form_columns = ('id', 'text_type')
+#     form_choices = {
+#         "text_type": [
+#             ("matching", "matching"),
+#             ("sorting", "sorting"),
+#             ("variable", "variable"),
+#         ]
+#     }
 
 
 class QuestionView(MiminetAdminModelView):
@@ -188,10 +187,11 @@ class QuestionView(MiminetAdminModelView):
         query_factory=lambda: Section.query.filter(Section.created_by_id == current_user.id).all(),
         get_pk=lambda section: section.id,
         get_label=lambda section: section.name +
-                                  (", " + User.query.get(section.created_by_id).nick) if section.created_by_id else "")
+                                  (" (" + User.query.get(
+                                      section.created_by_id).nick) + ")" if section.created_by_id else "")
     }
 
-    inline_models = (TextQuestionInline(TextQuestion),)
+    # inline_models = (TextQuestionInline(TextQuestion),)
 
     def on_model_change(self, form, model, is_created, **kwargs):
         # Call base class functionality
@@ -201,4 +201,46 @@ class QuestionView(MiminetAdminModelView):
         model.section_id = str(model.section_id).removesuffix(">")
 
         model.question_type = "text"
+
+    pass
+
+
+class AnswerView(MiminetAdminModelView):
+    # Remove columns from list view
+    column_exclude_list = ["is_deleted", "updated_on"]
+    # Remove fields
+    form_excluded_columns = ["is_deleted", "updated_on", "created_on"]
+
+    column_list = ("variant", "explanation", "is_correct", "position", "left", "right", "created_by_id")
+    column_sortable_list = ("created_by_id",)
+
+    column_labels = {
+        "variant": "Вариант ответа",
+        "explanation": "Пояснение",
+        "position": "Позиция ответа",
+        "left": "Левая часть",
+        "right": "Правая часть",
+        "created_by_id": "Автор"
+    }
+
+    column_formatters = {
+        "created_by_id": created_by_formatter
+    }
+
+    form_extra_fields = {"question_id": QuerySelectField(
+        "Вопрос",
+        query_factory=lambda: Question.query.all(),
+        get_pk=lambda question: question.id,
+        get_label=lambda question: question.text
+                                   + (" (" + User.query.get(
+            question.created_by_id).nick) + ")" if question.created_by_id else "")
+    }
+
+    def on_model_change(self, form, model, is_created, **kwargs):
+        # Call base class functionality
+        super().on_model_change(form, model, is_created)
+
+        model.question_id = str(model.question_id).removeprefix("<Question ")
+        model.question_id = str(model.question_id).removesuffix(">")
+
     pass
