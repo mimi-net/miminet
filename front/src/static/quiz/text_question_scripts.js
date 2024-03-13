@@ -6,16 +6,23 @@ function displayVariable(answersParsed) {
     }
 }
 
-// TODO: shuffle sides
 function displayMatching(answersParsed) {
     $('#variants.container')
         .css({display: "flex"})
         .append(`<div class=keys id=sortContainer></div><div class=values id=rightSide></div>`);
 
+    let left = [];
+    let right = [];
     for (let i = 0; i < answersParsed.length; i++) {
-        const value = answersParsed[i];
-        $('#sortContainer.keys').append(`<div id=${value["left"]} class=sortable>${value["left"]}</div>`);
-        $('#rightSide.values').append(`<div id=${value["right"]} class=matching>${value["right"]}</div>`);
+        left.push(answersParsed[i]["left"]);
+        right.push(answersParsed[i]["right"]);
+    }
+    // shuffle left side
+    left.sort(() => Math.random() - 0.5);
+
+    for (let i = 0; i < left.length; i++) {
+        $('#sortContainer.keys').append(`<div id=${left[i]} class=sortable>${left[i]}</div>`);
+        $('#rightSide.values').append(`<div id=${right[i]} class=matching>${right[i]}</div>`);
     }
 }
 

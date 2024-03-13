@@ -69,23 +69,35 @@ function RunAndWaitSimulation(network_guid) {
 }
 
 async function getAnswer() {
-    if (questionType === "text") {
-        switch (textType) {
+    if (questionType !== "practice") {
+        switch (questionType) {
             case 'variable':
                 return $('input.form-check-input:checked').map(function () {
-                    return {'answer_text': this.value};
+                    return {'variant': this.value};
                 }).get();
             case 'matching':
                 const leftSide = $('#sortContainer').sortable("toArray");
                 const rightSide = $('#rightSide div').map(function () {
                     return this.id
                 }).get();
-                return leftSide.reduce((acc, current, index) => {
-                    acc[current] = rightSide[index];
-                    return acc;
-                }, {});
+                let resultArray = [];
+                leftSide.forEach((leftValue, index) => {
+                    resultArray.push({
+                        "left": leftValue,
+                        "right": rightSide[index]
+                    });
+                });
+                return resultArray;
             case 'sorting':
-                return $('#sortContainer').sortable("toArray").join(' ');
+                let sortableArray = $('#sortContainer').sortable("toArray");
+                let dictionary = {};
+                sortableArray.forEach((value, index) => {
+                    dictionary[value] = {
+                        "variant": value,
+                        "position": index
+                    };
+                });
+                return dictionary;
         }
     }
     if (questionType === "practice") {

@@ -63,20 +63,19 @@ def check_task(task_dict, answer):
             else:
                 continue
 
-        if request and reply and request[0] == from_node and request[-1] == to_node and reply[0] == to_node and reply[-1] == from_node:
+        if (request and reply and request[0] == from_node and request[-1] == to_node
+                and reply[0] == to_node and reply[-1] == from_node):
             return True
         else:
             return False
 
 
-def answer_on_session_question(
-    session_question_id: str, answer_string: dict, user: User
-):
+def answer_on_session_question(session_question_id: str, answer_string: dict, user: User):
     session_question = SessionQuestion.query.filter_by(id=session_question_id).first()
     if session_question.created_by_id != user.id:
         return None, 403
     question = session_question.question
-    if question.question_type == "text":
+    if question.question_type != "practice":
         pass
         # text_question = TextQuestion.query.filter_by(id=question.id).first()
         #
