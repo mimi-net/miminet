@@ -48,7 +48,7 @@
         </div>
     </section>
 
-    {% if question.question_type == "text" %}
+    {% if question.question_type != "practice" %}
         <article class="container card border-0 shadow-sm" style="padding: 12px 40px 12px 18px">
             {# Question text #}
             <div class="card-body p-1" style="margin-right: 40px">
@@ -59,10 +59,10 @@
                 <div class="border border-1 border-success-subtle"></div>
 
                 {# Answer area #}
-                {% if question.question_type == "text" %}
+{#                {% if question.question_type != "practice" %}#}
                     <div class="container m-3" id="variants"></div>
                     <div class="container" id="explanation" hidden></div>
-                {% endif %}
+{#                {% endif %}#}
             </div>
 
             {# Control buttons #}
@@ -81,8 +81,8 @@
                 'sorting': displaySorting
             };
             const answers = '{{ question.answers | replace("'", '"') | safe }}';
-            const textType = '{{ question.text_type }}';
-            displayFunctions[textType](textType === 'sorting' ? answers.split(' ') : JSON.parse(answers));
+            const textType = '{{ question.question_type }}';
+            displayFunctions[textType](JSON.parse(answers));
         </script>
     {% endif %}
 

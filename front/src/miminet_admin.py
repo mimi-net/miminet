@@ -149,34 +149,35 @@ def get_section_name(view, context, model, name, **kwargs):
     raise Exception("Error occurred while retrieving section name")
 
 
-# class TextQuestionInline(InlineFormAdmin):
-#     form_columns = ('id', 'text_type')
-#     form_choices = {
-#         "text_type": [
-#             ("matching", "matching"),
-#             ("sorting", "sorting"),
-#             ("variable", "variable"),
-#         ]
-#     }
+def get_question_type(view, context, model, name, **kwargs):
+    types = {
+        0: "Практическое задание",
+        1: "С вариантами ответов",
+        2: "На сортировку",
+        3: "На сопоставление"
+    }
+    return types.get(model.question_type, "")
 
 
 class QuestionView(MiminetAdminModelView):
     form_excluded_columns = (MiminetAdminModelView.form_excluded_columns +
-                             ["practice_question", "session_questions", "created_by_user", "section", "question_type"])
+                             ["practice_question", "session_questions", "created_by_user", "section"])
 
-    column_list = ("section_id", "text", "created_on", "created_by_id")
+    column_list = ("section_id", "text", "question_type", "created_on", "created_by_id")
     column_sortable_list = ("created_on", "created_by_id")
 
     column_labels = {
         "section_id": "Вопрос раздела",
         "created_on": "Дата создания",
         "created_by_id": "Автор",
+        "question_type": "Тип вопроса",
         "text": "Текст вопроса"
     }
 
     column_formatters = {
         "created_by_id": created_by_formatter,
-        "section_id": get_section_name
+        "section_id": get_section_name,
+        "question_type": get_question_type
     }
 
     form_extra_fields = {"section_id": QuerySelectField(

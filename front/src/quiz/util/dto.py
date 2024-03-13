@@ -69,11 +69,17 @@ class AnswerResultDto:
 
 
 class AnswerDto:
-    def __init__(self, answer_text: str) -> None:
-        self.answer_text = answer_text
+    def __init__(self, question_type: str, answer: Answer) -> None:
+        if question_type == "matching":
+            self.left = answer.left
+            self.right = answer.right
+        else:
+            self.variant = answer.variant
 
     def to_dict(self):
-        return {"answer_text": self.answer_text}
+        attributes = ["variant", "left", "right"]
+        data = {attr: getattr(self, attr) for attr in attributes if hasattr(self, attr)}
+        return data
 
 
 class PracticeQuestionDto:
@@ -141,41 +147,47 @@ class QuestionDto:
     def __init__(self, user_id, question: Question) -> None:
         self.question_type = get_question_type(question.question_type)
         self.question_text = question.text
-        if self.question_type == "text":
-            pass
-            # text_question = question.text_question
-            # self.text_type = text_question.text_type
-            #
-            # if text_question.text_type == "variable":
-            #     variable_question = text_question.variable_question
-            #     self.answers = [
-            #         AnswerDto(answer_text=i.answer_text).to_dict()
-            #         for i in Answer.query.filter_by(
-            #             variable_question_id=variable_question.id, is_deleted=False
-            #         ).all()
-            #     ]
-            #
-            # elif text_question.text_type == "matching":
-            #     matching_question = text_question.matching_question
-            #
-            #     data = matching_question.map
-            #     keys = list(data.keys())
-            #     values = list(data.values())
-            #     random.shuffle(keys)
-            #     res = {keys[i]: values[i] for i in range(len(keys))}
-            #
-            #     self.answers = json.dumps(res)
-            #
-            # elif text_question.text_type == "sorting":
-            #     sorting_question = text_question.sorting_question
-            #     words = sorting_question.right_sequence.split()
-            #     random.shuffle(words)
-            #     self.answers = " ".join(words)
 
-        elif self.question_type == "practice":
-            self.practice_question = PracticeQuestionDto(user_id,
-                                                         question.practice_question
-                                                         ).to_dict()
+        if self.question_type == "practice":
+            self.practice_question = PracticeQuestionDto(user_id, question.practice_question).to_dict()
+            return
+
+        self.answers = [
+            AnswerDto(question_type=self.question_type, answer=answer).to_dict()
+            for answer in Answer.query.filter_by(
+                question_id=question.id, is_deleted=False
+            ).all()
+        ]
+        random.shuffle(self.answers)
+
+        # text_question = question.text_question
+        # self.text_type = text_question.text_type
+
+        # if self.question_type == "variable":
+        #     variable_question = text_question.variable_question
+        #     self.answers = [
+        #         AnswerDto(answer_text=i.answer_text).to_dict()
+        #         for i in Answer.query.filter_by(
+        #             variable_question_id=variable_question.id, is_deleted=False
+        #         ).all()
+        #     ]
+        #
+        # elif self.question_type == "matching":
+        #     matching_question = text_question.matching_question
+        #
+        #     data = matching_question.map
+        #     keys = list(data.keys())
+        #     values = list(data.values())
+        #     random.shuffle(keys)
+        #     res = {keys[i]: values[i] for i in range(len(keys))}
+        #
+        #     self.answers = json.dumps(res)
+        #
+        # elif self.question_type == "sorting":
+        #     sorting_question = text_question.sorting_question
+        #     words = sorting_question.right_sequence.split()
+        #     random.shuffle(words)
+        #     self.answers = " ".join(words)
 
 
 class SectionDto:

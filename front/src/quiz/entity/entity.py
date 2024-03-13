@@ -138,6 +138,9 @@ class Question(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):  
     question_type = db.Column(db.Integer, default=1, nullable=False)
     section_id = db.Column(db.Integer, db.ForeignKey(Section.id))
 
+    explanation = db.Column(db.String(512), default="")
+
+
     section = db.relationship("Section", uselist=False, back_populates="questions")
 
     # text_question = db.relationship(
@@ -235,7 +238,6 @@ class Answer(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):  # 
     __tablename__ = "answer"
 
     variant = db.Column(db.String(512), default="", nullable=False)
-    explanation = db.Column(db.String(512), default="")
     is_correct = db.Column(db.Boolean, default=False)
     position = db.Column(db.Integer, nullable=True)
     left = db.Column(db.String(512), default="", nullable=True)
@@ -269,12 +271,9 @@ class PracticeQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.M
     __tablename__ = "practice_question"
 
     id = db.Column(db.Integer, db.ForeignKey("question.id"), primary_key=True)
-    start_configuration = db.Column(
-        db.String(512), db.ForeignKey("network.guid"), unique=True
-    )
+    start_configuration = db.Column(db.String(512), db.ForeignKey("network.guid"))
 
     description = db.Column(db.String(512), default="")
-    explanation = db.Column(db.String(512), default="")
     available_host = db.Column(db.Integer, default=0)
     available_l2_switch = db.Column(db.Integer, default=0)
     available_l1_hub = db.Column(db.Integer, default=0)
