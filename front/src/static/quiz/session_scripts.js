@@ -1,13 +1,8 @@
-function timeToMilliseconds(timeString) {
-    const [hours, minutes, seconds] = timeString.split(':');
-    const totalSeconds = parseInt(hours, 10) * 3600 + parseInt(minutes, 10) * 60 + parseInt(seconds, 10);
-    return totalSeconds * 1000;
-}
-
 function updateTimer() {
     // Time in ms
     const startTime = parseInt(localStorage.getItem('quizStartTime'));
-    const duration = timeToMilliseconds(localStorage.getItem('timer'));
+    // Convert minutes to milliseconds
+    const duration = (localStorage.getItem('timer')) * 60000;
 
     const currentTime = new Date().getTime();
     const elapsedTime = currentTime - startTime;

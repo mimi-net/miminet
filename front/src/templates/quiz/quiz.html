@@ -58,7 +58,7 @@
                 document.getElementById('{{ section.section_id }}question').innerHTML =
                     questions + ' ' + morph(questions, ['вопрос', 'вопроса', 'вопросов']);
 
-                timer = timeToMinutes('{{section.timer}}');
+                timer = '{{section.timer}}';
                 document.getElementById('{{ section.section_id }}timer').innerHTML =
                     '&#8776;' + timer + ' ' + morph(timer, ['минута', 'минуты', 'минут']);
             </script>

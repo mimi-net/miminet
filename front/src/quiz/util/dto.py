@@ -13,7 +13,7 @@ def to_section_dto_list(sections: List[Section]):
             lambda our_section: SectionDto(
                 section_id=our_section.id,
                 section_name=our_section.name,
-                timer=our_section.timer.strftime("%H:%M:%S"),
+                timer=our_section.timer,
                 description=our_section.description,
                 question_count=len(our_section.questions),
             ),
@@ -47,7 +47,7 @@ def to_question_for_editor_dto_list(questions: List[Question]):
     dto_list: List[QuestionForEditorDto] = list(
         map(
             lambda question: QuestionForEditorDto(
-                question_id=question.id, question_text=question.question_text
+                question_id=question.id, question_text=question.text
             ),
             questions,
         )
@@ -98,13 +98,13 @@ class PracticeQuestionDto:
 
         u = uuid.uuid4()
         net_copy = Network(
-            guid = str(u),
+            guid=str(u),
             author_id=user_id,
-            network = net.network,
-            title = net.title,
-            description = "Network copy",
-            preview_uri = net.preview_uri,
-            is_task = True
+            network=net.network,
+            title=net.title,
+            description="Network copy",
+            preview_uri=net.preview_uri,
+            is_task=True
         )
         db.session.add(net_copy)
         db.session.commit()
@@ -127,39 +127,50 @@ class PracticeQuestionDto:
         return {attribute: str(getattr(self, attribute)) for attribute in attributes}
 
 
+def get_question_type(question_type: int):
+    types = {
+        0: "practice",
+        1: "variable",
+        2: "sorting",
+        3: "matching"
+    }
+    return types.get(question_type, "")
+
+
 class QuestionDto:
     def __init__(self, user_id, question: Question) -> None:
-        self.question_type = question.question_type
-        self.question_text = question.question_text
+        self.question_type = get_question_type(question.question_type)
+        self.question_text = question.text
         if self.question_type == "text":
-            text_question = question.text_question
-            self.text_type = text_question.text_type
-
-            if text_question.text_type == "variable":
-                variable_question = text_question.variable_question
-                self.answers = [
-                    AnswerDto(answer_text=i.answer_text).to_dict()
-                    for i in Answer.query.filter_by(
-                        variable_question_id=variable_question.id, is_deleted=False
-                    ).all()
-                ]
-
-            elif text_question.text_type == "matching":
-                matching_question = text_question.matching_question
-
-                data = matching_question.map
-                keys = list(data.keys())
-                values = list(data.values())
-                random.shuffle(keys)
-                res = {keys[i]: values[i] for i in range(len(keys))}
-
-                self.answers = json.dumps(res)
-
-            elif text_question.text_type == "sorting":
-                sorting_question = text_question.sorting_question
-                words = sorting_question.right_sequence.split()
-                random.shuffle(words)
-                self.answers = " ".join(words)
+            pass
+            # text_question = question.text_question
+            # self.text_type = text_question.text_type
+            #
+            # if text_question.text_type == "variable":
+            #     variable_question = text_question.variable_question
+            #     self.answers = [
+            #         AnswerDto(answer_text=i.answer_text).to_dict()
+            #         for i in Answer.query.filter_by(
+            #             variable_question_id=variable_question.id, is_deleted=False
+            #         ).all()
+            #     ]
+            #
+            # elif text_question.text_type == "matching":
+            #     matching_question = text_question.matching_question
+            #
+            #     data = matching_question.map
+            #     keys = list(data.keys())
+            #     values = list(data.values())
+            #     random.shuffle(keys)
+            #     res = {keys[i]: values[i] for i in range(len(keys))}
+            #
+            #     self.answers = json.dumps(res)
+            #
+            # elif text_question.text_type == "sorting":
+            #     sorting_question = text_question.sorting_question
+            #     words = sorting_question.right_sequence.split()
+            #     random.shuffle(words)
+            #     self.answers = " ".join(words)
 
         elif self.question_type == "practice":
             self.practice_question = PracticeQuestionDto(user_id,
@@ -169,12 +180,12 @@ class QuestionDto:
 
 class SectionDto:
     def __init__(
-        self,
-        section_id: str,
-        section_name: str,
-        timer: str,
-        description: str,
-        question_count: int,
+            self,
+            section_id: str,
+            section_name: str,
+            timer: str,
+            description: str,
+            question_count: int,
     ):
         self.section_id = section_id
         self.section_name = section_name
@@ -185,14 +196,14 @@ class SectionDto:
 
 class TestDto:
     def __init__(
-        self,
-        test_id: str,
-        test_name: str,
-        author_name: str,
-        description: str,
-        is_retakeable: bool,
-        is_ready: bool,
-        section_count: int,
+            self,
+            test_id: str,
+            test_name: str,
+            author_name: str,
+            description: str,
+            is_retakeable: bool,
+            is_ready: bool,
+            section_count: int,
     ):
         self.test_id = test_id
         self.test_name = test_name
@@ -211,13 +222,13 @@ class QuestionForEditorDto:
 
 class SessionResultDto:
     def __init__(
-        self,
-        test_name: str,
-        section_name: str,
-        correct_answers: int,
-        answers_count: int,
-        start_time: str,
-        time_spent: str,
+            self,
+            test_name: str,
+            section_name: str,
+            correct_answers: int,
+            answers_count: int,
+            start_time: str,
+            time_spent: str,
     ):
         self.test_name = test_name
         self.section_name = section_name

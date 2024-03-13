@@ -2,11 +2,11 @@ function morph(int, array) {
     return (array = array || ['раздел', 'раздела', 'разделов']) && array[(int % 100 > 4 && int % 100 < 20) ? 2 : [2, 0, 1, 1, 1, 2][(int % 10 < 5) ? int % 10 : 5]];
 }
 
-function timeToMinutes(timeString) {
-    const [hours, minutes, seconds] = timeString.split(':');
-    const totalSeconds = parseInt(hours, 10) * 3600 + parseInt(minutes, 10) * 60 + parseInt(seconds, 10);
-    return Math.round(totalSeconds / 60);
-}
+// function timeToMinutes(timeString) {
+//     const [hours, minutes, seconds] = timeString.split(':');
+//     const totalSeconds = parseInt(hours, 10) * 3600 + parseInt(minutes, 10) * 60 + parseInt(seconds, 10);
+//     return Math.round(totalSeconds / 60);
+// }
 
 function findParent(element) {
     while (element && element.tagName !== 'FORM') {
