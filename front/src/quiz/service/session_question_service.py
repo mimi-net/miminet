@@ -75,59 +75,9 @@ def answer_on_session_question(session_question_id: str, answer_string: dict, us
     if session_question.created_by_id != user.id:
         return None, 403
     question = session_question.question
-    if question.question_type != "practice":
-        pass
-        # text_question = TextQuestion.query.filter_by(id=question.id).first()
-        #
-        # if text_question.text_type == "variable":
-        #     explanation_list = []
-        #     answers = answer_string["answer"]
-        #     is_correct = True
-        #     correct_count = 0
-        #     answer_count = 0
-        #     for check in answers:
-        #         answer = Answer.query.filter_by(
-        #             variable_question_id=text_question.id,
-        #             answer_text=check["answer_text"],
-        #         ).first()
-        #         explanation_list.append(answer.explanation)
-        #         answer_count += 1
-        #         if not answer.is_correct:
-        #             is_correct = False
-        #     for _ in Answer.query.filter_by(
-        #         variable_question_id=text_question.id, is_correct=True
-        #     ).all():
-        #         correct_count += 1
-        #     correct = is_correct and answer_count == correct_count
-        #     session_question.is_correct = correct
-        #     db.session.add(session_question)
-        #     db.session.commit()
-        #
-        #     return AnswerResultDto(explanation_list, correct), 200
-        #
-        # elif text_question.text_type == "matching":
-        #     matching_question = MatchingQuestion.query.filter_by(
-        #         id=text_question.id
-        #     ).first()
-        #     correct = matching_question.map == answer_string["answer"]
-        #     session_question.is_correct = correct
-        #     db.session.add(session_question)
-        #     db.session.commit()
-        #
-        #     return AnswerResultDto(matching_question.explanation, correct), 200
-        #
-        # elif text_question.text_type == "sorting":
-        #     sorting_question = SortingQuestion.query.filter_by(
-        #         id=text_question.id
-        #     ).first()
-        #     correct = answer_string["answer"] == sorting_question.right_sequence
-        #     session_question.is_correct = correct
-        #     db.session.add(session_question)
-        #     db.session.commit()
-        #
-        #     return AnswerResultDto(sorting_question.explanation, correct), 200
 
-    elif question.question_type == "practice":
+    # practice
+    if question.question_type == 0:
         practice_question = PracticeQuestion.query.filter_by(id=question.id).first()
         tasks = practice_question.practice_tasks
         is_correct = True
@@ -144,3 +94,50 @@ def answer_on_session_question(session_question_id: str, answer_string: dict, us
         db.session.commit()
 
         return AnswerResultDto(practice_question.explanation, is_correct), 200
+
+    # variable
+    if question.question_type == 1:
+        answers = answer_string["answer"]
+        is_correct = True
+        for check in answers:
+            answer = Answer.query.filter_by(
+                question_id=question.id,
+                variant=check["variant"],
+            ).first()
+            if not answer.is_correct:
+                is_correct = False
+
+        correct_count = Answer.query.filter_by(question_id=question.id, is_correct=True).count()
+        correct = is_correct and len(answers) == correct_count
+        session_question.is_correct = correct
+        db.session.add(session_question)
+        db.session.commit()
+
+        return AnswerResultDto(question.explanation, correct), 200
+
+    # sorting
+    if question.question_type == 2:
+        answer = sorted(answer_string["answer"].items(), key=lambda x: int(x[0]))
+
+        answers = Answer.query.filter_by(question_id=question.id).all()
+        answer_set = sorted({(answer.position, answer.variant) for answer in answers})
+
+        correct = True if [value for key, value in answer] == [value for key, value in answer_set] else False
+        session_question.is_correct = correct
+        db.session.add(session_question)
+        db.session.commit()
+
+        return AnswerResultDto(question.explanation, correct), 200
+
+    # matching
+    if question.question_type == 3:
+        answers = Answer.query.filter_by(question_id=question.id).all()
+        set1 = {(answer.left, answer.right) for answer in answers}
+        set2 = set((item["left"], item["right"]) for item in answer_string["answer"])
+
+        correct = set1 == set2
+        session_question.is_correct = correct
+        db.session.add(session_question)
+        db.session.commit()
+
+        return AnswerResultDto(question.explanation, correct), 200

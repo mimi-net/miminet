@@ -76,9 +76,11 @@ async function getAnswer() {
                     return {'variant': this.value};
                 }).get();
             case 'matching':
-                const leftSide = $('#sortContainer').sortable("toArray");
+                const leftSide = $('#sortContainer div').map(function () {
+                    return $(this).text();
+                }).get();
                 const rightSide = $('#rightSide div').map(function () {
-                    return this.id
+                    return $(this).text();
                 }).get();
                 let resultArray = [];
                 leftSide.forEach((leftValue, index) => {
@@ -89,13 +91,12 @@ async function getAnswer() {
                 });
                 return resultArray;
             case 'sorting':
-                let sortableArray = $('#sortContainer').sortable("toArray");
+                let sortableArray = $('#sortContainer div').map(function () {
+                    return $(this).text();
+                }).get();
                 let dictionary = {};
                 sortableArray.forEach((value, index) => {
-                    dictionary[value] = {
-                        "variant": value,
-                        "position": index
-                    };
+                    dictionary[index] = value;
                 });
                 return dictionary;
         }
@@ -178,7 +179,7 @@ function displayExplanation(data) {
     $('#explanation.container')
         .removeAttr('hidden')
         .css({borderColor: borderColor})
-        .append(`<text>${phrase}</text><br><text>${data['explanation']}</text>`);
+        .append(`<text>${phrase}</text><br><text>${data['explanation'] ?? ""}</text>`);
 }
 
 // Saving data about session

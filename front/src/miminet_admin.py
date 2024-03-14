@@ -163,12 +163,13 @@ class QuestionView(MiminetAdminModelView):
     form_excluded_columns = (MiminetAdminModelView.form_excluded_columns +
                              ["practice_question", "session_questions", "created_by_user", "section"])
 
-    column_list = ("section_id", "text", "question_type", "created_on", "created_by_id")
+    column_list = ("section_id", "text", "explanation", "question_type", "created_on", "created_by_id")
     column_sortable_list = ("created_on", "created_by_id")
 
     column_labels = {
         "section_id": "Вопрос раздела",
         "created_on": "Дата создания",
+        "explanation": "Пояснение",
         "created_by_id": "Автор",
         "question_type": "Тип вопроса",
         "text": "Текст вопроса"
@@ -209,12 +210,11 @@ class QuestionView(MiminetAdminModelView):
 
 
 class AnswerView(MiminetAdminModelView):
-    column_list = ("variant", "explanation", "is_correct", "position", "left", "right", "created_by_id")
+    column_list = ("variant", "is_correct", "position", "left", "right", "created_by_id")
     column_sortable_list = ("created_by_id",)
 
     column_labels = {
         "variant": "Вариант ответа",
-        "explanation": "Пояснение",
         "position": "Позиция ответа",
         "left": "Левая часть",
         "right": "Правая часть",
