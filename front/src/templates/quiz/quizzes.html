@@ -10,7 +10,7 @@
                 <h1 class="me-3">Тренажер по компьютерным сетям</h1>
             </div>
             <div class="col">
-                <a href="/" class="btn btn-primary">Добавить тест</a>
+                <a href="/admin" class="btn btn-primary">Добавить тест</a>
             </div>
         </div>
 
@@ -44,7 +44,7 @@
                     return (array = array || ['раздел', 'раздела', 'разделов']) && array[(int % 100 > 4 && int % 100 < 20) ? 2 : [2, 0, 1, 1, 1, 2][(int % 10 < 5) ? int % 10 : 5]];
                 }
 
-                document.getElementById('{{quiz.test_id}}').innerHTML = {{ quiz.section_count }} +' ' + morph({{ quiz.section_count}});
+                document.getElementById('{{quiz.test_id}}').innerHTML = {{ quiz.section_count }} + ' ' + morph({{ quiz.section_count}});
             </script>
         {% endfor %}
 

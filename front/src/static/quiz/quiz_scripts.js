@@ -26,7 +26,12 @@ function submitForm(event) {
         method: form.method,
         body: new FormData(form)
     })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                 return response.text().then(text => { throw new Error(text) })
+            }
+            return response.json();
+        })
         .then(data => {
             console.log(data);
             /*console.log(data.session_question_ids);
