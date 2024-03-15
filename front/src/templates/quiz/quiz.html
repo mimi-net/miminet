@@ -10,7 +10,30 @@
             <h1 class="me-3"> {{ test_name }}</h1>
         </div>
 
+{#        <div class="toast" id="alert" role="alert" aria-live="assertive" aria-atomic="true">#}
+{#            <div class="toast-body">#}
+{#                <strong class="me-auto">Данный раздел уже пройден вами</strong>#}
+{#                <small>11 мин. назад</small>#}
+{#                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Закрыть"></button>#}
+{#            </div>#}
+{#            <div class="toast-body">#}
+{#            </div>#}
+{#        </div>#}
+
+
         {% for section in sections %}
+            <div class="toast align-items-center text-white bg-primary border-0 my-3" id="alert{{ section.section_id }}" role="alert"
+                 aria-live="assertive"
+                 aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        Данный раздел уже пройден вами
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                            aria-label="Закрыть"></button>
+                </div>
+            </div>
+
             <article class="card border-0 shadow-sm overflow-hidden mb-4">
                 <div class="row g-0">
                     <div class="col-sm-8">
@@ -66,7 +89,7 @@
         <script>
             let getQuestionUrl = '{{ url_for('get_question_by_session_question_id_endpoint') }}';
             let finishSessionUrl = '{{ url_for('finish_session_endpoint') }}';
-            localStorage.setItem('test_name', '{{ test_name }}');
+            sessionStorage.setItem('test_name', '{{ test_name }}');
         </script>
     </section>
 {% endblock %}

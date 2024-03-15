@@ -1,8 +1,8 @@
 function updateTimer() {
     // Time in ms
-    const startTime = parseInt(localStorage.getItem('quizStartTime'));
+    const startTime = parseInt(sessionStorage.getItem('quizStartTime'));
     // Convert minutes to milliseconds
-    const duration = (localStorage.getItem('timer')) * 60000;
+    const duration = (sessionStorage.getItem('timer')) * 60000;
 
     const currentTime = new Date().getTime();
     const elapsedTime = currentTime - startTime;
@@ -31,7 +31,8 @@ function updateTimer() {
 }
 
 function finishQuiz() {
-    const sessionId = localStorage.getItem('session_id');
+    window.removeEventListener('beforeunload', handleUnload);
+    const sessionId = sessionStorage.getItem('session_id');
 
     fetch(finishSessionUrl + '?id=' + sessionId, {
         method: 'PUT'
@@ -118,8 +119,9 @@ async function getAnswer() {
 }
 
 function nextQuestion() {
+    window.removeEventListener('beforeunload', handleUnload);
     // redirect to next question
-    localStorage.setItem('question_index', (questionIndex + 1).toString());
+    sessionStorage.setItem('question_index', (questionIndex + 1).toString());
 
     window.location.href = getQuestionUrl + `?question_id=` + questionIds[questionIndex + 1];
 }
@@ -182,13 +184,20 @@ function displayExplanation(data) {
         .append(`<text>${phrase}</text><br><text>${data['explanation'] ?? ""}</text>`);
 }
 
+function handleUnload(e){
+    e.preventDefault();
+    e.returnValue = '';
+}
+
+window.addEventListener('beforeunload', handleUnload);
+
 // Saving data about session
-const testName = localStorage.getItem('test_name');
-const sectionName = localStorage.getItem('section_name');
-const questionsCount = JSON.parse(localStorage.getItem('question_ids')).length;
-timer = localStorage.getItem('timer');
-const questionIds = JSON.parse(localStorage.getItem('question_ids'));
-const questionIndex = parseInt(localStorage.getItem('question_index'));
+const testName = sessionStorage.getItem('test_name');
+const sectionName = sessionStorage.getItem('section_name');
+const questionsCount = JSON.parse(sessionStorage.getItem('question_ids')).length;
+timer = sessionStorage.getItem('timer');
+const questionIds = JSON.parse(sessionStorage.getItem('question_ids'));
+const questionIndex = parseInt(sessionStorage.getItem('question_index'));
 const isLastQuestion = questionIndex + 1 >= questionsCount;
 
 if (timer !== null) {
@@ -197,8 +206,8 @@ if (timer !== null) {
     document.getElementById("timer").innerHTML = timer;
 
     // Set start time for the session
-    if (questionIndex === 0 && localStorage.getItem('quizStartTime') == null) {
-        localStorage.setItem('quizStartTime', new Date().getTime().toString());
+    if (questionIndex === 0 && sessionStorage.getItem('quizStartTime') == null) {
+        sessionStorage.setItem('quizStartTime', new Date().getTime().toString());
     }
 }
 

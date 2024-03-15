@@ -20,15 +20,15 @@
     </section>
 
     <script>
-        document.getElementById("test_name").innerHTML = localStorage.getItem('test_name');
-        document.getElementById("section_name").innerHTML = localStorage.getItem('section_name');
+        document.getElementById("test_name").innerHTML = sessionStorage.getItem('test_name');
+        document.getElementById("section_name").innerHTML = sessionStorage.getItem('section_name');
 
         document.querySelector('button[name="backToTests"]').addEventListener('click', backToTests);
 
         console.log({{ data | tojson | safe }});
 
         function backToTests() {
-            localStorage.clear();
+            sessionStorage.clear();
             window.location.href = '/quiz/test/all';
         }
 

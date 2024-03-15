@@ -117,10 +117,6 @@ class SectionView(MiminetAdminModelView):
         "test_id": get_test_name,
     }
 
-    # form_overrides = {
-    #     "timer": TimeField
-    # }
-
     form_extra_fields = {"test_id": QuerySelectField(
         "Раздел теста",
         query_factory=lambda: Test.query.filter(Test.created_by_id == current_user.id).all(),
@@ -136,8 +132,6 @@ class SectionView(MiminetAdminModelView):
 
         model.test_id = str(model.test_id).removeprefix("<Test ")
         model.test_id = str(model.test_id).removesuffix(">")
-        #
-        # model.timer = datetime.strptime(str(model.timer), "%H:%M:%S")
 
     pass
 

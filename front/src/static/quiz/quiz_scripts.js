@@ -22,13 +22,29 @@ function submitForm(event) {
     const sectionName = form.querySelector(`[name="section_name"]`).value
     const timer = form.querySelector(`[name="timer"]`).value
 
+    if (sessionStorage.session_id){
+        const sessionId = sessionStorage.getItem('session_id');
+
+        fetch(finishSessionUrl + '?id=' + sessionId, {
+            method: 'PUT'
+        })
+            .then(response => response.json())
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        sessionStorage.clear()
+    }
+
     fetch(form.action, {
         method: form.method,
         body: new FormData(form)
     })
-        .then(response => {
+        .then(async response => {
             if (!response.ok) {
-                 return response.text().then(text => { throw new Error(text) })
+                let text = await response.text();
+                let error = new Error(text);
+                error.code = response.status;
+                throw error;
             }
             return response.json();
         })
@@ -37,11 +53,11 @@ function submitForm(event) {
             /*console.log(data.session_question_ids);
             console.log(data.session_question_ids.type);*/
 
-            localStorage.setItem("section_name", sectionName)
-            localStorage.setItem("session_id", data.quiz_session_id)
-            localStorage.setItem("question_ids", JSON.stringify(data.session_question_ids))
-            localStorage.setItem("question_index", (questionIndex).toString())
-            localStorage.setItem("timer", timer)
+            sessionStorage.setItem("section_name", sectionName)
+            sessionStorage.setItem("session_id", data.quiz_session_id)
+            sessionStorage.setItem("question_ids", JSON.stringify(data.session_question_ids))
+            sessionStorage.setItem("question_index", (questionIndex).toString())
+            sessionStorage.setItem("timer", timer)
 
             if (questionIndex < data.session_question_ids.length) {
                 console.log(data);
@@ -51,6 +67,10 @@ function submitForm(event) {
             }
         })
         .catch(error => {
+            if (error.code === 403) {
+                id = event.target.id.replace(/\D/g, "");
+                $('#alert' + id + '.toast').toast('show');
+            }
             console.error('Error:', error);
         });
 }
