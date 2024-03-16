@@ -25,21 +25,21 @@
             </div>
 
             <article class="card border-0 shadow-sm overflow-hidden mb-4">
-                <div class="row g-0">
+                <div class="row g-0" style="align-items: baseline">
                     <div class="col-sm-8">
-                        <div class="card-body">
-                            <h4 class="h4" style="margin-left: 20px;margin-bottom: 4px">
+                        <div class="card-body" style="margin-left: 20px;">
+                            <h4 class="h4" style="margin-bottom: 4px">
                                 {{ section.section_name }}
                             </h4>
                             {% if section.description is not none %}
-                                <p style="margin-left: 40px;margin-bottom: 8px">{{ section.description }}</p>
+                                <p style="margin-bottom: 8px">{{ section.description }}</p>
                             {% endif %}
                         </div>
                     </div>
                     <div class="col-sm-4">
-                        <div class="card-body d-flex flex-column">
+                        <div class="card-body d-flex flex-column" style="row-gap: 4px">
                             <p id="{{ section.section_id }}question"
-                               style="text-align: right; margin: 0 40px 8px 0"></p>
+                               style="text-align: right; margin-right: 40px"></p>
 
                             {% if section.timer != null %}
                                 <p id="{{ section.section_id }}timer"

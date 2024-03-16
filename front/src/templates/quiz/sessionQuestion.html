@@ -81,6 +81,7 @@
                 'sorting': displaySorting
             };
             const answers = '{{ question.answers | replace("'", '"') | safe }}';
+            const correctCount = '{{ question.correct_count }}';
             const textType = '{{ question.question_type }}';
             displayFunctions[textType](JSON.parse(answers));
         </script>

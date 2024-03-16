@@ -147,16 +147,22 @@ class QuestionDto:
     def __init__(self, user_id, question: Question) -> None:
         self.question_type = get_question_type(question.question_type)
         self.question_text = question.text
+        self.correct_count = 0
 
         if self.question_type == "practice":
             self.practice_question = PracticeQuestionDto(user_id, question.practice_question).to_dict()
             return
 
-        self.answers = [
-            AnswerDto(question_type=self.question_type, answer=answer).to_dict()
-            for answer in Answer.query.filter_by(
+        filtered_answers = Answer.query.filter_by(
                 question_id=question.id, is_deleted=False
             ).all()
+
+        if self.question_type == "variable":
+            self.correct_count = sum(answer.is_correct for answer in filtered_answers)
+
+        self.answers = [
+            AnswerDto(question_type=self.question_type, answer=answer).to_dict()
+            for answer in filtered_answers
         ]
         random.shuffle(self.answers)
 

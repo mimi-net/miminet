@@ -1,8 +1,12 @@
 function displayVariable(answersParsed) {
+    const buttonType = correctCount === "1" ? 'radio' : 'checkbox'
     for (let i = 0; i < answersParsed.length; i++) {
         const value = answersParsed[i]['variant']
         $('#variants.container')
-            .append(`<div class=form-check><input class=form-check-input type=checkbox value=${value} id=flexCheckDefault><label class=form-check-label for=flexCheckDefault>${value}</label></div>`);
+            .append(`<div class=form-check>
+                        <input class=form-check-input type=${buttonType} value=${value} id=flexCheckDefault>
+                        <label class=form-check-label for=flexCheckDefault>${value}</label>
+                     </div>`);
     }
 }
 
