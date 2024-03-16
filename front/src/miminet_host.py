@@ -225,14 +225,16 @@ def save_host_config():
                     job_1_arg_1 = request.form.get("config_host_ping_c_1_ip")
 
                     if job_1_arg_1:
-                        jnet["jobs"].append({
-                            "id": job_id_generator(),
-                            "level": job_level,
-                            "job_id": job_id,
-                            "host_id": node["data"]["id"],
-                            "arg_1": job_1_arg_1,
-                            "print_cmd": "ping -c 1 " + job_1_arg_1,
-                        })
+                        jnet["jobs"].append(
+                            {
+                                "id": job_id_generator(),
+                                "level": job_level,
+                                "job_id": job_id,
+                                "host_id": node["data"]["id"],
+                                "arg_1": job_1_arg_1,
+                                "print_cmd": "ping -c 1 " + job_1_arg_1,
+                            }
+                        )
                     else:
                         ret.update({"warning": "Не указан IP адрес для команды ping"})
 
@@ -250,33 +252,42 @@ def save_host_config():
                         job_2_arg_1 = re.sub(r"[^\x00-\x7F]", "", job_2_arg_1)
 
                     if not job_2_arg_2:
-                        ret.update({
-                            "warning": (
-                                'Не указан IP адрес для команды "ping (с опциями)"'
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'Не указан IP адрес для команды "ping (с опциями)"'
+                                )
+                            }
+                        )
                         return make_response(jsonify(ret), 200)
 
                     try:
                         socket.inet_aton(job_2_arg_2)
-                        jnet["jobs"].append({
-                            "id": job_id_generator(),
-                            "level": job_level,
-                            "job_id": job_id,
-                            "host_id": node["data"]["id"],
-                            "arg_1": job_2_arg_1,
-                            "arg_2": job_2_arg_2,
-                            "print_cmd": (
-                                "ping -c 1 " + str(job_2_arg_1) + " " + str(job_2_arg_2)
-                            ),
-                        })
+                        jnet["jobs"].append(
+                            {
+                                "id": job_id_generator(),
+                                "level": job_level,
+                                "job_id": job_id,
+                                "host_id": node["data"]["id"],
+                                "arg_1": job_2_arg_1,
+                                "arg_2": job_2_arg_2,
+                                "print_cmd": (
+                                    "ping -c 1 "
+                                    + str(job_2_arg_1)
+                                    + " "
+                                    + str(job_2_arg_2)
+                                ),
+                            }
+                        )
                     except Exception:
-                        ret.update({
-                            "warning": (
-                                'IP адрес для команды "ping (с опциями)" указан'
-                                " неверно."
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'IP адрес для команды "ping (с опциями)" указан'
+                                    " неверно."
+                                )
+                            }
+                        )
 
                 # send UDP data
                 if job_id == 3:
@@ -297,57 +308,67 @@ def save_host_config():
                         job_3_arg_1 = 1000
 
                     if not job_3_arg_2:
-                        ret.update({
-                            "warning": (
-                                'Не указан IP адрес для команды "Отправить данные'
-                                ' (UDP)"'
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'Не указан IP адрес для команды "Отправить данные'
+                                    ' (UDP)"'
+                                )
+                            }
+                        )
                         return make_response(jsonify(ret), 200)
 
                     if not job_3_arg_3:
-                        ret.update({
-                            "warning": (
-                                'Не указан порт для команды "Отправить данные (UDP)"'
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'Не указан порт для команды "Отправить данные (UDP)"'
+                                )
+                            }
+                        )
                         return make_response(jsonify(ret), 200)
 
                     if int(job_3_arg_3) < 0 or int(job_3_arg_3) > 65535:
-                        ret.update({
-                            "warning": (
-                                'Неверно указан порт для команды "Отправить данные'
-                                ' (UDP)"'
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'Неверно указан порт для команды "Отправить данные'
+                                    ' (UDP)"'
+                                )
+                            }
+                        )
                         return make_response(jsonify(ret), 200)
 
                     try:
                         socket.inet_aton(job_3_arg_2)
-                        jnet["jobs"].append({
-                            "id": job_id_generator(),
-                            "level": job_level,
-                            "job_id": job_id,
-                            "host_id": node["data"]["id"],
-                            "arg_1": int(job_3_arg_1),
-                            "arg_2": job_3_arg_2,
-                            "arg_3": int(job_3_arg_3),
-                            "print_cmd": (
-                                "send -s "
-                                + str(job_3_arg_1)
-                                + " -p udp "
-                                + str(job_3_arg_2)
-                                + ":"
-                                + str(job_3_arg_3)
-                            ),
-                        })
+                        jnet["jobs"].append(
+                            {
+                                "id": job_id_generator(),
+                                "level": job_level,
+                                "job_id": job_id,
+                                "host_id": node["data"]["id"],
+                                "arg_1": int(job_3_arg_1),
+                                "arg_2": job_3_arg_2,
+                                "arg_3": int(job_3_arg_3),
+                                "print_cmd": (
+                                    "send -s "
+                                    + str(job_3_arg_1)
+                                    + " -p udp "
+                                    + str(job_3_arg_2)
+                                    + ":"
+                                    + str(job_3_arg_3)
+                                ),
+                            }
+                        )
                     except Exception:
-                        ret.update({
-                            "warning": (
-                                'IP адрес для команды "Отправить данные (UDP)" указан'
-                                " неверно."
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'IP адрес для команды "Отправить данные (UDP)" указан'
+                                    " неверно."
+                                )
+                            }
+                        )
 
                 # send TCP data
                 if job_id == 4:
@@ -368,58 +389,68 @@ def save_host_config():
                         job_4_arg_1 = 1000
 
                     if not job_4_arg_2:
-                        ret.update({
-                            "warning": (
-                                'Не указан IP адрес для команды "Отправить данные'
-                                ' (TCP)"'
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'Не указан IP адрес для команды "Отправить данные'
+                                    ' (TCP)"'
+                                )
+                            }
+                        )
                         return make_response(jsonify(ret), 200)
 
                     if not job_4_arg_3:
-                        ret.update({
-                            "warning": (
-                                'Не указан порт для команды "Отправить данные (TCP)"'
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'Не указан порт для команды "Отправить данные (TCP)"'
+                                )
+                            }
+                        )
                         return make_response(jsonify(ret), 200)
 
                     if int(job_4_arg_3) < 0 or int(job_4_arg_3) > 65535:
-                        ret.update({
-                            "warning": (
-                                'Неверно указан порт для команды "Отправить данные'
-                                ' (TCP)"'
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'Неверно указан порт для команды "Отправить данные'
+                                    ' (TCP)"'
+                                )
+                            }
+                        )
                         return make_response(jsonify(ret), 200)
 
                     try:
                         socket.inet_aton(job_4_arg_2)
-                        jnet["jobs"].append({
-                            "id": job_id_generator(),
-                            "level": job_level,
-                            "job_id": job_id,
-                            "host_id": node["data"]["id"],
-                            "arg_1": int(job_4_arg_1),
-                            "arg_2": job_4_arg_2,
-                            "arg_3": int(job_4_arg_3),
-                            "print_cmd": (
-                                "send -s "
-                                + str(job_4_arg_1)
-                                + " -p tcp "
-                                + str(job_4_arg_2)
-                                + ":"
-                                + str(job_4_arg_3)
-                            ),
-                        })
+                        jnet["jobs"].append(
+                            {
+                                "id": job_id_generator(),
+                                "level": job_level,
+                                "job_id": job_id,
+                                "host_id": node["data"]["id"],
+                                "arg_1": int(job_4_arg_1),
+                                "arg_2": job_4_arg_2,
+                                "arg_3": int(job_4_arg_3),
+                                "print_cmd": (
+                                    "send -s "
+                                    + str(job_4_arg_1)
+                                    + " -p tcp "
+                                    + str(job_4_arg_2)
+                                    + ":"
+                                    + str(job_4_arg_3)
+                                ),
+                            }
+                        )
                     except Exception as e:
                         print(e)
-                        ret.update({
-                            "warning": (
-                                'IP адрес для команды "Отправить данные (TCP)" указан'
-                                " неверно."
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'IP адрес для команды "Отправить данные (TCP)" указан'
+                                    " неверно."
+                                )
+                            }
+                        )
 
                 # traceroute -n (with options)
                 if job_id == 5:
@@ -435,37 +466,43 @@ def save_host_config():
                         job_5_arg_1 = re.sub(r"[^\x00-\x7F]", "", job_5_arg_1)
 
                     if not job_5_arg_2:
-                        ret.update({
-                            "warning": (
-                                'Не указан IP адрес для команды "traceroute -n (с'
-                                ' опциями)"'
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'Не указан IP адрес для команды "traceroute -n (с'
+                                    ' опциями)"'
+                                )
+                            }
+                        )
                         return make_response(jsonify(ret), 200)
 
                     try:
                         socket.inet_aton(job_5_arg_2)
-                        jnet["jobs"].append({
-                            "id": job_id_generator(),
-                            "level": job_level,
-                            "job_id": job_id,
-                            "host_id": node["data"]["id"],
-                            "arg_1": job_5_arg_1,
-                            "arg_2": job_5_arg_2,
-                            "print_cmd": (
-                                "traceroute -n "
-                                + str(job_5_arg_1)
-                                + " "
-                                + str(job_5_arg_2)
-                            ),
-                        })
+                        jnet["jobs"].append(
+                            {
+                                "id": job_id_generator(),
+                                "level": job_level,
+                                "job_id": job_id,
+                                "host_id": node["data"]["id"],
+                                "arg_1": job_5_arg_1,
+                                "arg_2": job_5_arg_2,
+                                "print_cmd": (
+                                    "traceroute -n "
+                                    + str(job_5_arg_1)
+                                    + " "
+                                    + str(job_5_arg_2)
+                                ),
+                            }
+                        )
                     except Exception:
-                        ret.update({
-                            "warning": (
-                                'IP адрес для команды "traceroute -n (с опциями)"'
-                                " указан неверно."
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'IP адрес для команды "traceroute -n (с опциями)"'
+                                    " указан неверно."
+                                )
+                            }
+                        )
 
                 # Add route
                 if job_id == 102:
@@ -480,59 +517,69 @@ def save_host_config():
                     )
 
                     if not job_102_arg_1:
-                        ret.update({
-                            "warning": (
-                                'Не указан IP адрес для команды "Добавить маршрут"'
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'Не указан IP адрес для команды "Добавить маршрут"'
+                                )
+                            }
+                        )
                         return make_response(jsonify(ret), 200)
 
                     if job_102_arg_2 < 0 or job_102_arg_2 > 32:
-                        ret.update({
-                            "warning": (
-                                'Маска для команды "Добавить маршрут" указана неверно.'
-                                " Допустимые значения от 0 до 32."
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'Маска для команды "Добавить маршрут" указана неверно.'
+                                    " Допустимые значения от 0 до 32."
+                                )
+                            }
+                        )
                         return make_response(jsonify(ret), 200)
 
                     if not job_102_arg_3:
-                        ret.update({
-                            "warning": (
-                                'Не указан IP адрес шлюза для команды "Добавить'
-                                ' маршрут"'
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'Не указан IP адрес шлюза для команды "Добавить'
+                                    ' маршрут"'
+                                )
+                            }
+                        )
                         return make_response(jsonify(ret), 200)
 
                     try:
                         socket.inet_aton(job_102_arg_1)
                         socket.inet_aton(job_102_arg_3)
-                        jnet["jobs"].append({
-                            "id": job_id_generator(),
-                            "level": job_level,
-                            "job_id": job_id,
-                            "host_id": node["data"]["id"],
-                            "arg_1": job_102_arg_1,
-                            "arg_2": job_102_arg_2,
-                            "arg_3": job_102_arg_3,
-                            "print_cmd": (
-                                "ip route add "
-                                + str(job_102_arg_1)
-                                + "/"
-                                + str(job_102_arg_2)
-                                + " via "
-                                + str(job_102_arg_3)
-                            ),
-                        })
+                        jnet["jobs"].append(
+                            {
+                                "id": job_id_generator(),
+                                "level": job_level,
+                                "job_id": job_id,
+                                "host_id": node["data"]["id"],
+                                "arg_1": job_102_arg_1,
+                                "arg_2": job_102_arg_2,
+                                "arg_3": job_102_arg_3,
+                                "print_cmd": (
+                                    "ip route add "
+                                    + str(job_102_arg_1)
+                                    + "/"
+                                    + str(job_102_arg_2)
+                                    + " via "
+                                    + str(job_102_arg_3)
+                                ),
+                            }
+                        )
                     except Exception as e:
                         print(e)
-                        ret.update({
-                            "warning": (
-                                'IP адрес для команды "Добавить маршрут" указан'
-                                " неверно."
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'IP адрес для команды "Добавить маршрут" указан'
+                                    " неверно."
+                                )
+                            }
+                        )
 
                 # arp -s ip hw_addr
                 if job_id == 103:
@@ -547,39 +594,45 @@ def save_host_config():
                         "[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$",
                         job_103_arg_2.lower(),
                     ):
-                        ret.update({
-                            "warning": (
-                                'MAC адрес для команды "Добавить запись в ARP-cache"'
-                                " указан неверно."
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'MAC адрес для команды "Добавить запись в ARP-cache"'
+                                    " указан неверно."
+                                )
+                            }
+                        )
                         return make_response(jsonify(ret), 200)
 
                     try:
                         socket.inet_aton(job_103_arg_1)
-                        jnet["jobs"].append({
-                            "id": job_id_generator(),
-                            "level": job_level,
-                            "job_id": job_id,
-                            "host_id": node["data"]["id"],
-                            "arg_1": job_103_arg_1,
-                            "arg_2": job_103_arg_2,
-                            "print_cmd": (
-                                "arp -s "
-                                + str(job_103_arg_1)
-                                + " "
-                                + str(job_103_arg_2)
-                            ),
-                        })
+                        jnet["jobs"].append(
+                            {
+                                "id": job_id_generator(),
+                                "level": job_level,
+                                "job_id": job_id,
+                                "host_id": node["data"]["id"],
+                                "arg_1": job_103_arg_1,
+                                "arg_2": job_103_arg_2,
+                                "print_cmd": (
+                                    "arp -s "
+                                    + str(job_103_arg_1)
+                                    + " "
+                                    + str(job_103_arg_2)
+                                ),
+                            }
+                        )
 
                     except Exception as e:
                         print(e)
-                        ret.update({
-                            "warning": (
-                                'IP адрес для команды "Добавить запись в ARP-cache"'
-                                " указан неверно."
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'IP адрес для команды "Добавить запись в ARP-cache"'
+                                    " указан неверно."
+                                )
+                            }
+                        )
                         return make_response(jsonify(ret), 200)
 
         # Set IP adresses
@@ -641,9 +694,9 @@ def save_host_config():
                 # ip = ipaddress.ip_address(default_gw)
                 node["config"]["default_gw"] = default_gw
             except ValueError:
-                ret.update({
-                    "warning": "IP адрес маршрута по умолчанию указан неверно."
-                })
+                ret.update(
+                    {"warning": "IP адрес маршрута по умолчанию указан неверно."}
+                )
                 return make_response(jsonify(ret), 200)
         else:
             node["config"]["default_gw"] = ""
@@ -656,9 +709,9 @@ def save_host_config():
         net.network = json.dumps(jnet)
         db.session.commit()
 
-        ret.update({
-            "message": "Конфигурация обновлена", "nodes": nodes, "jobs": jnet["jobs"]
-        })
+        ret.update(
+            {"message": "Конфигурация обновлена", "nodes": nodes, "jobs": jnet["jobs"]}
+        )
         return make_response(jsonify(ret), 200)
 
     ret.update({"message": "Неверный запрос"})
@@ -719,18 +772,20 @@ def save_router_config():
                         job_1_arg_1 = request.form.get("config_router_ping_c_1_ip")
 
                         if job_1_arg_1:
-                            jnet["jobs"].append({
-                                "id": job_id_generator(),
-                                "level": job_level,
-                                "job_id": job_id,
-                                "host_id": node["data"]["id"],
-                                "arg_1": job_1_arg_1,
-                                "print_cmd": "ping -c 1 " + job_1_arg_1,
-                            })
+                            jnet["jobs"].append(
+                                {
+                                    "id": job_id_generator(),
+                                    "level": job_level,
+                                    "job_id": job_id,
+                                    "host_id": node["data"]["id"],
+                                    "arg_1": job_1_arg_1,
+                                    "print_cmd": "ping -c 1 " + job_1_arg_1,
+                                }
+                            )
                         else:
-                            ret.update({
-                                "warning": "Не указан IP адрес для команды ping"
-                            })
+                            ret.update(
+                                {"warning": "Не указан IP адрес для команды ping"}
+                            )
 
                     # add IP/mask
                     if job_id == 100:
@@ -742,31 +797,37 @@ def save_router_config():
                         )
 
                         if not job_100_arg_1:
-                            ret.update({
-                                "warning": (
-                                    'Не указан интерфейс адрес для команды "Добавить IP'
-                                    ' адрес"'
-                                )
-                            })
+                            ret.update(
+                                {
+                                    "warning": (
+                                        'Не указан интерфейс адрес для команды "Добавить IP'
+                                        ' адрес"'
+                                    )
+                                }
+                            )
                             return make_response(jsonify(ret), 200)
 
                         if not job_100_arg_2:
-                            ret.update({
-                                "warning": (
-                                    'Не указан IP адрес для команды "Добавить IP адрес"'
-                                )
-                            })
+                            ret.update(
+                                {
+                                    "warning": (
+                                        'Не указан IP адрес для команды "Добавить IP адрес"'
+                                    )
+                                }
+                            )
                             return make_response(jsonify(ret), 200)
 
                         if (
                             "config_router_add_ip_mask_mask_input_field"
                             not in request.form
                         ):
-                            ret.update({
-                                "warning": (
-                                    'Не указана маска для команды "Добавить IP адрес"'
-                                )
-                            })
+                            ret.update(
+                                {
+                                    "warning": (
+                                        'Не указана маска для команды "Добавить IP адрес"'
+                                    )
+                                }
+                            )
                             return make_response(jsonify(ret), 200)
 
                         job_100_arg_3 = int(
@@ -776,40 +837,46 @@ def save_router_config():
                         )
 
                         if job_100_arg_3 < 0 or job_100_arg_3 > 32:
-                            ret.update({
-                                "warning": (
-                                    'Маска для команды "Добавить IP адрес" указана'
-                                    " неверно. Допустимые значения от 0 до 32."
-                                )
-                            })
+                            ret.update(
+                                {
+                                    "warning": (
+                                        'Маска для команды "Добавить IP адрес" указана'
+                                        " неверно. Допустимые значения от 0 до 32."
+                                    )
+                                }
+                            )
                             return make_response(jsonify(ret), 200)
 
                         try:
                             socket.inet_aton(job_100_arg_2)
-                            jnet["jobs"].append({
-                                "id": job_id_generator(),
-                                "level": job_level,
-                                "job_id": job_id,
-                                "host_id": node["data"]["id"],
-                                "arg_1": job_100_arg_1,
-                                "arg_2": job_100_arg_2,
-                                "arg_3": job_100_arg_3,
-                                "print_cmd": (
-                                    "ip addess add "
-                                    + str(job_100_arg_2)
-                                    + "/"
-                                    + str(job_100_arg_3)
-                                    + " dev "
-                                    + str(job_100_arg_1)
-                                ),
-                            })
+                            jnet["jobs"].append(
+                                {
+                                    "id": job_id_generator(),
+                                    "level": job_level,
+                                    "job_id": job_id,
+                                    "host_id": node["data"]["id"],
+                                    "arg_1": job_100_arg_1,
+                                    "arg_2": job_100_arg_2,
+                                    "arg_3": job_100_arg_3,
+                                    "print_cmd": (
+                                        "ip addess add "
+                                        + str(job_100_arg_2)
+                                        + "/"
+                                        + str(job_100_arg_3)
+                                        + " dev "
+                                        + str(job_100_arg_1)
+                                    ),
+                                }
+                            )
                         except Exception:
-                            ret.update({
-                                "warning": (
-                                    'IP адрес для команды "Добавить IP адрес" указан'
-                                    " неверно."
-                                )
-                            })
+                            ret.update(
+                                {
+                                    "warning": (
+                                        'IP адрес для команды "Добавить IP адрес" указан'
+                                        " неверно."
+                                    )
+                                }
+                            )
 
                     # add NAT masquerade to the interface
                     if job_id == 101:
@@ -818,24 +885,28 @@ def save_router_config():
                         )
 
                         if not job_101_arg_1 or job_101_arg_1 == "0":
-                            ret.update({
-                                "warning": (
-                                    'Не указан интерфейс для команды "Включить NAT'
-                                    ' masquerade"'
-                                )
-                            })
+                            ret.update(
+                                {
+                                    "warning": (
+                                        'Не указан интерфейс для команды "Включить NAT'
+                                        ' masquerade"'
+                                    )
+                                }
+                            )
                             return make_response(jsonify(ret), 200)
 
-                        jnet["jobs"].append({
-                            "id": job_id_generator(),
-                            "level": job_level,
-                            "job_id": job_id,
-                            "host_id": node["data"]["id"],
-                            "arg_1": job_101_arg_1,
-                            "print_cmd": (
-                                "add nat -o " + str(job_101_arg_1) + " -j masquerad"
-                            ),
-                        })
+                        jnet["jobs"].append(
+                            {
+                                "id": job_id_generator(),
+                                "level": job_level,
+                                "job_id": job_id,
+                                "host_id": node["data"]["id"],
+                                "arg_1": job_101_arg_1,
+                                "print_cmd": (
+                                    "add nat -o " + str(job_101_arg_1) + " -j masquerad"
+                                ),
+                            }
+                        )
 
                     # Add route
                     if job_id == 102:
@@ -850,58 +921,68 @@ def save_router_config():
                         )
 
                         if not job_102_arg_1:
-                            ret.update({
-                                "warning": (
-                                    'Не указан IP адрес для команды "Добавить маршрут"'
-                                )
-                            })
+                            ret.update(
+                                {
+                                    "warning": (
+                                        'Не указан IP адрес для команды "Добавить маршрут"'
+                                    )
+                                }
+                            )
                             return make_response(jsonify(ret), 200)
 
                         if job_102_arg_2 < 0 or job_102_arg_2 > 32:
-                            ret.update({
-                                "warning": (
-                                    'Маска для команды "Добавить маршрут" указана'
-                                    " неверно. Допустимые значения от 0 до 32."
-                                )
-                            })
+                            ret.update(
+                                {
+                                    "warning": (
+                                        'Маска для команды "Добавить маршрут" указана'
+                                        " неверно. Допустимые значения от 0 до 32."
+                                    )
+                                }
+                            )
                             return make_response(jsonify(ret), 200)
 
                         if not job_102_arg_3:
-                            ret.update({
-                                "warning": (
-                                    'Не указан IP адрес шлюза для команды "Добавить'
-                                    ' маршрут"'
-                                )
-                            })
+                            ret.update(
+                                {
+                                    "warning": (
+                                        'Не указан IP адрес шлюза для команды "Добавить'
+                                        ' маршрут"'
+                                    )
+                                }
+                            )
                             return make_response(jsonify(ret), 200)
 
                         try:
                             socket.inet_aton(job_102_arg_1)
                             socket.inet_aton(job_102_arg_3)
-                            jnet["jobs"].append({
-                                "id": job_id_generator(),
-                                "level": job_level,
-                                "job_id": job_id,
-                                "host_id": node["data"]["id"],
-                                "arg_1": job_102_arg_1,
-                                "arg_2": job_102_arg_2,
-                                "arg_3": job_102_arg_3,
-                                "print_cmd": (
-                                    "ip route add "
-                                    + str(job_102_arg_1)
-                                    + "/"
-                                    + str(job_102_arg_2)
-                                    + " via "
-                                    + str(job_102_arg_3)
-                                ),
-                            })
+                            jnet["jobs"].append(
+                                {
+                                    "id": job_id_generator(),
+                                    "level": job_level,
+                                    "job_id": job_id,
+                                    "host_id": node["data"]["id"],
+                                    "arg_1": job_102_arg_1,
+                                    "arg_2": job_102_arg_2,
+                                    "arg_3": job_102_arg_3,
+                                    "print_cmd": (
+                                        "ip route add "
+                                        + str(job_102_arg_1)
+                                        + "/"
+                                        + str(job_102_arg_2)
+                                        + " via "
+                                        + str(job_102_arg_3)
+                                    ),
+                                }
+                            )
                         except Exception:
-                            ret.update({
-                                "warning": (
-                                    'IP адрес для команды "Добавить маршрут" указан'
-                                    " неверно."
-                                )
-                            })
+                            ret.update(
+                                {
+                                    "warning": (
+                                        'IP адрес для команды "Добавить маршрут" указан'
+                                        " неверно."
+                                    )
+                                }
+                            )
 
         # Set IP adresses
         iface_ids = request.form.getlist("config_router_iface_ids[]")
@@ -963,9 +1044,9 @@ def save_router_config():
                 #  ip = ipaddress.ip_address(default_gw)
                 node["config"]["default_gw"] = default_gw
             except ValueError:
-                ret.update({
-                    "warning": "IP адрес маршрута по умолчанию указан неверно."
-                })
+                ret.update(
+                    {"warning": "IP адрес маршрута по умолчанию указан неверно."}
+                )
                 return make_response(jsonify(ret), 200)
         else:
             node["config"]["default_gw"] = ""
@@ -978,9 +1059,9 @@ def save_router_config():
         net.network = json.dumps(jnet)
         db.session.commit()
 
-        ret.update({
-            "message": "Конфигурация обновлена", "nodes": nodes, "jobs": jnet["jobs"]
-        })
+        ret.update(
+            {"message": "Конфигурация обновлена", "nodes": nodes, "jobs": jnet["jobs"]}
+        )
         return make_response(jsonify(ret), 200)
 
     ret.update({"message": "Неверный запрос"})
@@ -1041,14 +1122,16 @@ def save_server_config():
                     job_1_arg_1 = request.form.get("config_server_ping_c_1_ip")
 
                     if job_1_arg_1:
-                        jnet["jobs"].append({
-                            "id": job_id_generator(),
-                            "level": job_level,
-                            "job_id": job_id,
-                            "host_id": node["data"]["id"],
-                            "arg_1": job_1_arg_1,
-                            "print_cmd": "ping -c 1 " + job_1_arg_1,
-                        })
+                        jnet["jobs"].append(
+                            {
+                                "id": job_id_generator(),
+                                "level": job_level,
+                                "job_id": job_id,
+                                "host_id": node["data"]["id"],
+                                "arg_1": job_1_arg_1,
+                                "print_cmd": "ping -c 1 " + job_1_arg_1,
+                            }
+                        )
                     else:
                         ret.update({"warning": "Не указан IP адрес для команды ping"})
 
@@ -1062,53 +1145,63 @@ def save_server_config():
                     )
 
                     if not job_200_arg_1:
-                        ret.update({
-                            "warning": (
-                                'Не указан IP адрес для команды "Запустисть UDP сервер"'
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'Не указан IP адрес для команды "Запустисть UDP сервер"'
+                                )
+                            }
+                        )
                         return make_response(jsonify(ret), 200)
 
                     if not job_200_arg_2:
-                        ret.update({
-                            "warning": (
-                                'Не указан порт для команды "Запустисть UDP сервер"'
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'Не указан порт для команды "Запустисть UDP сервер"'
+                                )
+                            }
+                        )
                         return make_response(jsonify(ret), 200)
 
                     if int(job_200_arg_2) < 0 or int(job_200_arg_2) > 65535:
-                        ret.update({
-                            "warning": (
-                                'Неверно указан порт для команды "Запустить UDP сервер"'
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'Неверно указан порт для команды "Запустить UDP сервер"'
+                                )
+                            }
+                        )
                         return make_response(jsonify(ret), 200)
 
                     try:
                         socket.inet_aton(job_200_arg_1)
-                        jnet["jobs"].append({
-                            "id": job_id_generator(),
-                            "level": job_level,
-                            "job_id": job_id,
-                            "host_id": node["data"]["id"],
-                            "arg_1": job_200_arg_1,
-                            "arg_2": int(job_200_arg_2),
-                            "print_cmd": (
-                                "nc -u "
-                                + str(job_200_arg_1)
-                                + " -l "
-                                + str(job_200_arg_2)
-                            ),
-                        })
+                        jnet["jobs"].append(
+                            {
+                                "id": job_id_generator(),
+                                "level": job_level,
+                                "job_id": job_id,
+                                "host_id": node["data"]["id"],
+                                "arg_1": job_200_arg_1,
+                                "arg_2": int(job_200_arg_2),
+                                "print_cmd": (
+                                    "nc -u "
+                                    + str(job_200_arg_1)
+                                    + " -l "
+                                    + str(job_200_arg_2)
+                                ),
+                            }
+                        )
                     except Exception as e:
                         print(e)
-                        ret.update({
-                            "warning": (
-                                'IP адрес для команды "Запустить UDP сервер" указан'
-                                " неверно."
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'IP адрес для команды "Запустить UDP сервер" указан'
+                                    " неверно."
+                                )
+                            }
+                        )
 
                 # Start TCP server
                 if job_id == 201:
@@ -1120,50 +1213,63 @@ def save_server_config():
                     )
 
                     if not job_201_arg_1:
-                        ret.update({
-                            "warning": (
-                                'Не указан IP адрес для команды "Запустисть TCP сервер"'
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'Не указан IP адрес для команды "Запустисть TCP сервер"'
+                                )
+                            }
+                        )
                         return make_response(jsonify(ret), 200)
 
                     if not job_201_arg_2:
-                        ret.update({
-                            "warning": (
-                                'Не указан порт для команды "Запустисть TCP сервер"'
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'Не указан порт для команды "Запустисть TCP сервер"'
+                                )
+                            }
+                        )
                         return make_response(jsonify(ret), 200)
 
                     if int(job_201_arg_2) < 0 or int(job_201_arg_2) > 65535:
-                        ret.update({
-                            "warning": (
-                                'Неверно указан порт для команды "Запустить TCP сервер"'
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'Неверно указан порт для команды "Запустить TCP сервер"'
+                                )
+                            }
+                        )
                         return make_response(jsonify(ret), 200)
 
                     try:
                         socket.inet_aton(job_201_arg_1)
-                        jnet["jobs"].append({
-                            "id": job_id_generator(),
-                            "level": job_level,
-                            "job_id": job_id,
-                            "host_id": node["data"]["id"],
-                            "arg_1": job_201_arg_1,
-                            "arg_2": int(job_201_arg_2),
-                            "print_cmd": (
-                                "nc " + str(job_201_arg_1) + " -l " + str(job_201_arg_2)
-                            ),
-                        })
+                        jnet["jobs"].append(
+                            {
+                                "id": job_id_generator(),
+                                "level": job_level,
+                                "job_id": job_id,
+                                "host_id": node["data"]["id"],
+                                "arg_1": job_201_arg_1,
+                                "arg_2": int(job_201_arg_2),
+                                "print_cmd": (
+                                    "nc "
+                                    + str(job_201_arg_1)
+                                    + " -l "
+                                    + str(job_201_arg_2)
+                                ),
+                            }
+                        )
                     except Exception as e:
                         print(e)
-                        ret.update({
-                            "warning": (
-                                'IP адрес для команды "Запустить TCP сервер" указан'
-                                " неверно."
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'IP адрес для команды "Запустить TCP сервер" указан'
+                                    " неверно."
+                                )
+                            }
+                        )
 
                 # Block TCP/UDP port
                 if job_id == 202:
@@ -1172,38 +1278,46 @@ def save_server_config():
                     )
 
                     if not job_202_arg_1:
-                        ret.update({
-                            "warning": (
-                                'Не указан порт для команды "Блокировать TCP/UDP порт"'
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'Не указан порт для команды "Блокировать TCP/UDP порт"'
+                                )
+                            }
+                        )
                         return make_response(jsonify(ret), 200)
 
                     if int(job_202_arg_1) < 0 or int(job_202_arg_1) > 65535:
-                        ret.update({
-                            "warning": (
-                                'Неверно указан порт для команды "Блокировать TCP/UDP'
-                                ' порт"'
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'Неверно указан порт для команды "Блокировать TCP/UDP'
+                                    ' порт"'
+                                )
+                            }
+                        )
                         return make_response(jsonify(ret), 200)
 
                     try:
-                        jnet["jobs"].append({
-                            "id": job_id_generator(),
-                            "level": job_level,
-                            "job_id": job_id,
-                            "host_id": node["data"]["id"],
-                            "arg_1": job_202_arg_1,
-                            "print_cmd": "drop tcp/udp port " + str(job_202_arg_1),
-                        })
+                        jnet["jobs"].append(
+                            {
+                                "id": job_id_generator(),
+                                "level": job_level,
+                                "job_id": job_id,
+                                "host_id": node["data"]["id"],
+                                "arg_1": job_202_arg_1,
+                                "print_cmd": "drop tcp/udp port " + str(job_202_arg_1),
+                            }
+                        )
                     except Exception as e:
                         print(e)
-                        ret.update({
-                            "warning": (
-                                'Ошибка при добавлении job "Блокировать TCP/UDP порт'
-                            )
-                        })
+                        ret.update(
+                            {
+                                "warning": (
+                                    'Ошибка при добавлении job "Блокировать TCP/UDP порт'
+                                )
+                            }
+                        )
 
         # Set IP adresses
         iface_ids = request.form.getlist("config_server_iface_ids[]")
@@ -1264,9 +1378,9 @@ def save_server_config():
                 # ip = ipaddress.ip_address(default_gw)
                 node["config"]["default_gw"] = default_gw
             except ValueError:
-                ret.update({
-                    "warning": "IP адрес маршрута по умолчанию указан неверно."
-                })
+                ret.update(
+                    {"warning": "IP адрес маршрута по умолчанию указан неверно."}
+                )
                 return make_response(jsonify(ret), 200)
         else:
             node["config"]["default_gw"] = ""
@@ -1279,9 +1393,9 @@ def save_server_config():
         net.network = json.dumps(jnet)
         db.session.commit()
 
-        ret.update({
-            "message": "Конфигурация обновлена", "nodes": nodes, "jobs": jnet["jobs"]
-        })
+        ret.update(
+            {"message": "Конфигурация обновлена", "nodes": nodes, "jobs": jnet["jobs"]}
+        )
         return make_response(jsonify(ret), 200)
 
     ret.update({"message": "Неверный запрос"})

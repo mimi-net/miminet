@@ -1769,7 +1769,7 @@ const SetNetworkPlayerState = function(simultaion_id)
         return;
     }
 
-    // If we have packets, than we're ready to run
+    // If we have packets, then we're ready to run
     if (packets)
     {
         $('#NetworkPlayer').empty();

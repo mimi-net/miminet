@@ -28,6 +28,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     <!-- Main Theme Styles + Bootstrap -->
     <link rel="stylesheet" media="screen" href="/assets/css/theme.min.css">
+    <link rel="stylesheet" media="screen" href="/assets/css/style.css">
 
 </head>
 <body>
@@ -74,6 +75,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             {% if current_user.is_authenticated %}
                 <div class="navbar-nav">
                     <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('get_all_tests_endpoint') }}">Тренажер</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
                     </li>
                     <li class="nav-item">
@@ -83,6 +87,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             {% else %}
                 {% if request.path != url_for('login_index') %}
                     <div class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login_index') }}">Тренажер</a>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
                         </li>
