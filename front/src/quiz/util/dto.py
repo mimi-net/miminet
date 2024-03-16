@@ -150,7 +150,7 @@ class QuestionDto:
         self.correct_count = 0
 
         if self.question_type == "practice":
-            self.practice_question = PracticeQuestionDto(user_id, question.practice_question).to_dict()  # noqa
+            self.practice_question = PracticeQuestionDto(user_id, question.practice_question).to_dict()  # type: ignore
             return
 
         filtered_answers = Answer.query.filter_by(

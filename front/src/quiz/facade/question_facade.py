@@ -115,7 +115,7 @@ def create_question(section_id: str, question_dict: dict, user: User):
             setattr(practice_question, attribute, question_dict[attribute])
 
         practice_question.created_by_id = user.id
-        practice_question.practice_tasks = [  # noqa
+        practice_question.practice_tasks = [  # type: ignore
             create_practice_task(question_dict["tasks"], user)
         ]
         # practice_question.network = question_dict['network']

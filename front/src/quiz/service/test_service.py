@@ -67,7 +67,7 @@ def delete_test(user: User, test_id: str):
 
 
 def edit_test(
-    user: User, test_id: str, name: str, description: str, is_retakeable: bool
+        user: User, test_id: str, name: str, description: str, is_retakeable: bool
 ):
     test = Test.query.filter_by(id=test_id).first()
     if test is None or test.is_deleted is True:
@@ -90,7 +90,7 @@ def get_tests_by_author_name(author_name: str):
         .filter(Test.is_deleted.is_(False))
         .filter(Test.is_ready.is_(True))
     )
-    test_dtos = to_test_dto_list(tests) # noqa
+    test_dtos = to_test_dto_list(tests)  # type: ignore
 
     return test_dtos
 
