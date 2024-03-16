@@ -87,10 +87,10 @@ def get_tests_by_author_name(author_name: str):
         db.session.query(User, Test)
         .filter(User.nick == author_name)
         .filter(User.id == Test.created_by_id)
-        .filter(Test.is_deleted is False)
-        .filter(Test.is_ready is True)
+        .filter(Test.is_deleted.is_(False))
+        .filter(Test.is_ready.is_(True))
     )
-    test_dtos = to_test_dto_list(tests)
+    test_dtos = to_test_dto_list(tests) # noqa
 
     return test_dtos
 

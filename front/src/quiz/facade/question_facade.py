@@ -115,7 +115,7 @@ def create_question(section_id: str, question_dict: dict, user: User):
             setattr(practice_question, attribute, question_dict[attribute])
 
         practice_question.created_by_id = user.id
-        practice_question.practice_tasks = [
+        practice_question.practice_tasks = [  # noqa
             create_practice_task(question_dict["tasks"], user)
         ]
         # practice_question.network = question_dict['network']
@@ -127,7 +127,6 @@ def create_question(section_id: str, question_dict: dict, user: User):
     db.session.commit()
 
     return question.id, 201
-
 
 # def delete_question(question_id: str, user: User):
 #     question = Question.query.filter_by(id=question_id).first()

@@ -150,12 +150,12 @@ class QuestionDto:
         self.correct_count = 0
 
         if self.question_type == "practice":
-            self.practice_question = PracticeQuestionDto(user_id, question.practice_question).to_dict()
+            self.practice_question = PracticeQuestionDto(user_id, question.practice_question).to_dict()  # noqa
             return
 
         filtered_answers = Answer.query.filter_by(
-                question_id=question.id, is_deleted=False
-            ).all()
+            question_id=question.id, is_deleted=False
+        ).all()
 
         if self.question_type == "variable":
             self.correct_count = sum(answer.is_correct for answer in filtered_answers)
