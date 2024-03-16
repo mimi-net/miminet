@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from sqlalchemy import func
+
 from miminet_model import User, db
 from quiz.entity.entity import Question, QuizSession, SessionQuestion, Section
 from quiz.util.dto import SessionResultDto
@@ -44,7 +46,7 @@ def finish_session(quiz_session_id: str, user: User):
     elif quiz_session is None:
         return 404
 
-    quiz_session.finished_at = datetime.now()
+    quiz_session.finished_at = func.now()
 
     db.session.commit()
 
@@ -82,7 +84,7 @@ def get_results_by_user(user: User):
                 result[0],
                 result[1],
                 quiz_session.created_on.strftime("%m/%d/%Y, %H:%M:%S"),
-                result[2],
+                str(result[2]),
             )
         )
     return dto_list

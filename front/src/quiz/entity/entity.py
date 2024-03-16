@@ -2,7 +2,7 @@ import json
 import uuid
 from datetime import datetime
 
-from sqlalchemy import types
+from sqlalchemy import types, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.types import TypeDecorator, CHAR
 from sqlalchemy.orm import declared_attr
@@ -76,8 +76,8 @@ class SoftDeleteMixin(object):
 class TimeMixin(object):
     __table_args__ = ({"extend_existing": True},)
 
-    created_on = db.Column(db.DateTime, default=datetime.now())
-    updated_on = db.Column(db.DateTime, default=db.func.now(), onupdate=datetime.now())
+    created_on = db.Column(db.DateTime, default=func.now())
+    updated_on = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
 
 
 class CreatedByMixin(object):

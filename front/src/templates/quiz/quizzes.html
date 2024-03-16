@@ -23,7 +23,9 @@
                             <h4 class="h4" style="margin-top: 20px;margin-left: 20px;margin-bottom: 4px">
                                 <a href="{{ url_for('get_sections_by_test_endpoint', test_id=quiz.test_id) }}">{{ quiz.test_name }}</a>
                             </h4>
-                            <p style="margin-left: 40px;margin-bottom: 4px">{{ quiz.description }}</p>
+                            {% if quiz.description is not none %}
+                                <p style="margin-left: 40px;margin-bottom: 4px">{{ quiz.description }}</p>
+                            {% endif %}
                             <p style="margin-left: 40px;opacity: 50%">{{ quiz.author_name }}</p>
                         </div>
                     </div>
@@ -31,9 +33,9 @@
                         <div class="card-body">
                             <p id="{{ quiz.test_id }}"
                                style="text-align: right; margin-right: 40px; margin-top: 20px;"></p>
-                            {#                            <p style="text-align: right; margin-right: 40px;">#}
-                            {#                                {{ quiz.passed }}/{{ quiz.section_count }} пройдено#}
-                            {#                            </p>#}
+                           {# <p style="text-align: right; margin-right: 40px;">
+                                {{ quiz.passed }}/{{ quiz.section_count }} пройдено
+                            </p>#}
                         </div>
                     </div>
                 </div>

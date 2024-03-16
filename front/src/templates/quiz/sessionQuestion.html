@@ -29,16 +29,6 @@
             </div>
         </div>
 
-        {# Task text #}
-        {% if question.question_type == "practice" %}
-            <div style="flex: 2;display: flex;justify-content: center;align-items: flex-end;">
-                <div class="matching">
-                    <p class="text-black m-0"
-                   style="font-size: 20px">{{ question.question_text }}</p>
-                </div>
-            </div>
-        {% endif %}
-
         {# finishQuiz button #}
         <div class="col-auto ms-auto" style="flex: 1;display: flex;justify-content: flex-end;align-items: flex-end;margin: 8px 0 8px 0; font-size: 24px; opacity: 85%">
             <button name="finishQuiz" aria-label="Завершить тест" class="btn btn-outline-danger btn-icon me-5"
@@ -47,6 +37,16 @@
             </button>
         </div>
     </section>
+
+    {# Task text #}
+    {% if question.question_type == "practice" %}
+        <div style="flex: 2;display: flex;justify-content: center;align-items: flex-end;">
+            <div class="matching">
+                <p class="text-black m-0"
+                   style="font-size: 20px">{{ question.question_text }}</p>
+            </div>
+        </div>
+    {% endif %}
 
     {% if question.question_type != "practice" %}
         <article class="container card border-0 shadow-sm" style="padding: 12px 40px 12px 18px">
@@ -59,10 +59,10 @@
                 <div class="border border-1 border-success-subtle"></div>
 
                 {# Answer area #}
-{#                {% if question.question_type != "practice" %}#}
+                {% if question.question_type != "practice" %}
                     <div class="container m-3" id="variants"></div>
                     <div class="container" id="explanation" hidden></div>
-{#                {% endif %}#}
+                {% endif %}
             </div>
 
             {# Control buttons #}

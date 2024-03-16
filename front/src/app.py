@@ -41,7 +41,7 @@ from miminet_network import (
 )
 from miminet_shark import mimishark_page
 from miminet_simulation import check_simulation, run_simulation
-from quiz.controller.question_controller import (get_questions_by_section_endpoint)
+from quiz.controller.question_controller import (get_questions_by_section_endpoint, create_question_endpoint)
 from quiz.controller.quiz_session_controller import (
     start_session_endpoint,
     get_question_by_session_question_id_endpoint,
@@ -169,9 +169,9 @@ app.add_url_rule(
     "/quiz/section/test/all", methods=["GET"], view_func=get_sections_by_test_endpoint
 )
 
-# app.add_url_rule(
-#     "/quiz/question/create", methods=["POST"], view_func=create_question_endpoint
-# )
+app.add_url_rule(
+    "/quiz/question/create", methods=["POST"], view_func=create_question_endpoint
+)
 # app.add_url_rule(
 #     "/quiz/question/delete", methods=["DELETE"], view_func=delete_question_endpoint
 # )

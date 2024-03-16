@@ -54,78 +54,79 @@ def create_practice_task(task: str, user: User):
     return practice_task
 
 
-# def create_question(section_id: str, question_dict: dict, user: User):
-#     section = Section.query.filter_by(id=section_id).first()
-#     if section is None or section.is_deleted:
-#         return None, 404
-#     elif section.created_by_id != user.id:
-#         return None, 403
-#
-#     question = Question()
-#     question.section_id = section_id
-#     question.created_by_id = user.id
-#     question.question_type = question_dict["question_type"]
-#
-#     if question_dict["question_type"] == "text":
-#         text_question = TextQuestion()
-#         text_question.text_type = question_dict["text_type"]
-#
-#         if question_dict["text_type"] == "sorting":
-#             sorting_question = create_sorting_question(
-#                 question_dict["explanation"], question_dict["right_sequence"], user
-#             )
-#             text_question.sorting_question = sorting_question
-#
-#         elif question_dict["text_type"] == "matching":
-#             matching_question = create_matching_question(
-#                 question_dict["explanation"], question_dict["map"], user
-#             )
-#             text_question.matching_question = matching_question
-#
-#         elif question_dict["text_type"] == "variable":
-#             variable_question = create_variable_question(
-#                 question_dict["variants"], user
-#             )
-#             text_question.variable_question = variable_question
-#
-#         else:
-#             return None, 400
-#
-#         text_question.created_by_id = user.id
-#         question.text_question = text_question
-#         db.session.add(text_question)
-#         question.question_text = question_dict["question_text"]
-#
-#     elif question_dict["question_type"] == "practice":
-#         practice_question = PracticeQuestion()
-#
-#         attributes = [
-#             "description",
-#             "explanation",
-#             "start_configuration",
-#             "available_host",
-#             "available_l2_switch",
-#             "available_l1_hub",
-#             "available_l3_router",
-#             "available_server",
-#         ]
-#
-#         for attribute in attributes:
-#             setattr(practice_question, attribute, question_dict[attribute])
-#
-#         practice_question.created_by_id = user.id
-#         practice_question.practice_tasks = [
-#             create_practice_task(question_dict["tasks"], user)
-#         ]
-#         # practice_question.network = question_dict['network']
-#         question.practice_question = practice_question
-#         db.session.add(practice_question)
-#         question.question_text = question_dict["question_text"]
-#     else:
-#         return None, 400
-#     db.session.commit()
-#
-#     return question.id, 201
+def create_question(section_id: str, question_dict: dict, user: User):
+    section = Section.query.filter_by(id=section_id).first()
+    if section is None or section.is_deleted:
+        return None, 404
+    elif section.created_by_id != user.id:
+        return None, 403
+
+    question = Question()
+    question.section_id = section_id
+    question.created_by_id = user.id
+    question.question_type = question_dict["question_type"]
+
+    if question_dict["question_type"] == "text":
+        pass
+        # text_question = TextQuestion()
+        # text_question.text_type = question_dict["text_type"]
+        #
+        # if question_dict["text_type"] == "sorting":
+        #     sorting_question = create_sorting_question(
+        #         question_dict["explanation"], question_dict["right_sequence"], user
+        #     )
+        #     text_question.sorting_question = sorting_question
+        #
+        # elif question_dict["text_type"] == "matching":
+        #     matching_question = create_matching_question(
+        #         question_dict["explanation"], question_dict["map"], user
+        #     )
+        #     text_question.matching_question = matching_question
+        #
+        # elif question_dict["text_type"] == "variable":
+        #     variable_question = create_variable_question(
+        #         question_dict["variants"], user
+        #     )
+        #     text_question.variable_question = variable_question
+        #
+        # else:
+        #     return None, 400
+        #
+        # text_question.created_by_id = user.id
+        # question.text_question = text_question
+        # db.session.add(text_question)
+        # question.question_text = question_dict["question_text"]
+
+    elif question_dict["question_type"] == "practice":
+        practice_question = PracticeQuestion()
+
+        attributes = [
+            "description",
+            "explanation",
+            "start_configuration",
+            "available_host",
+            "available_l2_switch",
+            "available_l1_hub",
+            "available_l3_router",
+            "available_server",
+        ]
+
+        for attribute in attributes:
+            setattr(practice_question, attribute, question_dict[attribute])
+
+        practice_question.created_by_id = user.id
+        practice_question.practice_tasks = [
+            create_practice_task(question_dict["tasks"], user)
+        ]
+        # practice_question.network = question_dict['network']
+        question.practice_question = practice_question
+        db.session.add(practice_question)
+        question.question_text = question_dict["question_text"]
+    else:
+        return None, 400
+    db.session.commit()
+
+    return question.id, 201
 
 
 # def delete_question(question_id: str, user: User):

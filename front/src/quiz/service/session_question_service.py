@@ -93,7 +93,7 @@ def answer_on_session_question(session_question_id: str, answer_string: dict, us
         db.session.add(session_question)
         db.session.commit()
 
-        return AnswerResultDto(practice_question.explanation, is_correct), 200
+        return AnswerResultDto(question.explanation, is_correct), 200
 
     # variable
     if question.question_type == 1:

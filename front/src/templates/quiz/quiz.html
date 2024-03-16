@@ -10,19 +10,9 @@
             <h1 class="me-3"> {{ test_name }}</h1>
         </div>
 
-{#        <div class="toast" id="alert" role="alert" aria-live="assertive" aria-atomic="true">#}
-{#            <div class="toast-body">#}
-{#                <strong class="me-auto">Данный раздел уже пройден вами</strong>#}
-{#                <small>11 мин. назад</small>#}
-{#                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Закрыть"></button>#}
-{#            </div>#}
-{#            <div class="toast-body">#}
-{#            </div>#}
-{#        </div>#}
-
-
         {% for section in sections %}
-            <div class="toast align-items-center text-white bg-primary border-0 my-3" id="alert{{ section.section_id }}" role="alert"
+            <div class="toast align-items-center text-white bg-primary border-0 my-3" id="alert{{ section.section_id }}"
+                 role="alert"
                  aria-live="assertive"
                  aria-atomic="true">
                 <div class="d-flex">
@@ -41,7 +31,9 @@
                             <h4 class="h4" style="margin-left: 20px;margin-bottom: 4px">
                                 {{ section.section_name }}
                             </h4>
-                            <p style="margin-left: 40px;margin-bottom: 8px">{{ section.description }}</p>
+                            {% if section.description is not none %}
+                                <p style="margin-left: 40px;margin-bottom: 8px">{{ section.description }}</p>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="col-sm-4">
