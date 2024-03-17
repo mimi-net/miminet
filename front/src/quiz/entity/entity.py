@@ -92,9 +92,12 @@ class CreatedByMixin(object):
 
 
 class Test(
-    IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model
-):  # type:ignore[name-defined]
-
+    IdMixin,
+    SoftDeleteMixin,
+    TimeMixin,
+    CreatedByMixin,
+    db.Model,  # type:ignore[name-defined]
+):
     __tablename__ = "test"
 
     name = db.Column(db.String(512), default="Название теста")
@@ -111,9 +114,12 @@ class Test(
 
 
 class Section(
-    IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model
-):  # type:ignore[name-defined]
-
+    IdMixin,
+    SoftDeleteMixin,
+    TimeMixin,
+    CreatedByMixin,
+    db.Model,  # type:ignore[name-defined]
+):
     __tablename__ = "section"
 
     name = db.Column(db.String(512), default="Название раздела")
@@ -129,9 +135,12 @@ class Section(
 
 
 class Question(
-    IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model
-):  # type:ignore[name-defined]
-
+    IdMixin,
+    SoftDeleteMixin,
+    TimeMixin,
+    CreatedByMixin,
+    db.Model,  # type:ignore[name-defined]
+):
     __tablename__ = "question"
 
     text = db.Column(db.String(1024), default="", nullable=False)
@@ -164,9 +173,12 @@ class Question(
 
 
 class QuizSession(
-    IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model
-):  # type:ignore[name-defined]
-
+    IdMixin,
+    SoftDeleteMixin,
+    TimeMixin,
+    CreatedByMixin,
+    db.Model,  # type:ignore[name-defined]
+):
     __tablename__ = "quiz_session"
 
     section_id = db.Column(db.Integer, db.ForeignKey(Section.id))
@@ -177,9 +189,12 @@ class QuizSession(
 
 
 class SessionQuestion(
-    IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model
-):  # type:ignore[name-defined]
-
+    IdMixin,
+    SoftDeleteMixin,
+    TimeMixin,
+    CreatedByMixin,
+    db.Model,  # type:ignore[name-defined]
+):
     __tablename__ = "session_question"
 
     quiz_session_id = db.Column(db.Integer, db.ForeignKey(QuizSession.id))
@@ -190,63 +205,13 @@ class SessionQuestion(
     question = db.relationship("Question", back_populates="session_questions")
 
 
-# class TextQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model): # type:ignore[name-defined]
-
-#     __tablename__ = "text_question"
-#
-#     id = db.Column(db.String(512), db.ForeignKey(Question.id), primary_key=True)
-#
-#     # matching, variable, sorting
-#     text_type = db.Column(db.String(31), default="variable")
-#
-#     question = db.relationship("Question", back_populates="text_question")
-#     sorting_question = db.relationship(
-#         "SortingQuestion", uselist=False, back_populates="text_question"
-#     )
-#     variable_question = db.relationship(
-#         "VariableQuestion", uselist=False, back_populates="text_question"
-#     )
-#     matching_question = db.relationship(
-#         "MatchingQuestion", uselist=False, back_populates="text_question"
-#     )
-
-#
-# class SortingQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model): # type:ignore[name-defined]
-#
-#     __tablename__ = "sorting_question"
-#
-#     id = db.Column(db.String(512), db.ForeignKey("text_question.id"), primary_key=True)
-#     right_sequence = db.Column(db.UnicodeText, default="")
-#     explanation = db.Column(db.String(512), default="")
-#
-#     text_question = db.relationship("TextQuestion", back_populates="sorting_question")
-#
-#
-# class MatchingQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model): # type:ignore[name-defined]
-#
-#     __tablename__ = "matching_question"
-#
-#     id = db.Column(db.String(512), db.ForeignKey("text_question.id"), primary_key=True)
-#     map = db.Column(Json(), default="")
-#     explanation = db.Column(db.String(512), default="")
-#
-#     text_question = db.relationship("TextQuestion", back_populates="matching_question")
-#
-#
-# class VariableQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model): # type:ignore[name-defined]
-#
-#     __tablename__ = "variable_question"
-#
-#     id = db.Column(db.String(512), db.ForeignKey("text_question.id"), primary_key=True)
-#
-#     answers = db.relationship("Answer", back_populates="variable_question")
-#     text_question = db.relationship("TextQuestion", back_populates="variable_question")
-
-
 class Answer(
-    IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model
-):  # type:ignore[name-defined]
-
+    IdMixin,
+    SoftDeleteMixin,
+    TimeMixin,
+    CreatedByMixin,
+    db.Model,  # type:ignore[name-defined]
+):
     __tablename__ = "answer"
 
     variant = db.Column(db.String(512), default="", nullable=False)
@@ -259,29 +224,14 @@ class Answer(
 
     question = db.relationship("Question", back_populates="answers")
 
-    # variable_question_id = db.Column(
-    #     db.Integer, db.ForeignKey("variable_question.id")
-    # )
-    # variable_question = db.relationship("VariableQuestion", back_populates="answers")
-    #
-    # __table_args__ = (
-    #     db.Index(
-    #         "answer_variable_question_id_answer_text_ind",
-    #         "variable_question_id",
-    #         "answer_text",
-    #     ),
-    #     db.Index(
-    #         "answer_variable_question_id_is_correct_ind",
-    #         "variable_question_id",
-    #         "is_correct",
-    #     ),
-    # )
-
 
 class PracticeQuestion(
-    IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model
-):  # type:ignore[name-defined]
-
+    IdMixin,
+    SoftDeleteMixin,
+    TimeMixin,
+    CreatedByMixin,
+    db.Model,  # type:ignore[name-defined]
+):
     __tablename__ = "practice_question"
 
     id = db.Column(db.Integer, db.ForeignKey("question.id"), primary_key=True)
@@ -302,9 +252,12 @@ class PracticeQuestion(
 
 
 class PracticeTask(
-    IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model
-):  # type:ignore[name-defined]
-
+    IdMixin,
+    SoftDeleteMixin,
+    TimeMixin,
+    CreatedByMixin,
+    db.Model,  # type:ignore[name-defined]
+):
     __tablename__ = "practice_task"
 
     task = db.Column(db.String(512), default="")
