@@ -1,6 +1,6 @@
 import json
 
-from flask import request, abort, make_response, jsonify, render_template
+from flask import request, abort, make_response, jsonify
 from flask_login import login_required, current_user
 
 from quiz.facade.question_facade import create_question
@@ -38,6 +38,7 @@ def create_question_endpoint():
         ret = {"message": "Вопрос создан", "id": res[0]}
 
     return make_response(jsonify(ret), res[1])
+
 
 #
 # @login_required

@@ -1,11 +1,10 @@
 import json
 import uuid
-from datetime import datetime
 
 from sqlalchemy import types, func
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.types import TypeDecorator, CHAR
 from sqlalchemy.orm import declared_attr
+from sqlalchemy.types import TypeDecorator, CHAR
 
 from miminet_model import db
 
@@ -92,7 +91,9 @@ class CreatedByMixin(object):
         return db.relationship("User")
 
 
-class Test(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):  # type:ignore[name-defined]
+class Test(
+    IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model
+):  # type:ignore[name-defined]
 
     __tablename__ = "test"
 
@@ -109,7 +110,9 @@ class Test(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):  # ty
     # )
 
 
-class Section(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):  # type:ignore[name-defined]
+class Section(
+    IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model
+):  # type:ignore[name-defined]
 
     __tablename__ = "section"
 
@@ -125,7 +128,9 @@ class Section(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):  #
     __table_args__ = (db.Index("section_test_id_is_deleted", "test_id", "is_deleted"),)
 
 
-class Question(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):  # type:ignore[name-defined]
+class Question(
+    IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model
+):  # type:ignore[name-defined]
 
     __tablename__ = "question"
 
@@ -140,14 +145,15 @@ class Question(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):  
 
     explanation = db.Column(db.String(512), default="")
 
-
     section = db.relationship("Section", uselist=False, back_populates="questions")
 
     # text_question = db.relationship(
     #     "TextQuestion", uselist=False, back_populates="question"
     # )
 
-    practice_question = db.relationship("PracticeQuestion", uselist=False, back_populates="question")
+    practice_question = db.relationship(
+        "PracticeQuestion", uselist=False, back_populates="question"
+    )
     session_questions = db.relationship("SessionQuestion", back_populates="question")
 
     answers = db.relationship("Answer", back_populates="question")
@@ -157,7 +163,9 @@ class Question(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):  
     )
 
 
-class QuizSession(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):  # type:ignore[name-defined]
+class QuizSession(
+    IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model
+):  # type:ignore[name-defined]
 
     __tablename__ = "quiz_session"
 
@@ -168,7 +176,9 @@ class QuizSession(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model)
     sessions = db.relationship("SessionQuestion", back_populates="quiz_session")
 
 
-class SessionQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):  # type:ignore[name-defined]
+class SessionQuestion(
+    IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model
+):  # type:ignore[name-defined]
 
     __tablename__ = "session_question"
 
@@ -233,7 +243,9 @@ class SessionQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Mo
 #     text_question = db.relationship("TextQuestion", back_populates="variable_question")
 
 
-class Answer(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):  # type:ignore[name-defined]
+class Answer(
+    IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model
+):  # type:ignore[name-defined]
 
     __tablename__ = "answer"
 
@@ -266,7 +278,9 @@ class Answer(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):  # 
     # )
 
 
-class PracticeQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):  # type:ignore[name-defined]
+class PracticeQuestion(
+    IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model
+):  # type:ignore[name-defined]
 
     __tablename__ = "practice_question"
 
@@ -287,15 +301,15 @@ class PracticeQuestion(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.M
     practice_tasks = db.relationship("PracticeTask", back_populates="practice_question")
 
 
-class PracticeTask(IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model):  # type:ignore[name-defined]
+class PracticeTask(
+    IdMixin, SoftDeleteMixin, TimeMixin, CreatedByMixin, db.Model
+):  # type:ignore[name-defined]
 
     __tablename__ = "practice_task"
 
     task = db.Column(db.String(512), default="")
 
-    practice_question_id = db.Column(
-        db.Integer, db.ForeignKey("practice_question.id")
-    )
+    practice_question_id = db.Column(db.Integer, db.ForeignKey("practice_question.id"))
     practice_question = db.relationship(
         "PracticeQuestion", back_populates="practice_tasks"
     )

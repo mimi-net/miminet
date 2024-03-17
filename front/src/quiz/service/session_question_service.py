@@ -63,14 +63,22 @@ def check_task(task_dict, answer):
             else:
                 continue
 
-        if (request and reply and request[0] == from_node and request[-1] == to_node
-                and reply[0] == to_node and reply[-1] == from_node):
+        if (
+            request
+            and reply
+            and request[0] == from_node
+            and request[-1] == to_node
+            and reply[0] == to_node
+            and reply[-1] == from_node
+        ):
             return True
         else:
             return False
 
 
-def answer_on_session_question(session_question_id: str, answer_string: dict, user: User):
+def answer_on_session_question(
+    session_question_id: str, answer_string: dict, user: User
+):
     session_question = SessionQuestion.query.filter_by(id=session_question_id).first()
     if session_question.created_by_id != user.id:
         return None, 403
@@ -107,7 +115,9 @@ def answer_on_session_question(session_question_id: str, answer_string: dict, us
             if not answer.is_correct:
                 is_correct = False
 
-        correct_count = Answer.query.filter_by(question_id=question.id, is_correct=True).count()
+        correct_count = Answer.query.filter_by(
+            question_id=question.id, is_correct=True
+        ).count()
         correct = is_correct and len(answers) == correct_count
         session_question.is_correct = correct
         db.session.add(session_question)
@@ -122,7 +132,11 @@ def answer_on_session_question(session_question_id: str, answer_string: dict, us
         answers = Answer.query.filter_by(question_id=question.id).all()
         answer_set = sorted({(answer.position, answer.variant) for answer in answers})
 
-        correct = True if [value for key, value in answer] == [value for key, value in answer_set] else False
+        correct = (
+            True
+            if [value for key, value in answer] == [value for key, value in answer_set]
+            else False
+        )
         session_question.is_correct = correct
         db.session.add(session_question)
         db.session.commit()

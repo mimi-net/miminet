@@ -2,11 +2,17 @@ import sys
 from datetime import datetime
 
 from flask import Flask, make_response, render_template
-from flask_admin.contrib.sqla import ModelView
+from flask_admin import Admin
 from flask_login import current_user, login_required
 from flask_migrate import Migrate
 
-from miminet_admin import MiminetAdminIndexView, TestView, SectionView, QuestionView, AnswerView
+from miminet_admin import (
+    MiminetAdminIndexView,
+    TestView,
+    SectionView,
+    QuestionView,
+    AnswerView,
+)
 from miminet_auth import (
     google_callback,
     google_login,
@@ -16,7 +22,6 @@ from miminet_auth import (
     user_profile,
     vk_callback,
 )
-from flask_admin import Admin
 from miminet_config import SECRET_KEY, SQLITE_DATABASE_NAME
 from miminet_host import (
     delete_job,
@@ -41,7 +46,10 @@ from miminet_network import (
 )
 from miminet_shark import mimishark_page
 from miminet_simulation import check_simulation, run_simulation
-from quiz.controller.question_controller import (get_questions_by_section_endpoint, create_question_endpoint)
+from quiz.controller.question_controller import (
+    get_questions_by_section_endpoint,
+    create_question_endpoint,
+)
 from quiz.controller.quiz_session_controller import (
     start_session_endpoint,
     get_question_by_session_question_id_endpoint,
@@ -203,7 +211,12 @@ app.add_url_rule(
 )
 
 # Init Flask-admin
-admin = Admin(app, index_view=MiminetAdminIndexView(), name="Miminet Admin", template_mode="bootstrap4")
+admin = Admin(
+    app,
+    index_view=MiminetAdminIndexView(),
+    name="Miminet Admin",
+    template_mode="bootstrap4",
+)
 
 admin.add_view(TestView(Test, db.session))
 admin.add_view(SectionView(Section, db.session))

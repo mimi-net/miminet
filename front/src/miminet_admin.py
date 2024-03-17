@@ -57,10 +57,12 @@ class MiminetAdminModelView(ModelView):
             model.created_by_id = current_user.id
 
     MY_DEFAULT_FORMATTERS = dict(typefmt.BASE_FORMATTERS)
-    MY_DEFAULT_FORMATTERS.update({
-        type(None): typefmt.null_formatter,
-        date: lambda view, value: value.strftime('%d.%m.%Y')
-    })
+    MY_DEFAULT_FORMATTERS.update(
+        {
+            type(None): typefmt.null_formatter,
+            date: lambda view, value: value.strftime("%d.%m.%Y"),
+        }
+    )
 
     column_type_formatters = MY_DEFAULT_FORMATTERS
 
@@ -73,7 +75,14 @@ def created_by_formatter(view, context, model, name, **kwargs):
 
 
 class TestView(MiminetAdminModelView):
-    column_list = ("name", "description", "is_ready", "is_retakeable", "created_on", "created_by_id")
+    column_list = (
+        "name",
+        "description",
+        "is_ready",
+        "is_retakeable",
+        "created_on",
+        "created_by_id",
+    )
     column_sortable_list = ("name", "created_on", "created_by_id")
 
     column_labels = {
@@ -82,12 +91,10 @@ class TestView(MiminetAdminModelView):
         "is_ready": "Тест готов",
         "is_retakeable": "Можно перепроходить",
         "created_on": "Дата создания",
-        "created_by_id": "Автор"
+        "created_by_id": "Автор",
     }
 
-    column_formatters = {
-        "created_by_id": created_by_formatter
-    }
+    column_formatters = {"created_by_id": created_by_formatter}
 
     pass
 
@@ -100,7 +107,14 @@ def get_test_name(view, context, model, name, **kwargs):
 
 
 class SectionView(MiminetAdminModelView):
-    column_list = ("test_id", "name", "description", "timer", "created_on", "created_by_id")
+    column_list = (
+        "test_id",
+        "name",
+        "description",
+        "timer",
+        "created_on",
+        "created_by_id",
+    )
     column_sortable_list = ("name", "created_on", "created_by_id")
 
     column_labels = {
@@ -109,7 +123,7 @@ class SectionView(MiminetAdminModelView):
         "timer": "Время на прохождение (в минутах)",
         "test_id": "Раздел теста",
         "created_on": "Дата создания",
-        "created_by_id": "Автор"
+        "created_by_id": "Автор",
     }
 
     column_formatters = {
@@ -117,13 +131,22 @@ class SectionView(MiminetAdminModelView):
         "test_id": get_test_name,
     }
 
-    form_extra_fields = {"test_id": QuerySelectField(
-        "Раздел теста",
-        query_factory=lambda: Test.query.filter(Test.created_by_id == current_user.id).all(),
-        get_pk=lambda test: test.id,
-        get_label=lambda test: test.name
-                               + (", " + test.description if test.description else "")
-                               + (" (" + User.query.get(test.created_by_id).nick) + ")" if test.created_by_id else "")
+    form_extra_fields = {
+        "test_id": QuerySelectField(
+            "Раздел теста",
+            query_factory=lambda: Test.query.filter(
+                Test.created_by_id == current_user.id
+            ).all(),
+            get_pk=lambda test: test.id,
+            get_label=lambda test: (
+                test.name
+                + (", " + test.description if test.description else "")
+                + (" (" + User.query.get(test.created_by_id).nick)
+                + ")"
+                if test.created_by_id
+                else ""
+            ),
+        )
     }
 
     def on_model_change(self, form, model, is_created, **kwargs):
@@ -148,16 +171,27 @@ def get_question_type(view, context, model, name, **kwargs):
         0: "Практическое задание",
         1: "С вариантами ответов",
         2: "На сортировку",
-        3: "На сопоставление"
+        3: "На сопоставление",
     }
     return types.get(model.question_type, "")
 
 
 class QuestionView(MiminetAdminModelView):
-    form_excluded_columns = (MiminetAdminModelView.form_excluded_columns +
-                             ["practice_question", "session_questions", "created_by_user", "section"])
+    form_excluded_columns = MiminetAdminModelView.form_excluded_columns + [
+        "practice_question",
+        "session_questions",
+        "created_by_user",
+        "section",
+    ]
 
-    column_list = ("section_id", "text", "explanation", "question_type", "created_on", "created_by_id")
+    column_list = (
+        "section_id",
+        "text",
+        "explanation",
+        "question_type",
+        "created_on",
+        "created_by_id",
+    )
     column_sortable_list = ("created_on", "created_by_id")
 
     column_labels = {
@@ -166,31 +200,38 @@ class QuestionView(MiminetAdminModelView):
         "explanation": "Пояснение",
         "created_by_id": "Автор",
         "question_type": "Тип вопроса",
-        "text": "Текст вопроса"
+        "text": "Текст вопроса",
     }
 
     column_formatters = {
         "created_by_id": created_by_formatter,
         "section_id": get_section_name,
-        "question_type": get_question_type
+        "question_type": get_question_type,
     }
 
-    form_extra_fields = {"section_id": QuerySelectField(
-        "Вопрос раздела",
-        query_factory=lambda: Section.query.filter(Section.created_by_id == current_user.id).all(),
-        get_pk=lambda section: section.id,
-        get_label=lambda section: section.name +
-                                  (" (" + User.query.get(
-                                      section.created_by_id).nick) + ")" if section.created_by_id else ""),
-
-        "question_type": SelectField('Тип вопроса',
-                                     choices=[
-                                         (0, 'Практическое задание'),
-                                         (1, 'С вариантами ответов'),
-                                         (2, 'На сортировку'),
-                                         (3, 'На сопоставление'),
-                                     ],
-                                     widget=Select2Widget())
+    form_extra_fields = {
+        "section_id": QuerySelectField(
+            "Вопрос раздела",
+            query_factory=lambda: Section.query.filter(
+                Section.created_by_id == current_user.id
+            ).all(),
+            get_pk=lambda section: section.id,
+            get_label=lambda section: (
+                section.name + (" (" + User.query.get(section.created_by_id).nick) + ")"
+                if section.created_by_id
+                else ""
+            ),
+        ),
+        "question_type": SelectField(
+            "Тип вопроса",
+            choices=[
+                (0, "Практическое задание"),
+                (1, "С вариантами ответов"),
+                (2, "На сортировку"),
+                (3, "На сопоставление"),
+            ],
+            widget=Select2Widget(),
+        ),
     }
 
     def on_model_change(self, form, model, is_created, **kwargs):
@@ -204,7 +245,14 @@ class QuestionView(MiminetAdminModelView):
 
 
 class AnswerView(MiminetAdminModelView):
-    column_list = ("variant", "is_correct", "position", "left", "right", "created_by_id")
+    column_list = (
+        "variant",
+        "is_correct",
+        "position",
+        "left",
+        "right",
+        "created_by_id",
+    )
     column_sortable_list = ("created_by_id",)
 
     column_labels = {
@@ -212,20 +260,24 @@ class AnswerView(MiminetAdminModelView):
         "position": "Позиция ответа",
         "left": "Левая часть",
         "right": "Правая часть",
-        "created_by_id": "Автор"
+        "created_by_id": "Автор",
     }
 
-    column_formatters = {
-        "created_by_id": created_by_formatter
-    }
+    column_formatters = {"created_by_id": created_by_formatter}
 
-    form_extra_fields = {"question_id": QuerySelectField(
-        "Вопрос",
-        query_factory=lambda: Question.query.all(),
-        get_pk=lambda question: question.id,
-        get_label=lambda question: question.text
-                                   + (" (" + User.query.get(
-            question.created_by_id).nick) + ")" if question.created_by_id else "")
+    form_extra_fields = {
+        "question_id": QuerySelectField(
+            "Вопрос",
+            query_factory=lambda: Question.query.all(),
+            get_pk=lambda question: question.id,
+            get_label=lambda question: (
+                question.text
+                + (" (" + User.query.get(question.created_by_id).nick)
+                + ")"
+                if question.created_by_id
+                else ""
+            ),
+        )
     }
 
     def on_model_change(self, form, model, is_created, **kwargs):

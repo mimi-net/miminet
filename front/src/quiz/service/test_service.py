@@ -67,7 +67,7 @@ def delete_test(user: User, test_id: str):
 
 
 def edit_test(
-        user: User, test_id: str, name: str, description: str, is_retakeable: bool
+    user: User, test_id: str, name: str, description: str, is_retakeable: bool
 ):
     test = Test.query.filter_by(id=test_id).first()
     if test is None or test.is_deleted is True:

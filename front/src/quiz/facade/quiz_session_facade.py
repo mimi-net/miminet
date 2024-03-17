@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from sqlalchemy import func
 
 from miminet_model import User, db
@@ -13,11 +11,11 @@ def start_session(section_id: str, user: User):
     if section is None or section.is_deleted:
         return None, None, 404
     if (
-            not test.is_retakeable
-            and QuizSession.query.filter_by(
-        section_id=section_id, created_by_id=user.id, is_deleted=False
-    ).first()
-            is not None
+        not test.is_retakeable
+        and QuizSession.query.filter_by(
+            section_id=section_id, created_by_id=user.id, is_deleted=False
+        ).first()
+        is not None
     ):
         return None, None, 403
     quiz_session = QuizSession()
@@ -61,7 +59,7 @@ def session_result(quiz_session_id: str):
     question_count = len(quiz_session.sessions)
     time_spent = str(quiz_session.finished_at - quiz_session.created_on).split(".")[0]
     for question in list(
-            filter(lambda x: x.is_correct is not None, quiz_session.sessions)
+        filter(lambda x: x.is_correct is not None, quiz_session.sessions)
     ):
         if question.is_correct:
             correct += 1

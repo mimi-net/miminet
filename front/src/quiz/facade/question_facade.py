@@ -1,9 +1,6 @@
-import json
-
 from miminet_model import db, User
 from quiz.entity.entity import (
     Section,
-    Answer,
     Question,
     PracticeQuestion,
     PracticeTask,
@@ -127,6 +124,7 @@ def create_question(section_id: str, question_dict: dict, user: User):
     db.session.commit()
 
     return question.id, 201
+
 
 # def delete_question(question_id: str, user: User):
 #     question = Question.query.filter_by(id=question_id).first()

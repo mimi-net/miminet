@@ -1,4 +1,3 @@
-import json
 import random
 import uuid
 from typing import List
@@ -96,10 +95,9 @@ class PracticeQuestionDto:
         for attribute in attributes:
             setattr(self, attribute, getattr(practice_question, attribute))
 
-        net = (
-            Network.query.filter(Network.guid == practice_question.start_configuration)
-            .first()
-        )
+        net = Network.query.filter(
+            Network.guid == practice_question.start_configuration
+        ).first()
         escaped_string = net.network.replace('\\"', '"').replace('"', '\\"')
 
         u = uuid.uuid4()
@@ -110,7 +108,7 @@ class PracticeQuestionDto:
             title=net.title,
             description="Network copy",
             preview_uri=net.preview_uri,
-            is_task=True
+            is_task=True,
         )
         db.session.add(net_copy)
         db.session.commit()
@@ -134,12 +132,7 @@ class PracticeQuestionDto:
 
 
 def get_question_type(question_type: int):
-    types = {
-        0: "practice",
-        1: "variable",
-        2: "sorting",
-        3: "matching"
-    }
+    types = {0: "practice", 1: "variable", 2: "sorting", 3: "matching"}
     return types.get(question_type, "")
 
 
@@ -198,12 +191,12 @@ class QuestionDto:
 
 class SectionDto:
     def __init__(
-            self,
-            section_id: str,
-            section_name: str,
-            timer: str,
-            description: str,
-            question_count: int,
+        self,
+        section_id: str,
+        section_name: str,
+        timer: str,
+        description: str,
+        question_count: int,
     ):
         self.section_id = section_id
         self.section_name = section_name
@@ -214,14 +207,14 @@ class SectionDto:
 
 class TestDto:
     def __init__(
-            self,
-            test_id: str,
-            test_name: str,
-            author_name: str,
-            description: str,
-            is_retakeable: bool,
-            is_ready: bool,
-            section_count: int,
+        self,
+        test_id: str,
+        test_name: str,
+        author_name: str,
+        description: str,
+        is_retakeable: bool,
+        is_ready: bool,
+        section_count: int,
     ):
         self.test_id = test_id
         self.test_name = test_name
@@ -240,13 +233,13 @@ class QuestionForEditorDto:
 
 class SessionResultDto:
     def __init__(
-            self,
-            test_name: str,
-            section_name: str,
-            correct_answers: int,
-            answers_count: int,
-            start_time: str,
-            time_spent: str,
+        self,
+        test_name: str,
+        section_name: str,
+        correct_answers: int,
+        answers_count: int,
+        start_time: str,
+        time_spent: str,
     ):
         self.test_name = test_name
         self.section_name = section_name
