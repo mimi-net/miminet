@@ -6,14 +6,8 @@ services:
       context: .
       dockerfile: ./Dockerfile
     container_name: celery
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-        required: false
-    profiles: ["celery"]
+    network_mode: "host"
     restart: always
-    networks:
-      - rabbitmq_network
     env_file:
       - .env
     environment:
@@ -28,7 +22,6 @@ services:
     restart: always
     networks:
       - rabbitmq_network
-    profiles: ["rabbitmq"]
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}

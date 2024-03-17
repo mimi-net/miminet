@@ -181,7 +181,7 @@ class MyTopology(IPTopo):
                 nodes=[],
                 interfaces=[*interfaces],
                 base_filename="capture",
-                extra_arguments="-v -c 100 -Qout not igmp",
+                extra_arguments="not igmp",
             )
         super().build(*args, **kwargs)
 
@@ -274,13 +274,16 @@ def create_animation(
     for lp in topo.link_pair:
         link1, link2, edge_id, edge_source, edge_target = lp
 
+        pcap_out_file1 = "/tmp/capture_" + link1 + "_out.pcapng"
+        pcap_out_file2 = "/tmp/capture_" + link2 + "_out.pcapng"
+
         pcap_file1 = "/tmp/capture_" + link1 + ".pcapng"
         pcap_file2 = "/tmp/capture_" + link2 + ".pcapng"
 
-        if not os.path.exists(pcap_file1):
+        if not os.path.exists(pcap_out_file1):
             raise ValueError("No capture for interface: " + link1)
 
-        if not os.path.exists(pcap_file2):
+        if not os.path.exists(pcap_out_file2):
             raise ValueError("No capture for interface: " + link2)
 
         with open(pcap_file1, "rb") as file1, open(pcap_file2, "rb") as file2:
@@ -288,12 +291,14 @@ def create_animation(
             pcap_list.append((file2.read(), link2))
 
         pkts = create_pkt_animation(
-            pcap_file1, pcap_file2, edge_id, edge_source, edge_target
+            pcap_out_file1, pcap_out_file2, edge_id, edge_source, edge_target
         )
 
         animation += pkts
         os.remove(pcap_file1)
         os.remove(pcap_file2)
+        os.remove(pcap_out_file1)
+        os.remove(pcap_out_file2)
 
     return animation, pcap_list
 

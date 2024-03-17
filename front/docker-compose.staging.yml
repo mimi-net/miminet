@@ -6,8 +6,13 @@ services:
       context: .
       dockerfile: ./Dockerfile
     container_name: miminet
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+        required: false
     restart: always
     networks:
+      - rabbitmq_network
       - miminet_network
     env_file:
       - .env
@@ -27,6 +32,7 @@ services:
     restart: always
     volumes:
       - ./default.conf.template:/etc/nginx/templates/default.conf.template
+      - ./letsencrypt:/etc/letsencrypt
     ports:
       - "80:80"
       - "443:443"
@@ -39,4 +45,6 @@ volumes:
 networks:
   miminet_network:
     driver: bridge
-    
+  rabbitmq_network:
+    name: rabbitmq_network
+    external: true

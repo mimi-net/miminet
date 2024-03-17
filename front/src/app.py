@@ -149,6 +149,7 @@ def examples():
         "4fc0fafb-2a16-4244-a664-3f1e8f788a63",
         "6994b921-cc0f-4cbd-b209-7f30784027d7",
         "1646e111-1a47-4d98-a253-c396904e5351",
+        "1ccd87d4-a74f-485e-a95e-e1111c041fc7",
     ]
     networks = (
         Network.query.filter(Network.guid.in_(guids)).order_by(Network.id.asc()).all()
