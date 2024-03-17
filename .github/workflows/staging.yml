@@ -16,7 +16,7 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         with:
           command_timeout: 20m
-          host: "${{ secrets.HOST_1 }},${{ secrets.HOST_2}}"
+          host: ${{ secrets.HOST_1 }}
           port: ${{ secrets.PORT }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
