@@ -20,8 +20,8 @@ def get_question_by_session_question_id(session_question_id: str):
 
 
 def check_task(task_dict, answer):
-    nodes = answer["nodes"]
-    edges = answer["edges"]
+    # nodes = answer["nodes"]
+    # edges = answer["edges"]
     packets = answer["packets"]
 
     task = task_dict["task"]
@@ -34,11 +34,11 @@ def check_task(task_dict, answer):
 
         for packet in packets:
 
-            type = packet[0]["config"]["type"]
+            packet_type = packet[0]["config"]["type"]
             source = packet[0]["config"]["source"]
             target = packet[0]["config"]["target"]
 
-            if "ICMP echo-request" in type:
+            if "ICMP echo-request" in packet_type:
                 if not request:
                     request.append(source)
                     request.append(target)
@@ -49,7 +49,7 @@ def check_task(task_dict, answer):
                 if request[-1] != target:
                     request.append(target)
 
-            elif "ICMP echo-reply" in type:
+            elif "ICMP echo-reply" in packet_type:
                 if not reply:
                     reply.append(source)
                     reply.append(target)

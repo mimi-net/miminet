@@ -1,9 +1,8 @@
 import json
-import requests
 from datetime import datetime
 
+from flask import request, make_response, jsonify, abort, render_template
 from flask_login import login_required, current_user
-from flask import request, make_response, jsonify, abort, render_template, url_for
 
 from quiz.service.section_service import (
     create_section,
