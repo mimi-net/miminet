@@ -27,7 +27,7 @@ jobs:
           traceroute \
           curl \
           dnsutils \
-          netcat-openbsd \
+          netcat \
           openssh-client \
           iputils-ping \
           mininet \
