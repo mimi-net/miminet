@@ -359,7 +359,7 @@ def run_mininet(
     if len(network.jobs) == 0:
         return [], []
 
-    topo = MyTopology(network=network, time_to_wait_before_emulation=2)
+    topo = MyTopology(network=network, time_to_wait_before_emulation=3)
     net = IPNet(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
 
     try:
