@@ -238,6 +238,37 @@ class MyTopology(IPTopo):
 
         super().post_build(net)
 
+    def clear_files(self):
+
+        for lp in self.link_pair:
+
+            link1, link2, _, _, _ = lp
+
+            pcap_out_file1 = "/tmp/capture_" + link1 + "_out.pcapng"
+            pcap_out_file2 = "/tmp/capture_" + link2 + "_out.pcapng"
+            pcap_file1 = "/tmp/capture_" + link1 + ".pcapng"
+            pcap_file2 = "/tmp/capture_" + link2 + ".pcapng"
+
+            for filename in (pcap_out_file1, pcap_out_file2, pcap_file1, pcap_file2):
+                if os.path.exists(filename):
+                    os.remove(filename)
+
+    def check(self):
+        for lp in self.link_pair:
+
+            link1, link2, _, _, _ = lp
+
+            pcap_out_file1 = "/tmp/capture_" + link1 + "_out.pcapng"
+            pcap_out_file2 = "/tmp/capture_" + link2 + "_out.pcapng"
+
+            if not os.path.exists(pcap_out_file1):
+                self.clear_files()
+                raise ValueError("No capture for interface: " + link1)
+
+            if not os.path.exists(pcap_out_file2):
+                self.clear_files()
+                raise ValueError("No capture for interface: " + link2)
+
 
 def packet_uuid(size=8, chars: str = string.ascii_uppercase + string.digits) -> str:
     """Function for generate packet uid
@@ -295,10 +326,8 @@ def create_animation(
         )
 
         animation += pkts
-        os.remove(pcap_file1)
-        os.remove(pcap_file2)
-        os.remove(pcap_out_file1)
-        os.remove(pcap_out_file2)
+
+    topo.clear_files()
 
     return animation, pcap_list
 
@@ -340,6 +369,7 @@ def run_mininet(
         net.start()
         setup_vlans(net, network.nodes)
         time.sleep(topo.time_to_wait_before_emulation)
+        topo.check()
 
         # Don only 100+ jobs
         for job in network.jobs:
@@ -364,10 +394,9 @@ def run_mininet(
                 do_job(job, net)
             except Exception:
                 continue
-
     finally:
-        clean_bridges(net)
         time.sleep(2)
+        clean_bridges(net)
         net.stop()
 
     animation, pcap_list = create_animation(topo)
