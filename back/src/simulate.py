@@ -239,9 +239,7 @@ class MyTopology(IPTopo):
         super().post_build(net)
 
     def clear_files(self):
-
         for lp in self.link_pair:
-
             link1, link2, _, _, _ = lp
 
             pcap_out_file1 = "/tmp/capture_" + link1 + "_out.pcapng"
@@ -255,7 +253,6 @@ class MyTopology(IPTopo):
 
     def check(self):
         for lp in self.link_pair:
-
             link1, link2, _, _, _ = lp
 
             pcap_out_file1 = "/tmp/capture_" + link1 + "_out.pcapng"

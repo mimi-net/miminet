@@ -1,6 +1,7 @@
 import json
 import os
 import signal
+
 import marshmallow_dataclass
 from celery_app import (
     app,
@@ -34,10 +35,11 @@ def simulate(network: str):
     network_schema = marshmallow_dataclass.class_schema(Network)()
     animation = ""
     pcaps = []
+    network = network_schema.load(jnet)
 
-    for i in range(3):
+    for i in range(4):
         try:
-            animation, pcaps = run_mininet(network_schema.load(jnet))
+            animation, pcaps = run_mininet(network)
         except ValueError:
             continue
         except Exception:
