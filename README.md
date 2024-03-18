@@ -13,14 +13,7 @@
 ### Docker
 ```
 cd back
-COMPOSE_PROFILES=celery,rabbitmq docker compose up -d --build
-```
-Celery, Rabbitmq будут доступны после этого шага. В завимости от того, где разворачивается Rabbitmq, вам потребуется указать имена сервисов.
-
-Например, если у Вас уже развернут Rabbitmq на другом сервере и нужен только ipmininet worker:
-```
-cd back
-COMPOSE_PROFILES=celery docker compose up -d --build
+docker compose up -d --build
 ```
 
 ### Vagrant
