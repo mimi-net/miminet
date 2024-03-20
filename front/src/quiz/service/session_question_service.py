@@ -33,7 +33,6 @@ def check_task(task_dict, answer):
         reply = []
 
         for packet in packets:
-
             packet_type = packet[0]["config"]["type"]
             source = packet[0]["config"]["source"]
             target = packet[0]["config"]["target"]

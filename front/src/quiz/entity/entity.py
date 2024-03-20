@@ -40,7 +40,6 @@ class GUID(TypeDecorator):
 
 
 class Json(TypeDecorator):
-
     @property
     def python_type(self):
         return object
