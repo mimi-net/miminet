@@ -1,13 +1,14 @@
 import os
-import shutil
 import uuid
 
-from celery.result import AsyncResult
-from celery_app import DEFAULT_APP_EXCHANGE, EXCHANGE_TYPE, app
+from celery_app import (
+    SEND_NETWORK_EXCHANGE,
+    EXCHANGE_TYPE,
+    app,
+)
 from flask import jsonify, make_response, redirect, request, url_for
 from flask_login import current_user, login_required
 from miminet_model import Network, Simulate, SimulateLog, db
-from redis import RedisError
 
 
 @login_required
@@ -40,27 +41,27 @@ def run_simulation():
             db.session.delete(s)
             db.session.commit()
 
-        task_id = str(uuid.uuid4())
         simlog = SimulateLog(
             author_id=net.author_id, network=net.network, network_guid=net.guid
         )
-        sim = Simulate(network_id=net.id, packets="", task_guid=task_id)
+
+        task_guid = uuid.uuid4()
+        sim = Simulate(network_id=net.id, packets="", task_guid=str(task_guid))
         db.session.add(sim)
         db.session.add(simlog)
-        db.session.flush()
-        db.session.refresh(sim)
         db.session.commit()
 
         app.send_task(
             "tasks.mininet_worker",
             (net.network,),
             routing_key=str(uuid.uuid4()),
-            exchange=DEFAULT_APP_EXCHANGE,
+            exchange=SEND_NETWORK_EXCHANGE,
             exchange_type=EXCHANGE_TYPE,
-            task_id=task_id,
+            task_id=str(task_guid),
+            headers={"network_task_name": "tasks.save_simulate_result"},
         )
 
-        ret = {"simulation_id": sim.id}
+        ret = {"simulation_id": str(task_guid)}
         return make_response(jsonify(ret), 201)
 
     return redirect(url_for("home"))
@@ -68,28 +69,27 @@ def run_simulation():
 
 @login_required
 def check_simulation():
-    # user = current_user
-    simulation_id = request.args.get("simulation_id", type=int)
+    task_guid = request.args.get("simulation_id", type=str)
     network_guid = request.args.get("network_guid", type=str)
-    if not simulation_id:
-        ret = {"message": "Пропущен параметр simulation_id."}
+
+    if not task_guid:
+        ret = {"message": "Пропущен параметр task_guid."}
         return make_response(jsonify(ret), 400)
 
     if not network_guid:
         ret = {"message": "Пропущен параметр network_guid."}
         return make_response(jsonify(ret), 400)
 
-    sim = Simulate.query.filter(Simulate.id == simulation_id).first()
+    sim = Simulate.query.filter(Simulate.task_guid == task_guid).first()
 
     if not sim:
         ret = {"message": "Нет такой симуляции"}
         return make_response(jsonify(ret), 400)
 
-    # Check for a pcaps
-    pcap_dir = "static/pcaps/" + network_guid
-
     if sim.ready:
+        pcap_dir = "static/pcaps/" + network_guid
         pcaps = []
+
         if os.path.exists(pcap_dir):
             pcaps = [
                 os.path.splitext(f)[0]
@@ -100,44 +100,5 @@ def check_simulation():
         ret = {"message": "Симуляция завершена", "packets": sim.packets, "pcaps": pcaps}
         return make_response(jsonify(ret), 200)
 
-    try:
-        task_id = sim.task_guid
-        task_result = AsyncResult(task_id)
-        if task_result.status != "SUCCESS" and task_result.status != "FAILURE":
-            return make_response(jsonify({"message": "Сеть в процессе симуляции"}), 210)
-    except RedisError:
-        return make_response(
-            jsonify({"message": "Ошибка при подключении к backend серверу"}), 400
-        )
-
-    try:
-        result = task_result.result
-    except Exception:
-        return make_response(
-            jsonify({"message": "Ошибка на стороне ipmininet worker"}), 400
-        )
-
-    packets, binary_pcaps = result
-
-    # Костыль для того, чтобы при одновременной обработке
-    # одной и той же сети они не ждали результата при разных task_id,
-    # а обращались к готовому
-    sim.packets = packets
-    sim.ready = True
-    db.session.commit()
-
-    if not os.path.exists(pcap_dir):
-        os.makedirs(pcap_dir)
-    else:
-        shutil.rmtree(pcap_dir)
-        os.makedirs(pcap_dir)
-
-    pcaps = []
-    for pcap, name in binary_pcaps:
-        pcaps += name
-        with open(pcap_dir + "/" + name + ".pcap", "wb") as file:
-            file.write(pcap)
-
-    ret = {"message": "Симуляция завершена", "packets": packets, "pcaps": pcaps}
-
-    return make_response(jsonify(ret), 200)
+    ret = {"message": "Сеть в процессе симуляции"}
+    return make_response(jsonify(ret), 210)

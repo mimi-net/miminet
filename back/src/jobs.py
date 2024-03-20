@@ -4,13 +4,13 @@ import typing
 from network import Job
 
 
-def ping_handler(job: Job, job_host) -> None:
+def ping_handler(job: Job, job_host: typing.Any) -> None:
     """Execute ping -c 1"""
     arg1 = job.arg_1
     job_host.cmd("ping -c 1 " + str(arg1))
 
 
-def ping_with_options_handler(job: Job, job_host) -> None:
+def ping_with_options_handler(job: Job, job_host: typing.Any) -> None:
     """Execute ping with options"""
 
     arg_opt = job.arg_1
@@ -31,7 +31,7 @@ def get_sending_data_argument(job: Job) -> tuple[str | int, str | int, str | int
     return arg_size, arg_ip, arg_port
 
 
-def sending_udp_data_handler(job: Job, job_host) -> None:
+def sending_udp_data_handler(job: Job, job_host: typing.Any) -> None:
     """Method for sending UDP data"""
 
     arg_size, arg_ip, arg_port = get_sending_data_argument(job)
@@ -46,7 +46,7 @@ def sending_udp_data_handler(job: Job, job_host) -> None:
     )
 
 
-def sending_tcp_data_handler(job: Job, job_host) -> None:
+def sending_tcp_data_handler(job: Job, job_host: typing.Any) -> None:
     """Method for sending TCP data sending"""
 
     arg_size, arg_ip, arg_port = get_sending_data_argument(job)
@@ -61,7 +61,7 @@ def sending_tcp_data_handler(job: Job, job_host) -> None:
     )
 
 
-def traceroute_handler(job: Job, job_host) -> None:
+def traceroute_handler(job: Job, job_host: typing.Any) -> None:
     """Method for executing traceroute"""
 
     arg_opt = job.arg_1
@@ -73,7 +73,7 @@ def traceroute_handler(job: Job, job_host) -> None:
     job_host.cmd("traceroute -n " + str(arg_opt) + " " + str(arg_ip))
 
 
-def ip_addr_add_handler(job: Job, job_host) -> None:
+def ip_addr_add_handler(job: Job, job_host: typing.Any) -> None:
     """Method for executing ip addr add"""
 
     arg_ip = job.arg_2
@@ -88,7 +88,7 @@ def ip_addr_add_handler(job: Job, job_host) -> None:
     )
 
 
-def iptables_handler(job: Job, job_host) -> None:
+def iptables_handler(job: Job, job_host: typing.Any) -> None:
     """Method for adding forwarding rule"""
 
     arg_dev = job.arg_1
@@ -99,7 +99,7 @@ def iptables_handler(job: Job, job_host) -> None:
     job_host.cmd("iptables -t nat -A POSTROUTING -o ", arg_dev, "-j MASQUERADE")
 
 
-def ip_route_add_handler(job: Job, job_host) -> None:
+def ip_route_add_handler(job: Job, job_host: typing.Any) -> None:
     """Method for executing ip route add"""
     arg_ip = job.arg_1
     arg_mask = job.arg_2
@@ -110,7 +110,7 @@ def ip_route_add_handler(job: Job, job_host) -> None:
     )
 
 
-def block_tcp_udp_port(job: Job, job_host) -> None:
+def block_tcp_udp_port(job: Job, job_host: typing.Any) -> None:
     """ "Method for executing Block TCP/UDP port"""
     arg_port = job.arg_1
 
@@ -118,7 +118,7 @@ def block_tcp_udp_port(job: Job, job_host) -> None:
     job_host.cmd("iptables -A INPUT -p udp --dport " + str(arg_port) + " -j DROP")
 
 
-def open_tcp_server_handler(job: Job, job_host) -> None:
+def open_tcp_server_handler(job: Job, job_host: typing.Any) -> None:
     """ "Method for open tcp server"""
     arg_ip = job.arg_1
     arg_port = job.arg_2
@@ -132,7 +132,7 @@ def open_tcp_server_handler(job: Job, job_host) -> None:
     )
 
 
-def open_udp_server_handler(job: Job, job_host) -> None:
+def open_udp_server_handler(job: Job, job_host: typing.Any) -> None:
     """ "Method for open udp server"""
     arg_ip = job.arg_1
     arg_port = job.arg_2
@@ -146,7 +146,7 @@ def open_udp_server_handler(job: Job, job_host) -> None:
     )
 
 
-def arp_handler(job: Job, job_host):
+def arp_handler(job: Job, job_host: typing.Any) -> None:
     """ "Method for executing arp -s"""
     arg_ip = job.arg_1
     arg_mac = job.arg_2
@@ -157,7 +157,7 @@ def arp_handler(job: Job, job_host):
 class Jobs:
     """Class for representing various commands for working with miminet network"""
 
-    def __init__(self, job, job_host, **kwargs):
+    def __init__(self, job: Job, job_host: typing.Any, **kwargs) -> None:
         # Dictionary for storing strategies
         # (At the moment this is used since each command on the application server is encoded by a number)
         self._dct: dict[int, typing.Callable[[Job, typing.Any], None]] = {
@@ -191,7 +191,7 @@ class Jobs:
         return self._strategy
 
     @strategy.setter
-    def strategy(self, job_id: int):
+    def strategy(self, job_id: int) -> None:
         """Change the execution strategy
 
         Args:

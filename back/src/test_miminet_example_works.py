@@ -2,7 +2,7 @@ import dataclasses
 import re
 
 import pytest
-from tasks import mininet_worker
+from tasks import simulate
 
 
 @dataclasses.dataclass
@@ -28,6 +28,10 @@ FILE_NAMES = [
     ("switch_and_hub_network.json", "switch_and_hub_answer.json"),
     ("router_network.json", "router_answer.json"),
     ("first_and_last_ip_address_network.json", "first_and_last_ip_address_answer.json"),
+    ("vlan_access_network.json", "vlan_access_answer.json"),
+    ("vlan_trunk_network.json", "vlan_trunk_answer.json"),
+    ("vlan_with_stp_network.json", "vlan_with_stp_answer.json"),
+    ("vlan_with_access_switches_network.json", "vlan_with_access_switches_answer.json"),
 ]
 
 DINAMYC_PORT_FILE_NAMES = [
@@ -71,7 +75,7 @@ DINAMYC_PORT_TEST_CASES = [
 
 @pytest.mark.parametrize("test", TEST_CASES)
 def test_miminet_work(test: Case) -> None:
-    animation, pcaps = mininet_worker(test.json_network)
+    animation, pcaps = simulate(test.json_network)
     animation = re.sub(r'"timestamp": "\d+"', r'"timestamp": ""', animation)
     animation = re.sub(r'"id": "\w+"', r'"id": ""', animation)
     assert animation == test.json_answer
@@ -79,7 +83,7 @@ def test_miminet_work(test: Case) -> None:
 
 @pytest.mark.parametrize("test", DINAMYC_PORT_TEST_CASES)
 def test_miminet_work_for_dinamyc_port_test_cases(test: Case) -> None:
-    animation, pcaps = mininet_worker(test.json_network)
+    animation, pcaps = simulate(test.json_network)
     animation = re.sub(r'"timestamp": "\d+"', r'"timestamp": ""', animation)
     animation = re.sub(r'"id": "\w+"', r'"id": ""', animation)
     port_string = re.search(test.pattern_in_network, animation)

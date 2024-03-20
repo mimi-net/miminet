@@ -224,7 +224,7 @@ const ConfigSwitchName = function(hostname){
     var text = document.getElementById('config_switch_name_script').innerHTML;
 
     $(config_switch_main_form_id).prepend((text));
-    $('#config_switch_name').val(hostname);
+    $('#switch_name').val(hostname);
 }
 
 const ConfigSwtichSTP = function(stp){

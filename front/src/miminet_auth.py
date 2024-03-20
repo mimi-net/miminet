@@ -160,6 +160,12 @@ def google_login():
     return redirect(authorization_url)
 
 
+def vk_login():
+    authorization_link = "https://oauth.vk.com/authorize"
+    authorization_url = f"{authorization_link}?client_id={VK_CLIENT_ID}&display=page&redirect_uri={VK_REDIRECT_URI}&scope=friends,email&response_type=code&v=5.130"
+    return redirect(authorization_url)
+
+
 def google_callback():
     state = session["state"]
     print(request.args.get("state"), session)
@@ -292,11 +298,11 @@ def vk_callback():
             avatar_uri = os.urandom(16).hex()
             avatar_uri = avatar_uri + ".jpg"
 
-            # if "photo_100" in vk_user["response"][0]:
-            # r = requests.get(
-            #   vk_user["response"][0]["photo_100"], allow_redirects=True
-            # )
-            # open('static/avatar/' + avatar_uri, 'wb').write(r.content)
+            if "photo_100" in vk_user["response"][0]:
+                r = requests.get(
+                    vk_user["response"][0]["photo_100"], allow_redirects=True
+                )
+            open("static/avatar/" + avatar_uri, "wb").write(r.content)
 
             new_user = User(
                 nick=vk_user["response"][0]["first_name"]

@@ -1,4 +1,3 @@
-# default retry policy:
 # 'max_retries': 3,
 # 'interval_start': 0,
 # 'interval_step': 0.2,
@@ -31,18 +30,14 @@ EXCHANGE_NAME = os.getenv("exchange_name")
 
 DEFAULT_APP_EXCHANGE = Exchange(EXCHANGE_NAME, type=EXCHANGE_TYPE)
 
-QUEUES = (Queue(name) for name in QUEUES_NAMES)
+QUEUES = [
+    Queue(name, exchange=DEFAULT_APP_EXCHANGE, routing_key=ROUTING_KEY)
+    for name in QUEUES_NAMES
+]
 
-app.conf.task_default_exchange = "default"
+SEND_NETWORK_RESPONSE_EXCHANGE = Exchange("network-results-exchange", type="direct")
+SEND_NETWORK_RESPONSE_ROUTING_KEY = "result-routing-key"
+
 app.conf.task_queues = QUEUES
 app.config_from_object(celeryconfig)
-
-with app.connection() as conn:
-    # Create queues and exchange
-    ch = conn.channel()
-    DEFAULT_APP_EXCHANGE.declare(channel=ch)
-    for queue in QUEUES:
-        queue.declare(channel=ch)
-        queue.bind_to(
-            channel=ch, exchange=DEFAULT_APP_EXCHANGE, routing_key=ROUTING_KEY
-        )
+app.conf.task_ignore_result = True

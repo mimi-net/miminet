@@ -1,0 +1,49 @@
+- hosts: miminet_back
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Make sure destination dir exists
+      file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - /etc/conf.d
+
+    - name: Copy celery configuration for target server
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+      loop:
+        - src: "./{{ name }}.conf"
+          dest: "/etc/conf.d/celery"
+        - src: "./{{ name }}.service"
+          dest: "/etc/systemd/system/celery.service"
+
+    - name: install sudo
+      ansible.builtin.apt:
+        pkg:
+          - sudo
+          - git
+        force_apt_get: true
+        update_cache: true
+        install_recommends: false
+        state: latest
+      become: true
+      become_method: sudo
+
+    - name: Copy sudoers
+      copy:
+        dest: "/etc/sudoers.d/{{ ansible_target_ssh_user }}"
+        content: "{{ ansible_target_ssh_user }} ALL=(root) NOPASSWD: /home/{{ ansible_target_ssh_user }}/deploy.sh,/home/{{ ansible_target_ssh_user }}/miminet/back/venv/bin/celery\n"
+        mode: 0440
+
+    - name: Copy staging deploy script
+      copy:
+        src: "./{{ name }}.deploy"
+        dest: "/home/{{ ansible_target_ssh_user }}/deploy.sh"
+        mode: '755'
+
+    - name: Reload daemon
+      ansible.builtin.shell: |
+        systemctl daemon-reload

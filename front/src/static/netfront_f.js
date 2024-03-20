@@ -290,6 +290,9 @@ const ShowSwitchConfig = function(n, shared = 0){
     //Add checkbox STP
     ConfigSwtichSTP(n.config.stp);
 
+    //Add VLAN
+    ConfigVLAN(n);
+
     if (shared){
         DisableFormInputs();
     }
@@ -558,20 +561,40 @@ const AddEdge = function(source_id, target_id){
 
         // Add interface if connected to switch
         if (target_node.config.type === 'l2_switch'){
+            var vlan = null;
+            var type_connection = null;
+
+            if (areInterfaceFieldsFilled(target_node)) {
+                vlan = 1;
+                type_connection = 0;
+            }
+
             let iface_id = l2SwitchPortUid(target_node.data.id);
             target_node.interface.push({
                 id: iface_id,
                 name: iface_id,
                 connect: edge_id,
+                vlan: vlan,
+                type_connection: type_connection,
             });
         }
 
         if (source_node.config.type === 'l2_switch'){
+            var vlan = null;
+            var type_connection = null;
+
+            if (areInterfaceFieldsFilled(source_node)) {
+                vlan = 1;
+                type_connection = 0;
+            }
+
             let iface_id = l2SwitchPortUid(source_node.data.id);
             source_node.interface.push({
                 id: iface_id,
                 name: iface_id,
                 connect: edge_id,
+                vlan: vlan,
+                type_connection: type_connection,
             });
         }
 

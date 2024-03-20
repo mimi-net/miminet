@@ -21,6 +21,7 @@ from miminet_auth import (
     logout,
     user_profile,
     vk_callback,
+    vk_login,
 )
 from miminet_config import SECRET_KEY, SQLITE_DATABASE_NAME
 from miminet_host import (
@@ -94,6 +95,7 @@ zero_days_ago = (datetime.now()).date().isoformat()
 # Login
 app.add_url_rule("/auth/login.html", methods=["GET", "POST"], view_func=login_index)
 app.add_url_rule("/auth/google_login", methods=["GET"], view_func=google_login)
+app.add_url_rule("/auth/vk_login", methods=["GET"], view_func=vk_login)
 app.add_url_rule("/auth/vk_callback", methods=["GET"], view_func=vk_callback)
 app.add_url_rule("/auth/google_callback", methods=["GET"], view_func=google_callback)
 app.add_url_rule("/user/profile.html", methods=["GET", "POST"], view_func=user_profile)
@@ -230,6 +232,7 @@ def examples():
         "4fc0fafb-2a16-4244-a664-3f1e8f788a63",
         "6994b921-cc0f-4cbd-b209-7f30784027d7",
         "1646e111-1a47-4d98-a253-c396904e5351",
+        "1ccd87d4-a74f-485e-a95e-e1111c041fc7",
     ]
     networks = (
         Network.query.filter(Network.guid.in_(guids)).order_by(Network.id.asc()).all()

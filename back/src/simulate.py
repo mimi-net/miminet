@@ -11,6 +11,7 @@ from ipmininet.router.config import RouterConfig
 from jobs import Jobs
 from network import Job, Network, Node, NodeConfig, NodeData, NodeInterface
 from pkt_parser import create_pkt_animation, is_ipv4_address
+from net_utils.vlan import setup_vlans, clean_bridges
 
 
 class MyTopology(IPTopo):
@@ -180,7 +181,7 @@ class MyTopology(IPTopo):
                 nodes=[],
                 interfaces=[*interfaces],
                 base_filename="capture",
-                extra_arguments="-v -c 100 -Qout not igmp",
+                extra_arguments="not igmp",
             )
         super().build(*args, **kwargs)
 
@@ -210,7 +211,6 @@ class MyTopology(IPTopo):
         ), super().addLink(s, h_target, intfName2=interface_name_2, **opts2)
 
     def post_build(self, net: IPNet):
-
         for node in self._id_node_map.values():
             config = node.config
             if config.type == "router":
@@ -237,6 +237,34 @@ class MyTopology(IPTopo):
             sw.cmd("sysctl -w net.ipv6.conf.lo.disable_ipv6=1")
 
         super().post_build(net)
+
+    def clear_files(self):
+        for lp in self.link_pair:
+            link1, link2, _, _, _ = lp
+
+            pcap_out_file1 = "/tmp/capture_" + link1 + "_out.pcapng"
+            pcap_out_file2 = "/tmp/capture_" + link2 + "_out.pcapng"
+            pcap_file1 = "/tmp/capture_" + link1 + ".pcapng"
+            pcap_file2 = "/tmp/capture_" + link2 + ".pcapng"
+
+            for filename in (pcap_out_file1, pcap_out_file2, pcap_file1, pcap_file2):
+                if os.path.exists(filename):
+                    os.remove(filename)
+
+    def check(self):
+        for lp in self.link_pair:
+            link1, link2, _, _, _ = lp
+
+            pcap_out_file1 = "/tmp/capture_" + link1 + "_out.pcapng"
+            pcap_out_file2 = "/tmp/capture_" + link2 + "_out.pcapng"
+
+            if not os.path.exists(pcap_out_file1):
+                self.clear_files()
+                raise ValueError("No capture for interface: " + link1)
+
+            if not os.path.exists(pcap_out_file2):
+                self.clear_files()
+                raise ValueError("No capture for interface: " + link2)
 
 
 def packet_uuid(size=8, chars: str = string.ascii_uppercase + string.digits) -> str:
@@ -274,13 +302,16 @@ def create_animation(
     for lp in topo.link_pair:
         link1, link2, edge_id, edge_source, edge_target = lp
 
+        pcap_out_file1 = "/tmp/capture_" + link1 + "_out.pcapng"
+        pcap_out_file2 = "/tmp/capture_" + link2 + "_out.pcapng"
+
         pcap_file1 = "/tmp/capture_" + link1 + ".pcapng"
         pcap_file2 = "/tmp/capture_" + link2 + ".pcapng"
 
-        if not os.path.exists(pcap_file1):
+        if not os.path.exists(pcap_out_file1):
             raise ValueError("No capture for interface: " + link1)
 
-        if not os.path.exists(pcap_file2):
+        if not os.path.exists(pcap_out_file2):
             raise ValueError("No capture for interface: " + link2)
 
         with open(pcap_file1, "rb") as file1, open(pcap_file2, "rb") as file2:
@@ -288,12 +319,12 @@ def create_animation(
             pcap_list.append((file2.read(), link2))
 
         pkts = create_pkt_animation(
-            pcap_file1, pcap_file2, edge_id, edge_source, edge_target
+            pcap_out_file1, pcap_out_file2, edge_id, edge_source, edge_target
         )
 
         animation += pkts
-        os.remove(pcap_file1)
-        os.remove(pcap_file2)
+
+    topo.clear_files()
 
     return animation, pcap_list
 
@@ -328,38 +359,42 @@ def run_mininet(
     if len(network.jobs) == 0:
         return [], []
 
-    topo = MyTopology(network=network, time_to_wait_before_emulation=2)
+    topo = MyTopology(network=network, time_to_wait_before_emulation=3)
     net = IPNet(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
 
-    net.start()
-    time.sleep(topo.time_to_wait_before_emulation)
+    try:
+        net.start()
+        setup_vlans(net, network.nodes)
+        time.sleep(topo.time_to_wait_before_emulation)
+        topo.check()
 
-    # Don only 100+ jobs
-    for job in network.jobs:
-        job_id = job.job_id
+        # Don only 100+ jobs
+        for job in network.jobs:
+            job_id = job.job_id
 
-        if int(job_id) < 100:
-            continue
+            if int(job_id) < 100:
+                continue
 
-        try:
-            do_job(job, net)
-        except Exception:
-            continue
+            try:
+                do_job(job, net)
+            except Exception:
+                continue
 
-    # Do only job_id < 100
-    for job in network.jobs:
-        job_id = job.job_id
+        # Do only job_id < 100
+        for job in network.jobs:
+            job_id = job.job_id
 
-        if int(job_id) >= 100:
-            continue
+            if int(job_id) >= 100:
+                continue
 
-        try:
-            do_job(job, net)
-        except Exception:
-            continue
-
-    time.sleep(2)
-    net.stop()
+            try:
+                do_job(job, net)
+            except Exception:
+                continue
+    finally:
+        time.sleep(2)
+        clean_bridges(net)
+        net.stop()
 
     animation, pcap_list = create_animation(topo)
     animation_s = sorted(animation, key=lambda k: k.get("timestamp", 0))
