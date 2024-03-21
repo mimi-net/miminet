@@ -73,8 +73,13 @@ async function getAnswer() {
     if (questionType !== "practice") {
         switch (questionType) {
             case 'variable':
-                return $('input.form-check-input:checked').map(function () {
-                    return {'variant': this.value};
+                const checked = $('input.form-check-input:checked');
+                if ($('input[type=radio].form-check-input').length !== 0)
+                {
+                    return [{'variant': checked.siblings('label').text()}];
+                }
+                return checked.map(function () {
+                    return {'variant': $(this).siblings('label').text()};
                 }).get();
             case 'matching':
                 const leftSide = $('#sortContainer div').map(function () {
@@ -103,7 +108,7 @@ async function getAnswer() {
         }
     }
     if (questionType === "practice") {
-        if (packets === "null" || packets === undefined || packets === null) {
+        if (packets === "null" || packets === undefined || packets === null || packets === "") {
             // simulate and get packets
             if (!jobs.length) {
                 $('#noJobsModal').modal('toggle');
