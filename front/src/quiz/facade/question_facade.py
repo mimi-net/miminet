@@ -61,10 +61,10 @@ def create_question(section_id: str, question_dict: dict, user: User):
     question = Question()
     question.section_id = section_id
     question.created_by_id = user.id
-    question.question_type = question_dict["question_type"]
 
     if question_dict["question_type"] == "text":
         pass
+        # question.question_type = question_dict["question_type"]
         # text_question = TextQuestion()
         # text_question.text_type = question_dict["text_type"]
         #
@@ -111,6 +111,7 @@ def create_question(section_id: str, question_dict: dict, user: User):
         for attribute in attributes:
             setattr(practice_question, attribute, question_dict[attribute])
 
+        question.question_type = 0
         practice_question.created_by_id = user.id
         practice_question.practice_tasks = [  # type: ignore
             create_practice_task(question_dict["tasks"], user)
@@ -118,7 +119,7 @@ def create_question(section_id: str, question_dict: dict, user: User):
         # practice_question.network = question_dict['network']
         question.practice_question = practice_question
         db.session.add(practice_question)
-        question.question_text = question_dict["question_text"]
+        question.question_text = question_dict["text"]
     else:
         return None, 400
     db.session.commit()

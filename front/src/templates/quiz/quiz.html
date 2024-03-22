@@ -75,7 +75,7 @@
 
                 timer = '{{section.timer}}';
                 document.getElementById('{{ section.section_id }}timer').innerHTML =
-                    '&#8776;' + timer + ' ' + morph(timer, ['минута', 'минуты', 'минут']);
+                    timer + ' ' + morph(timer, ['минута', 'минуты', 'минут']);
             </script>
         {% endfor %}
         <script>
