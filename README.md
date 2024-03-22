@@ -8,6 +8,9 @@
 
 Если Вы используете virtualbox/vmware с Vagrant для backend, и разворачиваете Redis и Rabbitmq на хосте, укажите ip хоста в back/.env. (в virtual box по умолчанию 192.168.56.1)
 
+> **Запуск с помощью Docker** \
+> Для запуска всех контейнеров можно использовать скрипт *start_all_containers.sh*, находящийся в корневой папке проекта.
+
 ## Backend
 
 ### Docker
