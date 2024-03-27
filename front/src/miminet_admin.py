@@ -247,6 +247,7 @@ class QuestionView(MiminetAdminModelView):
 
 def _get_options_for_filter():
     from app import app
+    
     with app.app_context():
         return tuple([(q.id, q.text) for q in Question.query.all()])
 
@@ -288,8 +289,9 @@ class AnswerView(MiminetAdminModelView):
     }
 
     column_filters = [
-        FilterEqual(column=Answer.question_id, name="Вопрос",
-                    options=_get_options_for_filter)
+        FilterEqual(
+            column=Answer.question_id, name="Вопрос", options=_get_options_for_filter
+        )
     ]
 
     def on_model_change(self, form, model, is_created, **kwargs):
