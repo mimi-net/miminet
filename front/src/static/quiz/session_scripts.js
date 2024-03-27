@@ -74,8 +74,7 @@ async function getAnswer() {
         switch (questionType) {
             case 'variable':
                 const checked = $('input.form-check-input:checked');
-                if ($('input[type=radio].form-check-input').length !== 0)
-                {
+                if ($('input[type=radio].form-check-input').length !== 0) {
                     return [{'variant': checked.siblings('label').text()}];
                 }
                 return checked.map(function () {
@@ -189,7 +188,7 @@ function displayExplanation(data) {
         .append(`<text>${phrase}</text><br><text>${data['explanation'] ?? ""}</text>`);
 }
 
-function handleUnload(e){
+function handleUnload(e) {
     e.preventDefault();
     e.returnValue = '';
 }
