@@ -237,7 +237,6 @@ class MyTopology(IPTopo):
             r.cmd("sysctl -w net.ipv4.conf.all.log_martians=1")
 
         for sw in net.switches:
-
             # print ("disable ipv6 on " + sw.name)
             sw.cmd("sysctl -w net.bridge.bridge-nf-call-arptables=0")
             sw.cmd("sysctl -w net.bridge.bridge-nf-call-iptables=0")
