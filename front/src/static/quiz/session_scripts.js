@@ -30,8 +30,12 @@ function updateTimer() {
     }
 }
 
-function finishQuiz() {
+function seeResults() {
     window.removeEventListener('beforeunload', handleUnload);
+    finishQuiz();
+}
+
+function finishQuiz() {
     const sessionId = sessionStorage.getItem('session_id');
 
     fetch(finishSessionUrl + '?id=' + sessionId, {
@@ -126,6 +130,8 @@ function nextQuestion() {
     window.removeEventListener('beforeunload', handleUnload);
     // redirect to next question
     sessionStorage.setItem('question_index', (questionIndex + 1).toString());
+    sessionStorage.removeItem('answer');
+    sessionStorage.removeItem('is_correct');
 
     window.location.href = getQuestionUrl + `?question_id=` + questionIds[questionIndex + 1];
 }
@@ -142,7 +148,11 @@ async function answerQuestion() {
     document.querySelector('button[name="answerQuestion"]').textContent = "Проверка..."
     document.querySelector('button[name="answerQuestion"]').disabled = true
 
+    if (sessionStorage.getItem('answer')) {
+        return;
+    }
     const answer = await getAnswer();
+    sessionStorage.setItem('answer', JSON.stringify(answer));
     // console.log(JSON.stringify(answer));
     if (answer === undefined) {
         if (playerDiv) {
@@ -171,7 +181,7 @@ async function answerQuestion() {
         .then(response => response.json())
         .then(data => {
             console.log(data);
-
+            sessionStorage.setItem('is_correct', data['is_correct']);
             displayExplanation(data);
         })
         .catch(error => {
@@ -186,6 +196,21 @@ function displayExplanation(data) {
         .removeAttr('hidden')
         .css({borderColor: borderColor})
         .append(`<text>${phrase}</text><br><text>${data['explanation'] ?? ""}</text>`);
+}
+
+window.onload = function () {
+    const answer = sessionStorage.getItem('answer');
+    if (answer) {
+        // displayFunctions[textType](JSON.parse(answer));
+        displayExplanation(sessionStorage.getItem('is_correct'));
+        document.querySelector('button[name="answerQuestion"]').hidden = true;
+        document.querySelector('button[name="nextQuestion"]').hidden = isLastQuestion;
+
+        if (isLastQuestion) {
+            document.querySelector('button[name="seeResults"]').hidden = false;
+            document.querySelector('button[name="finishQuiz"]').hidden = true;
+        }
+    }
 }
 
 function handleUnload(e) {
@@ -217,7 +242,7 @@ if (timer !== null) {
 
 // Add event listener for finishQuiz and nextQuestion buttons
 document.querySelector('button[name="finishQuiz"]')?.addEventListener('click', finishQuiz);
-document.querySelector('button[name="seeResults"]')?.addEventListener('click', finishQuiz);
+document.querySelector('button[name="seeResults"]')?.addEventListener('click', seeResults);
 document.querySelector('button[name="answerQuestion"]')?.addEventListener('click', answerQuestion);
 document.querySelector('button[name="nextQuestion"]')?.addEventListener('click', nextQuestion);
 
