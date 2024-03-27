@@ -4,13 +4,14 @@ from flask import redirect, url_for
 from flask_admin import AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.fields import QuerySelectField
+from flask_admin.contrib.sqla.filters import FilterEqual
 from flask_admin.form import Select2Widget
-from wtforms import SelectField
 from flask_admin.model import typefmt
 from flask_login import current_user
+from wtforms import SelectField
 
 from miminet_model import User
-from quiz.entity.entity import Test, Section, Question
+from quiz.entity.entity import Test, Section, Question, Answer
 
 ADMIN_ROLE_LEVEL = 1
 
@@ -244,6 +245,12 @@ class QuestionView(MiminetAdminModelView):
     pass
 
 
+def _get_options_for_filter():
+    from app import app
+    with app.app_context():
+        return tuple([(q.id, q.text) for q in Question.query.all()])
+
+
 class AnswerView(MiminetAdminModelView):
     column_list = (
         "variant",
@@ -279,6 +286,11 @@ class AnswerView(MiminetAdminModelView):
             ),
         )
     }
+
+    column_filters = [
+        FilterEqual(column=Answer.question_id, name="Вопрос",
+                    options=_get_options_for_filter)
+    ]
 
     def on_model_change(self, form, model, is_created, **kwargs):
         # Call base class functionality
