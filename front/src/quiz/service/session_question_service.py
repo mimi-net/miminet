@@ -111,7 +111,7 @@ def answer_on_session_question(
                 question_id=question.id,
                 variant=check["variant"],
             ).first()
-            if not answer.is_correct:
+            if not answer or not answer.is_correct:
                 is_correct = False
 
         correct_count = Answer.query.filter_by(
