@@ -4,6 +4,7 @@ $('#config_switch').load( "/config_switch.html" );
 $('#config_edge').load( "/config_edge.html" );
 $('#config_router').load( "/config_router.html" );
 $('#config_server').load( "/config_server.html" );
+$('#config_vlan').load( "config_vlan.html" );
 
 const config_content_id = "#config_content";
 const config_main_form_id = "#config_main_form";
