@@ -6,10 +6,6 @@ services:
       context: .
       dockerfile: ./Dockerfile
     container_name: miminet
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-        required: false
     restart: always
     networks:
       - rabbitmq_network
