@@ -247,7 +247,7 @@ class QuestionView(MiminetAdminModelView):
 
 def _get_options_for_filter():
     from app import app
-    
+
     with app.app_context():
         return tuple([(q.id, q.text) for q in Question.query.all()])
 
