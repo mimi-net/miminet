@@ -40,7 +40,7 @@ export provider=vbox/vmware
 N - количество экземпляров vagrant(Miminet на данный момент не поддерживает мультипроцессинг, выходом является запуск нескольких вм).
 
 После окончания vagrant_vms.sh инициализируем worker в каждой виртуальной машине.
-```angular2html
+```
 . start_workers.sh
 ```
 
