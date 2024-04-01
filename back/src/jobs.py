@@ -154,6 +154,18 @@ def arp_handler(job: Job, job_host: typing.Any) -> None:
     job_host.cmd("arp -s " + str(arg_ip) + " " + str(arg_mac))
 
 
+def subinterface_with_vlan(job: Job, job_host: typing.Any) -> None:
+    """ "Method for adding subinterface with vlan"""
+    arg_intf = job.arg_1
+    arg_ip = job.arg_2
+    arg_mask = job.arg_3
+    arg_vlan = job.arg_4
+
+    job_host.cmd(f"ip link add link {arg_intf} name {arg_intf}.{arg_vlan} type vlan id {arg_vlan}")
+    job_host.cmd(f"ip addr add {arg_ip}/{arg_mask} dev {arg_intf}.{arg_vlan}")
+    job_host.cmd(f"ip link set dev {arg_intf}.{arg_vlan} up")
+
+
 class Jobs:
     """Class for representing various commands for working with miminet network"""
 
@@ -170,6 +182,7 @@ class Jobs:
             101: iptables_handler,
             102: ip_route_add_handler,
             103: arp_handler,
+            104: subinterface_with_vlan,
             200: open_udp_server_handler,
             201: open_tcp_server_handler,
             202: block_tcp_udp_port,
