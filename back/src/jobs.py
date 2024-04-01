@@ -161,9 +161,11 @@ def subinterface_with_vlan(job: Job, job_host: typing.Any) -> None:
     arg_mask = job.arg_3
     arg_vlan = job.arg_4
 
-    job_host.cmd(f"ip link add link {arg_intf} name {arg_intf}.{arg_vlan} type vlan id {arg_vlan}")
-    job_host.cmd(f"ip addr add {arg_ip}/{arg_mask} dev {arg_intf}.{arg_vlan}")
-    job_host.cmd(f"ip link set dev {arg_intf}.{arg_vlan} up")
+    job_host.cmd(
+        f"ip link add link {arg_intf} name {arg_intf[6:]}.{arg_vlan} type vlan id {arg_vlan}"
+    )
+    job_host.cmd(f"ip addr add {arg_ip}/{arg_mask} dev {arg_intf[6:]}.{arg_vlan}")
+    job_host.cmd(f"ip link set dev {arg_intf[6:]}.{arg_vlan} up")
 
 
 class Jobs:
