@@ -4,14 +4,13 @@ from flask import redirect, url_for
 from flask_admin import AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.fields import QuerySelectField
-from flask_admin.contrib.sqla.filters import FilterEqual
 from flask_admin.form import Select2Widget
 from flask_admin.model import typefmt
 from flask_login import current_user
 from wtforms import SelectField
 
 from miminet_model import User
-from quiz.entity.entity import Test, Section, Question, Answer
+from quiz.entity.entity import Test, Section, Question
 
 ADMIN_ROLE_LEVEL = 1
 
@@ -116,7 +115,7 @@ class SectionView(MiminetAdminModelView):
         "created_on",
         "created_by_id",
     )
-    column_sortable_list = ("name", "created_on", "created_by_id")
+    column_sortable_list = ("name", "created_on", "created_by_id", "test_id")
 
     column_labels = {
         "name": "Название",
@@ -193,7 +192,7 @@ class QuestionView(MiminetAdminModelView):
         "created_on",
         "created_by_id",
     )
-    column_sortable_list = ("created_on", "created_by_id")
+    column_sortable_list = ("created_on", "created_by_id", "section_id")
 
     column_labels = {
         "section_id": "Вопрос раздела",
@@ -245,15 +244,16 @@ class QuestionView(MiminetAdminModelView):
     pass
 
 
-def _get_options_for_filter():
-    from app import app
-
-    with app.app_context():
-        return tuple([(q.id, q.text) for q in Question.query.all()])
+def get_question_text(view, context, model, name, **kwargs):
+    question = Question.query.get(model.question_id)
+    if question and question.text:
+        return question.text
+    raise Exception("Error occurred while retrieving question text")
 
 
 class AnswerView(MiminetAdminModelView):
     column_list = (
+        "question_id",
         "variant",
         "is_correct",
         "position",
@@ -261,9 +261,10 @@ class AnswerView(MiminetAdminModelView):
         "right",
         "created_by_id",
     )
-    column_sortable_list = ("created_by_id",)
+    column_sortable_list = ("created_by_id", "question_id")
 
     column_labels = {
+        "question_id": "Вопрос",
         "variant": "Вариант ответа",
         "position": "Позиция ответа",
         "left": "Левая часть",
@@ -271,7 +272,10 @@ class AnswerView(MiminetAdminModelView):
         "created_by_id": "Автор",
     }
 
-    column_formatters = {"created_by_id": created_by_formatter}
+    column_formatters = {
+        "question_id": get_question_text,
+        "created_by_id": created_by_formatter,
+    }
 
     form_extra_fields = {
         "question_id": QuerySelectField(
@@ -287,12 +291,6 @@ class AnswerView(MiminetAdminModelView):
             ),
         )
     }
-
-    column_filters = [
-        FilterEqual(
-            column=Answer.question_id, name="Вопрос", options=_get_options_for_filter
-        )
-    ]
 
     def on_model_change(self, form, model, is_created, **kwargs):
         # Call base class functionality
