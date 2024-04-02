@@ -202,7 +202,8 @@ window.onload = function () {
     const answer = sessionStorage.getItem('answer');
     if (answer) {
         // displayFunctions[textType](JSON.parse(answer));
-        displayExplanation(sessionStorage.getItem('is_correct'));
+        displayExplanation({"is_correct": sessionStorage.getItem('is_correct') === "true"});
+        $('#sortContainer').sortable( "disable" );
         document.querySelector('button[name="answerQuestion"]').hidden = true;
         document.querySelector('button[name="nextQuestion"]').hidden = isLastQuestion;
 

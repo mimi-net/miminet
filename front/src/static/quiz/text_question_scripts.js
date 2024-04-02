@@ -1,12 +1,13 @@
 function displayVariable(answersParsed) {
     const buttonType = correctCount === "1" ? 'radio' : 'checkbox'
     const buttonId = correctCount === "1" ? "flexRadioDefault" : "flexCheckDefault"
+    const answer = sessionStorage.getItem("answer")
     $('#variants.container').append(`<div class="form-group" id="variants"></div>`)
     for (let i = 0; i < answersParsed.length; i++) {
         const value = answersParsed[i]['variant']
         $('#variants.form-group')
             .append(`<div class=form-check>
-                        <input class=form-check-input type=${buttonType} name=${buttonId} id=${buttonId}${i}>
+                        <input class=form-check-input type=${buttonType} name=${buttonId} id=${buttonId}${i} ${answer ? "disabled" : ""}>
                         <label class=form-check-label for=${buttonId}${i}>${value}</label>
                      </div>`);
     }
