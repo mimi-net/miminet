@@ -1000,7 +1000,6 @@ def save_router_config():
 
                         try:
                             socket.inet_aton(job_104_arg_2)
-
                             jnet["jobs"].append(
                                 {
                                     "id": job_id_generator(),
@@ -1019,6 +1018,88 @@ def save_router_config():
                                 {
                                     "warning": (
                                         'IP адрес для команды "Добавить сабинтерфейс с VLAN" указан'
+                                    )
+                                }
+                            )
+
+                    # Add ipip-interface
+                    if job_id == 105:
+                        job_105_arg_1 = request.form.get(
+                            "config_router_add_ipip_tunnel_iface_select_ip_field"
+                        )
+                        job_105_arg_2 = request.form.get(
+                            "config_router_add_ipip_tunnel_end_ip_input_field"
+                        )
+                        job_105_arg_3 = request.form.get(
+                            "config_router_add_ipip_tunnel_interface_ip_input_field"
+                        )
+                        job_105_arg_4 = request.form.get(
+                            "config_router_add_ipip_tunnel_interface_name_field"
+                        )
+
+                        if not job_105_arg_1:
+                            ret.update(
+                                {
+                                    "warning": (
+                                        'Не выбран IP адрес начальной точки для команды "Добавить IPIP-интерфейс"'
+                                    )
+                                }
+                            )
+                            return make_response(jsonify(ret), 200)
+
+                        if not job_105_arg_2:
+                            ret.update(
+                                {
+                                    "warning": (
+                                        'Не указан IP адрес конечной точки для команды "Добавить IPIP-интерфейс"'
+                                    )
+                                }
+                            )
+                            return make_response(jsonify(ret), 200)
+
+                        if not job_105_arg_3:
+                            ret.update(
+                                {
+                                    "warning": (
+                                        'Не указан IP адрес IPIP-интерфейса для команды "Добавить IPIP-интерфейс"'
+                                    )
+                                }
+                            )
+                            return make_response(jsonify(ret), 200)
+
+                        if not job_105_arg_4:
+                            ret.update(
+                                {
+                                    "warning": (
+                                        'Не указано название IPIP-интерфейса для команды "Добавить IPIP-интерфейс"'
+                                    )
+                                }
+                            )
+                            return make_response(jsonify(ret), 200)
+
+                        try:
+                            socket.inet_aton(job_105_arg_1)
+                            socket.inet_aton(job_105_arg_2)
+                            jnet["jobs"].append(
+                                {
+                                    "id": job_id_generator(),
+                                    "level": job_level,
+                                    "job_id": job_id,
+                                    "host_id": node["data"]["id"],
+                                    "arg_1": job_105_arg_1,
+                                    "arg_2": job_105_arg_2,
+                                    "arg_3": job_105_arg_3,
+                                    "arg_4": job_105_arg_4,
+                                    "print_cmd": (
+                                        f"ipip: {job_105_arg_4} from {job_105_arg_1} to {job_105_arg_2} \n{job_105_arg_4}: {job_105_arg_3}"
+                                    ),
+                                }
+                            )
+                        except Exception:
+                            ret.update(
+                                {
+                                    "warning": (
+                                        'IP адрес(а) для команды "Добавить IPIP-интерфейс" указан(ы)'
                                         " неверно."
                                     )
                                 }
