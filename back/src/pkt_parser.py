@@ -4,7 +4,7 @@ import string
 
 import dpkt
 from dpkt.pcap import Reader
-from dpkt.utils import inet_to_str
+from dpkt.utils import inet_to_str, mac_to_str
 
 
 def packet_uuid(
@@ -71,9 +71,9 @@ def arp_packet_type(pkt) -> str:
 
         match arp.op:
             case 1:
-                return "ARP-request"
+                return "ARP-request\nWho has " + inet_to_str(arp.tpa) + "? Tell " + inet_to_str(arp.spa)
             case 2:
-                return "ARP-response"
+                return "ARP-response\n" + inet_to_str(arp.spa) + " at " + mac_to_str(arp.sha)
             case _:
                 return "ARP packet"
 
@@ -125,6 +125,8 @@ def packet_parser(pcap1: Reader, edge_id: str, e_source: str, e_target: str):
                 }
             )
 
+            continue
+
         if isinstance(eth.data, dpkt.llc.LLC):
             llc = eth.data
 
@@ -135,6 +137,14 @@ def packet_parser(pcap1: Reader, edge_id: str, e_source: str, e_target: str):
 
             if llc.dsap == 0x42:
                 llc_label = "STP"
+
+                match llc.data.flags:
+                    case 0:
+                        llc_label = "STP (Root)"
+                    case 1:
+                        llc_label = "STP (TC + Root)"
+                    case _:
+                        llc_label = "STP"
 
             pkts.append(
                 {
