@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import pathlib
 import uuid
@@ -15,6 +16,8 @@ from flask_login import (
 )
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
+from requests_oauthlib import OAuth2Session
+from oauthlib.oauth2 import TokenExpiredError
 from miminet_model import Network, User, db
 from miminet_config import make_example_net_switch_and_hub
 from pip._vendor import cachecontrol
@@ -57,6 +60,14 @@ if os.path.exists(vk_secrets_file):
     VK_CLIENT_SECRET = vk_json["web"]["client_secret"]
     VK_REDIRECT_URI = vk_json["web"]["redirect_uri"]
 
+yandex_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_yandex.json")
+
+if os.path.exists(yandex_secrets_file):
+    with open(yandex_secrets_file, "r") as file:
+        yandex_json = json.loads(file.read())
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("miminet_auth")
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -341,3 +352,67 @@ def vk_callback():
         db.session.commit()
 
     return redirect_next_url(fallback=url_for("home"))
+
+def yandex_login():
+    yandex_session = OAuth2Session(
+        yandex_json["web"]["client_id"], redirect_uri=yandex_json["web"]["redirect_uris"][0]
+    )
+
+    yandex_session.redirect_uri = url_for("yandex_callback", _external=True)
+
+    authorization_url, state = yandex_session.authorization_url(
+        yandex_json["web"]["auth_uri"], access_type="offline", prompt="consent"
+    )
+
+    session["state"] = state
+
+    return redirect(authorization_url)
+
+def yandex_callback():
+    state = session.get("state")
+    if not state:
+        return redirect(url_for("login_index"))
+    
+    try:
+        yandex_session = OAuth2Session(
+            yandex_json["web"]["client_id"], redirect_uri=yandex_json["web"]["redirect_uris"][0], state=state
+        )
+
+        yandex_session.fetch_token(
+            yandex_json["web"]["token_uri"],
+            authorization_response=request.url,
+            client_secret=yandex_json["web"]["client_secret"],
+        )
+
+        user_info_response = yandex_session.get("https://login.yandex.ru/info")
+        user_info_response.raise_for_status()
+        id_info = user_info_response.json()
+
+        user = User.query.filter_by(yandex_id=id_info.get("id")).first()
+
+        if user is None:
+            try:
+                new_user = User(
+                    nick=id_info.get("login", ""),
+                    yandex_id=id_info.get("id"),
+                    email=id_info.get("default_email", ""),
+                    )
+                db.session.add(new_user)
+                db.session.commit()
+            
+            except SQLAlchemyError as e:
+                db.session.rollback()
+                error = str(e.__dict__["orig"])
+                logger.error('Error while adding new Yandex user: %s', e)
+                flash(error, category="error")
+                return redirect(url_for("login_index"))
+
+            user = User.query.filter_by(yandex_id=id_info.get("id")).first()
+
+        login_user(user, remember=True)
+        return redirect_next_url(fallback=url_for("home"))
+
+    except TokenExpiredError as e:
+        logger.error('Token expired: %s', e)
+        flash("Token expired. Please log in again.", category="error")
+        return redirect(url_for("login_index"))
