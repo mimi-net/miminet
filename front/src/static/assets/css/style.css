@@ -167,7 +167,9 @@ div.matching {
 }
 
 div.form-check {
+    line-height: normal;
     margin-left: 8px;
+    margin-bottom: 8px;
 }
 
 label.form-check-label {
