@@ -68,7 +68,6 @@ def ip_packet_type(pkt) -> str:
 def arp_packet_type(pkt) -> str:
     if isinstance(pkt.data, dpkt.arp.ARP):
         arp = pkt.data
-
         match arp.op:
             case 1:
                 return (
