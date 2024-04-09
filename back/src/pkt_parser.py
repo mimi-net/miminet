@@ -71,9 +71,18 @@ def arp_packet_type(pkt) -> str:
 
         match arp.op:
             case 1:
-                return "ARP-request\nWho has " + inet_to_str(arp.tpa) + "? Tell " + inet_to_str(arp.spa)
+                return (
+                    "ARP-request\nWho has " 
+                    + inet_to_str(arp.tpa) 
+                    + "? Tell " 
+                    + inet_to_str(arp.spa)
+                )
             case 2:
-                return "ARP-response\n" + inet_to_str(arp.spa) + " at " + mac_to_str(arp.sha)
+                return (
+                    "ARP-response\n" 
+                    + inet_to_str(arp.spa) 
+                    + " at " + mac_to_str(arp.sha)
+                )
             case _:
                 return "ARP packet"
 
