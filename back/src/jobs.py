@@ -168,6 +168,19 @@ def subinterface_with_vlan(job: Job, job_host: typing.Any) -> None:
     job_host.cmd(f"ip link set dev {arg_intf[6:]}.{arg_vlan} up")
 
 
+def add_ipip_interface(job: Job, job_host: typing.Any) -> None:
+    """Method for adding ipip-interface"""
+    arg_ip_start = job.arg_1
+    arg_ip_end = job.arg_2
+    arg_ip_int = job.arg_3
+    arg_name_int = job.arg_4
+
+    job_host.cmd(
+        f"ip tunnel add {arg_name_int} mode ipip remote {arg_ip_end} local {arg_ip_start}"
+    )
+    job_host.cmd(f"ifconfig {arg_name_int} {arg_ip_int}")
+
+
 class Jobs:
     """Class for representing various commands for working with miminet network"""
 
@@ -185,6 +198,7 @@ class Jobs:
             102: ip_route_add_handler,
             103: arp_handler,
             104: subinterface_with_vlan,
+            105: add_ipip_interface,
             200: open_udp_server_handler,
             201: open_tcp_server_handler,
             202: block_tcp_udp_port,
