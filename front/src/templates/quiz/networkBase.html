@@ -55,50 +55,53 @@
                 <img src="{{ url_for('static', filename='/images/logo.png') }}" width="170" alt="Miminet">
             </a>
 
-                {% if current_user.is_authenticated %}
+            {% if current_user.is_authenticated %}
+                <div class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('get_all_tests_endpoint') }}">Тренажер</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('home') }}">Мои сети</a>
+                    </li>
+                </div>
+            {% else %}
+                {% if request.path != url_for('login_index') %}
                     <div class="navbar-nav">
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('get_all_tests_endpoint') }}">Тренажер</a>
+                            <a class="nav-link" href="{{ url_for('login_index') }}">Тренажер</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('home') }}">Мои сети</a>
+                            <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary">
+                                <i class="bx fs-5 lh-1 me-1"></i>Вход
+                            </a>
                         </li>
                     </div>
-                {% else %}
-                    {% if request.path != url_for('login_index') %}
-                        <div class="navbar-nav">
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('login_index') }}">Тренажер</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary">
-                                    <i class="bx fs-5 lh-1 me-1"></i>Вход
-                                </a>
-                            </li>
-                        </div>
-                    {% endif %}
                 {% endif %}
+            {% endif %}
 
         </div>
     </nav>
 
-    <div class="modal" id="noJobsModal" tabindex="-1" role="dialog" aria-labelledby="noJobsModalLabel" aria-hidden="true" data-focus-on="input:first">
+    <div class="modal" id="noJobsModal" tabindex="-1" role="dialog" aria-labelledby="noJobsModalLabel"
+         aria-hidden="true" data-focus-on="input:first">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="noJobsModalLabel">Что делать?</h5>
-                    <button id="noJobsModalCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть"></button>
+                    <button id="noJobsModalCancelIcon" type="button" class="btn-close" data-dismiss="modal"
+                            aria-label="Закрыть"></button>
                 </div>
 
                 <div class="modal-body">
                     <p>Зачем симулировать сеть, если она ничего не делает?!</p>
-                    <p>Прочитайте задание и настройте сеть: добавьте устройства, сконфигурируйте IP адрес и маску у хостов, в настройках хоста добавьте необходимую команду.</p>
+                    <p>Прочитайте задание и настройте сеть: добавьте устройства, сконфигурируйте IP адрес и маску у
+                        хостов, в настройках хоста добавьте необходимую команду.</p>
                 </div>
                 <div class="modal-footer">
                     <button id="noJobsModalSubmit" type="button" class="btn btn-primary">Ок</button>
@@ -137,12 +140,12 @@
 <script src="{{ url_for('static', filename='/miminet_animation.js') }}"></script>
 
 <script>
-    $(document).ready(function() {
-        $("#noJobsModalCancelIcon").click(function(){
+    $(document).ready(function () {
+        $("#noJobsModalCancelIcon").click(function () {
             $('#noJobsModal').modal('hide');
         });
 
-        $("#noJobsModalSubmit").click(function(){
+        $("#noJobsModalSubmit").click(function () {
             $('#noJobsModal').modal('hide');
         });
 
@@ -153,8 +156,8 @@
 
     });
 
-    $(function() {
-        $('[data-toggle="tooltip"]').tooltip({trigger : 'hover'});
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip({trigger: 'hover'});
     });
 
 </script>

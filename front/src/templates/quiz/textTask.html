@@ -41,7 +41,6 @@
         </div>
 
 
-        {#    {% if question.question_type != "practice" %}#}
         <article class="container card border-0 shadow-sm" style="{#max-width: 800px;#}padding: 12px 40px 12px 18px">
             {#  Question text #}
             <div class="card-body p-1" style="margin-right: 40px">
@@ -65,10 +64,7 @@
                 <button name="seeResults" class="btn btn-primary" hidden>Посмотреть результаты</button>
             </div>
         </article>
-
     </section>
-
-    {#    </div>#}
 
     <script src="/quiz/text_question_scripts.js"></script>
     <script>
@@ -82,5 +78,4 @@
         const textType = '{{ question.question_type }}';
         displayFunctions[textType](JSON.parse(answers));
     </script>
-    {#    {% endif %}#}
 {% endblock %}
