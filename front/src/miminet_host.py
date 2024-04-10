@@ -984,6 +984,46 @@ def save_router_config():
                                 }
                             )
 
+                    if job_id == 104:
+                        job_104_arg_1 = request.form.get(
+                            "config_router_add_subinterface_iface_select_field"
+                        )
+                        job_104_arg_2 = request.form.get(
+                            "config_router_add_subinterface_ip_input_field"
+                        )
+                        job_104_arg_3 = request.form.get(
+                            "config_router_add_subinterface_mask_input_field"
+                        )
+                        job_104_arg_4 = request.form.get(
+                            "config_router_add_subinterface_vlan_input_field"
+                        )
+
+                        try:
+                            socket.inet_aton(job_104_arg_2)
+
+                            jnet["jobs"].append(
+                                {
+                                    "id": job_id_generator(),
+                                    "level": job_level,
+                                    "job_id": job_id,
+                                    "host_id": node["data"]["id"],
+                                    "arg_1": job_104_arg_1,
+                                    "arg_2": job_104_arg_2,
+                                    "arg_3": job_104_arg_3,
+                                    "arg_4": job_104_arg_4,
+                                    "print_cmd": f"subinterface {job_104_arg_2}:{job_104_arg_3} VLAN {job_104_arg_4}",
+                                }
+                            )
+                        except Exception:
+                            ret.update(
+                                {
+                                    "warning": (
+                                        'IP адрес для команды "Добавить сабинтерфейс с VLAN" указан'
+                                        " неверно."
+                                    )
+                                }
+                            )
+
         # Set IP adresses
         iface_ids = request.form.getlist("config_router_iface_ids[]")
         for iface_id in iface_ids:

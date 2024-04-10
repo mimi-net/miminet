@@ -791,6 +791,80 @@ const ConfigRouterJobOnChange = function(evnt){
             $('div[name="config_router_select_input"]').remove();
             $(elem).insertBefore(router_job_list);
             break;
+        
+        case '104':
+            elem = document.getElementById('config_router_add_subinterface_script').innerHTML;
+            router_job_list = document.getElementById('config_router_job_list');
+            
+            if (!elem || !router_job_list) {
+                return;
+            }
+            
+            $('div[name="config_router_select_input"]').remove();
+            $(elem).insertBefore(router_job_list);
+            
+            router_id = $('#router_id')[0].value;
+            if (!router_id) {
+                console.log("Не нашел router_id");
+                return
+            }
+            
+            n = nodes.find(n => n.data.id === router_id);
+
+            if (!n) {
+                return;
+            }
+
+            if(!n.interface.length){
+                console.log("Интерфейсов нет, нечего настраивать");
+                return;
+            }
+
+            if(n.interface.length !== 1){
+                $('#config_router_add_subinterface_iface_select_field').append('<option selected value="0">Выберите линк</option>');
+            }
+
+            $.each(n.interface, function (i) {
+                let iface_id = n.interface[i].id;
+
+                if (!iface_id){
+                    return;
+                }
+
+                let connect_id = n.interface[i].connect;
+                if (!connect_id){
+                    return;
+                }
+
+                let edge = edges.find(e => e.data.id === connect_id);
+
+                if (!edge){
+                    return;
+                }
+
+                let source_host = edge.data.source;
+                let target_host = edge.data.target;
+
+                if (!source_host || !target_host){
+                    return;
+                }
+
+                let connected_to = target_host;
+
+                if (n.data.id === target_host){
+                    connected_to = source_host;
+                }
+
+                let connected_to_host = nodes.find(n => n.data.id === connected_to);
+                let connected_to_host_label = "Unknown";
+
+                if (connected_to_host){
+                    connected_to_host_label = connected_to_host.data.label;
+                }
+
+                $('#config_router_add_subinterface_iface_select_field').append('<option value="' + iface_id  + '">' + connected_to_host_label + '</option>');
+            });
+            break;
 
         default:
             console.log("Unknown target.value");
