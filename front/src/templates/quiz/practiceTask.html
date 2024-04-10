@@ -5,15 +5,6 @@
     <section class="container" style="display: flex;flex-direction: row; margin-top: 48px; padding-top: 48px">
         <div class="row align-items-baseline"
              style=" flex: 1; display: flex;flex-direction: column;justify-content: space-evenly;">
-            {# Test name and section name #}
-            <div class="row align-items-baseline" style="display: flex;">
-                <div class="col-auto">
-                    <h2 class="mb-0" id="test_name">{{ test_name }}</h2>
-                </div>
-                <div class="col-auto text-center">
-                    <h4 class="mb-0" style="font-weight: normal" id="section_name">{{ section_name }}</h4>
-                </div>
-            </div>
 
             {# Timer, questions counter #}
             <div class="row align-items-baseline"
@@ -124,12 +115,10 @@
                             {# Control buttons #}
                             <div class="card-body d-flex justify-content-center" style="padding: 0 12px 0 12px">
                                 <button name="answerQuestion" class="btn btn-primary">Ответить</button>
-                                <button name="nextQuestion" class="btn btn-primary w-100" hidden>Следующий вопрос
-                                </button>
-                                <button name="seeResults" class="btn btn-primary w-100" hidden>Посмотреть
-                                    результаты
-                                </button>
-
+                                <button name="nextQuestion" class="btn w-100 px-0"
+                                        style="word-wrap: break-word;white-space: initial;" hidden></button>
+                                <button name="seeResults" class="btn w-100 px-0"
+                                        style="word-wrap: break-word;white-space: initial;" hidden></button>
                             </div>
 
                             {# Explanation #}

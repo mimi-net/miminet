@@ -130,10 +130,27 @@ function nextQuestion() {
     window.removeEventListener('beforeunload', handleUnload);
     // redirect to next question
     sessionStorage.setItem('question_index', (questionIndex + 1).toString());
+    sessionStorage.removeItem('explanation');
     sessionStorage.removeItem('answer');
     sessionStorage.removeItem('is_correct');
 
     window.location.href = getQuestionUrl + `?question_id=` + questionIds[questionIndex + 1];
+}
+
+function changeVisibility(is_correct) {
+    document.querySelector('button[name="answerQuestion"]').hidden = true;
+    document.querySelector('button[name="nextQuestion"]').hidden = isLastQuestion;
+
+    if (isLastQuestion) {
+        document.querySelector('button[name="finishQuiz"]').hidden = true;
+        document.querySelector('button[name="seeResults"]').hidden = false;
+
+        document.querySelector('button[name="seeResults"]').classList.add(is_correct ? 'btn-outline-success' : 'btn-outline-danger');
+        document.querySelector('button[name="seeResults"]').textContent = is_correct ? 'Верно! Посмотреть резульататы' : 'Неверно! Посмотреть резульататы';
+    } else {
+        document.querySelector('button[name="nextQuestion"]').classList.add(is_correct ? 'btn-outline-success' : 'btn-outline-danger');
+        document.querySelector('button[name="nextQuestion"]').textContent = is_correct ? 'Верно! Следующий вопрос' : 'Неверно! Следующий вопрос';
+    }
 }
 
 async function answerQuestion() {
@@ -158,17 +175,9 @@ async function answerQuestion() {
         if (playerDiv) {
             playerDiv.hidden = false;
         }
-        document.querySelector('button[name="answerQuestion"]').textContent = "Ответить"
-        document.querySelector('button[name="answerQuestion"]').disabled = false
+        document.querySelector('button[name="answerQuestion"]').textContent = "Ответить";
+        document.querySelector('button[name="answerQuestion"]').disabled = false;
         return;
-    }
-
-    document.querySelector('button[name="answerQuestion"]').hidden = true;
-    document.querySelector('button[name="nextQuestion"]').hidden = isLastQuestion;
-
-    if (isLastQuestion) {
-        document.querySelector('button[name="seeResults"]').hidden = false;
-        document.querySelector('button[name="finishQuiz"]').hidden = true;
     }
 
     fetch(answerQuestionURL + '?id=' + questionId, {
@@ -182,6 +191,8 @@ async function answerQuestion() {
         .then(data => {
             console.log(data);
             sessionStorage.setItem('is_correct', data['is_correct']);
+            sessionStorage.setItem('explanation', data['explanation']);
+            changeVisibility(data['is_correct']);
             displayExplanation(data);
         })
         .catch(error => {
@@ -190,27 +201,21 @@ async function answerQuestion() {
 }
 
 function displayExplanation(data) {
-    const borderColor = data['is_correct'] ? '#63F297' : '#F26963'
-    const phrase = data['is_correct'] ? 'Верно!\n' : 'Неверно!\n'
+    if (!data['explanation']) {
+        return;
+    }
     $('#explanation.container')
         .removeAttr('hidden')
-        .css({borderColor: borderColor})
-        .append(`<text>${phrase}</text><br><text>${data['explanation'] ?? ""}</text>`);
+        .append(`<text>${data['explanation']}</text>`);
 }
 
 window.onload = function () {
     const answer = sessionStorage.getItem('answer');
     if (answer) {
-        // displayFunctions[textType](JSON.parse(answer));
-        displayExplanation({"is_correct": sessionStorage.getItem('is_correct') === "true"});
-        $('#sortContainer').sortable( "disable" );
-        document.querySelector('button[name="answerQuestion"]').hidden = true;
-        document.querySelector('button[name="nextQuestion"]').hidden = isLastQuestion;
-
-        if (isLastQuestion) {
-            document.querySelector('button[name="seeResults"]').hidden = false;
-            document.querySelector('button[name="finishQuiz"]').hidden = true;
-        }
+        const is_correct = sessionStorage.getItem('is_correct') === "true";
+        displayExplanation({"explanation": sessionStorage.getItem('explanation')});
+        $('#sortContainer').sortable("disable");
+        changeVisibility(is_correct);
     }
 }
 
@@ -250,5 +255,6 @@ document.querySelector('button[name="nextQuestion"]')?.addEventListener('click',
 // Display data
 document.title = testName;
 document.getElementById("test_name").innerHTML = testName;
+document.getElementById("slash_symbol").innerHTML = sectionName ? " / " : "";
 document.getElementById("section_name").innerHTML = sectionName;
 document.getElementById("counter").innerHTML = (questionIndex + 1) + '/' + questionsCount;
