@@ -1,4 +1,4 @@
-name: Yandex authentication and authorization tests
+name: Yandex and Telegram authentication and authorization tests
 
 on: 
   push: 
@@ -26,3 +26,4 @@ jobs:
         python -m pytest -vv .
       env:
           CLIENT_YANDEX: ${{ secrets.CLIENT_YANDEX }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
