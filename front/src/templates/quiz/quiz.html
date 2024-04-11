@@ -28,9 +28,23 @@
                 <div class="row g-0" style="align-items: baseline">
                     <div class="col-sm-8">
                         <div class="card-body" style="margin-left: 20px;">
-                            <h4 class="h4" style="margin-bottom: 4px">
-                                {{ section.section_name }}
-                            </h4>
+                            <form id="postStartSession"
+                                  method="post"
+                                  action="{{ url_for('start_session_endpoint', section_id=section.section_id) }}"
+                                  style="cursor: pointer;"
+                            >
+                                <input type="hidden" name="question_index" value="0">
+                                <input type="hidden" name="section_name" value="{{ section.section_name }}">
+                                <input type="hidden" name="timer" value="{{ section.timer }}">
+                                <h4 class="h4"
+                                    style="margin-right: 8px;margin-bottom: 4px"
+                                    onmouseover="this.style.color='#6366f1';"
+                                    onmouseout="this.style.color='';"
+                                    id="startSession{{ section.section_id }}"
+                                >
+                                    {{ section.section_name }}
+                                </h4>
+                            </form>
                             {% if section.description is not none %}
                                 <p style="margin-bottom: 8px">{{ section.description }}</p>
                             {% endif %}
@@ -45,21 +59,6 @@
                                 <p id="{{ section.section_id }}timer"
                                    style="text-align: right; margin-right: 40px; "></p>
                             {% endif %}
-
-                            <form id="postStartSession"
-                                  method="post"
-                                  action="{{ url_for('start_session_endpoint', section_id=section.section_id) }}"
-                                  style="align-self: flex-end">
-                                <input type="hidden" name="question_index" value="0">
-                                <input type="hidden" name="section_name" value="{{ section.section_name }}">
-                                <input type="hidden" name="timer" value="{{ section.timer }}">
-                                <a class="btn btn-outline-primary"
-                                   style="margin-right: 8px"
-                                   id="startSession{{ section.section_id }}">
-                                    Начать прохождение
-                                </a>
-                            </form>
-
                         </div>
                     </div>
                 </div>
