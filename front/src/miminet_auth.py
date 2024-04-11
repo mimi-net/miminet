@@ -362,7 +362,7 @@ def vk_callback():
 
     return redirect_next_url(fallback=url_for("home"))
 
-def yandex_login():
+def yandex_login(yandex_json=yandex_json):
     yandex_session = OAuth2Session(
         yandex_json["web"]["client_id"], redirect_uri=yandex_json["web"]["redirect_uris"][0]
     )
@@ -377,7 +377,7 @@ def yandex_login():
 
     return redirect(authorization_url)
 
-def yandex_callback():
+def yandex_callback(yandex_json=yandex_json):
     state = session.get("state")
     if not state:
         return redirect(url_for("login_index"))
@@ -426,7 +426,7 @@ def yandex_callback():
         flash("Token expired. Please log in again.", category="error")
         return redirect(url_for("login_index"))
 
-def check_tg_authorization(auth_data):
+def check_tg_authorization(auth_data, tg_json=tg_json):
     BOT_TOKEN = tg_json["token"]["BOT_TOKEN"]
     check_hash = auth_data["hash"]
     del auth_data["hash"]
@@ -463,17 +463,15 @@ def tg_callback():
         logger.error('Error while processing Telegram callback: %s', e)
         flash(str(e), category="error")
         return redirect(url_for("login_index"))
-
-    telegram_user_id = str(user_data.get("id", ""))
-
+    
     user = User.query.filter(
-        (User.tg_id == telegram_user_id) | (User.email == user_data.get("username", ""))).first()
+        (User.tg_id == str(user_data.get("id", ""))) | (User.email == user_data.get("username", ""))).first()
 
     if user is None:
         try:
             new_user = User(
-                nick=user_data.get("last_name", "") + user_data.get("first_name", ""),
-                tg_id=telegram_user_id,
+                nick=user_data.get("first_name", ""),
+                tg_id=str(user_data.get("id", "")),
                 email=user_data.get("username", ""),
             )
             db.session.add(new_user)
@@ -486,7 +484,7 @@ def tg_callback():
             flash(error, category="error")
             return redirect(url_for("login_index"))
         
-        user = User.query.filter((User.tg_id == telegram_user_id)
+        user = User.query.filter((User.tg_id == str(user_data.get("id", "")))
                 | (User.email == user_data.get("username", ""))).first()
 
     login_user(user, remember=True)
