@@ -64,12 +64,14 @@ if os.path.exists(vk_secrets_file):
     VK_REDIRECT_URI = vk_json["web"]["redirect_uri"]
 
 yandex_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_yandex.json")
+yandex_json = None
 
 if os.path.exists(yandex_secrets_file):
     with open(yandex_secrets_file, "r") as file:
         yandex_json = json.loads(file.read())
 
 tg_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_tg.json")
+tg_json = None
 
 if os.path.exists(tg_secrets_file):
     with open(tg_secrets_file, "r") as file:
