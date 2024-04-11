@@ -141,6 +141,7 @@ div.keys#sortContainer {
     flex-shrink: 1;
     flex-grow: 1;
     flex-basis: 50%;
+    cursor: grab;
 }
 
 div.values#rightSide {
