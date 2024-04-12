@@ -49,7 +49,8 @@ from miminet_shark import mimishark_page
 from miminet_simulation import check_simulation, run_simulation
 from quiz.controller.question_controller import (
     get_questions_by_section_endpoint,
-    create_question_endpoint, delete_question_endpoint,
+    create_question_endpoint,
+    delete_question_endpoint,
 )
 from quiz.controller.quiz_session_controller import (
     start_session_endpoint,
@@ -65,7 +66,8 @@ from quiz.controller.section_controller import (
 from quiz.controller.test_controller import (
     get_all_tests_endpoint,
     get_tests_by_owner_endpoint,
-    get_test_endpoint, )
+    get_test_endpoint,
+)
 from quiz.entity.entity import Section, Test, Question, Answer
 
 app = Flask(

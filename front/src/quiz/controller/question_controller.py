@@ -39,7 +39,6 @@ def create_question_endpoint():
     return make_response(jsonify(ret), res[1])
 
 
-
 @login_required
 def delete_question_endpoint():
     question_id = request.args["id"]
@@ -48,7 +47,10 @@ def delete_question_endpoint():
     if res == 404:
         ret = {"message": "Вопрос не существует", "id": question_id}
     elif res == 403:
-        ret = {"message": "Попытка удалить чужой вопрос или нет прав", "id": question_id}
+        ret = {
+            "message": "Попытка удалить чужой вопрос или нет прав",
+            "id": question_id,
+        }
     elif res == 409:
         ret = {"message": "Попытка удалить удалённый вопрос", "id": question_id}
     else:
