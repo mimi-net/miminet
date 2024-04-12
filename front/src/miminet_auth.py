@@ -80,6 +80,7 @@ if os.path.exists(tg_secrets_file):
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("miminet_auth")
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -364,9 +365,11 @@ def vk_callback():
 
     return redirect_next_url(fallback=url_for("home"))
 
+
 def yandex_login(yandex_json=yandex_json):
     yandex_session = OAuth2Session(
-        yandex_json["web"]["client_id"], redirect_uri=yandex_json["web"]["redirect_uris"][0]
+        yandex_json["web"]["client_id"],
+        redirect_uri=yandex_json["web"]["redirect_uris"][0],
     )
 
     yandex_session.redirect_uri = url_for("yandex_callback", _external=True)
@@ -379,14 +382,17 @@ def yandex_login(yandex_json=yandex_json):
 
     return redirect(authorization_url)
 
+
 def yandex_callback(yandex_json=yandex_json):
     state = session.get("state")
     if not state:
         return redirect(url_for("login_index"))
-    
+
     try:
         yandex_session = OAuth2Session(
-            yandex_json["web"]["client_id"], redirect_uri=yandex_json["web"]["redirect_uris"][0], state=state
+            yandex_json["web"]["client_id"],
+            redirect_uri=yandex_json["web"]["redirect_uris"][0],
+            state=state,
         )
 
         yandex_session.fetch_token(
@@ -407,14 +413,14 @@ def yandex_callback(yandex_json=yandex_json):
                     nick=id_info.get("login", ""),
                     yandex_id=id_info.get("id"),
                     email=id_info.get("default_email", ""),
-                    )
+                )
                 db.session.add(new_user)
                 db.session.commit()
-            
+
             except SQLAlchemyError as e:
                 db.session.rollback()
                 error = str(e.__dict__["orig"])
-                logger.error('Error while adding new Yandex user: %s', e)
+                logger.error("Error while adding new Yandex user: %s", e)
                 flash(error, category="error")
                 return redirect(url_for("login_index"))
 
@@ -424,9 +430,10 @@ def yandex_callback(yandex_json=yandex_json):
         return redirect_next_url(fallback=url_for("home"))
 
     except TokenExpiredError as e:
-        logger.error('Token expired: %s', e)
+        logger.error("Token expired: %s", e)
         flash("Token expired. Please log in again.", category="error")
         return redirect(url_for("login_index"))
+
 
 def check_tg_authorization(auth_data, tg_json=tg_json):
     BOT_TOKEN = tg_json["token"]["BOT_TOKEN"]
@@ -451,6 +458,7 @@ def check_tg_authorization(auth_data, tg_json=tg_json):
 
     return auth_data
 
+
 def tg_callback():
     user_json = request.args.get("user")
 
@@ -462,12 +470,14 @@ def tg_callback():
     try:
         check_tg_authorization(user_data)
     except Exception as e:
-        logger.error('Error while processing Telegram callback: %s', e)
+        logger.error("Error while processing Telegram callback: %s", e)
         flash(str(e), category="error")
         return redirect(url_for("login_index"))
-    
+
     user = User.query.filter(
-        (User.tg_id == str(user_data.get("id", ""))) | (User.email == user_data.get("username", ""))).first()
+        (User.tg_id == str(user_data.get("id", "")))
+        | (User.email == user_data.get("username", ""))
+    ).first()
 
     if user is None:
         try:
@@ -482,12 +492,14 @@ def tg_callback():
         except SQLAlchemyError as e:
             db.session.rollback()
             error = str(e.__dict__["orig"])
-            logger.error('Error while adding new Telegram user: %s', e)
+            logger.error("Error while adding new Telegram user: %s", e)
             flash(error, category="error")
             return redirect(url_for("login_index"))
-        
-        user = User.query.filter((User.tg_id == str(user_data.get("id", "")))
-                | (User.email == user_data.get("username", ""))).first()
+
+        user = User.query.filter(
+            (User.tg_id == str(user_data.get("id", "")))
+            | (User.email == user_data.get("username", ""))
+        ).first()
 
     login_user(user, remember=True)
     return redirect_next_url(fallback=url_for("home"))
