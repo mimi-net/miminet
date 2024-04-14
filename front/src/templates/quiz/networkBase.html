@@ -51,19 +51,20 @@
 {% if mimishark_nav is not defined %}
     <nav class="header navbar navbar-expand-lg position-absolute navbar-sticky">
         <div class="container">
-            <a href="/" class="navbar-brand">
+            <a href="/" class="navbar-brand" style="min-width: 170px">
                 <img src="{{ url_for('static', filename='/images/logo.png') }}" width="170" alt="Miminet">
             </a>
 
             {# Test name and section name #}
-            <div class="align-items-baseline" style="display: flex; flex-direction: row;flex-wrap: wrap">
+            <div class="align-items-baseline"
+                 style="display: flex; flex-direction: row;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">
                 <div class="col-auto mx-1">
                     <b class="mb-0" id="test_name"></b>
                 </div>
                 <div class="col-auto mx-1">
                     <b class="mb-0" id="slash_symbol"></b>
                 </div>
-                <div class="col-auto mx-1 text-center">
+                <div class="col-auto mx-1">
                     <p class="mb-0" style="font-weight: normal" id="section_name"></p>
                 </div>
             </div>
