@@ -135,14 +135,23 @@ def ip_protocol_prop(self, indent=1):
 
 def create_mimishark_json(pcap, to_json):
     json_file = []
+    start_timestamp = 0
 
     with open(to_json, "w") as file:
         for timestamp, buf in pcap:
             pcap_file = {}
             eth = dpkt.ethernet.Ethernet(buf)
+
+            if not start_timestamp:
+                start_timestamp = datetime.datetime.fromtimestamp(timestamp)
+                pcap_file["time"] = "00:00.000000"
+            else:
+                dt = datetime.datetime.fromtimestamp(timestamp) - start_timestamp
+                pcap_file["time"] = ':'.join(str(dt).split(':')[1:])
+
+
             if isinstance(eth.data, dpkt.arp.ARP):
                 arp_pkt = eth.data
-                pcap_file["time"] = str(datetime.datetime.utcfromtimestamp(timestamp))
                 pcap_file["source"] = str(utils.mac_to_str(arp_pkt.sha))
                 pcap_file["destination"] = str(utils.mac_to_str(eth.dst))
                 pcap_file["protocol"] = "ARP"
@@ -163,11 +172,7 @@ def create_mimishark_json(pcap, to_json):
                 )
                 pcap_file["bytes"] = bytes_repr
 
-                pcap_file["decode_eth"] = (
-                    f" Ethernet Frame:  Destination: {mac_to_str(eth.dst)}  Sourse:"
-                    f" {mac_to_str(eth.src)}  Type: ARP"
-                    f" (0x{bytes_repr[36:41].replace(' ','')})"
-                )
+                '''
                 pcap_file["decode_arp"] = (
                     ip_protocol_prop(arp_pkt)
                     .replace("SenderMac", str(utils.mac_to_str(arp_pkt.sha)))
@@ -175,11 +180,47 @@ def create_mimishark_json(pcap, to_json):
                     .replace("TargerMac", str(utils.mac_to_str(eth.dst)))
                     .replace("TargetIP", str(utils.inet_to_str(arp_pkt.tpa)))
                 )
+                '''
+
                 # .replace('"','doublePrime').replace("'",'singlePrime').replace('\\','doubleslash')
                 json_file.append(pcap_file)
-            if isinstance(eth.data, dpkt.ip.IP):
-                pcap_file["time"] = str(datetime.datetime.utcfromtimestamp(timestamp))
 
+            if isinstance(eth.data, dpkt.llc.LLC):
+                llc = eth.data
+
+                pcap_file["source"] = str(utils.mac_to_str(eth.src))
+                pcap_file["destination"] = str(utils.mac_to_str(eth.dst))
+                pcap_file["length"] = len(mac_to_str(buf).split(":"))
+
+                if llc.dsap == 0x42:
+                    match llc.data.flags:
+
+                        case 0:
+                            pcap_file["protocol"] = "STP (Root)"
+                        case 1:
+                            pcap_file["protocol"] = "STP (TC + Root)"
+                        case _:
+                            pcap_file["protocol"] = "STP"
+
+
+                    bytes_repr = " ".join(mac_to_str(buf).split(":"))
+                    ascii = ""
+                    for i in bytes_repr.split(" "):
+                        a = bytes.fromhex(i)
+                        b = str(a)[2 : len((str(a))) - 1]
+                        if len(b) < 2:
+                            ascii += b
+                        else:
+                            ascii += "."
+
+                    pcap_file["ascii"] = ascii.replace('"', "doublePrime").replace(
+                            "'", "singlePrime"
+                    )
+
+                    pcap_file["bytes"] = bytes_repr
+                    json_file.append(pcap_file)
+
+            if isinstance(eth.data, dpkt.ip.IP):
                 ip = eth.data
                 pcap_file["source"] = inet_to_str(ip.src)
                 pcap_file["destination"] = inet_to_str(ip.dst)
@@ -199,11 +240,6 @@ def create_mimishark_json(pcap, to_json):
                     "'", "singlePrime"
                 )
                 pcap_file["bytes"] = bytes_repr
-                pcap_file["decode_eth"] = (
-                    f" Ethernet Frame:  Destination: {mac_to_str(eth.dst)}  Sourse:"
-                    f" {mac_to_str(eth.src)}  Type:"
-                    f" IPv{ip.v} (0x{bytes_repr[36:41].replace(' ','')})"
-                )
                 pcap_file["decode_ip"] = (
                     ip_protocol_prop(ip)
                     + " Source Address: "
