@@ -8,7 +8,8 @@ from flask_admin.contrib.sqla.filters import FilterEqual
 from flask_admin.form import Select2Widget
 from flask_admin.model import typefmt
 from flask_login import current_user
-from wtforms import SelectField
+from markupsafe import Markup
+from wtforms import SelectField, TextAreaField
 
 from miminet_model import User
 from quiz.entity.entity import Test, Section, Question, Answer
@@ -185,6 +186,14 @@ class QuestionView(MiminetAdminModelView):
         "section",
     ]
 
+    form_overrides = {
+        "text": TextAreaField,
+    }
+
+    form_widget_args = {
+        "text": {"rows": 4, "style": "font-family: monospace; width: 680px;"},
+    }
+
     column_list = (
         "section_id",
         "text",
@@ -208,6 +217,7 @@ class QuestionView(MiminetAdminModelView):
         "created_by_id": created_by_formatter,
         "section_id": get_section_name,
         "question_type": get_question_type,
+        "text": lambda v, c, model, n, **kwargs: Markup.unescape(model.text),
     }
 
     form_extra_fields = {
@@ -241,6 +251,8 @@ class QuestionView(MiminetAdminModelView):
 
         model.section_id = str(model.section_id).removeprefix("<Section ")
         model.section_id = str(model.section_id).removesuffix(">")
+
+        model.text = Markup.escape(Markup.unescape(model.text))
 
     pass
 

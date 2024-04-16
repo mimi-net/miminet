@@ -150,6 +150,7 @@ div.values#rightSide {
     flex-basis: 50%;
 }
 
+div.practice-question-text,
 div.sortable,
 div.matching {
     background-color: rgba(255, 255, 255, 0.7);

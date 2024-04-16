@@ -35,8 +35,8 @@
         <article class="container card border-0 shadow-sm" style="padding: 12px 40px 12px 18px">
             {#  Question text #}
             <div class="card-body p-1" style="margin-right: 40px">
-                <p class="text-black m-0 px-4 py-3" id="question_text"
-                   style="font-size: 24px">{{ question.question_text }}</p>
+                <div class="text-black m-0 px-4 py-3" id="question_text"
+                     style="font-size: 24px">{{ question.question_text }}</div>
 
                 {# Divider #}
                 <div class="border border-1 border-success-subtle"></div>
@@ -44,7 +44,6 @@
                 {# Answer area #}
                 {% if question.question_type != "practice" %}
                     <div class="container m-3" id="variants"></div>
-{#                    <div class="container" id="explanation" hidden></div>#}
                 {% endif %}
             </div>
 

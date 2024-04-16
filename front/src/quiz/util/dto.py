@@ -2,6 +2,8 @@ import random
 import uuid
 from typing import List
 
+from markupsafe import Markup
+
 from miminet_model import Network, db
 from quiz.entity.entity import Section, Test, Question, Answer, PracticeQuestion
 
@@ -139,7 +141,7 @@ def get_question_type(question_type: int):
 class QuestionDto:
     def __init__(self, user_id, question: Question) -> None:
         self.question_type = get_question_type(question.question_type)
-        self.question_text = question.text
+        self.question_text = Markup.unescape(question.text)
         self.correct_count = 0
 
         if self.question_type == "practice":
@@ -191,12 +193,12 @@ class QuestionDto:
 
 class SectionDto:
     def __init__(
-        self,
-        section_id: str,
-        section_name: str,
-        timer: str,
-        description: str,
-        question_count: int,
+            self,
+            section_id: str,
+            section_name: str,
+            timer: str,
+            description: str,
+            question_count: int,
     ):
         self.section_id = section_id
         self.section_name = section_name
@@ -207,14 +209,14 @@ class SectionDto:
 
 class TestDto:
     def __init__(
-        self,
-        test_id: str,
-        test_name: str,
-        author_name: str,
-        description: str,
-        is_retakeable: bool,
-        is_ready: bool,
-        section_count: int,
+            self,
+            test_id: str,
+            test_name: str,
+            author_name: str,
+            description: str,
+            is_retakeable: bool,
+            is_ready: bool,
+            section_count: int,
     ):
         self.test_id = test_id
         self.test_name = test_name
@@ -233,13 +235,13 @@ class QuestionForEditorDto:
 
 class SessionResultDto:
     def __init__(
-        self,
-        test_name: str,
-        section_name: str,
-        correct_answers: int,
-        answers_count: int,
-        start_time: str,
-        time_spent: str,
+            self,
+            test_name: str,
+            section_name: str,
+            correct_answers: int,
+            answers_count: int,
+            start_time: str,
+            time_spent: str,
     ):
         self.test_name = test_name
         self.section_name = section_name

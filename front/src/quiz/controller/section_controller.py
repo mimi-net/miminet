@@ -52,9 +52,10 @@ def get_sections_by_test_endpoint():
         abort(res[1])
     else:
         sections = res[0]
-        test_name = get_test(test_id)[0].name
+        test = get_test(test_id)[0]
+        test_info = {"test_name": test.name, "is_retakeable": test.is_retakeable}
         return make_response(
-            render_template("quiz/quiz.html", test_name=test_name, sections=sections),
+            render_template("quiz/quiz.html", test_info=test_info, sections=sections),
             200,
         )
 

@@ -9,6 +9,9 @@
 {% endif %}
 
 {% block content %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
+
     <script src="/quiz/session_scripts.js"></script>
     <script>
         let finishSessionUrl = '{{ url_for('finish_session_endpoint') }}';

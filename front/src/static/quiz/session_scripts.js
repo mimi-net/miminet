@@ -226,6 +226,29 @@ function handleUnload(e) {
 
 window.addEventListener('beforeunload', handleUnload);
 
+// Markdown convert
+let questionText = document.querySelector('div[id="question_text"]')?.innerHTML;
+const converter = new showdown.Converter();
+const html = converter.makeHtml(questionText);
+
+// Parse html string
+const parser = new DOMParser();
+const doc = parser.parseFromString(html, 'text/html');
+const documentChildren = doc.body.children;
+
+// Append html elements
+let textField = document.querySelector('div[id="question_text"]')
+textField.innerHTML = ""
+for (const child of documentChildren) {
+    textField.appendChild(child.cloneNode(true))
+}
+
+// If there's a code, unescape string
+const codeElement = document.getElementsByTagName("code")[0]
+if (codeElement) {
+    codeElement.textContent = _.unescape(codeElement.textContent)
+}
+
 // Saving data about session
 const testName = sessionStorage.getItem('test_name');
 const sectionName = sessionStorage.getItem('section_name');
