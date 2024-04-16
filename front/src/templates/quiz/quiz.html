@@ -4,6 +4,8 @@
 
 
 {% block content %}
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/jquery-ui.min.js"></script>
 
     <section class="container py-5 my-lg-5">
         <div class="align-items-center justify-content-between">
@@ -24,6 +26,29 @@
                 </div>
             </div>
 
+            <div class="modal" id="testWarningModal" tabindex="-1" role="dialog" aria-labelledby="testWarningModalLabel"
+                 aria-hidden="true" data-focus-on="input:first">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="testWarningModal">Что делать?</h5>
+                            <button id="testWarningModalCancelIcon" type="button" class="btn-close" data-dismiss="modal"
+                                    aria-label="Закрыть"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <p>Пройти тест можно только один раз.</p>
+                            <p>Время на решение ограничено. Вы готовы начать?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="testWarningModalSubmit" type="button" class="btn btn-primary">Начать
+                                прохождение
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <article class="card border-0 shadow-sm overflow-hidden mb-4">
                 <div class="row g-0" style="align-items: baseline">
                     <div class="col-sm-8">
@@ -31,6 +56,10 @@
                             <form id="postStartSession"
                                   method="post"
                                   action="{{ url_for('start_session_endpoint', section_id=section.section_id) }}"
+                                  {% if not test_info['is_retakeable'] %}
+                                      data-bs-toggle="modal" data-target="#testWarningModal"
+                                      href="#testWarningModal"
+                                  {% endif %}
                                   style="cursor: pointer;"
                             >
                                 <input type="hidden" name="question_index" value="0">
@@ -66,7 +95,9 @@
 
             <script src="/quiz/quiz_scripts.js"></script>
             <script>
-                document.getElementById('startSession{{ section.section_id }}').addEventListener('click', submitForm);
+                if ('{{ test_info['is_retakeable'] }}' === "True") {
+                    document.getElementById('startSession{{ section.section_id }}').addEventListener('click', submitForm);
+                }
 
                 questions = '{{section.question_count}}';
                 document.getElementById('{{ section.section_id }}question').innerHTML =
@@ -76,11 +107,30 @@
                 document.getElementById('{{ section.section_id }}timer').innerHTML =
                     timer + ' ' + morph(timer, ['минута', 'минуты', 'минут']);
             </script>
+
+            <script>
+                $(document).ready(function () {
+                    $('#testWarningModalCancelIcon').click(function () {
+                        $('#testWarningModal').modal('hide');
+                    });
+
+                    $('#testWarningModalSubmit').click(function () {
+                        let startSessionElement = document.getElementById('startSession{{ section.section_id }}');
+                        if (startSessionElement) {
+                            startSessionElement.addEventListener('click', submitForm);
+                            startSessionElement.click();
+                        }
+                        $('#testWarningModal').modal('hide');
+                    });
+                });
+            </script>
         {% endfor %}
+
         <script>
             let getQuestionUrl = '{{ url_for('get_question_by_session_question_id_endpoint') }}';
             let finishSessionUrl = '{{ url_for('finish_session_endpoint') }}';
-            sessionStorage.setItem('test_name', '{{ test_name }}');
+            sessionStorage.setItem('test_name', '{{ test_info['test_name'] }}');
+            sessionStorage.setItem('is_retakeable', '{{ test_info['is_retakeable'] }}');
         </script>
     </section>
 {% endblock %}

@@ -47,6 +47,7 @@
                 }
 
                 document.getElementById('{{quiz.test_id}}').innerHTML = {{ quiz.section_count }} + ' ' + morph({{ quiz.section_count}});
+                sessionStorage.setItem('is_retakeable', '{{quiz.is_retakeable}}');
             </script>
         {% endfor %}
 
