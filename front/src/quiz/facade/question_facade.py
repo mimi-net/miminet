@@ -1,4 +1,6 @@
-from miminet_model import db, User
+import uuid
+
+from miminet_model import db, User, Network
 from quiz.entity.entity import (
     Section,
     Question,
@@ -100,7 +102,7 @@ def create_question(section_id: str, question_dict: dict, user: User):
         attributes = [
             "description",
             "explanation",
-            "start_configuration",
+            # "start_configuration",
             "available_host",
             "available_l2_switch",
             "available_l1_hub",
@@ -110,6 +112,25 @@ def create_question(section_id: str, question_dict: dict, user: User):
 
         for attribute in attributes:
             setattr(practice_question, attribute, question_dict[attribute])
+
+        net = Network.query.filter(
+            Network.guid == question_dict["start_configuration"]
+        ).first()
+
+        u = uuid.uuid4()
+        net_copy = Network(
+            guid=str(u),
+            author_id=user.id,
+            network=net.network,
+            title=net.title,
+            description="Task start configuration copy",
+            preview_uri=net.preview_uri,
+            is_task=True,
+        )
+        db.session.add(net_copy)
+        db.session.commit()
+
+        practice_question.start_configuration = net_copy.guid
 
         question.question_type = 0
         practice_question.created_by_id = user.id
