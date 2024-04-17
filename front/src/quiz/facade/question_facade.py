@@ -127,38 +127,46 @@ def create_question(section_id: str, question_dict: dict, user: User):
     return question.id, 201
 
 
-# def delete_question(question_id: str, user: User):
-#     question = Question.query.filter_by(id=question_id).first()
-#     if question is None:
-#         return 404
-#     elif question.created_by_id != user.id:
-#         return 403
-#     elif question.is_deleted:
-#         return 409
-#     if question.question_type == "text":
-#         text_question = question.text_question
-#
-#         if text_question is not None:
-#             text_question.is_deleted = True
-#
-#             if text_question.text_type == "variable":
-#                 variable_question = text_question.variable_question
-#                 if variable_question is not None:
-#                     variable_question.is_deleted = True
-#                     for answer in variable_question.answers:
-#                         if answer is not None:
-#                             answer.is_deleted = True
-#
-#             if text_question.text_type == "sorting":
-#                 sorting_question = text_question.sorting_question
-#                 if sorting_question is not None:
-#                     sorting_question.is_deleted = True
-#
-#             if text_question.text_type == "matching":
-#                 sorting_question = text_question.sorting_question
-#                 if sorting_question is not None:
-#                     sorting_question.is_deleted = True
-#
-#     question.is_deleted = True
-#     db.session.commit()
-#     return 200
+def delete_question(question_id: str, user: User):
+    question = Question.query.filter_by(id=question_id).first()
+    if question is None:
+        return 404
+    elif question.created_by_id != user.id or user.role < 1:
+        return 403
+    elif question.is_deleted:
+        return 409
+
+    # Not practice question
+    # if question.question_type != 0:
+    #     text_question = question.text_question
+    #
+    #     if text_question is not None:
+    #         text_question.is_deleted = True
+    #
+    #         if text_question.text_type == "variable":
+    #             variable_question = text_question.variable_question
+    #             if variable_question is not None:
+    #                 variable_question.is_deleted = True
+    #                 for answer in variable_question.answers:
+    #                     if answer is not None:
+    #                         answer.is_deleted = True
+    #
+    #         if text_question.text_type == "sorting":
+    #             sorting_question = text_question.sorting_question
+    #             if sorting_question is not None:
+    #                 sorting_question.is_deleted = True
+    #
+    #         if text_question.text_type == "matching":
+    #             sorting_question = text_question.sorting_question
+    #             if sorting_question is not None:
+    #                 sorting_question.is_deleted = True
+    # else:
+    if question.question_type == 0:
+        practice_question = question.practice_question
+        if practice_question is not None:
+            db.session.delete(practice_question)
+
+    # question.is_deleted = True
+    db.session.delete(question)
+    db.session.commit()
+    return 200

@@ -50,6 +50,7 @@ from miminet_simulation import check_simulation, run_simulation
 from quiz.controller.question_controller import (
     get_questions_by_section_endpoint,
     create_question_endpoint,
+    delete_question_endpoint,
 )
 from quiz.controller.quiz_session_controller import (
     start_session_endpoint,
@@ -160,6 +161,11 @@ app.add_url_rule(
 app.add_url_rule(
     "/quiz/question/create", methods=["POST"], view_func=create_question_endpoint
 )
+
+app.add_url_rule(
+    "/quiz/question/delete", methods=["DELETE"], view_func=delete_question_endpoint
+)
+
 app.add_url_rule(
     "/quiz/question/all", methods=["GET"], view_func=get_questions_by_section_endpoint
 )
