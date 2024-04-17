@@ -1081,8 +1081,14 @@ def save_router_config():
                         if (
                             len(job_105_arg_4) < 2
                             or len(job_105_arg_4) > 15
-                            or "/" in job_105_arg_4
-                            or " " in job_105_arg_4
+                            or not all(
+                                "a" <= char <= "z"
+                                or "A" <= char <= "Z"
+                                or "0" <= char <= "9"
+                                or char == "-"
+                                or char == "_"
+                                for char in job_105_arg_4
+                            )
                         ):
                             ret.update(
                                 {
