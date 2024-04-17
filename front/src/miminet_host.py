@@ -1038,7 +1038,7 @@ def save_router_config():
                             "config_router_add_ipip_tunnel_interface_name_field"
                         )
 
-                        if not job_105_arg_1:
+                        if not job_105_arg_1 or job_105_arg_1 == "0":
                             ret.update(
                                 {
                                     "warning": (
@@ -1073,6 +1073,17 @@ def save_router_config():
                                 {
                                     "warning": (
                                         'Не указано название IPIP-интерфейса для команды "Добавить IPIP-интерфейс"'
+                                    )
+                                }
+                            )
+                            return make_response(jsonify(ret), 200)
+
+                        if len(job_105_arg_4) < 2 or len(job_105_arg_4) > 15:
+                            ret.update(
+                                {
+                                    "warning": (
+                                        'Название IPIP-интерфейса для команды "Добавить IPIP-интерфейс" указано неверно. '
+                                        "Допустимая длина от 2 до 15"
                                     )
                                 }
                             )
