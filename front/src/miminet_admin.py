@@ -214,9 +214,9 @@ class QuestionView(MiminetAdminModelView):
     }
 
     column_formatters = {
-        "created_by_id": created_by_formatter,
-        "section_id": get_section_name,
-        "question_type": get_question_type,
+        "created_by_id": created_by_formatter,  # type: ignore
+        "section_id": get_section_name,  # type: ignore
+        "question_type": get_question_type,  # type: ignore
         "text": lambda v, c, model, n, **kwargs: Markup.unescape(model.text),
     }
 

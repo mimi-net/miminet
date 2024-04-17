@@ -193,12 +193,12 @@ class QuestionDto:
 
 class SectionDto:
     def __init__(
-            self,
-            section_id: str,
-            section_name: str,
-            timer: str,
-            description: str,
-            question_count: int,
+        self,
+        section_id: str,
+        section_name: str,
+        timer: str,
+        description: str,
+        question_count: int,
     ):
         self.section_id = section_id
         self.section_name = section_name
@@ -209,14 +209,14 @@ class SectionDto:
 
 class TestDto:
     def __init__(
-            self,
-            test_id: str,
-            test_name: str,
-            author_name: str,
-            description: str,
-            is_retakeable: bool,
-            is_ready: bool,
-            section_count: int,
+        self,
+        test_id: str,
+        test_name: str,
+        author_name: str,
+        description: str,
+        is_retakeable: bool,
+        is_ready: bool,
+        section_count: int,
     ):
         self.test_id = test_id
         self.test_name = test_name
@@ -235,13 +235,13 @@ class QuestionForEditorDto:
 
 class SessionResultDto:
     def __init__(
-            self,
-            test_name: str,
-            section_name: str,
-            correct_answers: int,
-            answers_count: int,
-            start_time: str,
-            time_spent: str,
+        self,
+        test_name: str,
+        section_name: str,
+        correct_answers: int,
+        answers_count: int,
+        start_time: str,
+        time_spent: str,
     ):
         self.test_name = test_name
         self.section_name = section_name
