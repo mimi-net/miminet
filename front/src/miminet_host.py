@@ -1078,20 +1078,25 @@ def save_router_config():
                             )
                             return make_response(jsonify(ret), 200)
 
-                        if len(job_105_arg_4) < 2 or len(job_105_arg_4) > 15:
+                        if (
+                            len(job_105_arg_4) < 2
+                            or len(job_105_arg_4) > 15
+                            or "/" in job_105_arg_4
+                            or " " in job_105_arg_4
+                        ):
                             ret.update(
                                 {
                                     "warning": (
                                         'Название IPIP-интерфейса для команды "Добавить IPIP-интерфейс" указано неверно. '
-                                        "Допустимая длина от 2 до 15"
+                                        "Допустимая длина от 2 до 15, название не должно содержать / и пробелов"
                                     )
                                 }
                             )
                             return make_response(jsonify(ret), 200)
 
                         try:
-                            socket.inet_aton(job_105_arg_1)
                             socket.inet_aton(job_105_arg_2)
+                            socket.inet_aton(job_105_arg_3)
                             jnet["jobs"].append(
                                 {
                                     "id": job_id_generator(),
