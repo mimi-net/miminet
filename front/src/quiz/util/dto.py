@@ -17,6 +17,7 @@ def to_section_dto_list(sections: List[Section]):
                 timer=our_section.timer,
                 description=our_section.description,
                 question_count=len(our_section.questions),
+                sessions_count=len(our_section.quiz_sessions),
             ),
             sections,
         )
@@ -199,12 +200,14 @@ class SectionDto:
         timer: str,
         description: str,
         question_count: int,
+        sessions_count: int,
     ):
         self.section_id = section_id
         self.section_name = section_name
         self.timer = timer
         self.description = description
         self.question_count = question_count
+        self.sessions_count = sessions_count
 
 
 class TestDto:

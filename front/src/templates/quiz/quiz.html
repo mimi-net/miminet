@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ test_name }}{% endblock %}
+{% block title %}{{ test_info['test_name'] }}{% endblock %}
 {% block description %}Сетевой тренажер для обучения компьютерным сетям{% endblock %}
 
 
@@ -9,39 +9,45 @@
 
     <section class="container py-5 my-lg-5">
         <div class="align-items-center justify-content-between">
-            <h1 class="me-3"> {{ test_name }}</h1>
+            <h1 class="me-3"> {{ test_info['test_name'] }}</h1>
         </div>
 
         {% for section in sections %}
-            <div class="toast align-items-center text-white bg-primary border-0 my-3" id="alert{{ section.section_id }}"
-                 role="alert"
-                 aria-live="assertive"
-                 aria-atomic="true">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        Данный раздел уже пройден вами
+            <div class="modal" id="alertModal{{ section.section_id }}" tabindex="-1" role="dialog"
+                 aria-labelledby="alertModalLabel"
+                 aria-hidden="true" data-focus-on="input:first">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body"
+                             style="display: flex;flex-direction: row;justify-content: space-between;align-items: baseline;">
+                        <b>Данный раздел уже пройден вами</b>
+                            <button id="alertModalCancelIcon{{ section.section_id }}" type="button"
+                                    class="btn-close" data-dismiss="modal"
+                                    aria-label="Закрыть">
+                            </button>
+                        </div>
                     </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                            aria-label="Закрыть"></button>
                 </div>
             </div>
 
-            <div class="modal" id="testWarningModal" tabindex="-1" role="dialog" aria-labelledby="testWarningModalLabel"
+            <div class="modal" id="testWarningModal{{ section.section_id }}" tabindex="-1" role="dialog"
+                 aria-labelledby="testWarningModalLabel"
                  aria-hidden="true" data-focus-on="input:first">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="testWarningModal">Что делать?</h5>
-                            <button id="testWarningModalCancelIcon" type="button" class="btn-close" data-dismiss="modal"
+                            <button id="testWarningModalCancelIcon{{ section.section_id }}" type="button"
+                                    class="btn-close" data-dismiss="modal"
                                     aria-label="Закрыть"></button>
                         </div>
 
                         <div class="modal-body">
-                            <p>Пройти тест можно только один раз.</p>
+                            <b>Пройти тест можно только один раз.</b>
                             <p>Время на решение ограничено. Вы готовы начать?</p>
                         </div>
                         <div class="modal-footer">
-                            <button id="testWarningModalSubmit" type="button" class="btn btn-primary">Начать
+                            <button id="testWarningModalSubmit{{ section.section_id }}" type="button"
+                                    class="btn btn-primary">Начать
                                 прохождение
                             </button>
                         </div>
@@ -56,10 +62,13 @@
                             <form id="postStartSession"
                                   method="post"
                                   action="{{ url_for('start_session_endpoint', section_id=section.section_id) }}"
-                                  {% if not test_info['is_retakeable'] %}
-                                      data-bs-toggle="modal" data-target="#testWarningModal"
-                                      href="#testWarningModal"
-                                  {% endif %}
+                                    {% if not test_info['is_retakeable'] and section.sessions_count == 0 %}
+                                      data-bs-toggle="modal" data-target="#testWarningModal{{ section.section_id }}"
+                                      href="#testWarningModal{{ section.section_id }}"
+                                    {% elif not test_info['is_retakeable'] and section.sessions_count != 0 %}
+                                      data-bs-toggle="modal" data-target="#alertModal{{ section.section_id }}"
+                                      href="#alertModal{{ section.section_id }}"
+                                    {% endif %}
                                   style="cursor: pointer;"
                             >
                                 <input type="hidden" name="question_index" value="0">
@@ -110,17 +119,22 @@
 
             <script>
                 $(document).ready(function () {
-                    $('#testWarningModalCancelIcon').click(function () {
-                        $('#testWarningModal').modal('hide');
+                    $('#testWarningModalCancelIcon{{ section.section_id }}').click(function () {
+                        $('#testWarningModal{{ section.section_id }}').modal('hide');
                     });
 
-                    $('#testWarningModalSubmit').click(function () {
+                    $('#testWarningModalSubmit{{ section.section_id }}').click(function () {
                         let startSessionElement = document.getElementById('startSession{{ section.section_id }}');
                         if (startSessionElement) {
-                            startSessionElement.addEventListener('click', submitForm);
+                            startSessionElement.addEventListener('click', submitForm, {once: true});
                             startSessionElement.click();
                         }
-                        $('#testWarningModal').modal('hide');
+                        $('#testWarningModal{{ section.section_id }}').modal('hide');
+                    });
+
+                    $('#alertModalCancelIcon{{ section.section_id }}').click(function () {
+                        finishQuiz();
+                        $('#alertModal{{ section.section_id }}').modal('hide');
                     });
                 });
             </script>

@@ -10,25 +10,32 @@ function findParent(element) {
     return element;
 }
 
+function finishQuiz() {
+    const sessionId = sessionStorage.getItem('session_id');
+
+    fetch(finishSessionUrl + '?id=' + sessionId, {
+        method: 'PUT'
+    })
+        .then(response => response.json())
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    const testName = sessionStorage.getItem("test_name");
+    const isRetakeable = sessionStorage.getItem("is_retakeable");
+    sessionStorage.clear()
+    sessionStorage.setItem("test_name", testName);
+    sessionStorage.setItem("is_retakeable", isRetakeable);
+}
+
 function submitForm(event) {
     const form = findParent(event.target);
     const questionIndex = parseInt(form.querySelector('[name="question_index"]').value);
     const sectionName = form.querySelector(`[name="section_name"]`).value
     const timer = form.querySelector(`[name="timer"]`).value
 
-    if (sessionStorage.session_id){
-        const sessionId = sessionStorage.getItem('session_id');
-
-        fetch(finishSessionUrl + '?id=' + sessionId, {
-            method: 'PUT'
-        })
-            .then(response => response.json())
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        const testName = sessionStorage.getItem("test_name");
-        sessionStorage.clear()
-        sessionStorage.setItem("test_name", testName);
+    // Finish old session
+    if (sessionStorage.session_id) {
+        finishQuiz();
     }
 
     fetch(form.action, {
@@ -65,9 +72,8 @@ function submitForm(event) {
         .catch(error => {
             if (error.code === 403) {
                 id = event.target.id.replace(/\D/g, "");
-                $('#alert' + id + '.toast').toast('show');
+                $('#alertModal' + id + '.modal').modal('show');
             }
             console.error('Error:', error);
         });
 }
-
