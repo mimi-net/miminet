@@ -1078,23 +1078,14 @@ def save_router_config():
                             )
                             return make_response(jsonify(ret), 200)
 
-                        if (
-                            len(job_105_arg_4) < 2
-                            or len(job_105_arg_4) > 15
-                            or not all(
-                                "a" <= char <= "z"
-                                or "A" <= char <= "Z"
-                                or "0" <= char <= "9"
-                                or char == "-"
-                                or char == "_"
-                                for char in job_105_arg_4
-                            )
+                        if not bool(
+                            re.match("^[A-Za-z][A-Za-z0-9_-]{1,14}$", job_105_arg_4)
                         ):
                             ret.update(
                                 {
                                     "warning": (
                                         'Название IPIP-интерфейса для команды "Добавить IPIP-интерфейс" указано неверно. '
-                                        "Допустимая длина от 2 до 15, название не должно содержать / и пробелов"
+                                        "Допустимая длина от 2 до 15, допустимые символы: a-z, A-Z, 0-9, -, _."
                                     )
                                 }
                             )
