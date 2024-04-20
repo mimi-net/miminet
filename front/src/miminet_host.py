@@ -1038,7 +1038,7 @@ def save_router_config():
                             "config_router_add_ipip_tunnel_interface_name_field"
                         )
 
-                        if not job_105_arg_1:
+                        if not job_105_arg_1 or job_105_arg_1 == "0":
                             ret.update(
                                 {
                                     "warning": (
@@ -1078,9 +1078,22 @@ def save_router_config():
                             )
                             return make_response(jsonify(ret), 200)
 
+                        if not bool(
+                            re.match("^[A-Za-z][A-Za-z0-9_-]{1,14}$", job_105_arg_4)
+                        ):
+                            ret.update(
+                                {
+                                    "warning": (
+                                        'Название IPIP-интерфейса для команды "Добавить IPIP-интерфейс" указано неверно. '
+                                        "Допустимая длина от 2 до 15, допустимые символы: a-z, A-Z, 0-9, -, _."
+                                    )
+                                }
+                            )
+                            return make_response(jsonify(ret), 200)
+
                         try:
-                            socket.inet_aton(job_105_arg_1)
                             socket.inet_aton(job_105_arg_2)
+                            socket.inet_aton(job_105_arg_3)
                             jnet["jobs"].append(
                                 {
                                     "id": job_id_generator(),
