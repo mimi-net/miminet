@@ -5,7 +5,14 @@ from typing import List
 from markupsafe import Markup
 
 from miminet_model import Network, db
-from quiz.entity.entity import Section, Test, Question, Answer, PracticeQuestion
+from quiz.entity.entity import (
+    Section,
+    Test,
+    Question,
+    Answer,
+    PracticeQuestion,
+    QuizSession,
+)
 
 
 def to_section_dto_list(sections: List[Section]):
@@ -208,6 +215,16 @@ class SectionDto:
         self.description = description
         self.question_count = question_count
         self.sessions_count = sessions_count
+
+        session = (
+            QuizSession.query.filter(QuizSession.section_id == section_id)
+            .order_by(QuizSession.finished_at.desc())
+            .first()
+        )
+        if session:
+            self.last_correct_count = sum(
+                1 for question in session.sessions if question.is_correct
+            )
 
 
 class TestDto:

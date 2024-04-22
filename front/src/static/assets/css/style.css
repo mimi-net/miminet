@@ -181,9 +181,9 @@ label.form-check-label {
 }
 
 .container#explanation {
-    max-width: 400px;
+    max-width: 600px;
     padding: 16px;
-    margin-left: 36px;
+    margin-left: 46px;
 }
 
 .container#explanation text {
@@ -200,3 +200,12 @@ label.form-check-label {
     font-size: 22px;
     margin: 8px 0 8px 0;
 }
+
+p.lastResult {
+    margin-right: 35px;
+    background-color: rgb(99 102 241 / 13%);
+    border-radius: 6px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+

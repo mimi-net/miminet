@@ -28,8 +28,8 @@ function displayMatching(answersParsed) {
     left.sort(() => Math.random() - 0.5);
 
     for (let i = 0; i < left.length; i++) {
-        $('#sortContainer.keys').append(`<div id=${left[i]} class=sortable>${left[i]}</div>`);
-        $('#rightSide.values').append(`<div id=${right[i]} class=matching>${right[i]}</div>`);
+        $('#sortContainer.keys').append(`<div id=${i} class=sortable>${left[i]}</div>`);
+        $('#rightSide.values').append(`<div id=${i} class=matching>${right[i]}</div>`);
     }
 }
 
@@ -44,5 +44,31 @@ function displaySorting(answersParsed) {
     }
 }
 
-// Make divs with id="sortContainer" sortable
-$(() => $('#sortContainer').sortable({placeholder: 'emptySpace'}));
+function synchronizeHeights() {
+    $("div.keys#sortContainer > div.sortable").each(function () {
+        let currentElement = $(this);
+        let index = currentElement.index();
+        let correspondingItem = $("div.values#rightSide").find("div.matching#" + index);
+        if (correspondingItem.length) {
+            currentElement.height('auto');
+            correspondingItem.height('auto');
+            let maxHeight = Math.max(currentElement.height(), correspondingItem.height());
+            correspondingItem.height(maxHeight);
+            currentElement.height(maxHeight);
+        }
+    });
+}
+
+// Make divs with id="sortContainer" sortable, synchronize heights
+$(() => {
+    $('#sortContainer').sortable({
+        placeholder: 'emptySpace',
+        update: function (event, ui) {
+            synchronizeHeights();
+        }
+    });
+
+    synchronizeHeights();
+});
+
+

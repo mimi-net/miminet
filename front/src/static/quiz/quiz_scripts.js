@@ -52,8 +52,8 @@ function submitForm(event) {
             return response.json();
         })
         .then(data => {
-            console.log(data);
-            /*console.log(data.session_question_ids);
+            /*console.log(data);
+            console.log(data.session_question_ids);
             console.log(data.session_question_ids.type);*/
 
             sessionStorage.setItem("section_name", sectionName)
