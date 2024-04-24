@@ -1141,3 +1141,13 @@ const DisableFormInputs = function(){
     let s = config_content_id + ' :input';
     $(s).prop("disabled", true);
 }
+
+const DisableVLANInputs = function(n) {
+    var modalId = 'VlanModal_' + n.data.id;
+
+    $(document).ready(function() {
+        $('#config_button_vlan').prop('disabled', false);
+        $('#' + modalId + ' :input').not('.btn-close').prop('disabled', true);
+        $('#' + modalId + ' .form-check-input, ' + modalId + ' .form-switch input').prop('disabled', true);
+    });
+};  
