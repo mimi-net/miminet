@@ -22,6 +22,8 @@ from miminet_auth import (
     user_profile,
     vk_callback,
     vk_login,
+    yandex_login,
+    yandex_callback,
 )
 from miminet_config import SECRET_KEY, SQLITE_DATABASE_NAME
 from miminet_host import (
@@ -97,8 +99,10 @@ zero_days_ago = (datetime.now()).date().isoformat()
 app.add_url_rule("/auth/login.html", methods=["GET", "POST"], view_func=login_index)
 app.add_url_rule("/auth/google_login", methods=["GET"], view_func=google_login)
 app.add_url_rule("/auth/vk_login", methods=["GET"], view_func=vk_login)
+app.add_url_rule("/auth/yandex_login", methods=["GET"], view_func=yandex_login)
 app.add_url_rule("/auth/vk_callback", methods=["GET"], view_func=vk_callback)
 app.add_url_rule("/auth/google_callback", methods=["GET"], view_func=google_callback)
+app.add_url_rule("/auth/yandex_callback", methods=["GET"], view_func=yandex_callback)
 app.add_url_rule("/user/profile.html", methods=["GET", "POST"], view_func=user_profile)
 app.add_url_rule("/auth/logout", methods=["GET"], view_func=logout)
 
@@ -259,6 +263,8 @@ def sitemap():
         "/auth/google_login",
         "/auth/google_callback",
         "/auth/vk_callback",
+        "/auth/yandex_login",
+        "/auth/yandex_callback",
         "/auth/logout",
         "/run_simulation",
         "/check_simulation",
