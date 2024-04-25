@@ -1,4 +1,4 @@
-name: Yandex authentication and Miminet authorization tests
+name: Yandex and Telegram authentication and Miminet authorization tests
 
 on: [push, pull_request]
   
@@ -23,3 +23,4 @@ jobs:
         python -m pytest -vv .
       env:
           CLIENT_YANDEX: ${{ secrets.CLIENT_YANDEX }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
