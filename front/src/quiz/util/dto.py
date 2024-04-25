@@ -2,8 +2,17 @@ import random
 import uuid
 from typing import List
 
+from markupsafe import Markup
+
 from miminet_model import Network, db
-from quiz.entity.entity import Section, Test, Question, Answer, PracticeQuestion
+from quiz.entity.entity import (
+    Section,
+    Test,
+    Question,
+    Answer,
+    PracticeQuestion,
+    QuizSession,
+)
 
 
 def to_section_dto_list(sections: List[Section]):
@@ -15,6 +24,7 @@ def to_section_dto_list(sections: List[Section]):
                 timer=our_section.timer,
                 description=our_section.description,
                 question_count=len(our_section.questions),
+                sessions_count=len(our_section.quiz_sessions),
             ),
             sections,
         )
@@ -139,7 +149,7 @@ def get_question_type(question_type: int):
 class QuestionDto:
     def __init__(self, user_id, question: Question) -> None:
         self.question_type = get_question_type(question.question_type)
-        self.question_text = question.text
+        self.question_text = Markup.unescape(question.text)
         self.correct_count = 0
 
         if self.question_type == "practice":
@@ -197,12 +207,24 @@ class SectionDto:
         timer: str,
         description: str,
         question_count: int,
+        sessions_count: int,
     ):
         self.section_id = section_id
         self.section_name = section_name
         self.timer = timer
         self.description = description
         self.question_count = question_count
+        self.sessions_count = sessions_count
+
+        session = (
+            QuizSession.query.filter(QuizSession.section_id == section_id)
+            .order_by(QuizSession.finished_at.desc())
+            .first()
+        )
+        if session:
+            self.last_correct_count = sum(
+                1 for question in session.sessions if question.is_correct
+            )
 
 
 class TestDto:

@@ -141,6 +141,7 @@ div.keys#sortContainer {
     flex-shrink: 1;
     flex-grow: 1;
     flex-basis: 50%;
+    cursor: grab;
 }
 
 div.values#rightSide {
@@ -149,6 +150,7 @@ div.values#rightSide {
     flex-basis: 50%;
 }
 
+div.practice-question-text,
 div.sortable,
 div.matching {
     background-color: rgba(255, 255, 255, 0.7);
@@ -167,7 +169,9 @@ div.matching {
 }
 
 div.form-check {
+    line-height: normal;
     margin-left: 8px;
+    margin-bottom: 8px;
 }
 
 label.form-check-label {
@@ -177,13 +181,9 @@ label.form-check-label {
 }
 
 .container#explanation {
-    box-sizing: content-box;
-    max-width: 400px;
-    min-height: 85px;
+    max-width: 600px;
     padding: 16px;
-    margin-left: 36px;
-    border: 2px solid;
-    border-radius: 6px;
+    margin-left: 46px;
 }
 
 .container#explanation text {
@@ -200,3 +200,12 @@ label.form-check-label {
     font-size: 22px;
     margin: 8px 0 8px 0;
 }
+
+p.lastResult {
+    margin-right: 35px;
+    background-color: rgb(99 102 241 / 13%);
+    border-radius: 6px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
