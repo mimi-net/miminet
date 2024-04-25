@@ -3,6 +3,9 @@ import logging
 import os
 import pathlib
 import uuid
+import time
+import hmac
+import hashlib
 
 import google.auth.transport.requests
 import requests
@@ -65,6 +68,12 @@ yandex_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_yandex
 if os.path.exists(yandex_secrets_file):
     with open(yandex_secrets_file, "r") as file:
         yandex_json = json.loads(file.read())
+
+tg_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_tg.json")
+
+if os.path.exists(tg_secrets_file):
+    with open(tg_secrets_file, "r") as file:
+        tg_json = json.loads(file.read())
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("miminet_auth")
@@ -416,3 +425,69 @@ def yandex_callback():
         logger.error('Token expired: %s', e)
         flash("Token expired. Please log in again.", category="error")
         return redirect(url_for("login_index")) 
+
+def check_tg_authorization(auth_data):
+    BOT_TOKEN = tg_json["token"]["BOT_TOKEN"]
+    check_hash = auth_data["hash"]
+    del auth_data["hash"]
+
+    data_check_arr = [f"{key}={value}" for key, value in auth_data.items()]
+    data_check_arr.sort()
+
+    data_check_string = "\n".join(data_check_arr)
+
+    secret_key = hashlib.sha256(BOT_TOKEN.encode()).digest()
+    hash_result = hmac.new(
+        secret_key, data_check_string.encode(), hashlib.sha256
+    ).hexdigest()
+
+    if hash_result != check_hash:
+        raise Exception("Data is NOT from Telegram")
+
+    if (time.time() - int(auth_data["auth_date"])) > 86400:
+        raise Exception("Data is outdated")
+
+    return auth_data
+
+def tg_callback():
+    user_json = request.args.get("user")
+
+    if not user_json:
+        flash("Invalid Telegram user data", category="error")
+        return redirect(url_for("login_index"))
+
+    user_data = json.loads(user_json)
+    try:
+        check_tg_authorization(user_data)
+    except Exception as e:
+        logger.error('Error while processing Telegram callback: %s', e)
+        flash(str(e), category="error")
+        return redirect(url_for("login_index"))
+
+    telegram_user_id = str(user_data.get("id", ""))
+
+    user = User.query.filter(
+        (User.tg_id == telegram_user_id) | (User.email == user_data.get("username", ""))).first()
+
+    if user is None:
+        try:
+            new_user = User(
+                nick=user_data.get("last_name", "") + user_data.get("first_name", ""),
+                tg_id=telegram_user_id,
+                email=user_data.get("username", ""),
+            )
+            db.session.add(new_user)
+            db.session.commit()
+
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            error = str(e.__dict__["orig"])
+            logger.error('Error while adding new Telegram user: %s', e)
+            flash(error, category="error")
+            return redirect(url_for("login_index"))
+
+        user = User.query.filter((User.tg_id == telegram_user_id)
+                | (User.email == user_data.get("username", ""))).first()
+
+    login_user(user, remember=True)
+    return redirect_next_url(fallback=url_for("home"))

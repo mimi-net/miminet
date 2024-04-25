@@ -83,6 +83,7 @@ fabric.properties
 # Do not track configs
 client_google.json
 сlient_yandex.json
+client_tg.json
 miminet_secret.conf
 simulation.py
 migrations/
