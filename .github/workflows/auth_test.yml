@@ -1,0 +1,26 @@
+name: Yandex and Telegram authentication and Miminet authorization tests
+
+on: [push, pull_request]
+  
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    environment: test_env
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Installing dependencies
+      run: |
+        sudo apt-get update
+        pip install -r front/requirements.txt
+
+    - name: Running tests
+      run: |
+        cd front/src
+        pip install pytest pytest_mock
+        python -m pytest -vv .
+      env:
+          CLIENT_YANDEX: ${{ secrets.CLIENT_YANDEX }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
