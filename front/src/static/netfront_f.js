@@ -295,6 +295,7 @@ const ShowSwitchConfig = function(n, shared = 0){
 
     if (shared){
         DisableFormInputs();
+        DisableVLANInputs(n);
     }
 }
 
