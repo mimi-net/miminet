@@ -311,4 +311,13 @@ class AnswerView(MiminetAdminModelView):
         model.question_id = str(model.question_id).removeprefix("<Question ")
         model.question_id = str(model.question_id).removesuffix(">")
 
+        if model.variant:
+            model.variant = Markup.escape(Markup.unescape(model.variant))
+
+        if model.left:
+            model.left = Markup.escape(Markup.unescape(model.left))
+
+        if model.right:
+            model.right = Markup.escape(Markup.unescape(model.right))
+
     pass

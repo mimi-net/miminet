@@ -1,5 +1,7 @@
 import json
 
+from markupsafe import Markup
+
 from miminet_model import User, db
 from quiz.entity.entity import (
     SessionQuestion,
@@ -109,7 +111,7 @@ def answer_on_session_question(
         for check in answers:
             answer = Answer.query.filter_by(
                 question_id=question.id,
-                variant=check["variant"],
+                variant=Markup.escape(check["variant"]),
             ).first()
             if not answer or not answer.is_correct:
                 is_correct = False
