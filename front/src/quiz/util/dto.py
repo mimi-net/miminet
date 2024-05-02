@@ -2,6 +2,7 @@ import random
 import uuid
 from typing import List
 
+from flask_login import current_user
 from markupsafe import Markup
 
 from miminet_model import Network, db
@@ -19,7 +20,6 @@ def to_section_dto_list(sections: List[Section]):
     dto_list: List[SectionDto] = list(
         map(
             lambda our_section: SectionDto(
-                user_id=our_section.created_by_id,
                 section_id=our_section.id,
                 section_name=our_section.name,
                 timer=our_section.timer,
@@ -203,7 +203,6 @@ class QuestionDto:
 class SectionDto:
     def __init__(
         self,
-        user_id,
         section_id: str,
         section_name: str,
         timer: str,
@@ -219,7 +218,7 @@ class SectionDto:
         self.sessions_count = sessions_count
 
         session = (
-            QuizSession.query.filter(QuizSession.created_by_id == user_id)
+            QuizSession.query.filter(QuizSession.created_by_id == current_user.id)
             .filter(QuizSession.section_id == section_id)
             .order_by(QuizSession.finished_at.desc())
             .first()
