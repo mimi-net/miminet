@@ -25,7 +25,6 @@ def to_section_dto_list(sections: List[Section]):
                 timer=our_section.timer,
                 description=our_section.description,
                 question_count=len(our_section.questions),
-                sessions_count=len(our_section.quiz_sessions),
             ),
             sections,
         )
@@ -208,21 +207,20 @@ class SectionDto:
         timer: str,
         description: str,
         question_count: int,
-        sessions_count: int,
     ):
         self.section_id = section_id
         self.section_name = section_name
         self.timer = timer
         self.description = description
         self.question_count = question_count
-        self.sessions_count = sessions_count
 
-        session = (
-            QuizSession.query.filter(QuizSession.created_by_id == current_user.id)
-            .filter(QuizSession.section_id == section_id)
-            .order_by(QuizSession.finished_at.desc())
-            .first()
-        )
+        current_user_sessions = QuizSession.query.filter(
+            QuizSession.created_by_id == current_user.id
+        ).filter(QuizSession.section_id == section_id)
+
+        self.sessions_count = current_user_sessions.count()
+
+        session = current_user_sessions.order_by(QuizSession.finished_at.desc()).first()
         if session:
             self.last_correct_count = sum(
                 1 for question in session.sessions if question.is_correct

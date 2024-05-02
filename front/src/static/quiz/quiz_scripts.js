@@ -12,6 +12,9 @@ function findParent(element) {
 
 function finishQuiz() {
     const sessionId = sessionStorage.getItem('session_id');
+    if (!sessionId) {
+        return;
+    }
 
     fetch(finishSessionUrl + '?id=' + sessionId, {
         method: 'PUT'
