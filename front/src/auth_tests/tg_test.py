@@ -181,7 +181,7 @@ def test_tg_callback_handles_user_not_added_to_db_error(app, mocker):
         with pytest.raises(Exception) as exc_info:
             response = tg_callback()
             mock_logger.assert_called_with(
-                "Error while adding new Yandex user: %s", str(exc_info.value)
+                "Error while adding new Telegram user: %s", str(exc_info.value)
             )
             mock_flash.assert_called_with(str(exc_info.value), category="error")
             assert response.status_code == 500

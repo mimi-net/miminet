@@ -372,8 +372,6 @@ def yandex_login(yandex_json=yandex_json):
         redirect_uri=yandex_json["web"]["redirect_uris"][0],
     )
 
-    yandex_session.redirect_uri = url_for("yandex_callback", _external=True)
-
     authorization_url, state = yandex_session.authorization_url(
         yandex_json["web"]["auth_uri"], access_type="offline", prompt="consent"
     )
