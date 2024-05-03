@@ -7,9 +7,9 @@ from app import db
 @pytest.fixture()
 def app():
     app = flask_app
-    app.config['TESTING'] = True
-    app.config['LOGIN_DISABLED'] = True
-    app.config['WTF_CSRF_ENABLED'] = False
+    app.config["TESTING"] = True
+    app.config["LOGIN_DISABLED"] = True
+    app.config["WTF_CSRF_ENABLED"] = False
 
     with app.app_context():
         db.create_all()
@@ -24,7 +24,7 @@ def client(app):
 
 # Check unauthenticated user quiz page access
 def test_unauthenticated_page_access(client, app):
-    app.config['LOGIN_DISABLED'] = False
+    app.config["LOGIN_DISABLED"] = False
     response = client.get("/quiz/test/all", follow_redirects=True)
     assert len(response.history) == 1
     assert response.request.path == "/auth/login.html"

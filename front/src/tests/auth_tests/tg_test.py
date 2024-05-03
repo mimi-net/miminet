@@ -1,12 +1,14 @@
-import os
-import json
-import time
 import hashlib
 import hmac
+import json
+import os
+import time
+
 import pytest
 from flask import Flask, url_for
-from miminet_auth import check_tg_authorization, tg_callback, login_index, db
 from sqlalchemy.exc import SQLAlchemyError
+
+from miminet_auth import check_tg_authorization, tg_callback, login_index, db
 
 
 @pytest.fixture

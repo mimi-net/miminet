@@ -1,10 +1,12 @@
-import os
 import json
+import os
+
 import pytest
 from flask import Flask, session, url_for
-from miminet_auth import yandex_login, yandex_callback, login_index, db
-from sqlalchemy.exc import SQLAlchemyError
 from oauthlib.oauth2 import TokenExpiredError
+from sqlalchemy.exc import SQLAlchemyError
+
+from miminet_auth import yandex_login, yandex_callback, login_index, db
 
 
 @pytest.fixture

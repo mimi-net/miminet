@@ -16,16 +16,21 @@ jobs:
         sudo apt-get update
         pip install -r front/requirements.txt
 
+    - name: Running quiz tests
+      run: |
+        cd front/src
+        export PYTHONPATH="$PYTHONPATH:$(pwd)"
+        cd tests/quiz_tests
+        pip install pytest 
+        python -m pytest -vv .
+
     - name: Running auth tests
       run: |
-        cd front/src/tests/auth_tests
+        cd front/src
+        export PYTHONPATH="$PYTHONPATH:$(pwd)"
+        cd tests/auth_tests
         pip install pytest pytest_mock
         python -m pytest -vv .
       env:
           CLIENT_YANDEX: ${{ secrets.CLIENT_YANDEX }}
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-
-    - name: Running quiz tests
-      run: |
-        cd front/src/tests/quiz_tests
-        python -m pytest -vv .
