@@ -22,12 +22,22 @@ def client(app):
     return app.test_client()
 
 
-# Check unauthenticated user quiz page access
-def test_unauthenticated_page_access(client, app):
+def get_method_cases(app):
+    rules = app.url_map.iter_rules()
+
+    filtered_rules = [rule.rule for rule in rules if rule.rule.startswith("/quiz") and 'GET' in rule.methods]
+    filtered_rules.append("/admin/")
+
+    return filtered_rules
+
+
+def test_unauthenticated_pages_access(client, app):
+    quiz_routes = get_method_cases(app)
     app.config["LOGIN_DISABLED"] = False
-    response = client.get("/quiz/test/all", follow_redirects=True)
-    assert len(response.history) == 1
-    assert response.request.path == "/auth/login.html"
+    for route in quiz_routes:
+        response = client.get(route, follow_redirects=True)
+        assert len(response.history) == 1
+        assert response.request.path == "/auth/login.html"
 
 
 # Check authenticated user quiz page access
