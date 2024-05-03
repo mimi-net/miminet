@@ -37,7 +37,7 @@ function submitForm(event) {
     const timer = form.querySelector(`[name="timer"]`).value
 
     // Finish old session
-    if (sessionStorage.session_id) {
+    if (sessionStorage.getItem("session_id")) {
         finishQuiz();
     }
 
