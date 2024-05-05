@@ -25,7 +25,11 @@ def client(app):
 def get_method_cases(app):
     rules = app.url_map.iter_rules()
 
-    filtered_rules = [rule.rule for rule in rules if rule.rule.startswith("/quiz") and 'GET' in rule.methods]
+    filtered_rules = [
+        rule.rule
+        for rule in rules
+        if rule.rule.startswith("/quiz") and "GET" in rule.methods
+    ]
     filtered_rules.append("/admin/")
 
     return filtered_rules
