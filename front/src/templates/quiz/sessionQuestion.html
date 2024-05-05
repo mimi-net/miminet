@@ -2,11 +2,11 @@
 {% block title %}{% endblock %}
 {% block description %}Сетевой тренажер для обучения компьютерным сетям{% endblock %}
 
-{% if question.question_type == "practice" %}
+{#{% if question.question_type == "practice" %}
     {% include "quiz/practiceTask.html" %}
 {% else %}
     {% include "quiz/textTask.html" %}
-{% endif %}
+{% endif %}#}
 
 {% block content %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
@@ -15,6 +15,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
 
     <script>hljs.highlightAll();</script>
+
+    {% if question.question_type == "practice" %}
+        {% include "quiz/practiceTask.html" %}
+    {% else %}
+        {% include "quiz/textTask.html" %}
+    {% endif %}
 
     <script src="/quiz/session_scripts.js"></script>
     <script>
