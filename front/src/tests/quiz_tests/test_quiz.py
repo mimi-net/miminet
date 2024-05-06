@@ -4,6 +4,7 @@ from app import app as flask_app
 from app import db
 
 
+# Config app
 @pytest.fixture()
 def app():
     app = flask_app
@@ -22,8 +23,9 @@ def client(app):
     return app.test_client()
 
 
-def get_method_cases(app):
-    rules = app.url_map.iter_rules()
+# Getting all quiz rules with GET method from flask_app
+def get_method_cases():
+    rules = flask_app.url_map.iter_rules()
 
     filtered_rules = [
         rule.rule
@@ -35,13 +37,18 @@ def get_method_cases(app):
     return filtered_rules
 
 
-def test_unauthenticated_pages_access(client, app):
-    quiz_routes = get_method_cases(app)
+# Fixture to pass test cases --- routes
+@pytest.fixture(params=get_method_cases())
+def routes(request):
+    return request.param
+
+
+# Check unauthenticated user page access
+def test_unauthenticated_pages_access(client, app, routes):
     app.config["LOGIN_DISABLED"] = False
-    for route in quiz_routes:
-        response = client.get(route, follow_redirects=True)
-        assert len(response.history) == 1
-        assert response.request.path == "/auth/login.html"
+    response = client.get(routes, follow_redirects=True)
+    assert len(response.history) == 1
+    assert response.request.path == "/auth/login.html"
 
 
 # Check authenticated user quiz page access
