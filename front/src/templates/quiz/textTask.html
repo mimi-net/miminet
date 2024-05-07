@@ -1,73 +1,71 @@
-{% block content %}
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-    <script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/jquery-ui.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/jquery-ui.min.js"></script>
 
-    <section class="container"
-             style="display: flex;flex-direction: column; max-width: 1000px; margin-top: 48px; padding-top: 48px">
-        <div style="display: flex;flex-direction: row; padding: 0 24px 0 34px">
+<section class="container"
+         style="display: flex;flex-direction: column; max-width: 1000px; margin-top: 48px; padding-top: 48px">
+    <div style="display: flex;flex-direction: row; padding: 0 24px 0 34px">
+        <div class="row align-items-baseline"
+             style=" flex: 5; display: flex;flex-direction: column;justify-content: space-evenly;">
+
+            {# Timer, questions counter #}
             <div class="row align-items-baseline"
-                 style=" flex: 5; display: flex;flex-direction: column;justify-content: space-evenly;">
-
-                {# Timer, questions counter #}
-                <div class="row align-items-baseline"
-                     style="margin: 8px 0 0 0; font-size: 24px; opacity: 85%; display: flex;">
-                    <div class="col-auto">
-                        <p id="counter"></p>
-                    </div>
-                    <div class="col-auto text-center">
-                        <span id="timer">00:00:00</span>
-                    </div>
+                 style="margin: 8px 0 0 0; font-size: 24px; opacity: 85%; display: flex;">
+                <div class="col-auto">
+                    <p id="counter"></p>
                 </div>
-            </div>
-
-
-            {# finishQuiz button #}
-            <div class="col-auto ms-auto"
-                 style="flex: 1;display: flex;justify-content: flex-end;align-items: flex-end;margin: 8px 0 8px 0; font-size: 24px; opacity: 85%">
-                <button name="finishQuiz" aria-label="Завершить тест" class="btn btn-outline-danger btn-icon"
-                        data-toggle="tooltip" data-bs-placement="right" title="Завершить тест">
-                    <i class="bx bx-x fs-4 mx-1"></i>
-                </button>
+                <div class="col-auto text-center">
+                    <span id="timer">00:00:00</span>
+                </div>
             </div>
         </div>
 
 
-        <article class="container card border-0 shadow-sm" style="padding: 12px 40px 12px 18px">
-            {#  Question text #}
-            <div class="card-body p-1" style="margin-right: 40px">
-                <div class="text-black m-0 px-4 py-3" id="question_text"
-                     style="font-size: 24px">{{ question.question_text }}</div>
+        {# finishQuiz button #}
+        <div class="col-auto ms-auto"
+             style="flex: 1;display: flex;justify-content: flex-end;align-items: flex-end;margin: 8px 0 8px 0; font-size: 24px; opacity: 85%">
+            <button name="finishQuiz" aria-label="Завершить тест" class="btn btn-outline-danger btn-icon"
+                    data-toggle="tooltip" data-bs-placement="right" title="Завершить тест">
+                <i class="bx bx-x fs-4 mx-1"></i>
+            </button>
+        </div>
+    </div>
 
-                {# Divider #}
-                <div class="border border-1 border-success-subtle"></div>
 
-                {# Answer area #}
-                {% if question.question_type != "practice" %}
-                    <div class="container m-3" id="variants"></div>
-                {% endif %}
-            </div>
+    <article class="container card border-0 shadow-sm" style="padding: 12px 40px 12px 18px">
+        {#  Question text #}
+        <div class="card-body p-1 noselect" style="margin-right: 40px">
+            <div class="text-black m-0 px-4 py-3" id="question_text"
+                 style="font-size: 24px">{{ question.question_text }}</div>
 
-            {# Control buttons#}
-            <div class="card-body d-flex justify-content-left pt-0 pb-1" style="margin-left: 12px">
-                <button name="answerQuestion" class="btn btn-primary">Ответить</button>
-                <button name="nextQuestion" class="btn" hidden></button>
-                <button name="seeResults" class="btn" hidden></button>
-            </div>
+            {# Divider #}
+            <div class="border border-1 border-success-subtle"></div>
 
-            <div class="container" id="explanation" hidden></div>
-        </article>
-    </section>
+            {# Answer area #}
+            {% if question.question_type != "practice" %}
+                <div class="container m-3" id="variants"></div>
+            {% endif %}
+        </div>
 
-    <script src="/quiz/text_question_scripts.js"></script>
-    <script>
-        const displayFunctions = {
-            'variable': displayVariable,
-            'matching': displayMatching,
-            'sorting': displaySorting
-        };
-        const answers = '{{ question.answers | replace("'", '"') | safe }}';
-        const correctCount = '{{ question.correct_count }}';
-        const textType = '{{ question.question_type }}';
-        displayFunctions[textType](JSON.parse(answers));
-    </script>
-{% endblock %}
+        {# Control buttons#}
+        <div class="card-body d-flex justify-content-left pt-0 pb-1" style="margin-left: 12px">
+            <button name="answerQuestion" class="btn btn-primary">Ответить</button>
+            <button name="nextQuestion" class="btn" hidden></button>
+            <button name="seeResults" class="btn" hidden></button>
+        </div>
+
+        <div class="container" id="explanation" hidden></div>
+    </article>
+</section>
+
+<script src="/quiz/text_question_scripts.js"></script>
+<script>
+    const displayFunctions = {
+        'variable': displayVariable,
+        'matching': displayMatching,
+        'sorting': displaySorting
+    };
+    const answers = '{{ question.answers | replace("'", '"') | safe }}';
+    const correctCount = '{{ question.correct_count }}';
+    const textType = '{{ question.question_type }}';
+    displayFunctions[textType](JSON.parse(answers));
+</script>
