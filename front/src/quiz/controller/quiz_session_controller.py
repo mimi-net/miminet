@@ -7,7 +7,7 @@ from quiz.facade.quiz_session_facade import (
     start_session,
     finish_session,
     session_result,
-    get_results_by_user,
+    get_result_by_session_guid,
 )
 from quiz.service.session_question_service import (
     answer_on_session_question,
@@ -63,6 +63,6 @@ def session_result_endpoint():
 
 
 @login_required
-def get_results_by_user_endpoint():
-    res = get_results_by_user(current_user)
+def get_result_by_session_guid_endpoint():
+    res = get_result_by_session_guid(request.args["guid"])
     return make_response(json.dumps([obj.__dict__ for obj in res], default=str), 200)

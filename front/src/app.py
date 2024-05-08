@@ -61,7 +61,7 @@ from quiz.controller.quiz_session_controller import (
     finish_session_endpoint,
     answer_on_session_question_endpoint,
     session_result_endpoint,
-    get_results_by_user_endpoint,
+    get_result_by_session_guid_endpoint,
 )
 from quiz.controller.section_controller import (
     get_sections_by_test_endpoint,
@@ -196,7 +196,9 @@ app.add_url_rule(
     "/quiz/session/result", methods=["GET"], view_func=session_result_endpoint
 )
 app.add_url_rule(
-    "/quiz/session/results", methods=["GET"], view_func=get_results_by_user_endpoint
+    "/quiz/user/session/result",
+    methods=["GET"],
+    view_func=get_result_by_session_guid_endpoint,
 )
 
 # Init Flask-admin
