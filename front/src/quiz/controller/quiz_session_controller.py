@@ -59,10 +59,16 @@ def finish_session_endpoint():
 def session_result_endpoint():
     res = session_result(request.args["id"])
     ret = {"time_spent": res[2], "correct_answers": res[0], "answer_count": res[1]}
-    return make_response(render_template("quiz/sessionResult.html", data=ret), res[3])
+    return make_response(
+        render_template("quiz/userSessionResult.html", data=ret), res[3]
+    )
 
 
-@login_required
 def get_result_by_session_guid_endpoint():
     res = get_result_by_session_guid(request.args["guid"])
-    return make_response(json.dumps([obj.__dict__ for obj in res], default=str), 200)
+    return make_response(
+        render_template(
+            "quiz/sessionResult.html", data=res[0].to_dict(), questions_result=res[1]
+        ),
+        res[2],
+    )
