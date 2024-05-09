@@ -209,6 +209,12 @@ p.lastResult {
     padding-right: 5px;
 }
 
+a.lastResult {
+    margin-right: 35px;
+    border-radius: 6px;
+    padding: 5px;
+}
+
 .noselect {
   -webkit-touch-callout: none;
     -webkit-user-select: none;

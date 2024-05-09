@@ -225,6 +225,7 @@ class SectionDto:
             self.last_correct_count = sum(
                 1 for question in session.sessions if question.is_correct
             )
+            self.session_guid = session.guid
 
 
 class TestDto:

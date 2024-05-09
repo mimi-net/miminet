@@ -3,10 +3,11 @@
 {% block description %}Сетевой тренажер для обучения компьютерным сетям{% endblock %}
 
 {% block content %}
-    <section class="container" style="margin-top: 48px; padding-top: 48px">
+    <section class="container"
+             style="max-width: 1000px;margin-top: 48px;padding-top: 24px;display: flex;align-items: center;justify-content: center;flex-direction: column;">
         {# Time spent, correct questions counter #}
-        <div class="row align-items-baseline justify-content-center"
-             style="margin: 8px 0 0 0; font-size: 24px; opacity: 85%; display: flex;">
+        <div class="row"
+             style="margin-top: 8px; font-size: 24px; opacity: 85%;">
             <div class="col-auto">
                 <p id="counter">{{ data['correct_answers'] }}/{{ data['answers_count'] }}</p>
             </div>
@@ -14,41 +15,26 @@
                 <span id="timer">{{ data['time_spent'] }}</span>
             </div>
         </div>
+
+        {% for question in questions_result %}
+            <article
+                    class="container card shadow-sm
+                        {% if question.is_correct == 'True' %}
+                            border-success
+                        {% else %}
+                            border-danger
+                        {% endif %}"
+                    style="padding: 12px 18px 12px 18px; margin: 12px 0 12px 0; border: 1px solid">
+                {#  Question text #}
+                <div class="card-body p-1 noselect" style="margin-right: 40px">
+                    <div class="text-black m-0 px-2 py-3 text-center" id="question_text"
+                         style="font-size: 24px">{{ question.question_text | safe }}</div>
+                </div>
+            </article>
+        {% endfor %}
     </section>
 
-    {% for question in questions_result %}
-        <div>
-            "{{ question.question_text }}"
-        </div>
-        {#<article class="container card border-0 shadow-sm" style="padding: 12px 40px 12px 18px">
-              Question text
-            <div class="card-body p-1 noselect" style="margin-right: 40px">
-                <div class="text-black m-0 px-4 py-3" id="question_text"
-                     style="font-size: 24px">{{  }}</div>
-
-                 Divider
-                <div class="border border-1 border-success-subtle"></div>
-
-                 Answer area
-                {% if question.question_type != "practice" %}
-                    <div class="container m-3" id="variants"></div>
-                {% endif %}
-            </div>
-
-             Control buttons
-            <div class="card-body d-flex justify-content-left pt-0 pb-1" style="margin-left: 12px">
-                <button name="answerQuestion" class="btn btn-primary">Ответить</button>
-                <button name="nextQuestion" class="btn" hidden></button>
-                <button name="seeResults" class="btn" hidden></button>
-            </div>
-
-            <div class="container" id="explanation" hidden></div>
-        </article>#}
-    {% endfor %}
-
     <script>
-        console.log({{ data | safe }});
-
         document.getElementById("test_name").innerHTML = '{{ data['test_name'] }}';
         document.getElementById("slash_symbol").innerHTML = '{{ data['section_name'] }}' ? " / " : "";
         document.getElementById("section_name").innerHTML = '{{ data['section_name'] }}';
