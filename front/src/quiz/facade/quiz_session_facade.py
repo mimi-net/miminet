@@ -66,23 +66,28 @@ def session_result(quiz_session_id: str):
     return correct, question_count, time_spent, 200
 
 
-def get_results_by_user(user: User):
-    quiz_sessions = (
-        QuizSession.query.filter_by(created_by_id=user.id)
-        .order_by(QuizSession.created_on.desc())
-        .all()
+def get_result_by_session_guid(session_guid: str):
+    quiz_session = QuizSession.query.filter_by(guid=session_guid).first()
+    result = session_result(quiz_session.id)
+
+    session_data = SessionResultDto(
+        quiz_session.section.test.name,
+        quiz_session.section.name,
+        result[0],
+        result[1],
+        quiz_session.created_on.strftime("%m/%d/%Y, %H:%M:%S"),
+        str(result[2]),
     )
-    dto_list = []
-    for quiz_session in quiz_sessions:
-        result = session_result(quiz_session.id)
-        dto_list.append(
-            SessionResultDto(
-                quiz_session.section.test.name,
-                quiz_session.section.name,
-                result[0],
-                result[1],
-                quiz_session.created_on.strftime("%m/%d/%Y, %H:%M:%S"),
-                str(result[2]),
-            )
-        )
-    return dto_list
+
+    session_questions = SessionQuestion.query.filter_by(
+        quiz_session_id=quiz_session.id
+    ).all()
+    questions_result = [
+        {
+            "question_text": question.question.text,
+            "is_correct": str(question.is_correct),
+        }
+        for question in session_questions
+    ]
+
+    return session_data, questions_result, 200

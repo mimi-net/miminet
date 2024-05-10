@@ -225,6 +225,7 @@ class SectionDto:
             self.last_correct_count = sum(
                 1 for question in session.sessions if question.is_correct
             )
+            self.session_guid = session.guid
 
 
 class TestDto:
@@ -269,3 +270,15 @@ class SessionResultDto:
         self.answers_count = answers_count
         self.start_time = start_time
         self.time_spent = time_spent
+
+    def to_dict(self):
+        attributes = [
+            "test_name",
+            "section_name",
+            "correct_answers",
+            "answers_count",
+            "start_time",
+            "time_spent",
+        ]
+
+        return {attribute: str(getattr(self, attribute)) for attribute in attributes}
