@@ -96,7 +96,7 @@
                     <div class="col-sm-4" style="display: flex;flex-direction: row-reverse;">
                         <div class="card-body d-flex flex-column" style="row-gap: 4px;max-width: max-content;">
 
-                            {% if section.session_guid and section.last_correct_count %}
+                            {% if section.session_guid is defined and section.last_correct_count is defined %}
                                 {# Button for last result #}
                                 <a class="btn btn-outline-primary lastResult" id="{{ section.section_id }}link"
                                    data-bs-toggle="tooltip" title="Посмотреть последний результат"
@@ -104,7 +104,7 @@
                                    style="text-align: right;">
                                     {{ section.last_correct_count }}/{{ section.question_count }} верно
                                 </a>
-                            {% elif section.last_correct_count %}
+                            {% elif section.last_correct_count is defined %}
                                 {# Last result just text #}
                                 <p class="lastResult" id="{{ section.section_id }}text">
                                     {{ section.last_correct_count }}/{{ section.question_count }} верно
