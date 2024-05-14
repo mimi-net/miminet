@@ -4,8 +4,8 @@
 
 
 {% block content %}
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-    <script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/jquery-ui.min.js"></script>
+    <script src="{{ url_for('static', filename='/js/jquery-3.6.0.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='/js/jquery-ui.min.js') }}"></script>
 
     <section class="container py-5 my-lg-5">
         <div class="align-items-center justify-content-between">
