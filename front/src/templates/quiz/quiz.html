@@ -21,7 +21,7 @@
                     <div class="modal-content">
                         <div class="modal-body"
                              style="display: flex;flex-direction: row;justify-content: space-between;align-items: baseline;">
-                        <b>Данный раздел уже пройден вами</b>
+                            <b>Данный раздел уже пройден вами</b>
                             <button id="alertModalCancelIcon{{ section.section_id }}" type="button"
                                     class="btn-close" data-dismiss="modal"
                                     aria-label="Закрыть">
@@ -66,11 +66,11 @@
                                   method="post"
                                   action="{{ url_for('start_session_endpoint', section_id=section.section_id) }}"
                                     {% if not test_info['is_retakeable'] and section.sessions_count == 0 %}
-                                      data-bs-toggle="modal" data-target="#testWarningModal{{ section.section_id }}"
-                                      href="#testWarningModal{{ section.section_id }}"
+                                  data-bs-toggle="modal" data-target="#testWarningModal{{ section.section_id }}"
+                                  href="#testWarningModal{{ section.section_id }}"
                                     {% elif not test_info['is_retakeable'] and section.sessions_count != 0 %}
-                                      data-bs-toggle="modal" data-target="#alertModal{{ section.section_id }}"
-                                      href="#alertModal{{ section.section_id }}"
+                                  data-bs-toggle="modal" data-target="#alertModal{{ section.section_id }}"
+                                  href="#alertModal{{ section.section_id }}"
                                     {% endif %}
                                   style="cursor: pointer;"
                             >
@@ -95,8 +95,25 @@
                     {# Questions and time count #}
                     <div class="col-sm-4" style="display: flex;flex-direction: row-reverse;">
                         <div class="card-body d-flex flex-column" style="row-gap: 4px;max-width: max-content;">
-                            <p id="{{ section.section_id }}question"
-                               style="text-align: right;"></p>
+
+                            {% if section.session_guid is defined and section.last_correct_count is defined %}
+                                {# Button for last result #}
+                                <a class="btn btn-outline-primary lastResult" id="{{ section.section_id }}link"
+                                   data-bs-toggle="tooltip" title="Посмотреть последний результат"
+                                   href="{{ url_for('get_result_by_session_guid_endpoint') }}?guid={{ section.session_guid }}"
+                                   style="text-align: right;">
+                                    {{ section.last_correct_count }}/{{ section.question_count }} верно
+                                </a>
+                            {% elif section.last_correct_count is defined %}
+                                {# Last result just text #}
+                                <p class="lastResult" id="{{ section.section_id }}text">
+                                    {{ section.last_correct_count }}/{{ section.question_count }} верно
+                                </p>
+                            {% else %}
+                                {# Text with questions count #}
+                                <p id="{{ section.section_id }}question"
+                                   style="text-align: right;"></p>
+                            {% endif %}
 
                             {% if section.timer != null %}
                                 <p id="{{ section.section_id }}timer"
@@ -114,15 +131,12 @@
                 }
 
                 questions = '{{section.question_count}}';
-                lastResult = '{{ section.last_correct_count }}'
-                paragraph = document.getElementById('{{ section.section_id }}question')
-                if (lastResult) {
-                    paragraph.innerHTML = lastResult + '/' + questions + ' верно';
-                    paragraph.classList.add("lastResult");
-                } else {
+                paragraph = document.getElementById('{{ section.section_id }}question');
+                if (paragraph) {
                     paragraph.innerHTML = questions + ' ' + morph(questions, ['вопрос', 'вопроса', 'вопросов']);
-                    paragraph.style.marginRight = '40px'
+                    paragraph.style.marginRight = '40px';
                 }
+
 
                 timer = '{{section.timer}}';
                 document.getElementById('{{ section.section_id }}timer').innerHTML =
