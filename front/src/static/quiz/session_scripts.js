@@ -149,7 +149,7 @@ function changeVisibility(is_correct) {
         document.querySelector('button[name="seeResults"]').hidden = false;
 
         document.querySelector('button[name="seeResults"]').classList.add(is_correct ? 'btn-outline-success' : 'btn-outline-danger');
-        document.querySelector('button[name="seeResults"]').textContent = is_correct ? 'Верно! Посмотреть резульататы' : 'Неверно! Посмотреть резульататы';
+        document.querySelector('button[name="seeResults"]').textContent = is_correct ? 'Верно! Посмотреть результаты' : 'Неверно! Посмотреть результаты';
     } else {
         document.querySelector('button[name="nextQuestion"]').classList.add(is_correct ? 'btn-outline-success' : 'btn-outline-danger');
         document.querySelector('button[name="nextQuestion"]').textContent = is_correct ? 'Верно! Следующий вопрос' : 'Неверно! Следующий вопрос';
