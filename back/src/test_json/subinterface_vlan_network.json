@@ -1,0 +1,190 @@
+{
+    "nodes": [
+        {
+            "classes": [
+                "host"
+            ],
+            "config": {
+                "default_gw": "10.0.0.2",
+                "label": "host_1",
+                "type": "host"
+            },
+            "data": {
+                "id": "host_1",
+                "label": "host_1"
+            },
+            "interface": [
+                {
+                    "connect": "edge_lx4uq53cix4vmfl0nwg",
+                    "id": "iface_71360367",
+                    "ip": "10.0.0.1",
+                    "name": "iface_71360367",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 60.54326916489572,
+                "y": 86.50723611009174
+            }
+        },
+        {
+            "classes": [
+                "l2_switch"
+            ],
+            "config": {
+                "label": "l2sw1",
+                "stp": 0,
+                "type": "l2_switch"
+            },
+            "data": {
+                "id": "l2sw1",
+                "label": "l2sw1"
+            },
+            "interface": [
+                {
+                    "connect": "edge_lx4uq53cix4vmfl0nwg",
+                    "id": "l2sw1_1",
+                    "name": "l2sw1_1",
+                    "type_connection": 0,
+                    "vlan": 10
+                },
+                {
+                    "connect": "edge_lx4uq8tglfjxuccpb3d",
+                    "id": "l2sw1_2",
+                    "name": "l2sw1_2",
+                    "type_connection": 1,
+                    "vlan": [
+                        10
+                    ]
+                }
+            ],
+            "position": {
+                "x": 157.53546773370306,
+                "y": 133.50486176146788
+            }
+        },
+        {
+            "classes": [
+                "l3_router"
+            ],
+            "config": {
+                "default_gw": "10.0.1.1",
+                "label": "router_1",
+                "type": "router"
+            },
+            "data": {
+                "id": "router_1",
+                "label": "router_1"
+            },
+            "interface": [
+                {
+                    "connect": "edge_lx4uq8tglfjxuccpb3d",
+                    "id": "iface_28280212",
+                    "ip": "10.0.0.2",
+                    "name": "iface_28280212",
+                    "netmask": 24
+                },
+                {
+                    "connect": "edge_lx4v8ap0fsv7i3a5n1v",
+                    "id": "iface_87078201",
+                    "ip": "10.0.1.2",
+                    "name": "iface_87078201",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 232.03818127498752,
+                "y": 66.30572601856365
+            }
+        },
+        {
+            "classes": [
+                "server"
+            ],
+            "config": {
+                "default_gw": "10.0.1.2",
+                "label": "server_1",
+                "type": "server"
+            },
+            "data": {
+                "id": "server_1",
+                "label": "server_1"
+            },
+            "interface": [
+                {
+                    "connect": "edge_lx4v8ap0fsv7i3a5n1v",
+                    "id": "iface_65385002",
+                    "ip": "10.0.1.1",
+                    "name": "iface_65385002",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 338.5300406511341,
+                "y": 131.59019596373278
+            }
+        }
+    ],
+    "edges": [
+        {
+            "data": {
+                "id": "edge_lx4uq53cix4vmfl0nwg",
+                "source": "l2sw1",
+                "target": "host_1"
+            }
+        },
+        {
+            "data": {
+                "id": "edge_lx4uq8tglfjxuccpb3d",
+                "source": "router_1",
+                "target": "l2sw1"
+            }
+        },
+        {
+            "data": {
+                "id": "edge_lx4v8ap0fsv7i3a5n1v",
+                "source": "server_1",
+                "target": "router_1"
+            }
+        }
+    ],
+    "jobs": [
+        {
+            "id": "c88685b8773e4f42920cd2fc645965e7",
+            "level": 2,
+            "job_id": 104,
+            "host_id": "router_1",
+            "arg_1": "iface_28280212",
+            "arg_2": "10.0.0.3",
+            "arg_3": "24",
+            "arg_4": "10",
+            "print_cmd": "subinterface 10.0.0.3: 24 VLAN 10"
+        },
+        {
+            "id": "6321df62df7a4ccd8940646f5e18a6e8",
+            "level": 2,
+            "job_id": 200,
+            "host_id": "server_1",
+            "arg_1": "10.0.1.1",
+            "arg_2": 5555,
+            "print_cmd": "nc -u 10.0.1.1 -l 5555"
+        },
+        {
+            "id": "f44a9452092f459cba0d72e927a1e4c7",
+            "level": 2,
+            "job_id": 3,
+            "host_id": "host_1",
+            "arg_1": 10,
+            "arg_2": "10.0.1.1",
+            "arg_3": 5555,
+            "print_cmd": "send -s 10 -p udp 10.0.1.1: 5555"
+        }
+    ],
+    "config": {
+        "zoom": 2,
+        "pan_x": 0,
+        "pan_y": 0
+    },
+    "packets": "",
+    "pcap": []
+}

@@ -56,6 +56,13 @@ DINAMYC_PORT_FILE_NAMES = [
         len("TCP (SYN) "),
         r"port",
     ),
+    (
+        "subinterface_vlan_network.json",
+        "subinterface_vlan_answer.json",
+        r"UDP \d+",
+        len("UDP "),
+        r"port",
+    ),
     # ("multicast_udp_traffic_network.json", "multicast_udp_traffic_answer.json", r'UDP \d+', len('UDP '), r'port'),
 ]
 
