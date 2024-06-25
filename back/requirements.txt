@@ -1,6 +1,5 @@
-celery==5.3.6
+celery==5.4.0
 dpkt==1.9.8
-python-dotenv==1.0.0
-marshmallow_dataclass==8.6.0
-typeguard==4.1.5
+python-dotenv==1.0.1
+marshmallow_dataclass==8.7.0
 ipmininet @ git+https://github.com/mimi-net/ipmininet.git@v1.1.0
