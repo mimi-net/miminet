@@ -1,4 +1,4 @@
-﻿alembic==1.13.1
+﻿alembic==1.13.2
 beautifulsoup4==4.12.3
 cachetools==5.3.3
 certifi==2024.6.2
@@ -16,7 +16,7 @@ google-auth==2.30.0
 google-auth-oauthlib==1.2.0
 greenlet==3.0.3
 idna==3.7
-importlib-metadata==7.2.1
+importlib-metadata==8.0.0
 importlib-resources==6.4.0
 ipaddress==1.0.23
 itsdangerous==2.2.0
