@@ -12,7 +12,7 @@ Flask-Migrate==4.0.7
 Flask-SQLAlchemy==3.1.1
 Flask-Admin==1.6.1
 google==3.0.0
-google-auth==2.32.0
+google-auth==2.33.0
 google-auth-oauthlib==1.2.1
 greenlet==3.0.3
 idna==3.7
@@ -32,11 +32,11 @@ requests-oauthlib==2.0.0
 rsa==4.9
 six==1.16.0
 soupsieve==2.5
-SQLAlchemy==2.0.31
+SQLAlchemy==2.0.32
 urllib3==2.2.2
 uuid==1.30
 Werkzeug==3.0.3
-zipp==3.19.2
+zipp==3.20.0
 celery==5.4.0
-kombu==5.3.7
+kombu==5.4.0
 python-dotenv==1.0.1
