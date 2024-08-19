@@ -1,6 +1,6 @@
 ﻿alembic==1.13.2
 beautifulsoup4==4.12.3
-cachetools==5.4.0
+cachetools==5.5.0
 certifi==2024.7.4
 charset-normalizer==3.3.2
 click==8.1.7
@@ -12,12 +12,12 @@ Flask-Migrate==4.0.7
 Flask-SQLAlchemy==3.1.1
 Flask-Admin==1.6.1
 google==3.0.0
-google-auth==2.33.0
+google-auth==2.34.0
 google-auth-oauthlib==1.2.1
 greenlet==3.0.3
 idna==3.7
 importlib-metadata==8.2.0
-importlib-resources==6.4.0
+importlib-resources==6.4.3
 ipaddress==1.0.23
 itsdangerous==2.2.0
 Jinja2==3.1.4
@@ -31,7 +31,7 @@ requests==2.32.3
 requests-oauthlib==2.0.0
 rsa==4.9
 six==1.16.0
-soupsieve==2.5
+soupsieve==2.6
 SQLAlchemy==2.0.32
 urllib3==2.2.2
 uuid==1.30
