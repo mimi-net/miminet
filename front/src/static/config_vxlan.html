@@ -1,0 +1,88 @@
+
+
+<script id="config_button_vxlan_script" type="text/plain">
+    <button id="config_button_vxlan" name="config_button_vxlan" class="btn btn-outline-secondary btn-sm mt-2" type="button" data-bs-toggle="modal" data-bs-target="#VxlanModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройте VTEP, добавив клиентские устройства с соответствующими VNI и укажите интерфейс для отправки пакетов на другие VTEP.">
+        <i class='bx bx-network-chart fs-lg me-1'></i>
+        VXLAN
+    </button>
+    
+    <button type="button" class="btn btn-secondary btn-sm mt-2 ms-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Настройте VTEP, добавив клиентские устройства ассоциированные с VNI и укажите интерфейс и ip удаленного роутера для отправки пакетов с соответствующим VNI на заданный VTEP.">
+        <i class='bx bx-question-mark'></i>
+    </button>
+</script>
+
+<script id="config_modal_vxlan_script" type="text/plain">
+    <div class="modal" id="VxlanModal" tabindex="-1" role="dialog" aria-hidden="true" data-focus-on="input:first">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="netConfigModalLabel">Настройка VXLAN</h5>
+                    <button id="vxlanConfigrationCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="vxlanAlertContainer"></div>
+                    <div id="switch_vxlan" name="switch_vxlan" class="form-group form-switch">
+                        <input id="config_vxlan_switch" name="config_vxlan_switch" type="checkbox" class="form-check-input">
+                        <label class="form-check-label" for="customSwitch1">VXLAN</label>
+                    </div>
+                </div>
+                <div id="modal_footer_vxlan" class="modal-footer">
+                    <button id="vxlanConfigrationSubmit" type="button" class="btn btn-primary">Закрыть и сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script id="config_table_vxlan_script" type="text/plain">
+    <div class="container mt-3" id="config_table_vxlan" style="max-height: 500px; overflow-y: auto;">
+
+        <div class="mb-2 d-flex align-items-center">
+            <label class="form-label me-3" style="width: 150px;" for="clientVni">VNI:</label>
+            <input type="text" class="form-control client-vni" style="flex: 1;" />
+        </div>
+
+        <div class="mb-2 d-flex align-items-center">
+            <label class="form-label me-3" style="width: 150px;" for="clientDevice">Клиентский линк:</label>
+            <select class="form-control client-device" style="flex: 1;">
+                <!-- Options to be filled by JavaScript -->
+            </select>
+        </div>
+
+        <div class="mb-2">
+            <button type="button" class="btn btn-primary add-client-vxlan-interface">Добавить устройство</button>
+        </div>
+
+        <ul class="list-group mb-2 devices-list">
+            <!-- Devices will be listed here -->
+        </ul>
+
+        <hr class="mb-2">
+
+        <div class="mb-2 d-flex align-items-center">
+            <label class="form-label me-3" style="width: 150px;" for="networkVni">VNI:</label>
+            <input type="text" class="form-control network-vni" style="flex: 1;" />
+        </div>
+
+        <div class="mb-2 d-flex align-items-center">
+            <label class="form-label me-3" style="width: 150px;" for="remoteVtepIp">IP целевого VTEP:</label>
+            <input type="text" class="form-control remote-vtep-ip" style="flex: 1;" />
+        </div>
+
+        <div class="mb-2 d-flex align-items-center">
+            <label class="form-label me-3" style="width: 150px;" for="outInterface">Сетевой линк:</label>
+            <select class="form-control out-interface" style="flex: 1;">
+                <!-- Options to be filled by JavaScript -->
+            </select>
+        </div>
+
+        <div class="mb-2">
+            <button class="btn btn-success add-network-vxlan-interface">Добавить интерфейс</button>
+        </div>
+
+        <ul class="list-group interfaces-list">
+            <!-- Interfaces will be listed here -->
+        </ul>
+    </div>
+</script>

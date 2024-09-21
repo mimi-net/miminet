@@ -8,7 +8,7 @@ from dpkt.utils import inet_to_str
 
 
 def packet_uuid(
-    size: int = 8, chars: str = string.ascii_uppercase + string.digits
+        size: int = 8, chars: str = string.ascii_uppercase + string.digits
 ) -> str:
     uid = "".join(random.choice(chars) for _ in range(size))
     return "pkt_" + uid
@@ -81,7 +81,7 @@ def arp_packet_type(pkt) -> str:
 
 
 def create_pkt_animation(
-    file1: str, file2: str, edge_id: str, e_source: str, e_target: str
+        file1: str, file2: str, edge_id: str, e_source: str, e_target: str
 ):
     if not os.path.exists(file1) or not os.path.exists(file2):
         return None
@@ -161,12 +161,28 @@ def packet_parser(pcap1: Reader, edge_id: str, e_source: str, e_target: str):
             if isinstance(ip.data, dpkt.igmp.IGMP):
                 continue
 
+            # VXLAN encapsulates packets inside UDP. Check inside UDP packets to skip IPv6 and IGMP
+            if isinstance(ip.data, dpkt.udp.UDP):
+                udp = ip.data
+                if udp.dport == 4789:
+                    vxlan = VXLAN(udp.data)
+                    # Unpack the Ethernet frame
+                    inner_eth = dpkt.ethernet.Ethernet(vxlan.data)
+                    if isinstance(inner_eth.data, dpkt.ip6.IP6):
+                        continue
+                    if isinstance(inner_eth.data, dpkt.ip.IP):
+                        inner_ip = inner_eth.data
+                        if isinstance(inner_ip.data, dpkt.igmp.IGMP):
+                            continue
+
+
+
             ts = str(timestamp)
             ts = ts.replace(".", "").ljust(16, "0")
 
             pkt_type = ip_packet_type(ip)
             pkt_type = (
-                pkt_type + "\n" + inet_to_str(ip.src) + " > " + inet_to_str(ip.dst)
+                    pkt_type + "\n" + inet_to_str(ip.src) + " > " + inet_to_str(ip.dst)
             )
 
             pkts.append(
@@ -193,3 +209,30 @@ if __name__ == "__main__":
         "host1",
         "sw1",
     )
+
+
+class VXLAN(dpkt.Packet):
+    """Virtual eXtensible Local Area Network.
+
+    Attributes:
+        __hdr__: Header fields of VXLAN.
+            flags: (int): 8 bits of flags
+            rsvd0: (int): 8 bits of reserved
+            rsvd1: (int): 16 bits of reserved
+            vnirsvd: (int): 24 bits of Virtual Network Identifier and 8 bits of reserved
+    """
+
+    __hdr__ = (
+        ('flags', 'B', 0),  # 8 bits of flags
+        ('rsvd0', 'B', 0),  # 8 bits of reserved
+        ('rsvd1', 'H', 0),  # 16 bits of reserved
+        ('vnirsvd', 'I', 0)  # 24 bits of Virtual Network Identifier and 8 bits of reserved
+    )
+
+    @property
+    def vni(self):
+        return (self.vnirsvd >> 8) & 0xFFFFFF
+
+    @vni.setter
+    def vni(self, value):
+        self.vnirsvd = (value << 8) & 0xFFFFFF00
