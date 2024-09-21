@@ -388,9 +388,6 @@ const ConfigRouterInterface = function (name, ip, netmask, connected_to) {
     $('#config_router_iface_name_' + name).attr("placeholder", connected_to);
     $('#config_router_ip_' + name).val(ip);
     $('#config_router_mask_' + name).val(netmask);
-    if (pcaps.includes(name)) {
-        $('#config_router_iface_name_label_' + name).html('Линк к (<a href="/host/mimishark?guid=' + network_guid + '&iface=' + name + '" target="_blank">pcap</a>)');
-    }
 }
 
 const ConfigServerInterface = function (name, ip, netmask, connected_to) {

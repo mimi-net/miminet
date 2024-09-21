@@ -26,19 +26,15 @@ const ConfigVxlan = function (currentDevice) {
 
 function setupVxlanEventHandlers(currentDevice, modalId, tableId) {
     $('#' + modalId).find('#config_vxlan_switch').off('click').on('click', function () {
-        console.log("check check");
         if ($(this).is(':checked')) {
             $('#' + tableId).show();
-            // generateVxlanTableContent(currentDevice, tableId);
             let ifaceToDeviseList = getInterfaceAndConnectedNodes(currentDevice);
             generateDropdownMenues(tableId, ifaceToDeviseList);
             generateNetworkInterfacesContent(tableId, ifaceToDeviseList);
             generateClientsContent(tableId, ifaceToDeviseList);
-            console.log("checked");
         } else {
             resetVxlanInterfaceFields(currentDevice);
             restoreVxlanFormData(tableId);
-            console.log("unchecked")
             $('#' + tableId).hide();
         }
     });
@@ -75,7 +71,6 @@ function setupVxlanEventHandlers(currentDevice, modalId, tableId) {
     });
     $('#' + tableId).find('.add-client-vxlan-interface').off('click').on('click', function () {
         addClientVxlanInterface(currentDevice, tableId);
-        console.log(currentDevice)
         let ifaceToDeviseList = getInterfaceAndConnectedNodes(currentDevice);
         generateClientsContent(tableId, ifaceToDeviseList);
     });
@@ -88,20 +83,6 @@ function setupVxlanEventHandlers(currentDevice, modalId, tableId) {
 
     updateVxlanButtonStyle(currentDevice);
 }
-
-// function createEdgeAndNodeMaps(edges, nodes) {
-//     const edgesMap = new Map();
-//     for (var i = 0; i < edges.length; i++) {
-//         edgesMap.set(edges[i].data.id, edges[i]);
-//     }
-
-//     const nodesMap = new Map();
-//     for (var i = 0; i < nodes.length; i++) {
-//         nodesMap.set(nodes[i].data.id, nodes[i].data.label);
-//     }
-
-//     return { edgesMap, nodesMap };
-// }
 
 function getInterfaceAndConnectedNodes(currentDevice) {
     const result = [];
@@ -163,38 +144,6 @@ function generateNetworkInterfacesContent(tableId, ifaceToDeviseList) {
             }
         }
     });
-
-    // for (var i = 0; i < currentDevice.interface.length; i++) {
-    //     let interface = currentDevice.interface[i];
-    //     var connectedEdge = edgesMap.get(interface.connect);
-    //     if (connectedEdge !== undefined) {
-    //         let targetDeviceId = connectedEdge.data.target;
-    //         if (connectedEdge.data.source === currentDevice.data.id) {
-    //             targetDeviceId = connectedEdge.data.target;
-    //         } else {
-    //             targetDeviceId = connectedEdge.data.source;
-    //         }
-    //         var connectionType = interface.vxlan_connection_type;
-    //         let targetIp = interface.vxlan_vni_to_target_ip;
-
-    //         if (connectionType === 1 && targetIp !== null && targetIp !== undefined && targetIp) {
-    //             for (let j = 0; j < targetIp.length; j++) {
-    //                 const networkRow = document.createElement('li');
-    //                 networkRow.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center', 'network-interface');
-    //                 networkRow.dataset.id = interface.id;
-    //                 networkRow.textContent = `Линк к: ${nodesMap.get(targetDeviceId)}, VNI: ${targetIp[j][0]}, Удаленный IP: ${targetIp[j][1]}`;
-    //                 const removeButton = document.createElement('button');
-    //                 removeButton.classList.add('btn', 'btn-danger', 'btn-sm');
-    //                 removeButton.textContent = 'Удалить';
-    //                 removeButton.onclick = function () {
-    //                     removeInterface(interface, targetIp[j][1], targetIp[j][0], tableId);
-    //                 };
-    //                 networkRow.appendChild(removeButton);
-    //                 interfaces_list.appendChild(networkRow);
-    //             }
-    //         }
-    //     }
-    // }
 }
 
 function generateDropdownMenues(tableId, ifaceToDeviseList){
@@ -222,100 +171,6 @@ function generateDropdownMenues(tableId, ifaceToDeviseList){
 
 }
 
-// function generateVxlanTableContent(currentDevice, tableId) {
-
-//     var edgesMap = new Map();
-//     for (var i = 0; i < edges.length; i++) {
-//         edgesMap.set(edges[i].data.id, edges[i]);
-//     }
-
-//     var nodesMap = new Map();
-//     for (var i = 0; i < nodes.length; i++) {
-//         nodesMap.set(nodes[i].data.id, nodes[i].data.label);
-//     }
-
-//     const select_client_link = $('#' + tableId).find('.client-device')[0];
-//     const select_out_link = $('#' + tableId).find('.out-interface')[0];
-//     const devices_list = $('#' + tableId).find('.devices-list')[0];
-//     const interfaces_list = $('#' + tableId).find('.interfaces-list')[0];
-
-//     // Очистка выпадающих списков
-//     while (select_client_link.firstChild) {
-//         select_client_link.removeChild(select_client_link.firstChild);
-//     }
-//     while (select_out_link.firstChild) {
-//         select_out_link.removeChild(select_out_link.firstChild);
-//     }
-
-//     // Очистка списков девайсов и интерфейсов
-//     while (devices_list.firstChild) {
-//         devices_list.removeChild(devices_list.firstChild);
-//     }
-//     while (interfaces_list.firstChild) {
-//         interfaces_list.removeChild(interfaces_list.firstChild);
-//     }
-
-
-//     for (var i = 0; i < currentDevice.interface.length; i++) {
-//         let iface = currentDevice.interface[i];
-//         var connectedEdge = edgesMap.get(iface.connect);
-//         if (connectedEdge !== undefined) {
-//             let targetDeviceId = connectedEdge.data.target;
-//             if (connectedEdge.data.source === currentDevice.data.id) {
-//                 targetDeviceId = connectedEdge.data.target;
-//             } else {
-//                 targetDeviceId = connectedEdge.data.source;
-//             }
-//             var vni = iface.vxlan_vni
-//             var connectionType = iface.vxlan_connection_type;
-//             let targetIp = iface.vxlan_vni_to_target_ip;
-
-
-//             const option = document.createElement('option');
-//             option.value = iface.id;
-//             option.textContent = nodesMap.get(targetDeviceId);
-//             select_client_link.appendChild(option);
-
-//             const option2 = document.createElement('option');
-//             option2.value = iface.id;
-//             option2.textContent = nodesMap.get(targetDeviceId);
-//             select_out_link.appendChild(option2);
-
-
-//             if (vni !== null && vni !== undefined && connectionType === 0) {
-//                 const clientRow = document.createElement('li');
-//                 clientRow.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center', 'client-interface');
-//                 clientRow.dataset.id = iface.id;
-//                 clientRow.textContent = `Линк к: ${nodesMap.get(targetDeviceId)}, VNI: ${iface.vxlan_vni}`;
-//                 const removeButton = document.createElement('button');
-//                 removeButton.classList.add('btn', 'btn-danger', 'btn-sm');
-//                 removeButton.textContent = 'Удалить';
-//                 removeButton.onclick = function () {
-//                     console.log("removing")
-//                     removeDevice(iface, tableId);
-//                 };
-//                 clientRow.appendChild(removeButton);
-//                 devices_list.appendChild(clientRow);
-//             }
-//             if (connectionType === 1 && targetIp !== null && targetIp !== undefined && targetIp) {
-//                 for (let j = 0; j < targetIp.length; j++) {
-//                     const networkRow = document.createElement('li');
-//                     networkRow.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center', 'network-interface');
-//                     networkRow.dataset.id = iface.id;
-//                     networkRow.textContent = `Линк к: ${nodesMap.get(targetDeviceId)}, VNI: ${targetIp[j][0]}, Удаленный IP: ${targetIp[j][1]}`;
-//                     const removeButton = document.createElement('button');
-//                     removeButton.classList.add('btn', 'btn-danger', 'btn-sm');
-//                     removeButton.textContent = 'Удалить';
-//                     removeButton.onclick = function () {
-//                         removeInterface(iface, targetIp[j][1], targetIp[j][0], tableId);
-//                     };
-//                     networkRow.appendChild(removeButton);
-//                     interfaces_list.appendChild(networkRow);
-//                 }
-//             }
-//         }
-//     }
-// }
 
 function createNetIfaceRow(iface, deviceName, vni, ip, tableId) {
     const networkRow = document.createElement('li');
@@ -341,7 +196,6 @@ function createClientRow(iface, deviceName, tableId) {
     removeButton.classList.add('btn', 'btn-danger', 'btn-sm');
     removeButton.textContent = 'Удалить';
     removeButton.onclick = function () {
-        console.log("removing")
         removeDevice(iface, tableId);
     };
     clientRow.appendChild(removeButton);
@@ -407,17 +261,14 @@ function addClientVxlanInterface(currentDevice, tableId) {
     if (deviceEntry === null || deviceEntry === undefined || deviceEntry === '') {
         return;
     }
-    console.log(deviceEntry)
     var iface = currentDevice.interface.find(function (item) {
         return item.id === deviceEntry;
     });
-    console.log(iface)
     if (iface) {
           if (iface.vxlan_connection_type === 0 || iface.vxlan_connection_type === 1) {
             showAlert("Этот интерфейс уже имеет конфигурацию VXLAN.", "warning", tableId);
             return;
         }
-        console.log("added")
         iface.vxlan_vni = Number(vni);
         iface.vxlan_connection_type = 0;
         iface.vxlan_vni_to_target_ip = null;
@@ -493,8 +344,6 @@ function resetVxlanInterfaceFields(currentDevice) {
 }
 
 function areVxlanInterfaceFieldsFilled(currentDevice) {
-    console.log("Filled Or not")
-    console.log(currentDevice.interface.some(iface => ((iface.vxlan_vni !== null && iface.vxlan_vni !== undefined) || (iface.vxlan_vni_to_target_ip !== null && iface.vxlan_vni_to_target_ip !== undefined && iface.vxlan_vni_to_target_ip.length > 0)) && (iface.vxlan_connection_type !== null && iface.vxlan_connection_type !== undefined)));
     return currentDevice.interface.some(iface => ((iface.vxlan_vni !== null && iface.vxlan_vni !== undefined) || (iface.vxlan_vni_to_target_ip !== null && iface.vxlan_vni_to_target_ip !== undefined && iface.vxlan_vni_to_target_ip.length > 0)) && (iface.vxlan_connection_type !== null && iface.vxlan_connection_type !== undefined));
 }
 
@@ -509,11 +358,9 @@ function updateVxlanButtonStyle(currentDevice) {
 }
 
 function removeDevice(iface, tableId) {
-    console.log("removing inside")
     iface.vxlan_vni = null;
     iface.vxlan_connection_type = null;
     iface.vxlan_vni_to_target_ip = null;
-    console.log(iface)
 
     const deviceList = $('#' + tableId).find('.devices-list')[0];
     const deviceItems = deviceList.getElementsByClassName('client-interface');
@@ -521,7 +368,6 @@ function removeDevice(iface, tableId) {
     for (let item of deviceItems) {
         if (item.dataset.id === iface.id) {
             deviceList.removeChild(item);
-            console.log("item removed")
             break;
         }
     }
@@ -530,14 +376,8 @@ function removeDevice(iface, tableId) {
 function removeInterface(iface, vni, targetIp, tableId) {
     const interfaceList = $('#' + tableId).find('.interfaces-list')[0];
     const interfaceItems = interfaceList.getElementsByClassName('network-interface');
-    console.log(iface)
-    console.log(Array.isArray(iface.vxlan_vni_to_target_ip))
     if (Array.isArray(iface.vxlan_vni_to_target_ip)) {
-        console.log(iface.vxlan_vni_to_target_ip?.length)
-        console.log(vni)
-        console.log(targetIp)
         iface.vxlan_vni_to_target_ip = iface.vxlan_vni_to_target_ip.filter(item => item[0] !== vni || item[1] !== targetIp);
-        console.log(iface.vxlan_vni_to_target_ip?.length)
     }
 
     for (let item of interfaceItems) {
