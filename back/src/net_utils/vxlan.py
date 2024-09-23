@@ -48,8 +48,8 @@ def setup_network_interface(router: 'Node', intf: str, local_ip: str, target_ips
 
     for vni in vxlan_vnis:
         # Generate interface and bridge names
-        vxlan_name = f'vx{router.name}-{vni}'[:15]
-        bridge_name = f'br-{router.name}-{vni}'[:15]
+        vxlan_name = f'vx{router.name}-{vni}'[-15:]
+        bridge_name = f'br-{router.name}-{vni}'[-15:]
 
         vxlan_name = f'"{vxlan_name}"'
         bridge_name = f'"{bridge_name}"'
@@ -67,7 +67,7 @@ def setup_network_interface(router: 'Node', intf: str, local_ip: str, target_ips
     # Populate forwarding database (FDB) with target MAC addresses and destinations
     for elem in target_ips:
         vni, target_ip = elem
-        vxlan_name = f'vx{router.name}-{vni}'[:15]
+        vxlan_name = f'vx{router.name}-{vni}'[-15:]
         vxlan_name = f'"{vxlan_name}"'
 
         router.cmd(f'bridge fdb append 00:00:00:00:00:00 dev {vxlan_name} dst {target_ip}')
@@ -82,7 +82,7 @@ def setup_endpoint_interface(router: 'Node', intf: str, vni: int) -> None:
         intf (str): The name of the physical interface.
         vni (int): The VXLAN Network Identifier.
     """
-    bridge_name = f'br-{router.name}-{vni}'[:15]
+    bridge_name = f'br-{router.name}-{vni}'[-15:]
     bridge_name = f'"{bridge_name}"'
 
     # Attach physical interface to the bridge and bring it up
@@ -111,8 +111,8 @@ def teardown_vtep_bridges(net: 'IPNet', nodes: List['Node']) -> None:
                     vxlan_vnis = {elem[0] for elem in target_ips}
 
                     for vni in vxlan_vnis:
-                        vxlan_name = f'vx{router.name}-{vni}'[:15]
-                        bridge_name = f'br-{router.name}-{vni}'[:15]
+                        vxlan_name = f'vx{router.name}-{vni}'[-15:]
+                        bridge_name = f'br-{router.name}-{vni}'[-15:]
                         vxlan_name = f'"{vxlan_name}"'
                         bridge_name = f'"{bridge_name}"'
 

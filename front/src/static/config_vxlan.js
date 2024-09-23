@@ -70,13 +70,13 @@ function setupVxlanEventHandlers(currentDevice, modalId, tableId) {
         $('#' + modalId).modal('show');
     });
     $('#' + tableId).find('.add-client-vxlan-interface').off('click').on('click', function () {
-        addClientVxlanInterface(currentDevice, tableId);
+        addClientVxlanInterface(currentDevice, tableId, modalId);
         let ifaceToDeviseList = getInterfaceAndConnectedNodes(currentDevice);
         generateClientsContent(tableId, ifaceToDeviseList);
     });
 
     $('#' + tableId).find('.add-network-vxlan-interface').off('click').on('click', function () {
-        addNetworkVxlanInterface(currentDevice, tableId);
+        addNetworkVxlanInterface(currentDevice, tableId, modalId);
         let ifaceToDeviseList = getInterfaceAndConnectedNodes(currentDevice);
         generateNetworkInterfacesContent(tableId, ifaceToDeviseList);
     });
@@ -122,8 +122,9 @@ function generateClientsContent(tableId, ifaceToDeviseList) {
     }
     ifaceToDeviseList.forEach(([iface, connectedNode]) => {
         if (iface.vxlan_vni !== null && iface.vxlan_vni !== undefined && iface.vxlan_connection_type === 0) {
-        const row = createClientRow(iface, connectedNode, tableId)
-        devices_list.appendChild(row)}
+            const row = createClientRow(iface, connectedNode, tableId)
+            devices_list.appendChild(row)
+        }
     });
 }
 
@@ -139,14 +140,14 @@ function generateNetworkInterfacesContent(tableId, ifaceToDeviseList) {
         let targetIpList = iface.vxlan_vni_to_target_ip;
         if (connectionType === 1 && targetIpList !== null && targetIpList !== undefined && targetIpList) {
             for (let j = 0; j < targetIpList.length; j++) {
-            const row = createNetIfaceRow(iface,connectedNode, targetIpList[j][0], targetIpList[j][1], tableId);
-            interfaces_list.appendChild(row)
+                const row = createNetIfaceRow(iface, connectedNode, targetIpList[j][0], targetIpList[j][1], tableId);
+                interfaces_list.appendChild(row)
             }
         }
     });
 }
 
-function generateDropdownMenues(tableId, ifaceToDeviseList){
+function generateDropdownMenues(tableId, ifaceToDeviseList) {
     const select_client_link = $('#' + tableId).find('.client-device')[0];
     const select_out_link = $('#' + tableId).find('.out-interface')[0];
     while (select_client_link.firstChild) {
@@ -157,16 +158,16 @@ function generateDropdownMenues(tableId, ifaceToDeviseList){
     }
     ifaceToDeviseList.forEach(([iface, connectedNode]) => {
 
-            const option = document.createElement('option');
-            option.value = iface.id;
-            option.textContent = connectedNode;
-            select_client_link.appendChild(option);
+        const option = document.createElement('option');
+        option.value = iface.id;
+        option.textContent = connectedNode;
+        select_client_link.appendChild(option);
 
-            const option2 = document.createElement('option');
-            option2.value = iface.id;
-            option2.textContent = connectedNode;
-            select_out_link.appendChild(option2);
-        }
+        const option2 = document.createElement('option');
+        option2.value = iface.id;
+        option2.textContent = connectedNode;
+        select_out_link.appendChild(option2);
+    }
     );
 
 }
@@ -218,7 +219,7 @@ function isValidIP(ip) {
 }
 
 function isDuplicateNetworkEntry(currentDevice, vni, targetIp) {
-    return currentDevice.interface.some(iface => 
+    return currentDevice.interface.some(iface =>
         iface.vxlan_connection_type === 1 &&
         iface.vxlan_vni_to_target_ip &&
         iface.vxlan_vni_to_target_ip.some(entry => entry[0] === vni && entry[1] === targetIp)
@@ -239,22 +240,22 @@ function isLinkAlreadyAdded(currentDevice, interfaceId, role) {
 }
 
 
-function addClientVxlanInterface(currentDevice, tableId) {
+function addClientVxlanInterface(currentDevice, tableId, modalId) {
     const vni = $('#' + tableId).find('.client-vni').val();
     let deviceEntry = $('#' + tableId).find('.client-device').find('option:selected').val();
 
     if (!deviceEntry) {
-        showAlert("Пожалуйста, выберите клиентский интерфейс.", "warning", tableId);
+        showAlert("Пожалуйста, выберите клиентский интерфейс.", "warning", modalId);
         return;
     }
 
     if (!isValidVNI(vni)) {
-        showAlert("Неверный VNI. Пожалуйста, введите число от 1 до 16777214.", "danger", tableId);
+        showAlert("Неверный VNI. Пожалуйста, введите число от 1 до 16777214.", "danger", modalId);
         return;
     }
 
     if (isLinkAlreadyAdded(currentDevice, deviceEntry, 'client')) {
-        showAlert("Этот интерфейс уже используется как сетевой. Пожалуйста, выберите другой интерфейс.", "danger", tableId);
+        showAlert("Этот интерфейс уже используется как сетевой. Пожалуйста, выберите другой интерфейс.", "danger", modalId);
         return;
     }
 
@@ -265,8 +266,8 @@ function addClientVxlanInterface(currentDevice, tableId) {
         return item.id === deviceEntry;
     });
     if (iface) {
-          if (iface.vxlan_connection_type === 0 || iface.vxlan_connection_type === 1) {
-            showAlert("Этот интерфейс уже имеет конфигурацию VXLAN.", "warning", tableId);
+          if (iface.vxlan_connection_type === 0 && iface.vxlan_vni !== null && iface.vxlan_vni !== undefined) {
+            showAlert("Этот интерфейс уже привязан к VNI: " + String(iface.vxlan_vni), "warning", modalId);
             return;
         }
         iface.vxlan_vni = Number(vni);
@@ -276,33 +277,33 @@ function addClientVxlanInterface(currentDevice, tableId) {
     clearClientFields(tableId);
 }
 
-function addNetworkVxlanInterface(currentDevice, tableId) {
+function addNetworkVxlanInterface(currentDevice, tableId, modalId) {
     const vni = $('#' + tableId).find('.network-vni').val();
     const targetIp = $('#' + tableId).find('.remote-vtep-ip').val();
     let deviceEntry = $('#' + tableId).find('.out-interface').find('option:selected').val();
 
     if (!deviceEntry) {
-        showAlert("Пожалуйста, выберите исходящий интерфейс.", "warning", tableId);
+        showAlert("Пожалуйста, выберите исходящий интерфейс.", "warning", modalId);
         return;
     }
 
     if (!isValidVNI(vni)) {
-        showAlert("Неверный VNI. Пожалуйста, введите число от 1 до 16777214.", "danger", tableId);
+        showAlert("Неверный VNI. Пожалуйста, введите число от 1 до 16777214.", "danger", modalId);
         return;
     }
 
     if (!isValidIP(targetIp)) {
-        showAlert("Неверный IP-адрес. Пожалуйста, введите действительный IPv4 адрес.", "danger", tableId);
+        showAlert("Неверный IP-адрес. Пожалуйста, введите действительный IPv4 адрес.", "danger", modalId);
         return;
     }
 
     if (isLinkAlreadyAdded(currentDevice, deviceEntry, 'network')) {
-        showAlert("Этот интерфейс уже используется как клиентский. Пожалуйста, выберите другой интерфейс.", "danger", tableId);
+        showAlert("Этот интерфейс уже используется как клиентский. Пожалуйста, выберите другой интерфейс.", "danger", modalId);
         return;
     }
 
     if (isDuplicateNetworkEntry(currentDevice, vni, targetIp)) {
-        showAlert("Такая запись VXLAN сети уже существует.", "warning", tableId);
+        showAlert("Такая запись VXLAN уже существует на этом интерфейсе.", "warning", modalId);
         return;
     }
 
@@ -389,8 +390,8 @@ function removeInterface(iface, vni, targetIp, tableId) {
     }
 }
 
-function showAlert(message, type = 'info', tableId) {
-    const alertContainer = $('#vxlanAlertContainer')
+function showAlert(message, type = 'info', modalId) {
+    const alertContainer = $('#' + modalId + ' .vxlanAlertContainer');
     const alertId = `alert-${Date.now()}`;
 
     const alertHTML = `
