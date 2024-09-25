@@ -43,6 +43,7 @@
             <option value="102">Добавить маршрут</option>
             <option value="104">Добавить сабинтерфейс с VLAN</option>
             <option value="105">Добавить IPIP-интерфейс</option>
+            <option value="106">Добавить GRE-интерфейс</option>
         </select>
     </div>
 </script>
@@ -117,6 +118,33 @@
         <input type="text" class="form-control form-control-sm" id="config_router_add_ipip_tunnel_end_ip_input_field" name="config_router_add_ipip_tunnel_end_ip_input_field" placeholder='IP конечной точки'>
         <input type="text" class="form-control form-control-sm" id="config_router_add_ipip_tunnel_interface_ip_input_field" name="config_router_add_ipip_tunnel_interface_ip_input_field" placeholder='IP IPIP-интерфейса'>
         <input type="text" class="form-control form-control-sm" id="config_router_add_ipip_tunnel_interface_name_field" name="config_router_add_ipip_tunnel_interface_name_field" placeholder='Название IPIP-интерфейса'>
+
+    </div>
+</script>
+
+<script id="config_router_add_gre_interface_script" type="text/plain">
+    <div class="form-group pt-1" name="config_router_select_input">
+        <!-- Заголовок -->
+        <label id="config_router_add_gre_interface_label" for="config_router_add_gre_interface_label" 
+        class="text-sm">Параметры GRE-интерфейса</label>
+
+        <input type="text" class="form-control form-control-sm" id="config_router_add_gre_interface_end_ip_input_field" 
+        name="config_router_add_gre_interface_end_ip_input_field" placeholder='IP начальной точки'>
+        <input type="text" class="form-control form-control-sm" id="config_router_add_gre_interface_end_ip_input_field" 
+        name="config_router_add_gre_interface_end_ip_input_field" placeholder='IP конечной точки'>
+        <input type="text" class="form-control form-control-sm" id="config_router_add_gre_interface_interface_ip_input_field" 
+        name="config_router_add_gre_interface_interface_ip_input_field" placeholder='IP GRE-интерфейса'>
+        <input type="text" class="form-control form-control-sm" id="config_router_add_gre_interface_interface_name_field" 
+        name="config_router_add_gre_interface_interface_name_field" placeholder='Название GRE-интерфейса'>
+
+        <!-- TTL -->
+        <div class="input-group pb-2 flex-nowrap">
+            <label id="config_router_add_gre_interface_label_ttl" for="config_router_add_gre_interface_label_ttl" 
+            class="text-sm w-65">Time to Live</label>
+
+            <input type="number" class="px-2 form-control form-control-sm w-35" id="config_router_add_gre_interface_ttl_input_field" 
+            name="config_router_add_gre_interface_ttl_input_field" min="0" max="255" value="255">
+        </div>
 
     </div>
 </script>
