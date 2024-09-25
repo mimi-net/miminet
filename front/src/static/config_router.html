@@ -128,22 +128,27 @@
         <label id="config_router_add_gre_interface_label" for="config_router_add_gre_interface_label" 
         class="text-sm">Параметры GRE-интерфейса</label>
 
-        <input type="text" class="form-control form-control-sm" id="config_router_add_gre_interface_end_ip_input_field" 
-        name="config_router_add_gre_interface_end_ip_input_field" placeholder='IP начальной точки'>
-        <input type="text" class="form-control form-control-sm" id="config_router_add_gre_interface_end_ip_input_field" 
-        name="config_router_add_gre_interface_end_ip_input_field" placeholder='IP конечной точки'>
-        <input type="text" class="form-control form-control-sm" id="config_router_add_gre_interface_interface_ip_input_field" 
-        name="config_router_add_gre_interface_interface_ip_input_field" placeholder='IP GRE-интерфейса'>
-        <input type="text" class="form-control form-control-sm" id="config_router_add_gre_interface_interface_name_field" 
-        name="config_router_add_gre_interface_interface_name_field" placeholder='Название GRE-интерфейса'>
+        <input type="text" class="form-control form-control-sm" id="config_router_add_gre_interface_end_ip_input_field" name="config_router_add_gre_interface_end_ip_input_field" placeholder='IP начальной точки'>
+        <input type="text" class="form-control form-control-sm" id="config_router_add_gre_interface_end_ip_input_field" name="config_router_add_gre_interface_end_ip_input_field" placeholder='IP конечной точки'>
+        <input type="text" class="form-control form-control-sm" id="config_router_add_gre_interface_interface_ip_input_field" name="config_router_add_gre_interface_interface_ip_input_field" placeholder='IP GRE-интерфейса'>
+        <input type="text" class="form-control form-control-sm" id="config_router_add_gre_interface_interface_name_field" name="config_router_add_gre_interface_interface_name_field" placeholder='Название GRE-интерфейса'>
 
         <!-- TTL -->
-        <div class="input-group pb-2 flex-nowrap">
-            <label id="config_router_add_gre_interface_label_ttl" for="config_router_add_gre_interface_label_ttl" 
-            class="text-sm w-65">Time to Live</label>
+        <div class="input-group pb-2 flex-nowrap d-flex justify-content-between">
 
-            <input type="number" class="px-2 form-control form-control-sm w-35" id="config_router_add_gre_interface_ttl_input_field" 
-            name="config_router_add_gre_interface_ttl_input_field" min="0" max="255" value="255">
+            <div class="row justify-content-start">
+                <div class="col-lg align-items-center">
+                    <label id="config_router_add_gre_interface_label_ttl" for="config_router_add_gre_interface_label_ttl" 
+                    class="text-sm">Time to Live</label>
+                </div>
+                <div class="col-sm">
+                    <input type="number" class="form-control form-control-sm" id="config_router_add_gre_interface_ttl_input_field" 
+                    name="config_router_add_gre_interface_ttl_input_field" min="0" max="255" value="255">
+                </div>
+            <div class="ms-2">
+
+            </div>
+
         </div>
 
     </div>
