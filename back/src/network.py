@@ -49,9 +49,9 @@ class NodeInterface:
         netmask (str): netmask
         vlan (Union[int, List[int], None]): VLAN ID or list of VLAN
         type_connection (Optional[int]): Connection type (0 - Access, 1 - Trunk)
-        vxlan_vni (Optional[int]): VNI (VXLAN Network Identifier) для VxLAN.
-        vxlan_connection_type (Optional[int]): Тип соединения для VxLAN (0 - Клиентский интерфейс, 1 - Интерфейс для отправки UDP пакетов в сеть).
-        vxlan_vni_to_target_ip (Optional[List[List[str]]]): Сопоставление VNI с целевыми IP-адресами VTEP.
+        vxlan_vni (Optional[int]): VNI (VXLAN Network Identifier) for VxLAN.
+        vxlan_connection_type (Optional[int]): Connection type for VxLAN (0 - Client Interface, 1 - Interface for sending UDP packets to the network).
+        vxlan_vni_to_target_ip (Optional[List[List[str]]]): Matching VNIs to VTEP target IP addresses.
 
     """
 
