@@ -29,6 +29,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <!-- Main Theme Styles + Bootstrap -->
     <link rel="stylesheet" media="screen" href="/assets/css/theme.min.css">
     <link rel="stylesheet" media="screen" href="/assets/css/style.css">
+    <link rel="stylesheet" media="screen" href="/assets/css/scrollbar.css">
 
 </head>
 <body>
@@ -39,71 +40,85 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 {% if mimishark_nav is not defined %}
 <nav class="header navbar navbar-expand-lg position-absolute navbar-sticky">
-    <div class="container">
-        <a href="/" class="navbar-brand">
-            <img src="{{ url_for('static', filename='/images/logo.png') }}" width="170" alt="Miminet">
-        </a>
 
         {% if network %}
             {% if current_user.is_authenticated %}
-                <div class="mx-auto navbar-nav">
-                    {% if request.path != url_for('web_network_shared') %}
-                    <a class="d-inline nav-link" href="{{ url_for('home') }}">Мои сети</a>
-                    <a class="d-inline nav-link" href="#"> / </a>
-                    {% endif %}
-                    <a class="d-inline nav-link" id="network_title_head" href="{{ url_for('web_network', guid=network.guid) }}">{{ network.title }}</a>
-                </div>
+                <div class="container-fluid px-4">
+                    <a href="/" class="navbar-brand">
+                        <img src="{{ url_for('static', filename='/images/logo.png') }}" width="170" alt="Miminet">
+                    </a>
 
-                <div class="form-check pe-lg-1">
-                    <a class="btn btn-success btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" title="Сеть доступна по URL" onclick="urlCopyButton()">
-                        <i class='bx bx-share-alt fs-4 mx-1' ></i>
-                    </a>
-                    <a class="btn btn-outline-primary btn-icon me-4" data-target="#ModalCopy" data-toggle="tooltip" data-bs-placement="bottom" title="Сохранить копию" onclick="CopyNetwork()">
-                        <i class='bx bx-copy fs-4 mx-1'></i>
-                    </a>
-                    <a {% if request.path != url_for('web_network_shared') %} class="btn btn-outline-primary btn-icon" {% else %} class="btn btn-outline-primary btn-icon disabled" {% endif %} href="#netConfigModal" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети"><i class='bx bx-cog fs-4 mx-1'></i></a>
+                    <div class="mx-auto navbar-nav shadow-sm bg-body rounded">
+                        {% if request.path != url_for('web_network_shared') %}
+                        <a class="d-inline nav-link" href="{{ url_for('home') }}">Мои сети</a>
+                        <a class="d-inline nav-link" href="#"> / </a>
+                        {% endif %}
+                        <a class="d-inline nav-link" id="network_title_head" href="{{ url_for('web_network', guid=network.guid) }}">{{ network.title }}</a>
+                    </div>
+
+                    <div class="form-check pe-lg-1">
+                        <a class="btn btn-success btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" title="Сеть доступна по URL" onclick="urlCopyButton()">
+                            <i class='bx bx-share-alt fs-4 mx-1' ></i>
+                        </a>
+                        <a class="btn btn-outline-primary btn-icon me-4" data-target="#ModalCopy" data-toggle="tooltip" data-bs-placement="bottom" title="Сохранить копию" onclick="CopyNetwork()">
+                            <i class='bx bx-copy fs-4 mx-1'></i>
+                        </a>
+                        <a {% if request.path != url_for('web_network_shared') %} class="btn btn-outline-primary btn-icon" {% else %} class="btn btn-outline-primary btn-icon disabled" {% endif %} href="#netConfigModal" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети"><i class='bx bx-cog fs-4 mx-1'></i></a>
+                    </div>
                 </div>
             {% else %}
-                <div class="mx-auto navbar-nav">
-                    <a class="d-inline nav-link" id="network_title_head" href="#">{{ network.title }}</a>
+                <div class="container-fluid px-4">
+                    <a href="/" class="navbar-brand">
+                        <img src="{{ url_for('static', filename='/images/logo.png') }}" width="170" alt="Miminet">
+                    </a>
+                    <div class="mx-auto navbar-nav shadow-sm bg-body rounded">
+                        <a class="d-inline nav-link" id="network_title_head" href="#">{{ network.title }}</a>
+                    </div>
+                    <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary">
+                        <i class="bx fs-5 lh-1 me-1"></i>Вход
+                    </a>
                 </div>
-                <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary">
-                    <i class="bx fs-5 lh-1 me-1"></i>Вход
-                </a>
             {% endif %}
         {% else %}
             {% if current_user.is_authenticated %}
-                <div class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('get_all_tests_endpoint') }}">Тренажер</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('home') }}">Мои сети</a>
-                    </li>
-                </div>
-            {% else %}
-                {% if request.path != url_for('login_index') %}
+                <div class="container">
+                    <a href="/" class="navbar-brand">
+                        <img src="{{ url_for('static', filename='/images/logo.png') }}" width="170" alt="Miminet">
+                    </a>
+
                     <div class="navbar-nav">
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('login_index') }}">Тренажер</a>
+                            <a class="nav-link" href="{{ url_for('get_all_tests_endpoint') }}">Тренажер</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary">
-                                <i class="bx fs-5 lh-1 me-1"></i>Вход
-                            </a>
+                            <a class="nav-link" href="{{ url_for('home') }}">Мои сети</a>
                         </li>
+                    </div>
+                </div>
+            {% else %}
+                {% if request.path != url_for('login_index') %}
+                    <div class="container">
+                        <a href="/" class="navbar-brand">
+                            <img src="{{ url_for('static', filename='/images/logo.png') }}" width="170" alt="Miminet">
+                        </a>
+                        <div class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary">
+                                    <i class="bx fs-5 lh-1 me-1"></i>Вход
+                                </a>
+                            </li>
+                        </div>
                     </div>
                 {% endif %}
             {% endif %}
         {% endif %}
 
-    </div>
 </nav>
 {% endif %}
 
