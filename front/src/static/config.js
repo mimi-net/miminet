@@ -601,11 +601,11 @@ const ConfigServerGateway = function(gw){
     $('#config_server_default_gw').val(gw);
 }
 
-const ConfigRouterJobOnChange = function(evnt){
+const ConfigRouterJobOnChange = function(evnt) {
 
     let elem = null;
     let router_job_list = null;
-    let n = null;
+    let router_node = null;
     let router_id = null;
 
     switch(evnt.target.value)
@@ -631,75 +631,13 @@ const ConfigRouterJobOnChange = function(evnt){
             router_job_list = document.getElementById('config_router_job_list');
 
             if (!elem || !router_job_list){
-                console.log("config_router_add_ip_mask_script или config_router_job_list не найден.");
                 return;
             }
 
             $('div[name="config_router_select_input"]').remove();
             $(elem).insertBefore(router_job_list);
 
-            router_id = $('#router_id')[0].value;
-            if (!router_id){
-                console.log("Не нашел router_id");
-                return
-            }
-
-            n = nodes.find(n => n.data.id === router_id);
-
-            if (!n) {
-                return;
-            }
-
-            if(!n.interface.length){
-                console.log("Интерфейсов нет, нечего настраивать");
-                return;
-            }
-
-            if(n.interface.length !== 1){
-                $('#config_router_add_ip_mask_iface_select_field').append('<option selected value="0">Выберите линк</option>');
-            }
-
-            $.each(n.interface, function (i) {
-                let iface_id = n.interface[i].id;
-
-                if (!iface_id){
-                    return;
-                }
-
-                let connect_id = n.interface[i].connect;
-                if (!connect_id){
-                    return;
-                }
-
-                let edge = edges.find(e => e.data.id === connect_id);
-
-                if (!edge){
-                    return;
-                }
-
-                let source_host = edge.data.source;
-                let target_host = edge.data.target;
-
-                if (!source_host || !target_host){
-                    return;
-                }
-
-                let connected_to = target_host;
-
-                if (n.data.id === target_host){
-                    connected_to = source_host;
-                }
-
-                let connected_to_host = nodes.find(n => n.data.id === connected_to);
-                let connected_to_host_label = "Unknown";
-
-                if (connected_to_host){
-                    connected_to_host_label = connected_to_host.data.label;
-                }
-
-                $('#config_router_add_ip_mask_iface_select_field').append('<option value="' + iface_id  + '">' + connected_to_host_label + '</option>');
-
-            });
+            FillRouterSelectWithHosts("#config_router_add_ip_mask_iface_select_field");
             break;
 
         case '101':
@@ -713,71 +651,7 @@ const ConfigRouterJobOnChange = function(evnt){
             $('div[name="config_router_select_input"]').remove();
             $(elem).insertBefore(router_job_list);
 
-            router_id = $('#router_id')[0].value;
-            if (!router_id){
-                console.log("Не нашел router_id");
-                return
-            }
-
-            n = nodes.find(n => n.data.id === router_id);
-
-            if (!n) {
-                return;
-            }
-
-            if(!n.interface.length){
-                console.log("Нет интерфейсов, нечего настраивать.");
-                return;
-            }
-
-            if(n.interface.length === 1){
-                $('#config_router_add_nat_masquerade_iface_select_field').append('<option selected value="0">Мало интерфейсов</option>');
-                return;
-            }
-
-            $('#config_router_add_nat_masquerade_iface_select_field').append('<option selected value="0">Выберите линк</option>');
-
-            $.each(n.interface, function (i) {
-                let iface_id = n.interface[i].id;
-
-                if (!iface_id){
-                    return;
-                }
-
-                let connect_id = n.interface[i].connect;
-                if (!connect_id){
-                    return;
-                }
-
-                let edge = edges.find(e => e.data.id === connect_id);
-
-                if (!edge){
-                    return;
-                }
-
-                let source_host = edge.data.source;
-                let target_host = edge.data.target;
-
-                if (!source_host || !target_host){
-                    return;
-                }
-
-                let connected_to = target_host;
-
-                if (n.data.id === target_host){
-                    connected_to = source_host;
-                }
-
-                let connected_to_host = nodes.find(n => n.data.id === connected_to);
-                let connected_to_host_label = "Unknown";
-
-                if (connected_to_host){
-                    connected_to_host_label = connected_to_host.data.label;
-                }
-
-                $('#config_router_add_nat_masquerade_iface_select_field').append('<option value="' + iface_id  + '">' + connected_to_host_label + '</option>');
-
-            });
+            FillRouterSelectWithHosts("#config_router_add_nat_masquerade_iface_select_field");
             break;
 
         case '102':
@@ -803,68 +677,7 @@ const ConfigRouterJobOnChange = function(evnt){
             $('div[name="config_router_select_input"]').remove();
             $(elem).insertBefore(router_job_list);
             
-            router_id = $('#router_id')[0].value;
-            if (!router_id) {
-                console.log("Не нашел router_id");
-                return
-            }
-            
-            n = nodes.find(n => n.data.id === router_id);
-
-            if (!n) {
-                return;
-            }
-
-            if(!n.interface.length){
-                console.log("Интерфейсов нет, нечего настраивать");
-                return;
-            }
-
-            if(n.interface.length !== 1){
-                $('#config_router_add_subinterface_iface_select_field').append('<option selected value="0">Выберите линк</option>');
-            }
-
-            $.each(n.interface, function (i) {
-                let iface_id = n.interface[i].id;
-
-                if (!iface_id){
-                    return;
-                }
-
-                let connect_id = n.interface[i].connect;
-                if (!connect_id){
-                    return;
-                }
-
-                let edge = edges.find(e => e.data.id === connect_id);
-
-                if (!edge){
-                    return;
-                }
-
-                let source_host = edge.data.source;
-                let target_host = edge.data.target;
-
-                if (!source_host || !target_host){
-                    return;
-                }
-
-                let connected_to = target_host;
-
-                if (n.data.id === target_host){
-                    connected_to = source_host;
-                }
-
-                let connected_to_host = nodes.find(n => n.data.id === connected_to);
-                let connected_to_host_label = "Unknown";
-
-                if (connected_to_host){
-                    connected_to_host_label = connected_to_host.data.label;
-                }
-
-                $('#config_router_add_subinterface_iface_select_field').append('<option value="' + iface_id  + '">' + connected_to_host_label + '</option>');
-            });
-            break;
+            FillRouterSelectWithHosts("#config_router_add_subinterface_iface_select_field");
 
         case '105':
             elem = document.getElementById('config_router_add_ipip_tunnel_script').innerHTML;
@@ -877,155 +690,9 @@ const ConfigRouterJobOnChange = function(evnt){
             $('div[name="config_router_select_input"]').remove();
             $(elem).insertBefore(router_job_list);
 
-            router_id = $('#router_id')[0].value;
-            if (!router_id) {
-                console.log("Не нашел router_id");
-                return
-            }
-
-            n = nodes.find(n => n.data.id === router_id);
-
-            if (!n) {
-                return;
-            }
-
-            if (!n.interface.length) {
-                console.log("Нет интерфейсов, нечего настраивать.");
-                return;
-            }
-
-            if (n.interface.length === 1) {
-                $('#config_router_add_ipip_tunnel_iface_select_ip_field').append('<option selected value="0">Мало интерфейсов</option>');
-                return;
-            }
-
-            $('#config_router_add_ipip_tunnel_iface_select_ip_field').append('<option selected value="0">Интерфейс начальной точки</option>');
-
-            $.each(n.interface, function (i) {
-                let iface_id = n.interface[i].id;
-                let iface_ip = n.interface[i].ip;
-
-                if (!iface_id || !iface_ip) {
-                    return;
-                }
-
-                let connect_id = n.interface[i].connect;
-                if (!connect_id) {
-                    return;
-                }
-
-                let edge = edges.find(e => e.data.id === connect_id);
-
-                if (!edge) {
-                    return;
-                }
-
-                let source_host = edge.data.source;
-                let target_host = edge.data.target;
-
-                if (!source_host || !target_host) {
-                    return;
-                }
-
-                let connected_to = target_host;
-
-                if (n.data.id === target_host) {
-                    connected_to = source_host;
-                }
-
-                let connected_to_host = nodes.find(n => n.data.id === connected_to);
-                let connected_to_host_label = "Unknown";
-
-                if (connected_to_host) {
-                    connected_to_host_label = connected_to_host.data.label;
-                }
-
-                $('#config_router_add_ipip_tunnel_iface_select_ip_field').append('<option value="' + iface_ip + '">' + connected_to_host_label + '</option>');
-
-            });
+            FillRouterSelectWithHosts("#config_router_add_ipip_tunnel_iface_select_ip_field");
 
             break;
-
-        case '105':
-            elem = document.getElementById('config_router_add_ipip_tunnel_script').innerHTML;
-            router_job_list = document.getElementById('config_router_job_list');
-
-            if (!elem || !router_job_list) {
-                return;
-            }
-
-            $('div[name="config_router_select_input"]').remove();
-            $(elem).insertBefore(router_job_list);
-
-            router_id = $('#router_id')[0].value;
-            if (!router_id) {
-                console.log("Не нашел router_id");
-                return
-            }
-
-            n = nodes.find(n => n.data.id === router_id);
-
-            if (!n) {
-                return;
-            }
-
-            if (!n.interface.length) {
-                console.log("Нет интерфейсов, нечего настраивать.");
-                return;
-            }
-
-            if (n.interface.length === 1) {
-                $('#config_router_add_ipip_tunnel_iface_select_ip_field').append('<option selected value="0">Мало интерфейсов</option>');
-                return;
-            }
-
-            $('#config_router_add_ipip_tunnel_iface_select_ip_field').append('<option selected value="0">Интерфейс начальной точки</option>');
-
-            $.each(n.interface, function (i) {
-                let iface_id = n.interface[i].id;
-                let iface_ip = n.interface[i].ip;
-
-                if (!iface_id || !iface_ip) {
-                    return;
-                }
-
-                let connect_id = n.interface[i].connect;
-                if (!connect_id) {
-                    return;
-                }
-
-                let edge = edges.find(e => e.data.id === connect_id);
-
-                if (!edge) {
-                    return;
-                }
-
-                let source_host = edge.data.source;
-                let target_host = edge.data.target;
-
-                if (!source_host || !target_host) {
-                    return;
-                }
-
-                let connected_to = target_host;
-
-                if (n.data.id === target_host) {
-                    connected_to = source_host;
-                }
-
-                let connected_to_host = nodes.find(n => n.data.id === connected_to);
-                let connected_to_host_label = "Unknown";
-
-                if (connected_to_host) {
-                    connected_to_host_label = connected_to_host.data.label;
-                }
-
-                $('#config_router_add_ipip_tunnel_iface_select_ip_field').append('<option value="' + iface_ip + '">' + connected_to_host_label + '</option>');
-
-            });
-
-            break;
-
 
         case '106':
             // Add GRE-interface
@@ -1037,84 +704,18 @@ const ConfigRouterJobOnChange = function(evnt){
                 return;
             }
 
+            // remove previous fields
             $('div[name="config_router_select_input"]').remove();
+            // add new
             $(elem).insertBefore(router_job_list);
 
-            router_id = $('#router_id')[0].value;
-            if (!router_id) {
-                console.log("Не нашел router_id");
-                return
-            }
-
-            n = nodes.find(n => n.data.id === router_id);
-
-            if (!n) {
-                return;
-            }
-
-            // Input values check
-
-            if (!n.interface.length) {
-                console.log("Нет интерфейсов, нечего настраивать.");
-                return;
-            }
-
-            if (n.interface.length === 1) {
-                $('#config_router_add_ipip_tunnel_iface_select_ip_field').append('<option selected value="0">Мало интерфейсов</option>');
-                return;
-            }
-
-            $('#config_router_add_ipip_tunnel_iface_select_ip_field').append('<option selected value="0">Интерфейс начальной точки</option>');
-
-            $.each(n.interface, function (i) {
-                let iface_id = n.interface[i].id;
-                let iface_ip = n.interface[i].ip;
-
-                if (!iface_id || !iface_ip) {
-                    return;
-                }
-
-                let connect_id = n.interface[i].connect;
-                if (!connect_id) {
-                    return;
-                }
-
-                let edge = edges.find(e => e.data.id === connect_id);
-
-                if (!edge) {
-                    return;
-                }
-
-                let source_host = edge.data.source;
-                let target_host = edge.data.target;
-
-                if (!source_host || !target_host) {
-                    return;
-                }
-
-                let connected_to = target_host;
-
-                if (n.data.id === target_host) {
-                    connected_to = source_host;
-                }
-
-                let connected_to_host = nodes.find(n => n.data.id === connected_to);
-                let connected_to_host_label = "Unknown";
-
-                if (connected_to_host) {
-                    connected_to_host_label = connected_to_host.data.label;
-                }
-
-                $('#config_router_add_ipip_tunnel_iface_select_ip_field').append('<option value="' + iface_ip + '">' + connected_to_host_label + '</option>');
-
-            });
+            FillRouterSelectWithHosts("#config_router_add_gre_interface_select_ip_field");
 
             break; 
 
         default:
             console.log("Unknown target.value");
     }
-
 }
 
 const ConfigRouterJob = function(router_jobs, shared=0)
@@ -1315,4 +916,74 @@ const DisableVLANInputs = function(n) {
         $('#' + modalId + ' :input').not('.btn-close').prop('disabled', true);
         $('#' + modalId + ' .form-check-input, ' + modalId + ' .form-switch input').prop('disabled', true);
     });
-};  
+};
+
+const FillRouterSelectWithHosts = function(select_id) {
+    /**
+    * Fill select element with network hosts.
+    * @param  {String} select_id ID(name) of the element to which you need to add data.
+   */
+
+    // configured router id
+    router_id = $('#router_id')[0].value;
+
+    if (!router_id) {
+        console.log("Не нашел router_id");
+        return
+    }
+
+    router_node = nodes.find(n => n.data.id === router_id);
+    
+    if (!router_node) {
+        console.log("Не нашел router_node");
+        return;
+    }
+
+    if (!router_node.interface.length) {
+        $(select_id).append('<option selected value="0">Мало интерфейсов</option>');
+        return;
+    } else {
+        $(select_id).append('<option selected value="0">Интерфейс начальной точки</option>');
+    }
+
+    router_node.interface.forEach(function(iface) {
+        // iterating over the router interfaces
+
+        let iface_id = iface.id;
+        let iface_ip = iface.ip;
+
+        if (!iface_id || !iface_ip) {
+            console.log("Не нашел ip/id у интерфейса");
+            return;
+        }
+
+        let connect_id = iface.connect;
+        if (!connect_id) {
+            console.log("Не нашел подключение у интерфейса");
+            return;
+        }
+
+        let edge = edges.find(e => e.data.id === connect_id);
+
+        if (!edge) {
+            console.log("Не нашел ребро по подключению интерфейса");
+            return;
+        }
+
+        let edge_source = edge.data.source;
+        let edge_target = edge.data.target;
+
+        if (!edge_source || !edge_target) {
+            console.log("Не получилось найти target и source у ребра");
+            return;
+        }
+
+        let router_connection = (router_node.data.id === edge_target) ? edge_source : edge_target;
+
+        let router_connection_host_node = nodes.find(n => n.data.id === router_connection);
+        let router_connection_host_label = (router_connection_host_node) ? router_connection_host_node.data.label : "Unknown";
+
+        $(select_id).append('<option value="' + iface_ip + '">' + router_connection_host_label + '</option>');
+
+    });
+}
