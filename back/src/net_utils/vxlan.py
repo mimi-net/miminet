@@ -1,16 +1,15 @@
 from ipmininet.ipnet import IPNet
-from typing import List
 
 from network import Node
 
 
-def setup_vtep_interfaces(net: "IPNet", nodes: List["Node"]) -> None:
+def setup_vtep_interfaces(net: IPNet, nodes: list[Node]) -> None:
     """
     Configures VXLAN interfaces on router nodes within the network.
 
     Args:
         net (IPNet): The network containing all nodes.
-        nodes (List[Node]): A list of nodes to configure.
+        nodes (list[Node]): A list of nodes to configure.
     """
     for node in nodes:
         if node.config.type == "router":
@@ -34,7 +33,7 @@ def setup_vtep_interfaces(net: "IPNet", nodes: List["Node"]) -> None:
 
 
 def setup_network_interface(
-    router: "Node", intf: str, local_ip: str, target_ips: List[List[str]]
+    router: "Node", intf: str, local_ip: str, target_ips: list[list[str]]
 ) -> None:
     """
     Sets up a VXLAN network interface on the router.
@@ -43,7 +42,7 @@ def setup_network_interface(
         router (Node): The router node where the interface will be added.
         intf (str): The name of the physical interface.
         local_ip (str): The local IP address for VXLAN.
-        target_ips (List[List[str]]): A list containing [vni, target_ip] pairs.
+        target_ips (list[list[str]]): A list containing [vni, target_ip] pairs.
     """
     # Extract unique VNIs from the target IP list
     vxlan_vnis = {elem[0] for elem in target_ips}
@@ -96,7 +95,7 @@ def setup_endpoint_interface(router: "Node", intf: str, vni: int) -> None:
     router.cmd(f"ip link set dev {intf} up")
 
 
-def teardown_vtep_bridges(net: "IPNet", nodes: List["Node"]) -> None:
+def teardown_vtep_bridges(net: "IPNet", nodes: list["Node"]) -> None:
     """
     Removes all VXLAN bridges and associated interfaces on routers after simulation.
 

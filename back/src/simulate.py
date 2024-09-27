@@ -236,10 +236,8 @@ class MyTopology(IPTopo):
             r.cmd("sysctl -w net.bridge.bridge-nf-call-ip6tables=0")
             r.cmd("sysctl -w net.ipv4.conf.all.accept_source_route=1")
             r.cmd("sysctl -w net.ipv4.conf.all.log_martians=1")
-            r.cmd("sysctl -w net.bridge.bridge-nf-call-ip6tables=0")
             r.cmd("sysctl -w net.ipv6.conf.all.disable_ipv6=1")
             r.cmd("sysctl -w net.ipv6.conf.default.disable_ipv6=1")
-            r.cmd("sysctl -w net.ipv6.conf.lo.disable_ipv6=1")
 
         for sw in net.switches:
             # print ("disable ipv6 on " + sw.name)
