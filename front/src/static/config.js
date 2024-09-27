@@ -45,7 +45,7 @@ const ServerWarningMsg = function(msg){
 }
 
 const ConfigHostForm = function(host_id){
-    let form = document.getElementById('config_main_form_script').innerHTML;
+    let form = document.getElementById('config_host_main_form_script').innerHTML;
 
     // Clear all child
     $(config_content_id).empty();
@@ -57,7 +57,7 @@ const ConfigHostForm = function(host_id){
     $('#host_id').val( host_id );
     $('#net_guid').val( network_guid );
 
-    $('#config_main_form_submit_button').click(function(event) {
+    $('#config_host_main_form_submit_button').click(function(event) {
         event.preventDefault();
         let data = $('#config_main_form').serialize();
 
@@ -248,7 +248,7 @@ const ConfigSwtichSTP = function(stp){
 }
 
 const SharedConfigHostForm = function(host_id){
-    var form = document.getElementById('config_main_form_script').innerHTML;
+    var form = document.getElementById('config_host_main_form_script').innerHTML;
 
     // Clear all child
     $(config_content_id).empty();
@@ -259,7 +259,7 @@ const SharedConfigHostForm = function(host_id){
     // Set host_id
     $('#host_id').val( host_id );
     $('#net_guid').val( network_guid );
-    $('#config_main_form_submit_button').prop('disabled', true);
+    $('#config_host_main_form_submit_button').prop('disabled', true);
 }
 
 const SharedConfigRouterForm = function(router_id){
@@ -356,7 +356,7 @@ const ConfigHostInterface = function(name, ip, netmask, connected_to){
 
     var text = eth.innerHTML;
 
-    $(text).insertBefore('#config_main_form_submit_button');
+    $(text).insertBefore('#config_host_main_form_submit_button');
     $('<input type="hidden" name="config_host_iface_ids[]" value="' + name + '"/>').insertBefore('#config_host_iface_name_' + name);
     $('#config_host_iface_name_' + name).attr("placeholder", connected_to);
     $('#config_host_ip_' + name).val(ip);
@@ -581,7 +581,7 @@ const ConfigHostGateway = function(gw){
 
     var text = document.getElementById('config_host_default_gw_script').innerHTML;
 
-    $(text).insertBefore('#config_main_form_submit_button');
+    $(text).insertBefore('#config_host_main_form_submit_button');
     $('#config_host_default_gw').val(gw);
 }
 
