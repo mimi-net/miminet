@@ -603,11 +603,6 @@ const ConfigServerGateway = function(gw){
 
 const ConfigRouterJobOnChange = function(evnt) {
 
-    let elem = null;
-    let router_job_list = null;
-    let router_node = null;
-    let router_id = null;
-
     switch(evnt.target.value)
     {
         case '0':
@@ -615,101 +610,36 @@ const ConfigRouterJobOnChange = function(evnt) {
             break;
 
         case '1':
-            elem = document.getElementById('config_router_ping_c_1_script').innerHTML;
-            router_job_list = document.getElementById('config_router_job_list');
-
-            if (!elem || !router_job_list){
-                return;
-            }
-
-            $('div[name="config_router_select_input"]').remove();
-            $(elem).insertBefore(router_job_list);
+            UpdateRouterForm('config_router_ping_c_1_script');
             break;
 
         case '100':
-            elem = document.getElementById('config_router_add_ip_mask_script').innerHTML;
-            router_job_list = document.getElementById('config_router_job_list');
-
-            if (!elem || !router_job_list){
-                return;
-            }
-
-            $('div[name="config_router_select_input"]').remove();
-            $(elem).insertBefore(router_job_list);
-
-            FillRouterSelectWithHosts("#config_router_add_ip_mask_iface_select_field");
+            UpdateRouterForm('config_router_add_ip_mask_script');
+            FillRouterSelect("#config_router_add_ip_mask_iface_select_field");
             break;
 
         case '101':
-            elem = document.getElementById('config_router_add_nat_masquerade_script').innerHTML;
-            router_job_list = document.getElementById('config_router_job_list');
-
-            if (!elem || !router_job_list){
-                return;
-            }
-
-            $('div[name="config_router_select_input"]').remove();
-            $(elem).insertBefore(router_job_list);
-
-            FillRouterSelectWithHosts("#config_router_add_nat_masquerade_iface_select_field");
+            UpdateRouterForm('config_router_add_nat_masquerade_script');
+            FillRouterSelect("#config_router_add_nat_masquerade_iface_select_field");
             break;
 
         case '102':
-            elem = document.getElementById('config_router_add_route_script').innerHTML;
-            router_job_list = document.getElementById('config_router_job_list');
-
-            if (!elem || !router_job_list){
-                return;
-            }
-
-            $('div[name="config_router_select_input"]').remove();
-            $(elem).insertBefore(router_job_list);
+            UpdateRouterForm('config_router_add_route_script');
             break;
         
         case '104':
-            elem = document.getElementById('config_router_add_subinterface_script').innerHTML;
-            router_job_list = document.getElementById('config_router_job_list');
-            
-            if (!elem || !router_job_list) {
-                return;
-            }
-            
-            $('div[name="config_router_select_input"]').remove();
-            $(elem).insertBefore(router_job_list);
-            
-            FillRouterSelectWithHosts("#config_router_add_subinterface_iface_select_field");
+            UpdateRouterForm('config_router_add_subinterface_script');
+            FillRouterSelect("#config_router_add_subinterface_iface_select_field");
 
         case '105':
-            elem = document.getElementById('config_router_add_ipip_tunnel_script').innerHTML;
-            router_job_list = document.getElementById('config_router_job_list');
-
-            if (!elem || !router_job_list) {
-                return;
-            }
-
-            $('div[name="config_router_select_input"]').remove();
-            $(elem).insertBefore(router_job_list);
-
-            FillRouterSelectWithHosts("#config_router_add_ipip_tunnel_iface_select_ip_field");
+            UpdateRouterForm('config_router_add_ipip_tunnel_script');
+            FillRouterSelect("#config_router_add_ipip_tunnel_iface_select_ip_field");
 
             break;
 
         case '106':
-            // Add GRE-interface
-
-            elem = document.getElementById('config_router_add_gre_interface_script').innerHTML;
-            router_job_list = document.getElementById('config_router_job_list');
-
-            if (!elem || !router_job_list) {
-                return;
-            }
-
-            // remove previous fields
-            $('div[name="config_router_select_input"]').remove();
-            // add new
-            $(elem).insertBefore(router_job_list);
-
-            FillRouterSelectWithHosts("#config_router_add_gre_interface_select_ip_field");
+            UpdateRouterForm('config_router_add_gre_interface_script');
+            FillRouterSelect("#config_router_add_gre_interface_select_ip_field");
 
             break; 
 
@@ -918,7 +848,22 @@ const DisableVLANInputs = function(n) {
     });
 };
 
-const FillRouterSelectWithHosts = function(select_id) {
+const UpdateRouterForm = function(name) {
+    /**
+     * Replace old form with new one
+     */
+    elem = document.getElementById(name).innerHTML;
+    router_job_list = document.getElementById('config_router_job_list');
+
+    if (!elem || !router_job_list){
+        return;
+    }
+
+    $('div[name="config_router_select_input"]').remove();
+    $(elem).insertBefore(router_job_list);
+}
+
+const FillRouterSelect = function(select_id) {
     /**
     * Fill select element with network hosts.
     * @param  {String} select_id ID(name) of the element to which you need to add data.
