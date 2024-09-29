@@ -182,22 +182,14 @@ def add_ipip_interface(job: Job, job_host: Any) -> None:
 
 
 def add_gre(job: Job, job_host: Any) -> None:
-    """Method for adding GRE"""
     arg_ip_start = job.arg_1
     arg_ip_end = job.arg_2
-    arg_ip_int = job.arg_3      # New virtual interface (IP)
-    arg_name_int = job.arg_4    # New virtual interface (Name)
-    arg_ttl = job.arg_5         # TTL (Time to Live), number in range 1-255
-
-    job_host.cmd(
-        f"ip tunnel add {arg_name_int} mode gre remote {arg_ip_end} local {arg_ip_start} ttl {arg_ttl}"
-    )
-    job_host.cmd(
-        f"ip addr add {arg_ip_int}/30 dev {arg_name_int}"
-    )
-    job_host.cmd(
-        f"ip link set {arg_name_int} up"
-    )
+    arg_ip_iface = job.arg_3    # New virtual interface (IP)
+    arg_name_iface = job.arg_4  # New virtual interface (Name) + TTL value
+    
+    job_host.cmd(f"ip tunnel add {arg_name_iface} mode gre remote {arg_ip_end} local {arg_ip_start} ttl 255")
+    job_host.cmd(f"ip addr add {arg_ip_iface}/24 dev {arg_name_iface}")
+    job_host.cmd(f"ip link set {arg_name_iface} up")
 
 
 class Jobs:

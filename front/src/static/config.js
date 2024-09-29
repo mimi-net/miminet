@@ -607,26 +607,26 @@ const ConfigRouterJobOnChange = function(evnt) {
     {
         case '0':
             $('div[name="config_router_select_input"]').remove();
-            break;
 
+            break;
         case '1':
             UpdateRouterForm('config_router_ping_c_1_script');
+            
             break;
-
         case '100':
             UpdateRouterForm('config_router_add_ip_mask_script');
             FillRouterSelect("#config_router_add_ip_mask_iface_select_field");
-            break;
 
+            break;
         case '101':
             UpdateRouterForm('config_router_add_nat_masquerade_script');
             FillRouterSelect("#config_router_add_nat_masquerade_iface_select_field");
-            break;
 
+            break;
         case '102':
             UpdateRouterForm('config_router_add_route_script');
-            break;
-        
+
+            break;  
         case '104':
             UpdateRouterForm('config_router_add_subinterface_script');
             FillRouterSelect("#config_router_add_subinterface_iface_select_field");
@@ -636,13 +636,11 @@ const ConfigRouterJobOnChange = function(evnt) {
             FillRouterSelect("#config_router_add_ipip_tunnel_iface_select_ip_field");
 
             break;
-
         case '106':
             UpdateRouterForm('config_router_add_gre_interface_script');
             FillRouterSelect("#config_router_add_gre_interface_select_ip_field");
 
             break; 
-
         default:
             console.log("Unknown target.value");
     }
