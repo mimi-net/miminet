@@ -184,10 +184,12 @@ def add_ipip_interface(job: Job, job_host: Any) -> None:
 def add_gre(job: Job, job_host: Any) -> None:
     arg_ip_start = job.arg_1
     arg_ip_end = job.arg_2
-    arg_ip_iface = job.arg_3    # New virtual interface (IP)
+    arg_ip_iface = job.arg_3  # New virtual interface (IP)
     arg_name_iface = job.arg_4  # New virtual interface (Name) + TTL value
-    
-    job_host.cmd(f"ip tunnel add {arg_name_iface} mode gre remote {arg_ip_end} local {arg_ip_start} ttl 255")
+
+    job_host.cmd(
+        f"ip tunnel add {arg_name_iface} mode gre remote {arg_ip_end} local {arg_ip_start} ttl 255"
+    )
     job_host.cmd(f"ip addr add {arg_ip_iface}/24 dev {arg_name_iface}")
     job_host.cmd(f"ip link set {arg_name_iface} up")
 
@@ -222,9 +224,7 @@ class Jobs:
         }
         self._job: Job = job
         self._job_host = job_host
-        self._strategy: Callable[[Job, Any], None] = self._dct[
-            self._job.job_id
-        ]
+        self._strategy: Callable[[Job, Any], None] = self._dct[self._job.job_id]
 
     @property
     def strategy(self) -> Callable[[Job, Any], None]:
