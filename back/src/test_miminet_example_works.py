@@ -1,5 +1,6 @@
 import dataclasses
 import re
+import json
 
 import pytest
 from tasks import simulate
@@ -12,6 +13,7 @@ class Case:
     pattern_in_network: str = r""
     pattern_len: int = 0
     pattern_for_replace: str = r""
+    exclude_regex: str = r""
 
 
 DEFAULT_JSON_TEST_DIRECTORY = "test_json/"
@@ -59,6 +61,12 @@ DINAMYC_PORT_FILE_NAMES = [
     # ("multicast_udp_traffic_network.json", "multicast_udp_traffic_answer.json", r'UDP \d+', len('UDP '), r'port'),
 ]
 
+EXCLUDE_PACKETS_FILE_NAMES = [
+    ("vlan_with_vxlan_network.json", "vlan_with_vxlan_answer.json", r"^ARP"),
+    ("vxlan_with_nat_network.json", "vxlan_with_nat_answer.json", r"^ARP"),
+    ("vxlan_simple_network.json", "vxlan_simple_answer.json", r"^ARP"),
+]
+
 TEST_CASES = [
     Case(network, answer)
     for (network, answer) in [read_files(file[0], file[1]) for file in FILE_NAMES]
@@ -71,6 +79,45 @@ DINAMYC_PORT_TEST_CASES = [
         for case in DINAMYC_PORT_FILE_NAMES
     ]
 ]
+
+EXCLUDE_PACKETS_TEST_CASES = [
+    Case(json_network=network, json_answer=answer, exclude_regex=exclude)
+    for (network, answer, exclude) in [
+        (*read_files(case[0], case[1]), case[2]) for case in EXCLUDE_PACKETS_FILE_NAMES
+    ]
+]
+
+
+def extract_important_fields(packets_json, exclude_regex=None):
+    """
+    Извлекает важные(Поля которые не меняются каждую симуляцию) поля из пакетов, исключая пакеты, соответствующие заданному регулярному выражению.
+
+    :param packets_json: JSON-строка с резкльтатами симуляции.
+    :param exclude_regex: Регулярное выражение для исключения пакетов по label.
+    """
+    packets = json.loads(packets_json)
+    important_packets = []
+    pattern = re.compile(exclude_regex) if exclude_regex else None
+    for packet_group in packets:
+        for packet in packet_group:
+            label = packet["data"]["label"]
+            pkg_type = packet["config"]["type"]
+            if pattern and pattern.match(label):
+                continue
+            # Убираем порты которые генерируются динамически
+            label = re.sub(r"(UDP )\d+ > \d+", r"\1PORT > PORT", label)
+            label = re.sub(r"(TCP .*?)\d+ > \d+", r"\1PORT > PORT", label)
+            pkg_type = re.sub(r"(UDP )\d+ > \d+", r"\1PORT > PORT", pkg_type)
+            pkg_type = re.sub(r"(TCP .*?)\d+ > \d+", r"\1PORT > PORT", pkg_type)
+            important_packet = {
+                "type": pkg_type,
+                "label": label,
+                "path": packet["config"]["path"],
+                "source": packet["config"]["source"],
+                "target": packet["config"]["target"],
+            }
+            important_packets.append(important_packet)
+    return important_packets
 
 
 @pytest.mark.parametrize("test", TEST_CASES)
@@ -91,3 +138,24 @@ def test_miminet_work_for_dinamyc_port_test_cases(test: Case) -> None:
     port = port_string.group(0)[test.pattern_len :]
     test.json_answer = re.sub(test.pattern_for_replace, port, test.json_answer)
     assert animation == test.json_answer
+
+
+@pytest.mark.parametrize("test", EXCLUDE_PACKETS_TEST_CASES)
+def test_miminet_work_with_excluded_packages(test: Case) -> None:
+    animation, pcaps = simulate(test.json_network)
+
+    animation = re.sub(r'"timestamp": "\d+"', r'"timestamp": ""', animation)
+    animation = re.sub(r'"id": "\w+"', r'"id": ""', animation)
+
+    expected_animation = re.sub(
+        r'"timestamp": "\d+"', r'"timestamp": ""', test.json_answer
+    )
+    expected_animation = re.sub(r'"id": "\w+"', r'"id": ""', expected_animation)
+
+    exclude_regex = getattr(test, "exclude_regex", None)
+
+    # Извлекаем важные поля, исключая пакеты по регулярному выражению
+    actual_packets = extract_important_fields(animation, exclude_regex)
+    expected_packets = extract_important_fields(expected_animation, exclude_regex)
+
+    assert actual_packets == expected_packets

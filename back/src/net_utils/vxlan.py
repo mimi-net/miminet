@@ -1,3 +1,5 @@
+import re
+
 from ipmininet.ipnet import IPNet
 
 from network import Node
@@ -48,9 +50,10 @@ def setup_network_interface(
     vxlan_vnis = {elem[0] for elem in target_ips}
 
     for vni in vxlan_vnis:
-        # Generate interface and bridge names
-        vxlan_name = f"vx{router.name}-{vni}"[-15:]
-        bridge_name = f"br-{router.name}-{vni}"[-15:]
+        # Generate interface and bridge name
+
+        vxlan_name = re.sub(r"[^a-zA-Z0-9\-_]", "", f"vx{router.name}-{vni}")[-15:]
+        bridge_name = re.sub(r"[^a-zA-Z0-9\-_]", "", f"br-{router.name}-{vni}")[-15:]
 
         vxlan_name = f'"{vxlan_name}"'
         bridge_name = f'"{bridge_name}"'
@@ -70,7 +73,7 @@ def setup_network_interface(
     # Populate forwarding database (FDB) with target MAC addresses and destinations
     for elem in target_ips:
         vni, target_ip = elem
-        vxlan_name = f"vx{router.name}-{vni}"[-15:]
+        vxlan_name = re.sub(r"[^a-zA-Z0-9\-_]", "", f"vx{router.name}-{vni}")[-15:]
         vxlan_name = f'"{vxlan_name}"'
 
         router.cmd(
@@ -87,7 +90,7 @@ def setup_endpoint_interface(router: "Node", intf: str, vni: int) -> None:
         intf (str): The name of the physical interface.
         vni (int): The VXLAN Network Identifier.
     """
-    bridge_name = f"br-{router.name}-{vni}"[-15:]
+    bridge_name = re.sub(r"[^a-zA-Z0-9\-_]", "", f"br-{router.name}-{vni}")[-15:]
     bridge_name = f'"{bridge_name}"'
 
     # Attach physical interface to the bridge and bring it up
@@ -116,8 +119,13 @@ def teardown_vtep_bridges(net: "IPNet", nodes: list["Node"]) -> None:
                     vxlan_vnis = {elem[0] for elem in target_ips}
 
                     for vni in vxlan_vnis:
-                        vxlan_name = f"vx{router.name}-{vni}"[-15:]
-                        bridge_name = f"br-{router.name}-{vni}"[-15:]
+                        vxlan_name = re.sub(
+                            r"[^a-zA-Z0-9\-_]", "", f"vx{router.name}-{vni}"
+                        )[-15:]
+                        bridge_name = re.sub(
+                            r"[^a-zA-Z0-9\-_]", "", f"br-{router.name}-{vni}"
+                        )[-15:]
+
                         vxlan_name = f'"{vxlan_name}"'
                         bridge_name = f'"{bridge_name}"'
 
