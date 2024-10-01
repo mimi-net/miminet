@@ -90,10 +90,10 @@ EXCLUDE_PACKETS_TEST_CASES = [
 
 def extract_important_fields(packets_json, exclude_regex=None):
     """
-    Извлекает важные(Поля которые не меняются каждую симуляцию) поля из пакетов, исключая пакеты, соответствующие заданному регулярному выражению.
+    Извлекает важные(которые не меняются каждую симуляцию) поля из пакетов, исключая пакеты, соответствующие заданному регулярному выражению.
 
-    :param packets_json: JSON-строка с резкльтатами симуляции.
-    :param exclude_regex: Регулярное выражение для исключения пакетов по label.
+    :param packets_json: JSON-строка с результатами симуляции.
+    :param exclude_regex: Регулярное выражение для исключения пакетов по label и type.
     """
     packets = json.loads(packets_json)
     important_packets = []
