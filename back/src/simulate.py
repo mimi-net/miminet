@@ -351,7 +351,9 @@ def do_job(job: Job, net: IPNet) -> None:
     """
 
     host_id = job.host_id
+    # get host from network by it's ID
     job_host = net.get(host_id)
+    # initialize new Job by host and job type
     current_job = Jobs(job, job_host)
     current_job.handler()
 
