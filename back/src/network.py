@@ -38,6 +38,7 @@ class NodeConfig:
 
 @dataclass
 class NodeInterface:
+  
     """
     Represents an interface of a network node.
 
@@ -49,8 +50,9 @@ class NodeInterface:
         netmask (int): Netmask.
         vlan (Union[int, List[int], None]): VLAN ID or list of VLANs.
         type_connection (Optional[int]): Type of connection (0 - Access, 1 - Trunk).
+        
     """
-
+    
     connect: str
     id: str
     name: str = ""
@@ -58,6 +60,9 @@ class NodeInterface:
     netmask: int = 0
     vlan: Union[int, list[int], None] = None
     type_connection: Optional[int] = None
+    vxlan_vni: Optional[int] = None
+    vxlan_connection_type: Optional[int] = None
+    vxlan_vni_to_target_ip: Optional[list[list[str]]] = None
 
 
 @dataclass

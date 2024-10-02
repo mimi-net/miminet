@@ -247,8 +247,11 @@ const ShowRouterConfig = function(n, shared = 0){
         ConfigRouterGateway(default_gw);
     }
 
+    ConfigVxlan(n);
+
     if (shared){
         DisableFormInputs();
+        DisableVXLANInputs(n);
     }
 }
 
