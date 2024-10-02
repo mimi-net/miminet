@@ -1119,6 +1119,100 @@ def save_router_config():
                                 }
                             )
 
+                    if job_id == 106:
+                        # GRE Interface
+                        job_106_start_ip = request.form.get(
+                            "config_router_add_gre_interface_select_ip_field"
+                        )
+                        job_106_end_ip = request.form.get(
+                            "config_router_add_gre_interface_end_ip_input_field"
+                        )
+                        job_106_iface_ip = request.form.get(
+                            "config_router_add_gre_interface_ip_input_field"
+                        )
+                        job_106_iface_name = request.form.get(
+                            "config_router_add_gre_interface_name_field"
+                        )
+
+                        if not job_106_start_ip or job_106_start_ip == "0":
+                            ret.update(
+                                {
+                                    "warning": (
+                                        'Не выбран интерфейс начальной точки для команды "Добавить GRE-интерфейс"'
+                                    )
+                                }
+                            )
+                            return make_response(jsonify(ret), 200)
+
+                        if not job_106_end_ip:
+                            ret.update(
+                                {
+                                    "warning": (
+                                        'Не указан IP адрес конечной точки для команды "Добавить GRE-интерфейс"'
+                                    )
+                                }
+                            )
+                            return make_response(jsonify(ret), 200)
+
+                        if not job_106_iface_ip:
+                            ret.update(
+                                {
+                                    "warning": (
+                                        'Не указан IP адрес для GRE-интерфейса для команды "Добавить GRE-интерфейс"'
+                                    )
+                                }
+                            )
+                            return make_response(jsonify(ret), 200)
+
+                        if not job_106_iface_name:
+                            ret.update(
+                                {"warning": ("Не указано название для GRE-интерфейса")}
+                            )
+                            return make_response(jsonify(ret), 200)
+
+                        if not bool(
+                            re.match(
+                                "^[A-Za-z][A-Za-z0-9_-]{1,14}$", job_106_iface_name
+                            )
+                        ):
+                            ret.update(
+                                {
+                                    "warning": (
+                                        "Название GRE-интерфейса указано неверно. "
+                                        "Допустимая длина от 2 до 15, допустимые символы: a-z, A-Z, 0-9, -, _."
+                                    )
+                                }
+                            )
+                            return make_response(jsonify(ret), 200)
+
+                        try:
+                            socket.inet_aton(job_106_start_ip)
+                            socket.inet_aton(job_106_end_ip)
+                            jnet["jobs"].append(
+                                {
+                                    "id": job_id_generator(),
+                                    "level": job_level,
+                                    "job_id": job_id,
+                                    "host_id": node["data"]["id"],
+                                    "arg_1": job_106_start_ip,
+                                    "arg_2": job_106_end_ip,
+                                    "arg_3": job_106_iface_ip,
+                                    "arg_4": job_106_iface_name,
+                                    "print_cmd": (
+                                        f"gre: {job_106_iface_name} from {job_106_start_ip} to {job_106_end_ip} \n{job_106_iface_name}: {job_106_iface_ip}"
+                                    ),
+                                }
+                            )
+                        except Exception as e:
+                            ret.update(
+                                {
+                                    "warning": (
+                                        "Ошибка при добавлении GRE-интерфейса!"
+                                        f"{str(repr(e))}"
+                                    )
+                                }
+                            )
+
         # Set IP adresses
         iface_ids = request.form.getlist("config_router_iface_ids[]")
         for iface_id in iface_ids:

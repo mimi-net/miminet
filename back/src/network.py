@@ -1,5 +1,4 @@
-# Classes for deserialize miminet network
-# Classes for deserialize miminet network
+""" Classes for deserializing a Miminet network """
 
 from dataclasses import dataclass
 from typing import Union, Optional
@@ -7,12 +6,12 @@ from typing import Union, Optional
 
 @dataclass
 class NodeData:
-    """NodeData
+    """
+    Represents data associated with a network node.
 
-    Args:
-        id (int): node id
-        label (str): node label
-
+    Attributes:
+        id (str): Unique identifier for the node.
+        label (str): Human-readable label for the node.
     """
 
     id: str
@@ -21,14 +20,14 @@ class NodeData:
 
 @dataclass
 class NodeConfig:
-    """NodeConfig
+    """
+    Configuration settings for a network node.
 
-    Args:
-        label (str): node label (for example, l2sw1)
-        type (str): node type (for example, l2_switch)
-        stp (int): 1 if need stp
-        default_gw (str): default gateway
-
+    Attributes:
+        label (str): Label for the node (e.g., "l2sw1").
+        type (str): Node type (e.g., "l2_switch").
+        stp (int): 1 if spanning tree protocol (STP) is enabled; 0 otherwise.
+        default_gw (str): Default gateway for the node.
     """
 
     label: str = ""
@@ -39,16 +38,17 @@ class NodeConfig:
 
 @dataclass
 class NodeInterface:
-    """NodeInterface
+    """
+    Represents an interface of a network node.
 
-    Args:
-        connect (str): node label (for example, l2sw1)
-        id (str): interface id (for example, l2sw1_1)
-        name (str): interface name (for example, l2sw1_1)
-        ip (str): ip (for example, 10.0.0.1)
-        netmask (str): netmask
-        vlan (Union[int, List[int], None]): VLAN ID or list of VLAN
-        type_connection (Optional[int]): Connection type (0 - Access, 1 - Trunk)
+    Attributes:
+        connect (str): Label of the node the interface connects to (e.g., "l2sw1").
+        id (str): Unique identifier for the interface (e.g., "l2sw1_1").
+        name (str): Name of the interface (e.g., "l2sw1_1").
+        ip (str): IP address (e.g., "10.0.0.1").
+        netmask (int): Netmask.
+        vlan (Union[int, List[int], None]): VLAN ID or list of VLANs.
+        type_connection (Optional[int]): Type of connection (0 - Access, 1 - Trunk).
 
     """
 
@@ -59,16 +59,19 @@ class NodeInterface:
     netmask: int = 0
     vlan: Union[int, list[int], None] = None
     type_connection: Optional[int] = None
+    vxlan_vni: Optional[int] = None
+    vxlan_connection_type: Optional[int] = None
+    vxlan_vni_to_target_ip: Optional[list[list[str]]] = None
 
 
 @dataclass
 class NodePosition:
-    """NodePosition
+    """
+    Represents the graphical position of a node.
 
-    Args:
-        x (float): x node position
-        y (float): y node position
-
+    Attributes:
+        x (float): X-coordinate.
+        y (float): Y-coordinate.
     """
 
     x: float
@@ -77,15 +80,15 @@ class NodePosition:
 
 @dataclass
 class Node:
-    """Node
+    """
+    Represents a network node with its configuration, data, interfaces, position, and classes.
 
-    Args:
-        config (NodeConfig): NodeConfig instance
-        data (NodeData) : NodeData instance
-        interface (list[NodeInterface]): list of NodeInterface instance
-        position (NodePosition): NodePosition instance
-        classes (list[str]): for example(["l2_switch"])
-
+    Attributes:
+        config (NodeConfig): Configuration settings.
+        data (NodeData): Data associated.
+        interface (list[NodeInterface]): List of interfaces.
+        position (NodePosition): Graphical position.
+        classes (list[str]): Node classes (e.g., ["l2_switch"]).
     """
 
     config: NodeConfig
@@ -97,12 +100,12 @@ class Node:
 
 @dataclass
 class EdgeData:
-    """EdgeData
+    """Represents data associated with an edge connecting two nodes.
 
     Args:
-        id (str): edge id
-        source (str) : edge source (for example, "host_2")
-        target (str): edge target (for example, "l1hub1")
+        id (str): Unique identifier for the edge.
+        source (str) : Label of the source node.(e.g., "host_2")
+        target (str): Label of the target node. (e.g., "l1hub1")
 
     """
 
@@ -113,11 +116,11 @@ class EdgeData:
 
 @dataclass
 class Edge:
-    """Edge
+    """
+    Represents an edge connecting two nodes.
 
-    Args:
-        data (EdgeData): EdgeData instance
-
+    Attributes:
+        data (EdgeData): Data associated with the edge.
     """
 
     data: EdgeData
@@ -125,14 +128,15 @@ class Edge:
 
 @dataclass
 class Job:
-    """Job
+    """
+    Represents a job to be executed on the network (e.g., ping).
 
     Args:
         id (str): str job id
         level (int): job level
         job_id (int): int job id (for execute)
-        host_id (str): host id for job executing (for example, host_1)
-        arg_1 (str): parameter for job executing (for example, ip, port, netmask, ...)
+        host_id (str): host id for job executing (e.g., host_1)
+        arg_1 (str): parameter for job executing (e.g., example, ip, port, netmask, ...)
         arg_2 (str): parameter for job executing
         arg_3 (str): parameter for job executing
         arg_4 (str): parameter for job executing
@@ -151,12 +155,13 @@ class Job:
 
 @dataclass
 class NetworkConfig:
-    """Job
+    """
+    Configuration settings for the overall network visualization.
 
     Args:
-        zoom (float): zoom
-        pan_x (float): pan-x
-        pan_y (float): pan-y
+        zoom (float): Zoom level for the network view.
+        pan_x (float): Horizontal pan offset for the view.
+        pan_y (float): Vertical pan offset for the view.
 
     """
 
@@ -167,15 +172,16 @@ class NetworkConfig:
 
 @dataclass
 class Network:
-    """Job
+    """
+    Represents the complete Mininet network with nodes, edges, jobs, configuration, and network traffic data.
 
     Args:
-        nodes (list[Node]): list of Node instance
-        edges (list[Edge]): list of Edges instance
-        jobs (list[Job]): list of Jobs instance
-        config (NetworkConfig): NetworkConfig instance
+        nodes (list[Node]): list of network nodes.
+        edges (list[Edge]): list of connections between nodes.
+        jobs (list[Job]): List of jobs to be executed on the network.
+        config (NetworkConfig): Network visualization configuration.
         packets (str): packets
-        pcap (list[str]): pcaps
+        pcap (list[str]): List of PCAP files containing network traffic data.
 
     """
 
