@@ -1,9 +1,13 @@
+from abc import abstractmethod
 import json
+from ossaudiodev import control_labels
 import re
 import socket
 import uuid
+import ipaddress
 
-from flask import jsonify, make_response, request
+from typing import Optional
+from flask import jsonify, make_response, request, Response
 from flask_login import current_user, login_required
 from miminet_model import Network, Simulate, db
 
@@ -12,47 +16,273 @@ def job_id_generator():
     return uuid.uuid4().hex
 
 
+class ResultCode:
+    OK = 200
+    ERROR = 400
+
+
+def get_data(arg: str):
+    """Get data from user's request"""
+    return request.form.get(arg, type=str)
+
+
+def build_response(message: str, code: ResultCode = ResultCode.ERROR) -> Response:
+    """Create server response with specified message"""
+    ret = {"message": message}
+    return make_response(jsonify(ret), code)
+
+
+# ------ Argument Validators ------
+# (you can add your checks here)
+
+
+class AbstractArgValidator:
+    """Perform correctness check of the argument"""
+
+    @abstractmethod
+    def check(self, arg: str) -> bool:
+        """Return True if the argument passes the check"""
+        pass
+
+
+class IPv4Check(AbstractArgValidator):
+    """Check IP address correctness"""
+
+    def check(self, arg: str) -> bool:
+        try:
+            ipaddress.ip_address(arg)
+            return True
+        except:
+            return False
+
+
+class RangeCheck(AbstractArgValidator):
+    """Check if a number is within range"""
+
+    def __init__(self, range: range):
+        self.__range = range
+
+    def check(self, arg: str) -> bool:
+        try:
+            return int(arg) in self.__range
+        except:
+            return False
+
+
+class MaskCheck(AbstractArgValidator):
+    """Check subnet mask correctness"""
+
+    def check(self, arg: str) -> bool:
+        try:
+            return int(arg) in range(0, 33)
+        except:
+            return False
+
+
+class PortCheck(AbstractArgValidator):
+    """Check subnet mask correctness"""
+
+    def check(self, arg: str) -> bool:
+        try:
+            return int(arg) in range(0, 65536)
+        except:
+            return False
+
+
+class NameCheck(AbstractArgValidator):
+    """Checks that the name is in the allowed length from 2 to 15,
+    from allowed characters: a-z, A-Z, 0-9, -, _."""
+
+    def check(self, arg: str) -> bool:
+        return re.match("^[A-Za-z][A-Za-z0-9_-]{1,14}$", arg)
+
+
+class ASCIICheck(AbstractArgValidator):
+    """Check whether all characters in a string are ASCII characters"""
+
+    def check(self, arg: str) -> bool:
+        return arg.isascii()
+
+
+class EmptinessCheck(AbstractArgValidator):
+    """Check if the Python String is empty or not"""
+
+    def check(self, arg: str) -> bool:
+        return not arg
+
+
+class RegexCheck(AbstractArgValidator):
+    """Check if a string matches the given regex"""
+
+    def __init__(self, regex: str):
+        self.__pattern = re.compile(regex)
+
+    def check(self, arg: str) -> bool:
+        return bool(self.__pattern.match(arg))
+
+
+# ------ Jobs ------
+class JobBuilder:
+    def __init__(self, job_id: int, level: int, host_id: str, job_sign: str):
+        """
+        Args:
+            job_id (int): ID that is assigned to the job in the select list (see static/config*.html files)
+            level (int): job level in the device configuration list
+            host_id (str): device ID for which this job is assigned
+            job_sign (str): inscription that will be displayed above the device after adding a job
+        """
+        self.id: str = uuid.uuid4().hex  # random id
+        self.job_id: int = job_id
+        self.level: int = level
+        self.host_id: int = host_id
+        self.print_cmd: str = job_sign
+        self.args: list[str] = []
+
+
+class JobArg:
+    """Class with Job arguments data"""
+
+    def __init__(self, control_id: str):
+        """
+        Args:
+            cotrol_id (str): ID of the element with argument data
+        """
+        arg = request.form.get(control_id)
+        self.__arg: Optional[str] = None
+
+        if arg:  # if the data was successfully received
+            self.__arg = arg
+
+    @property
+    def arg(self) -> Optional[str]:
+        """None if argument didn't pass the checks"""
+        return self.__arg
+
+    def add_check(self, validator: AbstractArgValidator):
+        if (self.__arg is not None) and (not validator.check(self.__arg)):
+            self.__arg = None
+
+
+# ------ Network Device Configurators ------
+
+
 @login_required
 def delete_job():
+    """
+    Called when job is removed for an network element
+    """
     user = current_user
-    network_guid = request.form.get("guid", type=str)
-    jid = request.form.get("id", type=str)
+    network_guid = get_data("guid")
+    jid = get_data("id")
 
     if request.method != "POST":
-        ret = {"message": "Неверный запрос"}
-        return make_response(jsonify(ret), 400)
+        return build_response("Неверный запрос")
 
     if not network_guid:
-        ret = {"message": "Не указан параметр net_guid"}
-        return make_response(jsonify(ret), 400)
+        return build_response("Не указан параметр net_guid")
 
-    net = (
+    cur_network: Network = (
         Network.query.filter(Network.guid == network_guid)
         .filter(Network.author_id == user.id)
         .first()
     )
 
-    if not net:
-        ret = {"message": "Такая сеть не найдена"}
-        return make_response(jsonify(ret), 400)
+    if not cur_network:
+        return build_response("Такая сеть не найдена")
 
-    jnet = json.loads(net.network)
+    json_network: dict = json.loads(cur_network.network)
 
-    jobs = jnet["jobs"]
-    jj = list(filter(lambda x: x["id"] != jid, jobs))
-    jnet["jobs"] = jj
+    # get jobs & remove one
+    jobs: list = json_network["jobs"]
+    new_jobs: list = list(filter(lambda x: x["id"] != jid, jobs))
+    json_network["jobs"] = new_jobs
 
-    net.network = json.dumps(jnet)
+    # update network
+    cur_network.network = json.dumps(json_network)
 
     # Remove all previous simulations
-    sims = Simulate.query.filter(Simulate.network_id == net.id).all()
+    sims = Simulate.query.filter(Simulate.network_id == cur_network.id).all()
     for s in sims:
         db.session.delete(s)
 
     db.session.commit()
 
-    ret = {"message": "Команда удалена", "jobs": jnet["jobs"]}
-    return make_response(jsonify(ret), 200)
+    return build_response("Команда удалена", ResultCode.OK)
+
+
+@login_required
+def save_config(device_name: str):
+    """
+    Called on network element configuration saving
+    """
+    # check request correctness
+    if request.method != "POST":
+        return build_response("Неверный запрос: ожидался POST")
+
+    network_guid = get_data("net_guid")
+
+    if not network_guid:
+        return build_response("Не указан параметр net_guid")
+
+    # get user's network
+    cur_network: Network = (
+        Network.query.filter(Network.guid == network_guid)
+        .filter(Network.author_id == current_user.id)
+        .first()
+    )
+
+    if not cur_network:
+        return build_response("Сеть не найдена")
+
+    # get element (host, hub, switch, ...)
+    element_form_id = f"{device_name}_id"
+    device_id = get_data(element_form_id)
+
+    if not device_id:
+        return build_response(f"Не указан параметр {element_form_id}")
+
+    # json representation
+    json_network: dict = json.loads(cur_network.network)
+    nodes: list = json_network["nodes"]
+
+    # find all matches with device in nodes
+    filt_nodes = list(filter(lambda n: n["data"]["id"] == device_id, nodes))
+
+    if not filt_nodes:
+        return build_response(f"Такого элемента '{device_name}' не существует")
+
+    # current device's node
+    cur_node = filt_nodes[0]
+
+    # get label with device name
+    label = request.form.get(f"config_{device_name}_name")
+
+    if not label:
+        return build_response("Неверный запрос: не получилось обновить имя устройства")
+
+    # update device name (?)
+    cur_node["config"]["label"] = label
+    cur_node["data"]["label"] = cur_node["config"]["label"]
+
+    cur_network.network = json.dumps(json_network)
+    db.session.commit()
+
+    # -------- STP --------
+
+    switch_stp = request.form.get("config_switch_stp")
+
+    cur_node["config"]["stp"] = 0
+    if switch_stp == "on":
+        cur_node["config"]["stp"] = 1
+
+    # -------- STP --------
+
+    # Remove all previous simulations (after configuration update)
+    sims = Simulate.query.filter(Simulate.network_id == cur_network.id).all()
+    for s in sims:
+        db.session.delete(s)
+
+    return build_response("Конфигурация обновлена", ResultCode.OK)
 
 
 @login_required
@@ -211,6 +441,8 @@ def save_host_config():
         node = nn[0]
 
         # Add job?
+
+        # Get job ID from select field
         job_id = int(request.form.get("config_host_job_select_field"))
 
         if job_id:
@@ -686,6 +918,7 @@ def save_host_config():
             node["config"]["label"] = host_label
             node["data"]["label"] = node["config"]["label"]
 
+        # Add gateway
         default_gw = request.form.get("config_host_default_gw")
 
         if default_gw:
@@ -757,8 +990,8 @@ def save_router_config():
 
         node = nn[0]
 
-        # Add job?
         if "config_router_job_select_field" in request.form:
+            # If we add new job to configuration
             job_id = int(request.form.get("config_router_job_select_field"))
 
             if job_id:
