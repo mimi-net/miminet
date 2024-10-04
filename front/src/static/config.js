@@ -632,6 +632,7 @@ const ConfigRouterJobOnChange = function(evnt) {
             UpdateRouterForm('config_router_add_subinterface_script');
             FillRouterSelect("#config_router_add_subinterface_iface_select_field");
 
+            break;
         case '105':
             UpdateRouterForm('config_router_add_ipip_tunnel_script');
             FillRouterSelect("#config_router_add_ipip_tunnel_iface_select_ip_field");
