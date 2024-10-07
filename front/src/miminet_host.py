@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from ast import Call
 import json
 from ossaudiodev import control_labels
 import re
@@ -6,7 +7,7 @@ import socket
 import uuid
 import ipaddress
 
-from typing import Optional
+from typing import Optional, Callable
 from flask import jsonify, make_response, request, Response
 from flask_login import current_user, login_required
 from miminet_model import Network, Simulate, db
@@ -26,103 +27,118 @@ def get_data(arg: str):
     return request.form.get(arg, type=str)
 
 
-def build_response(message: str, code: ResultCode = ResultCode.ERROR) -> Response:
+def build_response(message: str, code = ResultCode.ERROR) -> Response:
     """Create server response with specified message"""
-    ret = {"message": message}
-    return make_response(jsonify(ret), code)
+    return make_response(jsonify({'message': message}), code)
 
 
 # ------ Argument Validators ------
 # (you can add your checks here)
 
 
-class AbstractArgValidator:
-    """Perform correctness check of the argument"""
-
-    @abstractmethod
-    def check(self, arg: str) -> bool:
-        """Return True if the argument passes the check"""
-        pass
-
-
-class IPv4Check(AbstractArgValidator):
+def IPv4_check(self, arg: str) -> bool:
     """Check IP address correctness"""
-
-    def check(self, arg: str) -> bool:
-        try:
-            ipaddress.ip_address(arg)
-            return True
-        except:
-            return False
+    try:
+        ipaddress.ip_address(arg)
+        return True
+    except:
+        return False
 
 
-class RangeCheck(AbstractArgValidator):
-    """Check if a number is within range"""
-
-    def __init__(self, range: range):
-        self.__range = range
-
-    def check(self, arg: str) -> bool:
-        try:
-            return int(arg) in self.__range
-        except:
-            return False
+def range_check(arg: str, range: range) -> bool:
+    """Check if a number is within a specified range"""
+    try:
+        return int(arg) in range
+    except:
+        return False
 
 
-class MaskCheck(AbstractArgValidator):
+def mask_check(arg: str) -> bool:
     """Check subnet mask correctness"""
-
-    def check(self, arg: str) -> bool:
-        try:
-            return int(arg) in range(0, 33)
-        except:
-            return False
+    try:
+        return int(arg) in range(0, 33)
+    except:
+        return False
 
 
-class PortCheck(AbstractArgValidator):
-    """Check subnet mask correctness"""
-
-    def check(self, arg: str) -> bool:
-        try:
-            return int(arg) in range(0, 65536)
-        except:
-            return False
+def port_check(self, arg: str) -> bool:
+    """Check port correctness"""
+    try:
+        return int(arg) in range(0, 65536)
+    except:
+        return False
 
 
-class NameCheck(AbstractArgValidator):
+def name_check(arg: str) -> bool:
     """Checks that the name is in the allowed length from 2 to 15,
     from allowed characters: a-z, A-Z, 0-9, -, _."""
-
-    def check(self, arg: str) -> bool:
-        return re.match("^[A-Za-z][A-Za-z0-9_-]{1,14}$", arg)
+    return re.match("^[A-Za-z][A-Za-z0-9_-]{1,14}$", arg)
 
 
-class ASCIICheck(AbstractArgValidator):
+def ascii_check(arg: str) -> bool:
     """Check whether all characters in a string are ASCII characters"""
-
-    def check(self, arg: str) -> bool:
-        return arg.isascii()
+    return arg.isascii()
 
 
-class EmptinessCheck(AbstractArgValidator):
+def emptiness_check(arg: str) -> bool:
     """Check if the Python String is empty or not"""
-
-    def check(self, arg: str) -> bool:
-        return not arg
+    return not arg
 
 
-class RegexCheck(AbstractArgValidator):
+def regex_check(arg: str, regex: str) -> bool:
     """Check if a string matches the given regex"""
-
-    def __init__(self, regex: str):
-        self.__pattern = re.compile(regex)
-
-    def check(self, arg: str) -> bool:
-        return bool(self.__pattern.match(arg))
+    return bool(re.match(regex, arg))
 
 
 # ------ Jobs ------
-class JobBuilder:
+class JobArgConfigurator:
+    """Class with Job arguments data"""
+
+    def __init__(self, control_id: str):
+        """
+        Args:
+            cotrol_id (str): ID of the element with argument data
+        """
+        self.__control_id: str = control_id
+        self.__validators: list[Callable[[str], bool]] = []
+        self.__error_msg: str = "Невозможно добавить команду: ошибка в аргументе"
+
+    def set_error_msg(self, msg: str):
+        if not msg:
+            raise ValueError("Incorrect error message")
+
+        self.__error_msg = msg
+        return self
+
+    @property
+    def error_msg(self):
+        return self.__error_msg
+
+    def add_check(self, validator: Callable[[str], bool]):
+        """Add new check for job param
+        Args:
+            validator (Callable[[str], bool]): function that takes a string and returns True if it passes the check_
+        """
+        self.__validators.append(validator)
+
+        return self
+
+    def configure(self) -> Optional[str]:
+        """Get an element from the request and performs validation
+
+        Returns:
+            Optional[str]: None if argument didn't pass checks
+        """
+        arg = request.form.get(self.__control_id, type=str)
+
+        if all(validate(arg) for validate in self.__validators):
+            return arg
+        return None
+
+
+class JobConfigurator:
+    """Frontend job configurator"""
+
     def __init__(self, job_id: int, level: int, host_id: str, job_sign: str):
         """
         Args:
@@ -131,40 +147,178 @@ class JobBuilder:
             host_id (str): device ID for which this job is assigned
             job_sign (str): inscription that will be displayed above the device after adding a job
         """
-        self.id: str = uuid.uuid4().hex  # random id
-        self.job_id: int = job_id
-        self.level: int = level
-        self.host_id: int = host_id
-        self.print_cmd: str = job_sign
-        self.args: list[str] = []
+        self.__id: str = uuid.uuid4().hex  # random id
+        self.__job_id: int = job_id
+        self.__level: int = level
+        self.__host_id: int = host_id
+        self.__print_cmd: str = job_sign
+        self.__arg_confs: list[JobArgConfigurator] = []
 
-
-class JobArg:
-    """Class with Job arguments data"""
-
-    def __init__(self, control_id: str):
+    def add_param(self, control_id: str) -> JobArgConfigurator:
         """
         Args:
             cotrol_id (str): ID of the element with argument data
         """
-        arg = request.form.get(control_id)
-        self.__arg: Optional[str] = None
+        new_arg = JobArgConfigurator(control_id)
+        self.__arg_confs.append(new_arg)
+        return new_arg
 
-        if arg:  # if the data was successfully received
-            self.__arg = arg
+    def configure(self) -> dict[str, str]:
+        """Validate every argument and return dict with response for the user's request"""
+        configured_args = [arg.configure() for arg in self.__arg_confs]
 
-    @property
-    def arg(self) -> Optional[str]:
-        """None if argument didn't pass the checks"""
-        return self.__arg
+        # check whether the arguments passed the checks
+        for i in range(configured_args):
+            if configured_args[i] is None:
+                # return warning for user with arg error message
+                return {"warning": self.__arg_confs[i].error_msg}
 
-    def add_check(self, validator: AbstractArgValidator):
-        if (self.__arg is not None) and (not validator.check(self.__arg)):
-            self.__arg = None
+        # insert arguments into label string
+        command_label: str = self.__print_cmd
+        for i, arg in enumerate(self.configured_args):
+            command_label = command_label.replace(f"[{i+1}]", arg)
+
+        response = {
+                    "id": self.__id,
+                    "level": self.__level,
+                    "job_id": self.__job_id,
+                    "host_id": self.__host_id,
+                    "print_cmd": command_label
+                    }
+
+        # add args to response
+        for i, arg in enumerate(self.configured_args):
+            response[f"arg_{i+1}"] = arg
+
+        return response
 
 
 # ------ Network Device Configurators ------
+class RequestArgError(Exception):
+    def __init__(self, message):            
+        super().__init__(message)
 
+class AbstractDeviceConfigurator():
+    def __init__(self, device_type: str):
+        self.__jobs: list[JobConfigurator] = []
+        self.__device_type: str = device_type
+        self._device_node = None # current device node in miminet network
+
+    def add_job(self, job: JobConfigurator):
+        self.__jobs.append(job)
+
+    def add_jobs(self, *jobs):
+        for job in jobs: self.add_job(job)
+
+    # [!] I have broken device configuration process into different blocks, they will be below
+
+    def _setup_configuration(self):
+        """Prepare variables for configuring"""
+        # check request correctness
+        if request.method != "POST":
+            raise RequestArgError("Неверный запрос: ожидался POST")
+
+        network_guid = get_data("net_guid")
+
+        if not network_guid:
+            return RequestArgError("Не указан параметр net_guid")
+
+        # get user's network
+        self._cur_network: Network = (
+            Network.query.filter(Network.guid == network_guid)
+            .filter(Network.author_id == current_user.id)
+            .first()
+        )
+
+        if not self._cur_network:
+            return RequestArgError("Сеть не найдена")
+
+        # get element (host, hub, switch, ...)
+        element_form_id = f"{self.__device_type}_id"
+        device_id = get_data(element_form_id)
+
+        if not device_id:
+            return RequestArgError("Не указан параметр {element_form_id}")
+
+        # json representation
+        self._json_network: dict = json.loads(self._cur_network.network)
+        self._nodes: list = self._json_network["nodes"]
+
+        # find all matches with device in nodes
+        filt_nodes = list(filter(lambda n: n["data"]["id"] == device_id, self._nodes))
+
+        if not filt_nodes:
+            return RequestArgError(f"Такого '{self.__device_type}' не существует")
+
+        # current device's node
+        self._device_node = filt_nodes[0]
+
+
+    def _update_label(self):
+        """Update device label during configuration. Typically used at the end of the configuration"""
+        # get label with device name
+        label = request.form.get(f"config_{self.__device_type}_name")
+
+        if not label:
+            return RequestArgError("Неверный запрос: не получилось обновить имя устройства")
+        
+        self._device_node["config"]["label"] = label
+        self._device_node["data"]["label"] = self._device_node["config"]["label"]
+    
+    def _delete_sims(self):
+        """Delete saved simulations. Typically used at the end of the configuration"""
+        self._cur_network.network = json.dumps(self._json_network)
+        db.session.commit()
+
+        # Remove all previous simulations (after configuration update)
+        sims = Simulate.query.filter(Simulate.network_id == self._cur_network.id).all()
+        for s in sims:
+            db.session.delete(s)
+
+    @abstractmethod
+    def configure(self) -> Response:
+        pass
+
+class HubConfigurator(AbstractDeviceConfigurator):
+    def __init__(self):
+        super().__init__(device_type='hub')
+
+    def configure(self) -> Response:
+        try:
+            self._setup_configuration()
+            self._update_label()
+            self._delete_sims()
+        except RequestArgError as e:
+            return make_response(jsonify({'warning': e}), 200)
+        else:        
+            ret = {"message": "Конфигурация обновлена", "nodes": self._nodes}
+            return make_response(jsonify(ret), 200)
+        
+class SwitchConfigurator(AbstractDeviceConfigurator):
+    def __init__(self):
+        super().__init__(device_type='switch')
+
+    def configure(self) -> Response:
+        try:
+            self._setup_configuration()
+            self._update_label()
+        
+            # --- STP ---
+
+            switch_stp = get_data("config_switch_stp")
+
+            self._node["config"]["stp"] = 0
+            if switch_stp == "on":
+                self._node["config"]["stp"] = 1
+
+            # --- ---
+
+                self._delete_sims()
+        except RequestArgError as e: 
+            return make_response(jsonify({'warning': e}), 200)        
+        else:              
+            ret = {"message": "Конфигурация обновлена", "nodes": self._nodes}
+            return make_response(jsonify(ret), 200)
 
 @login_required
 def delete_job():
@@ -210,132 +364,12 @@ def delete_job():
     return build_response("Команда удалена", ResultCode.OK)
 
 
-@login_required
-def save_config(device_name: str):
-    """
-    Called on network element configuration saving
-    """
-    # check request correctness
-    if request.method != "POST":
-        return build_response("Неверный запрос: ожидался POST")
-
-    network_guid = get_data("net_guid")
-
-    if not network_guid:
-        return build_response("Не указан параметр net_guid")
-
-    # get user's network
-    cur_network: Network = (
-        Network.query.filter(Network.guid == network_guid)
-        .filter(Network.author_id == current_user.id)
-        .first()
-    )
-
-    if not cur_network:
-        return build_response("Сеть не найдена")
-
-    # get element (host, hub, switch, ...)
-    element_form_id = f"{device_name}_id"
-    device_id = get_data(element_form_id)
-
-    if not device_id:
-        return build_response(f"Не указан параметр {element_form_id}")
-
-    # json representation
-    json_network: dict = json.loads(cur_network.network)
-    nodes: list = json_network["nodes"]
-
-    # find all matches with device in nodes
-    filt_nodes = list(filter(lambda n: n["data"]["id"] == device_id, nodes))
-
-    if not filt_nodes:
-        return build_response(f"Такого элемента '{device_name}' не существует")
-
-    # current device's node
-    cur_node = filt_nodes[0]
-
-    # get label with device name
-    label = request.form.get(f"config_{device_name}_name")
-
-    if not label:
-        return build_response("Неверный запрос: не получилось обновить имя устройства")
-
-    # update device name (?)
-    cur_node["config"]["label"] = label
-    cur_node["data"]["label"] = cur_node["config"]["label"]
-
-    cur_network.network = json.dumps(json_network)
-    db.session.commit()
-
-    # -------- STP --------
-
-    switch_stp = request.form.get("config_switch_stp")
-
-    cur_node["config"]["stp"] = 0
-    if switch_stp == "on":
-        cur_node["config"]["stp"] = 1
-
-    # -------- STP --------
-
-    # Remove all previous simulations (after configuration update)
-    sims = Simulate.query.filter(Simulate.network_id == cur_network.id).all()
-    for s in sims:
-        db.session.delete(s)
-
-    return build_response("Конфигурация обновлена", ResultCode.OK)
-
+hub = HubConfigurator()
+switch = SwitchConfigurator()
 
 @login_required
 def save_hub_config():
-    user = current_user
-
-    if request.method == "POST":
-        network_guid = request.form.get("net_guid", type=str)
-
-        if not network_guid:
-            ret = {"message": "Не указан параметр net_guid"}
-            return make_response(jsonify(ret), 400)
-
-        net = (
-            Network.query.filter(Network.guid == network_guid)
-            .filter(Network.author_id == user.id)
-            .first()
-        )
-
-        if not net:
-            ret = {"message": "Такая сеть не найдена"}
-            return make_response(jsonify(ret), 400)
-
-        hub_id = request.form.get("hub_id")
-
-        if not hub_id:
-            ret = {"message": "Не указан параметр hub_id"}
-            return make_response(jsonify(ret), 400)
-
-        jnet = json.loads(net.network)
-        nodes = jnet["nodes"]
-
-        nn = list(filter(lambda x: x["data"]["id"] == hub_id, nodes))
-
-        if not nn:
-            ret = {"message": "Такого хаба не существует"}
-            return make_response(jsonify(ret), 400)
-
-        node = nn[0]
-        hub_label = request.form.get("config_hub_name")
-
-        if hub_label:
-            node["config"]["label"] = hub_label
-            node["data"]["label"] = node["config"]["label"]
-
-            net.network = json.dumps(jnet)
-            db.session.commit()
-
-        ret = {"message": "Конфигурация обновлена", "nodes": nodes}
-        return make_response(jsonify(ret), 200)
-
-    ret = {"message": "Неверный запрос"}
-    return make_response(jsonify(ret), 400)
+    return hub.configure()
 
 
 @login_required
