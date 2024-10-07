@@ -27,9 +27,9 @@ def get_data(arg: str):
     return request.form.get(arg, type=str)
 
 
-def build_response(message: str, code = ResultCode.ERROR) -> Response:
+def build_response(message: str, code=ResultCode.ERROR) -> Response:
     """Create server response with specified message"""
-    return make_response(jsonify({'message': message}), code)
+    return make_response(jsonify({"message": message}), code)
 
 
 # ------ Argument Validators ------
@@ -179,12 +179,12 @@ class JobConfigurator:
             command_label = command_label.replace(f"[{i+1}]", arg)
 
         response = {
-                    "id": self.__id,
-                    "level": self.__level,
-                    "job_id": self.__job_id,
-                    "host_id": self.__host_id,
-                    "print_cmd": command_label
-                    }
+            "id": self.__id,
+            "level": self.__level,
+            "job_id": self.__job_id,
+            "host_id": self.__host_id,
+            "print_cmd": command_label,
+        }
 
         # add args to response
         for i, arg in enumerate(self.configured_args):
@@ -195,25 +195,33 @@ class JobConfigurator:
 
 # ------ Network Device Configurators ------
 class RequestArgError(Exception):
-    def __init__(self, message):            
+    """Special exception for user's request errors"""
+
+    def __init__(self, message):
         super().__init__(message)
 
-class AbstractDeviceConfigurator():
+
+class AbstractDeviceConfigurator:
     def __init__(self, device_type: str):
         self.__jobs: list[JobConfigurator] = []
         self.__device_type: str = device_type
-        self._device_node = None # current device node in miminet network
+        self._device_node = None  # current device node in miminet network
 
     def add_job(self, job: JobConfigurator):
         self.__jobs.append(job)
 
     def add_jobs(self, *jobs):
-        for job in jobs: self.add_job(job)
+        for job in jobs:
+            self.add_job(job)
 
     # [!] I have broken device configuration process into different blocks, they will be below
 
+    def _build_error_response(e: RequestArgError):
+        return build_response(str(e))
+
     def _setup_configuration(self):
         """Prepare variables for configuring"""
+
         # check request correctness
         if request.method != "POST":
             raise RequestArgError("Неверный запрос: ожидался POST")
@@ -253,35 +261,33 @@ class AbstractDeviceConfigurator():
         # current device's node
         self._device_node = filt_nodes[0]
 
-
     def _update_label(self):
         """Update device label during configuration. Typically used at the end of the configuration"""
         # get label with device name
         label = request.form.get(f"config_{self.__device_type}_name")
 
-        if not label:
-            return RequestArgError("Неверный запрос: не получилось обновить имя устройства")
-        
-        self._device_node["config"]["label"] = label
-        self._device_node["data"]["label"] = self._device_node["config"]["label"]
-    
+        if label:
+            self._device_node["config"]["label"] = label
+            self._device_node["data"]["label"] = self._device_node["config"]["label"]
+
     def _delete_sims(self):
         """Delete saved simulations. Typically used at the end of the configuration"""
-        self._cur_network.network = json.dumps(self._json_network)
-        db.session.commit()
-
         # Remove all previous simulations (after configuration update)
         sims = Simulate.query.filter(Simulate.network_id == self._cur_network.id).all()
         for s in sims:
             db.session.delete(s)
 
+        self._cur_network.network = json.dumps(self._json_network)
+        db.session.commit()
+
     @abstractmethod
     def configure(self) -> Response:
         pass
 
+
 class HubConfigurator(AbstractDeviceConfigurator):
     def __init__(self):
-        super().__init__(device_type='hub')
+        super().__init__(device_type="hub")
 
     def configure(self) -> Response:
         try:
@@ -289,83 +295,40 @@ class HubConfigurator(AbstractDeviceConfigurator):
             self._update_label()
             self._delete_sims()
         except RequestArgError as e:
-            return make_response(jsonify({'warning': e}), 200)
-        else:        
+            return self._build_error_response(e)
+        else:
             ret = {"message": "Конфигурация обновлена", "nodes": self._nodes}
             return make_response(jsonify(ret), 200)
-        
+
+
 class SwitchConfigurator(AbstractDeviceConfigurator):
     def __init__(self):
-        super().__init__(device_type='switch')
+        super().__init__(device_type="switch")
 
     def configure(self) -> Response:
         try:
             self._setup_configuration()
             self._update_label()
-        
-            # --- STP ---
 
+            # STP setup
             switch_stp = get_data("config_switch_stp")
 
-            self._node["config"]["stp"] = 0
-            if switch_stp == "on":
-                self._node["config"]["stp"] = 1
+            self._device_node["config"]["stp"] = 0
 
-            # --- ---
+            if switch_stp and switch_stp == "on":
+                self._device_node["config"]["stp"] = 1
 
-                self._delete_sims()
-        except RequestArgError as e: 
-            return make_response(jsonify({'warning': e}), 200)        
-        else:              
+            self._delete_sims()
+        except RequestArgError as e:
+            return self._build_error_response(e)
+        else:
             ret = {"message": "Конфигурация обновлена", "nodes": self._nodes}
             return make_response(jsonify(ret), 200)
-
-@login_required
-def delete_job():
-    """
-    Called when job is removed for an network element
-    """
-    user = current_user
-    network_guid = get_data("guid")
-    jid = get_data("id")
-
-    if request.method != "POST":
-        return build_response("Неверный запрос")
-
-    if not network_guid:
-        return build_response("Не указан параметр net_guid")
-
-    cur_network: Network = (
-        Network.query.filter(Network.guid == network_guid)
-        .filter(Network.author_id == user.id)
-        .first()
-    )
-
-    if not cur_network:
-        return build_response("Такая сеть не найдена")
-
-    json_network: dict = json.loads(cur_network.network)
-
-    # get jobs & remove one
-    jobs: list = json_network["jobs"]
-    new_jobs: list = list(filter(lambda x: x["id"] != jid, jobs))
-    json_network["jobs"] = new_jobs
-
-    # update network
-    cur_network.network = json.dumps(json_network)
-
-    # Remove all previous simulations
-    sims = Simulate.query.filter(Simulate.network_id == cur_network.id).all()
-    for s in sims:
-        db.session.delete(s)
-
-    db.session.commit()
-
-    return build_response("Команда удалена", ResultCode.OK)
 
 
 hub = HubConfigurator()
 switch = SwitchConfigurator()
+
 
 @login_required
 def save_hub_config():
@@ -374,65 +337,66 @@ def save_hub_config():
 
 @login_required
 def save_switch_config():
-    user = current_user
+    return switch.configure()
+    # user = current_user
 
-    if request.method != "POST":
-        ret = {"message": "Неверный запрос"}
-        return make_response(jsonify(ret), 400)
+    # if request.method != "POST":
+    #     ret = {"message": "Неверный запрос"}
+    #     return make_response(jsonify(ret), 400)
 
-    network_guid = request.form.get("net_guid", type=str)
+    # network_guid = request.form.get("net_guid", type=str)
 
-    if not network_guid:
-        ret = {"message": "Не указан параметр net_guid"}
-        return make_response(jsonify(ret), 400)
+    # if not network_guid:
+    #     ret = {"message": "Не указан параметр net_guid"}
+    #     return make_response(jsonify(ret), 400)
 
-    net = (
-        Network.query.filter(Network.guid == network_guid)
-        .filter(Network.author_id == user.id)
-        .first()
-    )
+    # net = (
+    #     Network.query.filter(Network.guid == network_guid)
+    #     .filter(Network.author_id == user.id)
+    #     .first()
+    # )
 
-    if not net:
-        ret = {"message": "Такая сеть не найдена"}
-        return make_response(jsonify(ret), 400)
+    # if not net:
+    #     ret = {"message": "Такая сеть не найдена"}
+    #     return make_response(jsonify(ret), 400)
 
-    switch_id = request.form.get("switch_id")
+    # switch_id = request.form.get("switch_id")
 
-    if not switch_id:
-        ret = {"message": "Не указан параметр switch_id"}
-        return make_response(jsonify(ret), 400)
+    # if not switch_id:
+    #     ret = {"message": "Не указан параметр switch_id"}
+    #     return make_response(jsonify(ret), 400)
 
-    jnet = json.loads(net.network)
-    nodes = jnet["nodes"]
+    # jnet = json.loads(net.network)
+    # nodes = jnet["nodes"]
 
-    nn = list(filter(lambda x: x["data"]["id"] == switch_id, nodes))
+    # nn = list(filter(lambda x: x["data"]["id"] == switch_id, nodes))
 
-    if not nn:
-        ret = {"message": "Такого свитча не существует"}
-        return make_response(jsonify(ret), 400)
+    # if not nn:
+    #     ret = {"message": "Такого свитча не существует"}
+    #     return make_response(jsonify(ret), 400)
 
-    node = nn[0]
-    switch_label = request.form.get("config_switch_name")
-    switch_stp = request.form.get("config_switch_stp")
+    # node = nn[0]
+    # switch_label = request.form.get("config_switch_name")
+    # switch_stp = request.form.get("config_switch_stp")
 
-    if switch_label:
-        node["config"]["label"] = switch_label
-        node["data"]["label"] = node["config"]["label"]
+    # if switch_label:
+    #     node["config"]["label"] = switch_label
+    #     node["data"]["label"] = node["config"]["label"]
 
-    node["config"]["stp"] = 0
-    if switch_stp == "on":
-        node["config"]["stp"] = 1
+    # node["config"]["stp"] = 0
+    # if switch_stp == "on":
+    #     node["config"]["stp"] = 1
 
-    # Remove all previous simulations
-    sims = Simulate.query.filter(Simulate.network_id == net.id).all()
-    for s in sims:
-        db.session.delete(s)
+    # # Remove all previous simulations
+    # sims = Simulate.query.filter(Simulate.network_id == net.id).all()
+    # for s in sims:
+    #     db.session.delete(s)
 
-    net.network = json.dumps(jnet)
-    db.session.commit()
+    # net.network = json.dumps(jnet)
+    # db.session.commit()
 
-    ret = {"message": "Конфигурация обновлена", "nodes": nodes}
-    return make_response(jsonify(ret), 200)
+    # ret = {"message": "Конфигурация обновлена", "nodes": nodes}
+    # return make_response(jsonify(ret), 200)
 
 
 @login_required
@@ -1896,3 +1860,47 @@ def save_server_config():
 
     ret.update({"message": "Неверный запрос"})
     return make_response(jsonify(ret), 400)
+
+
+@login_required
+def delete_job():
+    """
+    Called when job is removed for an network element
+    """
+    user = current_user
+    network_guid = get_data("guid")
+    jid = get_data("id")
+
+    if request.method != "POST":
+        return build_response("Неверный запрос")
+
+    if not network_guid:
+        return build_response("Не указан параметр net_guid")
+
+    cur_network: Network = (
+        Network.query.filter(Network.guid == network_guid)
+        .filter(Network.author_id == user.id)
+        .first()
+    )
+
+    if not cur_network:
+        return build_response("Такая сеть не найдена")
+
+    json_network: dict = json.loads(cur_network.network)
+
+    # get jobs & remove one
+    jobs: list = json_network["jobs"]
+    new_jobs: list = list(filter(lambda x: x["id"] != jid, jobs))
+    json_network["jobs"] = new_jobs
+
+    # update network
+    cur_network.network = json.dumps(json_network)
+
+    # Remove all previous simulations
+    sims = Simulate.query.filter(Simulate.network_id == cur_network.id).all()
+    for s in sims:
+        db.session.delete(s)
+
+    db.session.commit()
+
+    return build_response("Команда удалена", ResultCode.OK)
