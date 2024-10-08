@@ -247,8 +247,11 @@ const ShowRouterConfig = function(n, shared = 0){
         ConfigRouterGateway(default_gw);
     }
 
+    ConfigVxlan(n);
+
     if (shared){
         DisableFormInputs();
+        DisableVXLANInputs(n);
     }
 }
 
@@ -295,6 +298,7 @@ const ShowSwitchConfig = function(n, shared = 0){
 
     if (shared){
         DisableFormInputs();
+        DisableVLANInputs(n);
     }
 }
 
@@ -1792,12 +1796,12 @@ const SetNetworkPlayerState = function(simultaion_id)
         return;
     }
 
-    // If we have packets, than we're ready to run
+    // If we have packets, then we're ready to run
     if (packets)
     {
         $('#NetworkPlayer').empty();
         $('#NetworkPlayer').append('<button type="button" class="btn btn-danger me-2" id="NetworkStopButton"><i class="bx bx-stop fs-xl"></i></button>');
-        $('#NetworkPlayer').append('<button type="button" class="btn btn-success" id="NetworkPlayPauseButton"><i class="bx bx-play fs-xl"></i></button>');
+        $('#NetworkPlayer').append('<button type="button" class="btn btn-success" id="NetworkPlayPauseButton" onclick="if (typeof window.ym != \'undefined\'){ym(92293993,\'reachGoal\',\'PlayPauseButton\');}"><i class="bx bx-play fs-xl"></i></button>');
 
         // Init player
         PacketPlayer.getInstance().InitPlayer(packets);
@@ -1922,6 +1926,11 @@ const SetNetworkPlayerState = function(simultaion_id)
             return;
         }
 
+	if (typeof window.ym != 'undefined')
+	{
+		ym(92293993,'reachGoal','NetworkEmulate');
+	}
+	
         RunSimulation(network_guid);
 
         $('#NetworkPlayer').empty();
@@ -1945,7 +1954,7 @@ const SetSharedNetworkPlayerState = function()
     {
         $('#NetworkPlayer').empty();
         $('#NetworkPlayer').append('<button type="button" class="btn btn-danger me-2" id="NetworkStopButton"><i class="bx bx-stop fs-xl"></i></button>');
-        $('#NetworkPlayer').append('<button type="button" class="btn btn-success" id="NetworkPlayPauseButton"><i class="bx bx-play fs-xl"></i></button>');
+        $('#NetworkPlayer').append('<button type="button" class="btn btn-success" id="NetworkPlayPauseButton" onclick="if (typeof window.ym != \'undefined\'){ym(92293993,\'reachGoal\',\'PlayPauseButton\');}"><i class="bx bx-play fs-xl"></i></button>');
 
         // Init player
         PacketPlayer.getInstance().InitPlayer(packets);

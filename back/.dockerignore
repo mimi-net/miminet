@@ -5,5 +5,6 @@ venv
 *.cover
 *.log
 .git
+.env
 vagrant
 Vagrantfile

@@ -2,8 +2,17 @@ import sys
 from datetime import datetime
 
 from flask import Flask, make_response, render_template
+from flask_admin import Admin
 from flask_login import current_user, login_required
 from flask_migrate import Migrate
+
+from miminet_admin import (
+    MiminetAdminIndexView,
+    TestView,
+    SectionView,
+    QuestionView,
+    AnswerView,
+)
 from miminet_auth import (
     google_callback,
     google_login,
@@ -13,6 +22,9 @@ from miminet_auth import (
     user_profile,
     vk_callback,
     vk_login,
+    yandex_login,
+    yandex_callback,
+    tg_callback,
 )
 from miminet_config import SECRET_KEY, SQLITE_DATABASE_NAME
 from miminet_host import (
@@ -38,6 +50,28 @@ from miminet_network import (
 )
 from miminet_shark import mimishark_page
 from miminet_simulation import check_simulation, run_simulation
+from quiz.controller.question_controller import (
+    get_questions_by_section_endpoint,
+    create_question_endpoint,
+    delete_question_endpoint,
+)
+from quiz.controller.quiz_session_controller import (
+    start_session_endpoint,
+    get_question_by_session_question_id_endpoint,
+    finish_session_endpoint,
+    answer_on_session_question_endpoint,
+    session_result_endpoint,
+    get_result_by_session_guid_endpoint,
+)
+from quiz.controller.section_controller import (
+    get_sections_by_test_endpoint,
+)
+from quiz.controller.test_controller import (
+    get_all_tests_endpoint,
+    get_tests_by_owner_endpoint,
+    get_test_endpoint,
+)
+from quiz.entity.entity import Section, Test, Question, Answer
 
 app = Flask(
     __name__, static_url_path="", static_folder="static", template_folder="templates"
@@ -61,14 +95,16 @@ login_manager.init_app(app)
 # Init Sitemap
 zero_days_ago = (datetime.now()).date().isoformat()
 
-
 # App add_url_rule
 # Login
 app.add_url_rule("/auth/login.html", methods=["GET", "POST"], view_func=login_index)
 app.add_url_rule("/auth/google_login", methods=["GET"], view_func=google_login)
 app.add_url_rule("/auth/vk_login", methods=["GET"], view_func=vk_login)
+app.add_url_rule("/auth/yandex_login", methods=["GET"], view_func=yandex_login)
 app.add_url_rule("/auth/vk_callback", methods=["GET"], view_func=vk_callback)
 app.add_url_rule("/auth/google_callback", methods=["GET"], view_func=google_callback)
+app.add_url_rule("/auth/yandex_callback", methods=["GET"], view_func=yandex_callback)
+app.add_url_rule("/auth/tg_callback", methods=["GET"], view_func=tg_callback)
 app.add_url_rule("/user/profile.html", methods=["GET", "POST"], view_func=user_profile)
 app.add_url_rule("/auth/logout", methods=["GET"], view_func=logout)
 
@@ -91,7 +127,6 @@ app.add_url_rule(
     view_func=upload_network_picture,
 )
 app.add_url_rule("/network/copy_network", methods=["POST"], view_func=copy_network)
-
 
 # Simulation
 app.add_url_rule("/run_simulation", methods=["POST"], view_func=run_simulation)
@@ -118,6 +153,67 @@ app.add_url_rule(
 # MimiShark
 app.add_url_rule("/host/mimishark", methods=["GET"], view_func=mimishark_page)
 
+# Quiz
+app.add_url_rule(
+    "/quiz/test/owner", methods=["GET"], view_func=get_tests_by_owner_endpoint
+)
+app.add_url_rule("/quiz/test/all", methods=["GET"], view_func=get_all_tests_endpoint)
+app.add_url_rule("/quiz/test/get", methods=["GET"], view_func=get_test_endpoint)
+
+app.add_url_rule(
+    "/quiz/section/test/all", methods=["GET"], view_func=get_sections_by_test_endpoint
+)
+
+app.add_url_rule(
+    "/quiz/question/create", methods=["POST"], view_func=create_question_endpoint
+)
+
+app.add_url_rule(
+    "/quiz/question/delete", methods=["DELETE"], view_func=delete_question_endpoint
+)
+
+app.add_url_rule(
+    "/quiz/question/all", methods=["GET"], view_func=get_questions_by_section_endpoint
+)
+
+app.add_url_rule(
+    "/quiz/session/start", methods=["POST"], view_func=start_session_endpoint
+)
+app.add_url_rule(
+    "/quiz/session/question",
+    methods=["GET"],
+    view_func=get_question_by_session_question_id_endpoint,
+)
+app.add_url_rule(
+    "/quiz/session/answer",
+    methods=["POST"],
+    view_func=answer_on_session_question_endpoint,
+)
+app.add_url_rule(
+    "/quiz/session/finish", methods=["PUT"], view_func=finish_session_endpoint
+)
+app.add_url_rule(
+    "/quiz/session/result", methods=["GET"], view_func=session_result_endpoint
+)
+app.add_url_rule(
+    "/quiz/user/session/result",
+    methods=["GET"],
+    view_func=get_result_by_session_guid_endpoint,
+)
+
+# Init Flask-admin
+admin = Admin(
+    app,
+    index_view=MiminetAdminIndexView(),
+    name="Miminet Admin",
+    template_mode="bootstrap4",
+)
+
+admin.add_view(TestView(Test, db.session))
+admin.add_view(SectionView(Section, db.session))
+admin.add_view(QuestionView(Question, db.session))
+admin.add_view(AnswerView(Answer, db.session))
+
 
 @app.route("/")
 def index():  # put application's code here
@@ -130,6 +226,7 @@ def home():
     user = current_user
     networks = (
         Network.query.filter(Network.author_id == user.id)
+        .filter(Network.is_task.is_(False))
         .order_by(Network.id.desc())
         .all()
     )
@@ -149,6 +246,7 @@ def examples():
         "4fc0fafb-2a16-4244-a664-3f1e8f788a63",
         "6994b921-cc0f-4cbd-b209-7f30784027d7",
         "1646e111-1a47-4d98-a253-c396904e5351",
+        "1ccd87d4-a74f-485e-a95e-e1111c041fc7",
     ]
     networks = (
         Network.query.filter(Network.guid.in_(guids)).order_by(Network.id.asc()).all()
@@ -169,6 +267,9 @@ def sitemap():
         "/auth/google_login",
         "/auth/google_callback",
         "/auth/vk_callback",
+        "/auth/yandex_login",
+        "/auth/yandex_callback",
+        "/auth/tg_callback",
         "/auth/logout",
         "/run_simulation",
         "/check_simulation",

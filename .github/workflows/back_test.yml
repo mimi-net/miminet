@@ -16,7 +16,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-            
+
       - name: Install apt package
         run: |
           sudo apt-get update \
@@ -34,10 +34,19 @@ jobs:
           net-tools \
           bridge-utils \
           tcpdump \
+          gcc \
+          make \
+          libpcap-dev \
+          libbsd-dev \
           git
           sudo touch /etc/network/interfaces
           sudo mkdir -p /opt/mininet_dependencies
-          
+
+      - name: Build mimidump
+        run: |
+          git clone https://github.com/mimi-net/mimidump.git
+          cd mimidump && sudo make prefix=/usr install
+
       - name: Disable packet transmission to filters
         run: |
           sudo sysctl -w net.bridge.bridge-nf-call-iptables=0
@@ -50,7 +59,7 @@ jobs:
           sudo python -m pip install -U pip
           sudo python -m pip install wheel
           sudo python -m pip install -r back/requirements.txt
-          
+
       - name: Test with pytest
         run: |
           sudo python -m pip install pytest

@@ -1,0 +1,341 @@
+{
+  "jobs": [
+    {
+      "arg_1": "192.168.1.3",
+      "host_id": "host_1",
+      "id": "760357ff377543988614ecc396c71840",
+      "job_id": 1,
+      "level": 0,
+      "print_cmd": "ping -c 1 192.168.1.3"
+    },
+    {
+      "arg_1": "192.168.1.3",
+      "host_id": "host_1",
+      "id": "8856870b5e904241b61154d01f3f7fd8",
+      "job_id": 1,
+      "level": 1,
+      "print_cmd": "ping -c 1 192.168.1.3"
+    }
+  ],
+  "nodes": [
+    {
+      "classes": [
+        "l3_router"
+      ],
+      "config": {
+        "default_gw": "192.168.0.2",
+        "label": "router_1",
+        "type": "router"
+      },
+      "data": {
+        "id": "router_1",
+        "label": "router_1"
+      },
+      "interface": [
+        {
+          "connect": "edge_m16twm43olzwv46wkug",
+          "id": "iface_32318658",
+          "ip": "192.168.1.10",
+          "name": "iface_32318658",
+          "netmask": 24,
+          "vxlan_connection_type": 0,
+          "vxlan_vni": 1000,
+          "vxlan_vni_to_target_ip": null
+        },
+        {
+          "connect": "edge_m17hop2bb5acpbzd9ns",
+          "id": "iface_50106104",
+          "ip": "192.168.0.1",
+          "name": "iface_50106104",
+          "netmask": 24,
+          "vxlan_connection_type": 1,
+          "vxlan_vni": null,
+          "vxlan_vni_to_target_ip": [
+            [
+              "1000",
+              "192.168.0.2"
+            ],
+            [
+              "1000",
+              "192.168.0.3"
+            ]
+          ]
+        }
+      ],
+      "position": {
+        "x": 119,
+        "y": 105.296875
+      }
+    },
+    {
+      "classes": [
+        "l3_router"
+      ],
+      "config": {
+        "default_gw": "192.168.0.1",
+        "label": "router_2",
+        "type": "router"
+      },
+      "data": {
+        "id": "router_2",
+        "label": "router_2"
+      },
+      "interface": [
+        {
+          "connect": "edge_m16twnvluzzkhq36f98",
+          "id": "iface_32365871",
+          "ip": "192.168.1.20",
+          "name": "iface_32365871",
+          "netmask": 24,
+          "vxlan_connection_type": 0,
+          "vxlan_vni": 1000,
+          "vxlan_vni_to_target_ip": null
+        },
+        {
+          "connect": "edge_m17hoq0gj9yvlwif8y",
+          "id": "iface_35316364",
+          "ip": "192.168.0.2",
+          "name": "iface_35316364",
+          "netmask": 24,
+          "vxlan_connection_type": 1,
+          "vxlan_vni": null,
+          "vxlan_vni_to_target_ip": [
+            [
+              "1000",
+              "192.168.0.1"
+            ],
+            [
+              "1000",
+              "192.168.0.3"
+            ]
+          ]
+        }
+      ],
+      "position": {
+        "x": 270.5045780558523,
+        "y": 118.29450967114299
+      }
+    },
+    {
+      "classes": [
+        "host"
+      ],
+      "config": {
+        "default_gw": "192.168.1.10",
+        "label": "host_1",
+        "type": "host"
+      },
+      "data": {
+        "id": "host_1",
+        "label": "host_1"
+      },
+      "interface": [
+        {
+          "connect": "edge_m16twm43olzwv46wkug",
+          "id": "iface_88474442",
+          "ip": "192.168.1.1",
+          "name": "iface_88474442",
+          "netmask": 24
+        }
+      ],
+      "position": {
+        "x": 61.5,
+        "y": 209.5
+      }
+    },
+    {
+      "classes": [
+        "host"
+      ],
+      "config": {
+        "default_gw": "192.168.1.20",
+        "label": "host_2",
+        "type": "host"
+      },
+      "data": {
+        "id": "host_2",
+        "label": "host_2"
+      },
+      "interface": [
+        {
+          "connect": "edge_m16twnvluzzkhq36f98",
+          "id": "iface_75385413",
+          "ip": "192.168.1.2",
+          "name": "iface_75385413",
+          "netmask": 24
+        }
+      ],
+      "position": {
+        "x": 338.5,
+        "y": 219.5
+      }
+    },
+    {
+      "classes": [
+        "l3_router"
+      ],
+      "config": {
+        "default_gw": "",
+        "label": "router_3",
+        "type": "router"
+      },
+      "data": {
+        "id": "router_3",
+        "label": "router_3"
+      },
+      "interface": [
+        {
+          "connect": "edge_m17h53pkx2xumye3ri",
+          "id": "iface_07682608",
+          "ip": "192.168.1.20",
+          "name": "iface_07682608",
+          "netmask": 24,
+          "vxlan_connection_type": 0,
+          "vxlan_vni": 1000,
+          "vxlan_vni_to_target_ip": null
+        },
+        {
+          "connect": "edge_m17hohl88xajhp678a8",
+          "id": "iface_72724155",
+          "ip": "192.168.0.3",
+          "name": "iface_72724155",
+          "netmask": 24,
+          "vxlan_connection_type": 1,
+          "vxlan_vni": null,
+          "vxlan_vni_to_target_ip": [
+            [
+              "1000",
+              "192.168.0.2"
+            ],
+            [
+              "1000",
+              "192.168.0.1"
+            ]
+          ]
+        }
+      ],
+      "position": {
+        "x": 263.0048832595758,
+        "y": -6.699386254387264
+      }
+    },
+    {
+      "classes": [
+        "host"
+      ],
+      "config": {
+        "default_gw": "192.168.1.20",
+        "label": "host_3",
+        "type": "host"
+      },
+      "data": {
+        "id": "host_3",
+        "label": "host_3"
+      },
+      "interface": [
+        {
+          "connect": "edge_m17h53pkx2xumye3ri",
+          "id": "iface_60514008",
+          "ip": "192.168.1.3",
+          "name": "iface_60514008",
+          "netmask": 24
+        }
+      ],
+      "position": {
+        "x": 369.5048832595758,
+        "y": -11.496261254387264
+      }
+    },
+    {
+      "classes": [
+        "l2_switch"
+      ],
+      "config": {
+        "label": "l2sw1",
+        "stp": 0,
+        "type": "l2_switch"
+      },
+      "data": {
+        "id": "l2sw1",
+        "label": "l2sw1"
+      },
+      "interface": [
+        {
+          "connect": "edge_m17hohl88xajhp678a8",
+          "id": "l2sw1_1",
+          "name": "l2sw1_1",
+          "type_connection": null,
+          "vlan": null
+        },
+        {
+          "connect": "edge_m17hop2bb5acpbzd9ns",
+          "id": "l2sw1_2",
+          "name": "l2sw1_2",
+          "type_connection": null,
+          "vlan": null
+        },
+        {
+          "connect": "edge_m17hoq0gj9yvlwif8y",
+          "id": "l2sw1_3",
+          "name": "l2sw1_3",
+          "type_connection": null,
+          "vlan": null
+        }
+      ],
+      "position": {
+        "x": 199.00488325957582,
+        "y": 46.003738745612736
+      }
+    }
+  ],
+  "edges": [
+    {
+      "data": {
+        "id": "edge_m16twm43olzwv46wkug",
+        "source": "host_1",
+        "target": "router_1"
+      }
+    },
+    {
+      "data": {
+        "id": "edge_m16twnvluzzkhq36f98",
+        "source": "host_2",
+        "target": "router_2"
+      }
+    },
+    {
+      "data": {
+        "id": "edge_m17h53pkx2xumye3ri",
+        "source": "host_3",
+        "target": "router_3"
+      }
+    },
+    {
+      "data": {
+        "id": "edge_m17hohl88xajhp678a8",
+        "source": "l2sw1",
+        "target": "router_3"
+      }
+    },
+    {
+      "data": {
+        "id": "edge_m17hop2bb5acpbzd9ns",
+        "source": "l2sw1",
+        "target": "router_1"
+      }
+    },
+    {
+      "data": {
+        "id": "edge_m17hoq0gj9yvlwif8y",
+        "source": "l2sw1",
+        "target": "router_2"
+      }
+    }
+  ],
+  "config": {
+    "zoom": 2,
+    "pan_x": 0,
+    "pan_y": 0
+  },
+  "pcap": []
+}

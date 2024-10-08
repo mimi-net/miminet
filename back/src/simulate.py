@@ -12,6 +12,7 @@ from jobs import Jobs
 from network import Job, Network, Node, NodeConfig, NodeData, NodeInterface
 from pkt_parser import create_pkt_animation, is_ipv4_address
 from net_utils.vlan import setup_vlans, clean_bridges
+from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
 
 
 class MyTopology(IPTopo):
@@ -181,7 +182,7 @@ class MyTopology(IPTopo):
                 nodes=[],
                 interfaces=[*interfaces],
                 base_filename="capture",
-                extra_arguments="-v -c 100 -Qout not igmp",
+                extra_arguments="not igmp",
             )
         super().build(*args, **kwargs)
 
@@ -218,6 +219,9 @@ class MyTopology(IPTopo):
 
         for h in net.hosts:
             # print ("disable ipv6 on " + h.name)
+            h.cmd("sysctl -w net.bridge.bridge-nf-call-arptables=0")
+            h.cmd("sysctl -w net.bridge.bridge-nf-call-iptables=0")
+            h.cmd("sysctl -w net.bridge.bridge-nf-call-ip6tables=0")
             h.cmd("sysctl -w net.ipv6.conf.all.disable_ipv6=1")
             h.cmd("sysctl -w net.ipv6.conf.default.disable_ipv6=1")
             h.cmd("sysctl -w net.ipv6.conf.lo.disable_ipv6=1")
@@ -227,16 +231,52 @@ class MyTopology(IPTopo):
 
         # Enable source route
         for r in net.routers:
+            r.cmd("sysctl -w net.bridge.bridge-nf-call-arptables=0")
+            r.cmd("sysctl -w net.bridge.bridge-nf-call-iptables=0")
+            r.cmd("sysctl -w net.bridge.bridge-nf-call-ip6tables=0")
             r.cmd("sysctl -w net.ipv4.conf.all.accept_source_route=1")
             r.cmd("sysctl -w net.ipv4.conf.all.log_martians=1")
+            r.cmd("sysctl -w net.ipv6.conf.all.disable_ipv6=1")
+            r.cmd("sysctl -w net.ipv6.conf.default.disable_ipv6=1")
 
         for sw in net.switches:
             # print ("disable ipv6 on " + sw.name)
+            sw.cmd("sysctl -w net.bridge.bridge-nf-call-arptables=0")
+            sw.cmd("sysctl -w net.bridge.bridge-nf-call-iptables=0")
+            sw.cmd("sysctl -w net.bridge.bridge-nf-call-ip6tables=0")
             sw.cmd("sysctl -w net.ipv6.conf.all.disable_ipv6=1")
             sw.cmd("sysctl -w net.ipv6.conf.default.disable_ipv6=1")
             sw.cmd("sysctl -w net.ipv6.conf.lo.disable_ipv6=1")
 
         super().post_build(net)
+
+    def clear_files(self):
+        for lp in self.link_pair:
+            link1, link2, _, _, _ = lp
+
+            pcap_out_file1 = "/tmp/capture_" + link1 + "_out.pcapng"
+            pcap_out_file2 = "/tmp/capture_" + link2 + "_out.pcapng"
+            pcap_file1 = "/tmp/capture_" + link1 + ".pcapng"
+            pcap_file2 = "/tmp/capture_" + link2 + ".pcapng"
+
+            for filename in (pcap_out_file1, pcap_out_file2, pcap_file1, pcap_file2):
+                if os.path.exists(filename):
+                    os.remove(filename)
+
+    def check(self):
+        for lp in self.link_pair:
+            link1, link2, _, _, _ = lp
+
+            pcap_out_file1 = "/tmp/capture_" + link1 + "_out.pcapng"
+            pcap_out_file2 = "/tmp/capture_" + link2 + "_out.pcapng"
+
+            if not os.path.exists(pcap_out_file1):
+                self.clear_files()
+                raise ValueError("No capture for interface: " + link1)
+
+            if not os.path.exists(pcap_out_file2):
+                self.clear_files()
+                raise ValueError("No capture for interface: " + link2)
 
 
 def packet_uuid(size=8, chars: str = string.ascii_uppercase + string.digits) -> str:
@@ -274,13 +314,16 @@ def create_animation(
     for lp in topo.link_pair:
         link1, link2, edge_id, edge_source, edge_target = lp
 
+        pcap_out_file1 = "/tmp/capture_" + link1 + "_out.pcapng"
+        pcap_out_file2 = "/tmp/capture_" + link2 + "_out.pcapng"
+
         pcap_file1 = "/tmp/capture_" + link1 + ".pcapng"
         pcap_file2 = "/tmp/capture_" + link2 + ".pcapng"
 
-        if not os.path.exists(pcap_file1):
+        if not os.path.exists(pcap_out_file1):
             raise ValueError("No capture for interface: " + link1)
 
-        if not os.path.exists(pcap_file2):
+        if not os.path.exists(pcap_out_file2):
             raise ValueError("No capture for interface: " + link2)
 
         with open(pcap_file1, "rb") as file1, open(pcap_file2, "rb") as file2:
@@ -288,12 +331,12 @@ def create_animation(
             pcap_list.append((file2.read(), link2))
 
         pkts = create_pkt_animation(
-            pcap_file1, pcap_file2, edge_id, edge_source, edge_target
+            pcap_out_file1, pcap_out_file2, edge_id, edge_source, edge_target
         )
 
         animation += pkts
-        os.remove(pcap_file1)
-        os.remove(pcap_file2)
+
+    topo.clear_files()
 
     return animation, pcap_list
 
@@ -308,7 +351,9 @@ def do_job(job: Job, net: IPNet) -> None:
     """
 
     host_id = job.host_id
+    # get host from network by it's ID
     job_host = net.get(host_id)
+    # initialize new Job by host and job type
     current_job = Jobs(job, job_host)
     current_job.handler()
 
@@ -328,13 +373,15 @@ def run_mininet(
     if len(network.jobs) == 0:
         return [], []
 
-    topo = MyTopology(network=network, time_to_wait_before_emulation=2)
+    topo = MyTopology(network=network, time_to_wait_before_emulation=3)
     net = IPNet(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
 
     try:
+        setup_vtep_interfaces(net, network.nodes)
         net.start()
         setup_vlans(net, network.nodes)
         time.sleep(topo.time_to_wait_before_emulation)
+        topo.check()
 
         # Don only 100+ jobs
         for job in network.jobs:
@@ -359,10 +406,10 @@ def run_mininet(
                 do_job(job, net)
             except Exception:
                 continue
-
     finally:
-        clean_bridges(net)
         time.sleep(2)
+        clean_bridges(net)
+        teardown_vtep_bridges(net, network.nodes)
         net.stop()
 
     animation, pcap_list = create_animation(topo)

@@ -30,11 +30,14 @@ EXCHANGE_NAME = os.getenv("exchange_name")
 
 DEFAULT_APP_EXCHANGE = Exchange(EXCHANGE_NAME, type=EXCHANGE_TYPE)
 
-QUEUES = (
+QUEUES = [
     Queue(name, exchange=DEFAULT_APP_EXCHANGE, routing_key=ROUTING_KEY)
     for name in QUEUES_NAMES
-)
+]
 
-app.conf.task_default_exchange = DEFAULT_APP_EXCHANGE
+SEND_NETWORK_RESPONSE_EXCHANGE = Exchange("network-results-exchange", type="direct")
+SEND_NETWORK_RESPONSE_ROUTING_KEY = "result-routing-key"
+
 app.conf.task_queues = QUEUES
 app.config_from_object(celeryconfig)
+app.conf.task_ignore_result = True

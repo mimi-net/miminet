@@ -27,6 +27,8 @@ db = SQLAlchemy(metadata=metadata)
 class User(db.Model, UserMixin):  # type:ignore[name-defined]
     id = db.Column(db.Integer, primary_key=True)
 
+    role = db.Column(db.Integer, default=0, nullable=False)
+
     email = db.Column(db.String(255), unique=True, nullable=True)
     password_hash = db.Column(db.String(255), unique=False, nullable=True)
 
@@ -35,6 +37,8 @@ class User(db.Model, UserMixin):  # type:ignore[name-defined]
 
     vk_id = db.Column(db.String(255), nullable=True)
     google_id = db.Column(db.String(255), nullable=True)
+    yandex_id = db.Column(db.String(255), nullable=True)
+    tg_id = db.Column(db.String(255), nullable=True)
 
 
 class Network(db.Model):  # type:ignore[name-defined]
@@ -51,6 +55,9 @@ class Network(db.Model):  # type:ignore[name-defined]
 
     # Is this network in share mode?
     share_mode = db.Column(db.Boolean, default=True)
+
+    # Don't show networks for tasks
+    is_task = db.Column(db.Boolean, default=False, nullable=False)
 
 
 class Simulate(db.Model):  # type:ignore[name-defined]

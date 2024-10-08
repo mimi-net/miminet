@@ -1,0 +1,60 @@
+- hosts: miminet_back
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Clone repository
+      ansible.builtin.git:
+        dest: "/home/{{ ansible_target_ssh_user }}/miminet"
+        force: true
+        version: "{{ lookup('ansible.builtin.env', 'MIMINET_BACK_SHA', default=master)}}"
+        repo: 'https://github.com/mimi-net/miminet.git'
+
+    - name: Copy .env target server
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+      loop:
+        - src: "./{{ name }}.env"
+          dest: "/home/{{ ansible_target_ssh_user }}/miminet/back/.env"
+
+    - name: Install dependencies
+      ansible.builtin.apt:
+        pkg:
+          - python3-dev
+          - bridge-utils
+          - curl
+          - netcat-openbsd
+          - dnsutils
+          - ifupdown
+          - iproute2
+          - iptables
+          - iputils-ping
+          - mininet
+          - tcpdump
+          - python3-pip
+          - python3-setuptools
+          - python3-venv
+        force_apt_get: true
+        update_cache: true
+        install_recommends: false
+        state: latest
+      become: true
+      become_method: sudo
+
+    - name: Create env and create mininet dependencies directory
+      ansible.builtin.shell: |
+        python3 -m venv venv
+        sudo mkdir -p /opt/mininet_dependencies
+      args:
+        chdir: "/home/{{ ansible_target_ssh_user }}/miminet/back"
+
+    - name: Install requirements
+      ansible.builtin.pip:
+        requirements: requirements.txt
+        virtualenv: venv
+        chdir: "/home/{{ ansible_target_ssh_user }}/miminet/back"
+
+    #- name: Restart celery service
+     # ansible.builtin.shell: |
+      #  systemctl restart celery

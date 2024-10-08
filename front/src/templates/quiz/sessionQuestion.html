@@ -1,0 +1,51 @@
+{% extends "quiz/networkBase.html" %}
+{% block title %}{% endblock %}
+{% block description %}Сетевой тренажер для обучения компьютерным сетям{% endblock %}
+
+{% block content %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
+
+    <script>hljs.highlightAll();</script>
+
+    {% if question.question_type == "practice" %}
+        {% include "quiz/practiceTask.html" %}
+    {% else %}
+        {% include "quiz/textTask.html" %}
+    {% endif %}
+
+    <script src="/quiz/session_scripts.js"></script>
+    <script>
+        let finishSessionUrl = '{{ url_for('finish_session_endpoint') }}';
+        let answerQuestionURL = '{{ url_for('answer_on_session_question_endpoint') }}';
+        let getQuestionUrl = '{{ url_for('get_question_by_session_question_id_endpoint') }}';
+        let sessionResultUrl = '{{ url_for('session_result_endpoint') }}';
+
+        const questionType = '{{ question.question_type }}'
+    </script>
+{% endblock %}
+
+{% block network %}
+    {% if question.question_type == "practice" %}
+        <script>
+            let start_configuration = JSON.parse(practiceQuestion["start_configuration"])
+            const network_guid = practiceQuestion["network_guid"];
+            let network_title = "Practice Task Net";
+            let network_description = ""
+            let network_zoom = start_configuration["config"]["zoom"];
+            let network_pan_x = start_configuration["config"]["pan_x"];
+            let network_pan_y = start_configuration["config"]["pan_y"];
+
+            let nodes = start_configuration["nodes"];
+            let edges = start_configuration["edges"];
+            let jobs = start_configuration["jobs"];
+            let packets = start_configuration["packets"];
+            let pcaps = start_configuration["pcap"];
+            let ns = null;
+
+            DrawGraph();
+        </script>
+    {% endif %}
+{% endblock %}

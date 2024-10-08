@@ -1,0 +1,16 @@
+- hosts: miminet_back
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Add User
+      ansible.builtin.user:
+        name: "{{ ansible_target_ssh_user }}"
+        comment: "User to limit ssh actions"
+
+    - name: Deploy SSH Public Key
+      ansible.posix.authorized_key:
+        user: "{{ ansible_target_ssh_user }}"
+        state: present
+        key: "{{ lookup('file', '/home/{{ host_user }}/.ssh/id_rsa.pub') }}"
+        key_options: 'no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty,command="sudo /home/target_user/deploy.sh"'
