@@ -53,6 +53,15 @@ def range_check(arg: str, range: range) -> bool:
         return False
 
 
+def digit_check(arg: str) -> bool:
+    "Check if the argument is a number"
+    try:
+        num = int(arg)
+        return True
+    except:
+        return False
+
+
 def mask_check(arg: str) -> bool:
     """Check subnet mask correctness"""
     try:
@@ -93,6 +102,23 @@ def emptiness_check(arg: str) -> bool:
 def regex_check(arg: str, regex: str) -> bool:
     """Check if a string matches the given regex"""
     return bool(re.match(regex, arg))
+
+
+# ------ Error messages ------
+def get_ip_error(cmd: str) -> str:
+    return f'Неверно указан IP-адрес для команды "{cmd}"'
+
+
+def get_port_error(cmd: str) -> str:
+    return f'Неверно указан порт для команды "{cmd}"'
+
+
+def get_mask_error(cmd: str) -> str:
+    return f'Неверно указана маска подсети для команды "{cmd}"'
+
+
+def get_opt_error(cmd: str) -> str:
+    return f'Неверно указаны опции для команды "{cmd}"'
 
 
 # ------ Jobs ------
@@ -214,7 +240,7 @@ class ArgCheckError(Exception):
 class AbstractDeviceConfigurator:
     def __init__(self, device_type: str):
         self.__jobs: dict[int, JobConfigurator] = {}
-        self.__device_type: str = device_type
+        self._device_type: str = device_type
         self._device_node = None  # current device node in miminet network
 
     __MAX_JOBS_COUNT: int = 20
@@ -253,7 +279,7 @@ class AbstractDeviceConfigurator:
             raise ConfigurationError("Сеть не найдена")
 
         # get element (host, hub, switch, ...)
-        element_form_id = f"{self.__device_type}_id"
+        element_form_id = f"{self._device_type}_id"
         device_id = get_data(element_form_id)
 
         if not device_id:
@@ -267,7 +293,7 @@ class AbstractDeviceConfigurator:
         filt_nodes = list(filter(lambda n: n["data"]["id"] == device_id, self._nodes))
 
         if not filt_nodes:
-            raise ConfigurationError(f"Такого '{self.__device_type}' не существует")
+            raise ConfigurationError(f"Такого '{self._device_type}' не существует")
 
         # current device's node
         self._device_node = filt_nodes[0]
@@ -275,7 +301,7 @@ class AbstractDeviceConfigurator:
     def _conf_label_update(self):
         """Update device label during configuration. Typically used at the end of the configuration"""
         # get label with device name
-        label = request.form.get(f"config_{self.__device_type}_name")
+        label = request.form.get(f"config_{self._device_type}_name")
 
         if label:
             self._device_node["config"]["label"] = label
@@ -320,21 +346,23 @@ class AbstractDeviceConfigurator:
 
     def _conf_ip_addresses(self):
         """Configurate device IP-addresses"""
-    
+
         iface_ids = request.form.getlist("config_host_iface_ids[]")
         for iface_id in iface_ids:
             if not self._device_node["interface"]:
-                return # we have nothing to configure
+                return  # we have nothing to configure
 
-            filtered_ifaces = list(filter(lambda x: x["id"] == iface_id, self._device_node["interface"]))
+            filtered_ifaces = list(
+                filter(lambda x: x["id"] == iface_id, self._device_node["interface"])
+            )
 
             if not filtered_ifaces:
                 continue
 
             interface = filtered_ifaces[0]
 
-            ip_value = get_data(f"config_{self.__device_type}_ip_{str(iface_id)}")
-            mask_value = get_data(f"config_{self.__device_type}_mask_{str(iface_id)}")
+            ip_value = get_data(f"config_{self._device_type}_ip_{str(iface_id)}")
+            mask_value = get_data(f"config_{self._device_type}_mask_{str(iface_id)}")
 
             if not ip_value:
                 continue
@@ -346,21 +374,21 @@ class AbstractDeviceConfigurator:
                     ip_value = ip_mask[0]
                     mask_value = ip_mask[1]
                 else:
-                    raise ArgCheckError('Не указана маска для IP адреса')
+                    raise ArgCheckError("Не указана маска для IP адреса")
 
             mask_value = int(mask_value)
 
             if mask_value < 0 or mask_value > 32:
-                raise ArgCheckError('Маска подсети указана неверно')
+                raise ArgCheckError("Маска подсети указана неверно")
 
             if not IPv4_check(ip_value):
-                raise ArgCheckError('IP-адрес указан неверно')
-            
+                raise ArgCheckError("IP-адрес указан неверно")
+
             interface["ip"] = ip_value
             interface["netmask"] = mask_value
 
     def _conf_gw(self):
-        default_gw = get_data(f"config_{self.__device_type}_default_gw")
+        default_gw = get_data(f"config_{self._device_type}_default_gw")
 
         if default_gw:
             if not IPv4_check(default_gw):
@@ -441,13 +469,27 @@ class HostConfigurator(AbstractDeviceConfigurator):
 
         return res
 
+
+class RouterConfigurator(HostConfigurator):
+    def __init__(self):
+        super().__init__()
+        self._device_type = "router"
+
+
+# --- Network device configurators ---
+
+hub = HubConfigurator()
+switch = SwitchConfigurator()
+host = HostConfigurator()
+router = RouterConfigurator()
+
 # --- Jobs ---
 
 # ~ HOST ~
 # ping -c 1 (1 param)
 host_ping_job = JobConfigurator(1, "ping -c 1 [0]")
 host_ping_job.add_param("config_host_ping_c_1_ip").add_check(IPv4_check).set_error_msg(
-    'Неверно указан IP-адрес для команды "ping"'
+    get_ip_error("ping")
 )
 
 # ping -c 1 (with options)
@@ -455,75 +497,67 @@ host_ping_opt_job = JobConfigurator(2, "ping -c 1 [0] [1]")
 host_ping_opt_job.add_param(
     "config_host_ping_with_options_options_input_field"
 ).add_check(emptiness_check).add_check(ascii_check).set_error_msg(
-    'Опции для команды "ping (с опциями)" указаны неверно'
+    get_opt_error("ping (с опциями)")
 )
 host_ping_opt_job.add_param("config_host_ping_with_options_ip_input_field").add_check(
     IPv4_check
-).set_error_msg('Неверно указан IP адрес для команды "ping (с опциями)"')
+).set_error_msg(get_ip_error("ping (с опциями)"))
 
 # send UDP data
 host_udp_job = JobConfigurator(3, "send -s [0] -p udp [1]:[2]")
 host_udp_job.add_param("config_host_send_udp_data_size_input_field").add_check(
     port_check
-).set_error_msg('Указан неверный порт для команды "Отправить данные (UDP)"')
+).set_error_msg(get_port_error("Отправить данные (UDP)"))
 host_udp_job.add_param("config_host_send_udp_data_ip_input_field").add_check(
     IPv4_check
-).set_error_msg('Неверно указан IP адрес для команды "Отправить данные (UDP)"')
+).set_error_msg(get_ip_error("Отправить данные (UDP)"))
 host_udp_job.add_param("config_host_send_udp_data_port_input_field").add_check(
     mask_check
-).set_error_msg('Указан неверный порт для команды "Отправить данные (UDP)"')
+).set_error_msg(get_port_error("Отправить данные (UDP)"))
 
 # send TCP data
 host_tcp_job = JobConfigurator(4, "send -s [0] -p tcp [1]:[2]")
 host_tcp_job.add_param("config_host_send_tcp_data_size_input_field").add_check(
     port_check
-).set_error_msg('Указан неверный порт для команды "Отправить данные (TCP)"')
+).set_error_msg(get_port_error("Отправить данные (TCP)"))
 host_tcp_job.add_param("config_host_send_tcp_data_ip_input_field").add_check(
     IPv4_check
-).set_error_msg('Неверно указан IP адрес для команды "Отправить данные (TCP)"')
+).set_error_msg(get_ip_error("Отправить данные (TCP)"))
 host_tcp_job.add_param("config_host_send_tcp_data_port_input_field").add_check(
     mask_check
-).set_error_msg('Указан неверный порт для команды "Отправить данные (TCP)"')
+).set_error_msg(get_port_error("Отправить данные (TCP)"))
 
 # traceroute -n (with options)
 traceroute_job = JobConfigurator(5, "traceroute -n [0] [1]")
 traceroute_job.add_param(
     "config_host_traceroute_with_options_options_input_field"
 ).add_check(emptiness_check).add_check(ascii_check).set_error_msg(
-    'Указаны неверные опции для команды "traceroute -n (с опциями)"'
+    get_opt_error("traceroute -n (с опциями)")
 )
 traceroute_job.add_param(
     "config_host_traceroute_with_options_ip_input_field"
-).add_check(IPv4_check).set_error_msg(
-    'Указан неверный IP-адрес для команды "traceroute -n (с опциями)"'
-)
+).add_check(IPv4_check).set_error_msg(get_ip_error("traceroute -n (с опциями)"))
 
 # Add route
 add_route_job = JobConfigurator(102, "ip route add [0]/[1] via [2]")
 add_route_job.add_param("config_host_add_route_ip_input_field").add_check(
     IPv4_check
-).set_error_msg('Указан неверный IP-адрес для команды "Добавить маршрут"')
+).set_error_msg(get_ip_error("Добавить маршрут"))
 add_route_job.add_param("config_host_add_route_mask_input_field").add_check(
     mask_check
-).set_error_msg('Указан неверная маска подсети для команды "Добавить маршрут"')
+).set_error_msg(get_mask_error("Добавить маршрут"))
 add_route_job.add_param("config_host_add_route_gw_input_field").add_check(
     IPv4_check
-).set_error_msg('Указан неверный IP-адрес шлюза для команды "Добавить маршрут"')
+).set_error_msg(get_ip_error("Добавить маршрут"))
 
 # arp -s ip hw_addr
 arp_job = JobConfigurator(103, "arp -s [0] [1]")
 arp_job.add_param("config_host_add_arp_cache_ip_input_field").add_check(
     IPv4_check
-).set_error_msg(
-    'Указан неверный IP-адрес шлюза для команды "Добавить запись в ARP-cache"'
-)
+).set_error_msg(get_ip_error("Добавить запись в ARP-cache"))
 arp_job.add_param("config_host_add_arp_cache_mac_input_field").add_check(
     MAC_check
 ).set_error_msg('MAC-адрес для команды "Добавить запись в ARP-cache" указан неверно')
-
-hub = HubConfigurator()
-switch = SwitchConfigurator()
-host = HostConfigurator()
 
 host.add_jobs(
     host_ping_job,
@@ -533,6 +567,115 @@ host.add_jobs(
     traceroute_job,
     add_route_job,
     arp_job,
+)
+
+# ~ ROUTER ~
+
+# ping
+router_ping_job = JobConfigurator(1, "ping -c 1 [0]")
+router_ping_job.add_param("config_router_ping_c_1_ip").add_check(
+    IPv4_check
+).set_error_msg(get_ip_error("ping"))
+
+# add IP/mask
+add_ip_job = JobConfigurator(100, "ip addess add [0]/[1] dev [2]")
+add_ip_job.add_param("config_router_add_ip_mask_iface_select_field").add_check(
+    emptiness_check
+).set_error_msg('Не указан интерфейс для команды "Добавить IP-адрес"')
+add_ip_job.add_param("config_router_add_ip_mask_ip_input_field").add_check(
+    IPv4_check
+).set_error_msg(get_ip_error("Добавить IP-адрес"))
+add_ip_job.add_param("config_router_add_ip_mask_mask_input_field").add_check(
+    mask_check
+).set_error_msg(get_mask_error("Добавить IP-адрес"))
+
+# add NAT masquerade to the interface
+nat_job = JobConfigurator(101, "add nat -o [0] -j masquerad")
+nat_job.add_param("config_router_add_nat_masquerade_iface_select_field").add_check(
+    emptiness_check
+).set_error_msg('Не указан интерфейс для команды "Включить NAT masquerade"')
+
+# Add route
+router_add_route_job = JobConfigurator(102, "ip route add [0]/[1] via [2]")
+router_add_route_job.add_param("config_router_add_route_ip_input_field").add_check(
+    IPv4_check
+).set_error_msg(get_ip_error("Добавить маршрут"))
+router_add_route_job.add_param("config_router_add_route_mask_input_field").add_check(
+    mask_check
+).set_error_msg(get_mask_error("Добавить маршрут"))
+router_add_route_job.add_param("config_router_add_route_gw_input_field").add_check(
+    IPv4_check
+).set_error_msg(get_ip_error("Добавить маршрут"))
+
+# Add VLAN
+vlan_job = JobConfigurator(104, "subinterface [0]:[1] VLAN [2]")
+vlan_job.add_param("config_router_add_subinterface_iface_select_field").add_check(
+    emptiness_check
+).set_error_msg('Не выбран линк для команды "Добавить сабинтерфейс с VLAN"')
+vlan_job.add_param("config_router_add_subinterface_ip_input_field").add_check(
+    IPv4_check
+).set_error_msg(get_ip_error("Добавить сабинтерфейс с VLAN"))
+vlan_job.add_param("config_router_add_subinterface_mask_input_field").add_check(
+    mask_check
+).set_error_msg(get_mask_error("Добавить сабинтерфейс с VLAN"))
+vlan_job.add_param("config_router_add_subinterface_vlan_input_field").add_check(
+    digit_check
+).set_error_msg('Неверный параметр VLAN для команды "Добавить сабинтерфейс с VLAN"')
+
+# IPIP
+ipip_job = JobConfigurator(105, "ipip: [3] from [0] to [1] \n[3]: [2]")
+ipip_job.add_param("config_router_add_ipip_tunnel_iface_select_ip_field").add_check(
+    emptiness_check
+).set_error_msg(
+    'Не выбран IP-адрес начальной точки для команды "Добавить IPIP-интерфейс"'
+)
+ipip_job.add_param("config_router_add_ipip_tunnel_end_ip_input_field").add_check(
+    IPv4_check
+).set_error_msg(
+    'Не указан IP-адрес конечной точки для команды "Добавить IPIP-интерфейс"'
+)
+ipip_job.add_param("config_router_add_ipip_tunnel_interface_ip_input_field").add_check(
+    IPv4_check
+).set_error_msg(
+    'Не указан IP адрес IPIP-интерфейса для команды "Добавить IPIP-интерфейс"'
+)
+ipip_job.add_param("config_router_add_ipip_tunnel_interface_name_field").add_check(
+    name_check
+).set_error_msg(
+    'Не указано название IPIP-интерфейса для команды "Добавить IPIP-интерфейс"'
+)
+
+# GRE
+gre_job = JobConfigurator(106, "gre: [3] from [0] to [1] \n[3]: [2]")
+gre_job.add_param("config_router_add_gre_interface_select_ip_field").add_check(
+    emptiness_check
+).set_error_msg(
+    'Не выбран IP-адрес начальной точки для команды "Добавить GRE-интерфейс"'
+)
+gre_job.add_param("config_router_add_gre_interface_end_ip_input_field").add_check(
+    IPv4_check
+).set_error_msg(
+    'Не указан IP-адрес конечной точки для команды "Добавить GRE-интерфейс"'
+)
+gre_job.add_param("config_router_add_gre_interface_ip_input_field").add_check(
+    IPv4_check
+).set_error_msg(
+    'Не указан IP адрес GRE-интерфейса для команды "Добавить GRE-интерфейс"'
+)
+gre_job.add_param("config_router_add_gre_interface_name_field").add_check(
+    name_check
+).set_error_msg(
+    'Не указано название GRE-интерфейса для команды "Добавить GRE-интерфейс"'
+)
+
+router.add_jobs(
+    router_ping_job,
+    add_ip_job,
+    nat_job,
+    router_add_route_job,
+    vlan_job,
+    ipip_job,
+    gre_job,
 )
 
 
@@ -549,556 +692,11 @@ def save_switch_config():
 @login_required
 def save_host_config():
     return host.configure()
-    user = current_user
-    ret = {}
-
-    if request.method == "POST":
-        network_guid = request.form.get("net_guid", type=str)
-
-        if not network_guid:
-            ret.update({"message": "Не указан параметр net_guid"})
-            return make_response(jsonify(ret), 400)
-
-        net = (
-            Network.query.filter(Network.guid == network_guid)
-            .filter(Network.author_id == user.id)
-            .first()
-        )
-
-        if not net:
-            ret.update({"message": "Такая сеть не найдена"})
-            return make_response(jsonify(ret), 400)
-
-        host_id = request.form.get("host_id")
-
-        if not host_id:
-            ret.update({"message": "Не указан параметр host_id"})
-            return make_response(jsonify(ret), 400)
-
-        jnet = json.loads(net.network)
-        nodes = jnet["nodes"]
-
-        nn = list(filter(lambda x: x["data"]["id"] == host_id, nodes))
-
-        if not nn:
-            ret.update({"message": "Такого хоста не существует"})
-            return make_response(jsonify(ret), 400)
-
-        node = nn[0]
-
-        # Add job?
-
-        # Get job ID from select field
-        job_id = int(request.form.get("config_host_job_select_field"))
-
-        if job_id:
-            if not jnet.get("jobs"):
-                jnet["jobs"] = []
-
-            job_level = len(jnet["jobs"])
-
-            if job_level < 20:
-                # ping -c 1 (1 param)
-                if job_id == 1:
-                    job_1_arg_1 = request.form.get("config_host_ping_c_1_ip")
-
-                    if job_1_arg_1:
-                        jnet["jobs"].append(
-                            {
-                                "id": job_id_generator(),
-                                "level": job_level,
-                                "job_id": job_id,
-                                "host_id": node["data"]["id"],
-                                "arg_1": job_1_arg_1,
-                                "print_cmd": "ping -c 1 " + job_1_arg_1,
-                            }
-                        )
-                    else:
-                        ret.update({"warning": "Не указан IP адрес для команды ping"})
-
-                # ping -c 1 (with options)
-                if job_id == 2:
-                    job_2_arg_1 = request.form.get(
-                        "config_host_ping_with_options_options_input_field"
-                    )
-                    job_2_arg_2 = request.form.get(
-                        "config_host_ping_with_options_ip_input_field"
-                    )
-
-                    if job_2_arg_1:
-                        job_2_arg_1 = re.sub(r"[~|\\/'^&%]", "", job_2_arg_1)
-                        job_2_arg_1 = re.sub(r"[^\x00-\x7F]", "", job_2_arg_1)
-
-                    if not job_2_arg_2:
-                        ret.update(
-                            {
-                                "warning": (
-                                    'Не указан IP адрес для команды "ping (с опциями)"'
-                                )
-                            }
-                        )
-                        return make_response(jsonify(ret), 200)
-
-                    try:
-                        socket.inet_aton(job_2_arg_2)
-                        jnet["jobs"].append(
-                            {
-                                "id": job_id_generator(),
-                                "level": job_level,
-                                "job_id": job_id,
-                                "host_id": node["data"]["id"],
-                                "arg_1": job_2_arg_1,
-                                "arg_2": job_2_arg_2,
-                                "print_cmd": (
-                                    "ping -c 1 "
-                                    + str(job_2_arg_1)
-                                    + " "
-                                    + str(job_2_arg_2)
-                                ),
-                            }
-                        )
-                    except Exception:
-                        ret.update(
-                            {
-                                "warning": (
-                                    'IP адрес для команды "ping (с опциями)" указан'
-                                    " неверно."
-                                )
-                            }
-                        )
-
-                # send UDP data
-                if job_id == 3:
-                    job_3_arg_1 = request.form.get(
-                        "config_host_send_udp_data_size_input_field"
-                    )
-                    job_3_arg_2 = request.form.get(
-                        "config_host_send_udp_data_ip_input_field"
-                    )
-                    job_3_arg_3 = request.form.get(
-                        "config_host_send_udp_data_port_input_field"
-                    )
-
-                    if not job_3_arg_1:
-                        job_3_arg_1 = 1000
-
-                    if int(job_3_arg_1) < 0 or int(job_3_arg_1) > 65535:
-                        job_3_arg_1 = 1000
-
-                    if not job_3_arg_2:
-                        ret.update(
-                            {
-                                "warning": (
-                                    'Не указан IP адрес для команды "Отправить данные'
-                                    ' (UDP)"'
-                                )
-                            }
-                        )
-                        return make_response(jsonify(ret), 200)
-
-                    if not job_3_arg_3:
-                        ret.update(
-                            {
-                                "warning": (
-                                    'Не указан порт для команды "Отправить данные (UDP)"'
-                                )
-                            }
-                        )
-                        return make_response(jsonify(ret), 200)
-
-                    if int(job_3_arg_3) < 0 or int(job_3_arg_3) > 65535:
-                        ret.update(
-                            {
-                                "warning": (
-                                    'Неверно указан порт для команды "Отправить данные'
-                                    ' (UDP)"'
-                                )
-                            }
-                        )
-                        return make_response(jsonify(ret), 200)
-
-                    try:
-                        socket.inet_aton(job_3_arg_2)
-                        jnet["jobs"].append(
-                            {
-                                "id": job_id_generator(),
-                                "level": job_level,
-                                "job_id": job_id,
-                                "host_id": node["data"]["id"],
-                                "arg_1": int(job_3_arg_1),
-                                "arg_2": job_3_arg_2,
-                                "arg_3": int(job_3_arg_3),
-                                "print_cmd": (
-                                    "send -s "
-                                    + str(job_3_arg_1)
-                                    + " -p udp "
-                                    + str(job_3_arg_2)
-                                    + ":"
-                                    + str(job_3_arg_3)
-                                ),
-                            }
-                        )
-                    except Exception:
-                        ret.update(
-                            {
-                                "warning": (
-                                    'IP адрес для команды "Отправить данные (UDP)" указан'
-                                    " неверно."
-                                )
-                            }
-                        )
-
-                # send TCP data
-                if job_id == 4:
-                    job_4_arg_1 = request.form.get(
-                        "config_host_send_tcp_data_size_input_field"
-                    )
-                    job_4_arg_2 = request.form.get(
-                        "config_host_send_tcp_data_ip_input_field"
-                    )
-                    job_4_arg_3 = request.form.get(
-                        "config_host_send_tcp_data_port_input_field"
-                    )
-
-                    if not job_4_arg_1:
-                        job_4_arg_1 = 1000
-
-                    if int(job_4_arg_1) < 0 or int(job_4_arg_1) > 65535:
-                        job_4_arg_1 = 1000
-
-                    if not job_4_arg_2:
-                        ret.update(
-                            {
-                                "warning": (
-                                    'Не указан IP адрес для команды "Отправить данные'
-                                    ' (TCP)"'
-                                )
-                            }
-                        )
-                        return make_response(jsonify(ret), 200)
-
-                    if not job_4_arg_3:
-                        ret.update(
-                            {
-                                "warning": (
-                                    'Не указан порт для команды "Отправить данные (TCP)"'
-                                )
-                            }
-                        )
-                        return make_response(jsonify(ret), 200)
-
-                    if int(job_4_arg_3) < 0 or int(job_4_arg_3) > 65535:
-                        ret.update(
-                            {
-                                "warning": (
-                                    'Неверно указан порт для команды "Отправить данные'
-                                    ' (TCP)"'
-                                )
-                            }
-                        )
-                        return make_response(jsonify(ret), 200)
-
-                    try:
-                        socket.inet_aton(job_4_arg_2)
-                        jnet["jobs"].append(
-                            {
-                                "id": job_id_generator(),
-                                "level": job_level,
-                                "job_id": job_id,
-                                "host_id": node["data"]["id"],
-                                "arg_1": int(job_4_arg_1),
-                                "arg_2": job_4_arg_2,
-                                "arg_3": int(job_4_arg_3),
-                                "print_cmd": (
-                                    "send -s "
-                                    + str(job_4_arg_1)
-                                    + " -p tcp "
-                                    + str(job_4_arg_2)
-                                    + ":"
-                                    + str(job_4_arg_3)
-                                ),
-                            }
-                        )
-                    except Exception as e:
-                        print(e)
-                        ret.update(
-                            {
-                                "warning": (
-                                    'IP адрес для команды "Отправить данные (TCP)" указан'
-                                    " неверно."
-                                )
-                            }
-                        )
-
-                # traceroute -n (with options)
-                if job_id == 5:
-                    job_5_arg_1 = request.form.get(
-                        "config_host_traceroute_with_options_options_input_field"
-                    )
-                    job_5_arg_2 = request.form.get(
-                        "config_host_traceroute_with_options_ip_input_field"
-                    )
-
-                    if job_5_arg_1:
-                        job_5_arg_1 = re.sub(r"[~|\\/'^&%]", "", job_5_arg_1)
-                        job_5_arg_1 = re.sub(r"[^\x00-\x7F]", "", job_5_arg_1)
-
-                    if not job_5_arg_2:
-                        ret.update(
-                            {
-                                "warning": (
-                                    'Не указан IP адрес для команды "traceroute -n (с'
-                                    ' опциями)"'
-                                )
-                            }
-                        )
-                        return make_response(jsonify(ret), 200)
-
-                    try:
-                        socket.inet_aton(job_5_arg_2)
-                        jnet["jobs"].append(
-                            {
-                                "id": job_id_generator(),
-                                "level": job_level,
-                                "job_id": job_id,
-                                "host_id": node["data"]["id"],
-                                "arg_1": job_5_arg_1,
-                                "arg_2": job_5_arg_2,
-                                "print_cmd": (
-                                    "traceroute -n "
-                                    + str(job_5_arg_1)
-                                    + " "
-                                    + str(job_5_arg_2)
-                                ),
-                            }
-                        )
-                    except Exception:
-                        ret.update(
-                            {
-                                "warning": (
-                                    'IP адрес для команды "traceroute -n (с опциями)"'
-                                    " указан неверно."
-                                )
-                            }
-                        )
-
-                # Add route
-                if job_id == 102:
-                    job_102_arg_1 = request.form.get(
-                        "config_host_add_route_ip_input_field"
-                    )
-                    job_102_arg_2 = int(
-                        request.form.get("config_host_add_route_mask_input_field")
-                    )
-                    job_102_arg_3 = request.form.get(
-                        "config_host_add_route_gw_input_field"
-                    )
-
-                    if not job_102_arg_1:
-                        ret.update(
-                            {
-                                "warning": (
-                                    'Не указан IP адрес для команды "Добавить маршрут"'
-                                )
-                            }
-                        )
-                        return make_response(jsonify(ret), 200)
-
-                    if job_102_arg_2 < 0 or job_102_arg_2 > 32:
-                        ret.update(
-                            {
-                                "warning": (
-                                    'Маска для команды "Добавить маршрут" указана неверно.'
-                                    " Допустимые значения от 0 до 32."
-                                )
-                            }
-                        )
-                        return make_response(jsonify(ret), 200)
-
-                    if not job_102_arg_3:
-                        ret.update(
-                            {
-                                "warning": (
-                                    'Не указан IP адрес шлюза для команды "Добавить'
-                                    ' маршрут"'
-                                )
-                            }
-                        )
-                        return make_response(jsonify(ret), 200)
-
-                    try:
-                        socket.inet_aton(job_102_arg_1)
-                        socket.inet_aton(job_102_arg_3)
-                        jnet["jobs"].append(
-                            {
-                                "id": job_id_generator(),
-                                "level": job_level,
-                                "job_id": job_id,
-                                "host_id": node["data"]["id"],
-                                "arg_1": job_102_arg_1,
-                                "arg_2": job_102_arg_2,
-                                "arg_3": job_102_arg_3,
-                                "print_cmd": (
-                                    "ip route add "
-                                    + str(job_102_arg_1)
-                                    + "/"
-                                    + str(job_102_arg_2)
-                                    + " via "
-                                    + str(job_102_arg_3)
-                                ),
-                            }
-                        )
-                    except Exception as e:
-                        print(e)
-                        ret.update(
-                            {
-                                "warning": (
-                                    'IP адрес для команды "Добавить маршрут" указан'
-                                    " неверно."
-                                )
-                            }
-                        )
-
-                # arp -s ip hw_addr
-                if job_id == 103:
-                    job_103_arg_1 = request.form.get(
-                        "config_host_add_arp_cache_ip_input_field"
-                    )
-                    job_103_arg_2 = request.form.get(
-                        "config_host_add_arp_cache_mac_input_field"
-                    )
-
-                    if not re.match(
-                        "[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$",
-                        job_103_arg_2.lower(),
-                    ):
-                        ret.update(
-                            {
-                                "warning": (
-                                    'MAC адрес для команды "Добавить запись в ARP-cache"'
-                                    " указан неверно."
-                                )
-                            }
-                        )
-                        return make_response(jsonify(ret), 200)
-
-                    try:
-                        socket.inet_aton(job_103_arg_1)
-                        jnet["jobs"].append(
-                            {
-                                "id": job_id_generator(),
-                                "level": job_level,
-                                "job_id": job_id,
-                                "host_id": node["data"]["id"],
-                                "arg_1": job_103_arg_1,
-                                "arg_2": job_103_arg_2,
-                                "print_cmd": (
-                                    "arp -s "
-                                    + str(job_103_arg_1)
-                                    + " "
-                                    + str(job_103_arg_2)
-                                ),
-                            }
-                        )
-
-                    except Exception as e:
-                        print(e)
-                        ret.update(
-                            {
-                                "warning": (
-                                    'IP адрес для команды "Добавить запись в ARP-cache"'
-                                    " указан неверно."
-                                )
-                            }
-                        )
-                        return make_response(jsonify(ret), 200)
-
-        # Set IP adresses
-        iface_ids = request.form.getlist("config_host_iface_ids[]")
-        for iface_id in iface_ids:
-            # Do we really have that iface?
-            if not node["interface"]:
-                break
-
-            ii = list(filter(lambda x: x["id"] == iface_id, node["interface"]))
-
-            if not ii:
-                continue
-
-            interface = ii[0]
-
-            host_ip_value = request.form.get("config_host_ip_" + str(iface_id))
-            host_mask_value = request.form.get("config_host_mask_" + str(iface_id))
-
-            # If not IP
-            if not host_ip_value:
-                continue
-
-            if not host_mask_value.isdigit():
-                # Check if we have 1.2.3.4/5 ?
-                ip_mask = host_ip_value.split("/")
-                if len(ip_mask) == 2:
-                    host_ip_value = ip_mask[0]
-                    host_mask_value = ip_mask[1]
-                else:
-                    ret.update({"warning": "Не указана маска для IP адреса"})
-                    continue
-
-            host_mask_value = int(host_mask_value)
-
-            if host_mask_value < 0 or host_mask_value > 32:
-                ret.update({"warning": "Маска подсети указана неверно"})
-                continue
-
-            try:
-                socket.inet_aton(host_ip_value)
-                interface["ip"] = host_ip_value
-                interface["netmask"] = host_mask_value
-            except Exception:
-                ret.update({"warning": "IP адрес указан неверно."})
-                continue
-
-        host_label = request.form.get("config_host_name")
-
-        if host_label:
-            node["config"]["label"] = host_label
-            node["data"]["label"] = node["config"]["label"]
-
-        # Add gateway
-        default_gw = request.form.get("config_host_default_gw")
-
-        if default_gw:
-            # Check if default_gw is a valid IP address
-            try:
-                # ip = ipaddress.ip_address(default_gw)
-                node["config"]["default_gw"] = default_gw
-            except ValueError:
-                ret.update(
-                    {"warning": "IP адрес маршрута по умолчанию указан неверно."}
-                )
-                return make_response(jsonify(ret), 200)
-        else:
-            node["config"]["default_gw"] = ""
-
-        # Remove all previous simulations
-        sims = Simulate.query.filter(Simulate.network_id == net.id).all()
-        for s in sims:
-            db.session.delete(s)
-
-        net.network = json.dumps(jnet)
-        db.session.commit()
-
-        ret.update(
-            {"message": "Конфигурация обновлена", "nodes": nodes, "jobs": jnet["jobs"]}
-        )
-        return make_response(jsonify(ret), 200)
-
-    ret.update({"message": "Неверный запрос"})
-    return make_response(jsonify(ret), 400)
 
 
 @login_required
 def save_router_config():
+    return router.configure()
     user = current_user
     ret = {}
 
