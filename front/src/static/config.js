@@ -616,12 +616,12 @@ const ConfigRouterJobOnChange = function(evnt) {
             break;
         case '100':
             UpdateRouterForm('config_router_add_ip_mask_script');
-            FillRouterSelect("#config_router_add_ip_mask_iface_select_field");
+            FillRouterSelect("#config_router_add_ip_mask_iface_select_field", "Выберите линк", false);
         
             break;
         case '101':
             UpdateRouterForm('config_router_add_nat_masquerade_script');
-            FillRouterSelect("#config_router_add_nat_masquerade_iface_select_field");
+            FillRouterSelect("#config_router_add_nat_masquerade_iface_select_field", "Выберите линк", false);
 
             break;
         case '102':
@@ -630,7 +630,7 @@ const ConfigRouterJobOnChange = function(evnt) {
             break;  
         case '104':
             UpdateRouterForm('config_router_add_subinterface_script');
-            FillRouterSelect("#config_router_add_subinterface_iface_select_field");
+            FillRouterSelect("#config_router_add_subinterface_iface_select_field", "Выберите линк" ,false);
 
             break;
         case '105':
@@ -858,10 +858,12 @@ const UpdateRouterForm = function(name) {
     $(elem).insertBefore(router_job_list);
 }
 
-const FillRouterSelect = function(select_id) {
+const FillRouterSelect = function(select_id, field_msg = 'Интерфейс начальной точки', return_ip = true) {
     /**
     * Fill select element with network hosts.
     * @param  {String} select_id ID(name) of the element to which you need to add data.
+    * @param  {String} field_msg Message that will be displayed in the select list by default.
+    * @param  {Boolean} return_ip True if replace user's input with ip and False if replace it with element's id.
    */
 
     // configured router id
@@ -883,7 +885,7 @@ const FillRouterSelect = function(select_id) {
         $(select_id).append('<option selected value="0">Мало интерфейсов</option>');
         return;
     } else {
-        $(select_id).append('<option selected value="0">Интерфейс начальной точки</option>');
+        $(select_id).append(`<option selected value="0">${field_msg}</option>`);
     }
 
     router_node.interface.forEach(function(iface) {
@@ -923,7 +925,7 @@ const FillRouterSelect = function(select_id) {
         let router_connection_host_node = nodes.find(n => n.data.id === router_connection);
         let router_connection_host_label = (router_connection_host_node) ? router_connection_host_node.data.label : "Unknown";
 
-        $(select_id).append('<option value="' + iface_ip + '">' + router_connection_host_label + '</option>');
+        $(select_id).append('<option value="' + (return_ip ? iface_ip : iface_id) + '">' + router_connection_host_label + '</option>');
 
     });
 }
