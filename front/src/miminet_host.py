@@ -36,7 +36,7 @@ def build_response(message: str, code=ResultCode.ERROR) -> Response:
 # (you can add your checks here)
 
 
-def IPv4_check(self, arg: str) -> bool:
+def IPv4_check(arg: str) -> bool:
     """Check IP address correctness"""
     try:
         ipaddress.ip_address(arg)
@@ -61,7 +61,7 @@ def mask_check(arg: str) -> bool:
         return False
 
 
-def port_check(self, arg: str) -> bool:
+def port_check(arg: str) -> bool:
     """Check port correctness"""
     try:
         return int(arg) in range(0, 65536)
@@ -70,9 +70,14 @@ def port_check(self, arg: str) -> bool:
 
 
 def name_check(arg: str) -> bool:
-    """Checks that the name is in the allowed length from 2 to 15,
+    """Check that the name is in the allowed length from 2 to 15,
     from allowed characters: a-z, A-Z, 0-9, -, _."""
     return re.match("^[A-Za-z][A-Za-z0-9_-]{1,14}$", arg)
+
+
+def MAC_check(arg: str) -> bool:
+    """Check MAC-address correctness"""
+    return re.match("[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", arg.lower())
 
 
 def ascii_check(arg: str) -> bool:
@@ -82,7 +87,7 @@ def ascii_check(arg: str) -> bool:
 
 def emptiness_check(arg: str) -> bool:
     """Check if the Python String is empty or not"""
-    return not arg
+    return arg != ""
 
 
 def regex_check(arg: str, regex: str) -> bool:
@@ -129,9 +134,9 @@ class JobArgConfigurator:
         Returns:
             Optional[str]: None if argument didn't pass checks
         """
-        arg = request.form.get(self.__control_id, type=str)
+        arg = get_data(self.__control_id)
 
-        if all(validate(arg) for validate in self.__validators):
+        if all([validate(arg) for validate in self.__validators]):
             return arg
         return None
 
@@ -139,20 +144,19 @@ class JobArgConfigurator:
 class JobConfigurator:
     """Frontend job configurator"""
 
-    def __init__(self, job_id: int, level: int, host_id: str, job_sign: str):
+    def __init__(self, job_id: int, job_sign: str):
         """
         Args:
             job_id (int): ID that is assigned to the job in the select list (see static/config*.html files)
-            level (int): job level in the device configuration list
-            host_id (str): device ID for which this job is assigned
             job_sign (str): inscription that will be displayed above the device after adding a job
         """
-        self.__id: str = uuid.uuid4().hex  # random id
         self.__job_id: int = job_id
-        self.__level: int = level
-        self.__host_id: int = host_id
         self.__print_cmd: str = job_sign
         self.__arg_confs: list[JobArgConfigurator] = []
+
+    @property
+    def job_id(self):
+        return self.__job_id
 
     def add_param(self, control_id: str) -> JobArgConfigurator:
         """
@@ -165,37 +169,43 @@ class JobConfigurator:
 
     def configure(self) -> dict[str, str]:
         """Validate every argument and return dict with response for the user's request"""
+        random_id: str = uuid.uuid4().hex  # random id for every added job
         configured_args = [arg.configure() for arg in self.__arg_confs]
 
         # check whether the arguments passed the checks
-        for i in range(configured_args):
+        for i in range(len(configured_args)):
             if configured_args[i] is None:
                 # return warning for user with arg error message
-                return {"warning": self.__arg_confs[i].error_msg}
+                raise ArgCheckError(self.__arg_confs[i].error_msg)
 
         # insert arguments into label string
         command_label: str = self.__print_cmd
-        for i, arg in enumerate(self.configured_args):
-            command_label = command_label.replace(f"[{i+1}]", arg)
+        for i, arg in enumerate(configured_args):
+            command_label = command_label.replace(f"[{i}]", arg)
 
         response = {
-            "id": self.__id,
-            "level": self.__level,
+            "id": random_id,
             "job_id": self.__job_id,
-            "host_id": self.__host_id,
             "print_cmd": command_label,
         }
 
         # add args to response
-        for i, arg in enumerate(self.configured_args):
+        for i, arg in enumerate(configured_args):
             response[f"arg_{i+1}"] = arg
 
         return response
 
 
 # ------ Network Device Configurators ------
-class RequestArgError(Exception):
+class ConfigurationError(Exception):
     """Special exception for user's request errors"""
+
+    def __init__(self, message):
+        super().__init__(message)
+
+
+class ArgCheckError(Exception):
+    """Special exception for job argument errors"""
 
     def __init__(self, message):
         super().__init__(message)
@@ -203,12 +213,16 @@ class RequestArgError(Exception):
 
 class AbstractDeviceConfigurator:
     def __init__(self, device_type: str):
-        self.__jobs: list[JobConfigurator] = []
+        self.__jobs: dict[int, JobConfigurator] = {}
         self.__device_type: str = device_type
         self._device_node = None  # current device node in miminet network
 
+    __MAX_JOBS_COUNT: int = 20
+
     def add_job(self, job: JobConfigurator):
-        self.__jobs.append(job)
+        if job.job_id in self.__jobs.keys():
+            raise ValueError("This job already added")
+        self.__jobs[job.job_id] = job
 
     def add_jobs(self, *jobs):
         for job in jobs:
@@ -216,20 +230,17 @@ class AbstractDeviceConfigurator:
 
     # [!] I have broken device configuration process into different blocks, they will be below
 
-    def _build_error_response(e: RequestArgError):
-        return build_response(str(e))
-
-    def _setup_configuration(self):
+    def _conf_setup(self):
         """Prepare variables for configuring"""
 
         # check request correctness
         if request.method != "POST":
-            raise RequestArgError("Неверный запрос: ожидался POST")
+            raise ConfigurationError("Неверный запрос: ожидался POST")
 
         network_guid = get_data("net_guid")
 
         if not network_guid:
-            return RequestArgError("Не указан параметр net_guid")
+            raise ConfigurationError("Не указан параметр net_guid")
 
         # get user's network
         self._cur_network: Network = (
@@ -239,14 +250,14 @@ class AbstractDeviceConfigurator:
         )
 
         if not self._cur_network:
-            return RequestArgError("Сеть не найдена")
+            raise ConfigurationError("Сеть не найдена")
 
         # get element (host, hub, switch, ...)
         element_form_id = f"{self.__device_type}_id"
         device_id = get_data(element_form_id)
 
         if not device_id:
-            return RequestArgError("Не указан параметр {element_form_id}")
+            raise ConfigurationError("Не указан параметр {element_form_id}")
 
         # json representation
         self._json_network: dict = json.loads(self._cur_network.network)
@@ -256,12 +267,12 @@ class AbstractDeviceConfigurator:
         filt_nodes = list(filter(lambda n: n["data"]["id"] == device_id, self._nodes))
 
         if not filt_nodes:
-            return RequestArgError(f"Такого '{self.__device_type}' не существует")
+            raise ConfigurationError(f"Такого '{self.__device_type}' не существует")
 
         # current device's node
         self._device_node = filt_nodes[0]
 
-    def _update_label(self):
+    def _conf_label_update(self):
         """Update device label during configuration. Typically used at the end of the configuration"""
         # get label with device name
         label = request.form.get(f"config_{self.__device_type}_name")
@@ -270,7 +281,7 @@ class AbstractDeviceConfigurator:
             self._device_node["config"]["label"] = label
             self._device_node["data"]["label"] = self._device_node["config"]["label"]
 
-    def _delete_sims(self):
+    def __conf_sims_delete(self):
         """Delete saved simulations. Typically used at the end of the configuration"""
         # Remove all previous simulations (after configuration update)
         sims = Simulate.query.filter(Simulate.network_id == self._cur_network.id).all()
@@ -280,54 +291,249 @@ class AbstractDeviceConfigurator:
         self._cur_network.network = json.dumps(self._json_network)
         db.session.commit()
 
+    def _conf_jobs(self):
+        """Configurate all added jobs"""
+        job_id_str = get_data("config_host_job_select_field")
+
+        if not job_id_str:
+            raise ConfigurationError("Не указан параметр job_id")
+
+        job_id = int(job_id_str)
+
+        if job_id not in self.__jobs.keys():
+            return  # if user didn't select job
+
+        job_level = len(
+            self._json_network["jobs"]
+        )  # level in the device configuration list
+
+        if job_level > self.__MAX_JOBS_COUNT:
+            raise ConfigurationError("Превышен лимит на количество задач")
+
+        job = self.__jobs[job_id]
+        job_conf_res = job.configure()
+
+        job_conf_res["level"] = job_level
+        job_conf_res["host_id"] = self._device_node["data"]["id"]
+
+        self._json_network["jobs"].append(job_conf_res)
+
+    def _conf_ip_addresses(self):
+        """Configurate device IP-addresses"""
+    
+        iface_ids = request.form.getlist("config_host_iface_ids[]")
+        for iface_id in iface_ids:
+            if not self._device_node["interface"]:
+                return # we have nothing to configure
+
+            filtered_ifaces = list(filter(lambda x: x["id"] == iface_id, self._device_node["interface"]))
+
+            if not filtered_ifaces:
+                continue
+
+            interface = filtered_ifaces[0]
+
+            ip_value = get_data(f"config_{self.__device_type}_ip_{str(iface_id)}")
+            mask_value = get_data(f"config_{self.__device_type}_mask_{str(iface_id)}")
+
+            if not ip_value:
+                continue
+
+            if not mask_value.isdigit():
+                # Check if we have 1.2.3.4/5 ?
+                ip_mask = ip_value.split("/")
+                if len(ip_mask) == 2:
+                    ip_value = ip_mask[0]
+                    mask_value = ip_mask[1]
+                else:
+                    raise ArgCheckError('Не указана маска для IP адреса')
+
+            mask_value = int(mask_value)
+
+            if mask_value < 0 or mask_value > 32:
+                raise ArgCheckError('Маска подсети указана неверно')
+
+            if not IPv4_check(ip_value):
+                raise ArgCheckError('IP-адрес указан неверно')
+            
+            interface["ip"] = ip_value
+            interface["netmask"] = mask_value
+
+    def _conf_gw(self):
+        default_gw = get_data(f"config_{self.__device_type}_default_gw")
+
+        if default_gw:
+            if not IPv4_check(default_gw):
+                raise ArgCheckError('Неверно указан IP-адрес для "шлюза по умолчанию"')
+            self._device_node["config"]["default_gw"] = default_gw
+        else:
+            self._device_node["config"]["default_gw"] = ""
+
     @abstractmethod
-    def configure(self) -> Response:
+    def _conf_main() -> dict:
+        """Configuration main block in which the entire configuration process takes place"""
         pass
+
+    def configure(self) -> Response:
+        """Configurate current network device"""
+        try:
+            res = self._conf_main()  # configuration result
+            self.__conf_sims_delete()
+            return make_response(jsonify(res), 200)
+        except ConfigurationError as e:
+            return make_response(jsonify({"message": str(e)}), 400)
 
 
 class HubConfigurator(AbstractDeviceConfigurator):
     def __init__(self):
         super().__init__(device_type="hub")
 
-    def configure(self) -> Response:
-        try:
-            self._setup_configuration()
-            self._update_label()
-            self._delete_sims()
-        except RequestArgError as e:
-            return self._build_error_response(e)
-        else:
-            ret = {"message": "Конфигурация обновлена", "nodes": self._nodes}
-            return make_response(jsonify(ret), 200)
+    def _conf_main(self):
+        self._conf_setup()
+        self._conf_label_update()
+
+        return {"message": "Конфигурация обновлена", "nodes": self._nodes}
 
 
 class SwitchConfigurator(AbstractDeviceConfigurator):
     def __init__(self):
         super().__init__(device_type="switch")
 
-    def configure(self) -> Response:
-        try:
-            self._setup_configuration()
-            self._update_label()
+    def _conf_main(self):
+        self._conf_setup()
+        self._conf_label_update()
 
-            # STP setup
-            switch_stp = get_data("config_switch_stp")
+        # STP setup
+        switch_stp = get_data("config_switch_stp")
 
-            self._device_node["config"]["stp"] = 0
+        self._device_node["config"]["stp"] = 0
 
-            if switch_stp and switch_stp == "on":
-                self._device_node["config"]["stp"] = 1
+        if switch_stp and switch_stp == "on":
+            self._device_node["config"]["stp"] = 1
 
-            self._delete_sims()
-        except RequestArgError as e:
-            return self._build_error_response(e)
-        else:
-            ret = {"message": "Конфигурация обновлена", "nodes": self._nodes}
-            return make_response(jsonify(ret), 200)
+        return {"message": "Конфигурация обновлена", "nodes": self._nodes}
 
+
+class HostConfigurator(AbstractDeviceConfigurator):
+    def __init__(self):
+        super().__init__(device_type="host")
+
+    def _conf_main(self):
+        self._conf_setup()
+        self._conf_label_update()
+
+        res = {}
+
+        try:  # catch argument check errors
+            self._conf_jobs()
+            self._conf_ip_addresses()
+            self._conf_gw()
+        except ArgCheckError as e:
+            res.update({"warning": str(e)})
+
+        res.update(
+            {
+                "message": "Конфигурация обновлена",
+                "nodes": self._nodes,
+                "jobs": self._json_network["jobs"],
+            }
+        )
+
+        return res
+
+# --- Jobs ---
+
+# ~ HOST ~
+# ping -c 1 (1 param)
+host_ping_job = JobConfigurator(1, "ping -c 1 [0]")
+host_ping_job.add_param("config_host_ping_c_1_ip").add_check(IPv4_check).set_error_msg(
+    'Неверно указан IP-адрес для команды "ping"'
+)
+
+# ping -c 1 (with options)
+host_ping_opt_job = JobConfigurator(2, "ping -c 1 [0] [1]")
+host_ping_opt_job.add_param(
+    "config_host_ping_with_options_options_input_field"
+).add_check(emptiness_check).add_check(ascii_check).set_error_msg(
+    'Опции для команды "ping (с опциями)" указаны неверно'
+)
+host_ping_opt_job.add_param("config_host_ping_with_options_ip_input_field").add_check(
+    IPv4_check
+).set_error_msg('Неверно указан IP адрес для команды "ping (с опциями)"')
+
+# send UDP data
+host_udp_job = JobConfigurator(3, "send -s [0] -p udp [1]:[2]")
+host_udp_job.add_param("config_host_send_udp_data_size_input_field").add_check(
+    port_check
+).set_error_msg('Указан неверный порт для команды "Отправить данные (UDP)"')
+host_udp_job.add_param("config_host_send_udp_data_ip_input_field").add_check(
+    IPv4_check
+).set_error_msg('Неверно указан IP адрес для команды "Отправить данные (UDP)"')
+host_udp_job.add_param("config_host_send_udp_data_port_input_field").add_check(
+    mask_check
+).set_error_msg('Указан неверный порт для команды "Отправить данные (UDP)"')
+
+# send TCP data
+host_tcp_job = JobConfigurator(4, "send -s [0] -p tcp [1]:[2]")
+host_tcp_job.add_param("config_host_send_tcp_data_size_input_field").add_check(
+    port_check
+).set_error_msg('Указан неверный порт для команды "Отправить данные (TCP)"')
+host_tcp_job.add_param("config_host_send_tcp_data_ip_input_field").add_check(
+    IPv4_check
+).set_error_msg('Неверно указан IP адрес для команды "Отправить данные (TCP)"')
+host_tcp_job.add_param("config_host_send_tcp_data_port_input_field").add_check(
+    mask_check
+).set_error_msg('Указан неверный порт для команды "Отправить данные (TCP)"')
+
+# traceroute -n (with options)
+traceroute_job = JobConfigurator(5, "traceroute -n [0] [1]")
+traceroute_job.add_param(
+    "config_host_traceroute_with_options_options_input_field"
+).add_check(emptiness_check).add_check(ascii_check).set_error_msg(
+    'Указаны неверные опции для команды "traceroute -n (с опциями)"'
+)
+traceroute_job.add_param(
+    "config_host_traceroute_with_options_ip_input_field"
+).add_check(IPv4_check).set_error_msg(
+    'Указан неверный IP-адрес для команды "traceroute -n (с опциями)"'
+)
+
+# Add route
+add_route_job = JobConfigurator(102, "ip route add [0]/[1] via [2]")
+add_route_job.add_param("config_host_add_route_ip_input_field").add_check(
+    IPv4_check
+).set_error_msg('Указан неверный IP-адрес для команды "Добавить маршрут"')
+add_route_job.add_param("config_host_add_route_mask_input_field").add_check(
+    mask_check
+).set_error_msg('Указан неверная маска подсети для команды "Добавить маршрут"')
+add_route_job.add_param("config_host_add_route_gw_input_field").add_check(
+    IPv4_check
+).set_error_msg('Указан неверный IP-адрес шлюза для команды "Добавить маршрут"')
+
+# arp -s ip hw_addr
+arp_job = JobConfigurator(103, "arp -s [0] [1]")
+arp_job.add_param("config_host_add_arp_cache_ip_input_field").add_check(
+    IPv4_check
+).set_error_msg(
+    'Указан неверный IP-адрес шлюза для команды "Добавить запись в ARP-cache"'
+)
+arp_job.add_param("config_host_add_arp_cache_mac_input_field").add_check(
+    MAC_check
+).set_error_msg('MAC-адрес для команды "Добавить запись в ARP-cache" указан неверно')
 
 hub = HubConfigurator()
 switch = SwitchConfigurator()
+host = HostConfigurator()
+
+host.add_jobs(
+    host_ping_job,
+    host_ping_opt_job,
+    host_udp_job,
+    host_tcp_job,
+    traceroute_job,
+    add_route_job,
+    arp_job,
+)
 
 
 @login_required
@@ -338,69 +544,11 @@ def save_hub_config():
 @login_required
 def save_switch_config():
     return switch.configure()
-    # user = current_user
-
-    # if request.method != "POST":
-    #     ret = {"message": "Неверный запрос"}
-    #     return make_response(jsonify(ret), 400)
-
-    # network_guid = request.form.get("net_guid", type=str)
-
-    # if not network_guid:
-    #     ret = {"message": "Не указан параметр net_guid"}
-    #     return make_response(jsonify(ret), 400)
-
-    # net = (
-    #     Network.query.filter(Network.guid == network_guid)
-    #     .filter(Network.author_id == user.id)
-    #     .first()
-    # )
-
-    # if not net:
-    #     ret = {"message": "Такая сеть не найдена"}
-    #     return make_response(jsonify(ret), 400)
-
-    # switch_id = request.form.get("switch_id")
-
-    # if not switch_id:
-    #     ret = {"message": "Не указан параметр switch_id"}
-    #     return make_response(jsonify(ret), 400)
-
-    # jnet = json.loads(net.network)
-    # nodes = jnet["nodes"]
-
-    # nn = list(filter(lambda x: x["data"]["id"] == switch_id, nodes))
-
-    # if not nn:
-    #     ret = {"message": "Такого свитча не существует"}
-    #     return make_response(jsonify(ret), 400)
-
-    # node = nn[0]
-    # switch_label = request.form.get("config_switch_name")
-    # switch_stp = request.form.get("config_switch_stp")
-
-    # if switch_label:
-    #     node["config"]["label"] = switch_label
-    #     node["data"]["label"] = node["config"]["label"]
-
-    # node["config"]["stp"] = 0
-    # if switch_stp == "on":
-    #     node["config"]["stp"] = 1
-
-    # # Remove all previous simulations
-    # sims = Simulate.query.filter(Simulate.network_id == net.id).all()
-    # for s in sims:
-    #     db.session.delete(s)
-
-    # net.network = json.dumps(jnet)
-    # db.session.commit()
-
-    # ret = {"message": "Конфигурация обновлена", "nodes": nodes}
-    # return make_response(jsonify(ret), 200)
 
 
 @login_required
 def save_host_config():
+    return host.configure()
     user = current_user
     ret = {}
 
@@ -1869,7 +2017,7 @@ def delete_job():
     """
     user = current_user
     network_guid = get_data("guid")
-    jid = get_data("id")
+    job_id = get_data("id")
 
     if request.method != "POST":
         return build_response("Неверный запрос")
@@ -1890,7 +2038,7 @@ def delete_job():
 
     # get jobs & remove one
     jobs: list = json_network["jobs"]
-    new_jobs: list = list(filter(lambda x: x["id"] != jid, jobs))
+    new_jobs: list = list(filter(lambda x: x["id"] != job_id, jobs))
     json_network["jobs"] = new_jobs
 
     # update network
@@ -1903,4 +2051,4 @@ def delete_job():
 
     db.session.commit()
 
-    return build_response("Команда удалена", ResultCode.OK)
+    return {"message": "Команда удалена", "jobs": json_network["jobs"]}
