@@ -709,6 +709,7 @@ block_server_port.add_param("config_server_block_tcp_udp_port_input_field").add_
 
 # ------ request handlers ------
 
+
 @login_required
 def save_hub_config():
     return hub.configure()
