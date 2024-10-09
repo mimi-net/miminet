@@ -166,7 +166,7 @@ def create_mimishark_json(pcap, to_json):
                 pcap_file["decode_eth"] = (
                     f" Ethernet Frame:  Destination: {mac_to_str(eth.dst)}  Sourse:"
                     f" {mac_to_str(eth.src)}  Type: ARP"
-                    f" (0x{bytes_repr[36:41].replace(' ','')})"
+                    f" (0x{bytes_repr[36:41].replace(' ', '')})"
                 )
                 pcap_file["decode_arp"] = (
                     ip_protocol_prop(arp_pkt)
@@ -202,7 +202,7 @@ def create_mimishark_json(pcap, to_json):
                 pcap_file["decode_eth"] = (
                     f" Ethernet Frame:  Destination: {mac_to_str(eth.dst)}  Sourse:"
                     f" {mac_to_str(eth.src)}  Type:"
-                    f" IPv{ip.v} (0x{bytes_repr[36:41].replace(' ','')})"
+                    f" IPv{ip.v} (0x{bytes_repr[36:41].replace(' ', '')})"
                 )
                 pcap_file["decode_ip"] = (
                     ip_protocol_prop(ip)
