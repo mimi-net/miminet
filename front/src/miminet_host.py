@@ -14,23 +14,9 @@ from flask_login import current_user, login_required
 from miminet_model import Network, Simulate, db
 
 
-def job_id_generator():
-    return uuid.uuid4().hex
-
-
-class ResultCode:
-    OK = 200
-    ERROR = 400
-
-
 def get_data(arg: str):
     """Get data from user's request"""
     return request.form.get(arg, type=str)
-
-
-def build_response(message: str, code=ResultCode.ERROR) -> Response:
-    """Create server response with specified message"""
-    return make_response(jsonify({"message": message}), code)
 
 
 # ------ Argument Validators ------
@@ -307,7 +293,7 @@ class AbstractDeviceConfigurator:
     def _conf_label_update(self):
         """Update device label(name). Typically used at the end of the configuration"""
         # get label with device name
-        label = request.form.get(f"config_{self._device_type}_name")
+        label = get_data(f"config_{self._device_type}_name")
 
         if label:
             self._device_node["config"]["label"] = label
@@ -733,6 +719,10 @@ def save_router_config():
 @login_required
 def save_server_config():
     return server.configure()
+
+
+def build_response(msg: str) -> Response:
+    return make_response(jsonify({"message": msg}), 400)
 
 
 @login_required
