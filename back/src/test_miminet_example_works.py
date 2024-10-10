@@ -63,7 +63,7 @@ DINAMYC_ARP_FILE_NAMES = [
     (
         "router_network.json",
         "router_answer.json",
-        r"ARP-response\\n10.0.0.1 at ([0-9a-fA-F]{2}[:]){5}",
+        r"ARP-response\\n\d+\.\d+.\d+.\d+ at ([0-9a-fA-F]{2}[:]){6}",
         len("ARP-response\\n10.0.0.1 at "),
         r"mac",
     ),
@@ -118,7 +118,6 @@ def test_miminet_work_for_dinamyc_arp_test_cases(test: Case) -> None:
     animation = re.sub(r'"id": "\w+"', r'"id": ""', animation)
     mac_string = re.search(test.pattern_in_network, animation)
     assert mac_string is not None
-    print (mac_string)
     mac = mac_string.group(0)[test.pattern_len :]
     print (mac)
     test.json_answer = re.sub(test.pattern_for_replace, mac, test.json_answer)

@@ -80,7 +80,8 @@ def arp_packet_type(pkt) -> str:
                 return (
                     "ARP-response\n"
                     + inet_to_str(arp.spa)
-                    + " at " + mac_to_str(arp.sha)
+                    + " at "
+                    + mac_to_str(arp.sha)
                 )
             case _:
                 return "ARP packet"
