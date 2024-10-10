@@ -149,7 +149,6 @@ def create_mimishark_json(pcap, to_json):
                 dt = datetime.datetime.fromtimestamp(timestamp) - start_timestamp
                 pcap_file["time"] = ':'.join(str(dt).split(':')[1:])
 
-
             if isinstance(eth.data, dpkt.arp.ARP):
                 arp_pkt = eth.data
                 pcap_file["source"] = str(utils.mac_to_str(arp_pkt.sha))
@@ -172,7 +171,7 @@ def create_mimishark_json(pcap, to_json):
                 )
                 pcap_file["bytes"] = bytes_repr
 
-                '''
+                """
                 pcap_file["decode_arp"] = (
                     ip_protocol_prop(arp_pkt)
                     .replace("SenderMac", str(utils.mac_to_str(arp_pkt.sha)))
@@ -180,7 +179,7 @@ def create_mimishark_json(pcap, to_json):
                     .replace("TargerMac", str(utils.mac_to_str(eth.dst)))
                     .replace("TargetIP", str(utils.inet_to_str(arp_pkt.tpa)))
                 )
-                '''
+                """
 
                 # .replace('"','doublePrime').replace("'",'singlePrime').replace('\\','doubleslash')
                 json_file.append(pcap_file)
@@ -201,7 +200,6 @@ def create_mimishark_json(pcap, to_json):
                             pcap_file["protocol"] = "STP (TC + Root)"
                         case _:
                             pcap_file["protocol"] = "STP"
-
 
                     bytes_repr = " ".join(mac_to_str(buf).split(":"))
                     ascii = ""

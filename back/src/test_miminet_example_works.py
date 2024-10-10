@@ -63,7 +63,7 @@ DINAMYC_ARP_FILE_NAMES = [
     (
         "router_network.json",
         "router_answer.json",
-        r"ARP-response\\n10.0.0.1 at ([0-9a-fA-F]{2}[:]){5}",
+        r"ARP-response\n10.0.0.1 at ([0-9a-fA-F]{2}[:]){5}",
         len("ARP-response\\n10.0.0.1 at "),
         r"mac",
     ),
