@@ -13,6 +13,7 @@ RUN apt-get update \
     iputils-ping \
     mininet \
     net-tools \
+    kmod \
     bridge-utils \
     tcpdump \
     git\
@@ -25,7 +26,7 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/* \
  && touch /etc/network/interfaces \
  && mkdir /opt/mininet_dependencies
- 
+
 RUN git clone https://github.com/mimi-net/mimidump.git \
     && cd mimidump && git checkout 32e6e5e && make prefix=/usr install && cd .. && rm -rf mimidump
 

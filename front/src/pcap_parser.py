@@ -74,7 +74,7 @@ def ip_protocol_prop(self, indent=1):
                 add_field("Sender IP address", "SenderIP")
                 continue
             if "tha" == field_name:
-                add_field("Target MAC address", "TargerMac")
+                add_field("Target MAC address", "TargetMac")
                 continue
             if "tpa" == field_name:
                 add_field("Target IP address", "TargetIP")
@@ -176,7 +176,7 @@ def create_mimishark_json(pcap, to_json):
                     ip_protocol_prop(arp_pkt)
                     .replace("SenderMac", str(utils.mac_to_str(arp_pkt.sha)))
                     .replace("SenderIP", str(utils.inet_to_str(arp_pkt.spa)))
-                    .replace("TargerMac", str(utils.mac_to_str(eth.dst)))
+                    .replace("TargetMac", str(utils.mac_to_str(eth.dst)))
                     .replace("TargetIP", str(utils.inet_to_str(arp_pkt.tpa)))
                 )
                 """

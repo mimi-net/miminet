@@ -12,6 +12,7 @@ from jobs import Jobs
 from network import Job, Network, Node, NodeConfig, NodeData, NodeInterface
 from pkt_parser import create_pkt_animation, is_ipv4_address
 from net_utils.vlan import setup_vlans, clean_bridges
+from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
 
 
 class MyTopology(IPTopo):
@@ -235,6 +236,8 @@ class MyTopology(IPTopo):
             r.cmd("sysctl -w net.bridge.bridge-nf-call-ip6tables=0")
             r.cmd("sysctl -w net.ipv4.conf.all.accept_source_route=1")
             r.cmd("sysctl -w net.ipv4.conf.all.log_martians=1")
+            r.cmd("sysctl -w net.ipv6.conf.all.disable_ipv6=1")
+            r.cmd("sysctl -w net.ipv6.conf.default.disable_ipv6=1")
 
         for sw in net.switches:
             # print ("disable ipv6 on " + sw.name)
@@ -348,7 +351,9 @@ def do_job(job: Job, net: IPNet) -> None:
     """
 
     host_id = job.host_id
+    # get host from network by it's ID
     job_host = net.get(host_id)
+    # initialize new Job by host and job type
     current_job = Jobs(job, job_host)
     current_job.handler()
 
@@ -368,12 +373,14 @@ def run_mininet(
     if len(network.jobs) == 0:
         return [], []
 
-    topo = MyTopology(network=network, time_to_wait_before_emulation=3)
-    net = IPNet(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
-
     try:
+
+        topo = MyTopology(network=network, time_to_wait_before_emulation=3)
+        net = IPNet(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
+
         net.start()
         setup_vlans(net, network.nodes)
+        setup_vtep_interfaces(net, network.nodes)
         time.sleep(topo.time_to_wait_before_emulation)
         topo.check()
 
@@ -403,6 +410,7 @@ def run_mininet(
     finally:
         time.sleep(2)
         clean_bridges(net)
+        teardown_vtep_bridges(net, network.nodes)
         net.stop()
 
     animation, pcap_list = create_animation(topo)

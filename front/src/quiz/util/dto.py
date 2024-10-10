@@ -2,8 +2,18 @@ import random
 import uuid
 from typing import List
 
+from flask_login import current_user
+from markupsafe import Markup
+
 from miminet_model import Network, db
-from quiz.entity.entity import Section, Test, Question, Answer, PracticeQuestion
+from quiz.entity.entity import (
+    Section,
+    Test,
+    Question,
+    Answer,
+    PracticeQuestion,
+    QuizSession,
+)
 
 
 def to_section_dto_list(sections: List[Section]):
@@ -139,7 +149,7 @@ def get_question_type(question_type: int):
 class QuestionDto:
     def __init__(self, user_id, question: Question) -> None:
         self.question_type = get_question_type(question.question_type)
-        self.question_text = question.text
+        self.question_text = Markup.unescape(question.text)
         self.correct_count = 0
 
         if self.question_type == "practice":
@@ -204,6 +214,20 @@ class SectionDto:
         self.description = description
         self.question_count = question_count
 
+        current_user_sessions = QuizSession.query.filter(
+            QuizSession.created_by_id == current_user.id
+        ).filter(QuizSession.section_id == section_id)
+
+        self.sessions_count = current_user_sessions.count()
+
+        session = current_user_sessions.order_by(QuizSession.finished_at.desc()).first()
+        if session:
+            self.last_correct_count = sum(
+                1 for question in session.sessions if question.is_correct
+            )
+            if session.guid:
+                self.session_guid = session.guid
+
 
 class TestDto:
     def __init__(
@@ -247,3 +271,15 @@ class SessionResultDto:
         self.answers_count = answers_count
         self.start_time = start_time
         self.time_spent = time_spent
+
+    def to_dict(self):
+        attributes = [
+            "test_name",
+            "section_name",
+            "correct_answers",
+            "answers_count",
+            "start_time",
+            "time_spent",
+        ]
+
+        return {attribute: str(getattr(self, attribute)) for attribute in attributes}

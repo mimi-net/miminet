@@ -1,12 +1,13 @@
 function displayVariable(answersParsed) {
     const buttonType = correctCount === "1" ? 'radio' : 'checkbox'
     const buttonId = correctCount === "1" ? "flexRadioDefault" : "flexCheckDefault"
+    const answer = sessionStorage.getItem("answer")
     $('#variants.container').append(`<div class="form-group" id="variants"></div>`)
     for (let i = 0; i < answersParsed.length; i++) {
         const value = answersParsed[i]['variant']
         $('#variants.form-group')
             .append(`<div class=form-check>
-                        <input class=form-check-input type=${buttonType} name=${buttonId} id=${buttonId}${i}>
+                        <input class=form-check-input type=${buttonType} name=${buttonId} id=${buttonId}${i} ${answer ? "disabled" : ""}>
                         <label class=form-check-label for=${buttonId}${i}>${value}</label>
                      </div>`);
     }
@@ -27,8 +28,8 @@ function displayMatching(answersParsed) {
     left.sort(() => Math.random() - 0.5);
 
     for (let i = 0; i < left.length; i++) {
-        $('#sortContainer.keys').append(`<div id=${left[i]} class=sortable>${left[i]}</div>`);
-        $('#rightSide.values').append(`<div id=${right[i]} class=matching>${right[i]}</div>`);
+        $('#sortContainer.keys').append(`<div id=${i} class=sortable>${left[i]}</div>`);
+        $('#rightSide.values').append(`<div id=${i} class=matching>${right[i]}</div>`);
     }
 }
 
@@ -43,5 +44,31 @@ function displaySorting(answersParsed) {
     }
 }
 
-// Make divs with id="sortContainer" sortable
-$(() => $('#sortContainer').sortable({placeholder: 'emptySpace'}));
+function synchronizeHeights() {
+    $("div.keys#sortContainer > div.sortable").each(function () {
+        let currentElement = $(this);
+        let index = currentElement.index();
+        let correspondingItem = $("div.values#rightSide").find("div.matching#" + index);
+        if (correspondingItem.length) {
+            currentElement.height('auto');
+            correspondingItem.height('auto');
+            let maxHeight = Math.max(currentElement.height(), correspondingItem.height());
+            correspondingItem.height(maxHeight);
+            currentElement.height(maxHeight);
+        }
+    });
+}
+
+// Make divs with id="sortContainer" sortable, synchronize heights
+$(() => {
+    $('#sortContainer').sortable({
+        placeholder: 'emptySpace',
+        update: function (event, ui) {
+            synchronizeHeights();
+        }
+    });
+
+    synchronizeHeights();
+});
+
+

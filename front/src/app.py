@@ -22,6 +22,9 @@ from miminet_auth import (
     user_profile,
     vk_callback,
     vk_login,
+    yandex_login,
+    yandex_callback,
+    tg_callback,
 )
 from miminet_config import SECRET_KEY, SQLITE_DATABASE_NAME
 from miminet_host import (
@@ -50,6 +53,7 @@ from miminet_simulation import check_simulation, run_simulation
 from quiz.controller.question_controller import (
     get_questions_by_section_endpoint,
     create_question_endpoint,
+    delete_question_endpoint,
 )
 from quiz.controller.quiz_session_controller import (
     start_session_endpoint,
@@ -57,7 +61,7 @@ from quiz.controller.quiz_session_controller import (
     finish_session_endpoint,
     answer_on_session_question_endpoint,
     session_result_endpoint,
-    get_results_by_user_endpoint,
+    get_result_by_session_guid_endpoint,
 )
 from quiz.controller.section_controller import (
     get_sections_by_test_endpoint,
@@ -96,8 +100,11 @@ zero_days_ago = (datetime.now()).date().isoformat()
 app.add_url_rule("/auth/login.html", methods=["GET", "POST"], view_func=login_index)
 app.add_url_rule("/auth/google_login", methods=["GET"], view_func=google_login)
 app.add_url_rule("/auth/vk_login", methods=["GET"], view_func=vk_login)
+app.add_url_rule("/auth/yandex_login", methods=["GET"], view_func=yandex_login)
 app.add_url_rule("/auth/vk_callback", methods=["GET"], view_func=vk_callback)
 app.add_url_rule("/auth/google_callback", methods=["GET"], view_func=google_callback)
+app.add_url_rule("/auth/yandex_callback", methods=["GET"], view_func=yandex_callback)
+app.add_url_rule("/auth/tg_callback", methods=["GET"], view_func=tg_callback)
 app.add_url_rule("/user/profile.html", methods=["GET", "POST"], view_func=user_profile)
 app.add_url_rule("/auth/logout", methods=["GET"], view_func=logout)
 
@@ -160,6 +167,11 @@ app.add_url_rule(
 app.add_url_rule(
     "/quiz/question/create", methods=["POST"], view_func=create_question_endpoint
 )
+
+app.add_url_rule(
+    "/quiz/question/delete", methods=["DELETE"], view_func=delete_question_endpoint
+)
+
 app.add_url_rule(
     "/quiz/question/all", methods=["GET"], view_func=get_questions_by_section_endpoint
 )
@@ -184,7 +196,9 @@ app.add_url_rule(
     "/quiz/session/result", methods=["GET"], view_func=session_result_endpoint
 )
 app.add_url_rule(
-    "/quiz/session/results", methods=["GET"], view_func=get_results_by_user_endpoint
+    "/quiz/user/session/result",
+    methods=["GET"],
+    view_func=get_result_by_session_guid_endpoint,
 )
 
 # Init Flask-admin
@@ -253,6 +267,9 @@ def sitemap():
         "/auth/google_login",
         "/auth/google_callback",
         "/auth/vk_callback",
+        "/auth/yandex_login",
+        "/auth/yandex_callback",
+        "/auth/tg_callback",
         "/auth/logout",
         "/run_simulation",
         "/check_simulation",

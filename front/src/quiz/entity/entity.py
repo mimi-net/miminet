@@ -180,6 +180,8 @@ class QuizSession(
 ):
     __tablename__ = "quiz_session"
 
+    guid = db.Column(db.String(512), default=lambda: str(uuid.uuid4()))
+
     section_id = db.Column(db.Integer, db.ForeignKey(Section.id))
     finished_at = db.Column(db.DateTime)
 

@@ -1,65 +1,124 @@
 {% extends "base.html" %}
-{% block title %}{{ test_name }}{% endblock %}
+{% block title %}{{ test_info['test_name'] }}{% endblock %}
 {% block description %}Сетевой тренажер для обучения компьютерным сетям{% endblock %}
 
 
 {% block content %}
+    <script src="{{ url_for('static', filename='/js/jquery-3.6.0.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='/js/jquery-ui.min.js') }}"></script>
 
     <section class="container py-5 my-lg-5">
         <div class="align-items-center justify-content-between">
-            <h1 class="me-3"> {{ test_name }}</h1>
+            <h1 class="me-3"> {{ test_info['test_name'] }}</h1>
         </div>
 
         {% for section in sections %}
-            <div class="toast align-items-center text-white bg-primary border-0 my-3" id="alert{{ section.section_id }}"
-                 role="alert"
-                 aria-live="assertive"
-                 aria-atomic="true">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        Данный раздел уже пройден вами
+            {# Modal window for taken tests #}
+            <div class="modal" id="alertModal{{ section.section_id }}" tabindex="-1" role="dialog"
+                 aria-labelledby="alertModalLabel"
+                 aria-hidden="true" data-focus-on="input:first">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body"
+                             style="display: flex;flex-direction: row;justify-content: space-between;align-items: baseline;">
+                            <b>Данный раздел уже пройден вами</b>
+                            <button id="alertModalCancelIcon{{ section.section_id }}" type="button"
+                                    class="btn-close" data-dismiss="modal"
+                                    aria-label="Закрыть">
+                            </button>
+                        </div>
                     </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                            aria-label="Закрыть"></button>
+                </div>
+            </div>
+
+            {# Modal window for not retakeable tests #}
+            <div class="modal" id="testWarningModal{{ section.section_id }}" tabindex="-1" role="dialog"
+                 aria-labelledby="testWarningModalLabel"
+                 aria-hidden="true" data-focus-on="input:first">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button id="testWarningModalCancelIcon{{ section.section_id }}" type="button"
+                                    class="btn-close" data-dismiss="modal"
+                                    aria-label="Закрыть"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <b>Пройти тест можно только один раз.</b>
+                            <p>Время на решение ограничено. Вы готовы начать?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="testWarningModalSubmit{{ section.section_id }}" type="button"
+                                    class="btn btn-primary">Начать
+                                прохождение
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <article class="card border-0 shadow-sm overflow-hidden mb-4">
                 <div class="row g-0" style="align-items: baseline">
+                    {# Section name and description #}
                     <div class="col-sm-8">
                         <div class="card-body" style="margin-left: 20px;">
-                            <h4 class="h4" style="margin-bottom: 4px">
-                                {{ section.section_name }}
-                            </h4>
+                            <form id="postStartSession"
+                                  method="post"
+                                  action="{{ url_for('start_session_endpoint', section_id=section.section_id) }}"
+                                    {% if not test_info['is_retakeable'] and section.sessions_count == 0 %}
+                                  data-bs-toggle="modal" data-target="#testWarningModal{{ section.section_id }}"
+                                  href="#testWarningModal{{ section.section_id }}"
+                                    {% elif not test_info['is_retakeable'] and section.sessions_count != 0 %}
+                                  data-bs-toggle="modal" data-target="#alertModal{{ section.section_id }}"
+                                  href="#alertModal{{ section.section_id }}"
+                                    {% endif %}
+                                  style="cursor: pointer;"
+                            >
+                                <input type="hidden" name="question_index" value="0">
+                                <input type="hidden" name="section_name" value="{{ section.section_name }}">
+                                <input type="hidden" name="timer" value="{{ section.timer }}">
+                                <h4 class="h4"
+                                    style="margin-right: 8px;margin-bottom: 4px"
+                                    onmouseover="this.style.color='#6366f1';"
+                                    onmouseout="this.style.color='';"
+                                    id="startSession{{ section.section_id }}"
+                                >
+                                    {{ section.section_name }}
+                                </h4>
+                            </form>
                             {% if section.description is not none %}
                                 <p style="margin-bottom: 8px">{{ section.description }}</p>
                             {% endif %}
                         </div>
                     </div>
-                    <div class="col-sm-4">
-                        <div class="card-body d-flex flex-column" style="row-gap: 4px">
-                            <p id="{{ section.section_id }}question"
-                               style="text-align: right; margin-right: 40px"></p>
+
+                    {# Questions and time count #}
+                    <div class="col-sm-4" style="display: flex;flex-direction: row-reverse;">
+                        <div class="card-body d-flex flex-column" style="row-gap: 4px;max-width: max-content;">
+
+                            {% if section.session_guid is defined and section.last_correct_count is defined %}
+                                {# Button for last result #}
+                                <a class="btn btn-outline-primary lastResult" id="{{ section.section_id }}link"
+                                   data-bs-toggle="tooltip" title="Посмотреть последний результат"
+                                   href="{{ url_for('get_result_by_session_guid_endpoint') }}?guid={{ section.session_guid }}"
+                                   style="text-align: right;">
+                                    {{ section.last_correct_count }}/{{ section.question_count }} верно
+                                </a>
+                            {% elif section.last_correct_count is defined %}
+                                {# Last result just text #}
+                                <p class="lastResult" id="{{ section.section_id }}text">
+                                    {{ section.last_correct_count }}/{{ section.question_count }} верно
+                                </p>
+                            {% else %}
+                                {# Text with questions count #}
+                                <p id="{{ section.section_id }}question"
+                                   style="text-align: right;"></p>
+                            {% endif %}
 
                             {% if section.timer != null %}
                                 <p id="{{ section.section_id }}timer"
                                    style="text-align: right; margin-right: 40px; "></p>
                             {% endif %}
-
-                            <form id="postStartSession"
-                                  method="post"
-                                  action="{{ url_for('start_session_endpoint', section_id=section.section_id) }}"
-                                  style="align-self: flex-end">
-                                <input type="hidden" name="question_index" value="0">
-                                <input type="hidden" name="section_name" value="{{ section.section_name }}">
-                                <input type="hidden" name="timer" value="{{ section.timer }}">
-                                <a class="btn btn-outline-primary"
-                                   style="margin-right: 8px"
-                                   id="startSession{{ section.section_id }}">
-                                    Начать прохождение
-                                </a>
-                            </form>
-
                         </div>
                     </div>
                 </div>
@@ -67,21 +126,51 @@
 
             <script src="/quiz/quiz_scripts.js"></script>
             <script>
-                document.getElementById('startSession{{ section.section_id }}').addEventListener('click', submitForm);
+                if ('{{ test_info['is_retakeable'] }}' === "True") {
+                    document.getElementById('startSession{{ section.section_id }}').addEventListener('click', submitForm);
+                }
 
                 questions = '{{section.question_count}}';
-                document.getElementById('{{ section.section_id }}question').innerHTML =
-                    questions + ' ' + morph(questions, ['вопрос', 'вопроса', 'вопросов']);
+                paragraph = document.getElementById('{{ section.section_id }}question');
+                if (paragraph) {
+                    paragraph.innerHTML = questions + ' ' + morph(questions, ['вопрос', 'вопроса', 'вопросов']);
+                    paragraph.style.marginRight = '40px';
+                }
+
 
                 timer = '{{section.timer}}';
                 document.getElementById('{{ section.section_id }}timer').innerHTML =
                     timer + ' ' + morph(timer, ['минута', 'минуты', 'минут']);
             </script>
+
+            <script>
+                $(document).ready(function () {
+                    $('#testWarningModalCancelIcon{{ section.section_id }}').click(function () {
+                        $('#testWarningModal{{ section.section_id }}').modal('hide');
+                    });
+
+                    $('#testWarningModalSubmit{{ section.section_id }}').click(function () {
+                        let startSessionElement = document.getElementById('startSession{{ section.section_id }}');
+                        if (startSessionElement) {
+                            startSessionElement.addEventListener('click', submitForm, {once: true});
+                            startSessionElement.click();
+                        }
+                        $('#testWarningModal{{ section.section_id }}').modal('hide');
+                    });
+
+                    $('#alertModalCancelIcon{{ section.section_id }}').click(function () {
+                        finishQuiz();
+                        $('#alertModal{{ section.section_id }}').modal('hide');
+                    });
+                });
+            </script>
         {% endfor %}
+
         <script>
             let getQuestionUrl = '{{ url_for('get_question_by_session_question_id_endpoint') }}';
             let finishSessionUrl = '{{ url_for('finish_session_endpoint') }}';
-            sessionStorage.setItem('test_name', '{{ test_name }}');
+            sessionStorage.setItem('test_name', '{{ test_info['test_name'] }}');
+            sessionStorage.setItem('is_retakeable', '{{ test_info['is_retakeable'] }}');
         </script>
     </section>
 {% endblock %}
