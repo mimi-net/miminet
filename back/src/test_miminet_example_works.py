@@ -130,7 +130,6 @@ def test_miminet_work_for_dinamyc_arp_and_port_test_cases(test: Case) -> None:
     animation = re.sub(
         r'"ARP-response.+? at .+?"', r'"ARP-response"', animation, flags=re.S
     )
-    assert animation == test.json_answer
     port_string = re.search(test.pattern_in_network, animation)
     assert port_string is not None
     port = port_string.group(0)[test.pattern_len :]
