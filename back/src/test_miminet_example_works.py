@@ -115,5 +115,9 @@ def test_miminet_work_for_dinamyc_arp_test_cases(test: Case) -> None:
     animation, pcaps = simulate(test.json_network)
     animation = re.sub(r'"timestamp": "\d+"', r'"timestamp": ""', animation)
     animation = re.sub(r'"id": "\w+"', r'"id": ""', animation)
-    animation = re.sub(r'ARP-response\\n.+ at ([0-9a-fA-F]{2}[:]){6}', r'ARP-response', animation)
+    animation = re.sub(
+        r'"ARP-response.+ at ([0-9a-fA-F]{2}[:]){6}"', r'"ARP-response"', animation
+    )
+    print(animation)
+    print(---------xxxxxxxxxxxxxx------------)
     assert animation == test.json_answer
