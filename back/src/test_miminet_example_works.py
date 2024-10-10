@@ -119,5 +119,5 @@ def test_miminet_work_for_dinamyc_arp_test_cases(test: Case) -> None:
         r'"ARP-response.+ at ([0-9a-fA-F]{2}[:]){6}"', r'"ARP-response"', animation
     )
     print(animation)
-    print(---------xxxxxxxxxxxxxx------------)
+    print("---------xxxxxxxxxxxxxx------------")
     assert animation == test.json_answer
