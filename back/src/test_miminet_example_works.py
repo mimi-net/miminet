@@ -116,7 +116,7 @@ def test_miminet_work_for_dinamyc_arp_test_cases(test: Case) -> None:
     animation = re.sub(r'"timestamp": "\d+"', r'"timestamp": ""', animation)
     animation = re.sub(r'"id": "\w+"', r'"id": ""', animation)
     animation = re.sub(
-        r'"ARP-response.+? at .+?"', r'"ARP-response', animation, flags=re.S
+        r'"ARP-response.+? at .+?"', r'"ARP-response"', animation, flags=re.S
     )
     print(animation)
     print("---------xxxxxxxxxxxxxx------------")
