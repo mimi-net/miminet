@@ -41,6 +41,20 @@ DINAMYC_PORT_FILE_NAMES = [
         len("TCP (SYN) "),
         r"port",
     ),
+]
+
+DINAMYC_ARP_FILE_NAMES = [
+    (
+        "router_network.json",
+        "router_answer.json",
+        r"ARP-response\\n.+ at ([0-9a-fA-F]{2}[:]){6}",
+        len("ARP-response\\n10.0.0.1 at "),
+        r"mac",
+    ),
+]
+
+
+DINAMYC_ARP_AND_PORT_FILE_NAMES = [
     (
         "icmp_network_unavailable_network.json",
         "icmp_network_unavailable_answer.json",
@@ -55,18 +69,8 @@ DINAMYC_PORT_FILE_NAMES = [
         len("TCP (SYN) "),
         r"port",
     ),
-    # ("multicast_udp_traffic_network.json", "multicast_udp_traffic_answer.json", r'UDP \d+', len('UDP '), r'port'),
 ]
 
-DINAMYC_ARP_FILE_NAMES = [
-    (
-        "router_network.json",
-        "router_answer.json",
-        r"ARP-response\\n.+ at ([0-9a-fA-F]{2}[:]){6}",
-        len("ARP-response\\n10.0.0.1 at "),
-        r"mac",
-    ),
-]
 
 TEST_CASES = [
     Case(network, answer)
@@ -78,6 +82,14 @@ DINAMYC_PORT_TEST_CASES = [
     for (network, answer, pattern, length, replace) in [
         list(read_files(case[0], case[1])) + [case[2], case[3], case[4]]
         for case in DINAMYC_PORT_FILE_NAMES
+    ]
+]
+
+DINAMYC_ARP_AND_PORT_TEST_CASES = [
+    Case(network, answer, pattern, length, replace)
+    for (network, answer, pattern, length, replace) in [
+        list(read_files(case[0], case[1])) + [case[2], case[3], case[4]]
+        for case in DINAMYC_ARP_AND_PORT_FILE_NAMES
     ]
 ]
 
@@ -110,6 +122,22 @@ def test_miminet_work_for_dinamyc_port_test_cases(test: Case) -> None:
     assert animation == test.json_answer
 
 
+@pytest.mark.parametrize("test", DINAMYC_ARP_AND_PORT_TEST_CASES)
+def test_miminet_work_for_dinamyc_arp_and_port_test_cases(test: Case) -> None:
+    animation, pcaps = simulate(test.json_network)
+    animation = re.sub(r'"timestamp": "\d+"', r'"timestamp": ""', animation)
+    animation = re.sub(r'"id": "\w+"', r'"id": ""', animation)
+    animation = re.sub(
+        r'"ARP-response.+? at .+?"', r'"ARP-response"', animation, flags=re.S
+    )
+    assert animation == test.json_answer
+    port_string = re.search(test.pattern_in_network, animation)
+    assert port_string is not None
+    port = port_string.group(0)[test.pattern_len :]
+    test.json_answer = re.sub(test.pattern_for_replace, port, test.json_answer)
+    assert animation == test.json_answer
+
+
 @pytest.mark.parametrize("test", DINAMYC_ARP_TEST_CASES)
 def test_miminet_work_for_dinamyc_arp_test_cases(test: Case) -> None:
     animation, pcaps = simulate(test.json_network)
@@ -118,6 +146,4 @@ def test_miminet_work_for_dinamyc_arp_test_cases(test: Case) -> None:
     animation = re.sub(
         r'"ARP-response.+? at .+?"', r'"ARP-response"', animation, flags=re.S
     )
-    print(animation)
-    print("---------xxxxxxxxxxxxxx------------")
     assert animation == test.json_answer
