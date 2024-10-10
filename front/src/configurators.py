@@ -4,9 +4,15 @@ import json
 from flask import jsonify, make_response, request, Response
 from flask_login import current_user
 from miminet_model import Network, Simulate, db
+from typing import Callable, Optional
+import uuid
+import ipaddress
 
-# [!] Here are all the configurators for jobs, job arguments and network devices
-# [!] These configurators are used in miminet_host file 
+
+def get_data(arg: str):
+    """Get data from user's request"""
+    return request.form.get(arg, type=str)
+
 
 class JobArgConfigurator:
     """Class with job argument data"""
@@ -80,20 +86,17 @@ class JobConfigurator:
         self.__args.append(new_arg)
         return new_arg
 
-    def configure(self) -> dict[str, str]:
+    def configure(self) -> dict[str, object]:
         """Validate every argument and return dict with job's data"""
         random_id: str = uuid.uuid4().hex  # random id for every added job
         configured_args = [arg.configure() for arg in self.__args]
 
-        # check whether the arguments passed the checks
-        for i in range(len(configured_args)):
-            if configured_args[i] is None:
-                # return warning for user with arg error message
-                raise ArgCheckError(self.__args[i].error_msg)
-
         # insert arguments into label string
         command_label: str = self.__print_cmd
+
         for i, arg in enumerate(configured_args):
+            if arg is None:  # check whether the arguments passed the checks
+                raise ArgCheckError(self.__args[i].error_msg)
             command_label = command_label.replace(f"[{i}]", arg)
 
         response = {
@@ -235,8 +238,16 @@ class AbstractDeviceConfigurator:
 
         self._json_network["jobs"].append(job_conf_res)
 
+    def __ip_check(self, ip: str) -> bool:
+        try:
+            ipaddress.ip_address(ip)
+            return True
+        except:
+            return False
+
     def _conf_ip_addresses(self):
         """Configurate device IP-addresses"""
+
         # all interfaces
         iface_ids = request.form.getlist(f"config_{self._device_type}_iface_ids[]")
         for iface_id in iface_ids:
@@ -265,15 +276,15 @@ class AbstractDeviceConfigurator:
                     ip_value = ip_mask[0]
                     mask_value = ip_mask[1]
                 else:
-                    raise ArgCheckError("Не указана маска для IP адреса")
+                    raise ArgCheckError("Не указана маска IP-адреса для линка")
 
             mask_value = int(mask_value)
 
             if mask_value < 0 or mask_value > 32:
-                raise ArgCheckError("Маска подсети указана неверно")
+                raise ArgCheckError("Маска подсети для линка указана неверно")
 
-            if not IPv4_check(ip_value):
-                raise ArgCheckError("IP-адрес указан неверно")
+            if not self.__ip_check(ip_value):
+                raise ArgCheckError("IP-адрес для линка указан неверно")
 
             interface["ip"] = ip_value
             interface["netmask"] = mask_value
@@ -282,8 +293,8 @@ class AbstractDeviceConfigurator:
         default_gw = get_data(f"config_{self._device_type}_default_gw")
 
         if default_gw:
-            if not IPv4_check(default_gw):
-                raise ArgCheckError('Неверно указан IP-адрес для "шлюза по умолчанию"')
+            if not self.__ip_check(default_gw):
+                raise ArgCheckError('Неверно указан IP-адрес для шлюза по умолчанию')
             self._device_node["config"]["default_gw"] = default_gw
         else:
             self._device_node["config"]["default_gw"] = ""
