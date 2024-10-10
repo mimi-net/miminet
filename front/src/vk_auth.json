@@ -1,7 +1,0 @@
-{
-    "web" : {
-      "client_id" : 52347678,
-      "client_secret": "N1LLiNPusDo4D0tuLQvp",
-      "redirect_uri" : "http://localhost/auth/vk_callback"
-  }
-}
