@@ -147,7 +147,7 @@ def create_mimishark_json(pcap, to_json):
                 pcap_file["time"] = "00:00.000000"
             else:
                 dt = datetime.datetime.fromtimestamp(timestamp) - start_timestamp
-                pcap_file["time"] = ':'.join(str(dt).split(':')[1:])
+                pcap_file["time"] = ':'.join(str(dt).split(":")[1:])
 
             if isinstance(eth.data, dpkt.arp.ARP):
                 arp_pkt = eth.data
