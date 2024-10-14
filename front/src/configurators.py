@@ -294,20 +294,20 @@ class AbstractDeviceConfigurator:
 
         if default_gw:
             if not self.__ip_check(default_gw):
-                raise ArgCheckError('Неверно указан IP-адрес для шлюза по умолчанию')
+                raise ArgCheckError("Неверно указан IP-адрес для шлюза по умолчанию")
             self._device_node["config"]["default_gw"] = default_gw
         else:
             self._device_node["config"]["default_gw"] = ""
 
     @abstractmethod
-    def _conf_main() -> dict:
+    def _configure(self) -> dict:
         """Configuration main block in which the entire configuration process takes place"""
         pass
 
     def configure(self) -> Response:
         """Configure current network device"""
         try:
-            res = self._conf_main()  # configuration result
+            res = self._configure()  # configuration result
             self.__conf_sims_delete()
             return make_response(jsonify(res), 200)
         except ConfigurationError as e:
@@ -318,7 +318,7 @@ class HubConfigurator(AbstractDeviceConfigurator):
     def __init__(self):
         super().__init__(device_type="hub")
 
-    def _conf_main(self):
+    def _configure(self):
         self._conf_prepare()
         self._conf_label_update()
 
@@ -329,7 +329,7 @@ class SwitchConfigurator(AbstractDeviceConfigurator):
     def __init__(self):
         super().__init__(device_type="switch")
 
-    def _conf_main(self):
+    def _configure(self):
         self._conf_prepare()
         self._conf_label_update()
 
@@ -348,7 +348,7 @@ class HostConfigurator(AbstractDeviceConfigurator):
     def __init__(self):
         super().__init__(device_type="host")
 
-    def _conf_main(self):
+    def _configure(self):
         self._conf_prepare()
         self._conf_label_update()
 
