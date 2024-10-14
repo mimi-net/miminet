@@ -62,7 +62,9 @@ def name_check(arg: str) -> bool:
 
 def MAC_check(arg: str) -> bool:
     """Check MAC-address correctness"""
-    return bool(re.match("[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", arg.lower()))
+    return bool(
+        re.match("[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", arg.lower())
+    )
 
 
 def ascii_check(arg: str) -> bool:
