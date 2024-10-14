@@ -36,3 +36,4 @@ QUEUES = [
 app.conf.task_queues = QUEUES
 app.config_from_object(celeryconfig)
 app.conf.task_ignore_result = True
+app.conf.broker_connection_retry_on_startup = True

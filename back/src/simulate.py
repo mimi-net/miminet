@@ -373,13 +373,14 @@ def run_mininet(
     if len(network.jobs) == 0:
         return [], []
 
-    topo = MyTopology(network=network, time_to_wait_before_emulation=3)
-    net = IPNet(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
-
     try:
-        setup_vtep_interfaces(net, network.nodes)
+
+        topo = MyTopology(network=network, time_to_wait_before_emulation=3)
+        net = IPNet(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
+
         net.start()
         setup_vlans(net, network.nodes)
+        setup_vtep_interfaces(net, network.nodes)
         time.sleep(topo.time_to_wait_before_emulation)
         topo.check()
 
