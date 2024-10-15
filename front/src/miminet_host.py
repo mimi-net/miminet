@@ -5,7 +5,14 @@ import ipaddress
 from flask import jsonify, make_response, request, Response
 from flask_login import current_user, login_required
 from miminet_model import Network, Simulate, db
-from configurators import *
+from configurators import (
+    HostConfigurator,
+    SwitchConfigurator,
+    HubConfigurator,
+    ServerConfigurator,
+    RouterConfigurator,
+    get_data,
+)
 
 
 # ------ Argument Validators ------
@@ -17,7 +24,7 @@ def IPv4_check(arg: str) -> bool:
     try:
         ipaddress.ip_address(arg)
         return True
-    except:
+    except ValueError:
         return False
 
 
@@ -25,16 +32,16 @@ def range_check(arg: str, range: range) -> bool:
     """Check if a number is within a specified range"""
     try:
         return int(arg) in range
-    except:
+    except (ValueError, TypeError):
         return False
 
 
 def digit_check(arg: str) -> bool:
     "Check if the argument is a number"
     try:
-        num = int(arg)
+        int(arg)
         return True
-    except:
+    except (ValueError, TypeError):
         return False
 
 
@@ -42,7 +49,7 @@ def mask_check(arg: str) -> bool:
     """Check subnet mask correctness"""
     try:
         return int(arg) in range(0, 33)
-    except:
+    except (ValueError, TypeError):
         return False
 
 
@@ -50,7 +57,7 @@ def port_check(arg: str) -> bool:
     """Check port correctness"""
     try:
         return int(arg) in range(0, 65536)
-    except:
+    except (ValueError, TypeError):
         return False
 
 

@@ -242,7 +242,7 @@ class AbstractDeviceConfigurator:
         try:
             ipaddress.ip_address(ip)
             return True
-        except:
+        except ValueError:
             return False
 
     def _conf_ip_addresses(self):
