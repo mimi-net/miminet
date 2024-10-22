@@ -33,6 +33,7 @@ FILE_NAMES = [
     ("vlan_trunk_network.json", "vlan_trunk_answer.json"),
     ("vlan_with_stp_network.json", "vlan_with_stp_answer.json"),
     ("vlan_with_access_switches_network.json", "vlan_with_access_switches_answer.json"),
+    ("ipip_tunnel_network.json", "ipip_tunnel_answer.json"),
 ]
 
 DINAMYC_PORT_FILE_NAMES = [
