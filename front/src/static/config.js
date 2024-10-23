@@ -600,11 +600,6 @@ const ConfigServerGateway = function (gw) {
 
 const ConfigRouterJobOnChange = function(evnt) {
 
-    let elem = null;
-    let router_job_list = null;
-    let n = null;
-    let router_id = null;
-
     switch (evnt.target.value) {
         case '0':
             $('div[name="config_router_select_input"]').remove();
@@ -894,7 +889,7 @@ const FillRouterSelect = function(select_id, field_msg = 'Интерфейс н�
         let iface_id = iface.id;
         let iface_ip = iface.ip;
 
-        if (!iface_id || !iface_ip) {
+        if (!iface_id || (return_ip && !iface_ip)) {
             console.log("Не нашел ip/id у интерфейса");
             return;
         }
