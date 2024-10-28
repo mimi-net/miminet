@@ -1926,11 +1926,17 @@ const SetNetworkPlayerState = function(simultaion_id)
             return;
         }
 
+	if (nodes.length > 15)
+	{
+            $('#tooManyHostModal').modal('toggle');
+	    return;
+	}
+
 	if (typeof window.ym != 'undefined')
 	{
-		ym(92293993,'reachGoal','NetworkEmulate');
+	    ym(92293993,'reachGoal','NetworkEmulate');
 	}
-	
+
         RunSimulation(network_guid);
 
         $('#NetworkPlayer').empty();
