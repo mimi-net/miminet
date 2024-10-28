@@ -13,7 +13,7 @@ from network import Job, Network, Node, NodeConfig, NodeData, NodeInterface
 from pkt_parser import create_pkt_animation, is_ipv4_address
 from net_utils.vlan import setup_vlans, clean_bridges
 from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
-
+from mininet.log import setLogLevel
 
 class MyTopology(IPTopo):
     """Class representing topology for miminet networks"""
@@ -357,7 +357,6 @@ def do_job(job: Job, net: IPNet) -> None:
     current_job = Jobs(job, job_host)
     current_job.handler()
 
-
 def run_mininet(
     network: Network,
 ) -> tuple[list[list] | list, list | list[tuple[bytes, str]]]:
@@ -370,15 +369,17 @@ def run_mininet(
         tuple: animation list and pcap, pcap_name list
     """
 
+    setLogLevel("info")
+
     if len(network.jobs) == 0:
         return [], []
 
     try:
-
         topo = MyTopology(network=network, time_to_wait_before_emulation=3)
         net = IPNet(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
 
         net.start()
+
         setup_vlans(net, network.nodes)
         setup_vtep_interfaces(net, network.nodes)
         time.sleep(topo.time_to_wait_before_emulation)
@@ -407,11 +408,17 @@ def run_mininet(
                 do_job(job, net)
             except Exception:
                 continue
+    except Exception as e:
+        print('An error occurred during mininet configuration:', str(e))
     finally:
         time.sleep(2)
         clean_bridges(net)
         teardown_vtep_bridges(net, network.nodes)
-        net.stop()
+        
+        try:
+            net.stop()
+        except Exception as e:
+            print("Can't stop network: ", str(e))
 
     animation, pcap_list = create_animation(topo)
     animation_s = sorted(animation, key=lambda k: k.get("timestamp", 0))
