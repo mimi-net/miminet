@@ -15,6 +15,7 @@ from net_utils.vlan import setup_vlans, clean_bridges
 from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
 from mininet.log import setLogLevel
 
+
 class MyTopology(IPTopo):
     """Class representing topology for miminet networks"""
 
@@ -357,6 +358,7 @@ def do_job(job: Job, net: IPNet) -> None:
     current_job = Jobs(job, job_host)
     current_job.handler()
 
+
 def run_mininet(
     network: Network,
 ) -> tuple[list[list] | list, list | list[tuple[bytes, str]]]:
@@ -409,12 +411,12 @@ def run_mininet(
             except Exception:
                 continue
     except Exception as e:
-        print('An error occurred during mininet configuration:', str(e))
+        print("An error occurred during mininet configuration:", str(e))
     finally:
         time.sleep(2)
         clean_bridges(net)
         teardown_vtep_bridges(net, network.nodes)
-        
+
         try:
             net.stop()
         except Exception as e:
