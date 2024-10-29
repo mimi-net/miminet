@@ -1926,7 +1926,7 @@ const SetNetworkPlayerState = function(simultaion_id)
             return;
         }
 
-	if (nodes.length > 15)
+	if (nodes.length > 80)
 	{
             $('#tooManyHostModal').modal('toggle');
 	    return;
