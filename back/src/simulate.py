@@ -376,51 +376,59 @@ def run_mininet(
     if len(network.jobs) == 0:
         return [], []
 
-    try:
-        topo = MyTopology(network=network, time_to_wait_before_emulation=3)
-        net = IPNet(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
+    error_occurred = False
+    step = 1
 
-        net.start()
-
-        setup_vlans(net, network.nodes)
-        setup_vtep_interfaces(net, network.nodes)
-        time.sleep(topo.time_to_wait_before_emulation)
-        topo.check()
-
-        # Don only 100+ jobs
-        for job in network.jobs:
-            job_id = job.job_id
-
-            if int(job_id) < 100:
-                continue
-
-            try:
-                do_job(job, net)
-            except Exception:
-                continue
-
-        # Do only job_id < 100
-        for job in network.jobs:
-            job_id = job.job_id
-
-            if int(job_id) >= 100:
-                continue
-
-            try:
-                do_job(job, net)
-            except Exception:
-                continue
-    except Exception as e:
-        print("An error occurred during mininet configuration:", str(e))
-    finally:
-        time.sleep(2)
-        clean_bridges(net)
-        teardown_vtep_bridges(net, network.nodes)
-
+    while not error_occurred:
+        print(f'Current step: {step}')
+        step += 1
         try:
-            net.stop()
+            topo = MyTopology(network=network, time_to_wait_before_emulation=3)
+            net = IPNet(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
+
+            net.start()
+
+            setup_vlans(net, network.nodes)
+            setup_vtep_interfaces(net, network.nodes)
+            time.sleep(topo.time_to_wait_before_emulation)
+            topo.check()
+
+            # Don only 100+ jobs
+            for job in network.jobs:
+                job_id = job.job_id
+
+                if int(job_id) < 100:
+                    continue
+
+                try:
+                    do_job(job, net)
+                except Exception:
+                    continue
+
+            # Do only job_id < 100
+            for job in network.jobs:
+                job_id = job.job_id
+
+                if int(job_id) >= 100:
+                    continue
+
+                try:
+                    do_job(job, net)
+                except Exception:
+                    continue
         except Exception as e:
-            print("Can't stop network: ", str(e))
+            print("An error occurred during mininet configuration:", str(e))
+            error_occurred = True
+        finally:
+            time.sleep(2)
+            clean_bridges(net)
+            teardown_vtep_bridges(net, network.nodes)
+
+            try:
+                net.stop()
+            except Exception as e:
+                error_occurred = True
+                print("Can't stop network: ", str(e))
 
     animation, pcap_list = create_animation(topo)
     animation_s = sorted(animation, key=lambda k: k.get("timestamp", 0))
