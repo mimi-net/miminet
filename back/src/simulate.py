@@ -13,10 +13,7 @@ from network import Job, Network, Node, NodeConfig, NodeData, NodeInterface
 from pkt_parser import create_pkt_animation, is_ipv4_address
 from net_utils.vlan import setup_vlans, clean_bridges
 from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
-<<<<<<< HEAD
 import subprocess
-=======
->>>>>>> main
 from mininet.log import setLogLevel
 
 
