@@ -163,7 +163,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <button id="noJobsModalCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть"/>
                 </div>
                 <div class="modal-body">
-                    <p>Зачем симулировать сеть, если она ничего не делает?!</p>
+                    <p>Зачем эмулировать сеть, если она ничего не делает?!</p>
                     <p>В настройках хоста добавьте команду, например, вы можете выполнить команду 'ping' на определенный IP адрес или имя хоста.</p>
                     <p>И не забывайте конфигурировать IP адрес и маску у хостов.</p>
                 </div>
@@ -173,6 +173,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </div>
         </div>
     </div>
+
+
+    <div class="modal" id="tooManyHostModal" tabindex="-1" role="dialog" aria-labelledby="tooManyHostLabel" aria-hidden="true" data-focus-on="input:first">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="toomanyHostLabel">Сеть слишком большая!</h5>
+                    <button id="tooManyHostCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть"/>
+                </div>
+                <div class="modal-body">
+                    <p>Текущая сеть слишком большая для эмуляции.</p>
+                    <p>Максимальный размер сети доступный для эмуляции в Miminet составляет 80 узлов (хосты, коммутаторы, сервера, маршрутизацторы).</p>
+                </div>
+                <div class="modal-footer">
+                    <button id="tooManyHostModalSubmit" type="button" class="btn btn-primary">Ок</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 <div class="modal" id="ModalCopy" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -305,6 +325,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         $("#noJobsModalSubmit").click(function(){
             $('#noJobsModal').modal('hide');
         });
+
+        $("#tooManyHostCancelIcon").click(function(){
+            $('#tooManyHostModal').modal('hide');
+        });
+
+        $("#tooManyHostModalSubmit").click(function(){
+            $('#tooManyHostModal').modal('hide');
+        });
+
 
         var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
         var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
