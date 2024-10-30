@@ -13,83 +13,236 @@
 
 {% block content %}
 <main>
-    <section class="py-5 my-lg-5">
-        <div class="container py-3 h-100">
-            <div class="row flex-nowrap">
-                <div id="side_menu" class="col-auto col-lg-2 col-md-3 col-xl-2 px-sm-2 px-0 bg-white"
-                     style="height: 80vh;">
-                    <h5 class="pb-2 ps-2 ">Устройства</h5>
-                    <div class="row">
-                        <div class="col-sm-6 mb-3 text-center">
-                            <img class="drag" id="l2_switch"
-                                 src="{{ url_for('static', filename='/images/l2_switch.png') }}"/>
-                            <div class="icon-text">
-                                <span data-bs-toggle="popover" data-bs-trigger="hover"
-                                      data-bs-content="Свитч (коммутатор) работает на втором уровне модели OSI.">Свитч (L2)</span>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 mb-3 text-center">
-                            <img class="drag" id="host" src="{{ url_for('static', filename='/images/host.png') }}"/>
-                            <div class="icon-text pt-2">
-                                <span data-bs-toggle="popover" data-bs-trigger="hover"
-                                      data-bs-content="Хост - конечное сетевое устройство.">Хост</span>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 mb-3 text-center ">
-                            <img class="drag" id="l1_hub" src="{{ url_for('static', filename='/images/hub.png') }}"/>
-                            <div class="icon-text">
-                                <span data-bs-toggle="popover" data-bs-trigger="hover"
-                                      data-bs-content="Хаб (концентратор) &mdash; простейшее сетевое устойство.">Хаб (L1)</span>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 mb-3 text-center">
-                            <img class="drag" id="l3_router"
-                                 src="{{ url_for('static', filename='/images/l3_router.png') }}"/>
-                            <div class="icon-text">
-                                <span data-bs-toggle="popover" data-bs-trigger="hover"
-                                      data-bs-content="Маршрутизатор (роутер, раутер) &mdash; работает на 3-м уровне модели OSI, позволяет объединять различные сети.">Роутер (L3)</span>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 mb-3 text-center">
-                            <img class="drag" id="server" src="{{ url_for('static', filename='/images/server.png') }}"/>
-                            <div class="icon-text">
-                                <span data-bs-toggle="popover" data-bs-trigger="hover"
-                                      data-bs-content="Сервер &mdash; обслуживает клиентские запросы.">Сервер</span>
-                            </div>
-                        </div>
-                        <hr class="mb-4">
-                        <div class="col-12 text-center">
-                            <div class="d-flex justify-content-center" id="NetworkPlayer">
-                                <button type="button" class="btn btn-primary w-100" id="NetworkRunButton" disabled>
-                                    Проверка эмуляции
-                                </button>
-                            </div>
-                            <div class="pb-4" id="PacketSlider">
-                                <div class="range-slider pt-3" data-start-min="0" data-min="0" data-max="100"
-                                     data-step="1">
-                                    <div class="range-slider-ui mt-0 mb-2" id="PacketSliderInput"></div>
-                                    <input class="form-control range-slider-value-min" type="hidden">
-                                </div>
-                                <small id="NetworkPlayerLabel" class="text-muted text-center">Ожидание 10-30
-                                    сек.</small>
-                            </div>
+    <section>
 
-                            <small id="NetworkRunButtonHelpLabel" class="text-muted text-center">В случае ошибок или
-                                вопросов пишите нам в Телеграм <a href="https://t.me/MimiNetCommunity" parent="_blank">t.me/MimiNetCommunity</a></small>
-                        </div>
+        <!-- WorkSpace -->
+
+        <div id="network_scheme" 
+             class="position-absolute border bg-white border-white vh-100 vw-100">
+        </div>
+
+        <!-- Header -->
+
+        <nav class="navbar">
+
+            {% if current_user.is_authenticated %}
+
+                <a href="https://miminet.ru">
+                    <img src="{{ url_for('static', filename='/images/workspace/branding/logo.svg') }}"
+                         class="position-absolute start-0 top-0"
+                         style="margin: 35px;">
+                </a>
+
+                <div class="ws-name-case position-absolute top-0 start-50 translate-middle-x"
+                     style="margin-top: 35px;">
+                     {% if request.path != url_for('web_network_shared') %}
+                        <a class="d-inline nav-link"
+                           href="{{ url_for('home') }}">
+                           Мои сети
+                        </a>
+                        <a class="d-inline nav-link"
+                           href="#">
+                            / 
+                        </a>
+                     {% endif %}
+                     <a class="d-inline nav-link"
+                        id="network_title_head"
+                        href="{{ url_for('web_network', guid=network.guid) }}">
+                        {{ network.title }}
+                    </a>
+                </div>
+
+                <div class="d-flex position-absolute end-0 top-0"
+                     style="margin: 35px;">
+                     <a {% if request.path != url_for('web_network_shared') %}
+                            class="ws-settings-button"
+                        {% else %}
+                            class="ws-settings-button disabled"
+                        {% endif %}
+                        href="#netConfigModal"
+                        data-bs-toggle="modal"
+                        data-target="#netConfigModal"
+                        data-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        title="Настройки сети">
+                     </a>
+                     <a class="ws-copy-button"
+                        data-target="#ModalCopy"
+                        data-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        title="Сохранить копию"
+                        onclick="CopyNetwork()"
+                        style="margin-left: 16px; cursor: pointer;">
+                     </a>
+                     <a class="ws-share-button"
+                        data-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        title="Сеть доступна по URL"
+                        onclick="urlCopyButton()"
+                        style="margin-left: 16px; cursor: pointer;">
+                     </a>
+                </div>
+
+            {% else %}
+
+                <a href="https://miminet.ru">
+                    <img src="{{ url_for('static', filename='/images/workspace/branding/logo.svg') }}"
+                         class="position-absolute start-0 top-0"
+                         style="margin: 35px;">
+                </a>
+
+                <div class="ws-name-case position-absolute top-0 start-50 translate-middle-x"
+                     style="margin-top: 35px;">
+                     <a class="nav-link"
+                        id="network_title_head"
+                        href="#">
+                        {{ network.title }}
+                     </a>
+                </div>
+
+                <a href="{{ url_for('login_index') }}"
+                   class="position-absolute end-0 top-0 ws-login-button"
+                   style="margin: 35px;">
+                </a>
+
+            {% endif %}
+
+        </nav>
+
+        <!-- Menus -->
+
+        <div class="position-absolute start-0 top-50 translate-middle-y"
+             style="margin-left: 35px;">
+             <div class="ws-menu-devices-name">
+                  Меню
+             </div>
+             <div class="ws-menu-devices">
+                <div style="margin-bottom: 8px; margin-top: 8px;">
+                    <img class="drag"
+                         id="host"
+                         src="{{ url_for('static', filename='/images/workspace/devices/host.svg') }}"/>
+                    <div class="icon-text">
+                        <span data-bs-toggle="popover"
+                              data-bs-trigger="hover"
+                              data-bs-content="Хост - конечное сетевое устройство.">
+                              Хост
+                        </span>
                     </div>
                 </div>
-
-                <div class="col py-1 px-1 bg-light">
-                    <div id="network_scheme" class="border bg-white border-primary h-100 w-100"></div>
+                <div style="margin-bottom: 8px;">
+                    <img class="drag"
+                         id="server"
+                         src="{{ url_for('static', filename='/images/workspace/devices/server.svg') }}"/>
+                    <div class="icon-text">
+                        <span data-bs-toggle="popover"
+                              data-bs-trigger="hover"
+                              data-bs-content="Сервер &mdash;
+                                               обслуживает клиентские запросы.">
+                              Сервер
+                        </span>
+                    </div>
                 </div>
-
-                <div id="config_content" class="col-auto col-lg-2 col-md-3 col-xl-2 px-sm-2 px-0 pt-2 bg-white">
-                    <p class="fs-5">Тут будут настройки устройств.</p>
-                    <p class="fs-5">Выделите любое на схеме.</p>
+                <div style="margin-bottom: 8px;">
+                    <img class="drag"
+                         id="l2_switch"
+                         src="{{ url_for('static', filename='/images/workspace/devices/switch.svg') }}"/>
+                    <div class="icon-text">
+                        <span data-bs-toggle="popover"
+                              data-bs-trigger="hover"
+                              data-bs-content="Свитч (коммутатор) работает на втором уровне модели OSI.">
+                              Свитч (L2)
+                        </span>
+                    </div>
                 </div>
-            </div>
+                <div style="margin-bottom: 8px;">
+                    <img class="drag"
+                         id="l3_router"
+                         src="{{ url_for('static', filename='/images/workspace/devices/router.svg') }}"/>
+                    <div class="icon-text">
+                        <span data-bs-toggle="popover"
+                              data-bs-trigger="hover"
+                              data-bs-content="Маршрутизатор (роутер, раутер) &mdash;
+                                               работает на 3-м уровне модели OSI, позволяет объединять различные сети.">
+                              Роутер (L3)
+                        </span>
+                    </div>
+                </div>
+                <div style="margin-bottom: 8px;">
+                    <img class="drag"
+                         id="l1_hub"
+                         src="{{ url_for('static', filename='/images/workspace/devices/hub.svg') }}"/>
+                    <div class="icon-text">
+                        <span data-bs-toggle="popover"
+                              data-bs-trigger="hover"
+                              data-bs-content="Хаб (концентратор) &mdash;
+                                               простейшее сетевое устойство.">
+                              Хаб (L1)
+                        </span>
+                    </div>
+                </div>
+             </div>
         </div>
+
+        <div class="position-absolute end-0 top-50 translate-middle-y"
+             style="margin-right: 35px; height: 552px; pointer-events: none;">
+        
+             <div class="ws-menu-settings-name"
+                  style="pointer-events: all;">
+                  Настройки
+             </div>
+             <div id="config_content"
+                  class="ws-menu-settings overflow-auto"
+                  style="pointer-events: all;">
+                  Выберите устройство, чтобы настроить его.
+             </div>
+            
+        </div>
+
+        <!-- Footer -->
+
+        <div class="position-absolute start-0 bottom-0"
+             style="margin: 35px; font-family: 'Montserrat', sans-serif; font-weight: 500;">
+             <div id="PacketSlider">
+                  <div class="range-slider"
+                       data-start-min="0"
+                       data-min="0"
+                       data-max="100"
+                       data-step="1"
+                       style="text-align: center;">
+                       <input class="form-control range-slider-value-min"
+                              type="hidden">
+                       <div class="range-slider-ui"
+                            id="PacketSliderInput">
+                       </div>
+                  </div>
+                  <small id="NetworkPlayerLabel"
+                         class="text-muted"
+                         style="color: #222;">
+                         Ожидание: 10-30 сек.
+                  </small>
+             </div>
+             <div class="d-flex justify-content-center"
+                  id="NetworkPlayer"
+                  style="text-align: center;">
+                  <button type="button"
+                          class="btn btn-primary w-100"
+                          id="NetworkRunButton"
+                          disabled>
+                           Проверка эмуляции 
+                  </button>
+             </div>
+        </div>
+
+        <a href="https://t.me/MimiNetCommunity"
+           target="_blank"
+           class="position-absolute bottom-0 end-0 ws-ask-link">
+            <div id="NetworkRunButtonHelpLabel" class="ws-ask-button">
+                Задать вопрос
+            </div>
+        </a>
+
+        <!-- Designed by Artem Sergeevich Gryaznov. -->
+
     </section>
 </main>
 

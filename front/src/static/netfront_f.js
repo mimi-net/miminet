@@ -772,7 +772,7 @@ const MoveNodes = function(){
 
 const prepareStylesheet = function() {
     const getColor = function(ele) {
-      return ele.data('color') || '#ffaaaa';
+      return ele.data('color') || '#9FBFE5';
     };
     const getEdgeLabel = function(ele) {
       return ele.data('label') || '';
@@ -856,7 +856,7 @@ const prepareStylesheet = function() {
         })
         .selector('.eh-handle')
         .css({
-            'background-color': 'red',
+            'background-color': 'blue',
             'width': 8,
             'height': 8,
             'shape': 'ellipse',
@@ -867,35 +867,35 @@ const prepareStylesheet = function() {
 
         .selector('.eh-hover')
         .css({
-            'background-color': 'red'
+            'background-color': 'blue'
         })
 
         .selector('.eh-source')
         .css({
             'border-width': 2,
-            'border-color': 'red'
+            'border-color': 'blue'
         })
 
         .selector('.eh-target')
         .css({
             'border-width': 2,
-            'border-color': 'red'
+            'border-color': 'blue'
         })
 
         .selector('.eh-preview')
         .css({
-            'background-color': 'red',
-            'line-color': 'red',
-            'target-arrow-color': 'red',
-            'source-arrow-color': 'red'
+            'background-color': 'blue',
+            'line-color': 'blue',
+            'target-arrow-color': 'blue',
+            'source-arrow-color': 'blue'
         })
 
         .selector('.eh-ghost-edge')
         .css({
-            'background-color': 'red',
-            'line-color': 'red',
-            'target-arrow-color': 'red',
-            'source-arrow-color': 'red'
+            'background-color': 'blue',
+            'line-color': 'blue',
+            'target-arrow-color': 'blue',
+            'source-arrow-color': 'blue'
         })
 
         .selector('node[name]')

@@ -20,12 +20,12 @@ const ClearConfigForm = function (text) {
     let txt = ''
 
     if (!text) {
-        txt = 'Тут будут настройки устройств. Выделите любое на схеме.';
+        txt = 'Выберите устройство, чтобы настроить его.';
     }
 
     // Clear all child
     $(config_content_id).empty();
-    $(config_content_id).append('<h4>' + txt + '</h4>');
+    $(config_content_id).append('<span>' + txt + '<span>');
 }
 
 const HostWarningMsg = function (msg) {
