@@ -154,7 +154,7 @@ def create_mimishark_json(pcap, to_json):
                 pcap_file["source"] = str(utils.mac_to_str(arp_pkt.sha))
                 pcap_file["destination"] = str(utils.mac_to_str(eth.dst))
                 pcap_file["protocol"] = "ARP"
-                pcap_file["length"] = len(mac_to_str(buf).split(":"))
+                pcap_file["length"] = str(len(mac_to_str(buf).split(":")))
 
                 bytes_repr = " ".join(mac_to_str(buf).split(":"))
                 ascii = ""
@@ -223,7 +223,7 @@ def create_mimishark_json(pcap, to_json):
                 pcap_file["source"] = inet_to_str(ip.src)
                 pcap_file["destination"] = inet_to_str(ip.dst)
                 pcap_file["protocol"] = ip.get_proto(ip.p).__name__
-                pcap_file["length"] = len(mac_to_str(buf).split(":"))
+                pcap_file["length"] = str(len(mac_to_str(buf).split(":")))
 
                 bytes_repr = " ".join(mac_to_str(buf).split(":"))
                 ascii = ""
