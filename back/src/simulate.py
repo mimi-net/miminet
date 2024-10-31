@@ -13,6 +13,7 @@ from network import Job, Network, Node, NodeConfig, NodeData, NodeInterface
 from pkt_parser import create_pkt_animation, is_ipv4_address
 from net_utils.vlan import setup_vlans, clean_bridges
 from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
+import subprocess
 from mininet.log import setLogLevel
 
 
@@ -418,9 +419,13 @@ def run_mininet(
         teardown_vtep_bridges(net, network.nodes)
 
         try:
+            # Sometimes network can't be configured
+            # and we can't stop(clean) it
             net.stop()
         except Exception as e:
             print("Can't stop network: ", str(e))
+            # clean network directly
+            subprocess.call("mn -c", shell=True)
 
     animation, pcap_list = create_animation(topo)
     animation_s = sorted(animation, key=lambda k: k.get("timestamp", 0))
