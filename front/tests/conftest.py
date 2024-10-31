@@ -16,8 +16,8 @@ class testing_settings:
     miminet_address = f"http://{domain}"
 
 
-@pytest.fixture(scope='session')
-def chrome_driver() -> webdriver:
+@pytest.fixture(scope="class")
+def chrome_driver():
     # Set path Selenium
     CHROMEDRIVER_PATH = testing_settings.chrome_driver_path
     WINDOW_SIZE = testing_settings.window_size
@@ -32,8 +32,8 @@ def chrome_driver() -> webdriver:
     return Chrome(service=service, options=chrome_options)
 
 
-@pytest.fixture(scope='session')
-def testing_session() -> Session:
+@pytest.fixture(scope="class")
+def testing_session():
     # Send a POST request to the http://XXXX.YY/auth/login.html
     # perform authorization with this and save cookies in session
     # use these cookies for other requests!
@@ -55,11 +55,13 @@ def testing_session() -> Session:
     if response.status_code != 200:
         raise Exception("Unable to send authorization request!")
 
-    return session
+    yield session
+
+    session.close()
 
 
-@pytest.fixture(scope='session')
-def selenium(chrome_driver, testing_session) -> webdriver:
+@pytest.fixture(scope="class")
+def selenium(chrome_driver, testing_session):
     chrome_driver.get(testing_settings.miminet_address)
     cookies = testing_session.cookies
 
@@ -78,4 +80,6 @@ def selenium(chrome_driver, testing_session) -> webdriver:
             chrome_driver.add_cookie(selenium_cookie)
 
     # return configured chrome driver
-    return chrome_driver
+    yield chrome_driver
+
+    chrome_driver.close()
