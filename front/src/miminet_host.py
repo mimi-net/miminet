@@ -148,7 +148,7 @@ host_udp_job.add_param("config_host_send_udp_data_ip_input_field").add_check(
     IPv4_check
 ).set_error_msg(build_error(ErrorType.ip, "Отправить данные (UDP)"))
 host_udp_job.add_param("config_host_send_udp_data_port_input_field").add_check(
-    mask_check
+    port_check
 ).set_error_msg(build_error(ErrorType.port, "Отправить данные (UDP)"))
 
 # send TCP data
@@ -160,7 +160,7 @@ host_tcp_job.add_param("config_host_send_tcp_data_ip_input_field").add_check(
     IPv4_check
 ).set_error_msg(build_error(ErrorType.ip, "Отправить данные (TCP)"))
 host_tcp_job.add_param("config_host_send_tcp_data_port_input_field").add_check(
-    mask_check
+    port_check
 ).set_error_msg(build_error(ErrorType.port, "Отправить данные (TCP)"))
 
 # traceroute -n (with options)
