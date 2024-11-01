@@ -75,4 +75,5 @@ for cookie in cookies:
 driver.get("http:\\localhost")
 driver.find_element(By.CLASS_NAME, "nav-link").click()
 print(driver.title)
+driver.current_url
 driver.close()
