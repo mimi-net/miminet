@@ -1,9 +1,7 @@
 import pytest
-from selenium import webdriver
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
 import requests
 from requests import Session
 
@@ -13,34 +11,39 @@ class testing_settings:
     chrome_driver_path = "/usr/local/bin/chromedriver"
     window_size = "1920,1080"
     auth_data = {"email": "selenium-email", "password": "password"}
-    miminet_address = f"http://{domain}"
+
+
+@pytest.fixture(scope="session")
+def main_page():
+    return f"http://{testing_settings.domain}"
 
 
 @pytest.fixture(scope="class")
 def chrome_driver():
-    # Set path Selenium
-    CHROMEDRIVER_PATH = testing_settings.chrome_driver_path
-    WINDOW_SIZE = testing_settings.window_size
-
     chrome_options = Options()
     chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--window-size=%s" % WINDOW_SIZE)
+    chrome_options.add_argument("--window-size=%s" % testing_settings.window_size)
     chrome_options.add_argument("--no-sandbox")
 
-    service = Service(CHROMEDRIVER_PATH)
+    service = Service(testing_settings.chrome_driver_path)
 
     return Chrome(service=service, options=chrome_options)
 
 
 @pytest.fixture(scope="class")
-def testing_session():
+def requester(main_page: str):
+    """Request session, used to send requests (GET, POST, etc...) and process their results
+
+    **[!]** Selenium is much slower than Requester! If you can test something by just making a request, without using Selenium, do it.
+    """
+
     # Send a POST request to the http://XXXX.YY/auth/login.html
     # perform authorization with this and save cookies in session
     # use these cookies for other requests!
 
     session = requests.Session()
 
-    response = session.get(testing_settings.miminet_address)
+    response = session.get(main_page)
 
     if response.status_code != 200:
         raise Exception(
@@ -48,7 +51,7 @@ def testing_session():
         )
 
     response = session.post(
-        f"{testing_settings.miminet_address}//auth/login.html",
+        f"{main_page}//auth/login.html",
         data=testing_settings.auth_data,
     )
 
@@ -61,9 +64,9 @@ def testing_session():
 
 
 @pytest.fixture(scope="class")
-def selenium(chrome_driver, testing_session):
-    chrome_driver.get(testing_settings.miminet_address)
-    cookies = testing_session.cookies
+def selenium(chrome_driver: Chrome, requester: Session, main_page: str):
+    chrome_driver.get(main_page)
+    cookies = requester.cookies
 
     for cookie in cookies:
         if cookie.name and cookie.value and cookie.expires:
