@@ -5,9 +5,9 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 import requests
 from requests import Session
-from selenium.webdriver import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
 
 class testing_settings:
     domain = "localhost"
@@ -89,16 +89,10 @@ def selenium(chrome_driver: Chrome, requester: Session):
 
     chrome_driver.close()
 
-@pytest.fixture()
-def actions_chain(selenium):
-    chain = ActionChains(selenium)
 
-    yield chain
-    
-    chain.reset_actions() 
-
-def wait_until_can_click(selenium: Chrome, by: By ,element: str):
+def wait_until_can_click(selenium: Chrome, by: By, element: str):
     WebDriverWait(selenium, 20).until(EC.element_to_be_clickable((by, element))).click()
+
 
 @pytest.fixture(scope="class")
 def new_empty_network(selenium: Chrome):
@@ -106,7 +100,7 @@ def new_empty_network(selenium: Chrome):
     new_network_button_xpath = "/html/body/section/div/div/div[1]"
     options_button_xpath = "/html/body/nav/div/div[2]/a[3]/i"
     delete_network_button_xpath = "/html/body/div[1]/div/div/div[3]/button[1]"
-    confirm_button_xpath = '/html/body/div[2]/div/div/div[2]/button[1]'
+    confirm_button_xpath = "/html/body/div[2]/div/div/div[2]/button[1]"
 
     selenium.get(HOME_PAGE)
     selenium.find_element(By.XPATH, new_network_button_xpath).click()
