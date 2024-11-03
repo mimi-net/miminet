@@ -12,10 +12,8 @@ class testing_settings:
     window_size = "1920,1080"
     auth_data = {"email": "selenium-email", "password": "password"}
 
-
-@pytest.fixture(scope="session")
-def main_page():
-    return f"http://{testing_settings.domain}"
+MAIN_PAGE = f"http://{testing_settings.domain}"
+HOME_PAGE = f"{MAIN_PAGE}/home"
 
 
 @pytest.fixture(scope="class")
@@ -31,7 +29,7 @@ def chrome_driver():
 
 
 @pytest.fixture(scope="class")
-def requester(main_page: str):
+def requester():
     """Request session, used to send requests (GET, POST, etc...) and process their results
 
     **[!]** Selenium is much slower than Requester! If you can test something by just making a request, without using Selenium, do it.
@@ -43,7 +41,7 @@ def requester(main_page: str):
 
     session = requests.Session()
 
-    response = session.get(main_page)
+    response = session.get(MAIN_PAGE)
 
     if response.status_code != 200:
         raise Exception(
@@ -51,7 +49,7 @@ def requester(main_page: str):
         )
 
     response = session.post(
-        f"{main_page}//auth/login.html",
+        f"{MAIN_PAGE}//auth/login.html",
         data=testing_settings.auth_data,
     )
 
@@ -64,8 +62,8 @@ def requester(main_page: str):
 
 
 @pytest.fixture(scope="class")
-def selenium(chrome_driver: Chrome, requester: Session, main_page: str):
-    chrome_driver.get(main_page)
+def selenium(chrome_driver: Chrome, requester: Session):
+    chrome_driver.get(MAIN_PAGE)
     cookies = requester.cookies
 
     for cookie in cookies:
