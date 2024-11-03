@@ -12,6 +12,7 @@ class testing_settings:
     window_size = "1920,1080"
     auth_data = {"email": "selenium-email", "password": "password"}
 
+
 MAIN_PAGE = f"http://{testing_settings.domain}"
 HOME_PAGE = f"{MAIN_PAGE}/home"
 
@@ -84,3 +85,21 @@ def selenium(chrome_driver: Chrome, requester: Session):
     yield chrome_driver
 
     chrome_driver.close()
+
+
+@pytest.fixture(scope="class")
+def new_empty_network(selenium: Chrome):
+    """create 1 new network (same for all tests in this class)"""
+    new_network_button_xpath = "/html/body/section/div/div/div[1]"
+    options_button_xpath = "/html/body/nav/div/div[2]/a[3]/i"
+    delete_network_button_xpath = "/html/body/div[1]/div/div/div[3]/button[1]"
+
+    selenium.get(HOME_PAGE)
+    selenium.find_element(By.XPATH, new_network_button_xpath).click()
+    network_url = selenium.current_url
+
+    yield network_url
+
+    selenium.get(network_url)
+    selenium.find_element(By.XPATH, options_button_xpath).click()
+    selenium.find_element(By.XPATH, delete_network_button_xpath).click()
