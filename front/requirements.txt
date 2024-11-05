@@ -35,7 +35,7 @@ soupsieve==2.6
 SQLAlchemy==2.0.36
 urllib3==2.2.3
 uuid==1.30
-Werkzeug==3.1.1
+Werkzeug==3.1.2
 zipp==3.20.2
 celery==5.4.0
 kombu==5.4.2
