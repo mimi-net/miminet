@@ -16,6 +16,39 @@ class testing_settings:
     auth_data = {"email": "selenium-email", "password": "password"}
 
 
+class device_button:
+    switch_xpath = "/html/body/main/section/div/div/div[1]/div/div[1]/img"
+    switch_class = "l2_switch"
+
+    host_xpath = "/html/body/main/section/div/div/div[1]/div/div[2]/img"
+    host_class = "host"
+
+    hub_xpath = "/html/body/main/section/div/div/div[1]/div/div[3]/img"
+    hub_class = "l1_hub"
+
+    router_xpath = "/html/body/main/section/div/div/div[1]/div/div[4]/img"
+    router_class = "l3_router"
+
+    server_xpath = "/html/body/main/section/div/div/div[1]/div/div[5]/img"
+    server_class = "server"
+
+
+DEVICE_BUTTON_XPATHS = [
+    device_button.switch_xpath,
+    device_button.host_xpath,
+    device_button.hub_xpath,
+    device_button.router_xpath,
+    device_button.server_xpath,
+]
+
+DEVICE_BUTTON_CLASSES = [
+    device_button.switch_class,
+    device_button.host_class,
+    device_button.hub_class,
+    device_button.router_class,
+    device_button.server_class,
+]
+
 MAIN_PAGE = f"http://{testing_settings.domain}"
 HOME_PAGE = f"{MAIN_PAGE}/home"
 
@@ -95,7 +128,7 @@ def wait_until_can_click(selenium: Chrome, by: By, element: str):
 
 
 @pytest.fixture(scope="class")
-def new_empty_network(selenium: Chrome):
+def empty_network_guid(selenium: Chrome):
     """create 1 new network (same for all tests in this class)"""
     new_network_button_xpath = "/html/body/section/div/div/div[1]"
     options_button_xpath = "/html/body/nav/div/div[2]/a[3]/i"
