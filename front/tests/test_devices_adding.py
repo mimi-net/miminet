@@ -17,14 +17,14 @@ class TestDeviceButtons:
     def test_element_adding(
         self,
         selenium: Chrome,
-        empty_network_guid: str,
+        empty_network_url: str,
         element_xpath: str,
         element_name: str,
         current_node: int,
     ):
         target_xpath = "/html/body/main/section/div/div/div[2]/div/div/canvas[2]"
 
-        selenium.get(empty_network_guid)
+        selenium.get(empty_network_url)
 
         network_device_button = selenium.find_element(By.XPATH, element_xpath)
         target_panel = selenium.find_element(By.XPATH, target_xpath)

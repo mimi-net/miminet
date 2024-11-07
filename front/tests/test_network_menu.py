@@ -14,20 +14,20 @@ class TestNetworkMenu:
 
         assert selenium.current_url == HOME_PAGE
 
-    def test_new_network_existence(self, selenium: Chrome, new_empty_network: str):
+    def test_new_network_existence(self, selenium: Chrome, empty_network_url: str):
         """Checks if the created network exists"""
         network_name_xpath = "/html/body/nav/div/div[1]/a[3]"
 
-        selenium.get(new_empty_network)  # open new network by URL
+        selenium.get(empty_network_url)  # open new network by URL
         network_name = selenium.find_element(By.XPATH, network_name_xpath).text
 
         assert network_name == "Новая сеть"
 
-    def test_new_network_open(self, selenium: Chrome, new_empty_network: str):
+    def test_new_network_open(self, selenium: Chrome, empty_network_url: str):
         """Checks is it possible to open new network via home menu"""
         first_network_button_xpath = "/html/body/section/div/div/div[2]"
 
         selenium.get(HOME_PAGE)
         selenium.find_element(By.XPATH, first_network_button_xpath).click()
 
-        assert new_empty_network == selenium.current_url
+        assert empty_network_url == selenium.current_url
