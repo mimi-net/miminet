@@ -51,8 +51,29 @@ DEVICE_BUTTON_CLASSES = [
 ]
 
 
+class Selenium(Chrome):
+    """
+    Extends the selenium.webdriver.Chrome class,
+    adding new methods for convenient element interaction.
+    """
+
+    def wait_until_can_click(self, by: By, element: str, timeout=20):
+        """
+        Waits for the specified element to become clickable before clicking it.
+
+        Args:
+            by (By): The locator strategy (e.g., By.ID, By.XPATH).
+            element (str): The element locator (e.g., "myElementId", "//button[text()='Click Me']").
+            timeout (int): The maximum time in seconds to wait for the element to become clickable (default: 20).
+        """
+        WebDriverWait(self, timeout).until(
+            EC.element_to_be_clickable((by, element))
+        ).click()
+
+
 @pytest.fixture(scope="class")
 def chrome_driver():
+    """Headless WebBrowser instance for testing (authorization here is not passed)."""
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--window-size=%s" % testing_setting.window_size)
@@ -60,12 +81,17 @@ def chrome_driver():
 
     service = Service(testing_setting.chrome_driver_path)
 
-    return Chrome(service=service, options=chrome_options)
+    tester = Selenium(service=service, options=chrome_options)
+
+    yield tester
+
+    tester.close()
+    tester.quit()
 
 
 @pytest.fixture(scope="class")
 def requester():
-    """Request session, used to send requests (GET, POST, etc...) and process their results
+    """Request session, used to send requests (GET, POST, etc...) and process their results.
 
     **[!]** Selenium is much slower than Requester! If you can test something by just making a request, without using Selenium, do it.
     """
@@ -116,37 +142,4 @@ def selenium(chrome_driver: Chrome, requester: Session):
             chrome_driver.add_cookie(selenium_cookie)
 
     # return configured chrome driver
-    yield chrome_driver
-
-    chrome_driver.close()
-
-
-@pytest.fixture(scope="class")
-def empty_network_url(selenium: Chrome):
-    """create 1 new network (same for all tests in this class) and clear it after use"""
-    new_network_button_xpath = "/html/body/section/div/div/div[1]"
-
-    selenium.get(HOME_PAGE)
-    selenium.find_element(By.XPATH, new_network_button_xpath).click()
-    network_url = selenium.current_url
-
-    yield network_url
-
-    delete_network(selenium, network_url)
-
-
-def wait_until_can_click(selenium: Chrome, by: By, element: str):
-    WebDriverWait(selenium, 20).until(EC.element_to_be_clickable((by, element))).click()
-
-
-def delete_network(selenium: Chrome, network_url: str):
-    options_button_xpath = "/html/body/nav/div/div[2]/a[3]/i"
-    delete_network_button_xpath = "/html/body/div[1]/div/div/div[3]/button[1]"
-    confirm_button_xpath = "/html/body/div[2]/div/div/div[2]/button[1]"
-
-    selenium.get(network_url)
-
-    selenium.find_element(By.XPATH, options_button_xpath).click()
-
-    wait_until_can_click(selenium, By.XPATH, delete_network_button_xpath)
-    wait_until_can_click(selenium, By.XPATH, confirm_button_xpath)
+    return chrome_driver
