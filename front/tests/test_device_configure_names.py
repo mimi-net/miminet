@@ -1,12 +1,12 @@
 import pytest
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
-from conftest.environment_setup import MiminetTester, selenium, chrome_driver, requester
-from conftest.locators import (
+from conftest import MiminetTester, selenium, chrome_driver, requester
+from env.locators import (
     DEVICE_BUTTON_CLASSES,
     device_button,
 )
-from conftest.networks import MiminetTestNetwork
+from env.networks import MiminetTestNetwork
 
 
 def get_current_node(selenium: MiminetTester, device_class: str):

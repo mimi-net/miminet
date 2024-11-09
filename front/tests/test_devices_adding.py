@@ -1,11 +1,11 @@
 import pytest
 from selenium.webdriver.common.by import By
-from conftest.locators import (
+from env.locators import (
     DEVICE_BUTTON_XPATHS,
     DEVICE_BUTTON_CLASSES,
 )
-from conftest.environment_setup import MiminetTester, selenium, chrome_driver, requester
-from conftest.networks import MiminetTestNetwork
+from conftest import MiminetTester
+from env.networks import MiminetTestNetwork
 
 
 class TestDeviceButtons:

@@ -1,12 +1,11 @@
 import pytest
-from conftest.environment_setup import MiminetTester
 from selenium.webdriver.common.by import By
-from conftest.locators import (
+from env.locators import (
     DEVICE_BUTTON_XPATHS,
     network_top_button,
     NETWORK_PANEL_XPATH,
 )
-from conftest.environment_setup import HOME_PAGE
+from conftest import HOME_PAGE, MiminetTester
 import random
 
 

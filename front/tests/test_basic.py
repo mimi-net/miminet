@@ -1,12 +1,9 @@
 import pytest
 from requests import Session
-from conftest.environment_setup import (
+from conftest import (
     MiminetTester,
     MAIN_PAGE,
     HOME_PAGE,
-    selenium,
-    requester,
-    chrome_driver,
 )
 
 

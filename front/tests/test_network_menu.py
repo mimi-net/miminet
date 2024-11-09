@@ -1,15 +1,8 @@
 import pytest
 from selenium.webdriver.common.by import By
 from selenium.webdriver import Chrome
-from conftest.environment_setup import (
-    MiminetTester,
-    HOME_PAGE,
-    MAIN_PAGE,
-    selenium,
-    chrome_driver,
-    requester,
-)
-from conftest.networks import MiminetTestNetwork
+from conftest import MiminetTester, HOME_PAGE, MAIN_PAGE
+from env.networks import MiminetTestNetwork
 
 
 class TestNetworkMenu:
