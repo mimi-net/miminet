@@ -1,14 +1,33 @@
 import pytest
 from environment_setup import Tester
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
-from locators import HOME_PAGE, DEVICE_BUTTON_XPATHS
+from locators import (
+    HOME_PAGE,
+    DEVICE_BUTTON_XPATHS,
+    network_top_button,
+    NETWORK_PANEL_XPATH,
+)
 import random
 
 
-@pytest.fixture(scope="class")
-def empty_network_url(selenium: Tester):
-    """create 1 new network (same for all tests in this class) and clear it after use"""
+def delete_network(selenium: Tester, network_url: str):
+    confirm_button_xpath = "/html/body/div[2]/div/div/div[2]/button[1]"
+
+    selenium.get(network_url)
+
+    selenium.find_element(By.XPATH, network_top_button.options_xpath).click()
+
+    selenium.wait_and_click(By.XPATH, network_top_button.delete_xpath)
+    selenium.wait_and_click(By.XPATH, confirm_button_xpath)
+
+
+@pytest.fixture(scope="session")
+def empty_network(selenium: Tester):
+    """Create new network and clear it after use.
+
+    Returns:
+      (str) : Network URL
+    """
     new_network_button_xpath = "/html/body/section/div/div/div[1]"
 
     selenium.get(HOME_PAGE)
@@ -20,46 +39,30 @@ def empty_network_url(selenium: Tester):
     delete_network(selenium, network_url)
 
 
-def delete_network(selenium: Tester, network_url: str):
-    options_button_xpath = "/html/body/nav/div/div[2]/a[3]/i"
-    delete_network_button_xpath = "/html/body/div[1]/div/div/div[3]/button[1]"
-    confirm_button_xpath = "/html/body/div[2]/div/div/div[2]/button[1]"
+@pytest.fixture(scope="session")
+def network_with_elements(selenium: Tester, empty_network: str):
+    """Create new network where each element is randomly located and clear it after use.
 
-    selenium.get(network_url)
-
-    selenium.find_element(By.XPATH, options_button_xpath).click()
-
-    selenium.wait_until_can_click(By.XPATH, delete_network_button_xpath)
-    selenium.wait_until_can_click(By.XPATH, confirm_button_xpath)
-
-
-@pytest.fixture(scope="class")
-def network_with_elements_url(selenium: Tester, empty_network_url: str):
-    panel_xpath = "/html/body/main/section/div/div/div[2]/div/div/canvas[2]"
-    network_url = empty_network_url
-
-    selenium.get(network_url)
-
-    target = selenium.find_element(By.XPATH, panel_xpath)
+    Returns:
+      (str) : Network URL
+    """
+    url = empty_network
+    selenium.get(url)
+    panel = selenium.find_element(By.XPATH, NETWORK_PANEL_XPATH)
 
     # calculate offset of coordinates inside panel
 
-    width, height = int(target.rect["width"]), int(target.rect["height"])
-    target_x, target_y = int(target.rect["x"]), int(target.rect["y"])
+    width, height = int(panel.rect["width"]), int(panel.rect["height"])
+    target_x, target_y = int(panel.rect["x"]), int(panel.rect["y"])
 
     center_x, center_y = target_x + width / 2, target_y + height / 2
     offset_x, offset_y = center_x - target_x, center_y - target_y
 
     for button_xpath in DEVICE_BUTTON_XPATHS:
-        element = selenium.find_element(By.XPATH, button_xpath)
+        device = selenium.find_element(By.XPATH, button_xpath)
 
         x, y = random.randint(0, width) - offset_x, random.randint(0, height) - offset_y
 
-        actions_chain = ActionChains(selenium)
+        selenium.drag_and_drop(device, panel, x, y)
 
-        actions_chain.click_and_hold(element)
-        actions_chain.move_to_element_with_offset(target, x, y)
-        actions_chain.release()
-        actions_chain.perform()
-
-    return network_url
+    return url

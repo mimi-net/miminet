@@ -7,6 +7,8 @@ from selenium.webdriver.chrome.service import Service
 from requests import Session
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.remote.webelement import WebElement
 
 
 class environment_setting:
@@ -22,7 +24,7 @@ class Tester(Chrome):
     adding new methods for convenient element interaction.
     """
 
-    def wait_until_can_click(self, by: By, element: str, timeout=20):
+    def wait_and_click(self, by: By, element: str, timeout=20):
         """
         Waits for the specified element to become clickable before clicking it.
 
@@ -34,6 +36,14 @@ class Tester(Chrome):
         WebDriverWait(self, timeout).until(
             EC.element_to_be_clickable((by, element))
         ).click()
+
+    def drag_and_drop(self, source: WebElement, target: WebElement, x: int, y: int):
+        actions_chain = ActionChains(self)
+
+        actions_chain.click_and_hold(source)
+        actions_chain.move_to_element_with_offset(target, x, y)
+        actions_chain.release()
+        actions_chain.perform()
 
 
 @pytest.fixture(scope="class")

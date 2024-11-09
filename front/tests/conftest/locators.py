@@ -1,8 +1,11 @@
 from environment_setup import environment_setting
 
+MAIN_PAGE = f"http://{environment_setting.domain}"
+HOME_PAGE = f"{MAIN_PAGE}/home"
+
 
 class device_button:
-    """Data for identifying and locating various network devices"""
+    """Data for identifying and locating various network devices."""
 
     switch_xpath = "/html/body/main/section/div/div/div[1]/div/div[1]/img"
     switch_class = "l2_switch"
@@ -20,8 +23,16 @@ class device_button:
     server_class = "server"
 
 
-MAIN_PAGE = f"http://{environment_setting.domain}"
-HOME_PAGE = f"{MAIN_PAGE}/home"
+class network_top_button:
+    """Data for identifying and locating top buttons of network interacting page."""
+
+    options_xpath = "/html/body/nav/div/div[2]/a[3]/i"
+    delete_xpath = "/html/body/div[1]/div/div/div[3]/button[1]"
+    copy_xpath = "/html/body/nav/div/div[2]/a[2]"
+
+
+# Panel where you can place network devices and connect them
+NETWORK_PANEL_XPATH = "/html/body/main/section/div/div/div[2]/div/div/canvas[2]"
 
 DEVICE_BUTTON_XPATHS = [
     device_button.switch_xpath,
