@@ -43,7 +43,7 @@ class TestDeviceConfigure:
     @pytest.fixture(scope="class")
     def network_with_elements(self, selenium: MiminetTester):
         network = MiminetTestNetwork(selenium)
-        network.place_elements()
+        network.scatter_devices()
 
         return network.url
 

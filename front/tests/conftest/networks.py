@@ -32,7 +32,7 @@ class MiminetTestNetwork:
 
         self.__url = self.__selenium.current_url
 
-    def place_elements(self):
+    def scatter_devices(self):
         """Randomly add each network device to network."""
         self.__selenium.get(self.__url)
         panel = self.__selenium.find_element(By.XPATH, NETWORK_PANEL_XPATH)
