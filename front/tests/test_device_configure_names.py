@@ -45,7 +45,9 @@ class TestDeviceConfigure:
         network = MiminetTestNetwork(selenium)
         network.scatter_devices()
 
-        return network.url
+        yield network.url
+
+        network.delete()
 
     @pytest.mark.parametrize(
         "device_class",

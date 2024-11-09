@@ -17,7 +17,9 @@ class TestNetworkMenu:
     def empty_network(self, selenium: MiminetTester):
         empty_network = MiminetTestNetwork(selenium)
 
-        return empty_network.url
+        yield empty_network.url
+
+        empty_network.delete()
 
     def test_my_networks_button_press(self, selenium: Chrome):
         """Checks if it is possible to get to the network selection menu"""

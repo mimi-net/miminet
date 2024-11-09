@@ -13,7 +13,9 @@ class TestDeviceButtons:
     def empty_network(self, selenium: MiminetTester):
         empty_network = MiminetTestNetwork(selenium)
 
-        return empty_network.url
+        yield empty_network.url
+
+        empty_network.delete()
 
     @pytest.mark.parametrize(
         "element_xpath,element_name,current_node",
