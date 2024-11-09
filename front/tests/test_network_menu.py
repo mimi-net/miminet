@@ -1,7 +1,7 @@
 import pytest
 from selenium.webdriver.common.by import By
 from selenium.webdriver import Chrome
-from conftest import HOME_PAGE, MAIN_PAGE
+from front.tests.conftest.locators import HOME_PAGE, MAIN_PAGE
 
 
 class TestNetworkMenu:

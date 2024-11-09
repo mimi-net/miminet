@@ -1,7 +1,10 @@
 import pytest
 from selenium.webdriver.common.by import By
 from selenium.webdriver import Chrome
-from conftest import DEVICE_BUTTON_XPATHS, DEVICE_BUTTON_CLASSES
+from front.tests.conftest.locators import (
+    DEVICE_BUTTON_XPATHS,
+    DEVICE_BUTTON_CLASSES,
+)
 from selenium.webdriver import ActionChains
 
 

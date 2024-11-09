@@ -1,9 +1,10 @@
-from random import randint, randrange
 import pytest
-from selenium.webdriver.common.by import By
 from selenium.webdriver import Chrome
-from selenium.webdriver import ActionChains
-from conftest import DEVICE_BUTTON_XPATHS, DEVICE_BUTTON_CLASSES, device_button
+from selenium.webdriver.common.by import By
+from front.tests.conftest.locators import (
+    DEVICE_BUTTON_CLASSES,
+    device_button,
+)
 
 
 def get_current_node(selenium, device_class):
@@ -37,38 +38,6 @@ def open_config(selenium, device_node):
 
 
 class TestDeviceConfigure:
-
-    @pytest.fixture(scope="class")
-    def network_with_elements_url(self, selenium: Chrome, empty_network_url: str):
-        panel_xpath = "/html/body/main/section/div/div/div[2]/div/div/canvas[2]"
-        network_url = empty_network_url
-
-        selenium.get(network_url)
-
-        target = selenium.find_element(By.XPATH, panel_xpath)
-
-        # calculate offset of coordinates inside panel
-
-        width, height = int(target.rect["width"]), int(target.rect["height"])
-        target_x, target_y = int(target.rect["x"]), int(target.rect["y"])
-
-        center_x, center_y = target_x + width / 2, target_y + height / 2
-        offset_x, offset_y = center_x - target_x, center_y - target_y
-
-        for button_xpath in DEVICE_BUTTON_XPATHS:
-            element = selenium.find_element(By.XPATH, button_xpath)
-
-            x, y = randint(0, width) - offset_x, randint(0, height) - offset_y
-
-            actions_chain = ActionChains(selenium)
-
-            actions_chain.click_and_hold(element)
-            actions_chain.move_to_element_with_offset(target, x, y)
-            actions_chain.release()
-            actions_chain.perform()
-
-        return network_url
-
     @pytest.mark.parametrize(
         "device_class",
         (DEVICE_BUTTON_CLASSES),
@@ -119,7 +88,7 @@ class TestDeviceConfigure:
         name_field_xpath = "/html/body/main/section/div/div/div[3]/form/div[1]/input"
         confirm_button_xpath = "/html/body/main/section/div/div/div[3]/form/button"
 
-        new_device_name = 'a' * 100
+        new_device_name = "a" * 100
         # enter name
         name_field = selenium.find_element(By.XPATH, name_field_xpath)
         name_field.clear()

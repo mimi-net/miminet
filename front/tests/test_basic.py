@@ -1,7 +1,7 @@
 import pytest
-from conftest import MAIN_PAGE, HOME_PAGE
 from requests import Session
 from selenium.webdriver import Chrome
+from front.tests.conftest.locators import MAIN_PAGE, HOME_PAGE
 
 
 class TestAvailability:
