@@ -1,9 +1,3 @@
-from environment_setup import environment_setting
-
-MAIN_PAGE = f"http://{environment_setting.domain}"
-HOME_PAGE = f"{MAIN_PAGE}/home"
-
-
 class device_button:
     """Data for identifying and locating various network devices."""
 

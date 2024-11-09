@@ -1,7 +1,6 @@
 import pytest
 import requests
 from requests import Session
-from locators import MAIN_PAGE
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -19,7 +18,11 @@ class environment_setting:
     auth_data = {"email": "selenium-email", "password": "password"}
 
 
-class Tester(Chrome):
+MAIN_PAGE = f"http://{environment_setting.domain}"
+HOME_PAGE = f"{MAIN_PAGE}/home"
+
+
+class MiminetTester(Chrome):
     """
     Extends the selenium.webdriver.Chrome class,
     adding new methods for convenient element interaction.
@@ -65,7 +68,7 @@ def chrome_driver():
 
     service = Service(environment_setting.chrome_driver_path)
 
-    tester = Tester(service=service, options=chrome_options)
+    tester = MiminetTester(service=service, options=chrome_options)
 
     yield tester
 
@@ -107,7 +110,7 @@ def requester():
 
 
 @pytest.fixture(scope="class")
-def selenium(chrome_driver: Tester, requester: Session):
+def selenium(chrome_driver: MiminetTester, requester: Session):
     chrome_driver.get(MAIN_PAGE)
     cookies = requester.cookies
 

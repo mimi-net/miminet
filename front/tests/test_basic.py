@@ -1,12 +1,18 @@
 import pytest
 from requests import Session
-from selenium.webdriver import Chrome
-from front.tests.conftest.locators import MAIN_PAGE, HOME_PAGE
+from conftest.environment_setup import (
+    MiminetTester,
+    MAIN_PAGE,
+    HOME_PAGE,
+    selenium,
+    requester,
+    chrome_driver,
+)
 
 
 class TestAvailability:
 
-    def test_auth(self, selenium: Chrome):
+    def test_auth(self, selenium: MiminetTester):
         """Checks if it possible to open home page (are we authorized or not)"""
         selenium.get(HOME_PAGE)
 

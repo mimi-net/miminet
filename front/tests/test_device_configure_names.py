@@ -1,13 +1,15 @@
 import pytest
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
-from front.tests.conftest.locators import (
+from conftest.environment_setup import MiminetTester, selenium, chrome_driver, requester
+from conftest.locators import (
     DEVICE_BUTTON_CLASSES,
     device_button,
 )
+from conftest.networks import MiminetTestNetwork
 
 
-def get_current_node(selenium, device_class):
+def get_current_node(selenium: MiminetTester, device_class: str):
     nodes = selenium.execute_script("return nodes")
     filtered_nodes = list(
         filter(lambda node: node["classes"][0] == device_class, nodes)
@@ -20,7 +22,7 @@ def get_current_node(selenium, device_class):
     return device_node
 
 
-def open_config(selenium, device_node):
+def open_config(selenium: MiminetTester, device_node: dict):
     device_class = device_node["classes"][0]
 
     if device_class == device_button.host_class:
@@ -38,15 +40,22 @@ def open_config(selenium, device_node):
 
 
 class TestDeviceConfigure:
+    @pytest.fixture(scope="class")
+    def network_with_elements(self, selenium: MiminetTester):
+        network = MiminetTestNetwork(selenium)
+        network.place_elements()
+
+        return network.url
+
     @pytest.mark.parametrize(
         "device_class",
         (DEVICE_BUTTON_CLASSES),
     )
     def test_device_name_change(
-        self, selenium: Chrome, network_with_elements_url: str, device_class: str
+        self, selenium: MiminetTester, network_with_elements: str, device_class: str
     ):
         """Just change the name of the device"""
-        selenium.get(network_with_elements_url)
+        selenium.get(network_with_elements)
 
         device_node = get_current_node(selenium, device_class)
 
@@ -74,10 +83,10 @@ class TestDeviceConfigure:
         (DEVICE_BUTTON_CLASSES),
     )
     def test_device_name_change_to_long(
-        self, selenium: Chrome, network_with_elements_url: str, device_class: str
+        self, selenium: Chrome, network_with_elements: str, device_class: str
     ):
         """Change device name to long string and checks if it has been cut"""
-        selenium.get(network_with_elements_url)
+        selenium.get(network_with_elements)
 
         device_node = get_current_node(selenium, device_class)
 
