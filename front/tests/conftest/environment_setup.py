@@ -38,6 +38,14 @@ class Tester(Chrome):
         ).click()
 
     def drag_and_drop(self, source: WebElement, target: WebElement, x: int, y: int):
+        """Performs a drag-and-drop action from a source element to a target element.
+
+        Args:
+            source (WebElement): The source element to be dragged.
+            target (WebElement): The target element to drop the source element onto.
+            x (int): The x-offset to move to.
+            y (int): The y-offset to move to.
+        """
         actions_chain = ActionChains(self)
 
         actions_chain.click_and_hold(source)
