@@ -6,39 +6,9 @@ from env.locators import (
     DEVICE_BUTTON_CLASSES,
     device_button,
     CONFIG_NAME_FIELD_XPATH,
-    CONFIG_CONFIRM_BUTTON_XPATH
+    CONFIG_CONFIRM_BUTTON_XPATH,
 )
 from env.networks import MiminetTestNetwork
-
-
-def get_current_node(selenium: MiminetTester, device_class: str):
-    nodes = selenium.execute_script("return nodes")
-    filtered_nodes = list(
-        filter(lambda node: node["classes"][0] == device_class, nodes)
-    )
-
-    assert len(filtered_nodes) == 1, f"Can't find device node for {device_class}!!!"
-
-    device_node = filtered_nodes[0]
-
-    return device_node
-
-
-def open_config(selenium: MiminetTester, device_node: dict):
-    device_class = device_node["classes"][0]
-
-    if device_class == device_button.host_class:
-        selenium.execute_script(f"ShowHostConfig({device_node})")
-    elif device_class == device_button.switch_class:
-        selenium.execute_script(f"ShowSwitchConfig({device_node})")
-    elif device_class == device_button.hub_class:
-        selenium.execute_script(f"ShowHubConfig({device_node})")
-    elif device_class == device_button.router_class:
-        selenium.execute_script(f"ShowRouterConfig({device_node})")
-    elif device_class == device_button.server_class:
-        selenium.execute_script(f"ShowServerConfig({device_node})")
-    else:
-        raise Exception("Can't find device type !!!")
 
 
 class TestDeviceConfigure:
@@ -47,7 +17,7 @@ class TestDeviceConfigure:
         network = MiminetTestNetwork(selenium)
         network.scatter_devices()
 
-        yield network.url
+        yield network
 
         network.delete()
 
@@ -56,14 +26,16 @@ class TestDeviceConfigure:
         (DEVICE_BUTTON_CLASSES),
     )
     def test_device_name_change(
-        self, selenium: MiminetTester, network_with_elements: str, device_class: str
+        self,
+        selenium: MiminetTester,
+        network_with_elements: MiminetTestNetwork,
+        device_class: str,
     ):
         """Just change the name of the device"""
-        selenium.get(network_with_elements)
+        selenium.get(network_with_elements.url)
 
-        device_node = get_current_node(selenium, device_class)
-
-        open_config(selenium, device_node)
+        device_node = network_with_elements.get_nodes_by_class(device_class)[0]
+        network_with_elements.open_config(device_node)
 
         new_device_name = "new name!"
         # enter name
@@ -73,7 +45,7 @@ class TestDeviceConfigure:
         # press confirm button
         selenium.find_element(By.XPATH, CONFIG_CONFIRM_BUTTON_XPATH).click()
 
-        device_node = get_current_node(selenium, device_class)
+        device_node = network_with_elements.get_nodes_by_class(device_class)[0]
 
         assert device_node["config"]["label"] == new_device_name
 
@@ -82,14 +54,17 @@ class TestDeviceConfigure:
         (DEVICE_BUTTON_CLASSES),
     )
     def test_device_name_change_to_long(
-        self, selenium: Chrome, network_with_elements: str, device_class: str
+        self,
+        selenium: Chrome,
+        network_with_elements: MiminetTestNetwork,
+        device_class: str,
     ):
         """Change device name to long string and checks if it has been cut"""
-        selenium.get(network_with_elements)
+        selenium.get(network_with_elements.url)
 
-        device_node = get_current_node(selenium, device_class)
+        device_node = network_with_elements.get_nodes_by_class(device_class)[0]
 
-        open_config(selenium, device_node)
+        network_with_elements.open_config(device_node)
 
         # open config form
 
@@ -101,6 +76,6 @@ class TestDeviceConfigure:
         # press confirm button
         selenium.find_element(By.XPATH, CONFIG_CONFIRM_BUTTON_XPATH).click()
 
-        device_node = get_current_node(selenium, device_class)
+        device_node = network_with_elements.get_nodes_by_class(device_class)[0]
 
         assert device_node["config"]["label"] != new_device_name

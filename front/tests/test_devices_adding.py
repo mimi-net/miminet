@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 from env.locators import (
     DEVICE_BUTTON_XPATHS,
     DEVICE_BUTTON_CLASSES,
-    NETWORK_PANEL_XPATH
+    NETWORK_PANEL_XPATH,
 )
 from conftest import MiminetTester
 from env.networks import MiminetTestNetwork

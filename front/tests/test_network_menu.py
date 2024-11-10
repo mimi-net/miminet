@@ -3,7 +3,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver import Chrome
 from conftest import MiminetTester, HOME_PAGE, MAIN_PAGE
 from env.networks import MiminetTestNetwork
-from env.locators import MY_NETWORK_BUTTON_XPATH, NETWORK_NAME_LABEL_XPATH, FIRST_NETWORK_BUTTON_XPATH
+from env.locators import (
+    MY_NETWORK_BUTTON_XPATH,
+    NETWORK_NAME_LABEL_XPATH,
+    FIRST_NETWORK_BUTTON_XPATH,
+)
 
 
 class TestNetworkMenu:
