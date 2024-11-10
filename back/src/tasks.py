@@ -37,7 +37,7 @@ def simulate(network: str):
     pcaps = []
     network = network_schema.load(jnet)
 
-    for i in range(4):
+    for _ in range(4):
         try:
             animation, pcaps = run_mininet(network)
         except ValueError:
