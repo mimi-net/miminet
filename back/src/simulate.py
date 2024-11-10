@@ -415,16 +415,13 @@ def run_mininet(
         print("An error occurred during mininet configuration:", str(e))
         subprocess.call("mn -c", shell=True)
 
-        return [], []
+        raise e
     finally:
         time.sleep(2)
         clean_bridges(net)
         teardown_vtep_bridges(net, network.nodes)
 
-        try:
-            net.stop()
-        except Exception as e:
-            print("Can't stop network: ", str(e))
+        net.stop()
 
     animation, pcap_list = create_animation(topo)
     animation_s = sorted(animation, key=lambda k: k.get("timestamp", 0))
