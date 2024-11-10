@@ -9,6 +9,10 @@ import random
 
 
 class MiminetTestNetwork:
+    """
+    Represents a Miminet network created for testing purposes.
+    You can easily configure your test networks using this class.
+    """
     def __init__(self, selenium: MiminetTester):
         self.__selenium = selenium
         self.__build_empty_network()
@@ -62,3 +66,23 @@ class MiminetTestNetwork:
 
         self.__selenium.wait_and_click(By.XPATH, network_top_button.delete_xpath)
         self.__selenium.wait_and_click(By.XPATH, confirm_button_xpath)
+
+
+class MiminetTestArea:
+    """
+    Represents a test area within a Mininet network.
+    Provide access to its nodes and edges and methods for device configuring.
+    """
+    def __init__(self, selenium: MiminetTester, network_url: str):
+        self.__selenium = selenium
+        
+        selenium.get(network_url)
+            
+
+    @property
+    def nodes(self) -> dict:
+        return self.__selenium.execute_script("return nodes")
+
+    @property
+    def edges(self) -> dict:
+        return self.__selenium.execute_script("return edges")
