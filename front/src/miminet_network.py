@@ -489,6 +489,7 @@ def copy_network():
         n = Network(author_id=user.id, guid=str(u))
         n.network = net.network
         n.title = net.title + str(" - копия")
+        n.preview_uri = net.preview_uri
         db.session.add(n)
         db.session.commit()
         ret = {"message": "Сделана копия.", "new_url": "/web_network?guid=" + str(u)}

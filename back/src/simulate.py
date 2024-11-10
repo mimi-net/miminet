@@ -421,7 +421,10 @@ def run_mininet(
         clean_bridges(net)
         teardown_vtep_bridges(net, network.nodes)
 
-        net.stop()
+        try:
+            net.stop()
+        except Exception as e:
+            print("Can't stop network: ", str(e))
 
     animation, pcap_list = create_animation(topo)
     animation_s = sorted(animation, key=lambda k: k.get("timestamp", 0))
