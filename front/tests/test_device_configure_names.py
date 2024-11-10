@@ -11,7 +11,7 @@ from env.locators import (
 from env.networks import MiminetTestNetwork
 
 
-class TestDeviceConfigure:
+class TestDeviceNameChange:
     @pytest.fixture(scope="class")
     def network_with_elements(self, selenium: MiminetTester):
         network = MiminetTestNetwork(selenium)
@@ -35,7 +35,7 @@ class TestDeviceConfigure:
         selenium.get(network_with_elements.url)
 
         device_node = network_with_elements.get_nodes_by_class(device_class)[0]
-        network_with_elements.open_config(device_node)
+        network_with_elements.open_node_config(device_node)
 
         new_device_name = "new name!"
         # enter name
@@ -64,7 +64,7 @@ class TestDeviceConfigure:
 
         device_node = network_with_elements.get_nodes_by_class(device_class)[0]
 
-        network_with_elements.open_config(device_node)
+        network_with_elements.open_node_config(device_node)
 
         # open config form
 

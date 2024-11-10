@@ -4,8 +4,11 @@ from env.locators import (
     network_top_button,
     NETWORK_PANEL_XPATH,
     device_button,
+    CONFIG_PANEL_XPATH,
 )
 from conftest import HOME_PAGE, MiminetTester
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import random
 
 
@@ -67,13 +70,13 @@ class MiminetTestNetwork:
     def edges(self) -> dict:
         return self.__selenium.execute_script("return edges")
 
-    def open_config(self, device_node: dict):
+    def open_node_config(self, device_node: dict):
         """Open configuration menu.
 
         Args:
             device_node (dict): Node for which the menu opens
         """
-        device_class = device_node['classes'][0]
+        device_class = device_node["classes"][0]
 
         if device_class == device_button.host_class:
             self.__selenium.execute_script(f"ShowHostConfig({device_node})")
@@ -88,9 +91,33 @@ class MiminetTestNetwork:
         else:
             raise Exception("Can't find device type !!!")
 
+        WebDriverWait(self.__selenium, 5).until(
+            EC.visibility_of_element_located((By.XPATH, CONFIG_PANEL_XPATH))
+        )
+
+    def open_edge_config(self, edge: dict):
+        """Open configuration menu.
+
+        Args:
+            edge (dict): Edge for which the menu opens
+        """
+        edge_id = edge["data"]["id"]
+        self.__selenium.execute_script(f"ShowEdgeConfig('{edge_id}')")
+        WebDriverWait(self.__selenium, 5).until(
+            EC.visibility_of_element_located((By.XPATH, CONFIG_PANEL_XPATH))
+        )
+
+    def add_edge(self, source_node: dict, target_node: dict):
+        source_id = str(source_node["data"]["id"])
+        target_id = str(target_node["data"]["id"])
+
+        self.__selenium.execute_script(f"AddEdge('{source_id}', '{target_id}')")
+        self.__selenium.execute_script(f"DrawGraph()")
+        self.__selenium.execute_script(f"PostNodesEdges()")
+
     def get_nodes_by_class(self, device_class: str) -> list[dict]:
         filtered_nodes = list(
-            filter(lambda node: node['classes'][0] == device_class, self.nodes)
+            filter(lambda node: node["classes"][0] == device_class, self.nodes)
         )
 
         assert len(filtered_nodes) != 0, f"Can't find device node for {device_class}!!!"
