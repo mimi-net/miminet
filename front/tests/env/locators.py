@@ -27,6 +27,12 @@ class network_top_button:
 
 # Panel where you can place network devices and connect them
 NETWORK_PANEL_XPATH = "/html/body/main/section/div/div/div[2]/div/div/canvas[2]"
+CONFIG_NAME_FIELD_XPATH = "/html/body/main/section/div/div/div[3]/form/div[1]/input"
+CONFIG_CONFIRM_BUTTON_XPATH = "/html/body/main/section/div/div/div[3]/form/button"
+MY_NETWORK_BUTTON_XPATH = "/html/body/nav/div/div/li[3]/a"
+NETWORK_NAME_LABEL_XPATH = "/html/body/nav/div/div[1]/a[3]"
+FIRST_NETWORK_BUTTON_XPATH = "/html/body/section/div/div/div[2]"
+
 
 DEVICE_BUTTON_XPATHS = [
     device_button.switch_xpath,

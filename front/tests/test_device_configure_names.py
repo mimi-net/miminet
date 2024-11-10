@@ -1,10 +1,12 @@
 import pytest
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
-from conftest import MiminetTester, selenium, chrome_driver, requester
+from conftest import MiminetTester
 from env.locators import (
     DEVICE_BUTTON_CLASSES,
     device_button,
+    CONFIG_NAME_FIELD_XPATH,
+    CONFIG_CONFIRM_BUTTON_XPATH
 )
 from env.networks import MiminetTestNetwork
 
@@ -63,18 +65,13 @@ class TestDeviceConfigure:
 
         open_config(selenium, device_node)
 
-        # open config form
-
-        name_field_xpath = "/html/body/main/section/div/div/div[3]/form/div[1]/input"
-        confirm_button_xpath = "/html/body/main/section/div/div/div[3]/form/button"
-
         new_device_name = "new name!"
         # enter name
-        name_field = selenium.find_element(By.XPATH, name_field_xpath)
+        name_field = selenium.find_element(By.XPATH, CONFIG_NAME_FIELD_XPATH)
         name_field.clear()
         name_field.send_keys(new_device_name)
         # press confirm button
-        selenium.find_element(By.XPATH, confirm_button_xpath).click()
+        selenium.find_element(By.XPATH, CONFIG_CONFIRM_BUTTON_XPATH).click()
 
         device_node = get_current_node(selenium, device_class)
 
@@ -96,16 +93,13 @@ class TestDeviceConfigure:
 
         # open config form
 
-        name_field_xpath = "/html/body/main/section/div/div/div[3]/form/div[1]/input"
-        confirm_button_xpath = "/html/body/main/section/div/div/div[3]/form/button"
-
         new_device_name = "a" * 100
         # enter name
-        name_field = selenium.find_element(By.XPATH, name_field_xpath)
+        name_field = selenium.find_element(By.XPATH, CONFIG_NAME_FIELD_XPATH)
         name_field.clear()
         name_field.send_keys(new_device_name)
         # press confirm button
-        selenium.find_element(By.XPATH, confirm_button_xpath).click()
+        selenium.find_element(By.XPATH, CONFIG_CONFIRM_BUTTON_XPATH).click()
 
         device_node = get_current_node(selenium, device_class)
 

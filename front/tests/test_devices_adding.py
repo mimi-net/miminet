@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from env.locators import (
     DEVICE_BUTTON_XPATHS,
     DEVICE_BUTTON_CLASSES,
+    NETWORK_PANEL_XPATH
 )
 from conftest import MiminetTester
 from env.networks import MiminetTestNetwork
@@ -33,12 +34,10 @@ class TestDeviceButtons:
         element_name: str,
         current_node: int,
     ):
-        target_xpath = "/html/body/main/section/div/div/div[2]/div/div/canvas[2]"
-
         selenium.get(empty_network)
 
         network_device_button = selenium.find_element(By.XPATH, element_xpath)
-        target_panel = selenium.find_element(By.XPATH, target_xpath)
+        target_panel = selenium.find_element(By.XPATH, NETWORK_PANEL_XPATH)
 
         selenium.drag_and_drop(network_device_button, target_panel, 100, 100)
 
