@@ -26,6 +26,28 @@ class MiminetTestNetwork:
     def url(self):
         return self.__url
 
+    def __calc_panel_offset(self, panel, x: float, y: float):
+        """Calculates coordinates with offset within the Network Panel.
+
+        Args:
+        x (float): X-coordinate percentage within the panel (0-100).
+        y (float): Y-coordinate percentage within the panel (0-100).
+
+        Returns:
+        tuple: A tuple containing the calculated X and Y pixel offsets relative to the panel center.
+        """
+        assert 0 <= x <= 100, "x must be in [0, 100] range"
+        assert 0 <= y <= 100, "y must be in [0, 100] range"
+
+        # calculate offset of coordinates inside panel
+        width, height = int(panel.rect["width"]), int(panel.rect["height"])
+        target_x, target_y = int(panel.rect["x"]), int(panel.rect["y"])
+
+        center_x, center_y = target_x + width / 2, target_y + height / 2
+        offset_x, offset_y = center_x - target_x, center_y - target_y
+
+        return ((x / 100) * width) - offset_x, ((y / 100) * width) - offset_x
+
     def __build_empty_network(self):
         """Create new network and clear it after use.
 
@@ -41,23 +63,14 @@ class MiminetTestNetwork:
 
     def scatter_devices(self):
         """Randomly add each network device to network."""
-        self.__selenium.get(self.__url)
         panel = self.__selenium.find_element(By.XPATH, NETWORK_PANEL_XPATH)
 
         # calculate offset of coordinates inside panel
-
-        width, height = int(panel.rect["width"]), int(panel.rect["height"])
-        target_x, target_y = int(panel.rect["x"]), int(panel.rect["y"])
-
-        center_x, center_y = target_x + width / 2, target_y + height / 2
-        offset_x, offset_y = center_x - target_x, center_y - target_y
-
         for button_xpath in DEVICE_BUTTON_XPATHS:
             device = self.__selenium.find_element(By.XPATH, button_xpath)
 
-            x, y = (
-                random.randint(0, width) - offset_x,
-                random.randint(0, height) - offset_y,
+            x, y = self.__calc_panel_offset(
+                panel, random.randint(0, 100), random.randint(0, 100)
             )
 
             self.__selenium.drag_and_drop(device, panel, x, y)
@@ -106,6 +119,20 @@ class MiminetTestNetwork:
         WebDriverWait(self.__selenium, 5).until(
             EC.visibility_of_element_located((By.XPATH, CONFIG_PANEL_XPATH))
         )
+
+    def add_node(self, device_button):
+        """Add new device node
+
+        Args:
+            device_button (WebElement): Device button that can be moved
+        """
+        panel = self.__selenium.find_element(By.XPATH, NETWORK_PANEL_XPATH)
+
+        x, y = self.__calc_panel_offset(
+            panel, random.randint(0, 100), random.randint(0, 100)
+        )
+
+        self.__selenium.drag_and_drop(device_button, panel, x, y)
 
     def add_edge(self, source_node: dict, target_node: dict):
         source_id = str(source_node["data"]["id"])

@@ -57,6 +57,17 @@ class MiminetTester(Chrome):
         actions_chain.release()
         actions_chain.perform()
 
+    def wait_until_disappear(self, by: By, element: str, timeout=20):
+        web_element = self.find_element(by, element)
+
+        WebDriverWait(self, timeout).until(EC.invisibility_of_element(web_element))
+
+    def wait_until_text(self, by: By, element: str, text: str, timeout=20):
+        """Wait until text appears in element"""
+        WebDriverWait(self, timeout).until(
+            EC.text_to_be_present_in_element((by, element), text)
+        )
+
 
 @pytest.fixture(scope="class")
 def chrome_driver():

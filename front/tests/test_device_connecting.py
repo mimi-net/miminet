@@ -1,11 +1,5 @@
 import pytest
 from conftest import MiminetTester
-from env.locators import (
-    DEVICE_BUTTON_CLASSES,
-    device_button,
-    CONFIG_NAME_FIELD_XPATH,
-    CONFIG_CONFIRM_BUTTON_XPATH,
-)
 from env.networks import MiminetTestNetwork
 import random
 
@@ -43,6 +37,5 @@ class TestDeviceConnecting:
         to_label = selenium.execute_script("return $('#edge_target').val()")
 
         assert (
-            edge["data"]["source"] == from_label
-            and edge["data"]["target"] == to_label
+            edge["data"]["source"] == from_label and edge["data"]["target"] == to_label
         ), f"Can't find path from {from_label} to {to_label} in edges"

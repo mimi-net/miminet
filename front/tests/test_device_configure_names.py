@@ -3,6 +3,8 @@ from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
 from conftest import MiminetTester
 from env.locators import (
+    CONFIG_CONFIRM_BUTTON_TEXT,
+    CONFIG_PANEL_XPATH,
     DEVICE_BUTTON_CLASSES,
     device_button,
     CONFIG_NAME_FIELD_XPATH,
@@ -45,6 +47,10 @@ class TestDeviceNameChange:
         # press confirm button
         selenium.find_element(By.XPATH, CONFIG_CONFIRM_BUTTON_XPATH).click()
 
+        selenium.wait_until_text(
+            By.XPATH, CONFIG_CONFIRM_BUTTON_XPATH, CONFIG_CONFIRM_BUTTON_TEXT
+        )
+
         device_node = network_with_elements.get_nodes_by_class(device_class)[0]
 
         assert device_node["config"]["label"] == new_device_name
@@ -55,7 +61,7 @@ class TestDeviceNameChange:
     )
     def test_device_name_change_to_long(
         self,
-        selenium: Chrome,
+        selenium: MiminetTester,
         network_with_elements: MiminetTestNetwork,
         device_class: str,
     ):
@@ -75,6 +81,10 @@ class TestDeviceNameChange:
         name_field.send_keys(new_device_name)
         # press confirm button
         selenium.find_element(By.XPATH, CONFIG_CONFIRM_BUTTON_XPATH).click()
+
+        selenium.wait_until_text(
+            By.XPATH, CONFIG_CONFIRM_BUTTON_XPATH, CONFIG_CONFIRM_BUTTON_TEXT
+        )
 
         device_node = network_with_elements.get_nodes_by_class(device_class)[0]
 
