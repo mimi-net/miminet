@@ -18,9 +18,15 @@ class MiminetTestNetwork:
     You can easily configure your test networks using this class.
     """
 
-    def __init__(self, selenium: MiminetTester):
+    def __init__(self, selenium: MiminetTester, url: str = ""):
         self.__selenium = selenium
-        self.__build_empty_network()
+
+        if not url:
+            self.__build_empty_network()
+        else:
+            selenium.get(url)
+            self.__selenium = selenium
+            self.__url = url
 
     @property
     def url(self):

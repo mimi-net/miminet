@@ -46,6 +46,12 @@ JOB_FIELD_1_XPATH = "/html/body/main/section/div/div/div[3]/form/div[3]/input"
 
 # "Мои сети" button
 MY_NETWORK_BUTTON_XPATH = "/html/body/nav/div/div/li[3]/a"
+# Modal dialog
+MODAL_DIALOG_XPATH = "/html/body/div[5]/div"
+# Copy button (inside network page)
+NETWORK_COPY_BUTTON_XPATH = "/html/body/nav/div/div[2]/a[2]/i"
+# "Перейти к редактированию" button (inside copy menu)
+GO_TO_EDITING_BUTTON_XPATH = "/html/body/div[5]/div/div/div[2]/button[1]"
 # Label with network name (inside network page)
 NETWORK_NAME_LABEL_XPATH = "/html/body/nav/div/div[1]/a[3]"
 # First button in networks menu

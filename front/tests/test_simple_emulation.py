@@ -11,12 +11,15 @@ from env.locators import (
     CONFIG_CONFIRM_BUTTON_TEXT,
     EMULATE_BUTTON_XPATH,
     EMULATE_PLAYER_PAUSE_SELECTOR,
+    NETWORK_COPY_BUTTON_XPATH,
+    MODAL_DIALOG_XPATH,
+    GO_TO_EDITING_BUTTON_XPATH,
 )
 from env.locators import device_button
 from selenium.webdriver.common.keys import Keys
 
 
-class TestPingEmulation:
+class TestSimpleEmulation:
     @pytest.fixture(scope="class")
     def network(self, selenium: MiminetTester):
         network = MiminetTestNetwork(selenium)
@@ -59,10 +62,31 @@ class TestPingEmulation:
         selenium.find_element(By.XPATH, JOB_FIELD_1_XPATH).send_keys(Keys.RETURN)
         selenium.wait_until_appear(By.XPATH, ADDED_JOB_XPATH, timeout=60)
 
-    def test_1(self, selenium: MiminetTester, network: MiminetTestNetwork):
+    def test_ping_emulation(self, selenium: MiminetTester, network: MiminetTestNetwork):
+        selenium.get(network.url)
+
         selenium.find_element(By.XPATH, EMULATE_BUTTON_XPATH).click()
         selenium.wait_until_appear(By.CSS_SELECTOR, EMULATE_PLAYER_PAUSE_SELECTOR, 30)
 
         packets = selenium.execute_script("return packets")
 
-        assert len(packets) == 4
+        assert len(packets) == 4  # TODO change to something better???
+
+    def test_ping_network_copy(
+        self, selenium: MiminetTester, network: MiminetTestNetwork
+    ):
+        selenium.get(network.url)
+
+        nodes = network.nodes
+        edges = network.edges
+
+        selenium.find_element(By.XPATH, NETWORK_COPY_BUTTON_XPATH).click()
+        selenium.wait_until_appear(By.XPATH, MODAL_DIALOG_XPATH, timeout=5)
+
+        selenium.find_element(By.XPATH, GO_TO_EDITING_BUTTON_XPATH).click()
+
+        copy_network = MiminetTestNetwork(selenium, selenium.current_url)
+
+        assert selenium.current_url != network.url, "Redirecting wasn't completed"
+        assert copy_network.nodes == nodes, "Nodes don't match"
+        assert copy_network.edges == edges, "Edges don't match"
