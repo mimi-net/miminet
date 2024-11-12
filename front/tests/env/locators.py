@@ -30,11 +30,22 @@ NETWORK_PANEL_XPATH = "/html/body/main/section/div/div/div[2]/div/div/canvas[2]"
 CONFIG_PANEL_XPATH = "/html/body/main/section/div/div/div[3]"
 CONFIG_NAME_FIELD_XPATH = "/html/body/main/section/div/div/div[3]/form/div[1]/input"
 CONFIG_CONFIRM_BUTTON_XPATH = "/html/body/main/section/div/div/div[3]/form/button"
+CONFIG_IP_ADDRESS_FIELD_XPATH = (
+    "/html/body/main/section/div/div/div[3]/form/div[4]/input[1]"
+)
+CONFIG_MASK_FIELD_XPATH = "/html/body/main/section/div/div/div[3]/form/div[4]/input[2]"
+CONFIG_JOB_SELECT_XPATH = "/html/body/main/section/div/div/div[3]/form/div[2]/select"
+CONFIG_FIRST_JOB_FIELD_XPATH = (
+    "/html/body/main/section/div/div/div[3]/form/div[3]/input"
+)
 MY_NETWORK_BUTTON_XPATH = "/html/body/nav/div/div/li[3]/a"
 NETWORK_NAME_LABEL_XPATH = "/html/body/nav/div/div[1]/a[3]"
 FIRST_NETWORK_BUTTON_XPATH = "/html/body/section/div/div/div[2]"
+EMULATE_BUTTON_XPATH = "/html/body/main/section/div/div/div[1]/div/div[6]/div[1]/button"
+EMULATE_PLAYER_PAUSE_SELECTOR = "#NetworkPlayPauseButton"
 
 CONFIG_CONFIRM_BUTTON_TEXT = "Сохранить"
+EMULATE_BUTTON_TEXT = "Эмулировать"
 
 DEVICE_BUTTON_XPATHS = [
     device_button.switch_xpath,

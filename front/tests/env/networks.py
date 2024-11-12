@@ -116,9 +116,8 @@ class MiminetTestNetwork:
         """
         edge_id = edge["data"]["id"]
         self.__selenium.execute_script(f"ShowEdgeConfig('{edge_id}')")
-        WebDriverWait(self.__selenium, 5).until(
-            EC.visibility_of_element_located((By.XPATH, CONFIG_PANEL_XPATH))
-        )
+
+        self.__selenium.wait_until_appear(By.XPATH, CONFIG_PANEL_XPATH)
 
     def add_node(self, device_button):
         """Add new device node
@@ -126,6 +125,8 @@ class MiminetTestNetwork:
         Args:
             device_button (WebElement): Device button that can be moved
         """
+        old_nodes_len = len(self.nodes)
+
         panel = self.__selenium.find_element(By.XPATH, NETWORK_PANEL_XPATH)
 
         x, y = self.__calc_panel_offset(
@@ -133,14 +134,19 @@ class MiminetTestNetwork:
         )
 
         self.__selenium.drag_and_drop(device_button, panel, x, y)
+        self.__selenium.wait_for(lambda _: old_nodes_len < len(self.nodes), 1000)
 
     def add_edge(self, source_node: dict, target_node: dict):
+        old_edges_len = len(self.edges)
+
         source_id = str(source_node["data"]["id"])
         target_id = str(target_node["data"]["id"])
 
         self.__selenium.execute_script(f"AddEdge('{source_id}', '{target_id}')")
         self.__selenium.execute_script(f"DrawGraph()")
         self.__selenium.execute_script(f"PostNodesEdges()")
+
+        self.__selenium.wait_for(lambda _: old_edges_len < len(self.edges))
 
     def get_nodes_by_class(self, device_class: str) -> list[dict]:
         filtered_nodes = list(

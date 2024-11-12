@@ -3,6 +3,8 @@ import requests
 from requests import Session
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
@@ -57,6 +59,9 @@ class MiminetTester(Chrome):
         actions_chain.release()
         actions_chain.perform()
 
+    def wait_until_appear(self, by: By, element: str, timeout=20):
+        WebDriverWait(self, timeout).until(EC.visibility_of_element_located((by, element)))
+
     def wait_until_disappear(self, by: By, element: str, timeout=20):
         web_element = self.find_element(by, element)
 
@@ -67,6 +72,13 @@ class MiminetTester(Chrome):
         WebDriverWait(self, timeout).until(
             EC.text_to_be_present_in_element((by, element), text)
         )
+
+    def wait_for(self, condition, timeout=20):
+        WebDriverWait(self, timeout=timeout).until(condition)
+
+    def select_by_value(self, by: By, element: str, value: int):
+        select = Select(self.find_element(by, element))
+        select.select_by_value(str(value))
 
 
 @pytest.fixture(scope="class")
