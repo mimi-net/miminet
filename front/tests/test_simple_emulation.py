@@ -6,7 +6,7 @@ from env.locators import (
     CONFIG_IP_ADDRESS_FIELD_XPATH,
     CONFIG_MASK_FIELD_XPATH,
     CONFIG_JOB_SELECT_XPATH,
-    CONFIG_FIRST_JOB_FIELD_XPATH,
+    JOB_FIELD_1_XPATH,
     CONFIG_CONFIRM_BUTTON_XPATH,
     CONFIG_CONFIRM_BUTTON_TEXT,
     EMULATE_BUTTON_XPATH,
@@ -26,51 +26,38 @@ class TestPingEmulation:
         network.add_node(host_button)
         network.add_node(host_button)
 
-        nodes = network.nodes
-
         # edge between hosts
-        network.add_edge(nodes[0], nodes[1])
-
-        nodes = network.nodes
-        network.open_node_config(nodes[0])
-
-        ADDED_JOB_XPATH = "/html/body/main/section/div/div/div[3]/form/ul/li/small"
+        network.add_edge(network.nodes[0], network.nodes[1])
 
         # configure host 1
-        selenium.select_by_value(By.XPATH, CONFIG_JOB_SELECT_XPATH, 1)
-        selenium.find_element(By.XPATH, CONFIG_FIRST_JOB_FIELD_XPATH).send_keys(
-            "192.168.1.2"
-        )
-        selenium.find_element(By.XPATH, CONFIG_FIRST_JOB_FIELD_XPATH).send_keys(Keys.RETURN)
-        selenium.wait_until_appear(By.XPATH, ADDED_JOB_XPATH, timeout=60)
-
-        selenium.find_element(By.XPATH, CONFIG_IP_ADDRESS_FIELD_XPATH).send_keys(
-            "192.168.1.1"
-        )
-        selenium.find_element(By.XPATH, CONFIG_MASK_FIELD_XPATH).send_keys("24")
-
-        selenium.find_element(By.XPATH, CONFIG_CONFIRM_BUTTON_XPATH).click()
-        selenium.wait_until_text(
-            By.XPATH, CONFIG_CONFIRM_BUTTON_XPATH, CONFIG_CONFIRM_BUTTON_TEXT
-        )
-
-        nodes = network.nodes
-        network.open_node_config(nodes[1])
+        network.open_node_config(network.nodes[0])
+        self.configure_address(selenium, "192.168.1.1", "24")
+        self.add_ping_job(selenium, "192.168.1.2")
 
         # configure host 2
-        selenium.find_element(By.XPATH, CONFIG_IP_ADDRESS_FIELD_XPATH).send_keys(
-            "192.168.1.2"
-        )
-        selenium.find_element(By.XPATH, CONFIG_MASK_FIELD_XPATH).send_keys("24")
-
-        selenium.find_element(By.XPATH, CONFIG_CONFIRM_BUTTON_XPATH).click()
-        selenium.wait_until_text(
-            By.XPATH, CONFIG_CONFIRM_BUTTON_XPATH, CONFIG_CONFIRM_BUTTON_TEXT
-        )
+        network.open_node_config(network.nodes[1])
+        self.configure_address(selenium, "192.168.1.2", "24")
 
         yield network
 
         network.delete()
+
+    def configure_address(self, selenium: MiminetTester, ip: str, mask: str):
+        selenium.find_element(By.XPATH, CONFIG_IP_ADDRESS_FIELD_XPATH).send_keys(ip)
+        selenium.find_element(By.XPATH, CONFIG_MASK_FIELD_XPATH).send_keys(mask)
+
+        selenium.find_element(By.XPATH, CONFIG_CONFIRM_BUTTON_XPATH).click()
+        selenium.wait_until_text(
+            By.XPATH, CONFIG_CONFIRM_BUTTON_XPATH, CONFIG_CONFIRM_BUTTON_TEXT
+        )
+
+    def add_ping_job(self, selenium: MiminetTester, ip: str):
+        ADDED_JOB_XPATH = "/html/body/main/section/div/div/div[3]/form/ul/li/small"
+
+        selenium.select_by_value(By.XPATH, CONFIG_JOB_SELECT_XPATH, 1)
+        selenium.find_element(By.XPATH, JOB_FIELD_1_XPATH).send_keys(ip)
+        selenium.find_element(By.XPATH, JOB_FIELD_1_XPATH).send_keys(Keys.RETURN)
+        selenium.wait_until_appear(By.XPATH, ADDED_JOB_XPATH, timeout=60)
 
     def test_1(self, selenium: MiminetTester, network: MiminetTestNetwork):
         selenium.find_element(By.XPATH, EMULATE_BUTTON_XPATH).click()

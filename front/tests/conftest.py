@@ -60,7 +60,9 @@ class MiminetTester(Chrome):
         actions_chain.perform()
 
     def wait_until_appear(self, by: By, element: str, timeout=20):
-        WebDriverWait(self, timeout).until(EC.visibility_of_element_located((by, element)))
+        WebDriverWait(self, timeout).until(
+            EC.visibility_of_element_located((by, element))
+        )
 
     def wait_until_disappear(self, by: By, element: str, timeout=20):
         web_element = self.find_element(by, element)

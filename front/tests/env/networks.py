@@ -77,10 +77,12 @@ class MiminetTestNetwork:
 
     @property
     def nodes(self) -> dict:
+        """Current network nodes (may change during network usage)"""
         return self.__selenium.execute_script("return nodes")
 
     @property
     def edges(self) -> dict:
+        """Current network edges (may change during network usage)"""
         return self.__selenium.execute_script("return edges")
 
     def open_node_config(self, device_node: dict):

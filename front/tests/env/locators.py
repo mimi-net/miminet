@@ -27,21 +27,32 @@ class network_top_button:
 
 # Panel where you can place network devices and connect them
 NETWORK_PANEL_XPATH = "/html/body/main/section/div/div/div[2]/div/div/canvas[2]"
+# Network device configuration panel
 CONFIG_PANEL_XPATH = "/html/body/main/section/div/div/div[3]"
+# Network device name field
 CONFIG_NAME_FIELD_XPATH = "/html/body/main/section/div/div/div[3]/form/div[1]/input"
+# "Сохранить" button
 CONFIG_CONFIRM_BUTTON_XPATH = "/html/body/main/section/div/div/div[3]/form/button"
+# Network device IP address
 CONFIG_IP_ADDRESS_FIELD_XPATH = (
     "/html/body/main/section/div/div/div[3]/form/div[4]/input[1]"
 )
+# Network device mask
 CONFIG_MASK_FIELD_XPATH = "/html/body/main/section/div/div/div[3]/form/div[4]/input[2]"
+# Select field with jobs
 CONFIG_JOB_SELECT_XPATH = "/html/body/main/section/div/div/div[3]/form/div[2]/select"
-CONFIG_FIRST_JOB_FIELD_XPATH = (
-    "/html/body/main/section/div/div/div[3]/form/div[3]/input"
-)
+# Job first field (e.g. ip-address for IP job)
+JOB_FIELD_1_XPATH = "/html/body/main/section/div/div/div[3]/form/div[3]/input"
+
+# "Мои сети" button
 MY_NETWORK_BUTTON_XPATH = "/html/body/nav/div/div/li[3]/a"
+# Label with network name (inside network page)
 NETWORK_NAME_LABEL_XPATH = "/html/body/nav/div/div[1]/a[3]"
+# First button in networks menu
 FIRST_NETWORK_BUTTON_XPATH = "/html/body/section/div/div/div[2]"
+# "Эмулировать" button
 EMULATE_BUTTON_XPATH = "/html/body/main/section/div/div/div[1]/div/div[6]/div[1]/button"
+# Pause button in player
 EMULATE_PLAYER_PAUSE_SELECTOR = "#NetworkPlayPauseButton"
 
 CONFIG_CONFIRM_BUTTON_TEXT = "Сохранить"
