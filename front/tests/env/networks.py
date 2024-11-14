@@ -5,7 +5,7 @@ from env.locators import (
     NETWORK_PANEL_XPATH,
     device_button,
     CONFIG_PANEL_XPATH,
-    NEW_NETWORK_BUTTON_XPATH
+    NEW_NETWORK_BUTTON_XPATH,
 )
 from conftest import HOME_PAGE, MiminetTester
 from selenium.webdriver.support.ui import WebDriverWait
@@ -28,6 +28,9 @@ class MiminetTestNetwork:
             selenium.get(url)
             self.__selenium = selenium
             self.__url = url
+
+    def __check_page(self):
+        assert self.__selenium.current_url == self.__url, "It is impossible to interact with the page without being on it"
 
     @property
     def url(self):
@@ -53,7 +56,7 @@ class MiminetTestNetwork:
         center_x, center_y = target_x + width / 2, target_y + height / 2
         offset_x, offset_y = center_x - target_x, center_y - target_y
 
-        return ((x / 100) * width) - offset_x, ((y / 100) * width) - offset_y
+        return ((x / 100) * width) - offset_x, ((y / 100) * height) - offset_y
 
     def __build_empty_network(self):
         """Create new network and clear it after use.
@@ -68,26 +71,22 @@ class MiminetTestNetwork:
 
     def scatter_devices(self):
         """Randomly add each network device to network."""
-        panel = self.__selenium.find_element(By.XPATH, NETWORK_PANEL_XPATH)
+        self.__check_page()
 
-        # calculate offset of coordinates inside panel
         for button_xpath in DEVICE_BUTTON_XPATHS:
             device = self.__selenium.find_element(By.XPATH, button_xpath)
-
-            x, y = self.__calc_panel_offset(
-                panel, random.randint(0, 100), random.randint(0, 100)
-            )
-
-            self.__selenium.drag_and_drop(device, panel, x, y)
+            self.add_node(device)
 
     @property
     def nodes(self) -> dict:
         """Current network nodes (may change during network usage)"""
+        self.__check_page()
         return self.__selenium.execute_script("return nodes")
 
     @property
     def edges(self) -> dict:
         """Current network edges (may change during network usage)"""
+        self.__check_page()
         return self.__selenium.execute_script("return edges")
 
     def open_node_config(self, device_node: dict):
@@ -96,6 +95,7 @@ class MiminetTestNetwork:
         Args:
             device_node (dict): Node for which the menu opens
         """
+        self.__check_page()
         device_class = device_node["classes"][0]
 
         if device_class == device_button.host_class:
@@ -121,6 +121,7 @@ class MiminetTestNetwork:
         Args:
             edge (dict): Edge for which the menu opens
         """
+        self.__check_page()
         edge_id = edge["data"]["id"]
         self.__selenium.execute_script(f"ShowEdgeConfig('{edge_id}')")
 
@@ -132,6 +133,7 @@ class MiminetTestNetwork:
         Args:
             device_button (WebElement): Device button that can be moved
         """
+        self.__check_page()
         old_nodes_len = len(self.nodes)
 
         panel = self.__selenium.find_element(By.XPATH, NETWORK_PANEL_XPATH)
@@ -141,9 +143,10 @@ class MiminetTestNetwork:
         )
 
         self.__selenium.drag_and_drop(device_button, panel, x, y)
-        self.__selenium.wait_for(lambda _: old_nodes_len < len(self.nodes), 1000)
+        self.__selenium.wait_for(old_nodes_len < len(self.nodes), 10)
 
     def add_edge(self, source_node: dict, target_node: dict):
+        self.__check_page()
         old_edges_len = len(self.edges)
 
         source_id = str(source_node["data"]["id"])
@@ -153,9 +156,10 @@ class MiminetTestNetwork:
         self.__selenium.execute_script(f"DrawGraph()")
         self.__selenium.execute_script(f"PostNodesEdges()")
 
-        self.__selenium.wait_for(lambda _: old_edges_len < len(self.edges))
+        self.__selenium.wait_for(old_edges_len < len(self.edges))
 
     def get_nodes_by_class(self, device_class: str) -> list[dict]:
+        self.__check_page()
         filtered_nodes = list(
             filter(lambda node: node["classes"][0] == device_class, self.nodes)
         )
@@ -165,10 +169,12 @@ class MiminetTestNetwork:
         return filtered_nodes
 
     def delete(self):
+        self.__check_page()
+
         confirm_button_xpath = "/html/body/div[2]/div/div/div[2]/button[1]"
 
         self.__selenium.get(self.__url)
-
+        
         self.__selenium.find_element(By.XPATH, network_top_button.options_xpath).click()
 
         self.__selenium.wait_and_click(By.XPATH, network_top_button.delete_xpath)

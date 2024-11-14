@@ -66,8 +66,6 @@ class TestDeviceNameChange:
         device_class: str,
     ):
         """Change device name to long string and checks if it has been cut"""
-        selenium.get(network_with_elements.url)
-
         device_node = network_with_elements.get_nodes_by_class(device_class)[0]
 
         network_with_elements.open_node_config(device_node)

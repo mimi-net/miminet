@@ -76,14 +76,14 @@ class MiminetTester(Chrome):
         )
 
     def wait_for(self, condition, timeout=20):
-        WebDriverWait(self, timeout=timeout).until(condition)
+        WebDriverWait(self, timeout=timeout).until(lambda _: condition)
 
     def select_by_value(self, by: By, element: str, value: int):
         select = Select(self.find_element(by, element))
         select.select_by_value(str(value))
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="session")
 def chrome_driver():
     """Headless WebBrowser instance for testing (authorization here is not passed)."""
     chrome_options = Options()
@@ -101,7 +101,7 @@ def chrome_driver():
     tester.quit()
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="session")
 def requester():
     """Request session, used to send requests (GET, POST, etc...) and process their results.
 
@@ -134,7 +134,7 @@ def requester():
     session.close()
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="session")
 def selenium(chrome_driver: MiminetTester, requester: Session):
     chrome_driver.get(MAIN_PAGE)
     cookies = requester.cookies
