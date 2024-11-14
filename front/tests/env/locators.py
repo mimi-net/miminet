@@ -25,6 +25,8 @@ class network_top_button:
     copy_xpath = "/html/body/nav/div/div[2]/a[2]"
 
 
+# Button "Новая сеть"
+NEW_NETWORK_BUTTON_XPATH = "/html/body/section/div/div/div[1]"
 # Panel where you can place network devices and connect them
 NETWORK_PANEL_XPATH = "/html/body/main/section/div/div/div[2]/div/div/canvas[2]"
 # Network device configuration panel

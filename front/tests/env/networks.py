@@ -5,6 +5,7 @@ from env.locators import (
     NETWORK_PANEL_XPATH,
     device_button,
     CONFIG_PANEL_XPATH,
+    NEW_NETWORK_BUTTON_XPATH
 )
 from conftest import HOME_PAGE, MiminetTester
 from selenium.webdriver.support.ui import WebDriverWait
@@ -52,7 +53,7 @@ class MiminetTestNetwork:
         center_x, center_y = target_x + width / 2, target_y + height / 2
         offset_x, offset_y = center_x - target_x, center_y - target_y
 
-        return ((x / 100) * width) - offset_x, ((y / 100) * width) - offset_x
+        return ((x / 100) * width) - offset_x, ((y / 100) * width) - offset_y
 
     def __build_empty_network(self):
         """Create new network and clear it after use.
@@ -60,10 +61,8 @@ class MiminetTestNetwork:
         Returns:
         (str) : Network URL
         """
-        new_network_button_xpath = "/html/body/section/div/div/div[1]"
-
         self.__selenium.get(HOME_PAGE)
-        self.__selenium.find_element(By.XPATH, new_network_button_xpath).click()
+        self.__selenium.find_element(By.XPATH, NEW_NETWORK_BUTTON_XPATH).click()
 
         self.__url = self.__selenium.current_url
 
