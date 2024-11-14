@@ -6,6 +6,8 @@ from env.locators import (
     device_button,
     CONFIG_PANEL_XPATH,
     NEW_NETWORK_BUTTON_XPATH,
+    EMULATE_BUTTON_XPATH,
+    EMULATE_PLAYER_PAUSE_SELECTOR,
 )
 from conftest import HOME_PAGE, MiminetTester
 from selenium.webdriver.support.ui import WebDriverWait
@@ -167,6 +169,18 @@ class MiminetTestNetwork:
         assert len(filtered_nodes) != 0, f"Can't find device node for {device_class}!!!"
 
         return filtered_nodes
+    
+    def run_emulation(self) -> dict:
+        """Run miminet emulation.
+        
+        :Return: Emulation packets. """
+        self.__check_page()
+        self.__selenium.find_element(By.XPATH, EMULATE_BUTTON_XPATH).click()
+        self.__selenium.wait_until_appear(By.CSS_SELECTOR, EMULATE_PLAYER_PAUSE_SELECTOR, 30)
+
+        packets = self.__selenium.execute_script("return packets")
+
+        return packets
 
     def delete(self):
         self.__check_page()

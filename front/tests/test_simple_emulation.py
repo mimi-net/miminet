@@ -9,8 +9,6 @@ from env.locators import (
     JOB_FIELD_1_XPATH,
     CONFIG_CONFIRM_BUTTON_XPATH,
     CONFIG_CONFIRM_BUTTON_TEXT,
-    EMULATE_BUTTON_XPATH,
-    EMULATE_PLAYER_PAUSE_SELECTOR,
     NETWORK_COPY_BUTTON_XPATH,
     MODAL_DIALOG_XPATH,
     GO_TO_EDITING_BUTTON_XPATH,
@@ -63,12 +61,7 @@ class TestSimpleEmulation:
         selenium.wait_until_appear(By.XPATH, ADDED_JOB_XPATH, timeout=60)
 
     def test_ping_emulation(self, selenium: MiminetTester, network: MiminetTestNetwork):
-        selenium.get(network.url)
-
-        selenium.find_element(By.XPATH, EMULATE_BUTTON_XPATH).click()
-        selenium.wait_until_appear(By.CSS_SELECTOR, EMULATE_PLAYER_PAUSE_SELECTOR, 30)
-
-        packets = selenium.execute_script("return packets")
+        packets = network.run_emulation()
 
         assert len(packets) == 4  # TODO change to something better???
 
@@ -86,7 +79,12 @@ class TestSimpleEmulation:
         selenium.find_element(By.XPATH, GO_TO_EDITING_BUTTON_XPATH).click()
 
         copy_network = MiminetTestNetwork(selenium, selenium.current_url)
+        packets = copy_network.run_emulation()
 
         assert selenium.current_url != network.url, "Redirecting wasn't completed"
         assert copy_network.nodes == nodes, "Nodes don't match"
         assert copy_network.edges == edges, "Edges don't match"
+        assert len(packets) == 4, "Emulation doesn't match" # TODO change to something better???
+
+        selenium.get(network.url)
+
