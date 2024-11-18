@@ -1,8 +1,8 @@
 import pytest
 import requests
 from requests import Session
-from selenium import webdriver
-from selenium.webdriver import Chrome
+from selenium.webdriver import Remote
+from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
@@ -15,17 +15,17 @@ from selenium.webdriver.common.action_chains import ActionChains
 
 
 class environment_setting:
-    domain = "localhost"
-    chrome_driver_path = "/usr/local/bin/chromedriver"
+    miminet_ip = "172.19.0.2"
+    selenium_hub_url = "http://localhost:4444/wd/hub"
     window_size = "1920,1080"
     auth_data = {"email": "selenium-email", "password": "password"}
 
 
-MAIN_PAGE = f"http://{environment_setting.domain}"
+MAIN_PAGE = f"http://{environment_setting.miminet_ip}"
 HOME_PAGE = f"{MAIN_PAGE}/home"
 
 
-class MiminetTester(Chrome):
+class MiminetTester(WebDriver):
     """
     Extends the selenium.webdriver.Chrome class,
     adding new methods for convenient element interaction.
@@ -92,10 +92,7 @@ def chrome_driver():
     chrome_options.add_argument("--window-size=%s" % environment_setting.window_size)
     chrome_options.add_argument("--no-sandbox")
 
-    service = Service(environment_setting.chrome_driver_path)
-
-    webdriver.Remote("http://selenium:4444/wd/hub", options=chrome_options)
-    tester = MiminetTester(service=service, options=chrome_options)
+    tester = MiminetTester(environment_setting.selenium_hub_url, options=chrome_options)
 
     yield tester
 
@@ -144,7 +141,7 @@ def selenium(chrome_driver: MiminetTester, requester: Session):
     for cookie in cookies:
         if cookie.name and cookie.value and cookie.expires:
             selenium_cookie = {
-                "domain": environment_setting.domain,
+                "domain": environment_setting.miminet_ip,
                 "expiry": cookie.expires,
                 "httpOnly": False,
                 "name": cookie.name,
