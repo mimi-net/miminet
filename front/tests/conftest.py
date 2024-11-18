@@ -1,6 +1,7 @@
 import pytest
 import requests
 from requests import Session
+from selenium import webdriver
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -8,9 +9,9 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.remote.webelement import WebElement
 
 
 class environment_setting:
@@ -93,6 +94,7 @@ def chrome_driver():
 
     service = Service(environment_setting.chrome_driver_path)
 
+    webdriver.Remote("http://selenium:4444/wd/hub", options=chrome_options)
     tester = MiminetTester(service=service, options=chrome_options)
 
     yield tester

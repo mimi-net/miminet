@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  selenium:
+    image: selenium/standalone-chrome:latest
+    container_name: selenium
+    hostname: chrome
+    privileged: true
+    shm_size: 2g
+    restart: always
+    ports:
+      - 4444:4444
+    networks:
+      - miminet_network
+
+networks:
+  miminet_network:
+    driver: bridge
+    external: true

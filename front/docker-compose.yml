@@ -38,6 +38,7 @@ volumes:
 
 networks:
   miminet_network:
+    name: miminet_network
     driver: bridge
   rabbitmq_network:
     name: rabbitmq_network
