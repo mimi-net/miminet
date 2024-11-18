@@ -1,10 +1,6 @@
-from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
 from selenium import webdriver
-import requests
-import pytest
 
 
 # Set path Selenium
@@ -43,7 +39,7 @@ def get_driver():
     chrome_options.add_argument("--window-size=%s" % WINDOW_SIZE)
     chrome_options.add_argument("--no-sandbox")
 
-    print('here')
+    print("here")
     return webdriver.Remote("http://localhost:4444/wd/hub", options=chrome_options)
 
 
@@ -82,9 +78,9 @@ def get_driver():
 
 driver = get_driver()
 
-print('here')
+print("here")
 driver.get("http://172.19.0.2:80/")
-driver.save_screenshot('123.png')
+driver.save_screenshot("123.png")
 
 driver.close()
 driver.quit()

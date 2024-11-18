@@ -1,12 +1,9 @@
 import pytest
-from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
 from conftest import MiminetTester
 from env.locators import (
     CONFIG_CONFIRM_BUTTON_TEXT,
-    CONFIG_PANEL_XPATH,
     DEVICE_BUTTON_CLASSES,
-    device_button,
     CONFIG_NAME_FIELD_XPATH,
     CONFIG_CONFIRM_BUTTON_XPATH,
 )

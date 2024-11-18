@@ -32,7 +32,9 @@ class MiminetTestNetwork:
             self.__url = url
 
     def __check_page(self):
-        assert self.__selenium.current_url == self.__url, "It is impossible to interact with the page without being on it"
+        assert (
+            self.__selenium.current_url == self.__url
+        ), "It is impossible to interact with the page without being on it"
 
     @property
     def url(self):
@@ -155,8 +157,8 @@ class MiminetTestNetwork:
         target_id = str(target_node["data"]["id"])
 
         self.__selenium.execute_script(f"AddEdge('{source_id}', '{target_id}')")
-        self.__selenium.execute_script(f"DrawGraph()")
-        self.__selenium.execute_script(f"PostNodesEdges()")
+        self.__selenium.execute_script("DrawGraph()")
+        self.__selenium.execute_script("PostNodesEdges()")
 
         self.__selenium.wait_for(old_edges_len < len(self.edges))
 
@@ -169,14 +171,16 @@ class MiminetTestNetwork:
         assert len(filtered_nodes) != 0, f"Can't find device node for {device_class}!!!"
 
         return filtered_nodes
-    
+
     def run_emulation(self) -> dict:
         """Run miminet emulation.
-        
-        :Return: Emulation packets. """
+
+        :Return: Emulation packets."""
         self.__check_page()
         self.__selenium.find_element(By.XPATH, EMULATE_BUTTON_XPATH).click()
-        self.__selenium.wait_until_appear(By.CSS_SELECTOR, EMULATE_PLAYER_PAUSE_SELECTOR, 30)
+        self.__selenium.wait_until_appear(
+            By.CSS_SELECTOR, EMULATE_PLAYER_PAUSE_SELECTOR, 30
+        )
 
         packets = self.__selenium.execute_script("return packets")
 
@@ -188,7 +192,7 @@ class MiminetTestNetwork:
         confirm_button_xpath = "/html/body/div[2]/div/div/div[2]/button[1]"
 
         self.__selenium.get(self.__url)
-        
+
         self.__selenium.find_element(By.XPATH, network_top_button.options_xpath).click()
 
         self.__selenium.wait_and_click(By.XPATH, network_top_button.delete_xpath)

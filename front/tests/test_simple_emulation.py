@@ -84,7 +84,8 @@ class TestSimpleEmulation:
         assert selenium.current_url != network.url, "Redirecting wasn't completed"
         assert copy_network.nodes == nodes, "Nodes don't match"
         assert copy_network.edges == edges, "Edges don't match"
-        assert len(packets) == 4, "Emulation doesn't match" # TODO change to something better???
+        assert (
+            len(packets) == 4
+        ), "Emulation doesn't match"  # TODO change to something better???
 
         selenium.get(network.url)
-
