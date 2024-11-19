@@ -11,14 +11,14 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 
 
-class environment_setting:
+class testing_setting:
     miminet_ip = "172.19.0.2"
     selenium_hub_url = "http://localhost:4444/wd/hub"
     window_size = "1920,1080"
-    auth_data = {"email": "selenium-email", "password": "password"}
+    auth_data = {"email": "selenium", "password": "password"}
 
 
-MAIN_PAGE = f"http://{environment_setting.miminet_ip}"
+MAIN_PAGE = f"http://{testing_setting.miminet_ip}"
 HOME_PAGE = f"{MAIN_PAGE}/home"
 LOGIN_PAGE = f"{MAIN_PAGE}//auth/login.html"
 
@@ -87,10 +87,10 @@ def chrome_driver():
     """Headless WebBrowser instance for testing (authorization here is not passed)."""
     chrome_options = Options()
     chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--window-size=%s" % environment_setting.window_size)
+    chrome_options.add_argument("--window-size=%s" % testing_setting.window_size)
     chrome_options.add_argument("--no-sandbox")
 
-    tester = MiminetTester(environment_setting.selenium_hub_url, options=chrome_options)
+    tester = MiminetTester(testing_setting.selenium_hub_url, options=chrome_options)
 
     yield tester
 
@@ -113,14 +113,16 @@ def requester():
 
     response = session.get(MAIN_PAGE)
 
-    assert response.status_code == 200, "Miminet is not running or its address is incorrect: unable to get home page!"
+    assert (
+        response.status_code == 200
+    ), "Miminet is not running or its address is incorrect: unable to get home page!"
 
     response = session.post(
         f"{MAIN_PAGE}//auth/login.html",
-        data=environment_setting.auth_data,
+        data=testing_setting.auth_data,
     )
 
-    assert response.status_code == 200,"Unable to send authorization request!"
+    assert response.status_code == 200, "Unable to send authorization request!"
     assert response.url != LOGIN_PAGE, "Failed to login using the specified data"
 
     yield session
@@ -136,7 +138,7 @@ def selenium(chrome_driver: MiminetTester, requester: Session):
     for cookie in cookies:
         if cookie.name and cookie.value and cookie.expires:
             selenium_cookie = {
-                "domain": environment_setting.miminet_ip,
+                "domain": testing_setting.miminet_ip,
                 "expiry": cookie.expires,
                 "httpOnly": False,
                 "name": cookie.name,
