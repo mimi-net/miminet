@@ -86,7 +86,6 @@ class SimulateLog(db.Model):  # type:ignore[name-defined]
 
 def init_db(app):
     # Data
-
     users = []
 
     # Check if db file already exists. If so, backup it

@@ -25,7 +25,7 @@ from miminet_model import Network, User, db
 from miminet_config import make_example_net_switch_and_hub
 from pip._vendor import cachecontrol
 from sqlalchemy.exc import SQLAlchemyError
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 
 # Global variables
 UPLOAD_FOLDER = "static/avatar/"
@@ -501,3 +501,37 @@ def tg_callback():
 
     login_user(user, remember=True)
     return redirect_next_url(fallback=url_for("home"))
+
+class TestUserData:
+    """Data for test user initializing."""
+    nick = "test_user"
+    email = "selenium" 
+    password = "password"
+    password_hash = generate_password_hash(password)
+
+# TODO Найти место куда это деть
+
+def insert_test_user():
+    try:
+        test_user = User(
+            nick=TestUserData.nick,
+            email=TestUserData.email,
+            password_hash=TestUserData.password_hash,
+        )
+
+        db.session.add(test_user)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print(f"An error occurred while adding the test user: {e}")
+
+def remove_test_user():
+    try:
+        user_to_remove = User.query.filter_by(email=TestUserData.email).first()
+
+        if user_to_remove:
+            db.session.delete(user_to_remove)
+            db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print(f"An error occurred while removing the test user: {e}")
