@@ -16,9 +16,11 @@ from miminet_admin import (
 from miminet_auth import (
     google_callback,
     google_login,
+    insert_test_user,
     login_index,
     login_manager,
     logout,
+    remove_test_user,
     user_profile,
     vk_callback,
     vk_login,
@@ -302,10 +304,14 @@ def sitemap():
     response.headers["Content-Type"] = "application/xml"
     return response
 
-
 if __name__ == "__main__":
+
     if len(sys.argv) > 1:
         if sys.argv[1] == "init":
             init_db(app)
+        elif sys.argv[1] == "test":
+            insert_test_user(app)
+        elif sys.argv[1] == "prod":
+            remove_test_user(app)
     else:
         app.run()

@@ -509,29 +509,29 @@ class TestUserData:
     password = "password"
     password_hash = generate_password_hash(password)
 
-# TODO Найти место куда это деть
+def insert_test_user(app):
+    with app.app_context():
+        try:
+            test_user = User(
+                nick=TestUserData.nick,
+                email=TestUserData.email,
+                password_hash=TestUserData.password_hash,
+            )
 
-def insert_test_user():
-    try:
-        test_user = User(
-            nick=TestUserData.nick,
-            email=TestUserData.email,
-            password_hash=TestUserData.password_hash,
-        )
-
-        db.session.add(test_user)
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        print(f"An error occurred while adding the test user: {e}")
-
-def remove_test_user():
-    try:
-        user_to_remove = User.query.filter_by(email=TestUserData.email).first()
-
-        if user_to_remove:
-            db.session.delete(user_to_remove)
+            db.session.add(test_user)
             db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        print(f"An error occurred while removing the test user: {e}")
+        except Exception as e:
+            db.session.rollback()
+            print(f"An error occurred while adding the test user: {e}")
+
+def remove_test_user(app):
+    with app.app_context():
+        try:
+            user_to_remove = User.query.filter_by(email=TestUserData.email).first()
+
+            if user_to_remove:
+                db.session.delete(user_to_remove)
+                db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            print(f"An error occurred while removing the test user: {e}")
