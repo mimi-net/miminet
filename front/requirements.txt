@@ -1,4 +1,4 @@
-﻿alembic==1.13.3
+﻿alembic==1.14.0
 beautifulsoup4==4.12.3
 cachetools==5.5.0
 certifi==2024.8.30
@@ -12,7 +12,7 @@ Flask-Migrate==4.0.7
 Flask-SQLAlchemy==3.1.1
 Flask-Admin==1.6.1
 google==3.0.0
-google-auth==2.35.0
+google-auth==2.36.0
 google-auth-oauthlib==1.2.1
 greenlet==3.1.1
 idna==3.10
@@ -35,9 +35,9 @@ soupsieve==2.6
 SQLAlchemy==2.0.36
 urllib3==2.2.3
 uuid==1.30
-Werkzeug==3.1.2
-zipp==3.20.2
+Werkzeug==3.1.3
+zipp==3.21.0
 celery==5.4.0
 kombu==5.4.2
 python-dotenv==1.0.1
-WTForms==3.1.2
+WTForms==3.2.1
