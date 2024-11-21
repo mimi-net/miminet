@@ -23,6 +23,9 @@ jobs:
           cd front/
           docker compose up -d
 
+      - name: Wait for services to start
+        run: sleep 10
+
       - name: Get data from miminet
         run: |
           curl localhost
