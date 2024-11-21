@@ -35,13 +35,17 @@ def simulate(network: str):
     network_schema = marshmallow_dataclass.class_schema(Network)()
     network = network_schema.load(jnet)
 
-    try:
-        animation, pcaps = run_mininet(network)
+    for _ in range(4):
+            try:
+                animation, pcaps = run_mininet(network)
+            except ValueError:
+                continue
+            except Exception:
+                break
+            else:
+                break
 
-        return json.dumps(animation), pcaps
-    except Exception as e:
-        print(f"An error occurred in run_mininet: {e}")
-        return json.dumps({}), []
+    return json.dumps(animation), pcaps
 
 
 @app.task(bind=True)
