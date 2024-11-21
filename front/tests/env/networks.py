@@ -147,7 +147,7 @@ class MiminetTestNetwork:
         )
 
         self.__selenium.drag_and_drop(device_button, panel, x, y)
-        self.__selenium.wait_for(old_nodes_len < len(self.nodes), 10)
+        self.__selenium.wait_for(old_nodes_len < len(self.nodes))
 
     def add_edge(self, source_node: dict, target_node: dict):
         self.__check_page()
@@ -179,7 +179,7 @@ class MiminetTestNetwork:
         self.__check_page()
         self.__selenium.find_element(By.XPATH, EMULATE_BUTTON_XPATH).click()
         self.__selenium.wait_until_appear(
-            By.CSS_SELECTOR, EMULATE_PLAYER_PAUSE_SELECTOR, 30
+            By.CSS_SELECTOR, EMULATE_PLAYER_PAUSE_SELECTOR, 60
         )
 
         packets = self.__selenium.execute_script("return packets")

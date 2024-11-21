@@ -58,7 +58,7 @@ class TestSimpleEmulation:
         selenium.select_by_value(By.XPATH, CONFIG_JOB_SELECT_XPATH, 1)
         selenium.find_element(By.XPATH, JOB_FIELD_1_XPATH).send_keys(ip)
         selenium.find_element(By.XPATH, JOB_FIELD_1_XPATH).send_keys(Keys.RETURN)
-        selenium.wait_until_appear(By.XPATH, ADDED_JOB_XPATH, timeout=60)
+        selenium.wait_until_appear(By.XPATH, ADDED_JOB_XPATH)
 
     def test_ping_emulation(self, selenium: MiminetTester, network: MiminetTestNetwork):
         packets = network.run_emulation()
@@ -74,7 +74,7 @@ class TestSimpleEmulation:
         edges = network.edges
 
         selenium.find_element(By.XPATH, NETWORK_COPY_BUTTON_XPATH).click()
-        selenium.wait_until_appear(By.XPATH, MODAL_DIALOG_XPATH, timeout=5)
+        selenium.wait_until_appear(By.XPATH, MODAL_DIALOG_XPATH)
 
         selenium.find_element(By.XPATH, GO_TO_EDITING_BUTTON_XPATH).click()
 
