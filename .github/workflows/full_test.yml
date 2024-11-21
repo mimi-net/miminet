@@ -16,12 +16,12 @@ jobs:
       - name: Start miminet front
         run: |
           cd front/
-          docker-compose up -d
+          docker compose up -d
 
       - name: Start miminet back
         run: |
           cd back/
-          docker-compose up -d
+          docker compose up -d
 
       - name: Get data from miminet
         run: |
