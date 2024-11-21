@@ -33,14 +33,14 @@ def simulate(network: str):
 
     jnet = json.loads(network)
     network_schema = marshmallow_dataclass.class_schema(Network)()
-    animation = ""
-    pcaps = []
     network = network_schema.load(jnet)
 
-    for _ in range(4):
+    try:
         animation, pcaps = run_mininet(network)
 
-    return json.dumps(animation), pcaps
+        return json.dumps(animation), pcaps
+    except:
+        return json.dumps(""), []
 
 
 @app.task(bind=True)
