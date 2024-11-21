@@ -415,7 +415,7 @@ def run_mininet(
         print("An error occurred during mininet configuration:", str(e))
         subprocess.call("mn -c", shell=True)
 
-        raise e
+        return [], []
     finally:
         time.sleep(2)
         clean_bridges(net)
