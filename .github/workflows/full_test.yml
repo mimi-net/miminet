@@ -13,14 +13,14 @@ jobs:
       - name: Set up Docker BuildX
         uses: docker/setup-buildx-action@v1
 
-      - name: Start miminet front
-        run: |
-          cd front/
-          docker compose up -d
-
       - name: Start miminet back
         run: |
           cd back/
+          docker compose up -d
+
+      - name: Start miminet front
+        run: |
+          cd front/
           docker compose up -d
 
       - name: Get data from miminet
