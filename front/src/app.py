@@ -233,6 +233,11 @@ def home():
     return render_template("home.html", networks=networks)
 
 
+@app.route("/course")
+def course():
+    return render_template("course.html")
+
+
 @app.route("/examples")
 def examples():
     guids = [
@@ -247,6 +252,8 @@ def examples():
         "6994b921-cc0f-4cbd-b209-7f30784027d7",
         "1646e111-1a47-4d98-a253-c396904e5351",
         "1ccd87d4-a74f-485e-a95e-e1111c041fc7",
+        "fe1fc02f-6bb4-421d-94cb-6902f826e30d",
+        "993e2d62-ae6c-4b62-9ec4-6d90f768b56a",
     ]
     networks = (
         Network.query.filter(Network.guid.in_(guids)).order_by(Network.id.asc()).all()
