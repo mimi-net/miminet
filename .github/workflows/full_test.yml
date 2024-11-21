@@ -36,6 +36,19 @@ jobs:
            cd front/tests/docker
            docker compose up -d
 
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      - name: Install dependencies
+        run: |
+          sudo python -m pip install -U pip
+          sudo python -m pip install pytest
+          sudo python -m pip install selenium
+          sudo python -m pip install requests
+
       - name: Run tests
         run: |
            pytest front/tests
