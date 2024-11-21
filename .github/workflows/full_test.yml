@@ -21,6 +21,7 @@ jobs:
       - name: Start miminet (front)
         run: |
           cd front/
+          sed -i 's/MODE=prod/MODE=dev/' .env
           docker compose up -d
 
       - name: Wait for services to start
@@ -29,3 +30,12 @@ jobs:
       - name: Check availability
         run: |
           curl -f localhost
+    
+      - name: Start selenium
+        run: |
+           cd front/tests/docker
+           docker compose up -d
+
+      - name: Run tests
+        run: |
+           pytest front/tests

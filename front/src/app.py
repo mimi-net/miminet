@@ -309,7 +309,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         if sys.argv[1] == "init":
             init_db(app)
-        elif sys.argv[1] == "test":
+        elif sys.argv[1] == "dev":
             insert_test_user(app)
         elif sys.argv[1] == "prod":
             remove_test_user(app)
