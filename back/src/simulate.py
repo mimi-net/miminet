@@ -416,7 +416,7 @@ def run_mininet(
         subprocess.call("mn -c", shell=True)
 
         raise e
-    
+
     time.sleep(2)
     clean_bridges(net)
     teardown_vtep_bridges(net, network.nodes)
