@@ -39,8 +39,9 @@ def simulate(network: str):
         animation, pcaps = run_mininet(network)
 
         return json.dumps(animation), pcaps
-    except:
-        return json.dumps(""), []
+    except Exception as e:
+        print(f"An error occurred in run_mininet: {e}")
+        return json.dumps({}), []
 
 
 @app.task(bind=True)
