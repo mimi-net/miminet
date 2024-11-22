@@ -6,7 +6,7 @@ from env.networks import MiminetTestNetwork
 from env.locators import (
     MY_NETWORK_BUTTON_XPATH,
     NETWORK_NAME_LABEL_XPATH,
-    FIRST_NETWORK_BUTTON_XPATH,
+    GET_NETWORK_BUTTON_XPATH,
 )
 
 
@@ -36,6 +36,6 @@ class TestNetworkMenu:
     def test_new_network_open(self, selenium: MiminetTester, empty_network: str):
         """Checks is it possible to open new network via home menu"""
         selenium.get(HOME_PAGE)
-        selenium.find_element(By.XPATH, FIRST_NETWORK_BUTTON_XPATH).click()
+        selenium.find_element(By.XPATH, GET_NETWORK_BUTTON_XPATH(0)).click()
 
         assert empty_network == selenium.current_url

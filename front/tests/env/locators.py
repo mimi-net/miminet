@@ -56,8 +56,6 @@ NETWORK_COPY_BUTTON_XPATH = "/html/body/nav/div/div[2]/a[2]/i"
 GO_TO_EDITING_BUTTON_XPATH = "/html/body/div[5]/div/div/div[2]/button[1]"
 # Label with network name (inside network page)
 NETWORK_NAME_LABEL_XPATH = "/html/body/nav/div/div[1]/a[3]"
-# First button in networks menu
-FIRST_NETWORK_BUTTON_XPATH = "/html/body/section/div/div/div[2]"
 # "Эмулировать" button
 EMULATE_BUTTON_XPATH = "/html/body/main/section/div/div/div[1]/div/div[6]/div[1]/button"
 # Pause button in player
@@ -80,3 +78,11 @@ DEVICE_BUTTON_CLASSES = [
     device_button.router_class,
     device_button.server_class,
 ]
+
+def GET_NETWORK_BUTTON_XPATH(id):
+    """XPATH for specific network from home page.
+
+    Args:
+        id (int, optional): Position of network in networks list. Starts from 0.
+    """
+    return f"/html/body/section/div/div/div[{id+2}]"
