@@ -10,15 +10,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Disable packet transmission to filters
+        run: |
+          sudo sysctl -w net.bridge.bridge-nf-call-iptables=0
+          sudo sysctl -w net.bridge.bridge-nf-call-arptables=0
+          sudo sysctl -w net.bridge.bridge-nf-call-ip6tables=0
+          sudo sysctl -p
+
       - name: Set up Docker BuildX
         uses: docker/setup-buildx-action@v1
 
-      - name: Start miminet (back)
+      - name: Start backend
         run: |
           cd back/
           docker compose up -d
 
-      - name: Start miminet (front)
+      - name: Start frontend
         run: |
           cd front/
           sed -i 's/MODE=prod/MODE=dev/' .env
@@ -39,15 +46,14 @@ jobs:
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: 3.12
+          python-version: '3.12.3'
 
       - name: Install dependencies
         run: |
-          sudo python -m pip install -U pip
-          sudo python -m pip install pytest
-          sudo python -m pip install selenium
-          sudo python -m pip install requests
+          sudo python3 -m pip install -U pip
+          sudo python3 -m pip install pytest
+          sudo python3 -m pip install selenium
 
       - name: Run tests
         run: |
-           pytest front/tests
+           sudo python3 -m pytest -vv -s front/tests
