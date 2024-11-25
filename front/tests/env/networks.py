@@ -175,6 +175,8 @@ class MiminetTestNetwork:
     def run_emulation(self) -> dict:
         """Run miminet emulation.
 
+        [!] This function doesn't work in CI for unknown reasons :(.
+
         :Return: Emulation packets."""
         self.__check_page()
         self.__selenium.find_element(By.XPATH, EMULATE_BUTTON_XPATH).click()

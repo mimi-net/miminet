@@ -66,6 +66,7 @@ class TestSimpleEmulation:
 
         assert len(nodes) == 2
         assert len(edges) == 1
+        assert len(network.run_emulation()) == 4
 
     def test_ping_network_copy(
         self, selenium: MiminetTester, network: MiminetTestNetwork
