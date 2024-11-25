@@ -188,18 +188,27 @@ class MiminetTestNetwork:
 
         return packets
 
-    def are_nodes_equal(self, nodes: dict) -> bool:
+    def are_nodes_equal(self, b: dict) -> bool:
+        """
+        Compares the current network's nodes (self.nodes) with a given set of nodes.
+
+        :Returns:
+            True if the nodes are equal.
+
+        :Raises:
+            AssertionError
+    """
         self.__check_page()
 
-        my_nodes = self.nodes
+        a = self.nodes
 
-        assert my_nodes, "The current network has no nodes."
-        assert nodes, "Nodes for comparison can't be empty."
+        assert a, "The current network has no nodes."
+        assert b, "Nodes for comparison can't be empty."
 
-        assert len(nodes) == len(my_nodes), "The number of nodes doesn't match."
+        assert len(b) == len(a), "The number of nodes doesn't match."
 
-        for i, node in enumerate(nodes):
-            my_node = my_nodes[i]
+        for i, node in enumerate(b):
+            my_node = a[i]
 
             assert node["classes"] == my_node["classes"], f"Node {node} classes don't match."
 
@@ -218,6 +227,17 @@ class MiminetTestNetwork:
         return True
 
     def are_edges_equal(self, b: dict) -> bool:
+        """Checks if the edges of the current network are equal to a given set of edges.
+
+        :Args:
+            b: A dictionary representing the edges to compare against.
+
+        :Returns:
+            True if the edges are equal.
+
+        :Raises:
+            AssertionError
+        """
         self.__check_page()
 
         a = self.edges
