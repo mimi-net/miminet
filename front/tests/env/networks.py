@@ -197,7 +197,7 @@ class MiminetTestNetwork:
 
         :Raises:
             AssertionError
-    """
+        """
         self.__check_page()
 
         a = self.nodes
@@ -210,20 +210,26 @@ class MiminetTestNetwork:
         for i, node in enumerate(b):
             my_node = a[i]
 
-            assert node["classes"] == my_node["classes"], f"Node {node} classes don't match."
+            assert (
+                node["classes"] == my_node["classes"]
+            ), f"Node {node} classes don't match."
 
             assert len(node["interface"]) == len(
                 my_node["interface"]
             ), "Number of interfaces doesn't match"
 
-            for iface_i, iface in enumerate(node['interface']):
-                my_iface = my_node['interface'][iface_i]
+            for iface_i, iface in enumerate(node["interface"]):
+                my_iface = my_node["interface"][iface_i]
 
-                assert my_iface['ip'] == iface['ip'], f"Node {node} iface's ip don't match"
-                assert my_iface['netmask'] == iface['netmask'], f"Node {node} iface's netmask don't match"
+                assert (
+                    my_iface["ip"] == iface["ip"]
+                ), f"Node {node} iface's ip don't match"
+                assert (
+                    my_iface["netmask"] == iface["netmask"]
+                ), f"Node {node} iface's netmask don't match"
 
             assert node["data"] == my_node["data"], "Nodes data don't match."
-        
+
         return True
 
     def are_edges_equal(self, b: dict) -> bool:
@@ -250,8 +256,8 @@ class MiminetTestNetwork:
         for i, edge in enumerate(b):
             my_edge = a[i]
 
-            edge_data = edge['data']
-            my_edge_data = my_edge['data']
+            edge_data = edge["data"]
+            my_edge_data = my_edge["data"]
 
             assert (
                 my_edge_data["source"] == edge_data["source"]

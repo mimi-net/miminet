@@ -116,10 +116,12 @@ class TestSimpleEmulation:
         "position": {"x": 158.5374984741211, "y": 111},
     }
 
-    JSON_EDGES = [{
-        "data": {
-            "id": "edge_m3x96snujpyaycfix1",
-            "source": "host_1",
-            "target": "host_2",
+    JSON_EDGES = [
+        {
+            "data": {
+                "id": "edge_m3x96snujpyaycfix1",
+                "source": "host_1",
+                "target": "host_2",
+            }
         }
-    }]
+    ]
