@@ -61,11 +61,9 @@ class TestSimpleEmulation:
         selenium.wait_until_appear(By.XPATH, ADDED_JOB_XPATH)
 
     def test_ping_emulation(self, selenium: MiminetTester, network: MiminetTestNetwork):
-        nodes = network.nodes
-        edges = network.edges
 
-        assert len(nodes) == self.JSON_NODES
-        assert len(edges) == self.JSON_EDGES
+        assert network.are_nodes_equal(self.JSON_NODES)
+        assert network.are_edges_equal(self.JSON_EDGES)
 
     def test_ping_network_copy(
         self, selenium: MiminetTester, network: MiminetTestNetwork
@@ -118,10 +116,10 @@ class TestSimpleEmulation:
         "position": {"x": 158.5374984741211, "y": 111},
     }
 
-    JSON_EDGES = {
+    JSON_EDGES = [{
         "data": {
             "id": "edge_m3x96snujpyaycfix1",
             "source": "host_1",
             "target": "host_2",
         }
-    }
+    }]

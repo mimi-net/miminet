@@ -197,34 +197,50 @@ class MiminetTestNetwork:
         assert nodes, "Nodes for comparison can't be empty."
 
         assert len(nodes) == len(my_nodes), "The number of nodes doesn't match."
-        assert nodes["classes"] == my_nodes["classes"], "Nodes classes don't match."
-        assert len(nodes["interfaces"]) == len(
-            my_nodes["interfaces"]
-        ), "Number of interfaces doesn't match"
-        assert nodes["data"] == my_nodes["data"], "Nodes data don't match."
 
-    def are_edges_equal(self, edges: dict) -> bool:
+        for i, node in enumerate(nodes):
+            my_node = my_nodes[i]
+
+            assert node["classes"] == my_node["classes"], f"Node {node} classes don't match."
+
+            assert len(node["interface"]) == len(
+                my_node["interface"]
+            ), "Number of interfaces doesn't match"
+
+            for iface_i, iface in enumerate(node['interface']):
+                my_iface = my_node['interface'][iface_i]
+
+                assert my_iface['ip'] == iface['ip'], f"Node {node} iface's ip don't match"
+                assert my_iface['netmask'] == iface['netmask'], f"Node {node} iface's netmask don't match"
+
+            assert node["data"] == my_node["data"], "Nodes data don't match."
+        
+        return True
+
+    def are_edges_equal(self, b: dict) -> bool:
         self.__check_page()
 
-        my_edges = self.edges
+        a = self.edges
 
-        assert my_edges, "The current network has no edges."
-        assert edges, "Edges for comparison can't be empty."
+        assert a, "The current network has no edges."
+        assert b, "Edges for comparison can't be empty."
 
-        assert len(edges) == len(my_edges), "The number of nodes doesn't match."
-        assert len(edges["data"]) == len(
-            my_edges["data"]
-        ), "Length of data in edges doesn't match"
+        assert len(b) == len(a), "The number of nodes doesn't match."
 
-        for i, my_edge in enumerate(my_edges):
-            edge = edges[i]
+        for i, edge in enumerate(b):
+            my_edge = a[i]
+
+            edge_data = edge['data']
+            my_edge_data = my_edge['data']
 
             assert (
-                my_edge["data"]["source"] == edge["data"]["source"]
+                my_edge_data["source"] == edge_data["source"]
             ), "Edges sources don't match"
             assert (
-                my_edge["data"]["target"] == edge["data"]["target"]
+                my_edge_data["target"] == edge_data["target"]
             ), "Edges targets don't match"
+
+        return True
 
     def delete(self):
         self.__check_page()
