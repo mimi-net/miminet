@@ -6,7 +6,7 @@ charset-normalizer==3.4.0
 click==8.1.7
 colorama==0.4.6
 dpkt==1.9.8
-Flask==3.0.3
+Flask==3.1.0
 Flask-Login==0.6.3
 Flask-Migrate==4.0.7
 Flask-SQLAlchemy==3.1.1
