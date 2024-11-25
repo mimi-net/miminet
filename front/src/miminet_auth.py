@@ -502,12 +502,15 @@ def tg_callback():
     login_user(user, remember=True)
     return redirect_next_url(fallback=url_for("home"))
 
+
 class TestUserData:
     """Data for test user initializing."""
+
     nick = "test_user"
-    email = "selenium" 
+    email = "selenium"
     password = "password"
     password_hash = generate_password_hash(password)
+
 
 def insert_test_user(app):
     with app.app_context():
@@ -523,6 +526,7 @@ def insert_test_user(app):
         except Exception as e:
             db.session.rollback()
             print(f"An error occurred while adding the test user: {e}")
+
 
 def remove_test_user(app):
     with app.app_context():

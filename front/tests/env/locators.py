@@ -79,6 +79,7 @@ DEVICE_BUTTON_CLASSES = [
     device_button.server_class,
 ]
 
+
 def GET_NETWORK_BUTTON_XPATH(id):
     """XPATH for specific network from home page.
 

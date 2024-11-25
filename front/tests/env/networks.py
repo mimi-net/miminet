@@ -188,6 +188,44 @@ class MiminetTestNetwork:
 
         return packets
 
+    def are_nodes_equal(self, nodes: dict) -> bool:
+        self.__check_page()
+
+        my_nodes = self.nodes
+
+        assert my_nodes, "The current network has no nodes."
+        assert nodes, "Nodes for comparison can't be empty."
+
+        assert len(nodes) == len(my_nodes), "The number of nodes doesn't match."
+        assert nodes["classes"] == my_nodes["classes"], "Nodes classes don't match."
+        assert len(nodes["interfaces"]) == len(
+            my_nodes["interfaces"]
+        ), "Number of interfaces doesn't match"
+        assert nodes["data"] == my_nodes["data"], "Nodes data don't match."
+
+    def are_edges_equal(self, edges: dict) -> bool:
+        self.__check_page()
+
+        my_edges = self.edges
+
+        assert my_edges, "The current network has no edges."
+        assert edges, "Edges for comparison can't be empty."
+
+        assert len(edges) == len(my_edges), "The number of nodes doesn't match."
+        assert len(edges["data"]) == len(
+            my_edges["data"]
+        ), "Length of data in edges doesn't match"
+
+        for i, my_edge in enumerate(my_edges):
+            edge = edges[i]
+
+            assert (
+                my_edge["data"]["source"] == edge["data"]["source"]
+            ), "Edges sources don't match"
+            assert (
+                my_edge["data"]["target"] == edge["data"]["target"]
+            ), "Edges targets don't match"
+
     def delete(self):
         self.__check_page()
 

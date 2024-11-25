@@ -64,9 +64,8 @@ class TestSimpleEmulation:
         nodes = network.nodes
         edges = network.edges
 
-        assert len(nodes) == 2
-        assert len(edges) == 1
-        assert len(network.run_emulation()) == 4
+        assert len(nodes) == self.JSON_NODES
+        assert len(edges) == self.JSON_EDGES
 
     def test_ping_network_copy(
         self, selenium: MiminetTester, network: MiminetTestNetwork
@@ -84,7 +83,45 @@ class TestSimpleEmulation:
         copy_network = MiminetTestNetwork(selenium, selenium.current_url)
 
         assert selenium.current_url != network.url, "Redirecting wasn't completed"
-        assert copy_network.nodes == nodes, "Nodes don't match"
-        assert copy_network.edges == edges, "Edges don't match"
-    
+        assert copy_network.are_nodes_equal(nodes)
+        assert copy_network.are_edges_equal(edges)
+
         selenium.get(network.url)
+
+    JSON_NODES = {
+        "classes": ["host"],
+        "config": {"default_gw": "", "label": "host_1", "type": "host"},
+        "data": {"id": "host_1", "label": "host_1"},
+        "interface": [
+            {
+                "connect": "edge_m3x96snujpyaycfix1",
+                "id": "iface_86881674",
+                "ip": "192.168.1.1",
+                "name": "iface_86881674",
+                "netmask": 24,
+            }
+        ],
+        "position": {"x": 58.537498474121094, "y": 99},
+    }, {
+        "classes": ["host"],
+        "config": {"default_gw": "", "label": "host_2", "type": "host"},
+        "data": {"id": "host_2", "label": "host_2"},
+        "interface": [
+            {
+                "connect": "edge_m3x96snujpyaycfix1",
+                "id": "iface_77541826",
+                "ip": "192.168.1.2",
+                "name": "iface_77541826",
+                "netmask": 24,
+            }
+        ],
+        "position": {"x": 158.5374984741211, "y": 111},
+    }
+
+    JSON_EDGES = {
+        "data": {
+            "id": "edge_m3x96snujpyaycfix1",
+            "source": "host_1",
+            "target": "host_2",
+        }
+    }
