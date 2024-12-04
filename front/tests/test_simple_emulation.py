@@ -61,9 +61,8 @@ class TestSimpleEmulation:
         selenium.wait_until_appear(By.XPATH, ADDED_JOB_XPATH)
 
     def test_ping_emulation(self, selenium: MiminetTester, network: MiminetTestNetwork):
-
-        assert network.are_nodes_equal(self.JSON_NODES)
-        assert network.are_edges_equal(self.JSON_EDGES)
+        assert network.compare_nodes(self.JSON_NODES)
+        assert network.compare_edges(self.JSON_EDGES)
 
     def test_ping_network_copy(
         self, selenium: MiminetTester, network: MiminetTestNetwork
@@ -81,8 +80,8 @@ class TestSimpleEmulation:
         copy_network = MiminetTestNetwork(selenium, selenium.current_url)
 
         assert selenium.current_url != network.url, "Redirecting wasn't completed"
-        assert copy_network.are_nodes_equal(nodes)
-        assert copy_network.are_edges_equal(edges)
+        assert copy_network.compare_nodes(nodes)
+        assert copy_network.compare_edges(edges)
 
         selenium.get(network.url)
 

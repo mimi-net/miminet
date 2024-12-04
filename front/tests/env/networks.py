@@ -13,6 +13,7 @@ from conftest import HOME_PAGE, MiminetTester
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import random
+from typing import Optional
 
 
 class MiminetTestNetwork:
@@ -38,7 +39,20 @@ class MiminetTestNetwork:
 
     @property
     def url(self):
+        """url to network page"""
         return self.__url
+
+    @property
+    def nodes(self) -> dict:
+        """Current network nodes (may change during network usage)"""
+        self.__check_page()
+        return self.__selenium.execute_script("return nodes")
+
+    @property
+    def edges(self) -> dict:
+        """Current network edges (may change during network usage)"""
+        self.__check_page()
+        return self.__selenium.execute_script("return edges")
 
     def __calc_panel_offset(self, panel, x: float, y: float):
         """Calculates coordinates with offset within the Network Panel.
@@ -81,18 +95,6 @@ class MiminetTestNetwork:
             device = self.__selenium.find_element(By.XPATH, button_xpath)
             self.add_node(device)
 
-    @property
-    def nodes(self) -> dict:
-        """Current network nodes (may change during network usage)"""
-        self.__check_page()
-        return self.__selenium.execute_script("return nodes")
-
-    @property
-    def edges(self) -> dict:
-        """Current network edges (may change during network usage)"""
-        self.__check_page()
-        return self.__selenium.execute_script("return edges")
-
     def open_node_config(self, device_node: dict):
         """Open configuration menu.
 
@@ -131,10 +133,14 @@ class MiminetTestNetwork:
 
         self.__selenium.wait_until_appear(By.XPATH, CONFIG_PANEL_XPATH)
 
-    def add_node(self, device_button):
-        """Add new device node
+    def add_node(
+        self, device_button, x: Optional[float] = None, y: Optional[float] = None
+    ):
+        """Add new device node.
 
         Args:
+            x (float): X-coordinate percentage within the panel (0-100).
+            y (float): Y-coordinate percentage within the panel (0-100).
             device_button (WebElement): Device button that can be moved
         """
         self.__check_page()
@@ -142,11 +148,13 @@ class MiminetTestNetwork:
 
         panel = self.__selenium.find_element(By.XPATH, NETWORK_PANEL_XPATH)
 
-        x, y = self.__calc_panel_offset(
-            panel, random.randint(0, 100), random.randint(0, 100)
+        x, y = random.uniform(0, 100) if x is None else x, (
+            random.uniform(0, 100) if y is None else y
         )
 
-        self.__selenium.drag_and_drop(device_button, panel, x, y)
+        local_x, local_y = self.__calc_panel_offset(panel, x, y)
+
+        self.__selenium.drag_and_drop(device_button, panel, local_x, local_y)
         self.__selenium.wait_for(old_nodes_len < len(self.nodes))
 
     def add_edge(self, source_node: dict, target_node: dict):
@@ -188,7 +196,7 @@ class MiminetTestNetwork:
 
         return packets
 
-    def are_nodes_equal(self, b: dict) -> bool:
+    def compare_nodes(self, b: dict) -> bool:
         """
         Compares the current network's nodes (self.nodes) with a given set of nodes.
 
@@ -232,7 +240,7 @@ class MiminetTestNetwork:
 
         return True
 
-    def are_edges_equal(self, b: dict) -> bool:
+    def compare_edges(self, b: dict) -> bool:
         """Checks if the edges of the current network are equal to a given set of edges.
 
         :Args:
@@ -271,7 +279,9 @@ class MiminetTestNetwork:
     def delete(self):
         self.__check_page()
 
-        confirm_button_xpath = "/html/body/div[2]/div/div/div[2]/button[1]"
+        confirm_button_xpath = (
+            "/html/body/div[2]/div/div/div[2]/button[1]"  # TODO убрать это
+        )
 
         self.__selenium.get(self.__url)
 
