@@ -62,3 +62,10 @@ flask db init
 flask db migrate
 flask db upgrade
 ```
+
+## Запуск тестов
+В front/.env файле должен быть поставлен MODE=dev
+```
+sh front/tests/docker/run.sh
+pytest front/tests
+```
