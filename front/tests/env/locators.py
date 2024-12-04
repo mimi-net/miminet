@@ -49,7 +49,7 @@ CONFIG_JOB_SELECT_XPATH = "/html/body/main/section/div/div/div[3]/form/div[2]/se
 JOB_FIELD_1_XPATH = "/html/body/main/section/div/div/div[3]/form/div[3]/input"
 
 # "Мои сети" button
-MY_NETWORK_BUTTON_XPATH = "/html/body/nav/div/div/li[3]/a"
+MY_NETWORK_BUTTON_XPATH = "/html/body/nav/div/div/li[4]/a"
 # Modal dialog
 MODAL_DIALOG_XPATH = "/html/body/div[5]/div"
 # Copy button (inside network page)
