@@ -36,7 +36,7 @@ class MiminetTester(WebDriver):
     adding new methods for convenient element interaction.
     """
 
-    def wait_and_click(self, by: By, element: str, timeout=20):
+    def wait_and_click(self, by: str, element: str, timeout=20):
         """
         Waits for the specified element to become clickable before clicking it.
 
@@ -65,12 +65,12 @@ class MiminetTester(WebDriver):
         actions_chain.release()
         actions_chain.perform()
 
-    def wait_until_appear(self, by: By, element: str, timeout=20):
+    def wait_until_appear(self, by: str, element: str, timeout=20):
         """
         Waits until the specified element is present in the page's DOM and becomes visible.
 
         Args:
-            by (By): The locator strategy (e.g., By.ID, By.XPATH).
+            by (str): The locator strategy (e.g., By.ID, By.XPATH).
             element (str): The element locator (e.g., "myElementId", "//button[text()='Click Me']").
             timeout (int): The maximum time in seconds to wait (default: 20).
         """
@@ -78,12 +78,12 @@ class MiminetTester(WebDriver):
             EC.visibility_of_element_located((by, element))
         )
 
-    def wait_until_disappear(self, by: By, element: str, timeout=20):
+    def wait_until_disappear(self, by: str, element: str, timeout=20):
         """
         Waits until the specified element disappears from the page's DOM and becomes invisible.
 
         Args:
-            by (By): The locator strategy (e.g., By.ID, By.XPATH).
+            by (str): The locator strategy (e.g., By.ID, By.XPATH).
             element (str): The element locator (e.g., "myElementId", "//button[text()='Click Me']").
             timeout (int): The maximum time in seconds to wait (default: 20).
         """
@@ -91,12 +91,12 @@ class MiminetTester(WebDriver):
             EC.invisibility_of_element_located((by, element))
         )
 
-    def wait_until_text(self, by: By, element: str, text: str, timeout=20):
+    def wait_until_text(self, by: str, element: str, text: str, timeout=20):
         """
         Waits until text appears in the element.
 
         Args:
-            by (By): The locator strategy (e.g., By.ID, By.XPATH).
+            by (str): The locator strategy (e.g., By.ID, By.XPATH).
             element (str): The element locator (e.g., "myElementId", "//button[text()='Click Me']").
             timeout (int): The maximum time in seconds to wait (default: 20).
         """
@@ -113,11 +113,11 @@ class MiminetTester(WebDriver):
         """
         WebDriverWait(self, timeout=timeout).until(condition)
 
-    def select_by_value(self, by: By, element: str, value: int):
+    def select_by_value(self, by: str, element: str, value: int):
         """Selects an option in a select element by its value.
 
         Args:
-            by (By): The locator strategy (e.g., By.ID, By.XPATH).
+            by (str): The locator strategy (e.g., By.ID, By.XPATH).
             element (str): The element locator (e.g., "myElementId", "//button[text()='Click Me']").
             value: The value attribute of the option to select.
         """
