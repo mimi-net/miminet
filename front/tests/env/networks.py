@@ -14,7 +14,7 @@ from conftest import HOME_PAGE, MiminetTester
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import random
-from typing import Optional, Collection
+from typing import Optional
 
 
 class MiminetTestNetwork:

@@ -2,7 +2,6 @@ import pytest
 import requests
 from requests import Session
 from selenium.webdriver.remote.webdriver import WebDriver
-from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
