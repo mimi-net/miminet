@@ -35,6 +35,8 @@ CONFIG_PANEL_XPATH = "/html/body/main/section/div/div/div[3]"
 CONFIG_NAME_FIELD_XPATH = "/html/body/main/section/div/div/div[3]/form/div[1]/input"
 # "Сохранить" button
 CONFIG_CONFIRM_BUTTON_XPATH = "/html/body/main/section/div/div/div[3]/form/button"
+# "Да, удалить" confirm button
+DELETE_NETWORK_CONFIRM_BUTTON_XPATH = "/html/body/div[2]/div/div/div[2]/button[1]"
 # Network device IP address
 CONFIG_IP_ADDRESS_FIELD_XPATH = (
     "/html/body/main/section/div/div/div[3]/form/div[4]/input[1]"

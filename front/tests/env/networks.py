@@ -8,6 +8,7 @@ from env.locators import (
     NEW_NETWORK_BUTTON_XPATH,
     EMULATE_BUTTON_XPATH,
     EMULATE_PLAYER_PAUSE_SELECTOR,
+    DELETE_NETWORK_CONFIRM_BUTTON_XPATH,
 )
 from conftest import HOME_PAGE, MiminetTester
 from selenium.webdriver.support.ui import WebDriverWait
@@ -155,7 +156,7 @@ class MiminetTestNetwork:
         local_x, local_y = self.__calc_panel_offset(panel, x, y)
 
         self.__selenium.drag_and_drop(device_button, panel, local_x, local_y)
-        self.__selenium.wait_for(old_nodes_len < len(self.nodes))
+        self.__selenium.wait_for(lambda d: old_nodes_len < len(self.nodes))
 
     def add_edge(self, source_node: dict, target_node: dict):
         self.__check_page()
@@ -168,7 +169,7 @@ class MiminetTestNetwork:
         self.__selenium.execute_script("DrawGraph()")
         self.__selenium.execute_script("PostNodesEdges()")
 
-        self.__selenium.wait_for(old_edges_len < len(self.edges))
+        self.__selenium.wait_for(lambda d: old_edges_len < len(self.edges))
 
     def get_nodes_by_class(self, device_class: str) -> list[dict]:
         self.__check_page()
@@ -196,7 +197,7 @@ class MiminetTestNetwork:
 
         return packets
 
-    def compare_nodes(self, b: dict) -> bool:
+    def compare_nodes(self, nodes: dict) -> bool:
         """
         Compares the current network's nodes (self.nodes) with a given set of nodes.
 
@@ -208,39 +209,50 @@ class MiminetTestNetwork:
         """
         self.__check_page()
 
-        a = self.nodes
+        my_nodes = self.nodes
 
-        assert a, "The current network has no nodes."
-        assert b, "Nodes for comparison can't be empty."
+        if not my_nodes:
+            raise ValueError("The current network has no nodes.")
+        if not nodes:
+            raise ValueError("Nodes for comparison can't be empty.")
+        if len(nodes) != len(my_nodes):
+            raise ValueError(
+                f"The number of nodes doesn't match. Expected {len(my_nodes)}, got {len(nodes)}."
+            )
 
-        assert len(b) == len(a), "The number of nodes doesn't match."
+        for i, node in enumerate(nodes):
+            my_node = my_nodes[i]
 
-        for i, node in enumerate(b):
-            my_node = a[i]
+            if node["classes"] != my_node["classes"]:
+                raise ValueError(
+                    f"Node {i}: Classes don't match. Expected {my_node['classes']}, got {node['classes']}."
+                )
 
-            assert (
-                node["classes"] == my_node["classes"]
-            ), f"Node {node} classes don't match."
-
-            assert len(node["interface"]) == len(
-                my_node["interface"]
-            ), "Number of interfaces doesn't match"
+            if len(node["interface"]) != len(my_node["interface"]):
+                raise ValueError(
+                    f"Node {i}: Number of interfaces doesn't match. Expected {len(my_node['interface'])}, got {len(node['interface'])}."
+                )
 
             for iface_i, iface in enumerate(node["interface"]):
                 my_iface = my_node["interface"][iface_i]
 
-                assert (
-                    my_iface["ip"] == iface["ip"]
-                ), f"Node {node} iface's ip don't match"
-                assert (
-                    my_iface["netmask"] == iface["netmask"]
-                ), f"Node {node} iface's netmask don't match"
+                if my_iface["ip"] != iface["ip"]:
+                    raise ValueError(
+                        f"Node {i}, Interface {iface_i}: IP addresses don't match. Expected {my_iface['ip']}, got {iface['ip']}."
+                    )
+                if my_iface["netmask"] != iface["netmask"]:
+                    raise ValueError(
+                        f"Node {i}, Interface {iface_i}: Netmasks don't match. Expected {my_iface['netmask']}, got {iface['netmask']}."
+                    )
 
-            assert node["data"] == my_node["data"], "Nodes data don't match."
+            if node["data"] != my_node["data"]:
+                raise ValueError(
+                    f"Node {i}: Data doesn't match. Expected {my_node['data']}, got {node['data']}."
+                )
 
         return True
 
-    def compare_edges(self, b: dict) -> bool:
+    def compare_edges(self, edges: dict) -> bool:
         """Checks if the edges of the current network are equal to a given set of edges.
 
         :Args:
@@ -253,39 +265,45 @@ class MiminetTestNetwork:
             AssertionError
         """
         self.__check_page()
+        my_edges = self.edges
 
-        a = self.edges
+        if not my_edges:
+            raise ValueError("The current network has no edges.")
+        if not edges:
+            raise ValueError("Edges for comparison can't be empty.")
 
-        assert a, "The current network has no edges."
-        assert b, "Edges for comparison can't be empty."
+        if len(edges) != len(my_edges):
+            raise ValueError(
+                f"Number of edges mismatch: Expected {len(my_edges)}, got {len(edges)}."
+            )
 
-        assert len(b) == len(a), "The number of nodes doesn't match."
+        for i, edge in enumerate(edges):
+            my_edge = my_edges[i]
 
-        for i, edge in enumerate(b):
-            my_edge = a[i]
+            try:
+                edge_data = edge["data"]
+                my_edge_data = my_edge["data"]
 
-            edge_data = edge["data"]
-            my_edge_data = my_edge["data"]
+                if my_edge_data["source"] != edge_data["source"]:
+                    raise ValueError(
+                        f"Edges sources don't match at index {i}: Expected {edge_data['source']}, got {my_edge_data['source']}."
+                    )
+                if my_edge_data["target"] != edge_data["target"]:
+                    raise ValueError(
+                        f"Edges targets don't match at index {i}: Expected {edge_data['target']}, got {my_edge_data['target']}."
+                    )
 
-            assert (
-                my_edge_data["source"] == edge_data["source"]
-            ), "Edges sources don't match"
-            assert (
-                my_edge_data["target"] == edge_data["target"]
-            ), "Edges targets don't match"
+            except KeyError as e:
+                raise ValueError(f"Missing key in edge data at index {i}: {e}")
 
         return True
 
     def delete(self):
         self.__check_page()
 
-        confirm_button_xpath = (
-            "/html/body/div[2]/div/div/div[2]/button[1]"  # TODO убрать это
-        )
-
         self.__selenium.get(self.__url)
 
         self.__selenium.find_element(By.XPATH, network_top_button.options_xpath).click()
 
         self.__selenium.wait_and_click(By.XPATH, network_top_button.delete_xpath)
-        self.__selenium.wait_and_click(By.XPATH, confirm_button_xpath)
+        self.__selenium.wait_and_click(By.XPATH, DELETE_NETWORK_CONFIRM_BUTTON_XPATH)
