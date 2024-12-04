@@ -12,20 +12,27 @@ from selenium.webdriver.common.action_chains import ActionChains
 
 
 class testing_setting:
-    miminet_ip = "172.19.0.2"
-    selenium_hub_url = "http://localhost:4444/wd/hub"
+    """Configuration settings for testing environment."""
+
+    miminet_docker_ip = "172.19.0.2"  # nginx IP inside miminet docker network
+    selenium_hub_url = (
+        "http://localhost:4444/wd/hub"  # route for sending selenium commands
+    )
     window_size = "1920,1080"
-    auth_data = {"email": "selenium", "password": "password"}
+    auth_data = {
+        "email": "selenium",
+        "password": "password",
+    }  # this data should be inserted into the database, selenium uses it for authentication
 
 
-MAIN_PAGE = f"http://{testing_setting.miminet_ip}"
+MAIN_PAGE = f"http://{testing_setting.miminet_docker_ip}"
 HOME_PAGE = f"{MAIN_PAGE}/home"
 LOGIN_PAGE = f"{MAIN_PAGE}//auth/login.html"
 
 
 class MiminetTester(WebDriver):
     """
-    Extends the selenium.webdriver.Chrome class,
+    Extends standard selenium class,
     adding new methods for convenient element interaction.
     """
 
@@ -36,7 +43,7 @@ class MiminetTester(WebDriver):
         Args:
             by (By): The locator strategy (e.g., By.ID, By.XPATH).
             element (str): The element locator (e.g., "myElementId", "//button[text()='Click Me']").
-            timeout (int): The maximum time in seconds to wait for the element to become clickable (default: 20).
+            timeout (int): The maximum time in seconds to wait (default: 20).
         """
         WebDriverWait(self, timeout).until(
             EC.element_to_be_clickable((by, element))
@@ -59,25 +66,61 @@ class MiminetTester(WebDriver):
         actions_chain.perform()
 
     def wait_until_appear(self, by: By, element: str, timeout=20):
+        """
+        Waits until the specified element is present in the page's DOM and becomes visible.
+
+        Args:
+            by (By): The locator strategy (e.g., By.ID, By.XPATH).
+            element (str): The element locator (e.g., "myElementId", "//button[text()='Click Me']").
+            timeout (int): The maximum time in seconds to wait (default: 20).
+        """
         WebDriverWait(self, timeout).until(
             EC.visibility_of_element_located((by, element))
         )
 
     def wait_until_disappear(self, by: By, element: str, timeout=20):
-        web_element = self.find_element(by, element)
+        """
+        Waits until the specified element disappears from the page's DOM and becomes invisible.
 
-        WebDriverWait(self, timeout).until(EC.invisibility_of_element(web_element))
+        Args:
+            by (By): The locator strategy (e.g., By.ID, By.XPATH).
+            element (str): The element locator (e.g., "myElementId", "//button[text()='Click Me']").
+            timeout (int): The maximum time in seconds to wait (default: 20).
+        """
+        WebDriverWait(self, timeout).until(
+            EC.invisibility_of_element_located((by, element))
+        )
 
     def wait_until_text(self, by: By, element: str, text: str, timeout=20):
-        """Wait until text appears in element"""
+        """
+        Waits until text appears in the element.
+
+        Args:
+            by (By): The locator strategy (e.g., By.ID, By.XPATH).
+            element (str): The element locator (e.g., "myElementId", "//button[text()='Click Me']").
+            timeout (int): The maximum time in seconds to wait (default: 20).
+        """
         WebDriverWait(self, timeout).until(
             EC.text_to_be_present_in_element((by, element), text)
         )
 
     def wait_for(self, condition, timeout=20):
-        WebDriverWait(self, timeout=timeout).until(lambda _: condition)
+        """Waits for a given condition to be true.
+
+        Args:
+            condition: A function that returns True when the condition is met.  This function have WebDriver instance as its only argument.
+            timeout (int): The maximum time in seconds to wait (default: 20).
+        """
+        WebDriverWait(self, timeout=timeout).until(condition)
 
     def select_by_value(self, by: By, element: str, value: int):
+        """Selects an option in a select element by its value.
+
+        Args:
+            by (By): The locator strategy (e.g., By.ID, By.XPATH).
+            element (str): The element locator (e.g., "myElementId", "//button[text()='Click Me']").
+            value: The value attribute of the option to select.
+        """
         select = Select(self.find_element(by, element))
         select.select_by_value(str(value))
 
@@ -135,10 +178,11 @@ def selenium(chrome_driver: MiminetTester, requester: Session):
     chrome_driver.get(MAIN_PAGE)
     cookies = requester.cookies
 
+    # gift cookies to selenium
     for cookie in cookies:
         if cookie.name and cookie.value and cookie.expires:
             selenium_cookie = {
-                "domain": testing_setting.miminet_ip,
+                "domain": testing_setting.miminet_docker_ip,
                 "expiry": cookie.expires,
                 "httpOnly": False,
                 "name": cookie.name,
