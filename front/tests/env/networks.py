@@ -14,7 +14,7 @@ from conftest import HOME_PAGE, MiminetTester
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import random
-from typing import Optional
+from typing import Optional, Collection
 
 
 class MiminetTestNetwork:
@@ -197,7 +197,7 @@ class MiminetTestNetwork:
 
         return packets
 
-    def compare_nodes(self, nodes: dict) -> bool:
+    def compare_nodes(self, nodes) -> bool:
         """
         Compares the current network's nodes (self.nodes) with a given set of nodes.
 
@@ -252,7 +252,7 @@ class MiminetTestNetwork:
 
         return True
 
-    def compare_edges(self, edges: dict) -> bool:
+    def compare_edges(self, edges) -> bool:
         """Checks if the edges of the current network are equal to a given set of edges.
 
         :Args:
