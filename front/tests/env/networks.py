@@ -199,7 +199,7 @@ class MiminetTestNetwork:
         ).send_keys(ip)
         self.__selenium.find_element(
             By.XPATH, Locator.Network.ConfigPanel.get_mask_field_xpath(link_id)
-        ).send_keys(mask)
+        ).send_keys(str(mask))
 
         self.submit_config()
 
