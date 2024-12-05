@@ -1,18 +1,13 @@
 import pytest
 from selenium.webdriver.common.by import By
 from conftest import MiminetTester
-from env.locators import (
-    CONFIG_CONFIRM_BUTTON_TEXT,
-    DEVICE_BUTTON_CLASSES,
-    CONFIG_NAME_FIELD_XPATH,
-    CONFIG_CONFIRM_BUTTON_XPATH,
-)
+from env.locators import Locator, DEVICE_BUTTON_CLASSES
 from env.networks import MiminetTestNetwork
 
 
 class TestDeviceNameChange:
     @pytest.fixture(scope="class")
-    def network_with_elements(self, selenium: MiminetTester):
+    def network(self, selenium: MiminetTester):
         network = MiminetTestNetwork(selenium)
         network.scatter_devices()
 
@@ -27,30 +22,33 @@ class TestDeviceNameChange:
     def test_device_name_change(
         self,
         selenium: MiminetTester,
-        network_with_elements: MiminetTestNetwork,
+        network: MiminetTestNetwork,
         device_class: str,
     ):
         """Just change the name of the device"""
-        selenium.get(network_with_elements.url)
+        selenium.get(network.url)
 
-        device_node = network_with_elements.get_nodes_by_class(device_class)[0]
-        network_with_elements.open_node_config(device_node)
+        # get first node
+        device_node = network.get_nodes_by_class(device_class)[0]
+        network.open_node_config(device_node)
 
+        # change device name
         new_device_name = "new name!"
-        # enter name
-        name_field = selenium.find_element(By.XPATH, CONFIG_NAME_FIELD_XPATH)
+        name_field = selenium.find_element(
+            By.XPATH, Locator.Network.ConfigPanel.CONFIG_NAME_FIELD["xpath"]
+        )
         name_field.clear()
         name_field.send_keys(new_device_name)
-        # press confirm button
-        selenium.find_element(By.XPATH, CONFIG_CONFIRM_BUTTON_XPATH).click()
 
-        selenium.wait_until_text(
-            By.XPATH, CONFIG_CONFIRM_BUTTON_XPATH, CONFIG_CONFIRM_BUTTON_TEXT
-        )
+        # save data
+        network.submit_config()
 
-        device_node = network_with_elements.get_nodes_by_class(device_class)[0]
+        # check that name has been updated
+        device_node = network.get_nodes_by_class(device_class)[0]
 
-        assert device_node["config"]["label"] == new_device_name
+        assert (
+            device_node["config"]["label"] == new_device_name
+        ), "Failed to change device name."
 
     @pytest.mark.parametrize(
         "device_class",
@@ -59,28 +57,27 @@ class TestDeviceNameChange:
     def test_device_name_change_to_long(
         self,
         selenium: MiminetTester,
-        network_with_elements: MiminetTestNetwork,
+        network: MiminetTestNetwork,
         device_class: str,
     ):
         """Change device name to long string and checks if it has been cut"""
-        device_node = network_with_elements.get_nodes_by_class(device_class)[0]
+        device_node = network.get_nodes_by_class(device_class)[0]
+        network.open_node_config(device_node)
 
-        network_with_elements.open_node_config(device_node)
+        # change device name
+        new_device_name = "a" * 100  # long name
 
-        # open config form
-
-        new_device_name = "a" * 100
-        # enter name
-        name_field = selenium.find_element(By.XPATH, CONFIG_NAME_FIELD_XPATH)
+        name_field = selenium.find_element(
+            By.XPATH, Locator.Network.ConfigPanel.CONFIG_NAME_FIELD["xpath"]
+        )
         name_field.clear()
         name_field.send_keys(new_device_name)
-        # press confirm button
-        selenium.find_element(By.XPATH, CONFIG_CONFIRM_BUTTON_XPATH).click()
 
-        selenium.wait_until_text(
-            By.XPATH, CONFIG_CONFIRM_BUTTON_XPATH, CONFIG_CONFIRM_BUTTON_TEXT
-        )
+        # save changes
+        network.submit_config()
+        device_node = network.get_nodes_by_class(device_class)[0]
 
-        device_node = network_with_elements.get_nodes_by_class(device_class)[0]
-
-        assert device_node["config"]["label"] != new_device_name
+        # check that the name was cut off
+        assert (
+            device_node["config"]["label"] != new_device_name
+        ), "The device name isn't limited in size."

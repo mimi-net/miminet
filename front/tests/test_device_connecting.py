@@ -9,9 +9,11 @@ class TestDeviceConnecting:
 
     @pytest.fixture(scope="class")
     def network(self, selenium: MiminetTester):
+        """Network with devices scattered across it."""
         network = MiminetTestNetwork(selenium)
         network.scatter_devices()
 
+        # add edges randomly
         for _ in range(self.EDGES_COUNT):
             source_node = random.choice(network.nodes)
             target_node = random.choice(network.nodes)
@@ -32,10 +34,11 @@ class TestDeviceConnecting:
         edge = network.edges[edge_id]
         network.open_edge_config(edge)
 
-        # label updates dynamically
+        # (label updates dynamically)
         from_label = selenium.execute_script("return $('#edge_source').val()")
         to_label = selenium.execute_script("return $('#edge_target').val()")
 
+        # compare source and target
         assert (
             edge["data"]["source"] == from_label and edge["data"]["target"] == to_label
         ), f"Can't find path from {from_label} to {to_label} in edges"

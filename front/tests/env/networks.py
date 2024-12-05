@@ -1,18 +1,6 @@
 from selenium.webdriver.common.by import By
-from env.locators import (
-    DEVICE_BUTTON_XPATHS,
-    network_top_button,
-    NETWORK_PANEL_XPATH,
-    device_button,
-    CONFIG_PANEL_XPATH,
-    NEW_NETWORK_BUTTON_XPATH,
-    EMULATE_BUTTON_XPATH,
-    EMULATE_PLAYER_PAUSE_SELECTOR,
-    DELETE_NETWORK_CONFIRM_BUTTON_XPATH,
-)
+from env.locators import Locator, DEVICE_BUTTON_SELECTORS
 from conftest import HOME_PAGE, MiminetTester
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 import random
 from typing import Optional
 
@@ -84,7 +72,9 @@ class MiminetTestNetwork:
         (str) : Network URL
         """
         self.__selenium.get(HOME_PAGE)
-        self.__selenium.find_element(By.XPATH, NEW_NETWORK_BUTTON_XPATH).click()
+        self.__selenium.find_element(
+            By.CSS_SELECTOR, Locator.MyNetworks.NEW_NETWORK_BUTTON['selector']
+        ).click()
 
         self.__url = self.__selenium.current_url
 
@@ -92,8 +82,8 @@ class MiminetTestNetwork:
         """Randomly add each network device to network."""
         self.__check_page()
 
-        for button_xpath in DEVICE_BUTTON_XPATHS:
-            device = self.__selenium.find_element(By.XPATH, button_xpath)
+        for button_id in DEVICE_BUTTON_SELECTORS:
+            device = self.__selenium.find_element(By.CSS_SELECTOR, button_id)
             self.add_node(device)
 
     def open_node_config(self, device_node: dict):
@@ -105,22 +95,20 @@ class MiminetTestNetwork:
         self.__check_page()
         device_class = device_node["classes"][0]
 
-        if device_class == device_button.host_class:
+        if device_class == Locator.Network.DevicePanel.HOST["device_class"]:
             self.__selenium.execute_script(f"ShowHostConfig({device_node})")
-        elif device_class == device_button.switch_class:
+        elif device_class == Locator.Network.DevicePanel.SWITCH["device_class"]:
             self.__selenium.execute_script(f"ShowSwitchConfig({device_node})")
-        elif device_class == device_button.hub_class:
+        elif device_class == Locator.Network.DevicePanel.HUB["device_class"]:
             self.__selenium.execute_script(f"ShowHubConfig({device_node})")
-        elif device_class == device_button.router_class:
+        elif device_class == Locator.Network.DevicePanel.ROUTER["device_class"]:
             self.__selenium.execute_script(f"ShowRouterConfig({device_node})")
-        elif device_class == device_button.server_class:
+        elif device_class == Locator.Network.DevicePanel.SERVER["device_class"]:
             self.__selenium.execute_script(f"ShowServerConfig({device_node})")
         else:
             raise Exception("Can't find device type !!!")
 
-        WebDriverWait(self.__selenium, 5).until(
-            EC.visibility_of_element_located((By.XPATH, CONFIG_PANEL_XPATH))
-        )
+        self.__selenium.wait_until_appear(By.CSS_SELECTOR, Locator.Network.CONFIG_PANEL['selector'])
 
     def open_edge_config(self, edge: dict):
         """Open configuration menu.
@@ -132,7 +120,21 @@ class MiminetTestNetwork:
         edge_id = edge["data"]["id"]
         self.__selenium.execute_script(f"ShowEdgeConfig('{edge_id}')")
 
-        self.__selenium.wait_until_appear(By.XPATH, CONFIG_PANEL_XPATH)
+        self.__selenium.wait_until_appear(By.CSS_SELECTOR, Locator.Network.CONFIG_PANEL['selector'])
+
+    def submit_config(self):
+        """Close configuration menu."""
+        self.__check_page()
+        self.__selenium.find_element(
+            By.XPATH, Locator.Network.ConfigPanel.SUBMIT_BUTTON["xpath"]
+        ).click()
+
+        self.__selenium.wait_until_text(
+            By.XPATH,
+            Locator.Network.ConfigPanel.SUBMIT_BUTTON["xpath"],
+            Locator.Network.ConfigPanel.SUBMIT_BUTTON["text"],
+            timeout=5,
+        )
 
     def add_node(
         self, device_button, x: Optional[float] = None, y: Optional[float] = None
@@ -147,7 +149,9 @@ class MiminetTestNetwork:
         self.__check_page()
         old_nodes_len = len(self.nodes)
 
-        panel = self.__selenium.find_element(By.XPATH, NETWORK_PANEL_XPATH)
+        panel = self.__selenium.find_element(
+            By.CSS_SELECTOR, Locator.Network.MAIN_PANEL['selector']
+        )
 
         x, y = random.uniform(0, 100) if x is None else x, (
             random.uniform(0, 100) if y is None else y
@@ -162,8 +166,8 @@ class MiminetTestNetwork:
         self.__check_page()
         old_edges_len = len(self.edges)
 
-        source_id = str(source_node["data"]["id"])
-        target_id = str(target_node["data"]["id"])
+        source_id = str(source_node["data"]['id'])
+        target_id = str(target_node["data"]['id'])
 
         self.__selenium.execute_script(f"AddEdge('{source_id}', '{target_id}')")
         self.__selenium.execute_script("DrawGraph()")
@@ -181,6 +185,16 @@ class MiminetTestNetwork:
 
         return filtered_nodes
 
+    def fill_link(self, ip: str, mask: int, node, link_id: int = 0):
+        """Fill link (in config panel) with ip address and mask."""
+        self.__check_page()
+
+        self.open_node_config(node)
+        self.__selenium.find_element(By.XPATH, Locator.Network.ConfigPanel.get_ip_field_xpath(link_id)).send_keys(ip)
+        self.__selenium.find_element(By.XPATH, Locator.Network.ConfigPanel.get_mask_field_xpath(link_id)).send_keys(mask)
+
+        self.submit_config()
+
     def run_emulation(self) -> dict:
         """Run miminet emulation.
 
@@ -188,122 +202,120 @@ class MiminetTestNetwork:
 
         :Return: Emulation packets."""
         self.__check_page()
-        self.__selenium.find_element(By.XPATH, EMULATE_BUTTON_XPATH).click()
+        self.__selenium.find_element(
+            By.CSS_SELECTOR, Locator.Network.EMULATE_BUTTON['selector']
+        ).click()
         self.__selenium.wait_until_appear(
-            By.CSS_SELECTOR, EMULATE_PLAYER_PAUSE_SELECTOR, 60
+            By.CSS_SELECTOR, Locator.Network.EMULATE_PLAYER_PAUSE_BUTTON['selector'], 60
         )
 
         packets = self.__selenium.execute_script("return packets")
 
         return packets
 
-    def compare_nodes(self, nodes) -> bool:
-        """
-        Compares the current network's nodes (self.nodes) with a given set of nodes.
-
-        :Returns:
-            True if the nodes are equal.
-
-        :Raises:
-            AssertionError
-        """
-        self.__check_page()
-
-        my_nodes = self.nodes
-
-        if not my_nodes:
-            raise ValueError("The current network has no nodes.")
-        if not nodes:
-            raise ValueError("Nodes for comparison can't be empty.")
-        if len(nodes) != len(my_nodes):
-            raise ValueError(
-                f"The number of nodes doesn't match. Expected {len(my_nodes)}, got {len(nodes)}."
-            )
-
-        for i, node in enumerate(nodes):
-            my_node = my_nodes[i]
-
-            if node["classes"] != my_node["classes"]:
-                raise ValueError(
-                    f"Node {i}: Classes don't match. Expected {my_node['classes']}, got {node['classes']}."
-                )
-
-            if len(node["interface"]) != len(my_node["interface"]):
-                raise ValueError(
-                    f"Node {i}: Number of interfaces doesn't match. Expected {len(my_node['interface'])}, got {len(node['interface'])}."
-                )
-
-            for iface_i, iface in enumerate(node["interface"]):
-                my_iface = my_node["interface"][iface_i]
-
-                if my_iface["ip"] != iface["ip"]:
-                    raise ValueError(
-                        f"Node {i}, Interface {iface_i}: IP addresses don't match. Expected {my_iface['ip']}, got {iface['ip']}."
-                    )
-                if my_iface["netmask"] != iface["netmask"]:
-                    raise ValueError(
-                        f"Node {i}, Interface {iface_i}: Netmasks don't match. Expected {my_iface['netmask']}, got {iface['netmask']}."
-                    )
-
-            if node["data"] != my_node["data"]:
-                raise ValueError(
-                    f"Node {i}: Data doesn't match. Expected {my_node['data']}, got {node['data']}."
-                )
-
-        return True
-
-    def compare_edges(self, edges) -> bool:
-        """Checks if the edges of the current network are equal to a given set of edges.
-
-        :Args:
-            b: A dictionary representing the edges to compare against.
-
-        :Returns:
-            True if the edges are equal.
-
-        :Raises:
-            AssertionError
-        """
-        self.__check_page()
-        my_edges = self.edges
-
-        if not my_edges:
-            raise ValueError("The current network has no edges.")
-        if not edges:
-            raise ValueError("Edges for comparison can't be empty.")
-
-        if len(edges) != len(my_edges):
-            raise ValueError(
-                f"Number of edges mismatch: Expected {len(my_edges)}, got {len(edges)}."
-            )
-
-        for i, edge in enumerate(edges):
-            my_edge = my_edges[i]
-
-            try:
-                edge_data = edge["data"]
-                my_edge_data = my_edge["data"]
-
-                if my_edge_data["source"] != edge_data["source"]:
-                    raise ValueError(
-                        f"Edges sources don't match at index {i}: Expected {edge_data['source']}, got {my_edge_data['source']}."
-                    )
-                if my_edge_data["target"] != edge_data["target"]:
-                    raise ValueError(
-                        f"Edges targets don't match at index {i}: Expected {edge_data['target']}, got {my_edge_data['target']}."
-                    )
-
-            except KeyError as e:
-                raise ValueError(f"Missing key in edge data at index {i}: {e}")
-
-        return True
-
     def delete(self):
         self.__check_page()
 
         self.__selenium.get(self.__url)
 
-        self.__selenium.find_element(By.XPATH, network_top_button.options_xpath).click()
+        self.__selenium.find_element(
+            By.CSS_SELECTOR, Locator.Network.TopButton.OPTIONS['selector']
+        ).click()
 
-        self.__selenium.wait_and_click(By.XPATH, network_top_button.delete_xpath)
-        self.__selenium.wait_and_click(By.XPATH, DELETE_NETWORK_CONFIRM_BUTTON_XPATH)
+        self.__selenium.wait_and_click(
+            By.CSS_SELECTOR, Locator.Network.TopButton.ModalButton.DELETE_MODAL_BUTTON['selector']
+        )
+        self.__selenium.wait_and_click(
+            By.CSS_SELECTOR, Locator.Network.TopButton.ModalButton.DELETE_SUBMIT_BUTTON['selector']
+        )
+
+def compare_nodes(nodes_a, nodes_b) -> bool:
+    """
+    Compare nodes.
+
+    :Returns:
+        True if the nodes are equal.
+
+    :Raises:
+        AssertionError
+    """
+    if not nodes_a:
+        raise ValueError("Nodes for comparison can't be empty.")
+    if not nodes_b:
+        raise ValueError("Nodes for comparison can't be empty.")
+    if len(nodes_b) != len(nodes_a):
+        raise ValueError(
+            f"The number of nodes doesn't match. Expected {len(nodes_a)}, got {len(nodes_b)}."
+        )
+
+    for i, node in enumerate(nodes_b):
+        my_node = nodes_a[i]
+
+        if node["classes"] != my_node["classes"]:
+            raise ValueError(
+                f"Node {i}: Classes don't match. Expected {my_node['classes']}, got {node['classes']}."
+            )
+
+        if len(node["interface"]) != len(my_node["interface"]):
+            raise ValueError(
+                f"Node {i}: Number of interfaces doesn't match. Expected {len(my_node['interface'])}, got {len(node['interface'])}."
+            )
+
+        for iface_i, iface in enumerate(node["interface"]):
+            my_iface = my_node["interface"][iface_i]
+
+            if my_iface["ip"] != iface["ip"]:
+                raise ValueError(
+                    f"Node {i}, Interface {iface_i}: IP addresses don't match. Expected {my_iface['ip']}, got {iface['ip']}."
+                )
+            if my_iface["netmask"] != iface["netmask"]:
+                raise ValueError(
+                    f"Node {i}, Interface {iface_i}: Netmasks don't match. Expected {my_iface['netmask']}, got {iface['netmask']}."
+                )
+
+        if node["data"] != my_node["data"]:
+            raise ValueError(
+                f"Node {i}: Data doesn't match. Expected {my_node['data']}, got {node['data']}."
+            )
+
+    return True
+
+def compare_edges(edges_a, edges_b) -> bool:
+    """Checks if the edges are equal.
+
+    :Returns:
+        True if the edges are equal.
+
+    :Raises:
+        AssertionError
+    """
+    if not edges_a:
+        raise ValueError("Edges for comparison can't be empty.")
+    if not edges_b:
+        raise ValueError("Edges for comparison can't be empty.")
+
+    if len(edges_b) != len(edges_a):
+        raise ValueError(
+            f"Number of edges mismatch: Expected {len(edges_a)}, got {len(edges_b)}."
+        )
+
+    for i, edge in enumerate(edges_b):
+        my_edge = edges_a[i]
+
+        try:
+            edge_data = edge["data"]
+            my_edge_data = my_edge["data"]
+
+            if my_edge_data["source"] != edge_data["source"]:
+                raise ValueError(
+                    f"Edges sources don't match at index {i}: Expected {edge_data['source']}, got {my_edge_data['source']}."
+                )
+            if my_edge_data["target"] != edge_data["target"]:
+                raise ValueError(
+                    f"Edges targets don't match at index {i}: Expected {edge_data['target']}, got {my_edge_data['target']}."
+                )
+
+        except KeyError as e:
+            raise ValueError(f"Missing key in edge data at index {i}: {e}")
+
+    return True

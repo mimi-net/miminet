@@ -55,13 +55,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 </div>
 
                 <div class="form-check pe-lg-1">
-                    <a class="btn btn-success btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" title="Сеть доступна по URL" onclick="urlCopyButton()">
+                    <a class="btn btn-success btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" id="share-network" title="Сеть доступна по URL" onclick="urlCopyButton()">
                         <i class='bx bx-share-alt fs-4 mx-1' ></i>
                     </a>
-                    <a class="btn btn-outline-primary btn-icon me-4" data-target="#ModalCopy" data-toggle="tooltip" data-bs-placement="bottom" title="Сохранить копию" onclick="CopyNetwork()">
+                    <a class="btn btn-outline-primary btn-icon me-4" data-target="#ModalCopy" id="copy-network" data-toggle="tooltip" data-bs-placement="bottom" title="Сохранить копию" onclick="CopyNetwork()">
                         <i class='bx bx-copy fs-4 mx-1'></i>
                     </a>
-                    <a {% if request.path != url_for('web_network_shared') %} class="btn btn-outline-primary btn-icon" {% else %} class="btn btn-outline-primary btn-icon disabled" {% endif %} href="#netConfigModal" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети"><i class='bx bx-cog fs-4 mx-1'></i></a>
+                    <a {% if request.path != url_for('web_network_shared') %} class="btn btn-outline-primary btn-icon" {% else %} class="btn btn-outline-primary btn-icon disabled" {% endif %} href="#netConfigModal" id="net-settings" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети"><i class='bx bx-cog fs-4 mx-1'></i></a>
                 </div>
             {% else %}
                 <div class="mx-auto navbar-nav">

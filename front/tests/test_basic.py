@@ -16,7 +16,8 @@ class TestAvailability:
         assert selenium.title == "Веб-эмулятор"
 
     @pytest.mark.parametrize(
-        "endpoint", ["/", "/auth/login.html", "/quiz/test/all", "/examples", "/home"]
+        "endpoint",
+        ["/", "/auth/login.html", "/quiz/test/all", "/examples", "/home", "/course"],
     )
     def test_pages_availability(self, endpoint: str, requester: Session):
         """Checks accessibility for specified pages"""
