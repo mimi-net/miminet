@@ -2,14 +2,19 @@ class PageLocator:
     class NavigationTopButton:
         """Top buttons for navigating Miminet."""
 
+        # "Мои сети"
         MY_NETWORKS_BUTTON = {"ID": "#my-networks-nav-item"}
+        # "Примеры сетей"
         NETWORK_EXAMPLES_BUTTON = {"ID": "#examples-nav-item"}
+        # "Тренажер"
         TRAINER_BUTTON = {"ID": "#trainer-nav-item"}
+        # "Учебные курсы"
         TRAINING_COURSES_BUTTON = {"ID": "#courses-nav-item"}
 
     class MyNetworks:
         """User's networks page"""
 
+        # "+ Новая сеть"
         NEW_NETWORK_BUTTON = {"ID": "#new-network-button"}
 
         def get_network_button_xpath(id: int):
@@ -28,7 +33,7 @@ class PageLocator:
         CONFIG_PANEL = {"ID": "#config_content"}
         # Modal dialog for user warnings
         MODAL_DIALOG = {"CLASS": "modal-dialog"}
-        # Button for emulation starting
+        # "Эмулировать"
         EMULATE_BUTTON = {"ID": "#NetworkEmulateButton", "TEXT": "Эмулировать"}
         # Pause animation button
         EMULATE_PLAYER_PAUSE_BUTTON = {"ID": "#NetworkPlayPauseButton"}
@@ -38,9 +43,12 @@ class PageLocator:
         class TopButton:
             """Data for identifying and locating top buttons of network interacting page."""
 
-            OPTIONS = {"XPATH": "/html/body/nav/div/div[2]/a[3]"}
-            DELETE = {"XPATH": "/html/body/div[1]/div/div/div[3]/button[1]"}
-            COPY = {"XPATH": "/html/body/nav/div/div[2]/a[2]"}
+            # Network settings
+            OPTIONS = {"ID": "#net-settings"}
+            # Copy network
+            COPY = {"ID": "#copy-network"}
+            # Share network
+            SHARE = {"ID": "#share-network"}
 
             class ModalButton:
                 # Copy
@@ -66,10 +74,12 @@ class PageLocator:
             # Network device name field
             CONFIG_NAME_FIELD = {"ID": "#config_host_name"}
             DEFAULT_GATEWAY_FIELD = {"ID": "#config_host_default_gw"}
+            # "Сохранить"
             SUBMIT_BUTTON = {
                 "ID": "#config_host_main_form_submit_button",
                 "TEXT": "Сохранить",
             }
+            # "Выполнить команду"
             JOB_SELECT = {"ID": "#config_host_job_select_field"}
 
             def get_ip_field_xpath(id: int = 0):
