@@ -1,6 +1,7 @@
 class Locator:
     class NavigationButton:
         """Top buttons for navigating Miminet."""
+
         # "Мои сети"
         MY_NETWORKS_BUTTON = {"selector": "#my-networks-nav-item"}
         # "Примеры сетей"
@@ -16,6 +17,7 @@ class Locator:
         # "+ Новая сеть"
         NEW_NETWORK_BUTTON = {"selector": "#new-network-button"}
 
+        @staticmethod
         def get_network_button_xpath(id: int):
             """XPATH for specific network from home page.
             Args:
@@ -25,6 +27,7 @@ class Locator:
 
     class Network:
         """Specific network page."""
+
         # Panel where you can place network devices and connect them
         MAIN_PANEL = {"selector": "#network_scheme"}
         # Network device (or edge) configuration panel
@@ -40,6 +43,7 @@ class Locator:
 
         class TopButton:
             """Data for identifying and locating top buttons of network interacting page."""
+
             # Network settings
             OPTIONS = {"selector": "#net-settings"}
             # Copy network
@@ -67,18 +71,26 @@ class Locator:
 
         class ConfigPanel:
             """Elements in the configuration panel."""
+
             # *I use XPATH here because every config form has different selectors*
             # Network device name field
-            CONFIG_NAME_FIELD = {'xpath': '/html/body/main/section/div/div/div[3]/form/div[1]/input'}
-            DEFAULT_GATEWAY_FIELD = {'xpath': '/html/body/main/section/div/div/div[3]/form/div[5]/input'}
+            CONFIG_NAME_FIELD = {
+                "xpath": "/html/body/main/section/div/div/div[3]/form/div[1]/input"
+            }
+            DEFAULT_GATEWAY_FIELD = {
+                "xpath": "/html/body/main/section/div/div/div[3]/form/div[5]/input"
+            }
             # "Сохранить"
             SUBMIT_BUTTON = {
                 "xpath": "/html/body/main/section/div/div/div[3]/form/button",
                 "text": "Сохранить",
             }
             # "Выполнить команду"
-            JOB_SELECT = {"xpath": '/html/body/main/section/div/div/div[3]/form/div[2]/select'}
+            JOB_SELECT = {
+                "xpath": "/html/body/main/section/div/div/div[3]/form/div[2]/select"
+            }
 
+            @staticmethod
             def get_ip_field_xpath(id: int = 0):
                 """XPATH for specific ip address from config panel.
                 Args:
@@ -86,6 +98,7 @@ class Locator:
                 assert id >= 0, "IP field can't have index less than 0."
                 return f"/html/body/main/section/div/div/div[3]/form/div[4]/input[{1 + id * 2}]"
 
+            @staticmethod
             def get_mask_field_xpath(id: int = 0):
                 """XPATH for specific subnet mask from config panel.
                 Args:

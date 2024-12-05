@@ -11,7 +11,9 @@ class TestSimpleEmulation:
     def network(self, selenium: MiminetTester):
         network = MiminetTestNetwork(selenium)
 
-        host_button = selenium.find_element(By.CSS_SELECTOR, Locator.Network.DevicePanel.HOST['selector'])
+        host_button = selenium.find_element(
+            By.CSS_SELECTOR, Locator.Network.DevicePanel.HOST["selector"]
+        )
 
         network.add_node(host_button)
         network.add_node(host_button)
@@ -20,21 +22,23 @@ class TestSimpleEmulation:
         network.add_edge(network.nodes[0], network.nodes[1])
 
         # configure host 1
-        network.fill_link("192.168.1.1", "24", node=network.nodes[0])
+        network.fill_link("192.168.1.1", 24, node=network.nodes[0])
         self.add_ping_job(selenium, "192.168.1.2")
 
         # configure host 2
-        network.fill_link("192.168.1.2", "24", node=network.nodes[1])
+        network.fill_link("192.168.1.2", 24, node=network.nodes[1])
 
         yield network
 
         network.delete()
 
     def add_ping_job(self, selenium: MiminetTester, ip: str):
-        selenium.select_by_value(By.XPATH, Locator.Network.ConfigPanel.JOB_SELECT['xpath'], 1)
+        selenium.select_by_value(
+            By.XPATH, Locator.Network.ConfigPanel.JOB_SELECT["xpath"], 1
+        )
 
-        PING_IP = Locator.Network.ConfigPanel.Job.PING_FIELD['selector']
-        
+        PING_IP = Locator.Network.ConfigPanel.Job.PING_FIELD["selector"]
+
         selenium.find_element(By.CSS_SELECTOR, PING_IP).send_keys(ip)
         selenium.find_element(By.CSS_SELECTOR, PING_IP).send_keys(Keys.RETURN)
         selenium.wait_until_disappear(By.CSS_SELECTOR, PING_IP)
@@ -51,10 +55,14 @@ class TestSimpleEmulation:
         nodes = network.nodes
         edges = network.edges
 
-        selenium.find_element(By.CSS_SELECTOR, Locator.Network.TopButton.COPY['selector']).click()
-        selenium.wait_until_appear(By.XPATH, Locator.Network.MODAL_DIALOG['xpath'])
+        selenium.find_element(
+            By.CSS_SELECTOR, Locator.Network.TopButton.COPY["selector"]
+        ).click()
+        selenium.wait_until_appear(By.XPATH, Locator.Network.MODAL_DIALOG["xpath"])
 
-        selenium.find_element(By.XPATH, Locator.Network.TopButton.ModalButton.GO_TO_EDITING['xpath']).click()
+        selenium.find_element(
+            By.XPATH, Locator.Network.TopButton.ModalButton.GO_TO_EDITING["xpath"]
+        ).click()
 
         copy_network = MiminetTestNetwork(selenium, selenium.current_url)
 

@@ -73,7 +73,7 @@ class MiminetTestNetwork:
         """
         self.__selenium.get(HOME_PAGE)
         self.__selenium.find_element(
-            By.CSS_SELECTOR, Locator.MyNetworks.NEW_NETWORK_BUTTON['selector']
+            By.CSS_SELECTOR, Locator.MyNetworks.NEW_NETWORK_BUTTON["selector"]
         ).click()
 
         self.__url = self.__selenium.current_url
@@ -108,7 +108,9 @@ class MiminetTestNetwork:
         else:
             raise Exception("Can't find device type !!!")
 
-        self.__selenium.wait_until_appear(By.CSS_SELECTOR, Locator.Network.CONFIG_PANEL['selector'])
+        self.__selenium.wait_until_appear(
+            By.CSS_SELECTOR, Locator.Network.CONFIG_PANEL["selector"]
+        )
 
     def open_edge_config(self, edge: dict):
         """Open configuration menu.
@@ -120,7 +122,9 @@ class MiminetTestNetwork:
         edge_id = edge["data"]["id"]
         self.__selenium.execute_script(f"ShowEdgeConfig('{edge_id}')")
 
-        self.__selenium.wait_until_appear(By.CSS_SELECTOR, Locator.Network.CONFIG_PANEL['selector'])
+        self.__selenium.wait_until_appear(
+            By.CSS_SELECTOR, Locator.Network.CONFIG_PANEL["selector"]
+        )
 
     def submit_config(self):
         """Close configuration menu."""
@@ -150,7 +154,7 @@ class MiminetTestNetwork:
         old_nodes_len = len(self.nodes)
 
         panel = self.__selenium.find_element(
-            By.CSS_SELECTOR, Locator.Network.MAIN_PANEL['selector']
+            By.CSS_SELECTOR, Locator.Network.MAIN_PANEL["selector"]
         )
 
         x, y = random.uniform(0, 100) if x is None else x, (
@@ -166,8 +170,8 @@ class MiminetTestNetwork:
         self.__check_page()
         old_edges_len = len(self.edges)
 
-        source_id = str(source_node["data"]['id'])
-        target_id = str(target_node["data"]['id'])
+        source_id = str(source_node["data"]["id"])
+        target_id = str(target_node["data"]["id"])
 
         self.__selenium.execute_script(f"AddEdge('{source_id}', '{target_id}')")
         self.__selenium.execute_script("DrawGraph()")
@@ -190,8 +194,12 @@ class MiminetTestNetwork:
         self.__check_page()
 
         self.open_node_config(node)
-        self.__selenium.find_element(By.XPATH, Locator.Network.ConfigPanel.get_ip_field_xpath(link_id)).send_keys(ip)
-        self.__selenium.find_element(By.XPATH, Locator.Network.ConfigPanel.get_mask_field_xpath(link_id)).send_keys(mask)
+        self.__selenium.find_element(
+            By.XPATH, Locator.Network.ConfigPanel.get_ip_field_xpath(link_id)
+        ).send_keys(ip)
+        self.__selenium.find_element(
+            By.XPATH, Locator.Network.ConfigPanel.get_mask_field_xpath(link_id)
+        ).send_keys(mask)
 
         self.submit_config()
 
@@ -203,10 +211,10 @@ class MiminetTestNetwork:
         :Return: Emulation packets."""
         self.__check_page()
         self.__selenium.find_element(
-            By.CSS_SELECTOR, Locator.Network.EMULATE_BUTTON['selector']
+            By.CSS_SELECTOR, Locator.Network.EMULATE_BUTTON["selector"]
         ).click()
         self.__selenium.wait_until_appear(
-            By.CSS_SELECTOR, Locator.Network.EMULATE_PLAYER_PAUSE_BUTTON['selector'], 60
+            By.CSS_SELECTOR, Locator.Network.EMULATE_PLAYER_PAUSE_BUTTON["selector"], 60
         )
 
         packets = self.__selenium.execute_script("return packets")
@@ -219,15 +227,18 @@ class MiminetTestNetwork:
         self.__selenium.get(self.__url)
 
         self.__selenium.find_element(
-            By.CSS_SELECTOR, Locator.Network.TopButton.OPTIONS['selector']
+            By.CSS_SELECTOR, Locator.Network.TopButton.OPTIONS["selector"]
         ).click()
 
         self.__selenium.wait_and_click(
-            By.CSS_SELECTOR, Locator.Network.TopButton.ModalButton.DELETE_MODAL_BUTTON['selector']
+            By.CSS_SELECTOR,
+            Locator.Network.TopButton.ModalButton.DELETE_MODAL_BUTTON["selector"],
         )
         self.__selenium.wait_and_click(
-            By.CSS_SELECTOR, Locator.Network.TopButton.ModalButton.DELETE_SUBMIT_BUTTON['selector']
+            By.CSS_SELECTOR,
+            Locator.Network.TopButton.ModalButton.DELETE_SUBMIT_BUTTON["selector"],
         )
+
 
 def compare_nodes(nodes_a, nodes_b) -> bool:
     """
@@ -279,6 +290,7 @@ def compare_nodes(nodes_a, nodes_b) -> bool:
             )
 
     return True
+
 
 def compare_edges(edges_a, edges_b) -> bool:
     """Checks if the edges are equal.
