@@ -1,6 +1,6 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from env.locators import Locator, DEVICE_BUTTON_SELECTORS
+from env.locators import Locator, DEVICE_BUTTON_SELECTORS, CONFIG_PANEL_DEVICE_TYPE
 from conftest import HOME_PAGE, MiminetTester
 import random
 from typing import Optional
@@ -202,8 +202,10 @@ class MiminetTestNetwork:
 class NodeConfig:
     def __init__(self, selenium: MiminetTester, node: dict):
         self.__selenium = selenium
-        # locator for config elements
-        self.__config_locator = Locator.Network.ConfigPanel.Host
+        # Locator with config elements
+        self.__config_locator: CONFIG_PANEL_DEVICE_TYPE = (
+            Locator.Network.ConfigPanel.Host
+        )
 
         self.__open_config(node)
 
@@ -246,6 +248,15 @@ class NodeConfig:
         """
         self.__check_config_open()
 
+        if (
+            isinstance(self.__config_locator, Locator.Network.ConfigPanel.Hub)
+            or isinstance(self.__config_locator, Locator.Network.ConfigPanel.Switch)
+            or isinstance(self.__config_locator, type)
+        ):
+            raise ValueError(
+                f"Can't add job for device with type: {str(self.__config_locator)}"
+            )
+
         self.__selenium.select_by_value(
             by, self.__config_locator.JOB_SELECT["selector"], job_id
         )
@@ -255,7 +266,7 @@ class NodeConfig:
                 self.__selenium.find_element(by, job_field).send_keys(job_value)
                 self.__selenium.find_element(by, job_field).send_keys(Keys.RETURN)
                 self.__selenium.wait_until_disappear(by, job_field)
-            except:
+            except Exception:
                 raise ValueError(
                     f"Can't add job. Job's field: {job_field}, value: {job_value}."
                 )
@@ -318,8 +329,8 @@ class NodeConfig:
             self.__selenium.find_element(
                 By.CSS_SELECTOR, self.__config_locator.MAIN_FORM["selector"]
             )
-        except:
-            raise Exception("Config panel isn't open")
+        except Exception:
+            raise Exception("Config panel isn't open.")
 
 
 def compare_nodes(nodes_a, nodes_b) -> bool:

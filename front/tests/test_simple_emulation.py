@@ -3,7 +3,6 @@ from conftest import MiminetTester
 from env.networks import MiminetTestNetwork, compare_nodes, compare_edges
 from selenium.webdriver.common.by import By
 from env.locators import Locator
-from selenium.webdriver.common.keys import Keys
 
 
 class TestSimpleEmulation:

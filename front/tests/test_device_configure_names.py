@@ -1,7 +1,6 @@
 import pytest
-from selenium.webdriver.common.by import By
 from conftest import MiminetTester
-from env.locators import Locator, DEVICE_BUTTON_CLASSES
+from env.locators import DEVICE_BUTTON_CLASSES
 from env.networks import MiminetTestNetwork
 
 

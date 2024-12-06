@@ -1,3 +1,6 @@
+from typing import Union, Type
+
+
 class Locator:
     class NavigationButton:
         """Top buttons for navigating Miminet."""
@@ -157,4 +160,12 @@ DEVICE_BUTTON_CLASSES = [
     Locator.Network.DevicePanel.HUB["device_class"],
     Locator.Network.DevicePanel.ROUTER["device_class"],
     Locator.Network.DevicePanel.SERVER["device_class"],
+]
+# Common type for ConfigPanel locators (especially for mypy)
+CONFIG_PANEL_DEVICE_TYPE = Union[
+    Type[Locator.Network.ConfigPanel.Host],
+    Type[Locator.Network.ConfigPanel.Switch],
+    Type[Locator.Network.ConfigPanel.Hub],
+    Type[Locator.Network.ConfigPanel.Router],
+    Type[Locator.Network.ConfigPanel.Server],
 ]
