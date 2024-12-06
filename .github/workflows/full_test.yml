@@ -30,13 +30,6 @@ jobs:
           cd front/
           sed -i 's/MODE=prod/MODE=dev/' .env
           docker compose up -d
-
-      - name: Wait for services to start
-        run: sleep 10
-
-      - name: Check availability
-        run: |
-          curl -f localhost
     
       - name: Start selenium
         run: |
@@ -53,6 +46,13 @@ jobs:
           sudo python3 -m pip install -U pip
           sudo python3 -m pip install pytest
           sudo python3 -m pip install selenium
+
+      - name: Wait for services to start
+        run: sleep 10
+
+      - name: Check availability
+        run: |
+          curl -f localhost
 
       - name: Run tests
         run: |
