@@ -76,6 +76,7 @@ class Locator:
             class Switch:
                 MAIN_FORM = {"selector": "#config_switch_main_form"}
                 NAME_FIELD = {"selector": "#switch_name"}
+                DEFAULT_GATEWAY_FIELD: dict[str, str] = {}
                 SUBMIT_BUTTON = {
                     "selector": "#config_switch_main_form_submit_button",
                     "text": "Сохранить",
@@ -100,10 +101,20 @@ class Locator:
                     PING_OPTION_IP_FIELD = {
                         "selector": "#config_host_ping_with_options_ip_input_field"
                     }
+                    TCP_VOLUME_IN_BYTES_FIELD = {
+                        "selector": "#config_host_send_tcp_data_size_input_field"
+                    }
+                    TCP_IP_FIELD = {
+                        "selector": "#config_host_send_tcp_data_ip_input_field"
+                    }
+                    TCP_PORT_FIELD = {
+                        "selector": "#config_host_send_tcp_data_port_input_field"
+                    }
 
             class Hub:
                 MAIN_FORM = {"selector": "#config_hub_main_form"}
                 NAME_FIELD = {"selector": "#config_hub_name"}
+                DEFAULT_GATEWAY_FIELD: dict[str, str] = {}
                 SUBMIT_BUTTON = {
                     "selector": "#config_hub_main_form_submit_button",
                     "text": "Сохранить",
@@ -130,6 +141,14 @@ class Locator:
                 }
                 JOB_SELECT = {"selector": "#config_server_job_select_field"}
 
+                class Job:
+                    TCP_IP_FIELD = {
+                        "selector": "#config_server_start_tcp_server_ip_input_field"
+                    }
+                    TCP_PORT_FIELD = {
+                        "selector": "#config_server_start_tcp_server_port_input_field"
+                    }
+
             # The only stable way for finding ip/subnet mask on page is using XPATHs
 
             @staticmethod
@@ -138,7 +157,7 @@ class Locator:
                 Args:
                     id (int): Position of link in links list. Starts from 0."""
                 assert id >= 0, "IP field can't have index less than 0."
-                return f"/html/body/main/section/div/div/div[3]/form/div[4]/input[{1 + id * 2}]"
+                return f"/html/body/main/section/div/div/div[3]/form/div[{4 + id * 2}]/input[1]"
 
             @staticmethod
             def get_mask_field_xpath(id: int = 0):
@@ -146,7 +165,7 @@ class Locator:
                 Args:
                     id (int): Position of link in links list. Starts from 0."""
                 assert id >= 0, "Subnet mask field can't have index less than 0."
-                return f"/html/body/main/section/div/div/div[3]/form/div[4]/input[{2 + id*2}]"
+                return f"/html/body/main/section/div/div/div[3]/form/div[{4 + id * 2}]/input[2]"
 
 
 DEVICE_BUTTON_SELECTORS = [

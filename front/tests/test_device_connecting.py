@@ -15,8 +15,8 @@ class TestDeviceConnecting:
 
         # add edges randomly
         for _ in range(self.EDGES_COUNT):
-            source_node = random.choice(network.nodes)
-            target_node = random.choice(network.nodes)
+            source_node = random.randint(0, len(network.nodes) - 1)
+            target_node = random.randint(0, len(network.nodes) - 1)
 
             network.add_edge(source_node, target_node)
 

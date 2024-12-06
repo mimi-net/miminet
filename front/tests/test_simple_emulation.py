@@ -1,6 +1,6 @@
 import pytest
 from conftest import MiminetTester
-from env.networks import MiminetTestNetwork, compare_nodes, compare_edges
+from env.networks import NodeType, MiminetTestNetwork, compare_nodes, compare_edges
 from selenium.webdriver.common.by import By
 from env.locators import Locator
 
@@ -10,18 +10,14 @@ class TestSimpleEmulation:
     def network(self, selenium: MiminetTester):
         network = MiminetTestNetwork(selenium)
 
-        host_button = selenium.find_element(
-            By.CSS_SELECTOR, Locator.Network.DevicePanel.HOST["selector"]
-        )
-
-        network.add_node(host_button)
-        network.add_node(host_button)
+        network.add_node(NodeType.Host)
+        network.add_node(NodeType.Host)
 
         # edge between hosts
-        network.add_edge(network.nodes[0], network.nodes[1])
+        network.add_edge(0, 1)
 
         # configure host 1
-        config0 = network.open_node_config(network.nodes[0])
+        config0 = network.open_node_config(0)
         config0.fill_link("192.168.1.1", 24)
         config0.add_job(
             1,
@@ -34,7 +30,7 @@ class TestSimpleEmulation:
         config0.submit()
 
         # configure host 2
-        config1 = network.open_node_config(network.nodes[1])
+        config1 = network.open_node_config(1)
         config1.fill_link("192.168.1.2", 24)
         config1.submit()
 
@@ -71,35 +67,38 @@ class TestSimpleEmulation:
 
         selenium.get(network.url)
 
-    JSON_NODES = {
-        "classes": ["host"],
-        "config": {"default_gw": "", "label": "host_1", "type": "host"},
-        "data": {"id": "host_1", "label": "host_1"},
-        "interface": [
-            {
-                "connect": "edge_m3x96snujpyaycfix1",
-                "id": "iface_86881674",
-                "ip": "192.168.1.1",
-                "name": "iface_86881674",
-                "netmask": 24,
-            }
-        ],
-        "position": {"x": 58.537498474121094, "y": 99},
-    }, {
-        "classes": ["host"],
-        "config": {"default_gw": "", "label": "host_2", "type": "host"},
-        "data": {"id": "host_2", "label": "host_2"},
-        "interface": [
-            {
-                "connect": "edge_m3x96snujpyaycfix1",
-                "id": "iface_77541826",
-                "ip": "192.168.1.2",
-                "name": "iface_77541826",
-                "netmask": 24,
-            }
-        ],
-        "position": {"x": 158.5374984741211, "y": 111},
-    }
+    JSON_NODES = [
+        {
+            "classes": ["host"],
+            "config": {"default_gw": "", "label": "host_1", "type": "host"},
+            "data": {"id": "host_1", "label": "host_1"},
+            "interface": [
+                {
+                    "connect": "edge_m3x96snujpyaycfix1",
+                    "id": "iface_86881674",
+                    "ip": "192.168.1.1",
+                    "name": "iface_86881674",
+                    "netmask": 24,
+                }
+            ],
+            "position": {"x": 58.537498474121094, "y": 99},
+        },
+        {
+            "classes": ["host"],
+            "config": {"default_gw": "", "label": "host_2", "type": "host"},
+            "data": {"id": "host_2", "label": "host_2"},
+            "interface": [
+                {
+                    "connect": "edge_m3x96snujpyaycfix1",
+                    "id": "iface_77541826",
+                    "ip": "192.168.1.2",
+                    "name": "iface_77541826",
+                    "netmask": 24,
+                }
+            ],
+            "position": {"x": 158.5374984741211, "y": 111},
+        },
+    ]
 
     JSON_EDGES = [
         {

@@ -1,9 +1,18 @@
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from env.locators import Locator, DEVICE_BUTTON_SELECTORS, CONFIG_PANEL_DEVICE_TYPE
+from env.locators import Locator, CONFIG_PANEL_DEVICE_TYPE
 from conftest import HOME_PAGE, MiminetTester
 import random
 from typing import Optional
+
+
+class NodeType:
+    """Node types for testing purposes."""
+
+    Host = (By.CSS_SELECTOR, Locator.Network.DevicePanel.HOST["selector"])
+    Switch = (By.CSS_SELECTOR, Locator.Network.DevicePanel.SWITCH["selector"])
+    Router = (By.CSS_SELECTOR, Locator.Network.DevicePanel.ROUTER["selector"])
+    Hub = (By.CSS_SELECTOR, Locator.Network.DevicePanel.HUB["selector"])
+    Server = (By.CSS_SELECTOR, Locator.Network.DevicePanel.SERVER["selector"])
 
 
 class MiminetTestNetwork:
@@ -83,20 +92,34 @@ class MiminetTestNetwork:
         """Randomly add each network device to network."""
         self.__check_page()
 
-        for button_id in DEVICE_BUTTON_SELECTORS:
-            device = self.__selenium.find_element(By.CSS_SELECTOR, button_id)
-            self.add_node(device)
+        node_types = [
+            NodeType.Host,
+            NodeType.Switch,
+            NodeType.Hub,
+            NodeType.Router,
+            NodeType.Server,
+        ]
+        random.shuffle(node_types)
 
-    def open_node_config(self, device_node: dict):
+        for type in node_types:
+            self.add_node(type)
+
+    def open_node_config(self, device_node: dict | int):
         """Opens the configuration menu for a specific node.
 
         Args:
-            device_node (dict): Device node for which to open the configuration.
+            device_node (dict | int): Device node for which to open the configuration.
 
         Returns:
             NodeConfig: An instance of the NodeConfig class, providing access to the configuration menu.
         """
-        return NodeConfig(self.__selenium, device_node)
+
+        if isinstance(device_node, int):
+            node = self.nodes[device_node]
+        else:
+            node = device_node
+
+        return NodeConfig(self.__selenium, node)
 
     def open_edge_config(self, edge: dict):
         """Open configuration menu.
@@ -113,7 +136,10 @@ class MiminetTestNetwork:
         )
 
     def add_node(
-        self, device_button, x: Optional[float] = None, y: Optional[float] = None
+        self,
+        device_type: tuple[str, str],
+        x: Optional[float] = None,
+        y: Optional[float] = None,
     ):
         """Add new device node.
 
@@ -135,17 +161,26 @@ class MiminetTestNetwork:
 
         local_x, local_y = self.__calc_panel_offset(panel, x, y)
 
+        device_button = self.__selenium.find_element(*device_type)
+
         self.__selenium.drag_and_drop(device_button, panel, local_x, local_y)
         self.__selenium.wait_for(lambda d: old_nodes_len < len(self.nodes))
 
-    def add_edge(self, source_node: dict, target_node: dict):
+    def add_edge(self, source_id: int, target_id: int):
         self.__check_page()
         old_edges_len = len(self.edges)
 
-        source_id = str(source_node["data"]["id"])
-        target_id = str(target_node["data"]["id"])
+        source_node, target_node = (
+            self.nodes[source_id],
+            self.nodes[target_id],
+        )
 
-        self.__selenium.execute_script(f"AddEdge('{source_id}', '{target_id}')")
+        source_data_id = str(source_node["data"]["id"])
+        target_data_id = str(target_node["data"]["id"])
+
+        self.__selenium.execute_script(
+            f"AddEdge('{source_data_id}', '{target_data_id}')"
+        )
         self.__selenium.execute_script("DrawGraph()")
         self.__selenium.execute_script("PostNodesEdges()")
 
@@ -265,17 +300,32 @@ class NodeConfig:
             raise ValueError(f"Node with type {self.__config_locator} can't use jobs")
 
         for job_field, job_value in args.items():
+            self.__selenium.save_screenshot("1.png")
             try:
                 self.__selenium.find_element(by, job_field).send_keys(job_value)
-                self.__selenium.find_element(by, job_field).send_keys(Keys.RETURN)
-                self.__selenium.wait_until_disappear(by, job_field)
-            except Exception:
+            except Exception as e:
                 raise ValueError(
-                    f"Can't add job. Job's field: {job_field}, value: {job_value}."
+                    f"Can't add job. Job's field: {job_field}, value: {job_value}. Error message: {str(e)}"
                 )
+
+        # press "enter" to save job and remove job menu
+        try:
+            self.submit()
+        except Exception:
+            raise ValueError("Check that the entered data is correct.")
+
+    def fill_default_gw(self, ip: str):
+        """Fill default gateway with data."""
+        self.__check_config_open()
+        gw_field = self.__selenium.find_element(
+            By.CSS_SELECTOR, self.__config_locator.DEFAULT_GATEWAY_FIELD["selector"]
+        )
+        gw_field.clear()
+        gw_field.send_keys(ip)
 
     def change_name(self, name: str):
         """Change device name."""
+        self.__check_config_open()
         name_field = self.__selenium.find_element(
             By.CSS_SELECTOR, self.__config_locator.NAME_FIELD["selector"]
         )
@@ -358,34 +408,37 @@ def compare_nodes(nodes_a, nodes_b) -> bool:
             f"The number of nodes doesn't match. Expected {len(nodes_a)}, got {len(nodes_b)}."
         )
 
-    for i, node in enumerate(nodes_b):
-        my_node = nodes_a[i]
+    for i, node_b in enumerate(nodes_b):
+        node_a = nodes_a[i]
 
-        if node["classes"] != my_node["classes"]:
+        if node_b["classes"] != node_a["classes"]:
             raise ValueError(
-                f"Node {i}: Classes don't match. Expected {my_node['classes']}, got {node['classes']}."
+                f"Node {i}: Classes don't match. Expected {node_a['classes']}, got {node_b['classes']}."
             )
 
-        if len(node["interface"]) != len(my_node["interface"]):
+        if len(node_b["interface"]) != len(node_a["interface"]):
             raise ValueError(
-                f"Node {i}: Number of interfaces doesn't match. Expected {len(my_node['interface'])}, got {len(node['interface'])}."
+                f"Node {i}: Number of interfaces doesn't match. Expected {len(node_a['interface'])}, got {len(node_b['interface'])}."
             )
 
-        for iface_i, iface in enumerate(node["interface"]):
-            my_iface = my_node["interface"][iface_i]
+        for iface_i, iface_b in enumerate(node_b["interface"]):
+            my_iface_a = node_a["interface"][iface_i]
 
-            if my_iface["ip"] != iface["ip"]:
+            if "ip" in my_iface_a.keys() and my_iface_a["ip"] != iface_b["ip"]:
                 raise ValueError(
-                    f"Node {i}, Interface {iface_i}: IP addresses don't match. Expected {my_iface['ip']}, got {iface['ip']}."
+                    f"Node {i}, Interface {iface_i}: IP addresses don't match. Expected {my_iface_a['ip']}, got {iface_b['ip']}."
                 )
-            if my_iface["netmask"] != iface["netmask"]:
+            if (
+                "netmask" in my_iface_a.keys()
+                and my_iface_a["netmask"] != iface_b["netmask"]
+            ):
                 raise ValueError(
-                    f"Node {i}, Interface {iface_i}: Netmasks don't match. Expected {my_iface['netmask']}, got {iface['netmask']}."
+                    f"Node {i}, Interface {iface_i}: Netmasks don't match. Expected {my_iface_a['netmask']}, got {iface_b['netmask']}."
                 )
 
-        if node["data"] != my_node["data"]:
+        if node_b["data"] != node_a["data"]:
             raise ValueError(
-                f"Node {i}: Data doesn't match. Expected {my_node['data']}, got {node['data']}."
+                f"Node {i}: Data doesn't match. Expected {node_a['data']}, got {node_b['data']}."
             )
 
     return True
