@@ -30,24 +30,21 @@ class TestDeviceNameChange:
 
         # get first node
         device_node = network.get_nodes_by_class(device_class)[0]
-        network.open_node_config(device_node)
+        config = network.open_node_config(device_node)
 
         # change device name
         new_device_name = "new name!"
-        name_field = selenium.find_element(
-            By.XPATH, Locator.Network.ConfigPanel.CONFIG_NAME_FIELD["xpath"]
-        )
-        name_field.clear()
-        name_field.send_keys(new_device_name)
+        config.change_name(new_device_name)
 
         # save data
-        network.submit_config()
+        config.submit()
 
         # check that name has been updated
         device_node = network.get_nodes_by_class(device_class)[0]
 
         assert (
             device_node["config"]["label"] == new_device_name
+            and config.name == new_device_name
         ), "Failed to change device name."
 
     @pytest.mark.parametrize(
@@ -62,22 +59,18 @@ class TestDeviceNameChange:
     ):
         """Change device name to long string and checks if it has been cut"""
         device_node = network.get_nodes_by_class(device_class)[0]
-        network.open_node_config(device_node)
+        config = network.open_node_config(device_node)
 
         # change device name
         new_device_name = "a" * 100  # long name
-
-        name_field = selenium.find_element(
-            By.XPATH, Locator.Network.ConfigPanel.CONFIG_NAME_FIELD["xpath"]
-        )
-        name_field.clear()
-        name_field.send_keys(new_device_name)
+        config.change_name(new_device_name)
 
         # save changes
-        network.submit_config()
+        config.submit()
         device_node = network.get_nodes_by_class(device_class)[0]
 
         # check that the name was cut off
         assert (
             device_node["config"]["label"] != new_device_name
+            and new_device_name != config.name
         ), "The device name isn't limited in size."

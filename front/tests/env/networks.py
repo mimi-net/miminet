@@ -1,4 +1,5 @@
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from env.locators import Locator, DEVICE_BUTTON_SELECTORS
 from conftest import HOME_PAGE, MiminetTester
 import random
@@ -87,30 +88,15 @@ class MiminetTestNetwork:
             self.add_node(device)
 
     def open_node_config(self, device_node: dict):
-        """Open configuration menu.
+        """Opens the configuration menu for a specific node.
 
         Args:
-            device_node (dict): Node for which the menu opens
+            device_node (dict): Device node for which to open the configuration.
+
+        Returns:
+            NodeConfig: An instance of the NodeConfig class, providing access to the configuration menu.
         """
-        self.__check_page()
-        device_class = device_node["classes"][0]
-
-        if device_class == Locator.Network.DevicePanel.HOST["device_class"]:
-            self.__selenium.execute_script(f"ShowHostConfig({device_node})")
-        elif device_class == Locator.Network.DevicePanel.SWITCH["device_class"]:
-            self.__selenium.execute_script(f"ShowSwitchConfig({device_node})")
-        elif device_class == Locator.Network.DevicePanel.HUB["device_class"]:
-            self.__selenium.execute_script(f"ShowHubConfig({device_node})")
-        elif device_class == Locator.Network.DevicePanel.ROUTER["device_class"]:
-            self.__selenium.execute_script(f"ShowRouterConfig({device_node})")
-        elif device_class == Locator.Network.DevicePanel.SERVER["device_class"]:
-            self.__selenium.execute_script(f"ShowServerConfig({device_node})")
-        else:
-            raise Exception("Can't find device type !!!")
-
-        self.__selenium.wait_until_appear(
-            By.CSS_SELECTOR, Locator.Network.CONFIG_PANEL["selector"]
-        )
+        return NodeConfig(self.__selenium, device_node)
 
     def open_edge_config(self, edge: dict):
         """Open configuration menu.
@@ -124,20 +110,6 @@ class MiminetTestNetwork:
 
         self.__selenium.wait_until_appear(
             By.CSS_SELECTOR, Locator.Network.CONFIG_PANEL["selector"]
-        )
-
-    def submit_config(self):
-        """Close configuration menu."""
-        self.__check_page()
-        self.__selenium.find_element(
-            By.XPATH, Locator.Network.ConfigPanel.SUBMIT_BUTTON["xpath"]
-        ).click()
-
-        self.__selenium.wait_until_text(
-            By.XPATH,
-            Locator.Network.ConfigPanel.SUBMIT_BUTTON["xpath"],
-            Locator.Network.ConfigPanel.SUBMIT_BUTTON["text"],
-            timeout=5,
         )
 
     def add_node(
@@ -189,20 +161,6 @@ class MiminetTestNetwork:
 
         return filtered_nodes
 
-    def fill_link(self, ip: str, mask: int, node, link_id: int = 0):
-        """Fill link (in config panel) with ip address and mask."""
-        self.__check_page()
-
-        self.open_node_config(node)
-        self.__selenium.find_element(
-            By.XPATH, Locator.Network.ConfigPanel.get_ip_field_xpath(link_id)
-        ).send_keys(ip)
-        self.__selenium.find_element(
-            By.XPATH, Locator.Network.ConfigPanel.get_mask_field_xpath(link_id)
-        ).send_keys(str(mask))
-
-        self.submit_config()
-
     def run_emulation(self) -> dict:
         """Run miminet emulation.
 
@@ -222,6 +180,7 @@ class MiminetTestNetwork:
         return packets
 
     def delete(self):
+        """Delete current network."""
         self.__check_page()
 
         self.__selenium.get(self.__url)
@@ -232,12 +191,135 @@ class MiminetTestNetwork:
 
         self.__selenium.wait_and_click(
             By.CSS_SELECTOR,
-            Locator.Network.TopButton.ModalButton.DELETE_MODAL_BUTTON["selector"],
+            Locator.Network.ModalButton.DELETE_MODAL_BUTTON["selector"],
         )
         self.__selenium.wait_and_click(
             By.CSS_SELECTOR,
-            Locator.Network.TopButton.ModalButton.DELETE_SUBMIT_BUTTON["selector"],
+            Locator.Network.ModalButton.DELETE_SUBMIT_BUTTON["selector"],
         )
+
+
+class NodeConfig:
+    def __init__(self, selenium: MiminetTester, node: dict):
+        self.__selenium = selenium
+        # locator for config elements
+        self.__config_locator = Locator.Network.ConfigPanel.Host
+
+        self.__open_config(node)
+
+    @property
+    def name(self):
+        """Current name of the network device displayed in the configuration."""
+        name = self.__selenium.find_element(
+            By.CSS_SELECTOR, self.__config_locator.NAME_FIELD["selector"]
+        ).get_attribute("value")
+
+        return name
+
+    @property
+    def default_gw(self):
+        """Current default gateway of the network device displayed in the configuration."""
+        gw = self.__selenium.find_element(
+            By.CSS_SELECTOR, self.__config_locator.DEFAULT_GATEWAY_FIELD["selector"]
+        ).get_attribute("value")
+
+        return gw
+
+    def fill_link(self, ip: str, mask: int, link_id: int = 0):
+        """Fill link (in config panel) with ip address and mask."""
+        self.__check_config_open()
+
+        self.__selenium.find_element(
+            By.XPATH, Locator.Network.ConfigPanel.get_ip_field_xpath(link_id)
+        ).send_keys(ip)
+        self.__selenium.find_element(
+            By.XPATH, Locator.Network.ConfigPanel.get_mask_field_xpath(link_id)
+        ).send_keys(str(mask))
+
+    def add_job(self, job_id: int, args: dict[str, str], by=By.CSS_SELECTOR):
+        """Adds a job to the system using Selenium.
+
+        Args:
+            job_id: The ID of the job (currently unused in the implementation).
+            args: A dictionary where keys represent locators for job fields and values
+                  represent the corresponding values to be entered.
+        """
+        self.__check_config_open()
+
+        self.__selenium.select_by_value(
+            by, self.__config_locator.JOB_SELECT["selector"], job_id
+        )
+
+        for job_field, job_value in args.items():
+            try:
+                self.__selenium.find_element(by, job_field).send_keys(job_value)
+                self.__selenium.find_element(by, job_field).send_keys(Keys.RETURN)
+                self.__selenium.wait_until_disappear(by, job_field)
+            except:
+                raise ValueError(
+                    f"Can't add job. Job's field: {job_field}, value: {job_value}."
+                )
+
+    def change_name(self, name: str):
+        """Change device name."""
+        name_field = self.__selenium.find_element(
+            By.CSS_SELECTOR, self.__config_locator.NAME_FIELD["selector"]
+        )
+        name_field.clear()
+        name_field.send_keys(name)
+
+    def submit(self):
+        """Submit configuration."""
+        self.__check_config_open()
+        self.__selenium.find_element(
+            By.CSS_SELECTOR, self.__config_locator.SUBMIT_BUTTON["selector"]
+        ).click()
+
+        self.__selenium.wait_until_text(
+            By.CSS_SELECTOR,
+            self.__config_locator.SUBMIT_BUTTON["selector"],
+            self.__config_locator.SUBMIT_BUTTON["text"],
+            timeout=5,
+        )
+
+    def __open_config(self, node: dict):
+        device_class = node["classes"][0]
+
+        if device_class == Locator.Network.DevicePanel.HOST["device_class"]:
+            self.__selenium.execute_script(f"ShowHostConfig({node})")
+            self.__config_locator = Locator.Network.ConfigPanel.Host
+
+        elif device_class == Locator.Network.DevicePanel.SWITCH["device_class"]:
+            self.__selenium.execute_script(f"ShowSwitchConfig({node})")
+            self.__config_locator = Locator.Network.ConfigPanel.Switch
+
+        elif device_class == Locator.Network.DevicePanel.HUB["device_class"]:
+            self.__selenium.execute_script(f"ShowHubConfig({node})")
+            self.__config_locator = Locator.Network.ConfigPanel.Hub
+
+        elif device_class == Locator.Network.DevicePanel.ROUTER["device_class"]:
+            self.__selenium.execute_script(f"ShowRouterConfig({node})")
+            self.__config_locator = Locator.Network.ConfigPanel.Router
+
+        elif device_class == Locator.Network.DevicePanel.SERVER["device_class"]:
+            self.__selenium.execute_script(f"ShowServerConfig({node})")
+            self.__config_locator = Locator.Network.ConfigPanel.Server
+
+        else:
+            raise Exception("Can't find device type !!!")
+
+        self.__selenium.wait_until_appear(
+            By.CSS_SELECTOR, self.__config_locator.MAIN_FORM["selector"]
+        )
+
+    def __check_config_open(self):
+        """Check that the config is open."""
+        try:
+            self.__selenium.find_element(
+                By.CSS_SELECTOR, self.__config_locator.MAIN_FORM["selector"]
+            )
+        except:
+            raise Exception("Config panel isn't open")
 
 
 def compare_nodes(nodes_a, nodes_b) -> bool:

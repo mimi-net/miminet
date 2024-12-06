@@ -22,26 +22,26 @@ class TestSimpleEmulation:
         network.add_edge(network.nodes[0], network.nodes[1])
 
         # configure host 1
-        network.fill_link("192.168.1.1", 24, node=network.nodes[0])
-        self.add_ping_job(selenium, "192.168.1.2")
+        config0 = network.open_node_config(network.nodes[0])
+        config0.fill_link("192.168.1.1", 24)
+        config0.add_job(
+            1,
+            {
+                Locator.Network.ConfigPanel.Host.Job.PING_FIELD[
+                    "selector"
+                ]: "192.168.1.2"
+            },
+        )
+        config0.submit()
 
         # configure host 2
-        network.fill_link("192.168.1.2", 24, node=network.nodes[1])
+        config1 = network.open_node_config(network.nodes[1])
+        config1.fill_link("192.168.1.2", 24)
+        config1.submit()
 
         yield network
 
         network.delete()
-
-    def add_ping_job(self, selenium: MiminetTester, ip: str):
-        selenium.select_by_value(
-            By.XPATH, Locator.Network.ConfigPanel.JOB_SELECT["xpath"], 1
-        )
-
-        PING_IP = Locator.Network.ConfigPanel.Job.PING_FIELD["selector"]
-
-        selenium.find_element(By.CSS_SELECTOR, PING_IP).send_keys(ip)
-        selenium.find_element(By.CSS_SELECTOR, PING_IP).send_keys(Keys.RETURN)
-        selenium.wait_until_disappear(By.CSS_SELECTOR, PING_IP)
 
     def test_ping_emulation(self, selenium: MiminetTester, network: MiminetTestNetwork):
         assert compare_nodes(network.nodes, self.JSON_NODES)
@@ -61,7 +61,7 @@ class TestSimpleEmulation:
         selenium.wait_until_appear(By.XPATH, Locator.Network.MODAL_DIALOG["xpath"])
 
         selenium.find_element(
-            By.XPATH, Locator.Network.TopButton.ModalButton.GO_TO_EDITING["xpath"]
+            By.XPATH, Locator.Network.ModalButton.GO_TO_EDITING["xpath"]
         ).click()
 
         copy_network = MiminetTestNetwork(selenium, selenium.current_url)
