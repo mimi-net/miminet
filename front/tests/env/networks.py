@@ -200,6 +200,11 @@ class MiminetTestNetwork:
 
 
 class NodeConfig:
+    """
+    Represents a node configuration panel.
+    You can easily add new jobs, links or set different values.
+    """
+
     def __init__(self, selenium: MiminetTester, node: dict):
         self.__selenium = selenium
         # Locator with config elements
@@ -249,17 +254,15 @@ class NodeConfig:
         self.__check_config_open()
 
         if (
-            isinstance(self.__config_locator, Locator.Network.ConfigPanel.Hub)
-            or isinstance(self.__config_locator, Locator.Network.ConfigPanel.Switch)
-            or isinstance(self.__config_locator, type)
+            self.__config_locator == Locator.Network.ConfigPanel.Host
+            or self.__config_locator == Locator.Network.ConfigPanel.Switch
+            or self.__config_locator == Locator.Network.ConfigPanel.Server
         ):
-            raise ValueError(
-                f"Can't add job for device with type: {str(self.__config_locator)}"
+            self.__selenium.select_by_value(
+                by, self.__config_locator.JOB_SELECT["selector"], job_id
             )
-
-        self.__selenium.select_by_value(
-            by, self.__config_locator.JOB_SELECT["selector"], job_id
-        )
+        else:
+            raise ValueError(f"Node with type {self.__config_locator} can't use jobs")
 
         for job_field, job_value in args.items():
             try:
@@ -331,6 +334,9 @@ class NodeConfig:
             )
         except Exception:
             raise Exception("Config panel isn't open.")
+
+
+# ----- Compare functions -----
 
 
 def compare_nodes(nodes_a, nodes_b) -> bool:

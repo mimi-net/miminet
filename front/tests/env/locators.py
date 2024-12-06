@@ -80,6 +80,7 @@ class Locator:
                     "selector": "#config_switch_main_form_submit_button",
                     "text": "Сохранить",
                 }
+                JOB_SELECT: dict[str, str] = {}
 
             class Host:
                 MAIN_FORM = {"selector": "#config_main_form"}
@@ -107,6 +108,7 @@ class Locator:
                     "selector": "#config_hub_main_form_submit_button",
                     "text": "Сохранить",
                 }
+                JOB_SELECT: dict[str, str] = {}
 
             class Router:
                 MAIN_FORM = {"selector": "#config_main_form"}
