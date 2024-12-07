@@ -1,8 +1,8 @@
 from selenium.webdriver.common.by import By
-from env.locators import Locator, CONFIG_PANEL_DEVICE_TYPE
+from env.locators import Locator
 from conftest import HOME_PAGE, MiminetTester
 import random
-from typing import Optional
+from typing import Optional, Type
 
 
 class NodeType:
@@ -249,7 +249,7 @@ class NodeConfig:
     def __init__(self, selenium: MiminetTester, node: dict):
         self.__selenium = selenium
         # Locator with config elements
-        self.__config_locator: CONFIG_PANEL_DEVICE_TYPE = (
+        self.__config_locator: Type[Locator.Network.ConfigPanel.CommonDevice] = (
             Locator.Network.ConfigPanel.Host
         )
 

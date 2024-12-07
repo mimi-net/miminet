@@ -1,6 +1,3 @@
-from typing import Union, Type
-
-
 class Locator:
     class NavigationButton:
         """Top buttons for navigating Miminet."""
@@ -73,7 +70,16 @@ class Locator:
         class ConfigPanel:
             """Elements in the configuration panel."""
 
-            class Switch:
+            class CommonDevice:
+                """Common type for ConfigPanel locators (add especially for mypy)."""
+
+                MAIN_FORM: dict[str, str] = {}
+                NAME_FIELD: dict[str, str] = {}
+                DEFAULT_GATEWAY_FIELD: dict[str, str] = {}
+                SUBMIT_BUTTON: dict[str, str] = {}
+                JOB_SELECT: dict[str, str] = {}
+
+            class Switch(CommonDevice):
                 MAIN_FORM = {"selector": "#config_switch_main_form"}
                 NAME_FIELD = {"selector": "#switch_name"}
                 DEFAULT_GATEWAY_FIELD: dict[str, str] = {}
@@ -83,7 +89,7 @@ class Locator:
                 }
                 JOB_SELECT: dict[str, str] = {}
 
-            class Host:
+            class Host(CommonDevice):
                 MAIN_FORM = {"selector": "#config_main_form"}
                 NAME_FIELD = {"selector": "#config_host_name"}
                 DEFAULT_GATEWAY_FIELD = {"selector": "#config_host_default_gw"}
@@ -120,7 +126,7 @@ class Locator:
                         "selector": "#config_host_send_udp_data_port_input_field"
                     }
 
-            class Hub:
+            class Hub(CommonDevice):
                 MAIN_FORM = {"selector": "#config_hub_main_form"}
                 NAME_FIELD = {"selector": "#config_hub_name"}
                 DEFAULT_GATEWAY_FIELD: dict[str, str] = {}
@@ -130,7 +136,7 @@ class Locator:
                 }
                 JOB_SELECT: dict[str, str] = {}
 
-            class Router:
+            class Router(CommonDevice):
                 MAIN_FORM = {"selector": "#config_main_form"}
                 NAME_FIELD = {"selector": "#config_router_name"}
                 DEFAULT_GATEWAY_FIELD = {"selector": "#config_router_default_gw"}
@@ -140,7 +146,7 @@ class Locator:
                 }
                 JOB_SELECT = {"selector": "#config_router_job_select_field"}
 
-            class Server:
+            class Server(CommonDevice):
                 MAIN_FORM = {"selector": "#config_main_form"}
                 NAME_FIELD = {"selector": "#config_server_name"}
                 DEFAULT_GATEWAY_FIELD = {"selector": "#config_server_default_gw"}
@@ -196,12 +202,4 @@ DEVICE_BUTTON_CLASSES = [
     Locator.Network.DevicePanel.HUB["device_class"],
     Locator.Network.DevicePanel.ROUTER["device_class"],
     Locator.Network.DevicePanel.SERVER["device_class"],
-]
-# Common type for ConfigPanel locators (especially for mypy)
-CONFIG_PANEL_DEVICE_TYPE = Union[
-    Type[Locator.Network.ConfigPanel.Host],
-    Type[Locator.Network.ConfigPanel.Switch],
-    Type[Locator.Network.ConfigPanel.Hub],
-    Type[Locator.Network.ConfigPanel.Router],
-    Type[Locator.Network.ConfigPanel.Server],
 ]
