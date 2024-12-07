@@ -110,6 +110,15 @@ class Locator:
                     TCP_PORT_FIELD = {
                         "selector": "#config_host_send_tcp_data_port_input_field"
                     }
+                    UDP_VOLUME_IN_BYTES_FIELD = {
+                        "selector": "#config_host_send_udp_data_size_input_field"
+                    }
+                    UDP_IP_FIELD = {
+                        "selector": "#config_host_send_udp_data_ip_input_field"
+                    }
+                    UDP_PORT_FIELD = {
+                        "selector": "#config_host_send_udp_data_port_input_field"
+                    }
 
             class Hub:
                 MAIN_FORM = {"selector": "#config_hub_main_form"}
@@ -147,6 +156,12 @@ class Locator:
                     }
                     TCP_PORT_FIELD = {
                         "selector": "#config_server_start_tcp_server_port_input_field"
+                    }
+                    UDP_IP_FIELD = {
+                        "selector": "#config_server_start_udp_server_ip_input_field"
+                    }
+                    UDP_PORT_FIELD = {
+                        "selector": "#config_server_start_udp_server_port_input_field"
                     }
 
             # The only stable way for finding ip/subnet mask on page is using XPATHs

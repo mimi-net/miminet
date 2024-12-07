@@ -10,17 +10,18 @@ from env.networks import (
 from env.locators import Locator
 
 
-class TestTcp:
+class TestTcpUdp:
     """
     This test build complex network,
     using switch, hub, tcp server and host.
 
-    It checks not only the TCP connection setup,
+    It checks not only the TCP/UDP connection setup,
     but also the default gateway settings.
     """
 
-    @pytest.fixture(scope="class")
-    def network(self, selenium: MiminetTester):
+    @pytest.fixture(scope="class", params=["tcp", "udp"])
+    def network(self, selenium: MiminetTester, request):
+        protocol = request.param
         network = MiminetTestNetwork(selenium)
 
         # nodes
@@ -40,18 +41,41 @@ class TestTcp:
         host_config: NodeConfig = network.open_node_config(0)
         host_config.fill_link("192.168.1.1", 24)
         host_config.fill_default_gw("192.168.1.2")
-        host_config.add_job(
-            4,
-            {
-                Locator.Network.ConfigPanel.Host.Job.TCP_VOLUME_IN_BYTES_FIELD[
-                    "selector"
-                ]: "65535",
-                Locator.Network.ConfigPanel.Host.Job.TCP_IP_FIELD[
-                    "selector"
-                ]: "10.0.0.1",
-                Locator.Network.ConfigPanel.Host.Job.TCP_PORT_FIELD["selector"]: "3000",
-            },
-        )
+        job_params = ("65535", "10.0.0.1", "3000")
+
+        if protocol == "tcp":
+            host_config.add_job(
+                4,
+                {
+                    Locator.Network.ConfigPanel.Host.Job.TCP_VOLUME_IN_BYTES_FIELD[
+                        "selector"
+                    ]: job_params[0],
+                    Locator.Network.ConfigPanel.Host.Job.TCP_IP_FIELD[
+                        "selector"
+                    ]: job_params[1],
+                    Locator.Network.ConfigPanel.Host.Job.TCP_PORT_FIELD[
+                        "selector"
+                    ]: job_params[2],
+                },
+            )
+        elif protocol == "udp":
+            host_config.add_job(
+                3,
+                {
+                    Locator.Network.ConfigPanel.Host.Job.UDP_VOLUME_IN_BYTES_FIELD[
+                        "selector"
+                    ]: job_params[0],
+                    Locator.Network.ConfigPanel.Host.Job.UDP_IP_FIELD[
+                        "selector"
+                    ]: job_params[1],
+                    Locator.Network.ConfigPanel.Host.Job.UDP_PORT_FIELD[
+                        "selector"
+                    ]: job_params[2],
+                },
+            )
+        else:
+            raise ValueError(f"Got unsupported protocol: {protocol}.")
+
         host_config.submit()
 
         # config router
@@ -64,26 +88,44 @@ class TestTcp:
         server_config: NodeConfig = network.open_node_config(4)
         server_config.fill_link("10.0.0.1", 24)
         server_config.fill_default_gw("10.0.0.2")
-        server_config.add_job(
-            201,
-            {
-                Locator.Network.ConfigPanel.Server.Job.TCP_IP_FIELD[
-                    "selector"
-                ]: "10.0.0.1",
-                Locator.Network.ConfigPanel.Server.Job.TCP_PORT_FIELD[
-                    "selector"
-                ]: "3000",
-            },
-        )
+
+        if protocol == "tcp":
+            server_config.add_job(
+                201,
+                {
+                    Locator.Network.ConfigPanel.Server.Job.TCP_IP_FIELD[
+                        "selector"
+                    ]: job_params[1],
+                    Locator.Network.ConfigPanel.Server.Job.TCP_PORT_FIELD[
+                        "selector"
+                    ]: job_params[2],
+                },
+            )
+        elif protocol == "udp":
+            server_config.add_job(
+                200,
+                {
+                    Locator.Network.ConfigPanel.Server.Job.UDP_IP_FIELD[
+                        "selector"
+                    ]: job_params[1],
+                    Locator.Network.ConfigPanel.Server.Job.UDP_PORT_FIELD[
+                        "selector"
+                    ]: job_params[2],
+                },
+            )
+        else:
+            raise ValueError(f"Got unsupported protocol: {protocol}.")
+
         server_config.submit()
+
+        selenium.save_screenshot(f"{protocol}.png")
 
         # finish
         yield network
 
         network.delete()
 
-    def test_ping_emulation(self, selenium: MiminetTester, network: MiminetTestNetwork):
-        selenium.save_screenshot("1.png")
+    def test_tcp_udp(self, selenium: MiminetTester, network: MiminetTestNetwork):
         assert compare_nodes(JSON_NODES, network.nodes)
         assert compare_edges(JSON_EDGES, network.edges)
 

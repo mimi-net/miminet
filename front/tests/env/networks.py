@@ -288,6 +288,8 @@ class NodeConfig:
         """
         self.__check_config_open()
 
+        self.__selenium.save_screenshot("1.png")
+
         if (
             self.__config_locator == Locator.Network.ConfigPanel.Host
             or self.__config_locator == Locator.Network.ConfigPanel.Switch
