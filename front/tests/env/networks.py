@@ -43,15 +43,21 @@ class MiminetTestNetwork:
 
     @property
     def nodes(self) -> dict:
-        """Current network nodes (may change during network usage)"""
+        """Current network nodes (may change during network usage)."""
         self.__check_page()
         return self.__selenium.execute_script("return nodes")
 
     @property
     def edges(self) -> dict:
-        """Current network edges (may change during network usage)"""
+        """Current network edges (may change during network usage)."""
         self.__check_page()
         return self.__selenium.execute_script("return edges")
+
+    @property
+    def jobs(self) -> dict:
+        """Current network jobs (may change during network usage)."""
+        self.__check_page()
+        return self.__selenium.execute_script("return jobs")
 
     def __calc_panel_offset(self, panel, x: float, y: float):
         """Calculates coordinates with offset within the Network Panel.
@@ -99,9 +105,9 @@ class MiminetTestNetwork:
             NodeType.Router,
             NodeType.Server,
         ]
-        random.shuffle(node_types)
 
         for type in node_types:
+            self.__selenium.save_screenshot("1.png")
             self.add_node(type)
 
     def open_node_config(self, device_node: dict | int):
@@ -164,7 +170,7 @@ class MiminetTestNetwork:
         device_button = self.__selenium.find_element(*device_type)
 
         self.__selenium.drag_and_drop(device_button, panel, local_x, local_y)
-        self.__selenium.wait_for(lambda d: old_nodes_len < len(self.nodes))
+        self.__selenium.wait_for(lambda d: old_nodes_len < len(self.nodes), timeout=5)
 
     def add_edge(self, source_id: int, target_id: int):
         self.__check_page()
@@ -304,7 +310,9 @@ class NodeConfig:
         for job_field, job_value in args.items():
             self.__selenium.save_screenshot("1.png")
             try:
-                self.__selenium.find_element(by, job_field).send_keys(job_value)
+                field_element = self.__selenium.find_element(by, job_field)
+                field_element.clear()
+                field_element.send_keys(job_value)
             except Exception as e:
                 raise ValueError(
                     f"Can't add job. Job's field: {job_field}, value: {job_value}. Error message: {str(e)}"
@@ -401,10 +409,9 @@ def compare_nodes(nodes_a, nodes_b) -> bool:
     :Raises:
         AssertionError
     """
-    if not nodes_a:
+    if not nodes_a or not nodes_b:
         raise ValueError("Nodes for comparison can't be empty.")
-    if not nodes_b:
-        raise ValueError("Nodes for comparison can't be empty.")
+
     if len(nodes_b) != len(nodes_a):
         raise ValueError(
             f"The number of nodes doesn't match. Expected {len(nodes_a)}, got {len(nodes_b)}."
@@ -455,9 +462,7 @@ def compare_edges(edges_a, edges_b) -> bool:
     :Raises:
         AssertionError
     """
-    if not edges_a:
-        raise ValueError("Edges for comparison can't be empty.")
-    if not edges_b:
+    if not edges_a or not edges_b:
         raise ValueError("Edges for comparison can't be empty.")
 
     if len(edges_b) != len(edges_a):
@@ -483,5 +488,41 @@ def compare_edges(edges_a, edges_b) -> bool:
 
         except KeyError as e:
             raise ValueError(f"Missing key in edge data at index {i}: {e}")
+
+    return True
+
+
+def compare_jobs(jobs_a, jobs_b) -> bool:
+    """Checks if the jobs are equal.
+
+    :Returns:
+        True if the edges are equal.
+
+    :Raises:
+        AssertionError
+    """
+    if not jobs_a or not jobs_a:
+        raise ValueError("Both 'jobs_a' and 'jobs_b' must contain at least one job.")
+
+    if len(jobs_b) != len(jobs_a):
+        raise ValueError(
+            f"Number of jobs mismatch: Expected {len(jobs_b)}, got {len(jobs_a)}."
+        )
+
+    for i, job_b in enumerate(jobs_b):
+        job_a = jobs_a[i]
+
+        if job_a["print_cmd"] != job_b["print_cmd"]:
+            raise ValueError(
+                f"Job {i+1}: 'print_cmd' mismatch. Expected '{job_a['print_cmd']}', but received '{job_b['print_cmd']}'."
+            )
+        if job_a["job_id"] != job_b["job_id"]:
+            raise ValueError(
+                f"Job {i+1}: 'job_id' mismatch. Expected '{job_a['job_id']}', but received '{job_b['job_id']}'."
+            )
+        if job_a["host_id"] != job_b["host_id"]:
+            raise ValueError(
+                f"Job {i+1}: 'host_id' mismatch. Expected '{job_a['host_id']}', but received '{job_b['host_id']}'."
+            )
 
     return True

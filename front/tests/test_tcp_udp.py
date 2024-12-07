@@ -4,10 +4,12 @@ from env.networks import (
     NodeConfig,
     NodeType,
     MiminetTestNetwork,
+    compare_jobs,
     compare_nodes,
     compare_edges,
 )
 from env.locators import Locator
+from typing import Tuple
 
 
 class TestTcpUdp:
@@ -118,140 +120,194 @@ class TestTcpUdp:
 
         server_config.submit()
 
-        selenium.save_screenshot(f"{protocol}.png")
-
         # finish
-        yield network
+        yield (network, protocol)
 
         network.delete()
 
-    def test_tcp_udp(self, selenium: MiminetTester, network: MiminetTestNetwork):
-        assert compare_nodes(JSON_NODES, network.nodes)
-        assert compare_edges(JSON_EDGES, network.edges)
+    def test_tcp_udp(
+        self, selenium: MiminetTester, network: Tuple[MiminetTestNetwork, str]
+    ):
 
+        net = network[0]
+        protocol = network[1]
 
-JSON_NODES = [
-    {
-        "classes": ["host"],
-        "config": {"default_gw": "192.168.1.2", "label": "host_1", "type": "host"},
-        "data": {"id": "host_1", "label": "host_1"},
-        "interface": [
-            {
-                "connect": "edge_m4d8zjgq9irc5sosvnf",
-                "id": "iface_72076251",
-                "ip": "192.168.1.1",
-                "name": "iface_72076251",
-                "netmask": 24,
+        assert compare_nodes(self.JSON_NODES, net.nodes)
+        assert compare_edges(self.JSON_EDGES, net.edges)
+
+        if protocol == "udp":
+            assert compare_jobs(self.JSON_UDP_JOBS, net.jobs)
+        elif protocol == "tcp":
+            assert compare_jobs(self.JSON_TCP_JOBS, net.jobs)
+        else:
+            raise ValueError(f"Got unsupported protocol: {protocol}.")
+
+    JSON_NODES = [
+        {
+            "classes": ["host"],
+            "config": {"default_gw": "192.168.1.2", "label": "host_1", "type": "host"},
+            "data": {"id": "host_1", "label": "host_1"},
+            "interface": [
+                {
+                    "connect": "edge_m4d8zjgq9irc5sosvnf",
+                    "id": "iface_72076251",
+                    "ip": "192.168.1.1",
+                    "name": "iface_72076251",
+                    "netmask": 24,
+                }
+            ],
+            "position": {"x": 81.0374984741211, "y": 75},
+        },
+        {
+            "classes": ["l2_switch"],
+            "config": {"label": "l2sw1", "stp": 0, "type": "l2_switch"},
+            "data": {"id": "l2sw1", "label": "l2sw1"},
+            "interface": [
+                {
+                    "connect": "edge_m4d1o9tpdgzqjbt4wze",
+                    "id": "l2sw1_2",
+                    "name": "l2sw1_2",
+                    "type_connection": None,
+                    "vlan": None,
+                },
+                {
+                    "connect": "edge_m4d8zjgq9irc5sosvnf",
+                    "id": "l2sw1_3",
+                    "name": "l2sw1_3",
+                    "type_connection": None,
+                    "vlan": None,
+                },
+            ],
+            "position": {"x": 131.54959955491898, "y": 141.99415120802044},
+        },
+        {
+            "classes": ["l3_router"],
+            "config": {"default_gw": "", "label": "router_1", "type": "router"},
+            "data": {"id": "router_1", "label": "router_1"},
+            "interface": [
+                {
+                    "connect": "edge_m4d1o9tpdgzqjbt4wze",
+                    "id": "iface_80424814",
+                    "ip": "192.168.1.2",
+                    "name": "iface_80424814",
+                    "netmask": 24,
+                },
+                {
+                    "connect": "edge_m4d1pvjr9u4htwjbced",
+                    "id": "iface_14250267",
+                    "ip": "10.0.0.2",
+                    "name": "iface_14250267",
+                    "netmask": 24,
+                },
+            ],
+            "position": {"x": 180.5374984741211, "y": 68.30000305175781},
+        },
+        {
+            "classes": ["l1_hub"],
+            "config": {"label": "l1hub1", "type": "l1_hub"},
+            "data": {"id": "l1hub1", "label": "l1hub1"},
+            "interface": [
+                {
+                    "connect": "edge_m4d1pvjr9u4htwjbced",
+                    "id": "l1hub1_1",
+                    "name": "l1hub1_1",
+                },
+                {
+                    "connect": "edge_m4d1tqljkagg89ugwma",
+                    "id": "l1hub1_2",
+                    "name": "l1hub1_2",
+                },
+            ],
+            "position": {"x": 240.81154083854386, "y": 138.32973441098713},
+        },
+        {
+            "classes": ["server"],
+            "config": {"default_gw": "10.0.0.2", "label": "server_1", "type": "server"},
+            "data": {"id": "server_1", "label": "server_1"},
+            "interface": [
+                {
+                    "connect": "edge_m4d1tqljkagg89ugwma",
+                    "id": "iface_42385308",
+                    "ip": "10.0.0.1",
+                    "name": "iface_42385308",
+                    "netmask": 24,
+                }
+            ],
+            "position": {"x": 294.5622719375413, "y": 58.129486133684594},
+        },
+    ]
+
+    JSON_EDGES = [
+        {
+            "data": {
+                "id": "edge_m4d8zjgq9irc5sosvnf",
+                "source": "host_1",
+                "target": "l2sw1",
             }
-        ],
-        "position": {"x": 81.0374984741211, "y": 75},
-    },
-    {
-        "classes": ["l2_switch"],
-        "config": {"label": "l2sw1", "stp": 0, "type": "l2_switch"},
-        "data": {"id": "l2sw1", "label": "l2sw1"},
-        "interface": [
-            {
-                "connect": "edge_m4d1o9tpdgzqjbt4wze",
-                "id": "l2sw1_2",
-                "name": "l2sw1_2",
-                "type_connection": None,
-                "vlan": None,
-            },
-            {
-                "connect": "edge_m4d8zjgq9irc5sosvnf",
-                "id": "l2sw1_3",
-                "name": "l2sw1_3",
-                "type_connection": None,
-                "vlan": None,
-            },
-        ],
-        "position": {"x": 131.54959955491898, "y": 141.99415120802044},
-    },
-    {
-        "classes": ["l3_router"],
-        "config": {"default_gw": "", "label": "router_1", "type": "router"},
-        "data": {"id": "router_1", "label": "router_1"},
-        "interface": [
-            {
-                "connect": "edge_m4d1o9tpdgzqjbt4wze",
-                "id": "iface_80424814",
-                "ip": "192.168.1.2",
-                "name": "iface_80424814",
-                "netmask": 24,
-            },
-            {
-                "connect": "edge_m4d1pvjr9u4htwjbced",
-                "id": "iface_14250267",
-                "ip": "10.0.0.2",
-                "name": "iface_14250267",
-                "netmask": 24,
-            },
-        ],
-        "position": {"x": 180.5374984741211, "y": 68.30000305175781},
-    },
-    {
-        "classes": ["l1_hub"],
-        "config": {"label": "l1hub1", "type": "l1_hub"},
-        "data": {"id": "l1hub1", "label": "l1hub1"},
-        "interface": [
-            {
-                "connect": "edge_m4d1pvjr9u4htwjbced",
-                "id": "l1hub1_1",
-                "name": "l1hub1_1",
-            },
-            {
-                "connect": "edge_m4d1tqljkagg89ugwma",
-                "id": "l1hub1_2",
-                "name": "l1hub1_2",
-            },
-        ],
-        "position": {"x": 240.81154083854386, "y": 138.32973441098713},
-    },
-    {
-        "classes": ["server"],
-        "config": {"default_gw": "10.0.0.2", "label": "server_1", "type": "server"},
-        "data": {"id": "server_1", "label": "server_1"},
-        "interface": [
-            {
-                "connect": "edge_m4d1tqljkagg89ugwma",
-                "id": "iface_42385308",
-                "ip": "10.0.0.1",
-                "name": "iface_42385308",
-                "netmask": 24,
+        },
+        {
+            "data": {
+                "id": "edge_m4d1o9tpdgzqjbt4wze",
+                "source": "l2sw1",
+                "target": "router_1",
             }
-        ],
-        "position": {"x": 294.5622719375413, "y": 58.129486133684594},
-    },
-]
+        },
+        {
+            "data": {
+                "id": "edge_m4d1pvjr9u4htwjbced",
+                "source": "router_1",
+                "target": "l1hub1",
+            }
+        },
+        {
+            "data": {
+                "id": "edge_m4d1tqljkagg89ugwma",
+                "source": "l1hub1",
+                "target": "server_1",
+            }
+        },
+    ]
 
-JSON_EDGES = [
-    {
-        "data": {
-            "id": "edge_m4d8zjgq9irc5sosvnf",
-            "source": "host_1",
-            "target": "l2sw1",
-        }
-    },
-    {
-        "data": {
-            "id": "edge_m4d1o9tpdgzqjbt4wze",
-            "source": "l2sw1",
-            "target": "router_1",
-        }
-    },
-    {
-        "data": {
-            "id": "edge_m4d1pvjr9u4htwjbced",
-            "source": "router_1",
-            "target": "l1hub1",
-        }
-    },
-    {
-        "data": {
-            "id": "edge_m4d1tqljkagg89ugwma",
-            "source": "l1hub1",
-            "target": "server_1",
-        }
-    },
-]
+    JSON_TCP_JOBS = [
+        {
+            "id": "78aa220f361e4a00afd46e813d68d065",
+            "job_id": 4,
+            "print_cmd": "send -s 65535 -p tcp 10.0.0.1:3000",
+            "arg_1": "65535",
+            "arg_2": "10.0.0.2",
+            "arg_3": "3000",
+            "level": 0,
+            "host_id": "host_1",
+        },
+        {
+            "id": "4db5e8ebd4e94c9caea40dc8f118b211",
+            "job_id": 201,
+            "print_cmd": "nc 10.0.0.1 -l 3000",
+            "arg_1": "10.0.0.1",
+            "arg_2": "3000",
+            "level": 1,
+            "host_id": "server_1",
+        },
+    ]
+
+    JSON_UDP_JOBS = [
+        {
+            "id": "78aa220f361e4a00afd46e813d68d065",
+            "job_id": 3,
+            "print_cmd": "send -s 65535 -p udp 10.0.0.1:3000",
+            "arg_1": "65535",
+            "arg_2": "10.0.0.2",
+            "arg_3": "3000",
+            "level": 1,
+            "host_id": "host_1",
+        },
+        {
+            "id": "4db5e8ebd4e94c9caea40dc8f118b211",
+            "job_id": 200,
+            "print_cmd": "nc -u 10.0.0.1 -l 3000",
+            "arg_1": "10.0.0.1",
+            "arg_2": "3000",
+            "level": 1,
+            "host_id": "server_1",
+        },
+    ]

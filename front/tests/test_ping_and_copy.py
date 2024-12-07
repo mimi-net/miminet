@@ -1,11 +1,17 @@
 import pytest
 from conftest import MiminetTester
-from env.networks import NodeType, MiminetTestNetwork, compare_nodes, compare_edges
+from env.networks import (
+    NodeType,
+    MiminetTestNetwork,
+    compare_jobs,
+    compare_nodes,
+    compare_edges,
+)
 from selenium.webdriver.common.by import By
 from env.locators import Locator
 
 
-class TestSimpleEmulation:
+class TestPingAndCopy:
     @pytest.fixture(scope="class")
     def network(self, selenium: MiminetTester):
         network = MiminetTestNetwork(selenium)
@@ -38,9 +44,10 @@ class TestSimpleEmulation:
 
         network.delete()
 
-    def test_ping_emulation(self, selenium: MiminetTester, network: MiminetTestNetwork):
+    def test_ping(self, selenium: MiminetTester, network: MiminetTestNetwork):
         assert compare_nodes(network.nodes, self.JSON_NODES)
         assert compare_edges(network.edges, self.JSON_EDGES)
+        assert compare_jobs(network.jobs, self.JOBS)
 
     def test_ping_network_copy(
         self, selenium: MiminetTester, network: MiminetTestNetwork
@@ -49,6 +56,7 @@ class TestSimpleEmulation:
 
         nodes = network.nodes
         edges = network.edges
+        jobs = network.jobs
 
         selenium.find_element(
             By.CSS_SELECTOR, Locator.Network.TopButton.COPY["selector"]
@@ -64,6 +72,7 @@ class TestSimpleEmulation:
         assert selenium.current_url != network.url, "Redirecting wasn't completed"
         assert compare_nodes(nodes, copy_network.nodes)
         assert compare_edges(edges, copy_network.edges)
+        assert compare_jobs(jobs, copy_network.jobs)
 
         selenium.get(network.url)
 
@@ -107,5 +116,16 @@ class TestSimpleEmulation:
                 "source": "host_1",
                 "target": "host_2",
             }
+        }
+    ]
+
+    JOBS = [
+        {
+            "arg_1": "192.168.1.2",
+            "host_id": "host_1",
+            "id": "c6196d5b58d54d30b2cc98af5e8e9d33",
+            "job_id": 1,
+            "level": 0,
+            "print_cmd": "ping -c 1 192.168.1.2",
         }
     ]
