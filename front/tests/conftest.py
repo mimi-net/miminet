@@ -112,7 +112,7 @@ class MiminetTester(WebDriver):
         """
         WebDriverWait(self, timeout=timeout).until(condition)
 
-    def select_by_value(self, by: str, element: str, value: int):
+    def select_by_value(self, by: str, element: str, value: str):
         """Selects an option in a select element by its value.
 
         Args:
@@ -121,7 +121,7 @@ class MiminetTester(WebDriver):
             value: The value attribute of the option to select.
         """
         select = Select(self.find_element(by, element))
-        select.select_by_value(str(value))
+        select.select_by_value(value)
 
 
 @pytest.fixture(scope="session")

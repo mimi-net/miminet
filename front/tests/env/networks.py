@@ -3,6 +3,7 @@ from env.locators import Locator
 from conftest import HOME_PAGE, MiminetTester
 import random
 from typing import Optional, Type
+import re
 
 
 class NodeType:
@@ -143,7 +144,7 @@ class MiminetTestNetwork:
 
     def add_node(
         self,
-        device_type: tuple[str, str],
+        node_type: tuple[str, str],
         x: Optional[float] = None,
         y: Optional[float] = None,
     ):
@@ -167,7 +168,7 @@ class MiminetTestNetwork:
 
         local_x, local_y = self.__calc_panel_offset(panel, x, y)
 
-        device_button = self.__selenium.find_element(*device_type)
+        device_button = self.__selenium.find_element(*node_type)
 
         self.__selenium.drag_and_drop(device_button, panel, local_x, local_y)
         self.__selenium.wait_for(lambda d: old_nodes_len < len(self.nodes), timeout=5)
@@ -277,15 +278,46 @@ class NodeConfig:
         """Fill link (in config panel) with ip address and mask."""
         self.__check_config_open()
 
-        self.__selenium.find_element(
-            By.XPATH, Locator.Network.ConfigPanel.get_ip_field_xpath(link_id)
-        ).send_keys(ip)
-        self.__selenium.find_element(
-            By.XPATH, Locator.Network.ConfigPanel.get_mask_field_xpath(link_id)
-        ).send_keys(str(mask))
+        try:
+            self.__selenium.find_element(
+                By.XPATH, Locator.Network.ConfigPanel.get_ip_field_xpath(link_id)
+            ).send_keys(ip)
+            self.__selenium.find_element(
+                By.XPATH, Locator.Network.ConfigPanel.get_mask_field_xpath(link_id)
+            ).send_keys(str(mask))
+        except Exception:
+            raise Exception("Unable to find link. Maybe you forgot to add edges.")
 
-    def add_job(self, job_id: int, args: dict[str, str], by=By.CSS_SELECTOR):
+    def add_link_jobs(self, job_id: int, args: dict[str, str], by=By.CSS_SELECTOR):
+        """Adds a job (with selection field) to the system using Selenium.
+
+        Args:
+            job_id: The ID of the job (currently unused in the implementation).
+            args: A dictionary where keys represent locators for job select elements and values
+                  represent elements that should be selected. job_select: Locator for select element.
+        """
+        self.__check_config_open()
+
+        self.__select_job(job_id, by)
+
+        for job_select, value in args.items():
+            try:
+                self.__selenium.select_by_value(by, job_select, value)
+            except Exception:
+                raise Exception(
+                    f"Can't add link job. There is no {value} in {job_select}."
+                )
+
+        try:
+            self.submit()
+        except Exception:
+            raise ValueError(
+                "Can't add link job. Check that the entered data is correct."
+            )
+
+    def add_jobs(self, job_id: int, args: dict[str, str], by=By.CSS_SELECTOR):
         """Adds a job to the system using Selenium.
+        [!] Only for jobs that don't contain selection fields
 
         Args:
             job_id: The ID of the job (currently unused in the implementation).
@@ -294,21 +326,9 @@ class NodeConfig:
         """
         self.__check_config_open()
 
-        self.__selenium.save_screenshot("1.png")
-
-        if (
-            self.__config_locator == Locator.Network.ConfigPanel.Host
-            or self.__config_locator == Locator.Network.ConfigPanel.Switch
-            or self.__config_locator == Locator.Network.ConfigPanel.Server
-        ):
-            self.__selenium.select_by_value(
-                by, self.__config_locator.JOB_SELECT["selector"], job_id
-            )
-        else:
-            raise ValueError(f"Node with type {self.__config_locator} can't use jobs")
+        self.__select_job(job_id, by)
 
         for job_field, job_value in args.items():
-            self.__selenium.save_screenshot("1.png")
             try:
                 field_element = self.__selenium.find_element(by, job_field)
                 field_element.clear()
@@ -322,7 +342,7 @@ class NodeConfig:
         try:
             self.submit()
         except Exception:
-            raise ValueError("Check that the entered data is correct.")
+            raise ValueError("Can't add job. Check that the entered data is correct.")
 
     def fill_default_gw(self, ip: str):
         """Fill default gateway with data."""
@@ -355,6 +375,20 @@ class NodeConfig:
             self.__config_locator.SUBMIT_BUTTON["text"],
             timeout=5,
         )
+
+    def __select_job(self, job_id, by):
+        if (
+            self.__config_locator == Locator.Network.ConfigPanel.Host
+            or self.__config_locator == Locator.Network.ConfigPanel.Router
+            or self.__config_locator == Locator.Network.ConfigPanel.Server
+        ):
+            self.__selenium.select_by_value(
+                by, self.__config_locator.JOB_SELECT["selector"], str(job_id)
+            )
+        else:
+            raise ValueError(
+                f"Can't add job. Node with type {self.__config_locator} can't use jobs"
+            )
 
     def __open_config(self, node: dict):
         device_class = node["classes"][0]
@@ -512,7 +546,11 @@ def compare_jobs(jobs_a, jobs_b) -> bool:
     for i, job_b in enumerate(jobs_b):
         job_a = jobs_a[i]
 
-        if job_a["print_cmd"] != job_b["print_cmd"]:
+        # iface ids are random values
+        print_cmd_a = re.sub(r"iface_\d+", "", job_a["print_cmd"])
+        print_cmd_b = re.sub(r"iface_\d+", "", job_b["print_cmd"])
+
+        if print_cmd_a != print_cmd_b:
             raise ValueError(
                 f"Job {i+1}: 'print_cmd' mismatch. Expected '{job_a['print_cmd']}', but received '{job_b['print_cmd']}'."
             )

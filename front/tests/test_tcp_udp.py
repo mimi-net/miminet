@@ -46,7 +46,7 @@ class TestTcpUdp:
         job_params = ("65535", "10.0.0.1", "3000")
 
         if protocol == "tcp":
-            host_config.add_job(
+            host_config.add_jobs(
                 4,
                 {
                     Locator.Network.ConfigPanel.Host.Job.TCP_VOLUME_IN_BYTES_FIELD[
@@ -61,7 +61,7 @@ class TestTcpUdp:
                 },
             )
         elif protocol == "udp":
-            host_config.add_job(
+            host_config.add_jobs(
                 3,
                 {
                     Locator.Network.ConfigPanel.Host.Job.UDP_VOLUME_IN_BYTES_FIELD[
@@ -92,7 +92,7 @@ class TestTcpUdp:
         server_config.fill_default_gw("10.0.0.2")
 
         if protocol == "tcp":
-            server_config.add_job(
+            server_config.add_jobs(
                 201,
                 {
                     Locator.Network.ConfigPanel.Server.Job.TCP_IP_FIELD[
@@ -104,7 +104,7 @@ class TestTcpUdp:
                 },
             )
         elif protocol == "udp":
-            server_config.add_job(
+            server_config.add_jobs(
                 200,
                 {
                     Locator.Network.ConfigPanel.Server.Job.UDP_IP_FIELD[

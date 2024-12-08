@@ -146,6 +146,11 @@ class Locator:
                 }
                 JOB_SELECT = {"selector": "#config_router_job_select_field"}
 
+                class Job:
+                    NAT_LINK_SELECT = {
+                        "selector": "#config_router_add_nat_masquerade_iface_select_field"
+                    }
+
             class Server(CommonDevice):
                 MAIN_FORM = {"selector": "#config_main_form"}
                 NAME_FIELD = {"selector": "#config_server_name"}

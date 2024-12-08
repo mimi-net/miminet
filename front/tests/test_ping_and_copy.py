@@ -25,7 +25,7 @@ class TestPingAndCopy:
         # configure host 1
         config0 = network.open_node_config(0)
         config0.fill_link("192.168.1.1", 24)
-        config0.add_job(
+        config0.add_jobs(
             1,
             {
                 Locator.Network.ConfigPanel.Host.Job.PING_FIELD[
