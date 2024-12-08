@@ -55,13 +55,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 </div>
 
                 <div class="form-check pe-lg-1">
-                    <a class="btn btn-success btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" title="Сеть доступна по URL" onclick="urlCopyButton()">
+                    <a class="btn btn-success btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" id="share-network" title="Сеть доступна по URL" onclick="urlCopyButton()">
                         <i class='bx bx-share-alt fs-4 mx-1' ></i>
                     </a>
-                    <a class="btn btn-outline-primary btn-icon me-4" data-target="#ModalCopy" data-toggle="tooltip" data-bs-placement="bottom" title="Сохранить копию" onclick="CopyNetwork()">
+                    <a class="btn btn-outline-primary btn-icon me-4" data-target="#ModalCopy" id="copy-network" data-toggle="tooltip" data-bs-placement="bottom" title="Сохранить копию" onclick="CopyNetwork()">
                         <i class='bx bx-copy fs-4 mx-1'></i>
                     </a>
-                    <a {% if request.path != url_for('web_network_shared') %} class="btn btn-outline-primary btn-icon" {% else %} class="btn btn-outline-primary btn-icon disabled" {% endif %} href="#netConfigModal" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети"><i class='bx bx-cog fs-4 mx-1'></i></a>
+                    <a {% if request.path != url_for('web_network_shared') %} class="btn btn-outline-primary btn-icon" {% else %} class="btn btn-outline-primary btn-icon disabled" {% endif %} href="#netConfigModal" id="net-settings" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети"><i class='bx bx-cog fs-4 mx-1'></i></a>
                 </div>
             {% else %}
                 <div class="mx-auto navbar-nav">
@@ -74,32 +74,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         {% else %}
             {% if current_user.is_authenticated %}
                 <div class="navbar-nav">
-		    <li class="nav-item">
+		            <li id="courses-nav-item" class="nav-item">
                          <a class="nav-link" href="{{ url_for('course') }}">Учебные курсы</a>
                     </li>
-                    <li class="nav-item">
+                    <li id="trainer-nav-item" class="nav-item">
                         <a class="nav-link" href="{{ url_for('get_all_tests_endpoint') }}">Тренажер</a>
                     </li>
-                    <li class="nav-item">
+                    <li id="examples-nav-item" class="nav-item">
                         <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
                     </li>
-                    <li class="nav-item">
+                    <li id="my-networks-nav-item" class="nav-item">
                         <a class="nav-link" href="{{ url_for('home') }}">Мои сети</a>
                     </li>
                 </div>
             {% else %}
                 {% if request.path != url_for('login_index') %}
                     <div class="navbar-nav">
-                        <li class="nav-item">
+                        <li id="courses-nav-item" class="nav-item">
                             <a class="nav-link" href="{{ url_for('course') }}">Учебные курсы</a>
                         </li>
-                        <li class="nav-item">
+                        <li id="trainer-nav-item" id="trainer-nav-item" class="nav-item">
                             <a class="nav-link" href="{{ url_for('login_index') }}">Тренажер</a>
                         </li>
-                        <li class="nav-item">
+                        <li id="examples-nav-item" class="nav-item">
                             <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
                         </li>
-                        <li class="nav-item">
+                        <li id="auth-nav-item" class="nav-item">
                             <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary">
                                 <i class="bx fs-5 lh-1 me-1"></i>Вход
                             </a>

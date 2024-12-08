@@ -1,0 +1,1 @@
+cd front/tests/docker && docker compose up -d --build
