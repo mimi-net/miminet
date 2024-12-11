@@ -8,7 +8,7 @@ from env.networks import (
     compare_nodes,
     compare_edges,
 )
-from env.locators import Locator
+from env.locators import Location
 from typing import Tuple
 
 
@@ -49,30 +49,18 @@ class TestTcpUdp:
             host_config.add_jobs(
                 4,
                 {
-                    Locator.Network.ConfigPanel.Host.Job.TCP_VOLUME_IN_BYTES_FIELD[
-                        "selector"
-                    ]: job_params[0],
-                    Locator.Network.ConfigPanel.Host.Job.TCP_IP_FIELD[
-                        "selector"
-                    ]: job_params[1],
-                    Locator.Network.ConfigPanel.Host.Job.TCP_PORT_FIELD[
-                        "selector"
-                    ]: job_params[2],
+                    Location.Network.ConfigPanel.Host.Job.TCP_VOLUME_IN_BYTES_FIELD.selector: job_params[0],
+                    Location.Network.ConfigPanel.Host.Job.TCP_IP_FIELD.selector: job_params[1],
+                    Location.Network.ConfigPanel.Host.Job.TCP_PORT_FIELD.selector: job_params[2],
                 },
             )
         elif protocol == "udp":
             host_config.add_jobs(
                 3,
                 {
-                    Locator.Network.ConfigPanel.Host.Job.UDP_VOLUME_IN_BYTES_FIELD[
-                        "selector"
-                    ]: job_params[0],
-                    Locator.Network.ConfigPanel.Host.Job.UDP_IP_FIELD[
-                        "selector"
-                    ]: job_params[1],
-                    Locator.Network.ConfigPanel.Host.Job.UDP_PORT_FIELD[
-                        "selector"
-                    ]: job_params[2],
+                    Location.Network.ConfigPanel.Host.Job.UDP_VOLUME_IN_BYTES_FIELD.selector: job_params[0],
+                    Location.Network.ConfigPanel.Host.Job.UDP_IP_FIELD.selector: job_params[1],
+                    Location.Network.ConfigPanel.Host.Job.UDP_PORT_FIELD.selector: job_params[2],
                 },
             )
         else:
@@ -95,24 +83,16 @@ class TestTcpUdp:
             server_config.add_jobs(
                 201,
                 {
-                    Locator.Network.ConfigPanel.Server.Job.TCP_IP_FIELD[
-                        "selector"
-                    ]: job_params[1],
-                    Locator.Network.ConfigPanel.Server.Job.TCP_PORT_FIELD[
-                        "selector"
-                    ]: job_params[2],
+                    Location.Network.ConfigPanel.Server.Job.TCP_IP_FIELD.selector: job_params[1],
+                    Location.Network.ConfigPanel.Server.Job.TCP_PORT_FIELD.selector: job_params[2],
                 },
             )
         elif protocol == "udp":
             server_config.add_jobs(
                 200,
                 {
-                    Locator.Network.ConfigPanel.Server.Job.UDP_IP_FIELD[
-                        "selector"
-                    ]: job_params[1],
-                    Locator.Network.ConfigPanel.Server.Job.UDP_PORT_FIELD[
-                        "selector"
-                    ]: job_params[2],
+                    Location.Network.ConfigPanel.Server.Job.UDP_IP_FIELD.selector: job_params[1],
+                    Location.Network.ConfigPanel.Server.Job.UDP_PORT_FIELD.selector: job_params[2],
                 },
             )
         else:

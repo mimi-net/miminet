@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver import Chrome
 from conftest import MiminetTester, HOME_PAGE, MAIN_PAGE
 from env.networks import MiminetTestNetwork
-from env.locators import Locator
+from env.locators import Location
 
 
 class TestNetworkMenu:
@@ -19,7 +19,7 @@ class TestNetworkMenu:
         """Checks if it is possible to get to the network selection menu"""
         selenium.get(MAIN_PAGE)
         selenium.find_element(
-            By.CSS_SELECTOR, Locator.NavigationButton.MY_NETWORKS_BUTTON["selector"]
+            By.CSS_SELECTOR, Location.NavigationButton.MY_NETWORKS_BUTTON.selector
         ).click()
 
         assert selenium.current_url == HOME_PAGE
@@ -28,7 +28,7 @@ class TestNetworkMenu:
         """Checks if the created network exists"""
         selenium.get(empty_network)  # open new network by URL
         network_name = selenium.find_element(
-            By.CSS_SELECTOR, Locator.Network.TITLE_LABEL["selector"]
+            By.CSS_SELECTOR, Location.Network.TITLE_LABEL.selector
         ).text
 
         assert network_name == "Новая сеть"
@@ -37,7 +37,7 @@ class TestNetworkMenu:
         """Checks is it possible to open new network via home menu"""
         selenium.get(HOME_PAGE)
         selenium.find_element(
-            By.XPATH, Locator.MyNetworks.get_network_button_xpath(0)
+            By.XPATH, Location.MyNetworks.get_network_button_xpath(0)
         ).click()
 
         assert empty_network == selenium.current_url

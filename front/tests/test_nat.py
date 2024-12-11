@@ -8,7 +8,7 @@ from env.networks import (
     compare_nodes,
     compare_edges,
 )
-from env.locators import Locator
+from env.locators import Location
 
 
 class TestNat:
@@ -83,7 +83,7 @@ class TestNat:
         config.fill_default_gw("192.168.1.2")
         config.add_jobs(
             1,
-            {Locator.Network.ConfigPanel.Host.Job.PING_FIELD["selector"]: "10.0.0.1"},
+            {Location.Network.ConfigPanel.Host.Job.PING_FIELD.selector: "10.0.0.1"},
         )
         config.submit()
 
@@ -96,9 +96,7 @@ class TestNat:
         config.add_link_jobs(
             101,
             {
-                Locator.Network.ConfigPanel.Router.Job.NAT_LINK_SELECT[
-                    "selector"
-                ]: iface_id
+                Location.Network.ConfigPanel.Router.Job.NAT_LINK_SELECT.selector: iface_id
             },
         )
 

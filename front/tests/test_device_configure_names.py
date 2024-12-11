@@ -27,8 +27,6 @@ class TestDeviceNameChange:
         """Just change the name of the device"""
         selenium.get(network.url)
 
-        print("123")
-
         # get first node
         device_node = network.get_nodes_by_class(device_class)[0]
         config = network.open_node_config(device_node)

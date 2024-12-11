@@ -8,7 +8,7 @@ from env.networks import (
     compare_edges,
 )
 from selenium.webdriver.common.by import By
-from env.locators import Locator
+from env.locators import Location
 
 
 class TestPingAndCopy:
@@ -28,9 +28,7 @@ class TestPingAndCopy:
         config0.add_jobs(
             1,
             {
-                Locator.Network.ConfigPanel.Host.Job.PING_FIELD[
-                    "selector"
-                ]: "192.168.1.2"
+                Location.Network.ConfigPanel.Host.Job.PING_FIELD.selector: "192.168.1.2"
             },
         )
         config0.submit()
@@ -59,12 +57,12 @@ class TestPingAndCopy:
         jobs = network.jobs
 
         selenium.find_element(
-            By.CSS_SELECTOR, Locator.Network.TopButton.COPY["selector"]
+            By.CSS_SELECTOR, Location.Network.TopButton.COPY.selector
         ).click()
-        selenium.wait_until_appear(By.XPATH, Locator.Network.MODAL_DIALOG["xpath"])
+        selenium.wait_until_appear(By.XPATH, Location.Network.MODAL_DIALOG.xpath)
 
         selenium.find_element(
-            By.XPATH, Locator.Network.ModalButton.GO_TO_EDITING["xpath"]
+            By.XPATH, Location.Network.ModalButton.GO_TO_EDITING.xpath
         ).click()
 
         copy_network = MiminetTestNetwork(selenium, selenium.current_url)
