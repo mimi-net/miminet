@@ -22,7 +22,7 @@ class TestTcpUdp:
     """
 
     @pytest.fixture(scope="class", params=["tcp", "udp"])
-    def network(self, selenium: MiminetTester, request):
+    def protocol_and_network(self, selenium: MiminetTester, request):
         protocol = request.param
         network = MiminetTestNetwork(selenium)
 
@@ -49,18 +49,30 @@ class TestTcpUdp:
             host_config.add_jobs(
                 4,
                 {
-                    Location.Network.ConfigPanel.Host.Job.TCP_VOLUME_IN_BYTES_FIELD.selector: job_params[0],
-                    Location.Network.ConfigPanel.Host.Job.TCP_IP_FIELD.selector: job_params[1],
-                    Location.Network.ConfigPanel.Host.Job.TCP_PORT_FIELD.selector: job_params[2],
+                    Location.Network.ConfigPanel.Host.Job.TCP_VOLUME_IN_BYTES_FIELD.selector: job_params[
+                        0
+                    ],
+                    Location.Network.ConfigPanel.Host.Job.TCP_IP_FIELD.selector: job_params[
+                        1
+                    ],
+                    Location.Network.ConfigPanel.Host.Job.TCP_PORT_FIELD.selector: job_params[
+                        2
+                    ],
                 },
             )
         elif protocol == "udp":
             host_config.add_jobs(
                 3,
                 {
-                    Location.Network.ConfigPanel.Host.Job.UDP_VOLUME_IN_BYTES_FIELD.selector: job_params[0],
-                    Location.Network.ConfigPanel.Host.Job.UDP_IP_FIELD.selector: job_params[1],
-                    Location.Network.ConfigPanel.Host.Job.UDP_PORT_FIELD.selector: job_params[2],
+                    Location.Network.ConfigPanel.Host.Job.UDP_VOLUME_IN_BYTES_FIELD.selector: job_params[
+                        0
+                    ],
+                    Location.Network.ConfigPanel.Host.Job.UDP_IP_FIELD.selector: job_params[
+                        1
+                    ],
+                    Location.Network.ConfigPanel.Host.Job.UDP_PORT_FIELD.selector: job_params[
+                        2
+                    ],
                 },
             )
         else:
@@ -83,16 +95,24 @@ class TestTcpUdp:
             server_config.add_jobs(
                 201,
                 {
-                    Location.Network.ConfigPanel.Server.Job.TCP_IP_FIELD.selector: job_params[1],
-                    Location.Network.ConfigPanel.Server.Job.TCP_PORT_FIELD.selector: job_params[2],
+                    Location.Network.ConfigPanel.Server.Job.TCP_IP_FIELD.selector: job_params[
+                        1
+                    ],
+                    Location.Network.ConfigPanel.Server.Job.TCP_PORT_FIELD.selector: job_params[
+                        2
+                    ],
                 },
             )
         elif protocol == "udp":
             server_config.add_jobs(
                 200,
                 {
-                    Location.Network.ConfigPanel.Server.Job.UDP_IP_FIELD.selector: job_params[1],
-                    Location.Network.ConfigPanel.Server.Job.UDP_PORT_FIELD.selector: job_params[2],
+                    Location.Network.ConfigPanel.Server.Job.UDP_IP_FIELD.selector: job_params[
+                        1
+                    ],
+                    Location.Network.ConfigPanel.Server.Job.UDP_PORT_FIELD.selector: job_params[
+                        2
+                    ],
                 },
             )
         else:
@@ -101,24 +121,26 @@ class TestTcpUdp:
         server_config.submit()
 
         # finish
-        yield (network, protocol)
+        yield (protocol, network)
 
         network.delete()
 
     def test_tcp_udp(
-        self, selenium: MiminetTester, network: Tuple[MiminetTestNetwork, str]
+        self,
+        selenium: MiminetTester,
+        protocol_and_network: Tuple[str, MiminetTestNetwork],
     ):
 
-        net = network[0]
-        protocol = network[1]
+        protocol = protocol_and_network[0]
+        network = protocol_and_network[1]
 
-        assert compare_nodes(self.JSON_NODES, net.nodes)
-        assert compare_edges(self.JSON_EDGES, net.edges)
+        assert compare_nodes(self.JSON_NODES, network.nodes)
+        assert compare_edges(self.JSON_EDGES, network.edges)
 
         if protocol == "udp":
-            assert compare_jobs(self.JSON_UDP_JOBS, net.jobs)
+            assert compare_jobs(self.JSON_UDP_JOBS, network.jobs)
         elif protocol == "tcp":
-            assert compare_jobs(self.JSON_TCP_JOBS, net.jobs)
+            assert compare_jobs(self.JSON_TCP_JOBS, network.jobs)
         else:
             raise ValueError(f"Got unsupported protocol: {protocol}.")
 

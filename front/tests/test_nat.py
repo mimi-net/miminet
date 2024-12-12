@@ -93,7 +93,7 @@ class TestNat:
         config.fill_link("192.168.1.2", 24, link_id=0)
         config.fill_link(out_ip, 24, link_id=1)
         config.fill_default_gw(out_gw)
-        config.add_link_jobs(
+        config.add_jobs(
             101,
             {
                 Location.Network.ConfigPanel.Router.Job.NAT_LINK_SELECT.selector: iface_id

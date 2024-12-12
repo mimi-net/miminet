@@ -13,6 +13,16 @@ class Locator:
             setattr(self, key, value)
 
 
+class DeviceLocator(Locator):
+    """Holds different types of locators for network devices."""
+
+    def __init__(
+        self, selector=None, xpath=None, text=None, device_class=None, **kwargs
+    ):
+        super().__init__(selector=selector, xpath=xpath, text=text, **kwargs)
+        self.device_class = device_class
+
+
 class Location:
     class NavigationButton:
         """Top buttons for navigating Miminet."""
@@ -78,11 +88,11 @@ class Location:
         class DevicePanel:
             """Panel with network devices."""
 
-            SWITCH = Locator("#l2_switch_device", device_class="l2_switch")
-            HOST = Locator("#host_device", device_class="host")
-            HUB = Locator("#l1_hub_device", device_class="l1_hub")
-            ROUTER = Locator("#l3_router_device", device_class="l3_router")
-            SERVER = Locator("#server_device", device_class="server")
+            SWITCH = DeviceLocator("#l2_switch_device", device_class="l2_switch")
+            HOST = DeviceLocator("#host_device", device_class="host")
+            HUB = DeviceLocator("#l1_hub_device", device_class="l1_hub")
+            ROUTER = DeviceLocator("#l3_router_device", device_class="l3_router")
+            SERVER = DeviceLocator("#server_device", device_class="server")
 
         class ConfigPanel:
             """Elements in the configuration panel."""
@@ -90,7 +100,9 @@ class Location:
             class CommonDevice:
                 """Common type for ConfigPanel locators (add especially for mypy)."""
 
-                MAIN_FORM: Optional[Locator] = None
+                MAIN_FORM: Optional[Locator] = (
+                    None  # Config Panel form for current element
+                )
                 NAME_FIELD: Optional[Locator] = None
                 DEFAULT_GATEWAY_FIELD: Optional[Locator] = None
                 SUBMIT_BUTTON: Optional[Locator] = None
@@ -155,6 +167,39 @@ class Location:
                 class Job:
                     NAT_LINK_SELECT = Locator(
                         "#config_router_add_nat_masquerade_iface_select_field"
+                    )
+                    ADD_ROUTE_IP_FIELD = Locator(
+                        "#config_router_add_route_ip_input_field"
+                    )
+                    ADD_ROUTE_MASK_FIELD = Locator(
+                        "#config_router_add_route_mask_input_field"
+                    )
+                    ADD_ROUTE_IP_GW_FIELD = Locator(
+                        "#config_router_add_route_gw_input_field"
+                    )
+                    IPIP_IFACE_SELECT = Locator(
+                        "#config_router_add_ipip_tunnel_iface_select_ip_field"
+                    )
+                    IPIP_END_IP_FIELD = Locator(
+                        "#config_router_add_ipip_tunnel_end_ip_input_field"
+                    )
+                    IPIP_IFACE_IP_FIELD = Locator(
+                        "#config_router_add_ipip_tunnel_interface_ip_input_field"
+                    )
+                    IPIP_NAME_IFACE_FIELD = Locator(
+                        "#config_router_add_ipip_tunnel_interface_name_field"
+                    )
+                    GRE_IFACE_SELECT = Locator(
+                        "#config_router_add_gre_interface_select_ip_field"
+                    )
+                    GRE_END_IP_FIELD = Locator(
+                        "#config_router_add_gre_interface_end_ip_input_field"
+                    )
+                    GRE_IFACE_IP_FIELD = Locator(
+                        "#config_router_add_gre_interface_ip_input_field"
+                    )
+                    GRE_NAME_IFACE_FIELD = Locator(
+                        "#config_router_add_gre_interface_name_field"
                     )
 
             class Server(CommonDevice):

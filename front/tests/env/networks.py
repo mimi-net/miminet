@@ -108,7 +108,6 @@ class MiminetTestNetwork:
         ]
 
         for type in node_types:
-            self.__selenium.save_screenshot("1.png")
             self.add_node(type)
 
     def open_node_config(self, device_node: dict | int):
@@ -277,7 +276,10 @@ class NodeConfig:
         return gw
 
     def fill_link(self, ip: str, mask: int, link_id: int = 0):
-        """Fill link (in config panel) with ip address and mask."""
+        """Fill link (in config panel) with ip address and mask.
+
+        Args:
+            link_id: Link number in the config list (starts from 0)."""
         self.__check_config_open()
 
         try:
@@ -289,33 +291,6 @@ class NodeConfig:
             ).send_keys(str(mask))
         except Exception:
             raise Exception("Unable to find link. Maybe you forgot to add edges.")
-
-    def add_link_jobs(self, job_id: int, args: dict[str, str], by=By.CSS_SELECTOR):
-        """Adds a job (with selection field) to the system using Selenium.
-
-        Args:
-            job_id: The ID of the job (currently unused in the implementation).
-            args: A dictionary where keys represent locators for job select elements and values
-                  represent elements that should be selected. job_select: Locator for select element.
-        """
-        self.__check_config_open()
-
-        self.__select_job(job_id, by)
-
-        for job_select, value in args.items():
-            try:
-                self.__selenium.select_by_value(by, job_select, value)
-            except Exception:
-                raise Exception(
-                    f"Can't add link job. There is no {value} in {job_select}."
-                )
-
-        try:
-            self.submit()
-        except Exception:
-            raise ValueError(
-                "Can't add link job. Check that the entered data is correct."
-            )
 
     def add_jobs(self, job_id: int, args: dict[str, str], by=By.CSS_SELECTOR):
         """Adds a job to the system using Selenium.
@@ -333,11 +308,17 @@ class NodeConfig:
         for job_field, job_value in args.items():
             try:
                 field_element = self.__selenium.find_element(by, job_field)
-                field_element.clear()
-                field_element.send_keys(job_value)
+
+                if field_element.tag_name == "input":
+                    field_element.clear()
+                    field_element.send_keys(job_value)
+                elif field_element.tag_name == "select":
+                    self.__selenium.select_by_value(by, job_field, job_value)
+                else:
+                    raise Exception(f'Unknown tag "{field_element.tag_name}"')
             except Exception as e:
                 raise ValueError(
-                    f"Can't add job. Job's field: {job_field}, value: {job_value}. Error message: {str(e)}"
+                    f"Can't add job. Job's field: {job_field}, value: {job_value}. Error message: {str(e)}."
                 )
 
         # press "enter" to save job and remove job menu
@@ -349,6 +330,11 @@ class NodeConfig:
     def fill_default_gw(self, ip: str):
         """Fill default gateway with data."""
         self.__check_config_open()
+
+        assert (
+            self.__config_locator.DEFAULT_GATEWAY_FIELD
+        ), f'Unable to change default gateway for this element: "{self.__config_locator}".'
+
         gw_field = self.__selenium.find_element(
             By.CSS_SELECTOR, self.__config_locator.DEFAULT_GATEWAY_FIELD.selector
         )
@@ -358,6 +344,11 @@ class NodeConfig:
     def change_name(self, name: str):
         """Change device name."""
         self.__check_config_open()
+
+        assert (
+            self.__config_locator.NAME_FIELD
+        ), f'Unable to change name for this element: "{self.__config_locator}".'
+
         name_field = self.__selenium.find_element(
             By.CSS_SELECTOR, self.__config_locator.NAME_FIELD.selector
         )
@@ -417,6 +408,10 @@ class NodeConfig:
 
         else:
             raise Exception("Can't find device type !!!")
+
+        assert (
+            self.__config_locator.MAIN_FORM
+        ), f'Unable to open node config form for this element: "{self.__config_locator}".'
 
         self.__selenium.wait_until_appear(
             By.CSS_SELECTOR, self.__config_locator.MAIN_FORM.selector
@@ -551,6 +546,10 @@ def compare_jobs(jobs_a, jobs_b) -> bool:
         # iface ids are random values
         print_cmd_a = re.sub(r"iface_\d+", "", job_a["print_cmd"])
         print_cmd_b = re.sub(r"iface_\d+", "", job_b["print_cmd"])
+
+        # replace "\n" sym to real \n
+        print_cmd_a = print_cmd_a.replace("\\n", "\n")
+        print_cmd_b = print_cmd_b.replace("\\n", "\n")
 
         if print_cmd_a != print_cmd_b:
             raise ValueError(

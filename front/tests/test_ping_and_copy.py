@@ -27,9 +27,7 @@ class TestPingAndCopy:
         config0.fill_link("192.168.1.1", 24)
         config0.add_jobs(
             1,
-            {
-                Location.Network.ConfigPanel.Host.Job.PING_FIELD.selector: "192.168.1.2"
-            },
+            {Location.Network.ConfigPanel.Host.Job.PING_FIELD.selector: "192.168.1.2"},
         )
         config0.submit()
 
