@@ -1,0 +1,3 @@
+VHOST: /
+QUEUE: celery
+INDEX: v2
