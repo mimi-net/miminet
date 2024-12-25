@@ -489,7 +489,22 @@ def copy_network():
         n = Network(author_id=user.id, guid=str(u))
         n.network = net.network
         n.title = net.title + str(" - копия")
-        n.preview_uri = net.preview_uri
+
+        new_picture_blob_uri = os.urandom(16).hex() + ".png"
+        try:
+            copy_picture_blob = open("static/images/preview/" + net.preview_uri, "rb").read()
+        except Exception:
+            ret = {"message": "Не могу скопировать PNG"}
+            return make_response(jsonify(ret), 400)
+
+        try:
+            open("static/images/preview/" + new_picture_blob_uri, "wb").write(copy_picture_blob)
+        except Exception:
+            ret = {"message": "Не могу сохранить копию PNG"}
+            return make_response(jsonify(ret), 400)
+
+        n.preview_uri = new_picture_blob_uri
+
         db.session.add(n)
         db.session.commit()
         ret = {"message": "Сделана копия.", "new_url": "/web_network?guid=" + str(u)}
