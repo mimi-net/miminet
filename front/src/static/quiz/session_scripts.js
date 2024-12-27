@@ -154,32 +154,100 @@ function changeVisibility(is_correct) {
         document.querySelector('button[name="nextQuestion"]').classList.add(is_correct ? 'btn-outline-success' : 'btn-outline-danger');
         document.querySelector('button[name="nextQuestion"]').textContent = is_correct ? 'Верно! Следующий вопрос' : 'Неверно! Следующий вопрос';
     }
+}   
+
+function displayScore(score, maxScore) {
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const scoreElement = document.getElementById('score');
+    const hintIcon = document.getElementById('hint-icon');
+
+    if (scoreDisplay && scoreElement) {
+        scoreElement.textContent = `${score} из ${maxScore}`;
+        scoreDisplay.style.display = 'block';
+    }
+}
+
+function handlePracticeAnswerResult(data) {
+    const { score, explanation, max_score } = data;
+
+    displayScore(score, max_score);
+
+    if (explanation) {
+        displayExplanation({ explanation });
+    }
+}
+
+function handleScoreBasedVisibility() {
+    const answerButton = document.querySelector('button[name="answerQuestion"]');
+    const nextButton = document.querySelector('button[name="nextQuestion"]');
+    const finishButton = document.querySelector('button[name="finishQuiz"]');
+    const resultsButton = document.querySelector('button[name="seeResults"]');
+
+    if (answerButton) {
+        answerButton.hidden = true;
+    }
+
+    if (isLastQuestion) {
+        if (nextButton) {
+            nextButton.hidden = true;
+        }
+        if (finishButton) {
+            finishButton.hidden = true;
+        }
+        if (resultsButton) {
+            resultsButton.hidden = false;
+            resultsButton.textContent = "Посмотреть результаты";
+            resultsButton.classList.add('btn-outline-primary'); 
+        }
+    } else {
+        if (nextButton) {
+            nextButton.hidden = false;
+            nextButton.textContent = "Следующий вопрос";
+            nextButton.classList.add('btn-outline-primary'); 
+        }
+        if (resultsButton) {
+            resultsButton.hidden = true;
+        }
+    }
+}
+
+function displayHintsInModal(hints) {
+    const hintsContainer = document.getElementById("hintsContainer");
+
+    if (hintsContainer) {
+        hintsContainer.innerHTML = "";
+
+        hints.forEach((hint, index) => {
+            const hintElement = document.createElement("p");
+            hintElement.textContent = `${index + 1}. ${hint}`;
+            hintsContainer.appendChild(hintElement);
+        });
+    }
 }
 
 async function answerQuestion() {
     const questionId = questionIds[questionIndex];
 
-    let playerDiv = document.getElementById("NetworkPlayerDiv")
-
+    let playerDiv = document.getElementById("NetworkPlayerDiv");
     if (playerDiv) {
         playerDiv.hidden = true;
     }
 
-    document.querySelector('button[name="answerQuestion"]').textContent = "Проверка..."
-    document.querySelector('button[name="answerQuestion"]').disabled = true
+    const answerButton = document.querySelector('button[name="answerQuestion"]');
+    answerButton.textContent = "Проверка...";
+    answerButton.disabled = true;
 
     if (sessionStorage.getItem('answer')) {
         return;
     }
+
     const answer = await getAnswer();
-    sessionStorage.setItem('answer', JSON.stringify(answer));
-    // console.log(JSON.stringify(answer));
-    if (answer === undefined) {
+    if (!answer) {
         if (playerDiv) {
             playerDiv.hidden = false;
         }
-        document.querySelector('button[name="answerQuestion"]').textContent = "Ответить";
-        document.querySelector('button[name="answerQuestion"]').disabled = false;
+        answerButton.textContent = "Ответить";
+        answerButton.disabled = false;
         return;
     }
 
@@ -188,15 +256,33 @@ async function answerQuestion() {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({'answer': answer})
+        body: JSON.stringify({ answer })
     })
         .then(response => response.json())
         .then(data => {
             console.log(data);
-            sessionStorage.setItem('is_correct', data['is_correct']);
-            sessionStorage.setItem('explanation', data['explanation']);
-            changeVisibility(data['is_correct']);
-            displayExplanation(data);
+
+            if (questionType === "practice") {
+                handlePracticeAnswerResult(data);
+
+                if (data.hints && Array.isArray(data.hints) && data.hints.length > 0) {
+                    displayHintsInModal(data.hints);
+                    if (hintIcon) {
+                        hintIcon.style.display = "inline";
+                    }
+                } else {
+                    if (hintIcon) {
+                        hintIcon.style.display = "none";
+                    }
+                }                           
+
+                handleScoreBasedVisibility();
+            } else {
+                sessionStorage.setItem('is_correct', data['is_correct']);
+                sessionStorage.setItem('explanation', data['explanation']);
+                changeVisibility(data['is_correct']);
+                displayExplanation(data);
+            }
         })
         .catch(error => {
             console.error('Error:', error);

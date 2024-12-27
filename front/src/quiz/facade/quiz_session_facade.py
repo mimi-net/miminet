@@ -53,17 +53,38 @@ def finish_session(quiz_session_id: str, user: User):
 
 def session_result(quiz_session_id: str):
     quiz_session = QuizSession.query.filter_by(id=quiz_session_id).first()
-    correct = 0
     if quiz_session.finished_at is None:
         return None, None, None, 403
-    question_count = len(quiz_session.sessions)
+
+    theory_questions = [
+        q for q in quiz_session.sessions if q.question.question_type != 0
+    ]
+
+    practice_questions = [
+        q for q in quiz_session.sessions if q.question.question_type == 0
+    ]
+
+    theory_correct = sum(1 for q in theory_questions if q.is_correct)
+    theory_count = len(theory_questions)
+
+    practice_results = [
+        {
+            "question_id": q.question.id,
+            "score": q.score,
+            "max_score": q.max_score,
+        }
+        for q in practice_questions
+    ]
+
     time_spent = str(quiz_session.finished_at - quiz_session.created_on).split(".")[0]
-    for question in list(
-        filter(lambda x: x.is_correct is not None, quiz_session.sessions)
-    ):
-        if question.is_correct:
-            correct += 1
-    return correct, question_count, time_spent, 200
+
+    return {
+        "time_spent": time_spent,
+        "theory_correct": theory_correct,
+        "theory_count": theory_count,
+        "practice_results": practice_results,
+    }, 200
+
 
 
 def get_result_by_session_guid(session_guid: str):

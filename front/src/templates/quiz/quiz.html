@@ -77,14 +77,17 @@
                                 <input type="hidden" name="question_index" value="0">
                                 <input type="hidden" name="section_name" value="{{ section.section_name }}">
                                 <input type="hidden" name="timer" value="{{ section.timer }}">
-                                <h4 class="h4"
-                                    style="margin-right: 8px;margin-bottom: 4px"
-                                    onmouseover="this.style.color='#6366f1';"
-                                    onmouseout="this.style.color='';"
-                                    id="startSession{{ section.section_id }}"
-                                >
-                                    {{ section.section_name }}
-                                </h4>
+                            <h4 class="h4" style="margin-right: 8px; margin-bottom: 4px; vertical-align: middle;" 
+                                onmouseover="this.style.color='#6366f1';" 
+                                onmouseout="this.style.color='';" 
+                                id="startSession{{ section.section_id }}">
+                                {% if section.is_exam %}
+                                    <i class="bx bx-check-circle" style="vertical-align: middle;" title="Контрольное задание: этот раздел является экзаменом. Подсказки не предусмотрены."></i>
+                                {% else %}
+                                    <i class="bx bx-book" style="vertical-align: middle;" title="Учебное задание: этот раздел предназначен для обучения. При неверном выполнении задания будут даны разъяснения."></i>
+                                {% endif %}
+                                {{ section.section_name }}
+                            </h4>                                                                          
                             </form>
                             {% if section.description is not none %}
                                 <p style="margin-bottom: 8px">{{ section.description }}</p>

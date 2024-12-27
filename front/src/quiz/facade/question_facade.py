@@ -1,4 +1,7 @@
 import uuid
+import json
+import logging
+from copy import deepcopy
 
 from miminet_model import db, User, Network
 from quiz.entity.entity import (
@@ -43,17 +46,15 @@ from quiz.entity.entity import (
 #
 #     return sorting_question
 
-
-def create_practice_task(task: str, user: User):
+def create_practice_task(requirements, user: User):
     practice_task = PracticeTask()
-    practice_task.task = task
+    practice_task.requirements = json.dumps(requirements)  
     practice_task.created_by_id = user.id
     db.session.add(practice_task)
-
     return practice_task
 
 
-def create_question(section_id: str, question_dict: dict, user: User):
+def create_question(section_id: str, question_dict, user: User):
     section = Section.query.filter_by(id=section_id).first()
     if section is None or section.is_deleted:
         return None, 404
@@ -102,7 +103,6 @@ def create_question(section_id: str, question_dict: dict, user: User):
         attributes = [
             "description",
             "explanation",
-            # "start_configuration",
             "available_host",
             "available_l2_switch",
             "available_l1_hub",
@@ -117,16 +117,25 @@ def create_question(section_id: str, question_dict: dict, user: User):
             Network.guid == question_dict["start_configuration"]
         ).first()
 
+        original_network = json.loads(net.network)
+        modified_network = deepcopy(original_network)
+
+        modified_network.pop("packets", None) 
+        modified_network.pop("pcap", None)
+
+        modified_network_json = json.dumps(modified_network)
+
         u = uuid.uuid4()
         net_copy = Network(
             guid=str(u),
             author_id=user.id,
-            network=net.network,
+            network=modified_network_json,
             title=net.title,
             description="Task start configuration copy",
             preview_uri=net.preview_uri,
             is_task=True,
         )
+
         db.session.add(net_copy)
         db.session.commit()
 
@@ -134,15 +143,19 @@ def create_question(section_id: str, question_dict: dict, user: User):
 
         question.question_type = 0
         practice_question.created_by_id = user.id
-        practice_question.practice_tasks = [  # type: ignore
-            create_practice_task(question_dict["tasks"], user)
-        ]
-        # practice_question.network = question_dict['network']
+
+        logging.info(question_dict["requirements"])
+        logging.info(type(question_dict["requirements"]))
+        
+        practice_task = create_practice_task(question_dict["requirements"], user)
+        practice_question.practice_tasks = [practice_task]
+        question.text = question_dict["text"]
         question.practice_question = practice_question
+
         db.session.add(practice_question)
-        question.question_text = question_dict["text"]
     else:
         return None, 400
+    
     db.session.commit()
 
     return question.id, 201

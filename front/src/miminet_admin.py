@@ -8,7 +8,7 @@ from flask_admin.form import Select2Widget
 from flask_admin.model import typefmt
 from flask_login import current_user
 from markupsafe import Markup
-from wtforms import SelectField, TextAreaField
+from wtforms import SelectField, TextAreaField, BooleanField
 
 from miminet_model import User
 from quiz.entity.entity import Test, Section, Question
@@ -113,6 +113,7 @@ class SectionView(MiminetAdminModelView):
         "name",
         "description",
         "timer",
+        "is_exam",
         "created_on",
         "created_by_id",
     )
@@ -123,6 +124,7 @@ class SectionView(MiminetAdminModelView):
         "description": "Описание",
         "timer": "Время на прохождение (в минутах)",
         "test_id": "Раздел теста",
+        "is_exam": "Контрольная работа",
         "created_on": "Дата создания",
         "created_by_id": "Автор",
     }
@@ -133,6 +135,7 @@ class SectionView(MiminetAdminModelView):
     }
 
     form_extra_fields = {
+        "is_exam": BooleanField(default=False),
         "test_id": QuerySelectField(
             "Раздел теста",
             query_factory=lambda: Test.query.filter(
@@ -151,7 +154,6 @@ class SectionView(MiminetAdminModelView):
     }
 
     def on_model_change(self, form, model, is_created, **kwargs):
-        # Call base class functionality
         super().on_model_change(form, model, is_created)
 
         model.test_id = str(model.test_id).removeprefix("<Test ")

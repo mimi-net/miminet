@@ -3,34 +3,73 @@
 {% block description %}Сетевой тренажер для обучения компьютерным сетям{% endblock %}
 
 {% block content %}
-    <section class="container" style="margin-top: 48px; padding-top: 48px">
-        <div class="row align-items-baseline">
-            <div class="col-auto">
-                <h1 class="mb-0" id="test_name"></h1>
-            </div>
-            <div class="col-auto text-center">
-                <h3 class="mb-0" style="font-weight: normal" id="section_name"></h3>
-            </div>
+<section class="container" style="margin-top: 48px; padding-top: 48px">
+    <div class="row align-items-baseline">
+        <div class="col-auto">
+            <h1 class="mb-0" id="test_name"></h1>
         </div>
-        <div>
-            <div id="answersCount">Правильных ответов: {{ data['correct_answers'] }} из {{ data['answer_count'] }}</div>
-            <div id="timeCount">Тест пройден за: {{ data['time_spent'] }}</div>
-            <button class="btn btn-primary" name="backToTests" style="margin-top: 12px">Назад к тестам</button>
+        <div class="col-auto text-center">
+            <h3 class="mb-0" style="font-weight: normal" id="section_name"></h3>
         </div>
-    </section>
+    </div>
+    <div class="mt-4">
+        {% if data['theory_count'] > 0 %}
+        <div id="theoryResults" class="mb-3">
+            <h4 style="color: black;">Результаты теоретического теста:</h4>
+            <p style="font-size: 1.2rem;">
+                <strong>Правильных ответов:</strong> {{ data['theory_correct'] }} из {{ data['theory_count'] }}
+            </p>
+        </div>
+        {% endif %}
 
-    <script>
-        document.getElementById("test_name").innerHTML = sessionStorage.getItem('test_name');
-        document.getElementById("section_name").innerHTML = sessionStorage.getItem('section_name');
+        {% if data['practice_results'] %}
+        <div id="practiceResults" class="mb-3">
+            <h4 style="color: black;">Результаты практических заданий:</h4>
+            <ul style="font-size: 1.2rem;">
+                {% for practice in data['practice_results'] %}
+                <li>
+                    <strong>Практическое задание {{ practice['question_id'] }}:</strong> 
+                    {{ practice['score'] }} из {{ practice['max_score'] }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
 
-        document.querySelector('button[name="backToTests"]').addEventListener('click', backToTests);
+        {% set total_score = data['theory_correct'] + data['practice_results']|sum(attribute='score') %}
+        {% set total_max = data['theory_count'] + data['practice_results']|sum(attribute='max_score') %}
 
-        console.log({{ data | tojson | safe }});
+        <div class="mb-4">
+            <p id="timeCount" style="font-size: 1.2rem;">
+                <strong>Тест пройден за:</strong> {{ data['time_spent'] }}
+            </p>
+        </div>
 
-        function backToTests() {
-            sessionStorage.clear();
-            window.location.href = '/quiz/test/all';
-        }
+        <div class="d-flex align-items-center text-start">
+            <button class="btn btn-primary me-3" name="backToTests" style="font-size: 1rem; height: 2.5rem;">
+                Назад к тестам
+            </button>
+            <span class="badge d-flex align-items-center justify-content-center" 
+                  style="font-size: 1rem; height: 2.5rem; padding: 0 1rem;
+                         background-color: {% if total_score / total_max > 0.8 %}#28a745{% elif total_score / total_max > 0.5 %}#ffc107{% else %}#dc3545{% endif %};
+                         color: white;">
+                Итог: {{ total_score }} из {{ total_max }} баллов
+            </span>
+        </div>
+    </div>
+</section>
 
-    </script>
+<script>
+    document.getElementById("test_name").innerHTML = sessionStorage.getItem('test_name');
+    document.getElementById("section_name").innerHTML = sessionStorage.getItem('section_name');
+
+    document.querySelector('button[name="backToTests"]').addEventListener('click', backToTests);
+
+    console.log({{ data | tojson | safe }});
+
+    function backToTests() {
+        sessionStorage.clear();
+        window.location.href = '/quiz/test/all';
+    }
+</script>
 {% endblock %}

@@ -5,6 +5,8 @@ from typing import List
 from flask_login import current_user
 from markupsafe import Markup
 
+import logging
+
 from miminet_model import Network, db
 from quiz.entity.entity import (
     Section,
@@ -25,6 +27,7 @@ def to_section_dto_list(sections: List[Section]):
                 timer=our_section.timer,
                 description=our_section.description,
                 question_count=len(our_section.questions),
+                is_exam=our_section.is_exam,  
             ),
             sections,
         )
@@ -64,6 +67,37 @@ def to_question_for_editor_dto_list(questions: List[Question]):
 
     return dto_list
 
+class PracticeAnswerResultDto:
+    def __init__(self, score: int, explanation: str, max_score: int, hints: list):
+        self.score = score
+        self.explanation = explanation
+        self.max_score = max_score
+        self.hints = hints
+
+    def to_dict(self):
+        return {
+            "score": self.score,
+            "explanation": self.explanation,
+            "max_score": self.max_score,
+            "hints": self.hints,
+        }
+    
+def calculate_max_score(requirements: list) -> int:
+    def recursive_sum(data):
+        if isinstance(data, dict):
+            points = data.get("points", 0)
+            
+            if "different_paths" in data:
+                points += data["different_paths"] 
+
+            return points + sum(recursive_sum(value) for value in data.values())
+        
+        elif isinstance(data, list):
+            return sum(recursive_sum(item) for item in data)
+        
+        return 0
+
+    return recursive_sum(requirements)
 
 class AnswerResultDto:
     def __init__(self, explanation, is_correct: bool) -> None:
@@ -207,12 +241,14 @@ class SectionDto:
         timer: str,
         description: str,
         question_count: int,
+        is_exam: bool, 
     ):
         self.section_id = section_id
         self.section_name = section_name
         self.timer = timer
         self.description = description
         self.question_count = question_count
+        self.is_exam = is_exam  
 
         current_user_sessions = QuizSession.query.filter(
             QuizSession.created_by_id == current_user.id
