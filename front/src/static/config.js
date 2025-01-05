@@ -637,7 +637,12 @@ const ConfigRouterJobOnChange = function(evnt) {
             UpdateRouterForm('config_router_add_gre_interface_script');
             FillRouterSelect("#config_router_add_gre_interface_select_ip_field");
 
-            break; 
+            break;
+        case '107':
+            UpdateRouterForm('config_router_add_arp_proxy_script');
+            FillRouterSelect("#config_router_add_arp_proxy_iface_select_field", "Выберите линк", false);
+
+            break;
         default:
             console.log("Unknown target.value");
     }
