@@ -1,0 +1,42 @@
+{% extends "quiz/networkBase.html" %}
+{% block title %}Результаты{% endblock %}
+{% block description %}Сетевой тренажер для обучения компьютерным сетям{% endblock %}
+
+{% block content %}
+    <section class="container"
+             style="max-width: 1000px;margin-top: 48px;padding-top: 24px;display: flex;align-items: center;justify-content: center;flex-direction: column;">
+        {# Time spent, correct questions counter #}
+        <div class="row"
+             style="margin-top: 8px; font-size: 24px; opacity: 85%;">
+            <div class="col-auto">
+                <p id="counter">{{ data['correct_answers'] }}/{{ data['answers_count'] }}</p>
+            </div>
+            <div class="col-auto text-center">
+                <span id="timer">{{ data['time_spent'] }}</span>
+            </div>
+        </div>
+
+        {% for question in questions_result %}
+            <article
+                    class="container card shadow-sm
+                        {% if question.is_correct == 'True' %}
+                            border-success
+                        {% else %}
+                            border-danger
+                        {% endif %}"
+                    style="padding: 12px 18px 12px 18px; margin: 12px 0 12px 0; border: 1px solid">
+                {#  Question text #}
+                <div class="card-body p-1 noselect" style="margin-right: 40px">
+                    <div class="text-black m-0 px-2 py-3 text-center" id="question_text"
+                         style="font-size: 24px">{{ question.question_text | safe }}</div>
+                </div>
+            </article>
+        {% endfor %}
+    </section>
+
+    <script>
+        document.getElementById("test_name").innerHTML = '{{ data['test_name'] }}';
+        document.getElementById("slash_symbol").innerHTML = '{{ data['section_name'] }}' ? " / " : "";
+        document.getElementById("section_name").innerHTML = '{{ data['section_name'] }}';
+    </script>
+{% endblock %}

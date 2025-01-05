@@ -1,0 +1,22 @@
+{
+  "name": "rellax",
+  "main": "rellax.js",
+  "version": "1.2.0",
+  "homepage": "https://dixonandmoe.com/rellax/",
+  "authors": [
+    "moeamaya <moeamaya@gmail.com>"
+  ],
+  "description": "vanilla javascript parallax",
+  "moduleType": [],
+  "keywords": [
+    "parallax"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

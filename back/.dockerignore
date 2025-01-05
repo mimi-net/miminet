@@ -1,0 +1,10 @@
+__pycache__
+*.pyc
+venv
+.cache
+*.cover
+*.log
+.git
+.env
+vagrant
+Vagrantfile

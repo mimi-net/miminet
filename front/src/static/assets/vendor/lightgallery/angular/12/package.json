@@ -1,0 +1,18 @@
+{
+  "name": "lightgallery/angular/12",
+  "version": "0.0.1",
+  "peerDependencies": {
+    "@angular/common": "^12.2.0",
+    "@angular/core": "^12.2.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "main": "bundles/lightgallery-angular-12.umd.js",
+  "module": "fesm2015/lightgallery-angular-12.js",
+  "es2015": "fesm2015/lightgallery-angular-12.js",
+  "esm2015": "esm2015/lightgallery-angular-12.js",
+  "fesm2015": "fesm2015/lightgallery-angular-12.js",
+  "typings": "lightgallery-angular-12.d.ts",
+  "sideEffects": false
+}

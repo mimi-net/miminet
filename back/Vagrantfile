@@ -1,0 +1,57 @@
+#-*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require_relative 'get_os'
+
+Vagrant.configure("2") do |config|
+
+  box_configs = lambda do |box|
+    box.vm.box = "bento/ubuntu-22.04"
+    box.vm.hostname = 'miminethost'
+
+    unless os == :linux
+      box.vm.synced_folder ".", "/vagrant",
+        type: "smb"
+    else
+      box.vm.synced_folder ".", "/vagrant",
+        type: "nfs",
+        nfs_version: 4,
+        nfs_udp: false
+    end
+
+    box.vm.provision "ansible_local" do |ansible|
+      ansible.playbook = "vagrant/playbook.yml"
+    end
+  end
+
+  N = ENV["numberOfBoxes"].to_i
+  (1..N).each do |id|
+    config.vm.define "vbox#{id}", autostart: false do |vbox|
+      if os == :linux
+        vbox.vm.network "private_network", type: "dhcp"
+      end
+
+      vbox.vm.provider "virtualbox" do |v, override|
+
+        v.customize ["modifyvm", :id, "--memory", 2048]
+        v.customize ["modifyvm", :id, "--name", "miminet#{id}"]
+
+        v.customize ["modifyvm", :id, "--uart1", "0x3F8", "4"]
+        v.customize ["modifyvm", :id, "--uartmode1", "file", File::NULL]
+        v.gui = false
+        v.linked_clone = true
+        box_configs.call override
+      end
+    end
+  end
+
+  (1..N).each do |id|
+    config.vm.define "vmware#{id}", autostart: false  do |vmware|
+      vmware.vm.provider "vmware_desktop" do |v, override|
+        v.vmx["displayName"] = "miminet#{id}"
+        v.vmx["memsize"] = "1024"
+        box_configs.call override
+      end
+    end
+  end
+end

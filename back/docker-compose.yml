@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  miminet:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: celery
+    network_mode: "host"
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - celery_concurrency=${celery_concurrency}
+      - queue_names=${queue_names}
+    command: celery -A app.celery worker --loglevel=info
+    privileged: true
+

@@ -1,0 +1,85 @@
+{
+    "nodes": [
+        {
+            "data": {
+                "id": "host_1",
+                "label": "host_1"
+            },
+            "position": {
+                "x": 65.18333435058594,
+                "y": 112.5
+            },
+            "classes": [
+                "host"
+            ],
+            "config": {
+                "type": "host",
+                "label": "host_1",
+                "default_gw": "192.168.1.100"
+            },
+            "interface": [
+                {
+                    "id": "iface_26072350",
+                    "name": "iface_26072350",
+                    "connect": "edge_lpcqpdxeglsy53l451k",
+                    "ip": "192.168.1.1",
+                    "netmask": 24
+                }
+            ]
+        },
+        {
+            "data": {
+                "id": "router_1",
+                "label": "router_1"
+            },
+            "position": {
+                "x": 205.18333435058594,
+                "y": 111.30000305175781
+            },
+            "classes": [
+                "l3_router"
+            ],
+            "config": {
+                "type": "router",
+                "label": "router_1",
+                "default_gw": ""
+            },
+            "interface": [
+                {
+                    "id": "iface_51142263",
+                    "name": "iface_51142263",
+                    "connect": "edge_lpcqpdxeglsy53l451k",
+                    "ip": "192.168.1.100",
+                    "netmask": 24
+                }
+            ]
+        }
+    ],
+    "edges": [
+        {
+            "data": {
+                "id": "edge_lpcqpdxeglsy53l451k",
+                "source": "router_1",
+                "target": "host_1"
+            }
+        }
+    ],
+    "jobs": [
+        {
+            "id": "ce7166d270d64ed383018865475f9ec6",
+            "level": 0,
+            "job_id": 4,
+            "host_id": "host_1",
+            "arg_1": 1000,
+            "arg_2": "8.8.4.4",
+            "arg_3": 5555,
+            "print_cmd": "send -s 1000 -p tcp 8.8.4.4:5555"
+        }
+    ],
+    "config": {
+        "zoom": 2,
+        "pan_x": 0,
+        "pan_y": 0
+    },
+    "pcap": []
+}

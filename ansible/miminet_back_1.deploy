@@ -1,0 +1,4 @@
+cd miminet
+git fetch origin main
+git reset --hard origin/main
+docker compose -f back/docker-compose.staging.yml -f front/docker-compose.staging.yml up -d --build

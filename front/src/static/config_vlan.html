@@ -1,0 +1,50 @@
+<script id="config_button_vlan_script" type="text/plain">
+    <button id="config_button_vlan" name="config_button_vlan" class="btn btn-outline-secondary btn-sm mt-2" type="button" data-bs-toggle="modal" data-bs-target="#VlanModal" data-toggle="tooltip" data-bs-placement="bottom">
+        <i class='bx bx-network-chart fs-lg me-1'></i>
+        VLAN
+    </button>
+</script>
+
+<script id="config_modal_vlan_script" type="text/plain">
+    <div class="modal" id="VlanModal" tabindex="-1" role="dialog" aria-hidden="true" data-focus-on="input:first">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="netConfigModalLabel">Настройка VLAN</h5>
+                    <button id="vlanConfigrationCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="switch_vlan" name="switch_vlan" class="form-group form-switch">
+                        <input id="config_switch_vlan" name="config_switch_vlan" type="checkbox" class="form-check-input">
+                        <label class="form-check-label" for="customSwitch1">VLAN</label>
+                    </div>
+                </div>
+                <div id="modal_footer_vlan" class="modal-footer">
+                    <button id="vlanConfigrationCancel" type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    <button id="vlanConfigrationSubmit" type="button" class="btn btn-primary">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script id="config_table_vlan_script" type="text/plain">
+    <div id="config_table_vlan" class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+        <table class="table table-hover table-bordered mb-0 mt-1">
+            <thead>
+            <tr>
+                <th class="text-center align-middle">Устройство</th>
+                <th class="text-center align-middle">
+                    <span data-bs-toggle="tooltip" title="Допустимые значения: от 1 до 4094.">VLAN ID</span>
+                </th>
+                <th class="text-center align-middle" style="white-space: nowrap;">
+                    <span data-bs-toggle="tooltip" title="Для Trunk подключения вводите значения через запятую или пробел. Например: &quot;10 20&quot;">Тип подключения</span>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</script>
