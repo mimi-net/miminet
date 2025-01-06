@@ -1,7 +1,10 @@
 name: Yandex and Telegram authentication and Miminet authorization tests
 
-on: [push, pull_request]
-  
+on:
+  push:
+  pull_request_target:
+    types: [opened, synchronize]
+
 jobs:
   test:
     runs-on: ubuntu-latest
