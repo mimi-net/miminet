@@ -44,6 +44,7 @@
             <option value="104">Добавить сабинтерфейс с VLAN</option>
             <option value="105">Добавить IPIP-интерфейс</option>
             <option value="106">Добавить GRE-интерфейс</option>
+            <option value="107">Включить ARP Proxy на интерфейсе</option>
         </select>
     </div>
 </script>
@@ -69,6 +70,13 @@
 <script id="config_router_add_nat_masquerade_script" type="text/plain">
     <div class="form-group pt-1" name="config_router_select_input">
         <select id="config_router_add_nat_masquerade_iface_select_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_router_add_nat_masquerade_iface_select_field">
+        </select>
+    </div>
+</script>
+
+<script id="config_router_add_arp_proxy_script" type="text/plain">
+    <div class="form-group pt-1" name="config_router_select_input">
+        <select id="config_router_add_arp_proxy_iface_select_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_router_add_arp_proxy_iface_select_field">
         </select>
     </div>
 </script>
