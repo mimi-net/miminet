@@ -331,9 +331,7 @@ class AnswerView(MiminetAdminModelView):
 
 
 class QuestionCategoryView(MiminetAdminModelView):
-    column_list = (
-        "name",
-    )
+    column_list = ("name",)
 
     column_labels = {
         "name": "Название",

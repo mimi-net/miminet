@@ -85,7 +85,7 @@ class SimulateLog(db.Model):  # type:ignore[name-defined]
 
 
 # Table for question categories.
-class QuestionCategory(db.Model): # type:ignore[name-defined]
+class QuestionCategory(db.Model):  # type:ignore[name-defined]
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(1024), nullable=False, default="Тестовая категория")
 
