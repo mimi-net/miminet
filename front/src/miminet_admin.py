@@ -154,8 +154,7 @@ class SectionView(MiminetAdminModelView):
         # Call base class functionality
         super().on_model_change(form, model, is_created)
 
-        model.test_id = str(model.test_id).removeprefix("<Test ")
-        model.test_id = str(model.test_id).removesuffix(">")
+        model.test_id = model.test_id.get_id()
 
     pass
 
@@ -256,8 +255,7 @@ class QuestionView(MiminetAdminModelView):
         # Call base class functionality
         super().on_model_change(form, model, is_created)
 
-        model.section_id = str(model.section_id).removeprefix("<Section ")
-        model.section_id = str(model.section_id).removesuffix(">")
+        model.section_id = model.section_id.get_id()
         model.category_id = model.category_id.get_id()
 
         model.text = Markup.escape(Markup.unescape(model.text))
