@@ -166,6 +166,8 @@ class Question(
 
     answers = db.relationship("Answer", back_populates="question")
 
+    category_id = db.Column(db.Integer, db.ForeignKey("question_category.id"))
+
     __table_args__ = (
         db.Index("question_section_id_is_deleted_ind", "section_id", "is_deleted"),
     )
