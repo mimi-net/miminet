@@ -106,6 +106,12 @@ class Test(
 
     sections = db.relationship("Section", back_populates="test")
 
+    def __str__(self):
+        return self.name
+
+    def get_id(self):
+        return self.id
+
     # __table_args__ = (
     #     db.Index("test_id_is_deleted_ind", "id", "is_deleted"),
     #     db.Index("test_created_by_id_is_deleted_ind", "created_by_id", "is_deleted"),
@@ -132,6 +138,12 @@ class Section(
     quiz_sessions = db.relationship("QuizSession", back_populates="section")
 
     __table_args__ = (db.Index("section_test_id_is_deleted", "test_id", "is_deleted"),)
+
+    def __str__(self):
+        return self.name
+
+    def get_id(self):
+        return self.id
 
 
 class Question(
@@ -166,6 +178,8 @@ class Question(
     session_questions = db.relationship("SessionQuestion", back_populates="question")
 
     answers = db.relationship("Answer", back_populates="question")
+
+    category_id = db.Column(db.Integer, db.ForeignKey("question_category.id"))
 
     __table_args__ = (
         db.Index("question_section_id_is_deleted_ind", "section_id", "is_deleted"),

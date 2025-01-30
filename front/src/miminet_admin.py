@@ -10,7 +10,7 @@ from flask_login import current_user
 from markupsafe import Markup
 from wtforms import SelectField, TextAreaField, BooleanField
 
-from miminet_model import User
+from miminet_model import db, User, QuestionCategory
 from quiz.entity.entity import Test, Section, Question
 
 ADMIN_ROLE_LEVEL = 1
@@ -156,8 +156,7 @@ class SectionView(MiminetAdminModelView):
     def on_model_change(self, form, model, is_created, **kwargs):
         super().on_model_change(form, model, is_created)
 
-        model.test_id = str(model.test_id).removeprefix("<Test ")
-        model.test_id = str(model.test_id).removesuffix(">")
+        model.test_id = model.test_id.get_id()
 
     pass
 
@@ -202,6 +201,7 @@ class QuestionView(MiminetAdminModelView):
         "question_type",
         "created_on",
         "created_by_id",
+        "category_id",
     )
     column_sortable_list = ("created_on", "created_by_id", "section_id")
 
@@ -212,6 +212,7 @@ class QuestionView(MiminetAdminModelView):
         "created_by_id": "Автор",
         "question_type": "Тип вопроса",
         "text": "Текст вопроса",
+        "category_id": "Категория",
     }
 
     column_formatters = {
@@ -244,14 +245,20 @@ class QuestionView(MiminetAdminModelView):
             ],
             widget=Select2Widget(),
         ),
+        "category_id": QuerySelectField(
+            "Категория вопроса",
+            query_factory=lambda: db.session.query(QuestionCategory),
+            get_pk=lambda question_category: question_category.id,
+            get_label=lambda question_category: question_category.name,
+        ),
     }
 
     def on_model_change(self, form, model, is_created, **kwargs):
         # Call base class functionality
         super().on_model_change(form, model, is_created)
 
-        model.section_id = str(model.section_id).removeprefix("<Section ")
-        model.section_id = str(model.section_id).removesuffix(">")
+        model.section_id = model.section_id.get_id()
+        model.category_id = model.category_id.get_id()
 
         model.text = Markup.escape(Markup.unescape(model.text))
 
@@ -321,5 +328,15 @@ class AnswerView(MiminetAdminModelView):
 
         if model.right:
             model.right = Markup.escape(Markup.unescape(model.right))
+
+    pass
+
+
+class QuestionCategoryView(MiminetAdminModelView):
+    column_list = ("name",)
+
+    column_labels = {
+        "name": "Название",
+    }
 
     pass
