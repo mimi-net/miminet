@@ -12,6 +12,7 @@ from miminet_admin import (
     SectionView,
     QuestionView,
     AnswerView,
+    QuestionCategoryView,
 )
 from miminet_auth import (
     google_callback,
@@ -35,7 +36,7 @@ from miminet_host import (
     save_server_config,
     save_switch_config,
 )
-from miminet_model import Network, db, init_db
+from miminet_model import Network, QuestionCategory, db, init_db
 from miminet_network import (
     copy_network,
     create_network,
@@ -213,6 +214,7 @@ admin.add_view(TestView(Test, db.session))
 admin.add_view(SectionView(Section, db.session))
 admin.add_view(QuestionView(Question, db.session))
 admin.add_view(AnswerView(Answer, db.session))
+admin.add_view(QuestionCategoryView(QuestionCategory, db.session))
 
 
 @app.route("/")
