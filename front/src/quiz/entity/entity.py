@@ -112,11 +112,6 @@ class Test(
     def get_id(self):
         return self.id
 
-    # __table_args__ = (
-    #     db.Index("test_id_is_deleted_ind", "id", "is_deleted"),
-    #     db.Index("test_created_by_id_is_deleted_ind", "created_by_id", "is_deleted"),
-    # )
-
 
 class Section(
     IdMixin,
@@ -167,10 +162,6 @@ class Question(
     explanation = db.Column(db.String(512), default="")
 
     section = db.relationship("Section", uselist=False, back_populates="questions")
-
-    # text_question = db.relationship(
-    #     "TextQuestion", uselist=False, back_populates="question"
-    # )
 
     practice_question = db.relationship(
         "PracticeQuestion", uselist=False, back_populates="question"
@@ -261,26 +252,23 @@ class PracticeQuestion(
     available_l1_hub = db.Column(db.Integer, default=0)
     available_l3_router = db.Column(db.Integer, default=0)
     available_server = db.Column(db.Integer, default=0)
+    requirements = db.Column(db.JSON, default={})
 
     question = db.relationship(
         "Question", uselist=False, back_populates="practice_question"
     )
-    # network = db.relationship('Network', uselist=False, back_populates='practice_question')
-    practice_tasks = db.relationship("PracticeTask", back_populates="practice_question")
 
 
-class PracticeTask(
-    IdMixin,
-    SoftDeleteMixin,
-    TimeMixin,
-    CreatedByMixin,
-    db.Model,  # type:ignore[name-defined]
-):
-    __tablename__ = "practice_task"
+# Table for question categories.
+class QuestionCategory(db.Model):  # type:ignore[name-defined]
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(1024), nullable=False, default="Тестовая категория")
 
-    requirements = db.Column(db.JSON, default={})
+    def __repr__(self):
+        return self.id
 
-    practice_question_id = db.Column(db.Integer, db.ForeignKey("practice_question.id"))
-    practice_question = db.relationship(
-        "PracticeQuestion", back_populates="practice_tasks"
-    )
+    def __str__(self):
+        return self.name
+
+    def get_id(self):
+        return self.id

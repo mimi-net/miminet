@@ -8,98 +8,61 @@ from quiz.entity.entity import (
     Section,
     Question,
     PracticeQuestion,
-    PracticeTask,
+    Answer,
+    QuestionCategory
 )
 
-
-# def create_variable_question(variants: list, user: User):
-#     variable_question = VariableQuestion()
-#     variable_question.created_by_id = user.id
-#     for answer_json in variants:
-#         answer = Answer()
-#         answer.answer_text = answer_json["answer_text"]
-#         answer.explanation = answer_json["explanation"]
-#         answer.is_correct = answer_json["is_correct"]
-#         variable_question.answers.append(answer)
-#         answer.created_by_id = user.id
-#         db.session.add(answer)
-#     db.session.add(variable_question)
-#     return variable_question
-#
-#
-# def create_matching_question(explanation: str, matching_str: str, user: User):
-#     matching_question = MatchingQuestion()
-#     matching_question.explanation = explanation
-#     matching_question.map = matching_str
-#     matching_question.created_by_id = user.id
-#     db.session.add(matching_question)
-#
-#     return matching_question
-#
-#
-# def create_sorting_question(explanation: str, sorting_str: str, user: User):
-#     sorting_question = SortingQuestion()
-#     sorting_question.explanation = explanation
-#     sorting_question.right_sequence = sorting_str
-#     sorting_question.created_by_id = user.id
-#     db.session.add(sorting_question)
-#
-#     return sorting_question
-
-def create_practice_task(requirements, user: User):
-    practice_task = PracticeTask()
-    practice_task.requirements = json.dumps(requirements)  
-    practice_task.created_by_id = user.id
-    db.session.add(practice_task)
-    return practice_task
-
-
-def create_question(section_id: str, question_dict, user: User):
-    section = Section.query.filter_by(id=section_id).first()
-    if section is None or section.is_deleted:
-        return None, 404
-    elif section.created_by_id != user.id:
-        return None, 403
+def create_single_question(section_id: str, question_dict, user: User):
+    if section_id:
+        section = Section.query.filter_by(id=section_id).first()
+        if section is None or section.is_deleted:
+            return None, 404
+        elif section.created_by_id != user.id:
+            return None, 403
 
     question = Question()
-    question.section_id = section_id
-    question.created_by_id = user.id
+    if section_id:
+        question.section_id = section_id
 
-    if question_dict["question_type"] == "text":
-        pass
-        # question.question_type = question_dict["question_type"]
-        # text_question = TextQuestion()
-        # text_question.text_type = question_dict["text_type"]
-        #
-        # if question_dict["text_type"] == "sorting":
-        #     sorting_question = create_sorting_question(
-        #         question_dict["explanation"], question_dict["right_sequence"], user
-        #     )
-        #     text_question.sorting_question = sorting_question
-        #
-        # elif question_dict["text_type"] == "matching":
-        #     matching_question = create_matching_question(
-        #         question_dict["explanation"], question_dict["map"], user
-        #     )
-        #     text_question.matching_question = matching_question
-        #
-        # elif question_dict["text_type"] == "variable":
-        #     variable_question = create_variable_question(
-        #         question_dict["variants"], user
-        #     )
-        #     text_question.variable_question = variable_question
-        #
-        # else:
-        #     return None, 400
-        #
-        # text_question.created_by_id = user.id
-        # question.text_question = text_question
-        # db.session.add(text_question)
-        # question.question_text = question_dict["question_text"]
+    question.created_by_id = user.id
+    question.text = question_dict["text"]
+    question.explanation = question_dict.get("explanation", "")
+
+    if "category" in question_dict:
+        category = QuestionCategory.query.filter_by(name=question_dict["category"]).first()
+        if category:
+            question.category_id = category.id
+
+    if question_dict["question_type"] == "variable":
+        question.question_type = 1  # 1 - variable
+        for variant in question_dict["variants"]:
+            answer = Answer()
+            answer.variant = variant["answer_text"]
+            answer.is_correct = variant.get("is_correct", False)
+            answer.question = question
+            db.session.add(answer)
+
+    elif question_dict["question_type"] == "sorting":
+        question.question_type = 2  # 2 - sorting
+        for sorting_answer in question_dict["sorting_answers"]:
+            answer = Answer()
+            answer.variant = sorting_answer["answer_text"]
+            answer.position = sorting_answer["position"]
+            answer.question = question
+            db.session.add(answer)
+
+    elif question_dict["question_type"] == "matching":
+        question.question_type = 3  # 3 - matching
+        for pair in question_dict["matching_pairs"]:
+            answer = Answer()
+            answer.left = pair["left"]
+            answer.right = pair["right"]
+            answer.question = question
+            db.session.add(answer)
 
     elif question_dict["question_type"] == "practice":
+        question.question_type = 0  # 0 - practice
         practice_question = PracticeQuestion()
-
         attributes = [
             "description",
             "explanation",
@@ -109,7 +72,6 @@ def create_question(section_id: str, question_dict, user: User):
             "available_l3_router",
             "available_server",
         ]
-
         for attribute in attributes:
             setattr(practice_question, attribute, question_dict[attribute])
 
@@ -117,15 +79,16 @@ def create_question(section_id: str, question_dict, user: User):
             Network.guid == question_dict["start_configuration"]
         ).first()
 
+        if net is None:
+            return None, 404
+
         original_network = json.loads(net.network)
         modified_network = deepcopy(original_network)
-
-        modified_network.pop("packets", None) 
+        modified_network.pop("packets", None)
         modified_network.pop("pcap", None)
-
         modified_network_json = json.dumps(modified_network)
-
         u = uuid.uuid4()
+
         net_copy = Network(
             guid=str(u),
             author_id=user.id,
@@ -135,30 +98,50 @@ def create_question(section_id: str, question_dict, user: User):
             preview_uri=net.preview_uri,
             is_task=True,
         )
-
+        
         db.session.add(net_copy)
         db.session.commit()
 
         practice_question.start_configuration = net_copy.guid
-
-        question.question_type = 0
         practice_question.created_by_id = user.id
+        practice_question.requirements = question_dict["requirements"]
 
-        logging.info(question_dict["requirements"])
-        logging.info(type(question_dict["requirements"]))
-        
-        practice_task = create_practice_task(question_dict["requirements"], user)
-        practice_question.practice_tasks = [practice_task]
-        question.text = question_dict["text"]
         question.practice_question = practice_question
-
         db.session.add(practice_question)
     else:
         return None, 400
-    
-    db.session.commit()
+
+    db.session.add(question)
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        logging.error("Ошибка при коммите вопроса: %s", e)
+        return None, 500
 
     return question.id, 201
+
+
+def create_question(section_id: str, question_data, user: User):
+    """
+    Если question_data – список, то обрабатывает все объекты.
+    Если одиночный объект – обрабатывает его.
+    Возвращает кортеж: (список созданных ID, HTTP статус)
+    """
+    created_ids = []
+    if isinstance(question_data, list):
+        for q_data in question_data:
+            q_id, status = create_single_question(section_id, q_data, user)
+            if status == 201:
+                created_ids.append(q_id)
+            else:
+                logging.error("Ошибка создания вопроса: %s (код %s)", q_data, status)
+
+        if not created_ids:
+            return None, 400
+        return created_ids, 201
+    else:
+        return create_single_question(section_id, question_data, user)
 
 
 def delete_question(question_id: str, user: User):
@@ -172,28 +155,7 @@ def delete_question(question_id: str, user: User):
 
     # Not practice question
     # if question.question_type != 0:
-    #     text_question = question.text_question
-    #
-    #     if text_question is not None:
-    #         text_question.is_deleted = True
-    #
-    #         if text_question.text_type == "variable":
-    #             variable_question = text_question.variable_question
-    #             if variable_question is not None:
-    #                 variable_question.is_deleted = True
-    #                 for answer in variable_question.answers:
-    #                     if answer is not None:
-    #                         answer.is_deleted = True
-    #
-    #         if text_question.text_type == "sorting":
-    #             sorting_question = text_question.sorting_question
-    #             if sorting_question is not None:
-    #                 sorting_question.is_deleted = True
-    #
-    #         if text_question.text_type == "matching":
-    #             sorting_question = text_question.sorting_question
-    #             if sorting_question is not None:
-    #                 sorting_question.is_deleted = True
+
     # else:
     if question.question_type == 0:
         practice_question = question.practice_question

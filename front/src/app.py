@@ -36,7 +36,7 @@ from miminet_host import (
     save_server_config,
     save_switch_config,
 )
-from miminet_model import Network, QuestionCategory, db, init_db
+from miminet_model import Network, db, init_db
 from miminet_network import (
     copy_network,
     create_network,
@@ -72,7 +72,7 @@ from quiz.controller.test_controller import (
     get_tests_by_owner_endpoint,
     get_test_endpoint,
 )
-from quiz.entity.entity import Section, Test, Question, Answer
+from quiz.entity.entity import Section, Test, Question, Answer, QuestionCategory
 
 app = Flask(
     __name__, static_url_path="", static_folder="static", template_folder="templates"

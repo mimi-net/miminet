@@ -1,5 +1,3 @@
-import logging
-
 import json
 from markupsafe import Markup
 
@@ -16,7 +14,7 @@ from quiz.util.dto import QuestionDto, AnswerResultDto, PracticeAnswerResultDto,
 def get_question_by_session_question_id(session_question_id: str):
     session_question = SessionQuestion.query.filter_by(id=session_question_id).first()
     question = session_question.question
-    
+
     if question is None or question.is_deleted:
         return None, 404
 
@@ -37,21 +35,20 @@ def answer_on_session_question(
 
     # practice
     if question.question_type == 0:
-        practice_question = PracticeQuestion.query.filter_by(id=question.id).first()
-        tasks = practice_question.practice_tasks
+        practice_question = PracticeQuestion.query.get(question.id)
+        requirements = json.loads(practice_question.requirements) if isinstance(practice_question.requirements, str) else practice_question.requirements
 
-        requirements = json.loads(tasks[0].requirements)
         max_score = calculate_max_score(requirements)
-
         score, hints = check_task(requirements, answer_string["answer"])
+
 
         if score != max_score and len(hints) == 0:
             hints.append("По вашему решению не предусмотрены подсказки.")
-        
-        session_question.is_correct = score == max_score
+
+        session_question.is_correct = (score == max_score)
         session_question.score = score
         session_question.max_score = max_score
-        
+
         db.session.add(session_question)
         db.session.commit()
 
