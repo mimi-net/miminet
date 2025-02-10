@@ -9,8 +9,9 @@ from quiz.entity.entity import (
     Question,
     PracticeQuestion,
     Answer,
-    QuestionCategory
+    QuestionCategory,
 )
+
 
 def create_single_question(section_id: str, question_dict, user: User):
     if section_id:
@@ -29,7 +30,9 @@ def create_single_question(section_id: str, question_dict, user: User):
     question.explanation = question_dict.get("explanation", "")
 
     if "category" in question_dict:
-        category = QuestionCategory.query.filter_by(name=question_dict["category"]).first()
+        category = QuestionCategory.query.filter_by(
+            name=question_dict["category"]
+        ).first()
         if category:
             question.category_id = category.id
 
@@ -98,7 +101,7 @@ def create_single_question(section_id: str, question_dict, user: User):
             preview_uri=net.preview_uri,
             is_task=True,
         )
-        
+
         db.session.add(net_copy)
         db.session.commit()
 

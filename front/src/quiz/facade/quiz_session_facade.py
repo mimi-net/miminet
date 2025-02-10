@@ -86,7 +86,6 @@ def session_result(quiz_session_id: str):
     }, 200
 
 
-
 def get_result_by_session_guid(session_guid: str):
     quiz_session = QuizSession.query.filter_by(guid=session_guid).first()
     result = session_result(quiz_session.id)

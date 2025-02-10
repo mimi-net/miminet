@@ -150,7 +150,7 @@ class SectionView(MiminetAdminModelView):
                 if test.created_by_id
                 else ""
             ),
-        )
+        ),
     }
 
     def on_model_change(self, form, model, is_created, **kwargs):
@@ -163,8 +163,8 @@ class SectionView(MiminetAdminModelView):
 
 def get_section_name(view, context, model, name, **kwargs):
     if model.section_id is None:
-        return "Без раздела"  
-    
+        return "Без раздела"
+
     section = Section.query.get(model.section_id)
     if section and section.name:
         return section.name
@@ -234,10 +234,11 @@ class QuestionView(MiminetAdminModelView):
             get_pk=lambda section: section.id,
             get_label=lambda section: (
                 section.name + (" (" + User.query.get(section.created_by_id).nick + ")")
-                if section.created_by_id else ""
+                if section.created_by_id
+                else ""
             ),
-            allow_blank=True,           
-            blank_text="Без раздела",       
+            allow_blank=True,
+            blank_text="Без раздела",
         ),
         "question_type": SelectField(
             "Тип вопроса",
@@ -267,7 +268,6 @@ class QuestionView(MiminetAdminModelView):
 
         model.category_id = model.category_id.get_id()
         model.text = Markup.escape(Markup.unescape(model.text))
-
 
 
 def get_question_text(view, context, model, name, **kwargs):

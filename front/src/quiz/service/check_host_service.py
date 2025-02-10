@@ -1,44 +1,60 @@
 import ipaddress
-import logging
+
 
 def check_subnet_mask(answer, device, target, expected_mask):
     nodes = answer["nodes"]
-    edges = answer["edges"] 
+    edges = answer["edges"]
     hints = []
     host_node = next((node for node in nodes if node["data"]["id"] == device), None)
-    
+
     if not host_node:
-        hints.append(f"Устройство {device}, для которого требуется проверка сетевой маски, отсутствует в сети.")
+        hints.append(
+            f"Устройство {device}, для которого требуется проверка сетевой маски, отсутствует в сети."
+        )
         return False, hints
 
     if not host_node.get("interface"):
-        hints.append(f"Устройство {device} не имеет интерфейсов, для которых можно было бы проверить маску.")
+        hints.append(
+            f"Устройство {device} не имеет интерфейсов, для которых можно было бы проверить маску."
+        )
         return False, hints
 
     target_edge = next(
-        (edge["data"]["id"] for edge in edges
-         if (edge["data"]["source"] == device and edge["data"]["target"] == target) or
-            (edge["data"]["source"] == target and edge["data"]["target"] == device)),
-        None
+        (
+            edge["data"]["id"]
+            for edge in edges
+            if (edge["data"]["source"] == device and edge["data"]["target"] == target)
+            or (edge["data"]["source"] == target and edge["data"]["target"] == device)
+        ),
+        None,
     )
 
     if not target_edge:
-        hints.append(f"Соединение между {device} и {target} отсутствует, проверка маски невозможна.")
+        hints.append(
+            f"Соединение между {device} и {target} отсутствует, проверка маски невозможна."
+        )
         return False, hints
 
-    if not any(interface.get("connect") == target_edge for interface in host_node["interface"]):
-        hints.append(f"Интерфейс устройства {device} не подключён к {target}, проверка маски невозможна.")
+    if not any(
+        interface.get("connect") == target_edge for interface in host_node["interface"]
+    ):
+        hints.append(
+            f"Интерфейс устройства {device} не подключён к {target}, проверка маски невозможна."
+        )
         return False, hints
 
     for interface in host_node["interface"]:
         mask = interface.get("netmask")
 
-        if str(mask) == str(expected_mask): 
+        if str(mask) == str(expected_mask):
             return True, []
         else:
-            hints.append(f"Подсеть {mask} на интерфейсе устройства {device} не соответствует ожидаемой {expected_mask}.")
+            hints.append(
+                f"Подсеть {mask} на интерфейсе устройства {device} не соответствует ожидаемой {expected_mask}."
+            )
 
     return False, hints
+
 
 def check_vlan_id(answer, device, target, expected_equal):
     nodes = answer["nodes"]
@@ -50,19 +66,25 @@ def check_vlan_id(answer, device, target, expected_equal):
 
     if not device_node or not target_node:
         if not device_node:
-            hints.append(f"Устройство {device} отсутствует в сети, проверка VLAN ID невозможна.")
+            hints.append(
+                f"Устройство {device} отсутствует в сети, проверка VLAN ID невозможна."
+            )
         if not target_node:
-            hints.append(f"Устройство {target} отсутствует в сети, проверка VLAN ID невозможна.")
+            hints.append(
+                f"Устройство {target} отсутствует в сети, проверка VLAN ID невозможна."
+            )
 
         return False, hints
-    
+
     def find_connected_switch(node):
         for iface in node.get("interface", []):
             edge_id = iface.get("connect")
             if not edge_id:
                 continue
 
-            connected_edge = next((edge for edge in edges if edge["data"]["id"] == edge_id), None)
+            connected_edge = next(
+                (edge for edge in edges if edge["data"]["id"] == edge_id), None
+            )
             if not connected_edge:
                 continue
 
@@ -72,10 +94,12 @@ def check_vlan_id(answer, device, target, expected_equal):
                 else connected_edge["data"]["source"]
             )
 
-            connected_node = next((n for n in nodes if n["data"]["id"] == connected_node_id), None)
+            connected_node = next(
+                (n for n in nodes if n["data"]["id"] == connected_node_id), None
+            )
             if connected_node and connected_node["config"]["type"] == "l2_switch":
                 return connected_node
-            
+
         return None
 
     device_switch = find_connected_switch(device_node)
@@ -83,16 +107,23 @@ def check_vlan_id(answer, device, target, expected_equal):
 
     if not device_switch or not target_switch:
         if not device_switch:
-            hints.append(f"Устройство {device} не подключено к свитчу, настройка VLAN невозможна.")
+            hints.append(
+                f"Устройство {device} не подключено к свитчу, настройка VLAN невозможна."
+            )
         if not target_switch:
-            hints.append(f"Устройство {target} не подключено к свитчу, настройка VLAN невозможна.")
+            hints.append(
+                f"Устройство {target} не подключено к свитчу, настройка VLAN невозможна."
+            )
         return False, hints
 
     def get_vlans_on_switch(switch, node_id):
         vlans = set()
         for iface in switch.get("interface", []):
             if iface.get("connect") and iface["connect"] in [
-                iface.get("connect") for iface in next((n["interface"] for n in nodes if n["data"]["id"] == node_id), [])
+                iface.get("connect")
+                for iface in next(
+                    (n["interface"] for n in nodes if n["data"]["id"] == node_id), []
+                )
             ]:
                 vlan = iface.get("vlan")
                 if isinstance(vlan, list):
@@ -121,8 +152,10 @@ def check_vlan_id(answer, device, target, expected_equal):
             )
         return result, hints
 
+
 def is_private_ip(ip):
     return ipaddress.ip_address(ip).is_private
+
 
 def check_different_paths(answer, source_device, target_device):
     hints = []
@@ -149,11 +182,13 @@ def check_different_paths(answer, source_device, target_device):
                 reply_path.append(target)
 
     if not request_path or not reply_path:
-        hints.append("Не удалось найти полный путь для ICMP Echo Request или Echo Reply.")
+        hints.append(
+            "Не удалось найти полный путь для ICMP Echo Request или Echo Reply."
+        )
         return False, hints
 
     if request_path == reply_path:
-        hints.append(f"Пути ICMP Echo Request и Echo Reply совпадают, хотя не должны.")
+        hints.append("Пути ICMP Echo Request и Echo Reply совпадают, хотя не должны.")
         return False, hints
     else:
         return True, []
@@ -165,7 +200,7 @@ def check_path(answer, device, target, required_path):
 
     actual_path = []
     actual_path.append(device)
-    
+
     is_icmp = False
 
     for packet in packets:
@@ -176,25 +211,36 @@ def check_path(answer, device, target, required_path):
             is_icmp = True
 
     if not is_icmp:
-        hints.append(f"Вы не отправляете ICMP пакетов по сети.")
+        hints.append("Вы не отправляете ICMP пакетов по сети.")
 
-    if not (actual_path[0] == device and actual_path[-1] == device and actual_path[len(actual_path) // 2] == target):
+    if not (
+        actual_path[0] == device
+        and actual_path[-1] == device
+        and actual_path[len(actual_path) // 2] == target
+    ):
         if not (actual_path[0] == device):
-            hints.append(f"Начало пути не соответствует требуемому по условию устройству {device}.")
+            hints.append(
+                f"Начало пути не соответствует требуемому по условию устройству {device}."
+            )
         if not (actual_path[-1] == device):
-            hints.append(f"Конец пути не соответствует требуемому по условию устройству {device}.")
+            hints.append(
+                f"Конец пути не соответствует требуемому по условию устройству {device}."
+            )
         if not (actual_path[len(actual_path) // 2] == target):
             hints.append(f"Узел назначения {target} отсутствует в пути.")
 
         return False, hints
 
-    trimmed_actual_path = actual_path[1:len(actual_path) // 2]
+    trimmed_actual_path = actual_path[1 : len(actual_path) // 2]
 
     if trimmed_actual_path == required_path:
         return True, hints
     else:
-        hints.append(f"Путь до целевого устройства не совпадает с требуемым. Требуемый:{required_path}. А Ваш: {trimmed_actual_path}.")
+        hints.append(
+            f"Путь до целевого устройства не совпадает с требуемым. Требуемый:{required_path}. А Ваш: {trimmed_actual_path}."
+        )
         return False, hints
+
 
 def check_echo_request(answer, source_device, target_device, direction="two-way"):
     hints = []
@@ -229,17 +275,23 @@ def check_echo_request(answer, source_device, target_device, direction="two-way"
                     reply_path.append(target)
 
     if direction == "one-way":
-        if request_path and request_path[0] == source_device and request_path[-1] == target_device:
+        if (
+            request_path
+            and request_path[0] == source_device
+            and request_path[-1] == target_device
+        ):
             return True, []
         else:
             if not request_path:
-                hints.append(f"Устройство {source_device} не отправляет запросы к {target_device}.")
+                hints.append(
+                    f"Устройство {source_device} не отправляет запросы к {target_device}."
+                )
             else:
                 if request_path[0] != source_device:
                     hints.append(f"Запрос начался не с устройства {source_device}.")
                 if request_path[-1] != target_device:
                     hints.append(f"Запрос не завершился на устройстве {target_device}.")
-                    
+
     elif direction == "two-way":
         if (
             request_path
@@ -268,6 +320,7 @@ def check_echo_request(answer, source_device, target_device, direction="two-way"
 
     return False, hints
 
+
 def process_host_command(cmd, answer, device):
     points_for_host = 0
     hints = []
@@ -275,7 +328,9 @@ def process_host_command(cmd, answer, device):
     for command, target in cmd.items():
         if command == "echo-request":
             points = cmd.get("points", 1)
-            check_result, echo_hints = check_echo_request(answer, device, target, cmd.get("direction", "two-way"))
+            check_result, echo_hints = check_echo_request(
+                answer, device, target, cmd.get("direction", "two-way")
+            )
 
             if check_result:
                 points_for_host += points
@@ -283,11 +338,13 @@ def process_host_command(cmd, answer, device):
                 hints.extend(echo_hints)
 
             path = cmd.get("path")
-            if path and check_result: 
-                required_path = path.get("required_path")  
-                path_points = path.get("points", 1)    
+            if path and check_result:
+                required_path = path.get("required_path")
+                path_points = path.get("points", 1)
 
-                path_result, path_hints = check_path(answer, device, target, required_path)
+                path_result, path_hints = check_path(
+                    answer, device, target, required_path
+                )
 
                 if path_result:
                     points_for_host += path_points
@@ -301,5 +358,5 @@ def process_host_command(cmd, answer, device):
                     points_for_host += different_paths_points
                 else:
                     hints.extend(path_hints)
-    
+
     return points_for_host, hints

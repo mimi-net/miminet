@@ -25,11 +25,14 @@ def answer_on_session_question_endpoint():
 
 @login_required
 def get_question_by_session_question_id_endpoint():
-    res, is_exam, status_code = get_question_by_session_question_id(request.args["question_id"])
+    res, is_exam, status_code = get_question_by_session_question_id(
+        request.args["question_id"]
+    )
     if status_code == 404:
         abort(status_code)
     return make_response(
-        render_template("quiz/sessionQuestion.html", question=res, is_exam=is_exam), status_code
+        render_template("quiz/sessionQuestion.html", question=res, is_exam=is_exam),
+        status_code,
     )
 
 

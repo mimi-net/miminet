@@ -1,7 +1,7 @@
-import logging
 import quiz.service.check_host_service as chs
 
 from quiz.service.check_network_service import check_network_configuration
+
 
 def check_host(requirement, answer, device):
     points_for_host = 0
@@ -29,7 +29,9 @@ def check_host(requirement, answer, device):
         points = equal_vlan_id.get("points", 1)
 
         for target in targets:
-            result, equal_vlan_hints = chs.check_vlan_id(answer, device, target, expected_equal=True)
+            result, equal_vlan_hints = chs.check_vlan_id(
+                answer, device, target, expected_equal=True
+            )
             if not result:
                 all_vlan_conditions_passed = False
                 hints.extend(equal_vlan_hints)
@@ -39,14 +41,16 @@ def check_host(requirement, answer, device):
         points = 0
 
     all_vlan_conditions_passed = True
-    
+
     no_equal_vlan_id = requirement.get("no_equal_vlan_id")
     if no_equal_vlan_id:
         targets = no_equal_vlan_id.get("targets", [])
         points = no_equal_vlan_id.get("points", 1)
 
         for target in targets:
-            result, no_equal_vlan_hints = chs.check_vlan_id(answer, device, target, expected_equal=False)
+            result, no_equal_vlan_hints = chs.check_vlan_id(
+                answer, device, target, expected_equal=False
+            )
             if not result:
                 all_vlan_conditions_passed = False
                 hints.extend(no_equal_vlan_hints)
@@ -59,26 +63,38 @@ def check_host(requirement, answer, device):
         points = ip_check.get("points", 1)
         target_node_id = ip_check.get("to")
 
-        target_node = next((node for node in nodes if node["data"]["id"] == target_node_id), None)
+        target_node = next(
+            (node for node in nodes if node["data"]["id"] == target_node_id), None
+        )
 
         if not target_node:
-            hints.append(f"Целевое устройство {target_node_id} для проверки приватности ip-адреса не найдено в сети.")
+            hints.append(
+                f"Целевое устройство {target_node_id} для проверки приватности ip-адреса не найдено в сети."
+            )
 
         for interface in host_node.get("interface", []):
             edge_id = interface.get("connect")
 
             if not edge_id:
-                hints.append(f"Интерфейс на устройстве {device} не подключен к {target_node_id}.")
+                hints.append(
+                    f"Интерфейс на устройстве {device} не подключен к {target_node_id}."
+                )
                 continue
 
-            connected_edge = next((edge for edge in answer["edges"] if edge["data"]["id"] == edge_id), None)
-            
+            connected_edge = next(
+                (edge for edge in answer["edges"] if edge["data"]["id"] == edge_id),
+                None,
+            )
+
             if not connected_edge:
-                hints.append(f"Соединение для интерфейса на устройстве {device} не найдено.")
+                hints.append(
+                    f"Соединение для интерфейса на устройстве {device} не найдено."
+                )
                 continue
 
             connected_node_id = (
-                connected_edge["data"]["target"] if connected_edge["data"]["source"] == device
+                connected_edge["data"]["target"]
+                if connected_edge["data"]["source"] == device
                 else connected_edge["data"]["source"]
             )
 
@@ -88,19 +104,25 @@ def check_host(requirement, answer, device):
                     points_for_host += points
                     break
                 else:
-                    hints.append(f"IP-адрес {source_ip} на устройстве {device} не является приватным.")
-            else: 
-                hints.append(f"Устройство {device} не подключено к {target_node_id}. Проверка приватности IP-адреса невозможна.")
-  
+                    hints.append(
+                        f"IP-адрес {source_ip} на устройстве {device} не является приватным."
+                    )
+            else:
+                hints.append(
+                    f"Устройство {device} не подключено к {target_node_id}. Проверка приватности IP-адреса невозможна."
+                )
+
     required_default_gw = requirement.get("default_gw")
     if required_default_gw:
-            points = required_default_gw.get("points", 1)
-            actual_default_gw = host_node["config"].get("default_gw")
-            
-            if not actual_default_gw:
-                points_for_host += points
-            else:
-                hints.append(f"Вы настроили маршрут по умолчанию ({actual_default_gw}) у {device}, но по условию задания это не требовалось.")
+        points = required_default_gw.get("points", 1)
+        actual_default_gw = host_node["config"].get("default_gw")
+
+        if not actual_default_gw:
+            points_for_host += points
+        else:
+            hints.append(
+                f"Вы настроили маршрут по умолчанию ({actual_default_gw}) у {device}, но по условию задания это не требовалось."
+            )
 
     mask_check = requirement.get("mask_check")
     if mask_check:
@@ -108,7 +130,9 @@ def check_host(requirement, answer, device):
         target = mask_check.get("to")
         expected_mask = mask_check.get("subnet_mask")
 
-        result, mask_hints = chs.check_subnet_mask(answer, device, target, expected_mask)
+        result, mask_hints = chs.check_subnet_mask(
+            answer, device, target, expected_mask
+        )
 
         if result:
             points_for_host += points
@@ -117,20 +141,26 @@ def check_host(requirement, answer, device):
 
     return points_for_host, hints
 
+
 def check_task(task_dict, answer):
     total_points = 0
     hints = []
 
     for requirement in task_dict:
         for device, requirements in requirement.items():
-            if device.startswith("host") or device.startswith("server") or device.startswith("router"):
+            if (
+                device.startswith("host")
+                or device.startswith("server")
+                or device.startswith("router")
+            ):
                 points, device_hints = check_host(requirements, answer, device)
                 total_points += points
                 hints.extend(device_hints)
             elif device.startswith("network"):
-                points, network_hints = check_network_configuration(requirements, answer)
+                points, network_hints = check_network_configuration(
+                    requirements, answer
+                )
                 total_points += points
                 hints.extend(network_hints)
 
     return total_points, hints
-

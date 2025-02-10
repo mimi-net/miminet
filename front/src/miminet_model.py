@@ -84,7 +84,6 @@ class SimulateLog(db.Model):  # type:ignore[name-defined]
     ready = db.Column(db.Boolean, default=False, nullable=False)
 
 
-
 def init_db(app):
     # Data
 

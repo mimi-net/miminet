@@ -8,7 +8,12 @@ from quiz.entity.entity import (
     Answer,
     PracticeQuestion,
 )
-from quiz.util.dto import QuestionDto, AnswerResultDto, PracticeAnswerResultDto, calculate_max_score
+from quiz.util.dto import (
+    QuestionDto,
+    AnswerResultDto,
+    PracticeAnswerResultDto,
+    calculate_max_score,
+)
 
 
 def get_question_by_session_question_id(session_question_id: str):
@@ -24,7 +29,6 @@ def get_question_by_session_question_id(session_question_id: str):
     return QuestionDto(session_question.created_by_id, question), is_exam, 200
 
 
-
 def answer_on_session_question(
     session_question_id: str, answer_string: dict, user: User
 ):
@@ -36,23 +40,29 @@ def answer_on_session_question(
     # practice
     if question.question_type == 0:
         practice_question = PracticeQuestion.query.get(question.id)
-        requirements = json.loads(practice_question.requirements) if isinstance(practice_question.requirements, str) else practice_question.requirements
+        requirements = (
+            json.loads(practice_question.requirements)
+            if isinstance(practice_question.requirements, str)
+            else practice_question.requirements
+        )
 
         max_score = calculate_max_score(requirements)
         score, hints = check_task(requirements, answer_string["answer"])
 
-
         if score != max_score and len(hints) == 0:
             hints.append("По вашему решению не предусмотрены подсказки.")
 
-        session_question.is_correct = (score == max_score)
+        session_question.is_correct = score == max_score
         session_question.score = score
         session_question.max_score = max_score
 
         db.session.add(session_question)
         db.session.commit()
 
-        return PracticeAnswerResultDto(score, question.explanation, max_score, hints), 200
+        return (
+            PracticeAnswerResultDto(score, question.explanation, max_score, hints),
+            200,
+        )
 
     # variable
     if question.question_type == 1:
