@@ -22,7 +22,7 @@ def get_questions_by_section_endpoint():
 
 @login_required
 def create_question_endpoint():
-    section_id = request.args["id"]
+    section_id = request.args.get("id", None)
     res = create_question(section_id, request.json, current_user)
     if res[1] == 404:
         ret = {"message": "Не существует данного раздела", "id": section_id}
