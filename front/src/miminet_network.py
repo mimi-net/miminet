@@ -496,7 +496,10 @@ def copy_network():
 
         new_picture_blob_uri = generate_image_uri()
         try:
-            shutil.copy2("static/images/preview/" + net.preview_uri, "static/images/preview/" + new_picture_blob_uri)
+            shutil.copy2(
+                "static/images/preview/" + net.preview_uri,
+                "static/images/preview/" + new_picture_blob_uri,
+            )
         except Exception:
             ret = {"message": "Не могу сохранить копию PNG"}
             return make_response(jsonify(ret), 400)
