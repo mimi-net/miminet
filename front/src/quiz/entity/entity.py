@@ -140,6 +140,14 @@ class Section(
     def get_id(self):
         return self.id
 
+class QuestionImage(db.Model):
+    __tablename__ = 'question_image'
+    id = db.Column(db.Integer, primary_key=True)
+    question_id = db.Column(db.Integer, db.ForeignKey('question.id'))
+    file_path = db.Column(db.String(1024))  
+
+    question = db.relationship('Question', back_populates='images')
+
 
 class Question(
     IdMixin,
@@ -169,6 +177,7 @@ class Question(
     session_questions = db.relationship("SessionQuestion", back_populates="question")
 
     answers = db.relationship("Answer", back_populates="question")
+    images = db.relationship('QuestionImage', back_populates='question')
 
     category_id = db.Column(db.Integer, db.ForeignKey("question_category.id"))
 

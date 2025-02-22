@@ -28,6 +28,8 @@ def create_question_endpoint():
         ret = {"message": "Не существует данного раздела", "id": section_id}
     elif res[1] == 403:
         ret = {"message": "Нельзя создать вопрос по чужому разделу", "id": section_id}
+    elif res[1] == 400 and "missing" in res[0]:
+        ret = {"message": "Некоторые изображения отсутствуют", "details": res[0]}
     elif res[1] == 400:
         ret = {
             "message": "Нельзя создать вопрос с данными параметрами в данном разделе",

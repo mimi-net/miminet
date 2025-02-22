@@ -271,10 +271,10 @@ class QuestionView(MiminetAdminModelView):
 
 
 def get_question_text(view, context, model, name, **kwargs):
+    if not model.question_id:
+        return "Вопрос не установлен"
     question = Question.query.get(model.question_id)
-    if question and question.text:
-        return question.text
-    raise Exception("Error occurred while retrieving question text")
+    return question.text if question and question.text else "Вопрос не найден"
 
 
 class AnswerView(MiminetAdminModelView):
