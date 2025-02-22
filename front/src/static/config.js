@@ -888,6 +888,12 @@ const FillRouterSelect = function(select_id, field_msg = 'Интерфейс н�
         $(select_id).append(`<option selected value="0">${field_msg}</option>`);
     }
 
+    $(select_id).on('change', function () {
+        let selectedOption = $(this).find('option:selected'); // Получаем выбранный элемент
+        let selectedLabel = selectedOption.text(); // Получаем текст выбранного элемента
+        document.getElementById('router_connection_host_label_hidden').value = selectedLabel; // Записываем его в скрытое поле
+    });
+
     router_node.interface.forEach(function(iface) {
         // iterating over the router interfaces
 
