@@ -1,39 +1,36 @@
 <script src="{{ url_for('static', filename='/js/jquery-3.6.0.min.js') }}"></script>
 <script src="{{ url_for('static', filename='/js/jquery-ui.min.js') }}"></script>
 
-<section class="container" style="display: flex;flex-direction: row; margin-top: 48px; padding-top: 48px">
-    <div class="row align-items-baseline"
-         style=" flex: 1; display: flex;flex-direction: column;justify-content: space-evenly;">
+<section class="container" style="display: flex; flex-direction: column; margin-top: 48px; padding-top: 48px">
+    <div class="row"
+         style="display: flex; flex-wrap: nowrap; justify-content: space-between; align-items: flex-start; width: 100%; margin-bottom: 16px;">
+        
+        {# Timer and counter #}
+        <div class="col-auto d-flex align-items-center" 
+             style="font-size: 24px; opacity: 85%; white-space: nowrap; align-self: center; gap: 16px;">
+            <p id="counter" style="margin: 0;">Вопрос <span id="currentQuestion">1</span> из <span id="totalQuestions">10</span></p>
+            <span id="timer" style="display: inline-block; width: 80px; text-align: center;">00:00:00</span>
+        </div>
 
-        {# Timer, questions counter #}
-        <div class="row align-items-baseline"
-             style="margin: 8px 0 0 0; font-size: 24px; opacity: 85%; display: flex;">
-            <div class="col-auto">
-                <p id="counter"></p>
-            </div>
-            <div class="col-auto text-center">
-                <span id="timer">00:00:00</span>
+        {# Task text #}
+        <div class="col" style="flex: 1; padding: 0 16px; display: flex; justify-content: center;">
+            <div class="practice-question-text"
+                 style="max-height: 125px; overflow-y: auto; border: 1px solid #ddd; padding: 8px; border-radius: 4px; width: auto; min-width: fit-content; 
+                    max-width: 100%; text-align: center;">
+                <div class="text-black m-0" id="question_text" style="font-size: 20px;">{{ question.question_text }}</div>
             </div>
         </div>
-    </div>
 
-    {# finishQuiz button #}
-    <div class="col-auto ms-auto"
-         style="flex: 1;display: flex;justify-content: flex-end;align-items: flex-end;margin: 8px 0 8px 0; font-size: 24px; opacity: 85%">
-        <button name="finishQuiz" aria-label="Завершить тест" class="btn btn-outline-danger btn-icon me-5"
-                data-toggle="tooltip" data-bs-placement="right" title="Завершить тест">
-            <i class="bx bx-x fs-4 mx-1"></i>
-        </button>
+        {# Finish button #}
+        <div class="col-auto" style="align-self: flex-start;">
+            <button name="finishQuiz" aria-label="Завершить тест" class="btn btn-outline-danger btn-icon"
+                    data-toggle="tooltip" data-bs-placement="right" title="Завершить тест">
+                <i class="bx bx-x fs-4 mx-1"></i>
+            </button>
+        </div>
     </div>
 </section>
 
-{# Task text #}
-<div style="flex: 2;display: flex;justify-content: center;align-items: flex-end;">
-    <div class="practice-question-text">
-        <div class="text-black m-0" id="question_text"
-             style="font-size: 20px">{{ question.question_text }}</div>
-    </div>
-</div>
 
 <main>
     <section class="pb-5 mb-5">
@@ -109,13 +106,35 @@
                                     сек.</small>
                             </div>
                         </div>
-
-
+                        
+                        <div class="text-center mt-0 my-3" id="scoreDisplay" style="display: none;">
+                            <p class="fs-5">Вы набрали <span id="score">0</span> баллов
+                                {% if not is_exam %}
+                                <i id="hintIcon" class="bx bx-help-circle text-muted" style="cursor: pointer;"></i>
+                                {% endif %}
+                            </p>
+                        </div>
+                        
+                        <div id="hintModal" class="modal" tabindex="-1" role="dialog">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Подсказки</h5>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p id="hintsContainer"></p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button id="networkConfigrationCancel" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>                                             
+                        
                         {# Control buttons #}
                         <div class="card-body d-flex justify-content-center" style="padding: 0 12px 0 12px">
                             <button name="answerQuestion" class="btn btn-primary">Ответить</button>
-                            <button name="nextQuestion" class="btn w-100 px-0"
-                                    style="word-wrap: break-word;white-space: initial;" hidden></button>
+                            <button name="nextQuestion" class="btn w-100 px-0" hidden>Следующий вопрос</button>
                             <button name="seeResults" class="btn w-100 px-0"
                                     style="word-wrap: break-word;white-space: initial;" hidden></button>
                         </div>
@@ -148,11 +167,18 @@
 <div id="config_edge"></div>
 <div id="config_router"></div>
 <div id="config_server"></div>
+<div id="config_vlan"></div>
 
 <script>
     const practiceQuestion = JSON.parse('{{ question.practice_question | replace("'", '"') | safe }}')
-    console.log(practiceQuestion)
-    console.log(JSON.parse(practiceQuestion["start_configuration"]))
+
+    const hintIcon = document.getElementById("hintIcon");
+    if (hintIcon) {
+        hintIcon.addEventListener("click", function() {
+            var hintModal = new bootstrap.Modal(document.getElementById("hintModal"));
+            hintModal.show();
+        });
+    }
 </script>
 <script src="/quiz/practice_question_scripts.js"></script>
 <script src="/quiz/drop_node.js"></script>
