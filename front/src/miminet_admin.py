@@ -115,6 +115,7 @@ class SectionView(MiminetAdminModelView):
         "timer",
         "created_on",
         "created_by_id",
+        "meta",
     )
     column_sortable_list = ("name", "created_on", "created_by_id", "test_id")
 
@@ -125,6 +126,7 @@ class SectionView(MiminetAdminModelView):
         "test_id": "Раздел теста",
         "created_on": "Дата создания",
         "created_by_id": "Автор",
+        "meta": "Мета раздел",
     }
 
     column_formatters = {

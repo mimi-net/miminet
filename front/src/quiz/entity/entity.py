@@ -131,6 +131,7 @@ class Section(
     description = db.Column(db.String(512), default="")
     timer = db.Column(db.Integer, default=30)
     test_id = db.Column(db.Integer, db.ForeignKey("test.id"))
+    meta_description = db.Column(db.String(512), default="")
 
     test = db.relationship("Test", back_populates="sections")
     questions = db.relationship("Question", back_populates="section")
@@ -215,6 +216,7 @@ class SessionQuestion(
     quiz_session_id = db.Column(db.Integer, db.ForeignKey(QuizSession.id))
     question_id = db.Column(db.Integer, db.ForeignKey(Question.id))
     is_correct = db.Column(db.Boolean)
+    is_answered = db.Column(db.Boolean)
 
     quiz_session = db.relationship("QuizSession", back_populates="sessions")
     question = db.relationship("Question", back_populates="session_questions")
