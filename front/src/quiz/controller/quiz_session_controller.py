@@ -39,8 +39,10 @@ def start_session_endpoint():
 
     if res[2] == 404:
         abort(res[2])
-    if res[2] == 403:
+    elif res[2] == 403:
         ret = {"message": "Данный раздел уже пройден вами"}
+    elif res[2] == 410:
+        ret = {"message": "The number of questions selected for a category exceeds the number of questions under that category"}
     else:
         ret = {"quiz_session_id": res[0], "session_question_ids": res[1]}
     return make_response(jsonify(ret), res[2])

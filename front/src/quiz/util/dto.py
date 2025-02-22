@@ -1,5 +1,6 @@
 import random
 import uuid
+import json
 from typing import List
 
 from flask_login import current_user
@@ -24,13 +25,21 @@ def to_section_dto_list(sections: List[Section]):
                 section_name=our_section.name,
                 timer=our_section.timer,
                 description=our_section.description,
-                question_count=len(our_section.questions),
+                question_count=count_meta_section_questions(our_section.id) if our_section.meta_description else len(our_section.questions),
             ),
             sections,
         )
     )
 
     return dto_list
+
+
+def count_meta_section_questions(section_id: str):
+    section = Section.query.filter_by(id=section_id).first()
+    counter = 0
+    for _, question_number in json.loads(section.meta_description).items():
+        counter = question_number + counter
+    return counter
 
 
 def to_test_dto_list(tests: List[Test]):

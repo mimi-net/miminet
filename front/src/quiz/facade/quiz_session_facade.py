@@ -9,9 +9,12 @@ import random
 
 def start_session(section_id: str, user: User):
     section = Section.query.filter_by(id=section_id).first()
-    test = section.test
+
     if section is None or section.is_deleted:
         return None, None, 404
+    
+    test = section.test
+
     if (
         not test.is_retakeable
         and QuizSession.query.filter_by(
@@ -29,6 +32,9 @@ def start_session(section_id: str, user: User):
         for category_name, question_number in json.loads(section.meta_description).items():
             category = QuestionCategory.query.filter_by(name=category_name).first()
             category_questions = Question.query.filter_by(category_id=category.id, is_deleted=False).all()
+
+            if question_number > len(category_questions):
+                return None, None, 410
 
             random_questions_list = random.sample(category_questions, question_number)
 
