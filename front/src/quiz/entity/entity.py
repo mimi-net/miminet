@@ -142,7 +142,7 @@ class Section(
         return self.id
 
 
-class QuestionImage(db.Model): # type:ignore[name-defined]
+class QuestionImage(db.Model):  # type:ignore[name-defined]
     __tablename__ = "question_image"
     id = db.Column(db.Integer, primary_key=True)
     question_id = db.Column(db.Integer, db.ForeignKey("question.id"))

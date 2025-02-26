@@ -181,7 +181,7 @@ class QuestionDto:
         self.question_text = Markup.unescape(question.text)
         self.correct_count = 0
 
-        self.images = [img.file_path for img in question.images] # type: ignore
+        self.images = [img.file_path for img in question.images]  # type: ignore
 
         if self.question_type == "practice":
             self.practice_question = PracticeQuestionDto(user_id, question.practice_question).to_dict()  # type: ignore
