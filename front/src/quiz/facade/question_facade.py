@@ -2,6 +2,8 @@ import uuid
 import json
 import logging
 import os
+
+from quiz.facade.json_schema_validation import validate_requirements
 from copy import deepcopy
 
 from miminet_model import db, User, Network
@@ -17,6 +19,11 @@ from quiz.entity.entity import (
 UPLOAD_FOLDER = "/app/static/quiz_images"
 
 def create_single_question(section_id: str, question_dict, user: User):
+    if "requirements" in question_dict:
+        validation_result = validate_requirements(question_dict["requirements"])
+        if validation_result is not True:
+            return {"message": validation_result}, 400
+
     if section_id:
         section = Section.query.filter_by(id=section_id).first()
         if section is None or section.is_deleted:
@@ -46,7 +53,7 @@ def create_single_question(section_id: str, question_dict, user: User):
             answer.variant = variant["answer_text"]
             answer.is_correct = variant.get("is_correct", False)
             answer.question = question
-            answer.created_by_id = user.id  # Устанавливаем created_by_id
+            answer.created_by_id = user.id  
             db.session.add(answer)
 
     elif question_dict["question_type"] == "sorting":
@@ -56,7 +63,7 @@ def create_single_question(section_id: str, question_dict, user: User):
             answer.variant = sorting_answer["answer_text"]
             answer.position = sorting_answer["position"]
             answer.question = question
-            answer.created_by_id = user.id  # Устанавливаем created_by_id
+            answer.created_by_id = user.id  
             db.session.add(answer)
 
     elif question_dict["question_type"] == "matching":
@@ -66,7 +73,7 @@ def create_single_question(section_id: str, question_dict, user: User):
             answer.left = pair["left"]
             answer.right = pair["right"]
             answer.question = question
-            answer.created_by_id = user.id  # Устанавливаем created_by_id
+            answer.created_by_id = user.id 
             db.session.add(answer)
 
     elif question_dict["question_type"] == "practice":
@@ -89,7 +96,8 @@ def create_single_question(section_id: str, question_dict, user: User):
         ).first()
 
         if net is None:
-            return None, 404
+            net_guid = question_dict["start_configuration"]
+            return {"message": f"Сеть {net_guid} не найдена"}, 404
 
         original_network = json.loads(net.network)
         modified_network = deepcopy(original_network)

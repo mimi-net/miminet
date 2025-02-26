@@ -5,7 +5,6 @@ from PIL import Image
 import logging
 
 UPLOAD_FOLDER = "static/quiz_images"
-
 ALLOWED_EXTENSIONS = {"bmp", "png", "jpg", "jpeg"}
 
 image_routes = Blueprint("image_routes", __name__)
@@ -16,7 +15,7 @@ def allowed_file(filename):
 def check_image_with_pil(file_path):
     try:
         with Image.open(file_path) as img:
-            img.verify() 
+            img.verify()
         return True
     except (IOError, SyntaxError):
         return False
@@ -45,7 +44,7 @@ def upload_image_endpoint():
     file.save(file_path)
 
     if not check_image_with_pil(file_path):
-        os.remove(file_path) 
+        os.remove(file_path)
         return jsonify({"error": "File is not a valid image"}), 400
 
     return jsonify({"filename": unique_filename}), 201

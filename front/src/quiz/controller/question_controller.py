@@ -24,12 +24,17 @@ def get_questions_by_section_endpoint():
 def create_question_endpoint():
     section_id = request.args.get("id", None)
     res = create_question(section_id, request.json, current_user)
-    if res[1] == 404:
+    if res[1] == 404 and "message" in res[0]:
+        msg = res[0]["message"]
+        ret = {"message": f"{msg}"}
+    elif res[1] == 404:
         ret = {"message": "Не существует данного раздела", "id": section_id}
     elif res[1] == 403:
         ret = {"message": "Нельзя создать вопрос по чужому разделу", "id": section_id}
     elif res[1] == 400 and "missing" in res[0]:
         ret = {"message": "Некоторые изображения отсутствуют", "details": res[0]}
+    elif res[1] == 400 and "message" in res[0]:
+        ret = {"message": "Ваши требования не удовлетворяют шаблону.", "details": res[0]}
     elif res[1] == 400:
         ret = {
             "message": "Нельзя создать вопрос с данными параметрами в данном разделе",

@@ -85,19 +85,14 @@ class PracticeAnswerResultDto:
 def calculate_max_score(requirements: list) -> int:
     def recursive_sum(data):
         if isinstance(data, dict):
-            points = data.get("points", 0)
-
-            if "different_paths" in data:
-                points += data["different_paths"]
-
+            points = data.get("points", 1)
             return points + sum(recursive_sum(value) for value in data.values())
-
         elif isinstance(data, list):
             return sum(recursive_sum(item) for item in data)
-
-        return 0
+        return 1
 
     return recursive_sum(requirements)
+
 
 
 class AnswerResultDto:

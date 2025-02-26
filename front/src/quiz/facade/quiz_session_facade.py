@@ -1,7 +1,7 @@
 from sqlalchemy import func
 
-from miminet_model import User, QuestionCategory, db
-from quiz.entity.entity import Question, QuizSession, SessionQuestion, Section
+from miminet_model import User, db
+from quiz.entity.entity import Question, QuizSession, SessionQuestion, Section, QuestionCategory
 from quiz.util.dto import SessionResultDto
 import json
 import random
