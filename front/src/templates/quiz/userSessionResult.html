@@ -39,9 +39,15 @@
         {% set total_score = data['theory_correct'] + data['practice_results']|sum(attribute='score') %}
         {% set total_max = data['theory_count'] + data['practice_results']|sum(attribute='max_score') %}
 
-        <div class="mb-4">
+        <div class="mb-3">
             <p id="timeCount" style="font-size: 1.2rem;">
                 <strong>Тест пройден за:</strong> {{ data['time_spent'] }}
+            </p>
+        </div>
+
+        <div class="mb-3">
+            <p style="font-size: 1.2rem;">
+                <strong>Итог:</strong> {{ total_score }} из {{ total_max }} баллов
             </p>
         </div>
 
@@ -49,12 +55,6 @@
             <button class="btn btn-primary me-3" name="backToTests" style="font-size: 1rem; height: 2.5rem;">
                 Назад к тестам
             </button>
-            <span class="badge d-flex align-items-center justify-content-center" 
-                  style="font-size: 1rem; height: 2.5rem; padding: 0 1rem;
-                         background-color: {% if total_score / total_max > 0.8 %}#28a745{% elif total_score / total_max > 0.5 %}#ffc107{% else %}#dc3545{% endif %};
-                         color: white;">
-                Итог: {{ total_score }} из {{ total_max }} баллов
-            </span>
         </div>
     </div>
 </section>
