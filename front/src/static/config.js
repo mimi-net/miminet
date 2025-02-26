@@ -362,9 +362,11 @@ const ConfigHostInterface = function (name, ip, netmask, connected_to) {
     $('#config_host_ip_' + name).val(ip);
     $('#config_host_mask_' + name).val(netmask);
 
-    if (pcaps.includes(name)) {
+    if (Array.isArray(pcaps) && pcaps.includes(name)) {
         $('#config_host_iface_name_label_' + name).html('Линк к (<a href="/host/mimishark?guid=' + network_guid + '&iface=' + name + '" target="_blank">pcap</a>)');
-    }
+    } else {
+        console.warn('pcaps не определен или не является массивом:', pcaps);
+    }    
 }
 
 const ConfigRouterInterface = function (name, ip, netmask, connected_to) {

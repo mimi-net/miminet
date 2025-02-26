@@ -1,80 +1,32 @@
 import json
-
 from markupsafe import Markup
 
 from miminet_model import User, db
+from quiz.service.check_practice_service import check_task
 from quiz.entity.entity import (
     SessionQuestion,
     Answer,
     PracticeQuestion,
 )
-from quiz.util.dto import QuestionDto, AnswerResultDto
+from quiz.util.dto import (
+    QuestionDto,
+    AnswerResultDto,
+    PracticeAnswerResultDto,
+    calculate_max_score,
+)
 
 
 def get_question_by_session_question_id(session_question_id: str):
     session_question = SessionQuestion.query.filter_by(id=session_question_id).first()
     question = session_question.question
-    user_id = session_question.created_by_id
-    if question is None or question.is_deleted is True:
+
+    if question is None or question.is_deleted:
         return None, 404
 
-    return QuestionDto(user_id, question), 200
+    section = question.section
+    is_exam = section.is_exam if section else False
 
-
-def check_task(task_dict, answer):
-    # nodes = answer["nodes"]
-    # edges = answer["edges"]
-    packets = answer["packets"]
-
-    task = task_dict["task"]
-    if task == "ping 1 host":
-        from_node = task_dict["from"]
-        to_node = task_dict["to"]
-
-        request = []
-        reply = []
-
-        for packet in packets:
-            packet_type = packet[0]["config"]["type"]
-            source = packet[0]["config"]["source"]
-            target = packet[0]["config"]["target"]
-
-            if "ICMP echo-request" in packet_type:
-                if not request:
-                    request.append(source)
-                    request.append(target)
-
-                if request[-1] != source:
-                    request.append(source)
-
-                if request[-1] != target:
-                    request.append(target)
-
-            elif "ICMP echo-reply" in packet_type:
-                if not reply:
-                    reply.append(source)
-                    reply.append(target)
-
-                if reply[-1] != source:
-                    reply.append(source)
-
-                if reply[-1] != target:
-                    reply.append(target)
-
-            else:
-                continue
-
-        if (
-            request
-            and reply
-            and request[0] == from_node
-            and request[-1] == to_node
-            and reply[0] == to_node
-            and reply[-1] == from_node
-        ):
-            return True
-        else:
-            return False
+    return QuestionDto(session_question.created_by_id, question), is_exam, 200
 
 
 def answer_on_session_question(
@@ -87,22 +39,30 @@ def answer_on_session_question(
 
     # practice
     if question.question_type == 0:
-        practice_question = PracticeQuestion.query.filter_by(id=question.id).first()
-        tasks = practice_question.practice_tasks
-        is_correct = True
-        correct_count = 0
-        for task in tasks:
-            result = check_task(json.loads(task.task), answer_string["answer"])
-            is_correct &= result
-            correct_count += 1 if result else 0
+        practice_question = PracticeQuestion.query.get(question.id)
+        requirements = (
+            json.loads(practice_question.requirements)
+            if isinstance(practice_question.requirements, str)
+            else practice_question.requirements
+        )
 
-        is_correct &= correct_count == len(tasks)
+        max_score = calculate_max_score(requirements)
+        score, hints = check_task(requirements, answer_string["answer"])
 
-        session_question.is_correct = is_correct
+        if score != max_score and len(hints) == 0:
+            hints.append("По вашему решению не предусмотрены подсказки.")
+
+        session_question.is_correct = score == max_score
+        session_question.score = score
+        session_question.max_score = max_score
+
         db.session.add(session_question)
         db.session.commit()
 
-        return AnswerResultDto(question.explanation, is_correct), 200
+        return (
+            PracticeAnswerResultDto(score, question.explanation, max_score, hints),
+            200,
+        )
 
     # variable
     if question.question_type == 1:

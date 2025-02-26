@@ -112,11 +112,6 @@ class Test(
     def get_id(self):
         return self.id
 
-    # __table_args__ = (
-    #     db.Index("test_id_is_deleted_ind", "id", "is_deleted"),
-    #     db.Index("test_created_by_id_is_deleted_ind", "created_by_id", "is_deleted"),
-    # )
-
 
 class Section(
     IdMixin,
@@ -131,6 +126,8 @@ class Section(
     description = db.Column(db.String(512), default="")
     timer = db.Column(db.Integer, default=30)
     test_id = db.Column(db.Integer, db.ForeignKey("test.id"))
+    is_exam = db.Column(db.Boolean, default=False)
+    meta_description = db.Column(db.String(512), default="")
 
     test = db.relationship("Test", back_populates="sections")
     questions = db.relationship("Question", back_populates="section")
@@ -143,6 +140,15 @@ class Section(
 
     def get_id(self):
         return self.id
+
+
+class QuestionImage(db.Model):  # type:ignore[name-defined]
+    __tablename__ = "question_image"
+    id = db.Column(db.Integer, primary_key=True)
+    question_id = db.Column(db.Integer, db.ForeignKey("question.id"))
+    file_path = db.Column(db.String(1024))
+
+    question = db.relationship("Question", back_populates="images")
 
 
 class Question(
@@ -167,16 +173,13 @@ class Question(
 
     section = db.relationship("Section", uselist=False, back_populates="questions")
 
-    # text_question = db.relationship(
-    #     "TextQuestion", uselist=False, back_populates="question"
-    # )
-
     practice_question = db.relationship(
         "PracticeQuestion", uselist=False, back_populates="question"
     )
     session_questions = db.relationship("SessionQuestion", back_populates="question")
 
     answers = db.relationship("Answer", back_populates="question")
+    images = db.relationship("QuestionImage", back_populates="question")
 
     category_id = db.Column(db.Integer, db.ForeignKey("question_category.id"))
 
@@ -215,6 +218,8 @@ class SessionQuestion(
     quiz_session_id = db.Column(db.Integer, db.ForeignKey(QuizSession.id))
     question_id = db.Column(db.Integer, db.ForeignKey(Question.id))
     is_correct = db.Column(db.Boolean)
+    score = db.Column(db.Integer, default=0)
+    max_score = db.Column(db.Integer, default=0)
 
     quiz_session = db.relationship("QuizSession", back_populates="sessions")
     question = db.relationship("Question", back_populates="session_questions")
@@ -258,26 +263,23 @@ class PracticeQuestion(
     available_l1_hub = db.Column(db.Integer, default=0)
     available_l3_router = db.Column(db.Integer, default=0)
     available_server = db.Column(db.Integer, default=0)
+    requirements = db.Column(db.JSON, default={})
 
     question = db.relationship(
         "Question", uselist=False, back_populates="practice_question"
     )
-    # network = db.relationship('Network', uselist=False, back_populates='practice_question')
-    practice_tasks = db.relationship("PracticeTask", back_populates="practice_question")
 
 
-class PracticeTask(
-    IdMixin,
-    SoftDeleteMixin,
-    TimeMixin,
-    CreatedByMixin,
-    db.Model,  # type:ignore[name-defined]
-):
-    __tablename__ = "practice_task"
+# Table for question categories.
+class QuestionCategory(db.Model):  # type:ignore[name-defined]
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(1024), nullable=False, default="Тестовая категория")
 
-    task = db.Column(db.String(512), default="")
+    def __repr__(self):
+        return self.id
 
-    practice_question_id = db.Column(db.Integer, db.ForeignKey("practice_question.id"))
-    practice_question = db.relationship(
-        "PracticeQuestion", back_populates="practice_tasks"
-    )
+    def __str__(self):
+        return self.name
+
+    def get_id(self):
+        return self.id

@@ -22,6 +22,7 @@ services:
       - ./src/static/video:/app/static/video
       - ./src/static/pcaps:/app/static/pcaps
       - ./src/static/assets:/app/static/assets
+      - ./src/static/quiz_images:/app/static/quiz_images
     environment:
       - RABBITMQ_URL=amqp://rabbitmq:5672
   rabbitmq:

@@ -25,6 +25,7 @@ def to_section_dto_list(sections: List[Section]):
                 timer=our_section.timer,
                 description=our_section.description,
                 question_count=len(our_section.questions),
+                is_exam=our_section.is_exam,
             ),
             sections,
         )
@@ -63,6 +64,34 @@ def to_question_for_editor_dto_list(questions: List[Question]):
     )
 
     return dto_list
+
+
+class PracticeAnswerResultDto:
+    def __init__(self, score: int, explanation: str, max_score: int, hints: list):
+        self.score = score
+        self.explanation = explanation
+        self.max_score = max_score
+        self.hints = hints
+
+    def to_dict(self):
+        return {
+            "score": self.score,
+            "explanation": self.explanation,
+            "max_score": self.max_score,
+            "hints": self.hints,
+        }
+
+
+def calculate_max_score(requirements: list) -> int:
+    def recursive_sum(data):
+        if isinstance(data, dict):
+            points = data.get("points", 1)
+            return points + sum(recursive_sum(value) for value in data.values())
+        elif isinstance(data, list):
+            return sum(recursive_sum(item) for item in data)
+        return 1
+
+    return recursive_sum(requirements)
 
 
 class AnswerResultDto:
@@ -152,6 +181,8 @@ class QuestionDto:
         self.question_text = Markup.unescape(question.text)
         self.correct_count = 0
 
+        self.images = [img.file_path for img in question.images]  # type: ignore
+
         if self.question_type == "practice":
             self.practice_question = PracticeQuestionDto(user_id, question.practice_question).to_dict()  # type: ignore
             return
@@ -207,12 +238,14 @@ class SectionDto:
         timer: str,
         description: str,
         question_count: int,
+        is_exam: bool,
     ):
         self.section_id = section_id
         self.section_name = section_name
         self.timer = timer
         self.description = description
         self.question_count = question_count
+        self.is_exam = is_exam
 
         current_user_sessions = QuizSession.query.filter(
             QuizSession.created_by_id == current_user.id

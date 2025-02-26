@@ -8,10 +8,10 @@ from flask_admin.form import Select2Widget
 from flask_admin.model import typefmt
 from flask_login import current_user
 from markupsafe import Markup
-from wtforms import SelectField, TextAreaField
+from wtforms import SelectField, TextAreaField, BooleanField
 
-from miminet_model import db, User, QuestionCategory
-from quiz.entity.entity import Test, Section, Question
+from miminet_model import db, User
+from quiz.entity.entity import Test, Section, Question, QuestionCategory
 
 ADMIN_ROLE_LEVEL = 1
 
@@ -52,10 +52,13 @@ class MiminetAdminModelView(ModelView):
         return redirect(url_for("login_index"))
 
     def on_model_change(self, form, model, is_created, **kwargs):
-        if not is_created and model.created_by_id != current_user.id:
-            raise Exception("You are not allowed to edit this record.")
-        if is_created:
-            model.created_by_id = current_user.id
+        if hasattr(model, "created_by_id"):
+            if not is_created and model.created_by_id != current_user.id:
+                raise Exception("You are not allowed to edit this record.")
+            if is_created:
+                model.created_by_id = current_user.id
+        else:
+            pass
 
     MY_DEFAULT_FORMATTERS = dict(typefmt.BASE_FORMATTERS)
     MY_DEFAULT_FORMATTERS.update(
@@ -113,8 +116,10 @@ class SectionView(MiminetAdminModelView):
         "name",
         "description",
         "timer",
+        "is_exam",
         "created_on",
         "created_by_id",
+        "meta",
     )
     column_sortable_list = ("name", "created_on", "created_by_id", "test_id")
 
@@ -123,8 +128,10 @@ class SectionView(MiminetAdminModelView):
         "description": "Описание",
         "timer": "Время на прохождение (в минутах)",
         "test_id": "Раздел теста",
+        "is_exam": "Контрольная работа",
         "created_on": "Дата создания",
         "created_by_id": "Автор",
+        "meta": "Мета раздел",
     }
 
     column_formatters = {
@@ -133,6 +140,7 @@ class SectionView(MiminetAdminModelView):
     }
 
     form_extra_fields = {
+        "is_exam": BooleanField(default=False),
         "test_id": QuerySelectField(
             "Раздел теста",
             query_factory=lambda: Test.query.filter(
@@ -147,11 +155,10 @@ class SectionView(MiminetAdminModelView):
                 if test.created_by_id
                 else ""
             ),
-        )
+        ),
     }
 
     def on_model_change(self, form, model, is_created, **kwargs):
-        # Call base class functionality
         super().on_model_change(form, model, is_created)
 
         model.test_id = model.test_id.get_id()
@@ -160,6 +167,9 @@ class SectionView(MiminetAdminModelView):
 
 
 def get_section_name(view, context, model, name, **kwargs):
+    if model.section_id is None:
+        return "Без раздела"
+
     section = Section.query.get(model.section_id)
     if section and section.name:
         return section.name
@@ -228,10 +238,12 @@ class QuestionView(MiminetAdminModelView):
             ).all(),
             get_pk=lambda section: section.id,
             get_label=lambda section: (
-                section.name + (" (" + User.query.get(section.created_by_id).nick) + ")"
+                section.name + (" (" + User.query.get(section.created_by_id).nick + ")")
                 if section.created_by_id
                 else ""
             ),
+            allow_blank=True,
+            blank_text="Без раздела",
         ),
         "question_type": SelectField(
             "Тип вопроса",
@@ -252,22 +264,22 @@ class QuestionView(MiminetAdminModelView):
     }
 
     def on_model_change(self, form, model, is_created, **kwargs):
-        # Call base class functionality
         super().on_model_change(form, model, is_created)
 
-        model.section_id = model.section_id.get_id()
+        if model.section_id:
+            model.section_id = model.section_id.get_id()
+        else:
+            model.section_id = None
+
         model.category_id = model.category_id.get_id()
-
         model.text = Markup.escape(Markup.unescape(model.text))
-
-    pass
 
 
 def get_question_text(view, context, model, name, **kwargs):
+    if not model.question_id:
+        return "Вопрос не установлен"
     question = Question.query.get(model.question_id)
-    if question and question.text:
-        return question.text
-    raise Exception("Error occurred while retrieving question text")
+    return question.text if question and question.text else "Вопрос не найден"
 
 
 class AnswerView(MiminetAdminModelView):

@@ -84,21 +84,6 @@ class SimulateLog(db.Model):  # type:ignore[name-defined]
     ready = db.Column(db.Boolean, default=False, nullable=False)
 
 
-# Table for question categories.
-class QuestionCategory(db.Model):  # type:ignore[name-defined]
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(1024), nullable=False, default="Тестовая категория")
-
-    def __repr__(self):
-        return self.id
-
-    def __str__(self):
-        return self.name
-
-    def get_id(self):
-        return self.id
-
-
 def init_db(app):
     # Data
 

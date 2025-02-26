@@ -36,7 +36,7 @@ from miminet_host import (
     save_server_config,
     save_switch_config,
 )
-from miminet_model import Network, QuestionCategory, db, init_db
+from miminet_model import Network, db, init_db
 from miminet_network import (
     copy_network,
     create_network,
@@ -56,6 +56,7 @@ from quiz.controller.question_controller import (
     create_question_endpoint,
     delete_question_endpoint,
 )
+from quiz.controller.image_controller import upload_image_endpoint
 from quiz.controller.quiz_session_controller import (
     start_session_endpoint,
     get_question_by_session_question_id_endpoint,
@@ -72,7 +73,9 @@ from quiz.controller.test_controller import (
     get_tests_by_owner_endpoint,
     get_test_endpoint,
 )
-from quiz.entity.entity import Section, Test, Question, Answer
+from quiz.entity.entity import Section, Test, Question, Answer, QuestionCategory
+
+from quiz.controller.image_controller import image_routes
 
 app = Flask(
     __name__, static_url_path="", static_folder="static", template_folder="templates"
@@ -201,6 +204,11 @@ app.add_url_rule(
     methods=["GET"],
     view_func=get_result_by_session_guid_endpoint,
 )
+app.add_url_rule(
+    "/quiz/images/upload", methods=["POST"], view_func=upload_image_endpoint
+)
+
+app.register_blueprint(image_routes)
 
 # Init Flask-admin
 admin = Admin(

@@ -4,9 +4,17 @@ const ConfigVxlan = function (currentDevice) {
 
     $('#' + modalId).remove();
 
-    var buttonHTML = document.getElementById('config_button_vxlan_script').innerHTML;
-    var modalHTML = document.getElementById('config_modal_vxlan_script').innerHTML;
-    var tableHTML = document.getElementById('config_table_vxlan_script').innerHTML;
+    var buttonElem = document.getElementById('config_button_vxlan_script');
+    var modalElem = document.getElementById('config_modal_vxlan_script');
+    var tableElem = document.getElementById('config_table_vxlan_script');
+    
+    if (!buttonElem || !modalElem || !tableElem) {
+        return;
+    }
+    
+    var buttonHTML = buttonElem.innerHTML;
+    var modalHTML = modalElem.innerHTML;
+    var tableHTML = tableElem.innerHTML;    
 
     modalHTML = modalHTML.replace('id="VxlanModal"', 'id="' + modalId + '"');
     tableHTML = tableHTML.replace('id="config_table_vxlan"', 'id="' + tableId + '"');
