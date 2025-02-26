@@ -52,7 +52,7 @@ class MiminetAdminModelView(ModelView):
         return redirect(url_for("login_index"))
 
     def on_model_change(self, form, model, is_created, **kwargs):
-        if hasattr(model, 'created_by_id'):
+        if hasattr(model, "created_by_id"):
             if not is_created and model.created_by_id != current_user.id:
                 raise Exception("You are not allowed to edit this record.")
             if is_created:

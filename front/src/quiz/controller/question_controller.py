@@ -34,7 +34,10 @@ def create_question_endpoint():
     elif res[1] == 400 and "missing" in res[0]:
         ret = {"message": "Некоторые изображения отсутствуют", "details": res[0]}
     elif res[1] == 400 and "message" in res[0]:
-        ret = {"message": "Ваши требования не удовлетворяют шаблону.", "details": res[0]}
+        ret = {
+            "message": "Ваши требования не удовлетворяют шаблону.",
+            "details": res[0],
+        }
     elif res[1] == 400:
         ret = {
             "message": "Нельзя создать вопрос с данными параметрами в данном разделе",

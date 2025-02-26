@@ -13,10 +13,11 @@ from quiz.entity.entity import (
     PracticeQuestion,
     Answer,
     QuestionCategory,
-    QuestionImage  
+    QuestionImage,
 )
 
 UPLOAD_FOLDER = "/app/static/quiz_images"
+
 
 def create_single_question(section_id: str, question_dict, user: User):
     if "requirements" in question_dict:
@@ -47,37 +48,37 @@ def create_single_question(section_id: str, question_dict, user: User):
             question.category_id = category.id
 
     if question_dict["question_type"] == "variable":
-        question.question_type = 1  
+        question.question_type = 1
         for variant in question_dict["variants"]:
             answer = Answer()
             answer.variant = variant["answer_text"]
             answer.is_correct = variant.get("is_correct", False)
             answer.question = question
-            answer.created_by_id = user.id  
+            answer.created_by_id = user.id
             db.session.add(answer)
 
     elif question_dict["question_type"] == "sorting":
-        question.question_type = 2  
+        question.question_type = 2
         for sorting_answer in question_dict["sorting_answers"]:
             answer = Answer()
             answer.variant = sorting_answer["answer_text"]
             answer.position = sorting_answer["position"]
             answer.question = question
-            answer.created_by_id = user.id  
+            answer.created_by_id = user.id
             db.session.add(answer)
 
     elif question_dict["question_type"] == "matching":
-        question.question_type = 3  
+        question.question_type = 3
         for pair in question_dict["matching_pairs"]:
             answer = Answer()
             answer.left = pair["left"]
             answer.right = pair["right"]
             answer.question = question
-            answer.created_by_id = user.id 
+            answer.created_by_id = user.id
             db.session.add(answer)
 
     elif question_dict["question_type"] == "practice":
-        question.question_type = 0  
+        question.question_type = 0
         practice_question = PracticeQuestion()
         attributes = [
             "description",
@@ -129,18 +130,18 @@ def create_single_question(section_id: str, question_dict, user: User):
         return None, 400
 
     db.session.add(question)
-    
-    if "images" in question_dict: 
-        missing_images = []  
+
+    if "images" in question_dict:
+        missing_images = []
         for image_filename in question_dict["images"]:
             file_path = os.path.join(UPLOAD_FOLDER, image_filename)
-            if os.path.exists(file_path): 
+            if os.path.exists(file_path):
                 qi = QuestionImage()
                 qi.file_path = f"/quiz/images/{image_filename}"
-                qi.question = question 
+                qi.question = question
                 db.session.add(qi)
             else:
-                missing_images.append(image_filename)  
+                missing_images.append(image_filename)
 
         if missing_images:
             return {"missing": missing_images}, 400

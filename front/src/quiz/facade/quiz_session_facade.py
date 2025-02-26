@@ -1,7 +1,13 @@
 from sqlalchemy import func
 
 from miminet_model import User, db
-from quiz.entity.entity import Question, QuizSession, SessionQuestion, Section, QuestionCategory
+from quiz.entity.entity import (
+    Question,
+    QuizSession,
+    SessionQuestion,
+    Section,
+    QuestionCategory,
+)
 from quiz.util.dto import SessionResultDto
 import json
 import random
@@ -25,10 +31,14 @@ def start_session(section_id: str, user: User):
     quiz_session.section_id = section_id
     db.session.add(quiz_session)
 
-    if section.meta_description: 
-        for category_name, question_number in json.loads(section.meta_description).items():
+    if section.meta_description:
+        for category_name, question_number in json.loads(
+            section.meta_description
+        ).items():
             category = QuestionCategory.query.filter_by(name=category_name).first()
-            category_questions = Question.query.filter_by(category_id=category.id, is_deleted=False).all()
+            category_questions = Question.query.filter_by(
+                category_id=category.id, is_deleted=False
+            ).all()
 
             random_questions_list = random.sample(category_questions, question_number)
 
@@ -39,7 +49,9 @@ def start_session(section_id: str, user: User):
                 session_question.quiz_session = quiz_session
                 db.session.add(session_question)
     else:
-        questions = Question.query.filter_by(section_id=section_id, is_deleted=False).all()
+        questions = Question.query.filter_by(
+            section_id=section_id, is_deleted=False
+        ).all()
 
         for question in questions:
             session_question = SessionQuestion()
@@ -47,7 +59,7 @@ def start_session(section_id: str, user: User):
             session_question.created_by_id = user.id
             session_question.quiz_session = quiz_session
             db.session.add(session_question)
-    
+
     db.session.commit()
 
     return quiz_session.id, [i.id for i in quiz_session.sessions], 201  # type: ignore

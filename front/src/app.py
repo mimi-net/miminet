@@ -204,7 +204,9 @@ app.add_url_rule(
     methods=["GET"],
     view_func=get_result_by_session_guid_endpoint,
 )
-app.add_url_rule("/quiz/images/upload", methods=["POST"], view_func=upload_image_endpoint)
+app.add_url_rule(
+    "/quiz/images/upload", methods=["POST"], view_func=upload_image_endpoint
+)
 
 app.register_blueprint(image_routes)
 
