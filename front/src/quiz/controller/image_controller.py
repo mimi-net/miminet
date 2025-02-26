@@ -2,7 +2,6 @@ import os
 import uuid
 from flask import Blueprint, request, jsonify, send_from_directory
 from PIL import Image
-import logging
 
 UPLOAD_FOLDER = "static/quiz_images"
 ALLOWED_EXTENSIONS = {"bmp", "png", "jpg", "jpeg"}
