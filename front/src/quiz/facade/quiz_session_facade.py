@@ -1,8 +1,16 @@
 from sqlalchemy import func
 
 from miminet_model import User, db
-from quiz.entity.entity import Question, QuizSession, SessionQuestion, Section
+from quiz.entity.entity import (
+    Question,
+    QuizSession,
+    SessionQuestion,
+    Section,
+    QuestionCategory,
+)
 from quiz.util.dto import SessionResultDto
+import json
+import random
 
 
 def start_session(section_id: str, user: User):
@@ -23,14 +31,35 @@ def start_session(section_id: str, user: User):
     quiz_session.section_id = section_id
     db.session.add(quiz_session)
 
-    questions = Question.query.filter_by(section_id=section_id, is_deleted=False).all()
+    if section.meta_description:
+        for category_name, question_number in json.loads(
+            section.meta_description
+        ).items():
+            category = QuestionCategory.query.filter_by(name=category_name).first()
+            category_questions = Question.query.filter_by(
+                category_id=category.id, is_deleted=False
+            ).all()
 
-    for question in questions:
-        session_question = SessionQuestion()
-        session_question.question = question
-        session_question.created_by_id = user.id
-        session_question.quiz_session = quiz_session
-        db.session.add(session_question)
+            random_questions_list = random.sample(category_questions, question_number)
+
+            for question in random_questions_list:
+                session_question = SessionQuestion()
+                session_question.question = question
+                session_question.created_by_id = user.id
+                session_question.quiz_session = quiz_session
+                db.session.add(session_question)
+    else:
+        questions = Question.query.filter_by(
+            section_id=section_id, is_deleted=False
+        ).all()
+
+        for question in questions:
+            session_question = SessionQuestion()
+            session_question.question = question
+            session_question.created_by_id = user.id
+            session_question.quiz_session = quiz_session
+            db.session.add(session_question)
+
     db.session.commit()
 
     return quiz_session.id, [i.id for i in quiz_session.sessions], 201  # type: ignore
@@ -53,17 +82,37 @@ def finish_session(quiz_session_id: str, user: User):
 
 def session_result(quiz_session_id: str):
     quiz_session = QuizSession.query.filter_by(id=quiz_session_id).first()
-    correct = 0
     if quiz_session.finished_at is None:
         return None, None, None, 403
-    question_count = len(quiz_session.sessions)
+
+    theory_questions = [
+        q for q in quiz_session.sessions if q.question.question_type != 0
+    ]
+
+    practice_questions = [
+        q for q in quiz_session.sessions if q.question.question_type == 0
+    ]
+
+    theory_correct = sum(1 for q in theory_questions if q.is_correct)
+    theory_count = len(theory_questions)
+
+    practice_results = [
+        {
+            "question_id": q.question.id,
+            "score": q.score,
+            "max_score": q.max_score,
+        }
+        for q in practice_questions
+    ]
+
     time_spent = str(quiz_session.finished_at - quiz_session.created_on).split(".")[0]
-    for question in list(
-        filter(lambda x: x.is_correct is not None, quiz_session.sessions)
-    ):
-        if question.is_correct:
-            correct += 1
-    return correct, question_count, time_spent, 200
+
+    return {
+        "time_spent": time_spent,
+        "theory_correct": theory_correct,
+        "theory_count": theory_count,
+        "practice_results": practice_results,
+    }, 200
 
 
 def get_result_by_session_guid(session_guid: str):
