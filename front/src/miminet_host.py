@@ -294,6 +294,15 @@ gre_job.add_param("config_router_add_gre_interface_name_field").add_check(
     'Неверно указано название GRE-интерфейса для команды "Добавить GRE-интерфейс"'
 )
 
+# Add ARP Proxy to the interface
+arp_proxy_job = router.create_job(107, "arp proxy: [1]")
+arp_proxy_job.add_param("config_router_add_arp_proxy_iface_select_field").add_check(
+    emptiness_check
+).set_error_msg('Не указан интерфейс для команды "Добавить ARP Proxy-интерфейс"')
+arp_proxy_job.add_param("router_connection_host_label_hidden").add_check(
+    emptiness_check
+).set_error_msg('Не указан интерфейс для команды "Добавить ARP Proxy-интерфейс"')
+
 # ~ ~ ~ SERVER JOBS ~ ~ ~
 
 # ping -c 1

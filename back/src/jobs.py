@@ -194,6 +194,13 @@ def add_gre(job: Job, job_host: Any) -> None:
     job_host.cmd(f"ip link set {arg_name_iface} up")
 
 
+def arp_proxy_enable(job: Job, job_host: Any) -> None:
+    """Enable ARP proxying on the interface"""
+    arg_iface = job.arg_1
+
+    job_host.cmd(f"sysctl -w net.ipv4.conf.{arg_iface}.proxy_arp=1")
+
+
 class Jobs:
     """Class for representing various commands for working with miminet network"""
 
@@ -218,6 +225,7 @@ class Jobs:
             104: subinterface_with_vlan,
             105: add_ipip_interface,
             106: add_gre,
+            107: arp_proxy_enable,
             200: open_udp_server_handler,
             201: open_tcp_server_handler,
             202: block_tcp_udp_port,

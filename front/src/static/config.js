@@ -639,7 +639,12 @@ const ConfigRouterJobOnChange = function(evnt) {
             UpdateRouterForm('config_router_add_gre_interface_script');
             FillRouterSelect("#config_router_add_gre_interface_select_ip_field");
 
-            break; 
+            break;
+        case '107':
+            UpdateRouterForm('config_router_add_arp_proxy_script');
+            FillRouterSelect("#config_router_add_arp_proxy_iface_select_field", "Выберите линк", false);
+
+            break;
         default:
             console.log("Unknown target.value");
     }
@@ -884,6 +889,12 @@ const FillRouterSelect = function(select_id, field_msg = 'Интерфейс н�
     } else {
         $(select_id).append(`<option selected value="0">${field_msg}</option>`);
     }
+
+    $(select_id).on('change', function () {
+        let selectedOption = $(this).find('option:selected'); // Получаем выбранный элемент
+        let selectedLabel = selectedOption.text(); // Получаем текст выбранного элемента
+        document.getElementById('router_connection_host_label_hidden').value = selectedLabel; // Записываем его в скрытое поле
+    });
 
     router_node.interface.forEach(function(iface) {
         // iterating over the router interfaces
