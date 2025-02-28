@@ -25,11 +25,14 @@ def answer_on_session_question_endpoint():
 
 @login_required
 def get_question_by_session_question_id_endpoint():
-    res = get_question_by_session_question_id(request.args["question_id"])
-    if res[1] == 404:
-        abort(res[1])
+    res, is_exam, status_code = get_question_by_session_question_id(
+        request.args["question_id"]
+    )
+    if status_code == 404:
+        abort(status_code)
     return make_response(
-        render_template("quiz/sessionQuestion.html", question=res[0]), res[1]
+        render_template("quiz/sessionQuestion.html", question=res, is_exam=is_exam),
+        status_code,
     )
 
 
@@ -57,10 +60,12 @@ def finish_session_endpoint():
 
 @login_required
 def session_result_endpoint():
-    res = session_result(request.args["id"])
-    ret = {"time_spent": res[2], "correct_answers": res[0], "answer_count": res[1]}
+    res, status = session_result(request.args["id"])
+    if status != 200:
+        return make_response("Error", status)
+
     return make_response(
-        render_template("quiz/userSessionResult.html", data=ret), res[3]
+        render_template("quiz/userSessionResult.html", data=res), status
     )
 
 

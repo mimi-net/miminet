@@ -84,10 +84,12 @@ fabric.properties
 client_google.json
 сlient_yandex.json
 client_tg.json
+vk_auth.json
 miminet_secret.conf
 simulation.py
 migrations/
 static/avatar/
+static/quiz_images/
 static/images/preview/
 
 __pycache__/
