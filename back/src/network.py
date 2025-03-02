@@ -33,6 +33,7 @@ class NodeConfig:
     label: str = ""
     type: str = ""
     stp: int = 0
+    rstp: int = 0
     default_gw: str = ""
 
 

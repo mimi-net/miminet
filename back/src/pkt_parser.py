@@ -145,15 +145,32 @@ def packet_parser(pcap1: Reader, edge_id: str, e_source: str, e_target: str):
             llc_label = "LLC"
 
             if llc.dsap == 0x42:
-                llc_label = "STP"
+                data = bytes(llc.data)
+                version = data[2]
+                if version == 0x02:
+                    llc_label = "RSTP"
 
-                match llc.data.flags:
-                    case 0:
-                        llc_label = "STP (Root)"
-                    case 1:
-                        llc_label = "STP (TC + Root)"
-                    case _:
-                        llc_label = "STP"
+                    match llc.data.flags & 0x03:
+                        case 0:
+                            llc_label = "RSTP (Alternate/Backup)",
+                        case 1:
+                            llc_label = "RSTP (Root)",
+                        case 2:
+                            llc_label = "RSTP (Designated)",
+                        case 3:
+                            llc_label = "RSTP (Reserved)"
+                        case _:
+                            llc_label = "RSTP (Unknown)"
+                else:
+                    llc_label = "STP"
+
+                    match llc.data.flags:
+                        case 0:
+                            llc_label = "STP (Root)"
+                        case 1:
+                            llc_label = "STP (TC + Root)"
+                        case _:
+                            llc_label = "STP"
 
             pkts.append(
                 {

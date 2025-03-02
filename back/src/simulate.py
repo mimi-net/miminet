@@ -57,8 +57,12 @@ class MyTopology(IPTopo):
         match config.type:
             case "l2_switch":
                 stp = config.stp
-                self._nodes[node_id] = self.addSwitch(node_id, cls=IPSwitch, stp=stp)
-                if stp:
+                rstp = config.rstp
+                from ipovs_switch import IPOVSSwitch
+                self._nodes[node_id] = self.addSwitch(node_id, cls=IPOVSSwitch, stp=stp, rstp=rstp, cwd='/tmp')
+                if rstp:
+                    self.time_to_wait_before_emulation = max(5, self.time_to_wait_before_emulation)
+                elif stp:
                     self.time_to_wait_before_emulation = 33
             case "host" | "server":
                 default_gw = config.default_gw
@@ -200,6 +204,8 @@ class MyTopology(IPTopo):
         self.switch_count += 1
         s = "mimiswsw%d" % self.switch_count
         self.addSwitch(s, cls=IPSwitch, stp=False, hub=True)
+        from ipovs_switch import IPOVSSwitch
+        # self.addSwitch(s, cls=IPOVSSwitch, stp=False, hub=True)
 
         opts1 = dict()
         opts2 = dict()
