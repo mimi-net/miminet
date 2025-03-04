@@ -192,14 +192,28 @@ def create_mimishark_json(pcap, to_json):
                 pcap_file["length"] = len(mac_to_str(buf).split(":"))
 
                 if llc.dsap == 0x42:
-                    match llc.data.flags:
-
-                        case 0:
-                            pcap_file["protocol"] = "STP (Root)"
-                        case 1:
-                            pcap_file["protocol"] = "STP (TC + Root)"
-                        case _:
-                            pcap_file["protocol"] = "STP"
+                    data = bytes(llc.data)
+                    version = data[2]
+                    if version == 0x02:
+                        match llc.data.flags & 0x03:
+                            case 0:
+                                pcap_file["protocol"] = "RSTP (Alternate/Backup)",
+                            case 1:
+                                pcap_file["protocol"] = "RSTP (Root)",
+                            case 2:
+                                pcap_file["protocol"] = "RSTP (Designated)",
+                            case 3:
+                                pcap_file["protocol"] = "RSTP (Reserved)"
+                            case _:
+                                pcap_file["protocol"] = "RSTP (Unknown)"
+                    else:
+                        match llc.data.flags:
+                            case 0:
+                                pcap_file["protocol"] = "STP (Root)"
+                            case 1:
+                                pcap_file["protocol"] = "STP (TC + Root)"
+                            case _:
+                                pcap_file["protocol"] = "STP"
 
                     bytes_repr = " ".join(mac_to_str(buf).split(":"))
                     ascii = ""
