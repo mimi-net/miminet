@@ -197,15 +197,15 @@ def create_mimishark_json(pcap, to_json):
                     if version == 0x02:
                         match llc.data.flags & 0x03:
                             case 0:
-                                pcap_file["protocol"] = "RSTP (Alternate/Backup)",
-                            case 1:
-                                pcap_file["protocol"] = "RSTP (Root)",
-                            case 2:
-                                pcap_file["protocol"] = "RSTP (Designated)",
-                            case 3:
-                                pcap_file["protocol"] = "RSTP (Reserved)"
-                            case _:
                                 pcap_file["protocol"] = "RSTP (Unknown)"
+                            case 1:
+                                pcap_file["protocol"] = "RSTP (Alternate/Backup)"
+                            case 2:
+                                pcap_file["protocol"] = "RSTP (Root)"
+                            case 3:
+                                pcap_file["protocol"] = "RSTP (Designated)"
+                            case _:
+                                pcap_file["protocol"] = "RSTP (Reserved)"
                     else:
                         match llc.data.flags:
                             case 0:

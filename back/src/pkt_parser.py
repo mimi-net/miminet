@@ -152,15 +152,15 @@ def packet_parser(pcap1: Reader, edge_id: str, e_source: str, e_target: str):
 
                     match llc.data.flags & 0x03:
                         case 0:
-                            llc_label = "RSTP (Alternate/Backup)",
-                        case 1:
-                            llc_label = "RSTP (Root)",
-                        case 2:
-                            llc_label = "RSTP (Designated)",
-                        case 3:
-                            llc_label = "RSTP (Reserved)"
-                        case _:
                             llc_label = "RSTP (Unknown)"
+                        case 1:
+                            llc_label = "RSTP (Alternate/Backup)"
+                        case 2:
+                            llc_label = "RSTP (Root)"
+                        case 3:
+                            llc_label = "RSTP (Designated)"
+                        case _:
+                            llc_label = "RSTP (Reserved)"
                 else:
                     llc_label = "STP"
 
