@@ -117,7 +117,7 @@ def session_result(quiz_session_id: str):
 
 def get_result_by_session_guid(session_guid: str):
     quiz_session = QuizSession.query.filter_by(guid=session_guid).first()
-    
+
     if quiz_session is None:
         return None, None, 404
 
@@ -134,4 +134,3 @@ def get_result_by_session_guid(session_guid: str):
     )
 
     return session_data, status
-
