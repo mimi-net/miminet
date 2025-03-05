@@ -117,26 +117,20 @@ def session_result(quiz_session_id: str):
 
 def get_result_by_session_guid(session_guid: str):
     quiz_session = QuizSession.query.filter_by(guid=session_guid).first()
-    result = session_result(quiz_session.id)
+
+    if quiz_session is None:
+        return None, None, 404
+
+    result, status = session_result(quiz_session.id)
 
     session_data = SessionResultDto(
         quiz_session.section.test.name,
         quiz_session.section.name,
-        result[0],
-        result[1],
+        result["theory_correct"],
+        result["theory_count"],
+        result["practice_results"],
         quiz_session.created_on.strftime("%m/%d/%Y, %H:%M:%S"),
-        str(result[2]),
+        result["time_spent"],
     )
 
-    session_questions = SessionQuestion.query.filter_by(
-        quiz_session_id=quiz_session.id
-    ).all()
-    questions_result = [
-        {
-            "question_text": question.question.text,
-            "is_correct": str(question.is_correct),
-        }
-        for question in session_questions
-    ]
-
-    return session_data, questions_result, 200
+    return session_data, status

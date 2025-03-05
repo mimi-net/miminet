@@ -293,26 +293,27 @@ class SessionResultDto:
         self,
         test_name: str,
         section_name: str,
-        correct_answers: int,
-        answers_count: int,
+        theory_correct: int,
+        theory_count: int,
+        practice_results: list,
         start_time: str,
         time_spent: str,
     ):
         self.test_name = test_name
         self.section_name = section_name
-        self.correct_answers = correct_answers
-        self.answers_count = answers_count
+        self.theory_correct = theory_correct
+        self.theory_count = theory_count
+        self.practice_results = practice_results
         self.start_time = start_time
         self.time_spent = time_spent
 
     def to_dict(self):
-        attributes = [
-            "test_name",
-            "section_name",
-            "correct_answers",
-            "answers_count",
-            "start_time",
-            "time_spent",
-        ]
-
-        return {attribute: str(getattr(self, attribute)) for attribute in attributes}
+        return {
+            "test_name": self.test_name,
+            "section_name": self.section_name,
+            "theory_correct": self.theory_correct,
+            "theory_count": self.theory_count,
+            "practice_results": self.practice_results,
+            "start_time": self.start_time,
+            "time_spent": self.time_spent,
+        }
