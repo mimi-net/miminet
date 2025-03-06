@@ -60,12 +60,11 @@ class MyTopology(IPTopo):
                 stp = config.stp
                 rstp = config.rstp
                 self._nodes[node_id] = self.addSwitch(
-                    node_id, cls=IPOVSSwitch, stp=stp, rstp=rstp, cwd='/tmp'
+                    node_id, cls=IPOVSSwitch, stp=stp, rstp=rstp, cwd="/tmp"
                 )
                 if rstp:
                     self.time_to_wait_before_emulation = max(
-                        5,
-                        self.time_to_wait_before_emulation
+                        5, self.time_to_wait_before_emulation
                     )
                 elif stp:
                     self.time_to_wait_before_emulation = 33

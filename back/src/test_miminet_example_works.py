@@ -148,7 +148,7 @@ def extract_important_fields(packets_json, exclude_regex=None):
     return important_packets
 
 
-def compare_animations(expected, actual) -> bool:
+def compare_animations(actual, expected) -> bool:
     expected_packets = json.loads(expected)
     actual_packets = json.loads(actual)
     if len(expected_packets) != len(actual_packets):
