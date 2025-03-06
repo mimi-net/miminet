@@ -36,7 +36,6 @@ def validate_requirements(requirements):
                     "type": "object",
                     "anyOf": [
                         {"required": ["cmd"]},
-                        {"required": ["cmd", "path", "points"]},
                         {"required": ["ip_check"]},
                         {"required": ["mask_check"]},
                         {"required": ["equal_vlan_id"]},
@@ -52,18 +51,32 @@ def validate_requirements(requirements):
                                     "type": "string",
                                     "enum": ["one-way", "two-way"],
                                 },
-                                "different_paths": {"type": "integer", "minimum": 1},
+                                "different_paths": {
+                                    "type": "object",
+                                    "properties": {
+                                        "points": {"type": "integer", "minimum": 1}
+                                    },
+                                    "required": ["points"],
+                                    "additionalProperties": False,
+                                },
                                 "points": {"type": "integer", "minimum": 1},
+                                "path": {
+                                    "type": "object",
+                                    "properties": {
+                                        "required_path": {
+                                            "type": "array",
+                                            "items": {"type": "string"},
+                                            "minItems": 1,
+                                        },
+                                        "points": {"type": "integer", "minimum": 1},
+                                    },
+                                    "required": ["required_path", "points"],
+                                    "additionalProperties": False,
+                                },
                             },
                             "required": ["echo-request", "points"],
                             "additionalProperties": False,
                         },
-                        "path": {
-                            "type": "array",
-                            "items": {"type": "string"},
-                            "minItems": 1,
-                        },
-                        "points": {"type": "integer", "minimum": 1},
                         "ip_check": {
                             "type": "object",
                             "properties": {
@@ -116,8 +129,6 @@ def validate_requirements(requirements):
                             "additionalProperties": False,
                         },
                     },
-                    "if": {"required": ["path"]},
-                    "then": {"required": ["path", "points"]},
                     "additionalProperties": False,
                 }
             },
