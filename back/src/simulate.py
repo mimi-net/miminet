@@ -6,6 +6,7 @@ import time
 
 from ipmininet.ipnet import IPNet
 from ipmininet.ipswitch import IPSwitch
+from ipmininet.ipovs_switch import IPOVSSwitch
 from ipmininet.iptopo import IPTopo
 from ipmininet.router.config import RouterConfig
 from jobs import Jobs
@@ -57,8 +58,15 @@ class MyTopology(IPTopo):
         match config.type:
             case "l2_switch":
                 stp = config.stp
-                self._nodes[node_id] = self.addSwitch(node_id, cls=IPSwitch, stp=stp)
-                if stp:
+                rstp = config.rstp
+                self._nodes[node_id] = self.addSwitch(
+                    node_id, cls=IPOVSSwitch, stp=stp, rstp=rstp, cwd="/tmp"
+                )
+                if rstp:
+                    self.time_to_wait_before_emulation = max(
+                        5, self.time_to_wait_before_emulation
+                    )
+                elif stp:
                     self.time_to_wait_before_emulation = 33
             case "host" | "server":
                 default_gw = config.default_gw

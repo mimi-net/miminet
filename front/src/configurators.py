@@ -341,6 +341,14 @@ class SwitchConfigurator(AbstractDeviceConfigurator):
         if switch_stp and switch_stp == "on":
             self._device_node["config"]["stp"] = 1
 
+        # RSTP setup
+        switch_rstp = get_data("config_switch_rstp")
+
+        self._device_node["config"]["rstp"] = 0
+
+        if switch_rstp and switch_rstp == "on":
+            self._device_node["config"]["rstp"] = 1
+
         return {"message": "Конфигурация обновлена", "nodes": self._nodes}
 
 
