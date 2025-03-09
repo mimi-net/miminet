@@ -291,10 +291,11 @@ const ShowSwitchConfig = function(n, shared = 0){
     ConfigSwitchName(hostname);
 
     //Add checkbox STP
-    ConfigSwtichSTP(n.config.stp);
+//    ConfigSwtichSTP(n.config.stp);
 
     //Add checkbox RSTP
-    ConfigSwtichRSTP(n.config.rstp);
+//    ConfigSwtichRSTP(n.config.rstp);
+    ConfigRSTP(n);
 
     //Add VLAN
     ConfigVLAN(n);

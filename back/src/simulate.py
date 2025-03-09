@@ -57,8 +57,8 @@ class MyTopology(IPTopo):
 
         match config.type:
             case "l2_switch":
-                stp = config.stp
-                rstp = config.rstp
+                stp = config.stp == 1
+                rstp = config.stp == 2
                 self._nodes[node_id] = self.addSwitch(
                     node_id, cls=IPOVSSwitch, stp=stp, rstp=rstp, cwd="/tmp"
                 )
