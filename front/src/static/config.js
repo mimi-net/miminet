@@ -174,7 +174,7 @@ const ConfigSwitchForm = function (switch_id) {
     $('#net_guid').val(network_guid);
 
     $('#config_switch_main_form_submit_button').click(function (event) {
-        $("#config_rstp_stp").val($('#config_button_rstp').val());
+        $("#config_switch_main_form [name='config_rstp_stp']").val($('#config_button_rstp').val());
         event.preventDefault();
         let data = $('#config_switch_main_form').serialize();
 

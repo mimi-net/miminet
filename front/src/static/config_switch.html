@@ -56,16 +56,20 @@
                     <button id="rstpConfigrationCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть">
                     </button>
                 </div>
-                <div class="modal-body">
-                    <form id="switch_rstp_stp_config">
-                        <input class="form-check-input" type="radio" id="none" name="switch_rstp_stp_config" value=0>
-                        <label class="form-check-label" for="customSwitch1">Без RSTP и STP</label><br>
-                        <input class="form-check-input" type="radio" id="stp" name="switch_rstp_stp_config" value=1>
-                        <label class="form-check-label" for="customSwitch1">STP</label><br>
-                        <input class="form-check-input" type="radio" id="rstp" name="switch_rstp_stp_config" value=2>
-                        <label class="form-check-label" for="customSwitch1">RSTP</label>
+                    <div class="modal-body">
+                    <form id="form_config_rstp_stp">
+                        <input type="hidden" id="switch_id" name="switch_id" value=""/>
+                        <input type="hidden" id="net_guid" name="net_guid" value=""/>
+                        <form id="switch_rstp_stp_config">
+                            <input class="form-check-input" type="radio" id="none" name="config_rstp_stp" value=0>
+                            <label class="form-check-label" for="customSwitch1">Отключить STP</label><br>
+                            <input class="form-check-input" type="radio" id="stp" name="config_rstp_stp" value=1>
+                            <label class="form-check-label" for="customSwitch1">STP</label><br>
+                            <input class="form-check-input" type="radio" id="rstp" name="config_rstp_stp" value=2>
+                            <label class="form-check-label" for="customSwitch1">RSTP</label>
+                        </form>
                     </form>
-                </div>
+                    </div>
                 <div id="modal_footer_vlan" class="modal-footer">
                     <button id="rstpConfigrationCancel" type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
                     <button id="rstpConfigrationSubmit" type="button" class="btn btn-primary">Сохранить</button>
