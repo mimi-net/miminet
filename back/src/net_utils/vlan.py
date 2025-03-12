@@ -47,7 +47,7 @@ def clean_bridges(net: IPNet) -> None:
 
 def configure_access(switch: IPSwitch, intf: str, vlan: int) -> None:
     if isinstance(switch, IPOVSSwitch):
-        switch.vsctl(f' del-port {switch} {intf}')
+        switch.vsctl(f" del-port {switch} {intf}")
         switch.vsctl(f' add-port {f"br-{switch.name}"} {intf}')
         switch.vsctl(f" set port {intf} tag={vlan}")
     else:
@@ -58,7 +58,7 @@ def configure_access(switch: IPSwitch, intf: str, vlan: int) -> None:
 
 def configure_trunk(switch: IPSwitch, intf: str, vlans: list[int]) -> None:
     if isinstance(switch, IPOVSSwitch):
-        switch.vsctl(f' del-port {switch} {intf}')
+        switch.vsctl(f" del-port {switch} {intf}")
         switch.vsctl(f' add-port {f"br-{switch.name}"} {intf}')
         switch.vsctl(f" set port {intf} trunks={','.join(map(str, vlans))}")
     else:
@@ -72,7 +72,9 @@ def configure_trunk(switch: IPSwitch, intf: str, vlans: list[int]) -> None:
 def add_bridge(switch: IPSwitch) -> None:
     if isinstance(switch, IPOVSSwitch):
         switch.vsctl(f' add-br {f"br-{switch.name}"}')
-        switch.vsctl(f' set bridge {f"br-{switch.name}"} other_config:enable-vlan-filtering=true')
+        switch.vsctl(
+            f' set bridge {f"br-{switch.name}"} other_config:enable-vlan-filtering=true'
+        )
     else:
         switch.cmd(f'ip link add name {f"br-{switch.name}"} type bridge')
     switch.cmd(f'ip link set dev {f"br-{switch.name}"} up')
