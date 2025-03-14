@@ -414,7 +414,7 @@ const ConfigServerInterface = function (name, ip, netmask, connected_to) {
     $('#config_server_ip_' + name).val(ip);
     $('#config_server_mask_' + name).val(netmask);
 
-    if (pcaps.includes(name)) {
+    if (pcaps && pcaps.includes(name)) {
         $('#config_server_iface_name_label_' + name).html('Линк к (<a href="/host/mimishark?guid=' + network_guid + '&iface=' + name + '" target="_blank">pcap</a>)');
     }
 }

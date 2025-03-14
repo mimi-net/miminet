@@ -246,7 +246,10 @@ def check_path(answer, device, target, required_path):
 
 def check_echo_request(answer, source_device, target_device, direction="two-way"):
     hints = []
-    packets = answer["packets"]
+    packets = answer.get("packets", [])
+
+    if not packets or len(packets) == 0:
+        return False, ["Вы не отправляете пакетов по сети."]
 
     request_path = []
     reply_path = []
