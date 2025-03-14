@@ -182,12 +182,14 @@ def check_different_paths(answer, source_device, target_device):
                 reply_path.append(target)
 
     if not request_path or not reply_path:
-        hints.append(
-            "Не удалось найти полный путь для ICMP Echo Request или Echo Reply."
-        )
+        hints.append("Не удалось найти полный путь для ICMP Echo Request.")
         return False, hints
 
-    if request_path == reply_path:
+    elif not reply_path:
+        hints.append("Не удалось найти полный путь для ICMP Echo Reply.")
+        return False, hints
+
+    if request_path == reply_path[::-1]:
         hints.append("Пути ICMP Echo Request и Echo Reply совпадают, хотя не должны.")
         return False, hints
     else:
@@ -244,7 +246,10 @@ def check_path(answer, device, target, required_path):
 
 def check_echo_request(answer, source_device, target_device, direction="two-way"):
     hints = []
-    packets = answer["packets"]
+    packets = answer.get("packets", [])
+
+    if not packets or len(packets) == 0:
+        return False, ["Вы не отправляете пакетов по сети."]
 
     request_path = []
     reply_path = []
@@ -355,7 +360,7 @@ def process_host_command(cmd, answer, device):
             if different_paths_points and check_result:
                 path_result, path_hints = check_different_paths(answer, device, target)
                 if path_result:
-                    points_for_host += different_paths_points
+                    points_for_host += different_paths_points.get("points", 1)
                 else:
                     hints.extend(path_hints)
 

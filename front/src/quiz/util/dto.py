@@ -1,6 +1,7 @@
 import random
 import uuid
 from typing import List
+import json
 
 from flask_login import current_user
 from markupsafe import Markup
@@ -16,6 +17,16 @@ from quiz.entity.entity import (
 )
 
 
+def calculate_question_count(section: Section) -> int:
+    if section.meta_description:
+        try:
+            meta_data = json.loads(section.meta_description)
+            return sum(meta_data.values())
+        except json.JSONDecodeError:
+            return 0
+    return len(section.questions)
+
+
 def to_section_dto_list(sections: List[Section]):
     dto_list: List[SectionDto] = list(
         map(
@@ -24,13 +35,12 @@ def to_section_dto_list(sections: List[Section]):
                 section_name=our_section.name,
                 timer=our_section.timer,
                 description=our_section.description,
-                question_count=len(our_section.questions),
+                question_count=calculate_question_count(our_section),
                 is_exam=our_section.is_exam,
             ),
             sections,
         )
     )
-
     return dto_list
 
 
@@ -85,11 +95,12 @@ class PracticeAnswerResultDto:
 def calculate_max_score(requirements: list) -> int:
     def recursive_sum(data):
         if isinstance(data, dict):
-            points = data.get("points", 1)
-            return points + sum(recursive_sum(value) for value in data.values())
+            return data.get("points", 0) + sum(
+                recursive_sum(value) for value in data.values()
+            )
         elif isinstance(data, list):
             return sum(recursive_sum(item) for item in data)
-        return 1
+        return 0
 
     return recursive_sum(requirements)
 
