@@ -26,13 +26,15 @@ class NodeConfig:
     Attributes:
         label (str): Label for the node (e.g., "l2sw1").
         type (str): Node type (e.g., "l2_switch").
-        stp (int): 1 if spanning tree protocol (STP) is enabled; 0 otherwise.
+        stp (int): 1 if spanning tree protocol (STP) is enabled; 2 if rapid spanning tree protocol (RSTP) is enabled; 0 otherwise.
+        priority (Optional[int]): stp or rstp priority
         default_gw (str): Default gateway for the node.
     """
 
     label: str = ""
     type: str = ""
     stp: int = 0
+    priority: Optional[int] = None
     default_gw: str = ""
 
 
