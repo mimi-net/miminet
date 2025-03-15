@@ -346,7 +346,7 @@ class SwitchConfigurator(AbstractDeviceConfigurator):
         stp_priority = get_data("config_stp_priority")
 
         if stp_priority:
-            self._device_node["config"]["priority"] = min(max(int(stp_priority), 0), 65535)
+            self._device_node["config"]["priority"] = int(stp_priority)
 
         return {"message": "Конфигурация обновлена", "nodes": self._nodes}
 
