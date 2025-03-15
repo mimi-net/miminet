@@ -33,6 +33,8 @@ FILE_NAMES = [
     ("vlan_trunk_network.json", "vlan_trunk_answer.json"),
     ("vlan_with_stp_network.json", "vlan_with_stp_answer.json"),
     ("vlan_with_access_switches_network.json", "vlan_with_access_switches_answer.json"),
+    ("rstp_simple_network.json", "rstp_simple_answer.json"),
+    ("rstp_four_switch_network.json", "rstp_four_switch_answer.json"),
 ]
 
 DINAMYC_PORT_FILE_NAMES = [
@@ -154,8 +156,8 @@ def compare_animations(actual, expected) -> bool:
     if len(expected_packets) != len(actual_packets):
         return False
     for expected_group, actual_group in zip(expected_packets, actual_packets):
-        sorted_expected = sorted(expected_group, key=lambda x: x["config"]["path"])
-        sorted_actual = sorted(actual_group, key=lambda x: x["config"]["path"])
+        sorted_expected = sorted(expected_group, key=lambda x: (x["config"]["path"], x["config"]["source"]))
+        sorted_actual = sorted(actual_group, key=lambda x: (x["config"]["path"], x["config"]["source"]))
         if sorted_actual != sorted_expected:
             return False
     return True

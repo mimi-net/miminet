@@ -59,8 +59,9 @@ class MyTopology(IPTopo):
             case "l2_switch":
                 stp = config.stp == 1
                 rstp = config.stp == 2
+                priority = config.priority
                 self._nodes[node_id] = self.addSwitch(
-                    node_id, cls=IPOVSSwitch, stp=stp, rstp=rstp, cwd="/tmp"
+                    node_id, cls=IPOVSSwitch, stp=stp, rstp=rstp, cwd="/tmp", priority=priority
                 )
                 if rstp:
                     self.time_to_wait_before_emulation = max(
