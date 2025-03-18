@@ -13,7 +13,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 class testing_setting:
     """Configuration settings for testing environment."""
 
-    miminet_docker_ip = "172.19.0.2"  # nginx IP inside miminet docker network
+    miminet_docker_ip = "172.18.0.2"  # nginx IP inside miminet docker network
     selenium_hub_url = (
         "http://localhost:4444/wd/hub"  # route for sending selenium commands
     )

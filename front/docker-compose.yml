@@ -61,7 +61,8 @@ services:
     ports:
       - "80:80"
     networks:
-      - miminet_network
+      miminet_network:
+        ipv4_address: 172.18.0.2
 
 volumes:
   databases:
@@ -70,5 +71,8 @@ networks:
   miminet_network:
     name: miminet_network
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
   rabbitmq_network:
     name: rabbitmq_network
