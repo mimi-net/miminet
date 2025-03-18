@@ -304,6 +304,17 @@ class NodeConfig:
             ip, mask = ip_mask.split(":")
             self.fill_link(ip, mask, link_id)
 
+    def switch_ftp(self):
+        """Switch the FTP configuration toggle."""
+        self.__check_config_open()
+
+        try:
+            self.__selenium.find_element(
+                By.CSS_SELECTOR, Location.Network.ConfigPanel.Switch.STP_SWITCH.selector
+            ).click()
+        except Exception:
+            raise Exception("Unable to switch FTP. Element not found.")
+
     def add_jobs(self, job_id: int, args: dict[str, str], by=By.CSS_SELECTOR):
         """Adds a job to the system using Selenium.
         [!] Only for jobs that don't contain selection fields

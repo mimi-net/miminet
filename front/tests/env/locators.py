@@ -114,6 +114,7 @@ class Location:
                 SUBMIT_BUTTON = Locator(
                     "#config_switch_main_form_submit_button", text="Сохранить"
                 )
+                STP_SWITCH = Locator("#config_switch_stp")
 
             class Host(CommonDevice):
                 MAIN_FORM = Locator("#config_main_form")
