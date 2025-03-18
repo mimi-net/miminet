@@ -1,6 +1,7 @@
 import random
 import uuid
 from typing import List
+import json
 
 from flask_login import current_user
 from markupsafe import Markup
@@ -16,6 +17,16 @@ from quiz.entity.entity import (
 )
 
 
+def calculate_question_count(section: Section) -> int:
+    if section.meta_description:
+        try:
+            meta_data = json.loads(section.meta_description)
+            return sum(meta_data.values())
+        except json.JSONDecodeError:
+            return 0
+    return len(section.questions)
+
+
 def to_section_dto_list(sections: List[Section]):
     dto_list: List[SectionDto] = list(
         map(
@@ -24,12 +35,12 @@ def to_section_dto_list(sections: List[Section]):
                 section_name=our_section.name,
                 timer=our_section.timer,
                 description=our_section.description,
-                question_count=len(our_section.questions),
+                question_count=calculate_question_count(our_section),
+                is_exam=our_section.is_exam,
             ),
             sections,
         )
     )
-
     return dto_list
 
 
@@ -63,6 +74,35 @@ def to_question_for_editor_dto_list(questions: List[Question]):
     )
 
     return dto_list
+
+
+class PracticeAnswerResultDto:
+    def __init__(self, score: int, explanation: str, max_score: int, hints: list):
+        self.score = score
+        self.explanation = explanation
+        self.max_score = max_score
+        self.hints = hints
+
+    def to_dict(self):
+        return {
+            "score": self.score,
+            "explanation": self.explanation,
+            "max_score": self.max_score,
+            "hints": self.hints,
+        }
+
+
+def calculate_max_score(requirements: list) -> int:
+    def recursive_sum(data):
+        if isinstance(data, dict):
+            return data.get("points", 0) + sum(
+                recursive_sum(value) for value in data.values()
+            )
+        elif isinstance(data, list):
+            return sum(recursive_sum(item) for item in data)
+        return 0
+
+    return recursive_sum(requirements)
 
 
 class AnswerResultDto:
@@ -152,6 +192,8 @@ class QuestionDto:
         self.question_text = Markup.unescape(question.text)
         self.correct_count = 0
 
+        self.images = [img.file_path for img in question.images]  # type: ignore
+
         if self.question_type == "practice":
             self.practice_question = PracticeQuestionDto(user_id, question.practice_question).to_dict()  # type: ignore
             return
@@ -207,12 +249,14 @@ class SectionDto:
         timer: str,
         description: str,
         question_count: int,
+        is_exam: bool,
     ):
         self.section_id = section_id
         self.section_name = section_name
         self.timer = timer
         self.description = description
         self.question_count = question_count
+        self.is_exam = is_exam
 
         current_user_sessions = QuizSession.query.filter(
             QuizSession.created_by_id == current_user.id
@@ -260,26 +304,27 @@ class SessionResultDto:
         self,
         test_name: str,
         section_name: str,
-        correct_answers: int,
-        answers_count: int,
+        theory_correct: int,
+        theory_count: int,
+        practice_results: list,
         start_time: str,
         time_spent: str,
     ):
         self.test_name = test_name
         self.section_name = section_name
-        self.correct_answers = correct_answers
-        self.answers_count = answers_count
+        self.theory_correct = theory_correct
+        self.theory_count = theory_count
+        self.practice_results = practice_results
         self.start_time = start_time
         self.time_spent = time_spent
 
     def to_dict(self):
-        attributes = [
-            "test_name",
-            "section_name",
-            "correct_answers",
-            "answers_count",
-            "start_time",
-            "time_spent",
-        ]
-
-        return {attribute: str(getattr(self, attribute)) for attribute in attributes}
+        return {
+            "test_name": self.test_name,
+            "section_name": self.section_name,
+            "theory_correct": self.theory_correct,
+            "theory_count": self.theory_count,
+            "practice_results": self.practice_results,
+            "start_time": self.start_time,
+            "time_spent": self.time_spent,
+        }

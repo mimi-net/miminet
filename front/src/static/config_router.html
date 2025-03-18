@@ -44,6 +44,7 @@
             <option value="104">Добавить сабинтерфейс с VLAN</option>
             <option value="105">Добавить IPIP-интерфейс</option>
             <option value="106">Добавить GRE-интерфейс</option>
+            <option value="107">Включить ARP Proxy на интерфейсе</option>
         </select>
     </div>
 </script>
@@ -125,15 +126,27 @@
 <script id="config_router_add_gre_interface_script" type="text/plain">
     <div class="form-group pt-1" name="config_router_select_input">
         <!-- Заголовок -->
-        <label id="config_router_add_gre_interface_label" for="config_router_add_gre_interface_label" 
+        <label id="config_router_add_gre_interface_label" for="config_router_add_gre_interface_label"
         class="text-sm">Параметры GRE-интерфейса</label>
 
         <select id="config_router_add_gre_interface_select_ip_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_router_add_gre_interface_select_ip_field">
-        </select>        
+        </select>
         <input type="text" class="form-control form-control-sm" id="config_router_add_gre_interface_end_ip_input_field" name="config_router_add_gre_interface_end_ip_input_field" placeholder='IP конечной точки'>
         <input type="text" class="form-control form-control-sm" id="config_router_add_gre_interface_ip_input_field" name="config_router_add_gre_interface_ip_input_field" placeholder='IP GRE-интерфейса'>
         <input type="text" class="form-control form-control-sm" id="config_router_add_gre_interface_name_field" name="config_router_add_gre_interface_name_field" placeholder='Название GRE-интерфейса'>
 
+    </div>
+</script>
+
+<script id="config_router_add_arp_proxy_script" type="text/plain">
+    <div class="form-group pt-1" name="config_router_select_input">
+        <label id="config_router_add_arp_proxy_iface_label" for="config_router_add_arp_proxy_iface_label"
+        class="text-sm">Параметры ARP Proxy-интерфейса</label>
+
+        <select id="config_router_add_arp_proxy_iface_select_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_router_add_arp_proxy_iface_select_field">
+        </select>
+
+        <input type="hidden" id="router_connection_host_label_hidden" name="router_connection_host_label_hidden" value="">
     </div>
 </script>
 
@@ -143,7 +156,7 @@
 </script>
 
 <script id="config_router_job_list_elem_script" type="text/plain">
-  <li class="py-1 px-2 list-group-item d-flex justify-content-between align-items-center">
-    <span class="ms-auto"><a href="" id="config_router_job_delete"><i class="bx bx-x fs-xl align-middle"></i></a></span>
-  </li>
+    <li class="py-1 px-2 list-group-item d-flex justify-content-between align-items-center">
+      <span class="ms-auto"><a href="" id="config_router_job_delete"><i class="bx bx-x fs-xl align-middle"></i></a></span>
+    </li>
 </script>
