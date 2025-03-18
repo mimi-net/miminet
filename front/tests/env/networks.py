@@ -292,6 +292,18 @@ class NodeConfig:
         except Exception:
             raise Exception("Unable to find link. Maybe you forgot to add edges.")
 
+    def fill_links(self, ip_mask_list: list):
+        """Fill multiple links (in config panel) with IP addresses and masks.
+
+        Args:
+            ip_mask_list: List of strings in the format "ip:mask".
+        """
+        self.__check_config_open()
+
+        for link_id, ip_mask in enumerate(ip_mask_list):
+            ip, mask = ip_mask.split(":")
+            self.fill_link(ip, mask, link_id)
+
     def add_jobs(self, job_id: int, args: dict[str, str], by=By.CSS_SELECTOR):
         """Adds a job to the system using Selenium.
         [!] Only for jobs that don't contain selection fields
