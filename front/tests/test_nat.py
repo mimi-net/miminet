@@ -102,7 +102,7 @@ class TestNat:
 
         config.submit()
 
-    def test_tcp_udp(self, selenium: MiminetTester, network: MiminetTestNetwork):
+    def test_nat(self, selenium: MiminetTester, network: MiminetTestNetwork):
         assert compare_nodes(network.nodes, self.JSON_NODES)
         assert compare_edges(network.edges, self.JSON_EDGES)
         assert compare_jobs(network.jobs, self.JSON_JOBS)
