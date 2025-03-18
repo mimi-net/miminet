@@ -1,42 +1,75 @@
-{% extends "quiz/networkBase.html" %}
+{% extends "base.html" %}
 {% block title %}Результаты{% endblock %}
 {% block description %}Сетевой тренажер для обучения компьютерным сетям{% endblock %}
 
 {% block content %}
-    <section class="container"
-             style="max-width: 1000px;margin-top: 48px;padding-top: 24px;display: flex;align-items: center;justify-content: center;flex-direction: column;">
-        {# Time spent, correct questions counter #}
-        <div class="row"
-             style="margin-top: 8px; font-size: 24px; opacity: 85%;">
-            <div class="col-auto">
-                <p id="counter">{{ data['correct_answers'] }}/{{ data['answers_count'] }}</p>
-            </div>
-            <div class="col-auto text-center">
-                <span id="timer">{{ data['time_spent'] }}</span>
-            </div>
+<section class="container" style="margin-top: 48px; padding-top: 48px">
+    <div class="row align-items-baseline">
+        <div class="col-auto">
+            <h1 class="mb-0" id="test_name"></h1>
+        </div>
+        <div class="col-auto text-center">
+            <h3 class="mb-0" style="font-weight: normal" id="section_name"></h3>
+        </div>
+    </div>
+    <div class="mt-4">
+        {% if data['theory_count'] > 0 %}
+        <div id="theoryResults" class="mb-3">
+            <h4 style="color: black;">Результаты теоретического теста:</h4>
+            <p style="font-size: 1.2rem;">
+                <strong>Правильных ответов:</strong> {{ data['theory_correct'] }} из {{ data['theory_count'] }}
+            </p>
+        </div>
+        {% endif %}
+
+        {% if data['practice_results'] %}
+        <div id="practiceResults" class="mb-3">
+            <h4 style="color: black;">Результаты практических заданий:</h4>
+            <ul style="font-size: 1.2rem;">
+                {% for practice in data['practice_results'] %}
+                <li>
+                    <strong>Практическое задание {{ practice['question_id'] }}:</strong> 
+                    {{ practice['score'] }} из {{ practice['max_score'] }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% set total_score = data['theory_correct'] + data['practice_results']|sum(attribute='score') %}
+        {% set total_max = data['theory_count'] + data['practice_results']|sum(attribute='max_score') %}
+
+        <div class="mb-3">
+            <p id="timeCount" style="font-size: 1.2rem;">
+                <strong>Тест пройден за:</strong> {{ data['time_spent'] }}
+            </p>
         </div>
 
-        {% for question in questions_result %}
-            <article
-                    class="container card shadow-sm
-                        {% if question.is_correct == 'True' %}
-                            border-success
-                        {% else %}
-                            border-danger
-                        {% endif %}"
-                    style="padding: 12px 18px 12px 18px; margin: 12px 0 12px 0; border: 1px solid">
-                {#  Question text #}
-                <div class="card-body p-1 noselect" style="margin-right: 40px">
-                    <div class="text-black m-0 px-2 py-3 text-center" id="question_text"
-                         style="font-size: 24px">{{ question.question_text | safe }}</div>
-                </div>
-            </article>
-        {% endfor %}
-    </section>
+        <div class="mb-3">
+            <p style="font-size: 1.2rem;">
+                <strong>Итог:</strong> {{ total_score }} из {{ total_max }} баллов
+            </p>
+        </div>
 
-    <script>
-        document.getElementById("test_name").innerHTML = '{{ data['test_name'] }}';
-        document.getElementById("slash_symbol").innerHTML = '{{ data['section_name'] }}' ? " / " : "";
-        document.getElementById("section_name").innerHTML = '{{ data['section_name'] }}';
-    </script>
+        <div class="d-flex align-items-center text-start">
+            <button class="btn btn-primary me-3" name="backToTests" style="font-size: 1rem; height: 2.5rem;">
+                Назад к тестам
+            </button>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.getElementById("test_name").innerHTML = sessionStorage.getItem('test_name');
+    document.getElementById("section_name").innerHTML = sessionStorage.getItem('section_name');
+
+    document.querySelector('button[name="backToTests"]').addEventListener('click', backToTests);
+
+    console.log({{ data | tojson | safe }});
+
+    function backToTests() {
+        sessionStorage.clear();
+        window.location.href = '/quiz/test/all';
+    }
+</script>
 {% endblock %}

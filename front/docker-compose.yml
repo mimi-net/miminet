@@ -22,6 +22,36 @@ services:
       - ./src/static/video:/app/static/video
       - ./src/static/pcaps:/app/static/pcaps
       - ./src/static/assets:/app/static/assets
+      - ./src/static/quiz_images:/app/static/quiz_images
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+  rabbitmq:
+    image: rabbitmq:latest
+    hostname: rabbitmq
+    container_name: rabbitmq
+    restart: always
+    networks:
+      - rabbitmq_network
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+      - ./rabbitmq/rabbitmq:/var/lib/rabbitmq
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./rabbitmq/metrics_collector.conf:/etc/rabbitmq/conf.d/20-management_agent.disable_metrics_collector.conf
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+      - "4369:4369"
+      - "25672:25672"
+      - "35197:35197"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
   nginx:
     container_name: nginx
     image: nginx

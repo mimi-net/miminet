@@ -1,6 +1,7 @@
 import json
 import os
 import uuid
+import shutil
 
 from flask import (
     flash,
@@ -286,6 +287,10 @@ def web_network():
     )
 
 
+def generate_image_uri(extension=".png"):
+    return os.urandom(16).hex() + extension
+
+
 # Depricated?
 @login_required
 def post_nodes():
@@ -437,8 +442,7 @@ def upload_network_picture():
         picture_blob = request.get_data()
 
         # Try to save data
-        picture_blob_uri = os.urandom(16).hex()
-        picture_blob_uri = picture_blob_uri + ".png"
+        picture_blob_uri = generate_image_uri()
 
         try:
             open("static/images/preview/" + picture_blob_uri, "wb").write(picture_blob)
@@ -489,7 +493,19 @@ def copy_network():
         n = Network(author_id=user.id, guid=str(u))
         n.network = net.network
         n.title = net.title + str(" - копия")
-        n.preview_uri = net.preview_uri
+
+        new_picture_blob_uri = generate_image_uri()
+        try:
+            shutil.copy2(
+                "static/images/preview/" + net.preview_uri,
+                "static/images/preview/" + new_picture_blob_uri,
+            )
+        except Exception:
+            ret = {"message": "Не могу сохранить копию PNG"}
+            return make_response(jsonify(ret), 400)
+
+        n.preview_uri = new_picture_blob_uri
+
         db.session.add(n)
         db.session.commit()
         ret = {"message": "Сделана копия.", "new_url": "/web_network?guid=" + str(u)}
