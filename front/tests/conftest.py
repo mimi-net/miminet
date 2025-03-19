@@ -13,7 +13,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 class testing_setting:
     """Configuration settings for testing environment."""
 
-    miminet_docker_ip = "172.18.0.2"  # nginx IP inside miminet docker network
+    nginx_docker_ip = "172.18.0.2"  # nginx IP inside miminet docker network
     selenium_hub_url = (
         "http://localhost:4444/wd/hub"  # route for sending selenium commands
     )
@@ -24,7 +24,7 @@ class testing_setting:
     }  # this data should be inserted into the database, selenium uses it for authentication
 
 
-MAIN_PAGE = f"http://{testing_setting.miminet_docker_ip}"
+MAIN_PAGE = f"http://{testing_setting.nginx_docker_ip}"
 HOME_PAGE = f"{MAIN_PAGE}/home"
 LOGIN_PAGE = f"{MAIN_PAGE}//auth/login.html"
 
@@ -63,6 +63,16 @@ class MiminetTester(WebDriver):
         actions_chain.move_to_element_with_offset(target, x, y)
         actions_chain.release()
         actions_chain.perform()
+
+    def exist_element(self, by: str, element: str):
+        """
+        Check if an element exists on the page.
+
+        Args:
+            by (str): The locator strategy (e.g., By.ID, By.XPATH).
+            element (str): The element locator (e.g., "myElementId", "//button[text()='Click Me']").
+        """
+        return len(self.find_elements(by, element)) > 0
 
     def wait_until_appear(self, by: str, element: str, timeout=20):
         """
@@ -181,7 +191,7 @@ def selenium(chrome_driver: MiminetTester, requester: Session):
     for cookie in cookies:
         if cookie.name and cookie.value and cookie.expires:
             selenium_cookie = {
-                "domain": testing_setting.miminet_docker_ip,
+                "domain": testing_setting.nginx_docker_ip,
                 "expiry": cookie.expires,
                 "httpOnly": False,
                 "name": cookie.name,

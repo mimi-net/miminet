@@ -9,7 +9,8 @@ import re
 class TestNetworkComparator:
     """Utility class for comparing nodes, edges, and jobs in your test networks."""
 
-    def __compare_lists(list_a, list_b, item_name):
+    @staticmethod
+    def __compare_lists(list_a: list, list_b: list, item_name):
         if not list_a or not list_b:
             raise ValueError(f"{item_name.capitalize()} for comparison can't be empty.")
         if len(list_a) != len(list_b):
@@ -17,10 +18,12 @@ class TestNetworkComparator:
                 f"Number of {item_name} mismatch: Expected {len(list_a)}, got {len(list_b)}."
             )
 
+    @staticmethod
     def __normalize_print_cmd(cmd):
         return re.sub(r"iface_\d+", "", cmd).replace("\\n", "\n")
 
-    def compare_nodes(nodes_a, nodes_b) -> bool:
+    @staticmethod
+    def compare_nodes(nodes_a: list, nodes_b: list) -> bool:
         TestNetworkComparator.__compare_lists(nodes_a, nodes_b, "nodes")
 
         for i, (node_a, node_b) in enumerate(zip(nodes_a, nodes_b)):
@@ -45,7 +48,8 @@ class TestNetworkComparator:
 
         return True
 
-    def compare_edges(edges_a, edges_b) -> bool:
+    @staticmethod
+    def compare_edges(edges_a: list, edges_b: list) -> bool:
         TestNetworkComparator.__compare_lists(edges_a, edges_b, "edges")
 
         for i, (edge_a, edge_b) in enumerate(zip(edges_a, edges_b)):
@@ -59,7 +63,8 @@ class TestNetworkComparator:
 
         return True
 
-    def compare_jobs(jobs_a, jobs_b) -> bool:
+    @staticmethod
+    def compare_jobs(jobs_a: list, jobs_b: list) -> bool:
         TestNetworkComparator.__compare_lists(jobs_a, jobs_b, "jobs")
         normalize = TestNetworkComparator.__normalize_print_cmd
 

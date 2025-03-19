@@ -1,11 +1,6 @@
 import pytest
 from conftest import MiminetTester
-from env.networks import (
-    NodeConfig,
-    NodeType,
-    MiminetTestNetwork
-)
-from env.checkers import TestNetworkComparator
+from env.networks import NodeConfig, NodeType, MiminetTestNetwork
 from env.locators import Location
 from typing import Tuple
 from env.checkers import TestNetworkComparator

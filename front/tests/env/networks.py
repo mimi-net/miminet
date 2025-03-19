@@ -3,7 +3,6 @@ from env.locators import Location
 from conftest import HOME_PAGE, MiminetTester
 import random
 from typing import Optional, Type, Tuple
-import re
 from selenium.common.exceptions import NoSuchElementException
 from json import dumps as json_dumps
 
@@ -45,19 +44,19 @@ class MiminetTestNetwork:
         return self.__url
 
     @property
-    def nodes(self) -> dict:
+    def nodes(self) -> list:
         """Current network nodes (may change during network usage)."""
         self.__check_page()
         return self.__selenium.execute_script("return nodes")
 
     @property
-    def edges(self) -> dict:
+    def edges(self) -> list:
         """Current network edges (may change during network usage)."""
         self.__check_page()
         return self.__selenium.execute_script("return edges")
 
     @property
-    def jobs(self) -> dict:
+    def jobs(self) -> list:
         """Current network jobs (may change during network usage)."""
         self.__check_page()
         return self.__selenium.execute_script("return jobs")
@@ -182,11 +181,12 @@ class MiminetTestNetwork:
                     lambda _: old_nodes_len < len(self.nodes), timeout=5
                 )
                 return len(self.nodes) - 1
-            except Exception as e:
+            except Exception:
                 if attempt == max_attempts:
                     raise Exception(
                         f"Failed to add device node to field after {max_attempts} attempts"
                     )
+        return len(self.nodes) - 1
 
     def add_edge(self, source_id: int, target_id: int) -> int:
         self.__check_page()
@@ -395,10 +395,65 @@ class NodeConfig:
         name_field.clear()
         name_field.send_keys(name)
 
-    def configure_vlan(
-        self, toggle_button: bool, fill_table: dict[str, Tuple[str, str]]
-    ):
-        pass
+    def configure_vlan(self, switch_name: str, fill_table: dict[str, Tuple[str, str]]):
+        """Open and configure VLAN panel.
+
+        Args:
+            switch_name (str): Name of the switch for which we are opening a VLAN.
+            fill_table (dict[str, Tuple[str, str]]): Dictionary with structure { Device Name: (VLAN ID, Connection type) }
+        """
+        vlan_config_button = self.__selenium.find_element(
+            By.CSS_SELECTOR, Location.Network.ConfigPanel.Switch.VLAN_BUTTON.selector
+        )
+        vlan_config_button.click()
+
+        # Wait until modal dialog appear
+        self.__selenium.wait_until_appear(
+            By.CSS_SELECTOR,
+            Location.Network.ConfigPanel.Switch.VlanPanel.get_modal_dialog_selector(
+                switch_name
+            ),
+            timeout=5,
+        )
+
+        switch_button = self.__selenium.find_element(
+            By.CSS_SELECTOR,
+            Location.Network.ConfigPanel.Switch.VlanPanel.SWITCH_BUTTON.selector,
+        )
+
+        switch_button.click()
+
+        # Go through each row
+        current_row_id = 0
+        while True:
+            row_xpath = (
+                Location.Network.ConfigPanel.Switch.VlanPanel.get_table_row_xpath(
+                    switch_name, current_row_id
+                )
+            )
+            if not self.__selenium.exist_element(By.XPATH, row_xpath):
+                break
+
+            row = self.__selenium.find_element(By.XPATH, row_xpath)
+            row_elements = row.find_elements(By.TAG_NAME, "td")
+
+            device_name, vlan_id_element, connection_type_element = (
+                row_elements[0].text,
+                row_elements[1],
+                row_elements[2],
+            )
+
+            if device_name not in fill_table:
+                raise Exception(f"Can't find {device_name} in VLAN table.")
+
+            vlan_id, connection_type = fill_table[device_name]
+
+            vlan_id_element.send_keys(vlan_id)
+            connection_type_element.select_by_value(connection_type)
+
+            current_row_id += 1
+
+            # TODO
 
     def submit(self):
         """Submit configuration."""

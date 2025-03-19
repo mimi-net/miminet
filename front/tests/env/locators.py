@@ -115,6 +115,23 @@ class Location:
                     "#config_switch_main_form_submit_button", text="Сохранить"
                 )
                 STP_SWITCH = Locator("#config_switch_stp")
+                VLAN_BUTTON = Locator("#config_button_vlan")
+
+                class VlanPanel:
+                    SWITCH_BUTTON = Locator("#config_switch_vlan")
+
+                    @staticmethod
+                    def get_modal_dialog_selector(switch_name: str):
+                        """CSS Selector for specific switch modal dialog."""
+                        return f"#VlanModal_{switch_name}"
+
+                    @staticmethod
+                    def get_table_row_xpath(switch_name: str, id: int):
+                        """XPATH for specific row in VLAN table.
+                        Args:
+                            id (int): Position of row in VLAN table. Starts from 0."""
+                        assert id >= 0, "Row can't have index less than 0."
+                        return f'//*[@id="config_table_vlan_{switch_name}"]/table/tbody/tr[{id+1}]'
 
             class Host(CommonDevice):
                 MAIN_FORM = Locator("#config_main_form")
@@ -244,7 +261,7 @@ class Location:
                     id (int): Position of link in links list. Starts from 0."""
                 assert id >= 0, "Subnet mask field can't have index less than 0."
                 return f"/html/body/main/section/div/div/div[3]/form/div[{4 + id * 2}]/input[2]"
-            
+
             MODAL_ERROR_DIALOG = Locator("#config_content > div")
 
 
