@@ -20,15 +20,15 @@ jobs:
       - name: Set up Docker BuildX
         uses: docker/setup-buildx-action@v1
 
-      - name: Start backend
-        run: |
-          cd back/
-          docker compose up -d
-
       - name: Start frontend
         run: |
           cd front/
           sed -i 's/MODE=prod/MODE=dev/' .env
+          docker compose up -d
+
+      - name: Start backend
+        run: |
+          cd back/
           docker compose up -d
     
       - name: Start selenium
