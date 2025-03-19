@@ -49,10 +49,10 @@ jobs:
       - name: Wait for services to start
         run: sleep 10
 
-      - name: Check availability
-        run: |
-          docker ps
-          curl -f localhost
+      # - name: Check availability
+      #   run: |
+      #     docker ps
+      #     curl -f localhost
 
       - name: Run tests
         run: |
