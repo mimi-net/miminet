@@ -2,7 +2,7 @@ from selenium.webdriver.common.by import By
 from env.locators import Location
 from conftest import HOME_PAGE, MiminetTester
 import random
-from typing import Optional, Type
+from typing import Optional, Type, Tuple
 import re
 from selenium.common.exceptions import NoSuchElementException
 from json import dumps as json_dumps
@@ -148,13 +148,16 @@ class MiminetTestNetwork:
         node_type: tuple[str, str],
         x: Optional[float] = None,
         y: Optional[float] = None,
-    ):
+    ) -> int:
         """Add a new device node.
 
         Args:
             node_type (tuple[str, str]): Locator for the device button.
             x (Optional[float]): X-coordinate percentage within the panel (0-100). Defaults to a random value.
             y (Optional[float]): Y-coordinate percentage within the panel (0-100). Defaults to a random value.
+
+        Returns:
+            Id of the added node.
         """
         self.__check_page()
         old_nodes_len = len(self.nodes)
@@ -178,14 +181,14 @@ class MiminetTestNetwork:
                 self.__selenium.wait_for(
                     lambda _: old_nodes_len < len(self.nodes), timeout=5
                 )
-                break
+                return len(self.nodes) - 1
             except Exception as e:
                 if attempt == max_attempts:
                     raise Exception(
                         f"Failed to add device node to field after {max_attempts} attempts"
                     )
 
-    def add_edge(self, source_id: int, target_id: int):
+    def add_edge(self, source_id: int, target_id: int) -> int:
         self.__check_page()
         old_edges_len = len(self.edges)
 
@@ -204,6 +207,7 @@ class MiminetTestNetwork:
         self.__selenium.execute_script("PostNodesEdges()")
 
         self.__selenium.wait_for(lambda d: old_edges_len < len(self.edges))
+        return len(self.edges) - 1
 
     def get_nodes_by_class(self, device_class: str) -> list[dict]:
         self.__check_page()
@@ -390,6 +394,11 @@ class NodeConfig:
         )
         name_field.clear()
         name_field.send_keys(name)
+
+    def configure_vlan(
+        self, toggle_button: bool, fill_table: dict[str, Tuple[str, str]]
+    ):
+        pass
 
     def submit(self):
         """Submit configuration."""
