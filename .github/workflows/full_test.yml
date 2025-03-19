@@ -43,7 +43,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo python3 -m pip install -U pip
           sudo python3 -m pip install pytest
           sudo python3 -m pip install selenium
 
