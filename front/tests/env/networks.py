@@ -8,6 +8,7 @@ from selenium.common.exceptions import NoSuchElementException
 from json import dumps as json_dumps
 
 
+
 class NodeType:
     """Node types for testing purposes."""
 
