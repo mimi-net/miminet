@@ -3,11 +3,9 @@ from conftest import MiminetTester
 from env.networks import (
     NodeConfig,
     NodeType,
-    MiminetTestNetwork,
-    compare_jobs,
-    compare_nodes,
-    compare_edges,
+    MiminetTestNetwork
 )
+from env.checkers import TestNetworkComparator
 from env.locators import Location
 
 
@@ -68,8 +66,8 @@ class TestRouterCycle:
         config.submit()
 
     def test_cycle(self, selenium: MiminetTester, network: MiminetTestNetwork):
-        assert compare_nodes(network.nodes, self.JSON_NODES)
-        assert compare_jobs(network.jobs, self.JSON_JOBS)
+        assert TestNetworkComparator.compare_nodes(network.nodes, self.JSON_NODES)
+        assert TestNetworkComparator.compare_jobs(network.jobs, self.JSON_JOBS)
 
     JSON_NODES = [
         {

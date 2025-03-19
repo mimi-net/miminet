@@ -2,11 +2,9 @@ import pytest
 from conftest import MiminetTester
 from env.networks import (
     NodeType,
-    MiminetTestNetwork,
-    compare_jobs,
-    compare_nodes,
-    compare_edges,
+    MiminetTestNetwork
 )
+from env.checkers import TestNetworkComparator
 from selenium.webdriver.common.by import By
 from env.locators import Location
 
@@ -41,9 +39,9 @@ class TestPingAndCopy:
         network.delete()
 
     def test_ping(self, selenium: MiminetTester, network: MiminetTestNetwork):
-        assert compare_nodes(network.nodes, self.JSON_NODES)
-        assert compare_edges(network.edges, self.JSON_EDGES)
-        assert compare_jobs(network.jobs, self.JOBS)
+        assert TestNetworkComparator.compare_nodes(network.nodes, self.JSON_NODES)
+        assert TestNetworkComparator.compare_edges(network.edges, self.JSON_EDGES)
+        assert TestNetworkComparator.compare_jobs(network.jobs, self.JOBS)
 
     def test_ping_network_copy(
         self, selenium: MiminetTester, network: MiminetTestNetwork
@@ -66,9 +64,9 @@ class TestPingAndCopy:
         copy_network = MiminetTestNetwork(selenium, selenium.current_url)
 
         assert selenium.current_url != network.url, "Redirecting wasn't completed"
-        assert compare_nodes(nodes, copy_network.nodes)
-        assert compare_edges(edges, copy_network.edges)
-        assert compare_jobs(jobs, copy_network.jobs)
+        assert TestNetworkComparator.compare_nodes(nodes, copy_network.nodes)
+        assert TestNetworkComparator.compare_edges(edges, copy_network.edges)
+        assert TestNetworkComparator.compare_jobs(jobs, copy_network.jobs)
 
         selenium.get(network.url)
 
