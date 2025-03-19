@@ -47,12 +47,17 @@ jobs:
           sudo python3 -m pip install selenium
 
       - name: Wait for services to start
-        run: sleep 10
+        run: sleep 30
 
-      # - name: Check availability
-      #   run: |
-      #     docker ps
-      #     curl -f localhost
+      - name: Check Docker logs
+        run: |
+          docker logs miminet
+          docker logs nginx
+
+      - name: Check availability
+        run: |
+          docker ps
+          curl -f localhost
 
       - name: Run tests
         run: |
