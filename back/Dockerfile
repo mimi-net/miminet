@@ -23,6 +23,7 @@ RUN apt-get update \
     make \
     libpcap-dev \
     libbsd-dev \
+    openvswitch-switch \
  && rm -rf /var/lib/apt/lists/* \
  && touch /etc/network/interfaces \
  && mkdir /opt/mininet_dependencies
