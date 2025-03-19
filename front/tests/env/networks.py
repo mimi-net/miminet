@@ -4,6 +4,8 @@ from conftest import HOME_PAGE, MiminetTester
 import random
 from typing import Optional, Type
 import re
+from selenium.common.exceptions import NoSuchElementException
+from json import dumps as json_dumps
 
 
 class NodeType:
@@ -304,7 +306,7 @@ class NodeConfig:
             ip, mask = ip_mask.split(":")
             self.fill_link(ip, mask, link_id)
 
-    def switch_ftp(self):
+    def switch_stp(self):
         """Switch the FTP configuration toggle."""
         self.__check_config_open()
 
@@ -409,12 +411,14 @@ class NodeConfig:
     def __open_config(self, node: dict):
         device_class = node["classes"][0]
 
+        node_json = json_dumps(node)
+
         if device_class == Location.Network.DevicePanel.HOST.device_class:
             self.__selenium.execute_script(f"ShowHostConfig({node})")
             self.__config_locator = Location.Network.ConfigPanel.Host
 
         elif device_class == Location.Network.DevicePanel.SWITCH.device_class:
-            self.__selenium.execute_script(f"ShowSwitchConfig({node})")
+            self.__selenium.execute_script(f"ShowSwitchConfig({node_json})")
             self.__config_locator = Location.Network.ConfigPanel.Switch
 
         elif device_class == Location.Network.DevicePanel.HUB.device_class:
@@ -441,13 +445,27 @@ class NodeConfig:
         )
 
     def __check_config_open(self):
-        """Check that the config is open."""
+        """Check that the config is open and handle any errors."""
         try:
             self.__selenium.find_element(
                 By.CSS_SELECTOR, self.__config_locator.MAIN_FORM.selector
             )
-        except Exception:
-            raise Exception("Config panel isn't open.")
+        except NoSuchElementException:
+            raise Exception("Config panel isn't open during some operation.")
+
+        # Collect error messages from modal dialogs
+        error_msgs = [
+            err_el.text
+            for err_el in self.__selenium.find_elements(
+                By.CSS_SELECTOR,
+                Location.Network.ConfigPanel.MODAL_ERROR_DIALOG.selector,
+            )
+        ]
+
+        if error_msgs:
+            raise Exception(
+                f"An error occurred while managing the config panel: {error_msgs}"
+            )
 
 
 # ----- Compare functions -----

@@ -244,6 +244,8 @@ class Location:
                     id (int): Position of link in links list. Starts from 0."""
                 assert id >= 0, "Subnet mask field can't have index less than 0."
                 return f"/html/body/main/section/div/div/div[3]/form/div[{4 + id * 2}]/input[2]"
+            
+            MODAL_ERROR_DIALOG = Locator("#config_content > div")
 
 
 DEVICE_BUTTON_SELECTORS = [
