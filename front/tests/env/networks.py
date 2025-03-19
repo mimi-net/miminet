@@ -8,7 +8,6 @@ from selenium.common.exceptions import NoSuchElementException
 from json import dumps as json_dumps
 
 
-
 class NodeType:
     """Node types for testing purposes."""
 
@@ -150,12 +149,12 @@ class MiminetTestNetwork:
         x: Optional[float] = None,
         y: Optional[float] = None,
     ):
-        """Add new device node.
+        """Add a new device node.
 
         Args:
-            x (float): X-coordinate percentage within the panel (0-100).
-            y (float): Y-coordinate percentage within the panel (0-100).
-            device_button (WebElement): Device button that can be moved
+            node_type (tuple[str, str]): Locator for the device button.
+            x (Optional[float]): X-coordinate percentage within the panel (0-100). Defaults to a random value.
+            y (Optional[float]): Y-coordinate percentage within the panel (0-100). Defaults to a random value.
         """
         self.__check_page()
         old_nodes_len = len(self.nodes)
@@ -164,16 +163,27 @@ class MiminetTestNetwork:
             By.CSS_SELECTOR, Location.Network.MAIN_PANEL.selector
         )
 
-        x, y = random.uniform(0, 100) if x is None else x, (
-            random.uniform(0, 100) if y is None else y
-        )
+        x = x if x is not None else random.uniform(0, 100)
+        y = y if y is not None else random.uniform(0, 100)
 
         local_x, local_y = self.__calc_panel_offset(panel, x, y)
 
-        device_button = self.__selenium.find_element(*node_type)
-
-        self.__selenium.drag_and_drop(device_button, panel, local_x, local_y)
-        self.__selenium.wait_for(lambda d: old_nodes_len < len(self.nodes), timeout=5)
+        max_attempts = 3
+        # Try to add device several times.
+        # (Sometimes adding fails for unknown reasons)
+        for attempt in range(1, max_attempts + 1):
+            try:
+                device_button = self.__selenium.find_element(*node_type)
+                self.__selenium.drag_and_drop(device_button, panel, local_x, local_y)
+                self.__selenium.wait_for(
+                    lambda _: old_nodes_len < len(self.nodes), timeout=5
+                )
+                break
+            except Exception as e:
+                if attempt == max_attempts:
+                    raise Exception(
+                        f"Failed to add device node to field after {max_attempts} attempts"
+                    )
 
     def add_edge(self, source_id: int, target_id: int):
         self.__check_page()
