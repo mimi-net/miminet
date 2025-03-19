@@ -51,6 +51,7 @@ jobs:
 
       - name: Check availability
         run: |
+          docker ps
           curl -f localhost
 
       - name: Run tests
