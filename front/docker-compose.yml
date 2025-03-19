@@ -8,8 +8,9 @@ services:
     container_name: miminet
     restart: always
     networks:
-      - rabbitmq_network
-      - miminet_network
+      miminet_network:
+        ipv4_address: 172.18.0.3
+      rabbitmq_network:
     env_file:
       - .env
     expose:
@@ -76,3 +77,6 @@ networks:
         - subnet: 172.18.0.0/16
   rabbitmq_network:
     name: rabbitmq_network
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
