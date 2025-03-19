@@ -1,13 +1,8 @@
 import pytest
 from conftest import MiminetTester
-from env.networks import (
-    NodeType,
-    MiminetTestNetwork,
-    compare_jobs,
-    compare_nodes,
-    compare_edges,
-)
+from env.networks import NodeType, MiminetTestNetwork
 from env.locators import Location
+from env.checkers import TestNetworkComparator
 
 
 class TestSTP:
@@ -63,10 +58,9 @@ class TestSTP:
         # network.delete()
 
     def test_stp(self, selenium: MiminetTester, network: MiminetTestNetwork):
-        print(network.url)
-        assert compare_nodes(network.nodes, self.JSON_NODES)
-        assert compare_edges(network.edges, self.JSON_EDGES)
-        assert compare_jobs(network.jobs, self.JSON_JOBS)
+        assert TestNetworkComparator.compare_nodes(network.nodes, self.JSON_NODES)
+        assert TestNetworkComparator.compare_edges(network.edges, self.JSON_EDGES)
+        assert TestNetworkComparator.compare_jobs(network.jobs, self.JSON_JOBS)
 
     JSON_NODES = [
         {

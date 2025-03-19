@@ -3,13 +3,11 @@ from conftest import MiminetTester
 from env.networks import (
     NodeConfig,
     NodeType,
-    MiminetTestNetwork,
-    compare_jobs,
-    compare_nodes,
-    compare_edges,
+    MiminetTestNetwork
 )
 from env.locators import Location
 from typing import Tuple
+from env.checkers import TestNetworkComparator
 
 
 class TestTcpUdp:
@@ -134,13 +132,13 @@ class TestTcpUdp:
         protocol = protocol_and_network[0]
         network = protocol_and_network[1]
 
-        assert compare_nodes(self.JSON_NODES, network.nodes)
-        assert compare_edges(self.JSON_EDGES, network.edges)
+        assert TestNetworkComparator.compare_nodes(self.JSON_NODES, network.nodes)
+        assert TestNetworkComparator.compare_edges(self.JSON_EDGES, network.edges)
 
         if protocol == "udp":
-            assert compare_jobs(self.JSON_UDP_JOBS, network.jobs)
+            assert TestNetworkComparator.compare_jobs(self.JSON_UDP_JOBS, network.jobs)
         elif protocol == "tcp":
-            assert compare_jobs(self.JSON_TCP_JOBS, network.jobs)
+            assert TestNetworkComparator.compare_jobs(self.JSON_TCP_JOBS, network.jobs)
         else:
             raise ValueError(f"Got unsupported protocol: {protocol}.")
 
