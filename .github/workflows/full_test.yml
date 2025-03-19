@@ -20,6 +20,17 @@ jobs:
       - name: Set up Docker BuildX
         uses: docker/setup-buildx-action@v1
 
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.3'
+
+      - name: Install dependencies
+        run: |
+          sudo python -m pip install pip
+          sudo python3 -m pip install pytest
+          sudo python3 -m pip install selenium
+
       - name: Start frontend
         run: |
           cd front/
@@ -36,18 +47,8 @@ jobs:
            cd front/tests/docker
            docker compose up -d
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12.3'
-
-      - name: Install dependencies
-        run: |
-          sudo python3 -m pip install pytest
-          sudo python3 -m pip install selenium
-
       - name: Wait for services to start
-        run: sleep 30
+        run: sleep 15
 
       - name: Check Docker logs
         run: |
