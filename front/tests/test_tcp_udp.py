@@ -5,6 +5,7 @@ from env.networks import (
     NodeType,
     MiminetTestNetwork
 )
+from env.checkers import TestNetworkComparator
 from env.locators import Location
 from typing import Tuple
 from env.checkers import TestNetworkComparator
