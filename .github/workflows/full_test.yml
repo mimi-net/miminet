@@ -50,10 +50,10 @@ jobs:
       # - name: Wait for services to start
       #   run: sleep 15
 
-      # - name: Check Docker logs
-      #   run: |
-      #     docker logs miminet
-      #     docker logs nginx
+      - name: Check Docker logs
+        run: |
+          docker logs miminet
+          docker logs nginx
 
       - name: Check availability
         run: |
