@@ -10,56 +10,36 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # - name: Disable packet transmission to filters
-      #   run: |
-      #     sudo sysctl -w net.bridge.bridge-nf-call-iptables=0
-      #     sudo sysctl -w net.bridge.bridge-nf-call-arptables=0
-      #     sudo sysctl -w net.bridge.bridge-nf-call-ip6tables=0
-      #     sudo sysctl -p
-
       - name: Set up Docker BuildX
         uses: docker/setup-buildx-action@v1
-
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12.3'
-
-      - name: Install dependencies
-        run: |
-          sudo python -m pip install pip
-          sudo python3 -m pip install pytest
-          sudo python3 -m pip install selenium
 
       - name: Start frontend
         run: |
           cd front/
           sed -i 's/MODE=prod/MODE=dev/' .env
           docker compose up -d
-
-      # - name: Start backend
-      #   run: |
-      #     cd back/
-      #     docker compose up -d
     
-      # - name: Start selenium
-      #   run: |
-      #      cd front/tests/docker
-      #      docker compose up -d
-
-      - name: Wait for services to start
-        run: sleep 15
-
-      - name: Check Docker logs
+      - name: Start selenium
         run: |
-          docker logs miminet
-          docker logs nginx
+           cd front/tests/docker
+           docker compose up -d
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+            python-version: '3.12.3'
+   
+      - name: Install dependencies
+        run: |
+            sudo python -m pip install pip
+            sudo python3 -m pip install pytest
+            sudo python3 -m pip install selenium
 
       - name: Check availability
         run: |
           docker ps
           curl -f localhost
 
-      # - name: Run tests
-      #   run: |
-      #      sudo python3 -m pytest -vv -s front/tests
+      - name: Run tests
+        run: |
+           sudo python3 -m pytest -vv -s front/tests
