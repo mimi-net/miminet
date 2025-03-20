@@ -10,12 +10,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Disable packet transmission to filters
-        run: |
-          sudo sysctl -w net.bridge.bridge-nf-call-iptables=0
-          sudo sysctl -w net.bridge.bridge-nf-call-arptables=0
-          sudo sysctl -w net.bridge.bridge-nf-call-ip6tables=0
-          sudo sysctl -p
+      # - name: Disable packet transmission to filters
+      #   run: |
+      #     sudo sysctl -w net.bridge.bridge-nf-call-iptables=0
+      #     sudo sysctl -w net.bridge.bridge-nf-call-arptables=0
+      #     sudo sysctl -w net.bridge.bridge-nf-call-ip6tables=0
+      #     sudo sysctl -p
 
       - name: Set up Docker BuildX
         uses: docker/setup-buildx-action@v1
