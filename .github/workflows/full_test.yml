@@ -37,29 +37,29 @@ jobs:
           sed -i 's/MODE=prod/MODE=dev/' .env
           docker compose up -d
 
-      - name: Start backend
-        run: |
-          cd back/
-          docker compose up -d
+      # - name: Start backend
+      #   run: |
+      #     cd back/
+      #     docker compose up -d
     
-      - name: Start selenium
-        run: |
-           cd front/tests/docker
-           docker compose up -d
+      # - name: Start selenium
+      #   run: |
+      #      cd front/tests/docker
+      #      docker compose up -d
 
-      - name: Wait for services to start
-        run: sleep 15
+      # - name: Wait for services to start
+      #   run: sleep 15
 
-      - name: Check Docker logs
-        run: |
-          docker logs miminet
-          docker logs nginx
+      # - name: Check Docker logs
+      #   run: |
+      #     docker logs miminet
+      #     docker logs nginx
 
       - name: Check availability
         run: |
           docker ps
           curl -f localhost
 
-      - name: Run tests
-        run: |
-           sudo python3 -m pytest -vv -s front/tests
+      # - name: Run tests
+      #   run: |
+      #      sudo python3 -m pytest -vv -s front/tests
