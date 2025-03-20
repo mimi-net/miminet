@@ -47,8 +47,8 @@ jobs:
       #      cd front/tests/docker
       #      docker compose up -d
 
-      # - name: Wait for services to start
-      #   run: sleep 15
+      - name: Wait for services to start
+        run: sleep 15
 
       - name: Check Docker logs
         run: |
