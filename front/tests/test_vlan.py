@@ -113,6 +113,5 @@ class TestVLAN:
         # TODO
         pass
 
-    def test_vlan(self, selenium: MiminetTester, network: MiminetTestNetwork):
-
+    def test_vlan(self):
         assert True

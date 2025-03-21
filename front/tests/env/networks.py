@@ -3,7 +3,7 @@ from env.locators import Location
 from conftest import HOME_PAGE, MiminetTester
 import random
 from typing import Optional, Type, Tuple
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from json import dumps as json_dumps
 
 
@@ -181,7 +181,7 @@ class MiminetTestNetwork:
                     lambda _: old_nodes_len < len(self.nodes), timeout=5
                 )
                 return len(self.nodes) - 1
-            except Exception:
+            except TimeoutException:
                 if attempt == max_attempts:
                     raise Exception(
                         f"Failed to add device node to field after {max_attempts} attempts"
