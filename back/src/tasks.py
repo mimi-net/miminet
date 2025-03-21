@@ -38,10 +38,8 @@ def simulate(network: str):
     for _ in range(4):
         try:
             animation, pcaps = run_mininet(network)
-        except ValueError:
-            continue
         except Exception:
-            break
+            continue
         else:
             break
 
