@@ -1,5 +1,5 @@
 from selenium.webdriver.common.by import By
-from env.locators import Location
+from utils.locators import Location
 from conftest import HOME_PAGE, MiminetTester
 import random
 from typing import Optional, Type, Tuple

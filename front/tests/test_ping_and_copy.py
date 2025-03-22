@@ -1,9 +1,9 @@
 import pytest
 from conftest import MiminetTester
-from env.networks import NodeType, MiminetTestNetwork
+from utils.networks import NodeType, MiminetTestNetwork
 from selenium.webdriver.common.by import By
-from env.locators import Location
-from env.checkers import TestNetworkComparator
+from utils.locators import Location
+from utils.checkers import TestNetworkComparator
 
 
 class TestPingAndCopy:

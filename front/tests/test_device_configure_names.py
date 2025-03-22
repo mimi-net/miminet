@@ -1,7 +1,7 @@
 import pytest
 from conftest import MiminetTester
-from env.locators import DEVICE_BUTTON_CLASSES
-from env.networks import MiminetTestNetwork
+from utils.locators import DEVICE_BUTTON_CLASSES
+from utils.networks import MiminetTestNetwork
 
 
 class TestDeviceNameChange:

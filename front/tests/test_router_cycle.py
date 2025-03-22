@@ -1,8 +1,8 @@
 import pytest
 from conftest import MiminetTester
-from env.networks import NodeConfig, NodeType, MiminetTestNetwork
-from env.locators import Location
-from env.checkers import TestNetworkComparator
+from utils.networks import NodeConfig, NodeType, MiminetTestNetwork
+from utils.locators import Location
+from utils.checkers import TestNetworkComparator
 
 
 class TestRouterCycle:
