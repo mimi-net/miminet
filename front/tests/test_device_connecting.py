@@ -1,6 +1,6 @@
 import pytest
 from conftest import MiminetTester
-from env.networks import MiminetTestNetwork
+from utils.networks import MiminetTestNetwork
 import random
 
 

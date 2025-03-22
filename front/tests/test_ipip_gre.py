@@ -1,9 +1,9 @@
 import pytest
 from conftest import MiminetTester
-from env.networks import NodeType, MiminetTestNetwork
-from env.locators import Location
+from utils.networks import NodeType, MiminetTestNetwork
+from utils.locators import Location
 from typing import Tuple
-from env.checkers import TestNetworkComparator
+from utils.checkers import TestNetworkComparator
 
 
 class TestIPIPGre:
