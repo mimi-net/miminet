@@ -36,64 +36,36 @@ class TestVLAN:
         host4_config = network.open_node_config(host4_id)
         self.configure_right_host(host4_config)
 
-        # configure switch
+        # configure left switch
         l2sw1_config = network.open_node_config(l2sw1_id)
         l2sw1_config.configure_vlan(
-            "l2sw1",
             {
                 "l2sw2": ("10,20", "Trunk"),
                 "host_1": ("10", "Access"),
-                "host_3": ("10", "Access"),
+                "host_3": ("20", "Access"),
             },
         )
+        selenium.save_screenshot('2.png')
+        # l2sw1_config.submit()
+        selenium.refresh()
+        network.open_node_config(l2sw1_id)
+        selenium.save_screenshot('3.png')
 
-        selenium.save_screenshot("3.png")
-
-        # # configure hosts
-        # # - top host
-        # top_host_config = network.open_node_config(0)
-        # self.configure_client_host(top_host_config)
-
-        # # - bottom host
-        # bottom_host_config = network.open_node_config(1)
-        # self.configure_client_host(bottom_host_config)
-
-        # # configure routers
-        # # - top router
-        # top_router_config = network.open_node_config(2)
-        # self.configure_client_router(
-        #     top_router_config,
-        #     "172.16.0.1",
-        #     "172.16.0.2",
-        #     network.nodes[2]["interface"][1]["id"],
+        # configure right switch
+        # l2sw2_config = network.open_node_config(l2sw2_id)
+        # selenium.save_screenshot('3.png')
+        # l2sw2_config.configure_vlan(
+        #     {
+        #         "l2sw1": ("10,20", "Trunk"),
+        #         "host_2": ("10", "Access"),
+        #         "host_4": ("20", "Access"),
+        #     },
         # )
-
-        # # - bottom router
-        # bottom_router_config = network.open_node_config(3)
-        # self.configure_client_router(
-        #     bottom_router_config,
-        #     "172.16.1.1",
-        #     "172.16.1.2",
-        #     network.nodes[3]["interface"][1]["id"],
-        # )
-
-        # # configure center router
-        # center_router_config = network.open_node_config(4)
-        # center_router_config.fill_link("172.16.0.2", 24, 0)
-        # center_router_config.fill_link("172.16.1.2", 24, 1)
-        # center_router_config.fill_link("10.0.0.2", 24, 2)
-
-        # center_router_config.submit()
-
-        # # configure server
-        # server_config = network.open_node_config(5)
-        # server_config.fill_link("10.0.0.1", 24)
-        # server_config.fill_default_gw("10.0.0.2")
-        # server_config.submit()
+        # l2sw2_config.submit()
 
         yield network
 
-        # network.delete()
+        network.delete()
 
     def configure_left_host(self, config: NodeConfig):
         config.fill_link("10.0.0.1", 24)
@@ -107,11 +79,6 @@ class TestVLAN:
         config.fill_link("10.0.0.2", 24)
         config.submit()
 
-    def configure_client_router(
-        self, config: NodeConfig, out_ip: str, out_gw: str, iface_id: str
-    ):
-        # TODO
-        pass
-
-    def test_vlan(self):
-        assert True
+    def test_vlan(self, selenium: MiminetTester, network: MiminetTestNetwork):
+        print(network.url)
+        assert False

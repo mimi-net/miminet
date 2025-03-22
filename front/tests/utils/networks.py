@@ -1,3 +1,4 @@
+from time import sleep
 from selenium.webdriver.common.by import By
 from utils.locators import Location
 from conftest import HOME_PAGE, MiminetTester
@@ -5,6 +6,7 @@ import random
 from typing import Optional, Type, Tuple
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from json import dumps as json_dumps
+from selenium.webdriver.support.ui import Select
 
 
 class NodeType:
@@ -395,13 +397,14 @@ class NodeConfig:
         name_field.clear()
         name_field.send_keys(name)
 
-    def configure_vlan(self, switch_name: str, fill_table: dict[str, Tuple[str, str]]):
+    def configure_vlan(self, fill_table: dict[str, Tuple[str, str]]):
         """Open and configure VLAN panel.
 
         Args:
-            switch_name (str): Name of the switch for which we are opening a VLAN.
             fill_table (dict[str, Tuple[str, str]]): Dictionary with structure { Device Name: (VLAN ID, Connection type) }
         """
+        switch_name = self.name
+
         vlan_config_button = self.__selenium.find_element(
             By.CSS_SELECTOR, Location.Network.ConfigPanel.Switch.VLAN_BUTTON.selector
         )
@@ -424,40 +427,55 @@ class NodeConfig:
         switch_button.click()
 
         # Go through each row
-        current_row_id = 0
+        row_id = 0
         while True:
             row_xpath = (
                 Location.Network.ConfigPanel.Switch.VlanPanel.get_table_row_xpath(
-                    switch_name, current_row_id
+                    switch_name, row_id
                 )
             )
+
             if not self.__selenium.exist_element(By.XPATH, row_xpath):
+                # element out of table
                 break
 
-            row = self.__selenium.find_element(By.XPATH, row_xpath)
-            row_elements = row.find_elements(By.TAG_NAME, "td")
+            table_row_element = self.__selenium.find_element(By.XPATH, row_xpath)
+            row_elements = table_row_element.find_elements(By.TAG_NAME, "td")
 
-            device_name, vlan_id_element, connection_type_element = (
-                row_elements[0].text,
-                row_elements[1],
-                row_elements[2],
-            )
+            device_name = row_elements[0].text
+            vlan_id_element = row_elements[1].find_element(By.TAG_NAME, "input")
+
+            vlan_id, connection_type = fill_table[device_name]
+
+            vlan_id_element.clear()
+            vlan_id_element.send_keys(vlan_id)
 
             if device_name not in fill_table:
                 raise Exception(f"Can't find {device_name} in VLAN table.")
 
-            vlan_id, connection_type = fill_table[device_name]
+            connection_type_element = row_elements[2].find_element(
+                By.TAG_NAME, "select"
+            )
 
-            vlan_id_element.send_keys(vlan_id)
-            connection_type_element.select_by_value(connection_type)
+            Select(connection_type_element).select_by_value(connection_type)
 
-            current_row_id += 1
+            row_id += 1
 
-            # TODO
+        self.__selenium.save_screenshot('0.png')
+
+        # Save new table
+        submit_button = self.__selenium.find_element(
+            By.CSS_SELECTOR,
+            Location.Network.ConfigPanel.Switch.VlanPanel.SUBMIT_BUTTON.selector,
+        )
+        submit_button.click()
+
+        self.__selenium.save_screenshot('0.5.png')
 
     def submit(self):
         """Submit configuration."""
         self.__check_config_open()
+        print(self.__config_locator.SUBMIT_BUTTON.selector)
         self.__selenium.find_element(
             By.CSS_SELECTOR, self.__config_locator.SUBMIT_BUTTON.selector
         ).click()
