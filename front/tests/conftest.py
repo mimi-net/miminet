@@ -148,14 +148,17 @@ class MiminetTester(WebDriver):
         logs = self.get_log("browser")
         return list(filter(logs_filter, logs)) if logs_filter else list(logs)
 
-    def get_console_logs(self):
+    def get_console_messages(self):
         """
         Retrieve browser console logs (console.log()). This can be used in debug purposes.
         Returns:
-            iterator: list with the log entries.
+            iterator: list with the log messages.
         """
-        return self.get_logs(
-            lambda log: log["source"] == "console-api" and log["level"] == "INFO"
+        return map(
+            lambda log: log["message"],
+            self.get_logs(
+                lambda log: log["source"] == "console-api" and log["level"] == "INFO"
+            ),
         )
 
 
