@@ -75,13 +75,16 @@ class MiminetTestNetwork:
         assert 0 <= y <= 100, "y must be in [0, 100] range"
 
         # calculate offset of coordinates inside panel
-        width, height = int(panel.rect["width"]), int(panel.rect["height"])
-        target_x, target_y = int(panel.rect["x"]), int(panel.rect["y"])
+        panel_width, panel_height = panel.rect["width"], panel.rect["height"]
+        panel_x, panel_y = panel.rect["x"], panel.rect["y"]
 
-        center_x, center_y = target_x + width / 2, target_y + height / 2
-        offset_x, offset_y = center_x - target_x, center_y - target_y
+        center_x, center_y = panel_x + panel_width / 2, panel_y + panel_height / 2
+        offset_x, offset_y = center_x - panel_x, center_y - panel_y
 
-        return ((x / 100) * width) - offset_x, ((y / 100) * height) - offset_y
+        margin_x = min(99, max(3, x))
+        margin_y = min(99, max(3, y))
+ 
+        return ((margin_x / 100) * panel_width) - offset_x, ((margin_y / 100) * panel_height) - offset_y
 
     def __build_empty_network(self):
         """Create new network and clear it after use.
@@ -95,21 +98,6 @@ class MiminetTestNetwork:
         ).click()
 
         self.__url = self.__selenium.current_url
-
-    def scatter_devices(self):
-        """Randomly add each network device to network."""
-        self.__check_page()
-
-        node_types = [
-            NodeType.Host,
-            NodeType.Switch,
-            NodeType.Hub,
-            NodeType.Router,
-            NodeType.Server,
-        ]
-
-        for type in node_types:
-            self.add_node(type)
 
     def open_node_config(self, device_node: dict | int):
         """Opens the configuration menu for a specific node.
@@ -170,22 +158,9 @@ class MiminetTestNetwork:
 
         local_x, local_y = self.__calc_panel_offset(panel, x, y)
 
-        max_attempts = 3
-        # Try to add device several times.
-        # (Sometimes adding fails for unknown reasons)
-        for attempt in range(1, max_attempts + 1):
-            try:
-                device_button = self.__selenium.find_element(*node_type)
-                self.__selenium.drag_and_drop(device_button, panel, local_x, local_y)
-                self.__selenium.wait_for(
-                    lambda _: old_nodes_len < len(self.nodes), timeout=5
-                )
-                return len(self.nodes) - 1
-            except TimeoutException:
-                if attempt == max_attempts:
-                    raise Exception(
-                        f"Failed to add device node to field after {max_attempts} attempts"
-                    )
+        device_button = self.__selenium.find_element(*node_type)
+        self.__selenium.drag_and_drop(device_button, panel, local_x, local_y)
+        self.__selenium.wait_for(lambda _: old_nodes_len < len(self.nodes), timeout=5)
         return len(self.nodes) - 1
 
     def add_edge(self, source_id: int, target_id: int) -> int:
