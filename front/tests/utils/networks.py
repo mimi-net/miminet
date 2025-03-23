@@ -461,16 +461,12 @@ class NodeConfig:
 
             row_id += 1
 
-        self.__selenium.save_screenshot('0.png')
-
         # Save new table
         submit_button = self.__selenium.find_element(
             By.CSS_SELECTOR,
             Location.Network.ConfigPanel.Switch.VlanPanel.SUBMIT_BUTTON.selector,
         )
         submit_button.click()
-
-        self.__selenium.save_screenshot('0.5.png')
 
     def submit(self):
         """Submit configuration."""
