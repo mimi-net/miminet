@@ -156,6 +156,10 @@ app.add_url_rule(
 
 # MimiShark
 app.add_url_rule("/host/mimishark", methods=["GET"], view_func=mimishark_page)
+app.add_url_rule("/router/mimishark", methods=["GET"], view_func=mimishark_page)
+app.add_url_rule("/server/mimishark", methods=["GET"], view_func=mimishark_page)
+app.add_url_rule("/hub/mimishark", methods=["GET"], view_func=mimishark_page)
+app.add_url_rule("/switch/mimishark", methods=["GET"], view_func=mimishark_page)
 
 # Quiz
 app.add_url_rule(
