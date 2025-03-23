@@ -273,7 +273,7 @@ class NodeConfig:
         self.__config_locator: Type[Location.Network.ConfigPanel.CommonDevice] = (
             Location.Network.ConfigPanel.Host
         )
-
+        self.__node = node
         self.__open_config(node)
 
     @property
@@ -471,7 +471,7 @@ class NodeConfig:
     def submit(self):
         """Submit configuration."""
         self.__check_config_open()
-        print(self.__config_locator.SUBMIT_BUTTON.selector)
+
         self.__selenium.find_element(
             By.CSS_SELECTOR, self.__config_locator.SUBMIT_BUTTON.selector
         ).click()
