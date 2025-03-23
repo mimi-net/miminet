@@ -35,9 +35,8 @@ class MiminetTestNetwork:
             self.__url = url
 
     def __check_page(self):
-        assert (
-            self.__selenium.current_url == self.__url
-        ), "It is impossible to interact with the page without being on it"
+        if self.__selenium.current_url != self.__url:
+            self.__selenium.get(self.__url)
 
     @property
     def url(self):
@@ -243,8 +242,6 @@ class MiminetTestNetwork:
     def delete(self):
         """Delete current network."""
         self.__check_page()
-
-        self.__selenium.get(self.__url)
 
         self.__selenium.find_element(
             By.CSS_SELECTOR, Location.Network.TopButton.OPTIONS.selector
