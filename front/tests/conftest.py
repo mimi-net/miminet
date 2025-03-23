@@ -8,6 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 
 class testing_setting:
@@ -133,6 +134,30 @@ class MiminetTester(WebDriver):
         select = Select(self.find_element(by, element))
         select.select_by_value(value)
 
+    def get_logs(self, logs_filter=None):
+        """
+        Retrieve browser logs with an optional filter.
+
+        Args:
+            logs_filter (function, optional): A function that takes a log entry as input
+                                            and returns True if the entry should be included.
+                                            Defaults to None, meaning all logs are returned.
+        Returns:
+            list: list with the filtered log entries.
+        """
+        logs = self.get_log("browser")
+        return list(filter(logs_filter, logs)) if logs_filter else list(logs)
+
+    def get_console_logs(self):
+        """
+        Retrieve browser console logs (console.log()). This can be used in debug purposes.
+        Returns:
+            iterator: list with the log entries.
+        """
+        return self.get_logs(
+            lambda log: log["source"] == "console-api" and log["level"] == "INFO"
+        )
+
 
 @pytest.fixture(scope="session")
 def chrome_driver():
@@ -141,6 +166,10 @@ def chrome_driver():
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--window-size=%s" % testing_setting.window_size)
     chrome_options.add_argument("--no-sandbox")
+
+    chrome_options.set_capability(
+        "goog:loggingPrefs", {"browser": "ALL"}
+    )  # Capture console logs
 
     tester = MiminetTester(testing_setting.selenium_hub_url, options=chrome_options)
 
