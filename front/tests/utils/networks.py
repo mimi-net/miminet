@@ -3,7 +3,7 @@ from utils.locators import Location
 from conftest import HOME_PAGE, MiminetTester
 import random
 from typing import Optional, Type, Tuple
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import NoSuchElementException
 from json import dumps as json_dumps
 from selenium.webdriver.support.ui import Select
 
@@ -83,8 +83,10 @@ class MiminetTestNetwork:
 
         margin_x = min(99, max(3, x))
         margin_y = min(99, max(3, y))
- 
-        return ((margin_x / 100) * panel_width) - offset_x, ((margin_y / 100) * panel_height) - offset_y
+
+        return ((margin_x / 100) * panel_width) - offset_x, (
+            (margin_y / 100) * panel_height
+        ) - offset_y
 
     def __build_empty_network(self):
         """Create new network and clear it after use.
