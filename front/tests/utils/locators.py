@@ -119,6 +119,7 @@ class Location:
 
                 class VlanPanel:
                     SWITCH_BUTTON = Locator("#config_switch_vlan")
+                    SUBMIT_BUTTON = Locator("#vlanConfigrationSubmit")
 
                     @staticmethod
                     def get_modal_dialog_selector(switch_name: str):
@@ -131,6 +132,8 @@ class Location:
                         Args:
                             id (int): Position of row in VLAN table. Starts from 0."""
                         assert id >= 0, "Row can't have index less than 0."
+                        # /html/body/div[15]/div/div/div[2]/div[2]/table/tbody/tr[1]
+                        # /html/body/div[15]/div/div/div[2]/div[2]/table/tbody/tr[2]
                         return f'//*[@id="config_table_vlan_{switch_name}"]/table/tbody/tr[{id+1}]'
 
             class Host(CommonDevice):

@@ -1,9 +1,9 @@
 import pytest
 from conftest import MiminetTester
-from env.networks import NodeType, MiminetTestNetwork
+from utils.networks import NodeType, MiminetTestNetwork
 from selenium.webdriver.common.by import By
-from env.locators import Location
-from env.checkers import TestNetworkComparator
+from utils.locators import Location
+from utils.checkers import TestNetworkComparator
 
 
 class TestPingAndCopy:
@@ -11,14 +11,14 @@ class TestPingAndCopy:
     def network(self, selenium: MiminetTester):
         network = MiminetTestNetwork(selenium)
 
-        network.add_node(NodeType.Host)
-        network.add_node(NodeType.Host)
+        host1_id = network.add_node(NodeType.Host)
+        host2_id = network.add_node(NodeType.Host)
 
         # edge between hosts
-        network.add_edge(0, 1)
+        network.add_edge(host1_id, host2_id)
 
         # configure host 1
-        config0 = network.open_node_config(0)
+        config0 = network.open_node_config(host1_id)
         config0.fill_link("192.168.1.1", 24)
         config0.add_jobs(
             1,
@@ -27,7 +27,7 @@ class TestPingAndCopy:
         config0.submit()
 
         # configure host 2
-        config1 = network.open_node_config(1)
+        config1 = network.open_node_config(host2_id)
         config1.fill_link("192.168.1.2", 24)
         config1.submit()
 
@@ -60,11 +60,12 @@ class TestPingAndCopy:
 
         copy_network = MiminetTestNetwork(selenium, selenium.current_url)
 
-        assert selenium.current_url != network.url, "Redirecting wasn't completed"
+        assert copy_network.url != network.url, "Redirecting wasn't completed"
         assert TestNetworkComparator.compare_nodes(nodes, copy_network.nodes)
         assert TestNetworkComparator.compare_edges(edges, copy_network.edges)
         assert TestNetworkComparator.compare_jobs(jobs, copy_network.jobs)
 
+        copy_network.delete()
         selenium.get(network.url)
 
     JSON_NODES = [

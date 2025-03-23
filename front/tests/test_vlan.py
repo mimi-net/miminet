@@ -1,7 +1,8 @@
 import pytest
 from conftest import MiminetTester
-from env.networks import NodeConfig, NodeType, MiminetTestNetwork
-from env.locators import Location
+from utils.networks import NodeConfig, NodeType, MiminetTestNetwork
+from utils.locators import Location
+from utils.checkers import TestNetworkComparator
 
 
 class TestVLAN:
@@ -36,64 +37,35 @@ class TestVLAN:
         host4_config = network.open_node_config(host4_id)
         self.configure_right_host(host4_config)
 
-        # configure switch
+        # configure left switch
         l2sw1_config = network.open_node_config(l2sw1_id)
         l2sw1_config.configure_vlan(
-            "l2sw1",
             {
                 "l2sw2": ("10,20", "Trunk"),
                 "host_1": ("10", "Access"),
-                "host_3": ("10", "Access"),
+                "host_3": ("20", "Access"),
             },
         )
+        l2sw1_config.submit()
 
-        selenium.save_screenshot("3.png")
+        # selenium (or VLAN code) doesn't allow re-interaction with vlan form without refreshing
+        # so we need this hack to fix this
+        selenium.refresh()
 
-        # # configure hosts
-        # # - top host
-        # top_host_config = network.open_node_config(0)
-        # self.configure_client_host(top_host_config)
-
-        # # - bottom host
-        # bottom_host_config = network.open_node_config(1)
-        # self.configure_client_host(bottom_host_config)
-
-        # # configure routers
-        # # - top router
-        # top_router_config = network.open_node_config(2)
-        # self.configure_client_router(
-        #     top_router_config,
-        #     "172.16.0.1",
-        #     "172.16.0.2",
-        #     network.nodes[2]["interface"][1]["id"],
-        # )
-
-        # # - bottom router
-        # bottom_router_config = network.open_node_config(3)
-        # self.configure_client_router(
-        #     bottom_router_config,
-        #     "172.16.1.1",
-        #     "172.16.1.2",
-        #     network.nodes[3]["interface"][1]["id"],
-        # )
-
-        # # configure center router
-        # center_router_config = network.open_node_config(4)
-        # center_router_config.fill_link("172.16.0.2", 24, 0)
-        # center_router_config.fill_link("172.16.1.2", 24, 1)
-        # center_router_config.fill_link("10.0.0.2", 24, 2)
-
-        # center_router_config.submit()
-
-        # # configure server
-        # server_config = network.open_node_config(5)
-        # server_config.fill_link("10.0.0.1", 24)
-        # server_config.fill_default_gw("10.0.0.2")
-        # server_config.submit()
+        # configure right switch
+        l2sw2_config = network.open_node_config(l2sw2_id)
+        l2sw2_config.configure_vlan(
+            {
+                "l2sw1": ("10,20", "Trunk"),
+                "host_2": ("10", "Access"),
+                "host_4": ("20", "Access"),
+            },
+        )
+        l2sw2_config.submit()
 
         yield network
 
-        # network.delete()
+        network.delete()
 
     def configure_left_host(self, config: NodeConfig):
         config.fill_link("10.0.0.1", 24)
@@ -107,11 +79,183 @@ class TestVLAN:
         config.fill_link("10.0.0.2", 24)
         config.submit()
 
-    def configure_client_router(
-        self, config: NodeConfig, out_ip: str, out_gw: str, iface_id: str
-    ):
-        # TODO
-        pass
+    def test_vlan(self, selenium: MiminetTester, network: MiminetTestNetwork):
+        assert TestNetworkComparator.compare_nodes(self.JSON_NODES, network.nodes)
+        assert TestNetworkComparator.compare_edges(self.JSON_EDGES, network.edges)
+        assert TestNetworkComparator.compare_jobs(self.JSON_JOBS, network.jobs)
 
-    def test_vlan(self):
-        assert True
+    JSON_NODES = [
+        {
+            "classes": ["host"],
+            "config": {"default_gw": "", "label": "host_1", "type": "host"},
+            "data": {"id": "host_1", "label": "host_1"},
+            "interface": [
+                {
+                    "connect": "edge_m8llhem5fmccigh4ne",
+                    "id": "iface_06074200",
+                    "ip": "10.0.0.1",
+                    "name": "iface_06074200",
+                    "netmask": 24,
+                }
+            ],
+            "position": {"x": 108.5, "y": 81.5},
+        },
+        {
+            "classes": ["host"],
+            "config": {"default_gw": "", "label": "host_2", "type": "host"},
+            "data": {"id": "host_2", "label": "host_2"},
+            "interface": [
+                {
+                    "connect": "edge_m8llhevc0plhwsiuw0s",
+                    "id": "iface_65487112",
+                    "ip": "10.0.0.2",
+                    "name": "iface_65487112",
+                    "netmask": 24,
+                }
+            ],
+            "position": {"x": 326.5, "y": 81.5},
+        },
+        {
+            "classes": ["host"],
+            "config": {"default_gw": "", "label": "host_3", "type": "host"},
+            "data": {"id": "host_3", "label": "host_3"},
+            "interface": [
+                {
+                    "connect": "edge_m8llhf7481nr9ar52fh",
+                    "id": "iface_85870513",
+                    "ip": "10.0.0.1",
+                    "name": "iface_85870513",
+                    "netmask": 24,
+                }
+            ],
+            "position": {"x": 108.5, "y": 174.5},
+        },
+        {
+            "classes": ["host"],
+            "config": {"default_gw": "", "label": "host_4", "type": "host"},
+            "data": {"id": "host_4", "label": "host_4"},
+            "interface": [
+                {
+                    "connect": "edge_m8llhffak9jd26o49dl",
+                    "id": "iface_11682264",
+                    "ip": "10.0.0.2",
+                    "name": "iface_11682264",
+                    "netmask": 24,
+                }
+            ],
+            "position": {"x": 326.5, "y": 174.5},
+        },
+        {
+            "classes": ["l2_switch"],
+            "config": {"label": "l2sw1", "stp": 0, "type": "l2_switch"},
+            "data": {"id": "l2sw1", "label": "l2sw1"},
+            "interface": [
+                {
+                    "connect": "edge_m8llhem5fmccigh4ne",
+                    "id": "l2sw1_1",
+                    "name": "l2sw1_1",
+                    "type_connection": 0,
+                    "vlan": 10,
+                },
+                {
+                    "connect": "edge_m8llhf7481nr9ar52fh",
+                    "id": "l2sw1_2",
+                    "name": "l2sw1_2",
+                    "type_connection": 0,
+                    "vlan": 20,
+                },
+                {
+                    "connect": "edge_m8llhfmu0rqjach341i9",
+                    "id": "l2sw1_3",
+                    "name": "l2sw1_3",
+                    "type_connection": 1,
+                    "vlan": [10, 20],
+                },
+            ],
+            "position": {"x": 174, "y": 120.5},
+        },
+        {
+            "classes": ["l2_switch"],
+            "config": {"label": "l2sw2", "stp": 0, "type": "l2_switch"},
+            "data": {"id": "l2sw2", "label": "l2sw2"},
+            "interface": [
+                {
+                    "connect": "edge_m8llhevc0plhwsiuw0s",
+                    "id": "l2sw2_1",
+                    "name": "l2sw2_1",
+                    "type_connection": 0,
+                    "vlan": 10,
+                },
+                {
+                    "connect": "edge_m8llhffak9jd26o49dl",
+                    "id": "l2sw2_2",
+                    "name": "l2sw2_2",
+                    "type_connection": 0,
+                    "vlan": 20,
+                },
+                {
+                    "connect": "edge_m8llhfmu0rqjach341i9",
+                    "id": "l2sw2_3",
+                    "name": "l2sw2_3",
+                    "type_connection": 1,
+                    "vlan": [10, 20],
+                },
+            ],
+            "position": {"x": 261, "y": 120.5},
+        },
+    ]
+    JSON_EDGES = [
+        {
+            "data": {
+                "id": "edge_m8llhem5fmccigh4ne",
+                "source": "host_1",
+                "target": "l2sw1",
+            }
+        },
+        {
+            "data": {
+                "id": "edge_m8llhevc0plhwsiuw0s",
+                "source": "host_2",
+                "target": "l2sw2",
+            }
+        },
+        {
+            "data": {
+                "id": "edge_m8llhf7481nr9ar52fh",
+                "source": "host_3",
+                "target": "l2sw1",
+            }
+        },
+        {
+            "data": {
+                "id": "edge_m8llhffak9jd26o49dl",
+                "source": "host_4",
+                "target": "l2sw2",
+            }
+        },
+        {
+            "data": {
+                "id": "edge_m8llhfmu0rqjach341i9",
+                "source": "l2sw1",
+                "target": "l2sw2",
+            }
+        },
+    ]
+    JSON_JOBS = [
+        {
+            "id": "c56093e3187e402e964018a5ec8f5403",
+            "job_id": 1,
+            "print_cmd": "ping -c 1 10.0.0.2",
+            "arg_1": "10.0.0.2",
+            "level": 0,
+            "host_id": "host_1",
+        },
+        {
+            "id": "c3b6ef62d6be47f2af4338ce88d516da",
+            "job_id": 1,
+            "print_cmd": "ping -c 1 10.0.0.2",
+            "arg_1": "10.0.0.2",
+            "level": 1,
+            "host_id": "host_3",
+        },
+    ]

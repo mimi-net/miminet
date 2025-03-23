@@ -1,10 +1,11 @@
 from selenium.webdriver.common.by import By
-from env.locators import Location
+from utils.locators import Location
 from conftest import HOME_PAGE, MiminetTester
 import random
 from typing import Optional, Type, Tuple
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import NoSuchElementException
 from json import dumps as json_dumps
+from selenium.webdriver.support.ui import Select
 
 
 class NodeType:
@@ -34,9 +35,8 @@ class MiminetTestNetwork:
             self.__url = url
 
     def __check_page(self):
-        assert (
-            self.__selenium.current_url == self.__url
-        ), "It is impossible to interact with the page without being on it"
+        if self.__selenium.current_url != self.__url:
+            self.__selenium.get(self.__url)
 
     @property
     def url(self):
@@ -75,13 +75,18 @@ class MiminetTestNetwork:
         assert 0 <= y <= 100, "y must be in [0, 100] range"
 
         # calculate offset of coordinates inside panel
-        width, height = int(panel.rect["width"]), int(panel.rect["height"])
-        target_x, target_y = int(panel.rect["x"]), int(panel.rect["y"])
+        panel_width, panel_height = panel.rect["width"], panel.rect["height"]
+        panel_x, panel_y = panel.rect["x"], panel.rect["y"]
 
-        center_x, center_y = target_x + width / 2, target_y + height / 2
-        offset_x, offset_y = center_x - target_x, center_y - target_y
+        center_x, center_y = panel_x + panel_width / 2, panel_y + panel_height / 2
+        offset_x, offset_y = center_x - panel_x, center_y - panel_y
 
-        return ((x / 100) * width) - offset_x, ((y / 100) * height) - offset_y
+        margin_x = min(99, max(3, x))
+        margin_y = min(99, max(3, y))
+
+        return ((margin_x / 100) * panel_width) - offset_x, (
+            (margin_y / 100) * panel_height
+        ) - offset_y
 
     def __build_empty_network(self):
         """Create new network and clear it after use.
@@ -95,21 +100,6 @@ class MiminetTestNetwork:
         ).click()
 
         self.__url = self.__selenium.current_url
-
-    def scatter_devices(self):
-        """Randomly add each network device to network."""
-        self.__check_page()
-
-        node_types = [
-            NodeType.Host,
-            NodeType.Switch,
-            NodeType.Hub,
-            NodeType.Router,
-            NodeType.Server,
-        ]
-
-        for type in node_types:
-            self.add_node(type)
 
     def open_node_config(self, device_node: dict | int):
         """Opens the configuration menu for a specific node.
@@ -170,22 +160,9 @@ class MiminetTestNetwork:
 
         local_x, local_y = self.__calc_panel_offset(panel, x, y)
 
-        max_attempts = 3
-        # Try to add device several times.
-        # (Sometimes adding fails for unknown reasons)
-        for attempt in range(1, max_attempts + 1):
-            try:
-                device_button = self.__selenium.find_element(*node_type)
-                self.__selenium.drag_and_drop(device_button, panel, local_x, local_y)
-                self.__selenium.wait_for(
-                    lambda _: old_nodes_len < len(self.nodes), timeout=5
-                )
-                return len(self.nodes) - 1
-            except TimeoutException:
-                if attempt == max_attempts:
-                    raise Exception(
-                        f"Failed to add device node to field after {max_attempts} attempts"
-                    )
+        device_button = self.__selenium.find_element(*node_type)
+        self.__selenium.drag_and_drop(device_button, panel, local_x, local_y)
+        self.__selenium.wait_for(lambda _: old_nodes_len < len(self.nodes), timeout=5)
         return len(self.nodes) - 1
 
     def add_edge(self, source_id: int, target_id: int) -> int:
@@ -243,8 +220,6 @@ class MiminetTestNetwork:
         """Delete current network."""
         self.__check_page()
 
-        self.__selenium.get(self.__url)
-
         self.__selenium.find_element(
             By.CSS_SELECTOR, Location.Network.TopButton.OPTIONS.selector
         ).click()
@@ -271,7 +246,7 @@ class NodeConfig:
         self.__config_locator: Type[Location.Network.ConfigPanel.CommonDevice] = (
             Location.Network.ConfigPanel.Host
         )
-
+        self.__node = node
         self.__open_config(node)
 
     @property
@@ -395,13 +370,14 @@ class NodeConfig:
         name_field.clear()
         name_field.send_keys(name)
 
-    def configure_vlan(self, switch_name: str, fill_table: dict[str, Tuple[str, str]]):
+    def configure_vlan(self, fill_table: dict[str, Tuple[str, str]]):
         """Open and configure VLAN panel.
 
         Args:
-            switch_name (str): Name of the switch for which we are opening a VLAN.
             fill_table (dict[str, Tuple[str, str]]): Dictionary with structure { Device Name: (VLAN ID, Connection type) }
         """
+        switch_name = self.name
+
         vlan_config_button = self.__selenium.find_element(
             By.CSS_SELECTOR, Location.Network.ConfigPanel.Switch.VLAN_BUTTON.selector
         )
@@ -424,40 +400,51 @@ class NodeConfig:
         switch_button.click()
 
         # Go through each row
-        current_row_id = 0
+        row_id = 0
         while True:
             row_xpath = (
                 Location.Network.ConfigPanel.Switch.VlanPanel.get_table_row_xpath(
-                    switch_name, current_row_id
+                    switch_name, row_id
                 )
             )
+
             if not self.__selenium.exist_element(By.XPATH, row_xpath):
+                # element out of table
                 break
 
-            row = self.__selenium.find_element(By.XPATH, row_xpath)
-            row_elements = row.find_elements(By.TAG_NAME, "td")
+            table_row_element = self.__selenium.find_element(By.XPATH, row_xpath)
+            row_elements = table_row_element.find_elements(By.TAG_NAME, "td")
 
-            device_name, vlan_id_element, connection_type_element = (
-                row_elements[0].text,
-                row_elements[1],
-                row_elements[2],
-            )
+            device_name = row_elements[0].text
+            vlan_id_element = row_elements[1].find_element(By.TAG_NAME, "input")
+
+            vlan_id, connection_type = fill_table[device_name]
+
+            vlan_id_element.clear()
+            vlan_id_element.send_keys(vlan_id)
 
             if device_name not in fill_table:
                 raise Exception(f"Can't find {device_name} in VLAN table.")
 
-            vlan_id, connection_type = fill_table[device_name]
+            connection_type_element = row_elements[2].find_element(
+                By.TAG_NAME, "select"
+            )
 
-            vlan_id_element.send_keys(vlan_id)
-            connection_type_element.select_by_value(connection_type)
+            Select(connection_type_element).select_by_value(connection_type)
 
-            current_row_id += 1
+            row_id += 1
 
-            # TODO
+        # Save new table
+        submit_button = self.__selenium.find_element(
+            By.CSS_SELECTOR,
+            Location.Network.ConfigPanel.Switch.VlanPanel.SUBMIT_BUTTON.selector,
+        )
+        submit_button.click()
 
     def submit(self):
         """Submit configuration."""
         self.__check_config_open()
+
         self.__selenium.find_element(
             By.CSS_SELECTOR, self.__config_locator.SUBMIT_BUTTON.selector
         ).click()

@@ -1,6 +1,6 @@
 import pytest
 from conftest import MiminetTester
-from env.networks import MiminetTestNetwork
+from utils.networks import MiminetTestNetwork, NodeType
 import random
 
 
@@ -11,14 +11,23 @@ class TestDeviceConnecting:
     def network(self, selenium: MiminetTester):
         """Network with devices scattered across it."""
         network = MiminetTestNetwork(selenium)
-        network.scatter_devices()
 
-        # add edges randomly
-        for _ in range(self.EDGES_COUNT):
+        network.add_node(NodeType.Host)
+        network.add_node(NodeType.Hub)
+        network.add_node(NodeType.Router)
+        network.add_node(NodeType.Server)
+        network.add_node(NodeType.Switch)
+
+        edges: set = set()
+
+        while len(edges) < self.EDGES_COUNT:
+            # random source and target for every edge
             source_node = random.randint(0, len(network.nodes) - 1)
             target_node = random.randint(0, len(network.nodes) - 1)
 
-            network.add_edge(source_node, target_node)
+            if (source_node, target_node) not in edges:
+                edges.add((source_node, target_node))
+                network.add_edge(source_node, target_node)
 
         yield network
 
