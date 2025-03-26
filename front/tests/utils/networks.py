@@ -305,36 +305,30 @@ class NodeConfig:
             Location.Network.ConfigPanel.Switch.RSTP_BUTTON.selector,
         ).click()
 
-        self.__selenium.wait_until_appear(
+        modal_el = (
             By.CSS_SELECTOR,
             Location.Network.ConfigPanel.Switch.get_modal_dialog_selector(
                 self.__node["data"]["id"]
-            ),
+            )
         )
 
-        self.__selenium.find_element(
-            By.CSS_SELECTOR,
-            Location.Network.ConfigPanel.Switch.StpPanel.STP_BUTTON.selector,
-        ).click()
+        with self.__selenium.run_in_modal_context(*modal_el) as dialog:
+            dialog.find_element(
+                By.CSS_SELECTOR,
+                Location.Network.ConfigPanel.Switch.StpPanel.STP_BUTTON.selector,
+            ).click()
 
-        priority_field = self.__selenium.find_element(
-            By.CSS_SELECTOR,
-            Location.Network.ConfigPanel.Switch.StpPanel.PRIORITY_FIELD.selector,
-        )
-        priority_field.clear()
-        priority_field.send_keys(str(priority))
+            priority_field = dialog.find_element(
+                By.CSS_SELECTOR,
+                Location.Network.ConfigPanel.Switch.StpPanel.PRIORITY_FIELD.selector,
+            )
+            priority_field.clear()
+            priority_field.send_keys(str(priority))
 
-        self.__selenium.find_element(
-            By.CSS_SELECTOR,
-            Location.Network.ConfigPanel.Switch.StpPanel.SUBMIT_BUTTON.selector,
-        ).click()
-
-        self.__selenium.wait_until_disappear(
-            By.CSS_SELECTOR,
-            Location.Network.ConfigPanel.Switch.get_modal_dialog_selector(
-                self.__node["data"]["id"]
-            ),
-        )
+            dialog.find_element(
+                By.CSS_SELECTOR,
+                Location.Network.ConfigPanel.Switch.StpPanel.SUBMIT_BUTTON.selector,
+            ).click()
 
     def disable_stp(self):
         """Switch the FTP configuration toggle."""
@@ -345,29 +339,23 @@ class NodeConfig:
             Location.Network.ConfigPanel.Switch.RSTP_BUTTON.selector,
         ).click()
 
-        self.__selenium.wait_until_appear(
+        modal_el = (
             By.CSS_SELECTOR,
             Location.Network.ConfigPanel.Switch.get_modal_dialog_selector(
                 self.__node["data"]["id"]
-            ),
+            )
         )
 
-        self.__selenium.find_element(
-            By.CSS_SELECTOR,
-            Location.Network.ConfigPanel.Switch.StpPanel.OFF_STP_BUTTON.selector,
-        ).click()
+        with self.__selenium.run_in_modal_context(*modal_el) as dialog:
+            dialog.find_element(
+                By.CSS_SELECTOR,
+                Location.Network.ConfigPanel.Switch.StpPanel.OFF_STP_BUTTON.selector,
+            ).click()
 
-        self.__selenium.find_element(
-            By.CSS_SELECTOR,
-            Location.Network.ConfigPanel.Switch.StpPanel.SUBMIT_BUTTON.selector,
-        ).click()
-
-        self.__selenium.wait_until_disappear(
-            By.CSS_SELECTOR,
-            Location.Network.ConfigPanel.Switch.get_modal_dialog_selector(
-                self.__node["data"]["id"]
-            ),
-        )
+            dialog.find_element(
+                By.CSS_SELECTOR,
+                Location.Network.ConfigPanel.Switch.StpPanel.SUBMIT_BUTTON.selector,
+            ).click()
 
     def add_jobs(self, job_id: int, args: dict[str, str], by=By.CSS_SELECTOR):
         """Adds a job to the system using Selenium.
