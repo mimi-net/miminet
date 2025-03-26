@@ -9,50 +9,48 @@
             <h1 class="mb-0" id="test_name"></h1>
         </div>
         <div class="col-auto text-center">
-            <h3 class="mb-0" style="font-weight: normal" id="section_name"></h3>
+            <h3 class="mb-0 text-muted" id="section_name"></h3>
         </div>
     </div>
+
     <div class="mt-4">
-        {% if data['theory_count'] > 0 %}
-        <div id="theoryResults" class="mb-3">
-            <h4 style="color: black;">Результаты теоретического теста:</h4>
-            <p style="font-size: 1.2rem;">
-                <strong>Правильных ответов:</strong> {{ data['theory_correct'] }} из {{ data['theory_count'] }}
-            </p>
+        <h2 class="mb-3">Результаты теста</h2>
+
+        <div class="row">
+            {% for question in data['results'] %}
+                <div class="card mb-3 h-100">
+                    <div class="card-body d-flex align-items-center">
+                        <div>
+                            <h5 class="card-title">
+                                {% if question['is_correct'] %}
+                                    ✅ {{ question['question_text'] }}
+                                {% else %}
+                                    ❌ {{ question['question_text'] }}
+                                {% endif %}
+                            </h5>
+                            {% if question['max_score'] > 0 %}
+                                <p class="card-text mt-2"><strong>Баллы:</strong> {{ question['score'] }} из {{ question['max_score'] }}</p>
+                            {% else %}
+                                <p class="card-text mt-2"><strong>Баллы:</strong> 1 из 1</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
         </div>
-        {% endif %}
 
-        {% if data['practice_results'] %}
-        <div id="practiceResults" class="mb-3">
-            <h4 style="color: black;">Результаты практических заданий:</h4>
-            <ul style="font-size: 1.2rem;">
-                {% for practice in data['practice_results'] %}
-                <li>
-                    <strong>Практическое задание {{ practice['question_id'] }}:</strong> 
-                    {{ practice['score'] }} из {{ practice['max_score'] }}
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-        {% endif %}
-
-        {% set total_score = data['theory_correct'] + data['practice_results']|sum(attribute='score') %}
-        {% set total_max = data['theory_count'] + data['practice_results']|sum(attribute='max_score') %}
-
-        <div class="mb-3">
-            <p id="timeCount" style="font-size: 1.2rem;">
+        <div class="mt-4">
+            <p class="fs-5">
                 <strong>Тест пройден за:</strong> {{ data['time_spent'] }}
             </p>
-        </div>
-
-        <div class="mb-3">
-            <p style="font-size: 1.2rem;">
-                <strong>Итог:</strong> {{ total_score }} из {{ total_max }} баллов
+            <p class="fs-5 mt-2">
+                <strong>Итоговый результат:</strong> {{ data['theory_correct'] + data['practice_results']|sum(attribute='score') }} /
+                {{ data['theory_count'] + data['practice_results']|sum(attribute='max_score') }} баллов
             </p>
         </div>
 
-        <div class="d-flex align-items-center text-start">
-            <button class="btn btn-primary me-3" name="backToTests" style="font-size: 1rem; height: 2.5rem;">
+        <div class="d-flex align-items-center text-start mt-4">
+            <button class="btn btn-primary me-3" name="backToTests">
                 Назад к тестам
             </button>
         </div>
@@ -64,8 +62,6 @@
     document.getElementById("section_name").innerHTML = sessionStorage.getItem('section_name');
 
     document.querySelector('button[name="backToTests"]').addEventListener('click', backToTests);
-
-    console.log({{ data | tojson | safe }});
 
     function backToTests() {
         sessionStorage.clear();

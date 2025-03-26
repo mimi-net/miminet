@@ -1,3 +1,5 @@
+import logging
+
 from sqlalchemy import func
 
 from miminet_model import User, db
@@ -82,6 +84,7 @@ def finish_session(quiz_session_id: str, user: User):
 
 def session_result(quiz_session_id: str):
     quiz_session = QuizSession.query.filter_by(id=quiz_session_id).first()
+
     if quiz_session.finished_at is None:
         return None, None, None, 403
 
@@ -121,16 +124,29 @@ def get_result_by_session_guid(session_guid: str):
     if quiz_session is None:
         return None, None, 404
 
+    results = SessionQuestion.query.filter_by(quiz_session_id=quiz_session.id).all()
     result, status = session_result(quiz_session.id)
 
+    question_results = [{
+        "id": sq.id,
+        "quiz_session_id": sq.quiz_session_id,
+        "question_id": sq.question_id,
+        "question_text": sq.question.text,  
+        "is_correct": sq.is_correct,
+        "score": sq.score,
+        "max_score": sq.max_score
+    } for sq in results]
+    
     session_data = SessionResultDto(
-        quiz_session.section.test.name,
-        quiz_session.section.name,
-        result["theory_correct"],
-        result["theory_count"],
-        result["practice_results"],
-        quiz_session.created_on.strftime("%m/%d/%Y, %H:%M:%S"),
-        result["time_spent"],
+        test_name=quiz_session.section.test.name,
+        section_name=quiz_session.section.name,
+        theory_correct=result["theory_correct"],
+        theory_count=result["theory_count"],
+        practice_results=result["practice_results"],
+        results=question_results,  
+        start_time=quiz_session.created_on.strftime("%m/%d/%Y, %H:%M:%S"),
+        time_spent=result["time_spent"],
     )
 
     return session_data, status
+

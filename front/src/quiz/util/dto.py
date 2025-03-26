@@ -307,6 +307,7 @@ class SessionResultDto:
         theory_correct: int,
         theory_count: int,
         practice_results: list,
+        results: list,  # Добавили поле для списка вопросов
         start_time: str,
         time_spent: str,
     ):
@@ -315,6 +316,7 @@ class SessionResultDto:
         self.theory_correct = theory_correct
         self.theory_count = theory_count
         self.practice_results = practice_results
+        self.results = results 
         self.start_time = start_time
         self.time_spent = time_spent
 
@@ -325,6 +327,7 @@ class SessionResultDto:
             "theory_correct": self.theory_correct,
             "theory_count": self.theory_count,
             "practice_results": self.practice_results,
+            "results": self.results,
             "start_time": self.start_time,
             "time_spent": self.time_spent,
         }
