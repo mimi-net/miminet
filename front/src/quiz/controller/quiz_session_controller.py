@@ -75,5 +75,5 @@ def get_result_by_session_guid_endpoint():
         render_template(
             "quiz/sessionResult.html", data=res[0].to_dict(), questions_result=res[1]
         ),
-        res[2],
+        res[1],
     )

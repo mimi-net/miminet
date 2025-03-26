@@ -360,83 +360,69 @@ const ConfigServerName = function (hostname) {
     $('#config_server_name').val(hostname);
 }
 
-const ConfigHostInterface = function (name, ip, netmask, connected_to) {
+const ConfigItemInterface = function (name, ip, netmask, connected_to, item) {
 
-    let elem = document.getElementById('config_host_interface_script');
+    let conf_item = 'config_' + item;
+    let elem = document.getElementById(conf_item + '_interface_script');
     let eth = jQuery.extend({}, elem);
 
     if (!name) {
         return;
     }
 
-    eth.innerHTML = eth.innerHTML.replace(/config_host_iface_name_label_example/g, 'config_host_iface_name_label_' + name);
-    eth.innerHTML = eth.innerHTML.replace(/config_host_iface_name_example/g, 'config_host_iface_name_' + name);
-    eth.innerHTML = eth.innerHTML.replace(/config_host_ip_example/g, 'config_host_ip_' + name);
-    eth.innerHTML = eth.innerHTML.replace(/config_host_mask_example/g, 'config_host_mask_' + name);
+    let ids = ["_iface_name_label_", "_iface_name_", "_ip_", "_mask_"];
+    ids.forEach(function (id) {
+        eth.innerHTML = eth.innerHTML.replace(RegExp(conf_item + id + 'example', "g"), conf_item + id + name);
+    });
 
-    var text = eth.innerHTML;
+    let tag = '#' + conf_item;
+    let text = eth.innerHTML;
+    $(text).insertBefore(tag + '_main_form_submit_button');
 
-    $(text).insertBefore('#config_host_main_form_submit_button');
-    $('<input type="hidden" name="config_host_iface_ids[]" value="' + name + '"/>').insertBefore('#config_host_iface_name_' + name);
-    $('#config_host_iface_name_' + name).attr("placeholder", connected_to);
-    $('#config_host_ip_' + name).val(ip);
-    $('#config_host_mask_' + name).val(netmask);
+    $('<input type="hidden" name="' + conf_item + '_iface_ids[]" value="' + name + '"/>').insertBefore(tag + ids[1] + name);
+    $(tag + ids[1] + name).attr("placeholder", connected_to);
+    $(tag + ids[2] + name).val(ip);
+    $(tag + ids[3] + name).val(netmask);
 
     if (Array.isArray(pcaps) && pcaps.includes(name)) {
-        $('#config_host_iface_name_label_' + name).html('Линк к (<a href="/host/mimishark?guid=' + network_guid + '&iface=' + name + '" target="_blank">pcap</a>)');
+        $(tag + '_iface_name_label_' + name).html('Линк к (<a href="/' + item + '/mimishark?guid=' + network_guid + '&iface=' + name + '" target="_blank">pcap</a>)');
     } else {
         console.warn('pcaps не определен или не является массивом:', pcaps);
-    }    
+    }
+}
+
+const ConfigHostInterface = function (name, ip, netmask, connected_to) {
+    ConfigItemInterface(name, ip, netmask, connected_to, "host");
 }
 
 const ConfigRouterInterface = function (name, ip, netmask, connected_to) {
-
-    let elem = document.getElementById('config_router_interface_script');
-    let eth = jQuery.extend({}, elem);
-
-    if (!name) {
-        return;
-    }
-
-    eth.innerHTML = eth.innerHTML.replace(/config_router_iface_name_label_example/g, 'config_router_iface_name_label_' + name);
-    eth.innerHTML = eth.innerHTML.replace(/config_router_iface_name_example/g, 'config_router_iface_name_' + name);
-    eth.innerHTML = eth.innerHTML.replace(/config_router_ip_example/g, 'config_router_ip_' + name);
-    eth.innerHTML = eth.innerHTML.replace(/config_router_mask_example/g, 'config_router_mask_' + name);
-
-    var text = eth.innerHTML;
-
-    $(text).insertBefore('#config_router_main_form_submit_button');
-    $('<input type="hidden" name="config_router_iface_ids[]" value="' + name + '"/>').insertBefore('#config_router_iface_name_' + name);
-    $('#config_router_iface_name_' + name).attr("placeholder", connected_to);
-    $('#config_router_ip_' + name).val(ip);
-    $('#config_router_mask_' + name).val(netmask);
+    ConfigItemInterface(name, ip, netmask, connected_to, "router");
 }
 
 const ConfigServerInterface = function (name, ip, netmask, connected_to) {
+    ConfigItemInterface(name, ip, netmask, connected_to, "server");
+}
 
-    let elem = document.getElementById('config_server_interface_script');
-    let eth = jQuery.extend({}, elem);
+const ConfigHubInterface = function (name, ip, netmask, connected_to) {
+    ConfigItemInterface(name, ip, netmask, connected_to, "hub");
+}
 
-    if (!name) {
-        return;
-    }
+const ConfigSwitchInterface = function (name, ip, netmask, connected_to) {
+    ConfigItemInterface(name, ip, netmask, connected_to, "switch");
+}
 
-    eth.innerHTML = eth.innerHTML.replace(/config_server_iface_name_label_example/g, 'config_server_iface_name_label_' + name);
-    eth.innerHTML = eth.innerHTML.replace(/config_server_iface_name_example/g, 'config_server_iface_name_' + name);
-    eth.innerHTML = eth.innerHTML.replace(/config_server_ip_example/g, 'config_server_ip_' + name);
-    eth.innerHTML = eth.innerHTML.replace(/config_server_mask_example/g, 'config_server_mask_' + name);
+const ConfigItemIndent = function (item) {
+    let conf_item = 'config_' + item
+    let text = document.getElementById(conf_item + '_indent_script').innerHTML;
+    $(text).insertBefore('#' + conf_item + '_main_form_submit_button');
+}
 
-    var text = eth.innerHTML;
+const ConfigHubIndent = function () {
+    ConfigItemIndent("hub");
+}
 
-    $(text).insertBefore('#config_server_main_form_submit_button');
-    $('<input type="hidden" name="config_server_iface_ids[]" value="' + name + '"/>').insertBefore('#config_server_iface_name_' + name);
-    $('#config_server_iface_name_' + name).attr("placeholder", connected_to);
-    $('#config_server_ip_' + name).val(ip);
-    $('#config_server_mask_' + name).val(netmask);
-
-    if (pcaps.includes(name)) {
-        $('#config_server_iface_name_label_' + name).html('Линк к (<a href="/host/mimishark?guid=' + network_guid + '&iface=' + name + '" target="_blank">pcap</a>)');
-    }
+const ConfigSwitchIndent = function () {
+    ConfigItemIndent("switch");
 }
 
 const ConfigHostJobOnChange = function (evnt) {
