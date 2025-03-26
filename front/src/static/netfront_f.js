@@ -62,6 +62,61 @@ const ServerUid = function(){
     return "server_" + uid();
 }
 
+const ActionWithInterface = function (n, i, fun) {
+
+    let iface_id = n.interface[i].id;
+
+    if (!iface_id){
+        return;
+    }
+
+    let connect_id = n.interface[i].connect;
+
+    if (!connect_id){
+        return;
+    }
+
+    let edge = edges.find(e => e.data.id === connect_id);
+
+    if (!edge){
+        return;
+    }
+
+    let source_host = edge.data.source;
+    let target_host = edge.data.target;
+
+    if (!source_host || !target_host){
+        return;
+    }
+
+    let connected_to = target_host;
+    if (n.data.id === target_host){
+        connected_to = source_host;
+    }
+
+    let connected_to_host = nodes.find(n => n.data.id === connected_to);
+    let connected_to_host_label = "Unknown";
+
+    if (connected_to_host){
+        connected_to_host_label = connected_to_host.data.label;
+    }
+
+    ip_addr = n.interface[i].ip;
+
+    if (!ip_addr){
+        ip_addr = '';
+    }
+
+    netmask = n.interface[i].netmask;
+
+    if (!netmask){
+        netmask = '';
+    }
+
+    fun(iface_id, ip_addr, netmask, connected_to_host_label);
+
+}
+
 const ShowHostConfig = function(n, shared = 0){
 
     let hostname = n.config.label;
@@ -87,58 +142,8 @@ const ShowHostConfig = function(n, shared = 0){
     ConfigHostJob(host_jobs, shared);
 
     // Add interfaces
-    $.each(n.interface, function (i) {
-        let iface_id = n.interface[i].id;
-
-        if (!iface_id){
-            return;
-        }
-
-        let connect_id = n.interface[i].connect;
-
-        if (!connect_id){
-            return;
-        }
-
-        let edge = edges.find(e => e.data.id === connect_id);
-
-        if (!edge){
-            return;
-        }
-
-        let source_host = edge.data.source;
-        let target_host = edge.data.target;
-
-        if (!source_host || !target_host){
-            return;
-        }
-
-        let connected_to = target_host;
-        if (n.data.id === target_host){
-            connected_to = source_host;
-        }
-
-        let connected_to_host = nodes.find(n => n.data.id === connected_to);
-        let connected_to_host_label = "Unknown";
-
-        if (connected_to_host){
-            connected_to_host_label = connected_to_host.data.label;
-        }
-
-        ip_addr = n.interface[i].ip;
-
-        if (!ip_addr){
-            ip_addr = '';
-        }
-
-        netmask = n.interface[i].netmask;
-
-        if (!netmask){
-            netmask = '';
-        }
-
-        ConfigHostInterface(iface_id, ip_addr, netmask, connected_to_host_label);
-
+    $.each(n.interface, function(i) {
+        ActionWithInterface(n, i, ConfigHostInterface)
     });
 
     if(n.interface.length)
@@ -183,57 +188,7 @@ const ShowRouterConfig = function(n, shared = 0){
 
     // Add interfaces
     $.each(n.interface, function (i) {
-        let iface_id = n.interface[i].id;
-
-        if (!iface_id){
-            return;
-        }
-
-        let connect_id = n.interface[i].connect;
-
-        if (!connect_id){
-            return;
-        }
-
-        let edge = edges.find(e => e.data.id === connect_id);
-
-        if (!edge){
-            return;
-        }
-
-        let source_host = edge.data.source;
-        let target_host = edge.data.target;
-
-        if (!source_host || !target_host){
-            return;
-        }
-
-        let connected_to = target_host;
-        if (n.data.id === target_host){
-            connected_to = source_host;
-        }
-
-        let connected_to_host = nodes.find(n => n.data.id === connected_to);
-        let connected_to_host_label = "Unknown";
-
-        if (connected_to_host){
-            connected_to_host_label = connected_to_host.data.label;
-        }
-
-        ip_addr = n.interface[i].ip;
-
-        if (!ip_addr){
-            ip_addr = '';
-        }
-
-        netmask = n.interface[i].netmask;
-
-        if (!netmask){
-            netmask = '';
-        }
-
-        ConfigRouterInterface(iface_id, ip_addr, netmask, connected_to_host_label);
-
+        ActionWithInterface(n, i, ConfigRouterInterface)
     });
 
     if(n.interface.length)
@@ -255,6 +210,51 @@ const ShowRouterConfig = function(n, shared = 0){
     }
 }
 
+const ShowServerConfig = function(n, shared = 0){
+
+    let hostname = n.config.label;
+    hostname = hostname || n.data.id;
+
+    // Create form
+    if (shared){
+        SharedConfigServerForm(n.data.id);
+    } else {
+        ConfigServerForm(n.data.id);
+    }
+
+    // Add hostname
+    ConfigServerName(hostname);
+
+    // Add jobs
+    let host_jobs = [];
+
+    if (jobs){
+        host_jobs = jobs.filter(j => j.host_id === n.data.id);
+    }
+
+    ConfigServerJob(host_jobs, shared);
+
+    // Add interfaces
+    $.each(n.interface, function (i) {
+        ActionWithInterface(n, i, ConfigServerInterface)
+    });
+
+    if(n.interface.length)
+    {
+        let default_gw = '';
+
+        if ("default_gw" in n.config){
+            default_gw = n.config.default_gw;
+        }
+
+        ConfigServerGateway(default_gw);
+    }
+
+    if (shared){
+        DisableFormInputs();
+    }
+}
+
 const ShowHubConfig = function(n, shared = 0){
 
     let hostname = n.config.label;
@@ -269,6 +269,15 @@ const ShowHubConfig = function(n, shared = 0){
 
     // Add hostname
     ConfigHubName(hostname);
+
+    // Add interfaces
+    $.each(n.interface, function (i) {
+        ActionWithInterface(n, i, ConfigHubInterface)
+    });
+
+    if(n.interface.length){
+        ConfigHubIndent();
+    }
 
     if (shared){
         DisableFormInputs();
@@ -290,11 +299,20 @@ const ShowSwitchConfig = function(n, shared = 0){
     // Add hostname
     ConfigSwitchName(hostname);
 
-    //Add checkbox STP
+    // Add checkbox STP
     ConfigSwtichSTP(n.config.stp);
 
-    //Add VLAN
+    // Add VLAN
     ConfigVLAN(n);
+
+    // Add interfaces
+    $.each(n.interface, function (i) {
+        ActionWithInterface(n, i, ConfigSwitchInterface)
+    });
+
+    if(n.interface.length){
+        ConfigSwitchIndent();
+    }
 
     if (shared){
         DisableFormInputs();
@@ -326,101 +344,6 @@ const ShowEdgeConfig = function(edge_id, shared = 0){
 
 const PacketUid = function(){
     return "pkt_" + uid();
-}
-
-const ShowServerConfig = function(n, shared = 0){
-
-    let hostname = n.config.label;
-    hostname = hostname || n.data.id;
-
-    // Create form
-    if (shared){
-        SharedConfigServerForm(n.data.id);
-    } else {
-        ConfigServerForm(n.data.id);
-    }
-
-    // Add hostname
-    ConfigServerName(hostname);
-
-    // Add jobs
-    let host_jobs = [];
-
-    if (jobs){
-        host_jobs = jobs.filter(j => j.host_id === n.data.id);
-    }
-
-    ConfigServerJob(host_jobs, shared);
-
-    // Add interfaces
-    $.each(n.interface, function (i) {
-        let iface_id = n.interface[i].id;
-
-        if (!iface_id){
-            return;
-        }
-
-        let connect_id = n.interface[i].connect;
-
-        if (!connect_id){
-            return;
-        }
-
-        let edge = edges.find(e => e.data.id === connect_id);
-
-        if (!edge){
-            return;
-        }
-
-        let source_host = edge.data.source;
-        let target_host = edge.data.target;
-
-        if (!source_host || !target_host){
-            return;
-        }
-
-        let connected_to = target_host;
-        if (n.data.id === target_host){
-            connected_to = source_host;
-        }
-
-        let connected_to_host = nodes.find(n => n.data.id === connected_to);
-        let connected_to_host_label = "Unknown";
-
-        if (connected_to_host){
-            connected_to_host_label = connected_to_host.data.label;
-        }
-
-        ip_addr = n.interface[i].ip;
-
-        if (!ip_addr){
-            ip_addr = '';
-        }
-
-        netmask = n.interface[i].netmask;
-
-        if (!netmask){
-            netmask = '';
-        }
-
-        ConfigServerInterface(iface_id, ip_addr, netmask, connected_to_host_label);
-
-    });
-
-    if(n.interface.length)
-    {
-        let default_gw = '';
-
-        if ("default_gw" in n.config){
-            default_gw = n.config.default_gw;
-        }
-
-        ConfigServerGateway(default_gw);
-    }
-
-    if (shared){
-        DisableFormInputs();
-    }
 }
 
 const l1HubUid = function(){
