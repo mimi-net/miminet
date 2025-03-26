@@ -41,6 +41,14 @@ function setupEventHandlers(currentDevice, modalId, tableId) {
     $('#' + modalId).find('#vlanConfigrationSubmit').on('click', function () {
         if ($('#' + modalId).find('#config_switch_vlan').is(':checked')) {
             saveCurrentFormData(currentDevice, '#' + tableId);
+
+            // TODO explain why we need this fix
+            // (for some reason, nodes aren't updating fast enough)
+            var index = nodes.findIndex(function (n) {
+                return n.data.id == currentDevice.data.id;
+            });
+
+            nodes[index].interface = currentDevice.interface
         } else {
             resetInterfaceFields(currentDevice);
         }
