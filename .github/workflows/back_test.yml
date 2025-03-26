@@ -38,6 +38,7 @@ jobs:
           make \
           libpcap-dev \
           libbsd-dev \
+          openvswitch-switch \
           git
           sudo touch /etc/network/interfaces
           sudo mkdir -p /opt/mininet_dependencies
@@ -53,6 +54,11 @@ jobs:
           sudo sysctl -w net.bridge.bridge-nf-call-arptables=0
           sudo sysctl -w net.bridge.bridge-nf-call-ip6tables=0
           sudo sysctl -p
+
+      - name: Run Open VSwitch
+        run: |
+          sudo /usr/share/openvswitch/scripts/ovs-ctl start
+          sudo ovs-vswitchd &
 
       - name: Install dependencies
         run: |

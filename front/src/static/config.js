@@ -174,6 +174,7 @@ const ConfigSwitchForm = function (switch_id) {
     $('#net_guid').val(network_guid);
 
     $('#config_switch_main_form_submit_button').click(function (event) {
+        $("#config_switch_main_form [name='config_rstp_stp']").val($('#config_button_rstp').val());
         event.preventDefault();
         let data = $('#config_switch_main_form').serialize();
 
@@ -243,6 +244,25 @@ const ConfigSwtichSTP = function (stp) {
             $(warning_text).insertBefore('#config_switch_main_form_submit_button');
         } else {
             $('#config_warning_stp').remove();
+        }
+    });
+}
+
+const ConfigSwtichRSTP = function (rstp) {
+    var elem = document.getElementById('config_switch_checkbox_rstp_script');
+
+    $(elem.innerHTML).insertBefore('#config_switch_main_form_submit_button');
+
+    if (rstp === 1) {
+        $('#config_switch_rstp').attr('checked', 'checked');
+    }
+
+    var warning_text = document.getElementById('config_switch_warning_rstp_script').innerHTML;
+    $('#config_switch_rstp').on('click', function () {
+        if ($(this).is(':checked')) {
+            $(warning_text).insertBefore('#config_switch_main_form_submit_button');
+        } else {
+            $('#config_warning_rstp').remove();
         }
     });
 }

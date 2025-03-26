@@ -49,7 +49,6 @@ class TestVLAN:
         l2sw1_config.submit()
 
         # selenium (or VLAN code) doesn't allow re-interaction with vlan form without refreshing
-        # so we need this hack to fix this
         selenium.refresh()
 
         # configure right switch

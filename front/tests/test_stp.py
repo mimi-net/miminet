@@ -39,23 +39,23 @@ class TestSTP:
         host2_config.submit()
 
         # config switches
-        switch1_config = network.open_node_config(2)
-        switch1_config.switch_stp()  # ON stp
-        switch1_config.switch_stp()  # OFF stp (just for test)
-        switch1_config.submit()
+        # switch1_config = network.open_node_config(2)
+        # switch1_config.enable_stp()  # ON stp
+        # switch1_config.disable_stp() # OFF stp (just for test)
+        # switch1_config.submit()
 
         switch2_config = network.open_node_config(3)
-        switch2_config.switch_stp()  # ON stp
+        switch2_config.enable_stp()  # ON stp
         switch2_config.submit()
 
-        switch3_config = network.open_node_config(4)
-        switch3_config.switch_stp()  # ON stp
-        switch3_config.switch_stp()  # OFF stp (just for test)
-        switch3_config.submit()
+        # switch3_config = network.open_node_config(4)
+        # switch3_config.enable_stp()  # ON stp
+        # switch3_config.disable_stp()  # OFF stp (just for test)
+        # switch3_config.submit()
 
         yield network
 
-        # network.delete()
+        network.delete()
 
     def test_stp(self, selenium: MiminetTester, network: MiminetTestNetwork):
         assert TestNetworkComparator.compare_nodes(network.nodes, self.JSON_NODES)
