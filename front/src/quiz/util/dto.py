@@ -316,7 +316,7 @@ class SessionResultDto:
         self.theory_correct = theory_correct
         self.theory_count = theory_count
         self.practice_results = practice_results
-        self.results = results 
+        self.results = results
         self.start_time = start_time
         self.time_spent = time_spent
 

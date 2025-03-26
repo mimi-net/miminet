@@ -127,26 +127,28 @@ def get_result_by_session_guid(session_guid: str):
     results = SessionQuestion.query.filter_by(quiz_session_id=quiz_session.id).all()
     result, status = session_result(quiz_session.id)
 
-    question_results = [{
-        "id": sq.id,
-        "quiz_session_id": sq.quiz_session_id,
-        "question_id": sq.question_id,
-        "question_text": sq.question.text,  
-        "is_correct": sq.is_correct,
-        "score": sq.score,
-        "max_score": sq.max_score
-    } for sq in results]
-    
+    question_results = [
+        {
+            "id": sq.id,
+            "quiz_session_id": sq.quiz_session_id,
+            "question_id": sq.question_id,
+            "question_text": sq.question.text,
+            "is_correct": sq.is_correct,
+            "score": sq.score,
+            "max_score": sq.max_score,
+        }
+        for sq in results
+    ]
+
     session_data = SessionResultDto(
         test_name=quiz_session.section.test.name,
         section_name=quiz_session.section.name,
         theory_correct=result["theory_correct"],
         theory_count=result["theory_count"],
         practice_results=result["practice_results"],
-        results=question_results,  
+        results=question_results,
         start_time=quiz_session.created_on.strftime("%m/%d/%Y, %H:%M:%S"),
         time_spent=result["time_spent"],
     )
 
     return session_data, status
-

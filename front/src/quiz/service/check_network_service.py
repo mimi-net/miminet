@@ -1,5 +1,6 @@
 from quiz.service.check_host_service import is_private_ip
 
+
 def check_network_ip_private(answer):
     nodes = answer["nodes"]
 
