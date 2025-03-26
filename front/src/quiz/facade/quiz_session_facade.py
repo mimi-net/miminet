@@ -1,5 +1,3 @@
-import logging
-
 from sqlalchemy import func
 
 from miminet_model import User, db
