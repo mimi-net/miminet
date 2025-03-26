@@ -66,7 +66,7 @@ class MyTopology(IPTopo):
                     stp=stp,
                     rstp=rstp,
                     cwd="/tmp",
-                    priority=priority
+                    priority=priority,
                 )
                 if rstp:
                     self.time_to_wait_before_emulation = max(
