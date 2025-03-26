@@ -2,6 +2,7 @@
     <form id='config_switch_main_form' action='/host/switch_save_config' method='POST'>
         <input type="hidden" id="switch_id" name="switch_id" value=""/>
         <input type="hidden" id="net_guid" name="net_guid" value=""/>
+        <input type="hidden" id="config_rstp_stp" name="config_rstp_stp" value=""/>
         <button id="config_switch_main_form_submit_button" type="submit" class="btn btn-success w-100">Сохранить</button>
     </form>
 </script>
@@ -23,6 +24,64 @@
 <script id="config_switch_warning_stp_script" type="text/plain">
     <div id="config_warning_stp" class="form-group pb-2">
         <label class="text-sm" style="font-size:0.85em">Включение протокола STP увеличивает эмуляцию на <b>30 секунд</b>.</label>
+    </div>
+</script>
+
+<script id="config_switch_checkbox_rstp_script" type="text/plain">
+    <div class="form-group form-switch">
+        <input id="config_switch_rstp" name="config_switch_rstp" type="checkbox" class="form-check-input">
+        <label class="form-check-label" for="customSwitch1">RSTP</label>
+    </div>
+</script>
+
+<script id="config_switch_warning_rstp_script" type="text/plain">
+    <div id="config_warning_rstp" class="form-group pb-2">
+        <label class="text-sm" style="font-size:0.85em">Включение протокола RSTP увеличивает эмуляцию на <b>10 секунд</b>.</label>
+    </div>
+</script>
+
+<script id="config_button_rstp_script" type="text/plain">
+<button id="config_button_rstp" name="config_button_rstp" class="btn btn-outline-secondary btn-sm mt-2" type="button" data-bs-toggle="modal" data-bs-target="#RstpModal" data-toggle="tooltip" data-bs-placement="bottom">
+    <i class='bx bx-network-chart fs-lg me-1'></i>
+    <span class="btn-text" id="config_button_rstp_text" style="width: 31px">STP</span>
+</button>
+</script>
+
+<script id="config_modal_rstp_script" type="text/plain">
+    <div class="modal" id="RstpModal" tabindex="-1" role="dialog" aria-hidden="true" data-focus-on="input:first">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="netConfigModalLabel">Выбор STP/RSTP</h5>
+                    <button id="rstpConfigrationCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть">
+                    </button>
+                </div>
+                    <div class="modal-body">
+                    <form id="form_config_rstp_stp">
+                        <input type="hidden" id="modal_switch_id" name="switch_id" value=""/>
+                        <input type="hidden" id="modal_net_guid" name="net_guid" value=""/>
+                        <div id="switch_rstp_stp_config">
+                            <input class="form-check-input" type="radio" id="none" name="config_rstp_stp" value=0>
+                            <label class="form-check-label" for="customSwitch1">Отключить STP</label><br>
+                            <input class="form-check-input" type="radio" id="stp" name="config_rstp_stp" value=1>
+                            <label class="form-check-label" for="customSwitch1">STP</label><br>
+                            <input class="form-check-input" type="radio" id="rstp" name="config_rstp_stp" value=2>
+                            <label class="form-check-label" for="customSwitch1">RSTP</label>
+                        </div>
+                        <div class="form-group pb-2 flex-nowrap" id="input_priority_form" style="display: none;">
+                            <div class="row">
+                                <label for="customSwitch1" class="form-check-label col-8 text-nowrap">Приоритет</label>
+                                <input type="number" id="config_stp_priority" name="config_stp_priority" min="0" max="65535" class="form-control form-control-sm w-25 text-end">
+                            </div>
+                        </div>
+                    </form>
+                    </div>
+                <div id="modal_footer_vlan" class="modal-footer">
+                    <button id="rstpConfigrationCancel" type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    <button id="rstpConfigrationSubmit" type="button" class="btn btn-primary">Сохранить</button>
+                </div>
+            </div>
+        </div>
     </div>
 </script>
 

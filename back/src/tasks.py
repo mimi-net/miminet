@@ -8,7 +8,7 @@ from celery_app import (
     SEND_NETWORK_RESPONSE_EXCHANGE,
     SEND_NETWORK_RESPONSE_ROUTING_KEY,
 )
-from mininet.log import setLogLevel
+from mininet.log import setLogLevel, error
 
 from network import Network
 from simulate import run_mininet
@@ -38,8 +38,11 @@ def simulate(network: str):
     for _ in range(4):
         try:
             animation, pcaps = run_mininet(network)
-        except Exception:
+        except ValueError:
             continue
+        except Exception as e:
+            error(e)
+            break
         else:
             break
 

@@ -333,13 +333,20 @@ class SwitchConfigurator(AbstractDeviceConfigurator):
         self._conf_prepare()
         self._conf_label_update()
 
-        # STP setup
-        switch_stp = get_data("config_switch_stp")
+        # RSTP/STP setup
+        switch_stp = get_data("config_rstp_stp")
 
         self._device_node["config"]["stp"] = 0
 
-        if switch_stp and switch_stp == "on":
+        if switch_stp and switch_stp == "1":
             self._device_node["config"]["stp"] = 1
+        elif switch_stp and switch_stp == "2":
+            self._device_node["config"]["stp"] = 2
+
+        stp_priority = get_data("config_stp_priority")
+
+        if stp_priority:
+            self._device_node["config"]["priority"] = int(stp_priority)
 
         return {"message": "Конфигурация обновлена", "nodes": self._nodes}
 
