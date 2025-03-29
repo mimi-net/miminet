@@ -83,7 +83,7 @@ EXCLUDE_PACKETS_FILE_NAMES = [
 ]
 
 TEST_CASES = [
-    Case(network, answer)п
+    Case(network, answer)
     for (network, answer) in [read_files(file[0], file[1]) for file in FILE_NAMES]
 ]
 
