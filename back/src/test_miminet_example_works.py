@@ -55,6 +55,13 @@ DINAMYC_ARP_FILE_NAMES = [
         len("ARP-response\\n10.0.0.1 at "),
         r"mac",
     ),
+    (
+        "arp_proxy_network.json",
+        "arp_proxy_answer.json",
+        r"ARP-response\\n.+ at ([0-9a-fA-F]{2}[:]){6}",
+        len("ARP-response\\n10.0.0.1 at "),
+        r"mac",
+    ),
 ]
 
 
