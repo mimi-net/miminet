@@ -114,8 +114,20 @@ class Location:
                 SUBMIT_BUTTON = Locator(
                     "#config_switch_main_form_submit_button", text="Сохранить"
                 )
-                STP_SWITCH = Locator("#config_switch_stp")
+
+                RSTP_BUTTON = Locator("#config_button_rstp")
                 VLAN_BUTTON = Locator("#config_button_vlan")
+
+                @staticmethod
+                def get_modal_dialog_selector(switch_name: str):
+                    """CSS Selector for STP switch modal dialog."""
+                    return f"#RstpModal_{switch_name} > div"
+
+                class StpPanel:
+                    STP_BUTTON = Locator("#stp")
+                    OFF_STP_BUTTON = Locator("#none")
+                    PRIORITY_FIELD = Locator("#config_stp_priority")
+                    SUBMIT_BUTTON = Locator("#rstpConfigrationSubmit")
 
                 class VlanPanel:
                     SWITCH_BUTTON = Locator("#config_switch_vlan")

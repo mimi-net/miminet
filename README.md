@@ -87,5 +87,3 @@ export provider=vbox/vmware
 sh front/tests/docker/run.sh
 pytest front/tests
 ```
-
-

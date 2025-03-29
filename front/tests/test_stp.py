@@ -55,7 +55,7 @@ class TestSTP:
 
         yield network
 
-        # network.delete()
+        network.delete()
 
     def test_stp(self, selenium: MiminetTester, network: MiminetTestNetwork):
         assert TestNetworkComparator.compare_nodes(network.nodes, self.JSON_NODES)
