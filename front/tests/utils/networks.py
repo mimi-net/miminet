@@ -309,7 +309,7 @@ class NodeConfig:
             By.CSS_SELECTOR,
             Location.Network.ConfigPanel.Switch.get_modal_dialog_selector(
                 self.__node["data"]["id"]
-            )
+            ),
         )
 
         with self.__selenium.run_in_modal_context(*modal_el) as dialog:
@@ -343,7 +343,7 @@ class NodeConfig:
             By.CSS_SELECTOR,
             Location.Network.ConfigPanel.Switch.get_modal_dialog_selector(
                 self.__node["data"]["id"]
-            )
+            ),
         )
 
         with self.__selenium.run_in_modal_context(*modal_el) as dialog:
@@ -433,63 +433,62 @@ class NodeConfig:
         )
         vlan_config_button.click()
 
-        # Wait until modal dialog appear
-        self.__selenium.wait_until_appear(
+        modal = (
             By.CSS_SELECTOR,
             Location.Network.ConfigPanel.Switch.VlanPanel.get_modal_dialog_selector(
                 switch_name
             ),
-            timeout=5,
         )
 
-        switch_button = self.__selenium.find_element(
-            By.CSS_SELECTOR,
-            Location.Network.ConfigPanel.Switch.VlanPanel.SWITCH_BUTTON.selector,
-        )
+        with self.__selenium.run_in_modal_context(*modal) as dialog:
+            switch_button = dialog.find_element(
+                By.CSS_SELECTOR,
+                Location.Network.ConfigPanel.Switch.VlanPanel.SWITCH_BUTTON.selector,
+            )
 
-        switch_button.click()
+            switch_button.click()
 
-        # Go through each row
-        row_id = 0
-        while True:
-            row_xpath = (
-                Location.Network.ConfigPanel.Switch.VlanPanel.get_table_row_xpath(
-                    switch_name, row_id
+            # Go through each row
+            row_id = 0
+            while True:
+                row_xpath = (
+                    Location.Network.ConfigPanel.Switch.VlanPanel.get_table_row_xpath(
+                        switch_name, row_id
+                    )
                 )
+
+                if not self.__selenium.exist_element(By.XPATH, row_xpath):
+                    # element out of table
+                    break
+
+                table_row_element = dialog.find_element(By.XPATH, row_xpath)
+                row_elements = table_row_element.find_elements(By.TAG_NAME, "td")
+
+                device_name = row_elements[0].text
+                vlan_id_element = row_elements[1].find_element(By.TAG_NAME, "input")
+
+                vlan_id, connection_type = fill_table[device_name]
+
+                vlan_id_element.clear()
+                vlan_id_element.send_keys(vlan_id)
+
+                if device_name not in fill_table:
+                    raise Exception(f"Can't find {device_name} in VLAN table.")
+
+                connection_type_element = row_elements[2].find_element(
+                    By.TAG_NAME, "select"
+                )
+
+                Select(connection_type_element).select_by_value(connection_type)
+
+                row_id += 1
+
+            # Save new table
+            submit_button = dialog.find_element(
+                By.CSS_SELECTOR,
+                Location.Network.ConfigPanel.Switch.VlanPanel.SUBMIT_BUTTON.selector,
             )
-
-            if not self.__selenium.exist_element(By.XPATH, row_xpath):
-                # element out of table
-                break
-
-            table_row_element = self.__selenium.find_element(By.XPATH, row_xpath)
-            row_elements = table_row_element.find_elements(By.TAG_NAME, "td")
-
-            device_name = row_elements[0].text
-            vlan_id_element = row_elements[1].find_element(By.TAG_NAME, "input")
-
-            vlan_id, connection_type = fill_table[device_name]
-
-            vlan_id_element.clear()
-            vlan_id_element.send_keys(vlan_id)
-
-            if device_name not in fill_table:
-                raise Exception(f"Can't find {device_name} in VLAN table.")
-
-            connection_type_element = row_elements[2].find_element(
-                By.TAG_NAME, "select"
-            )
-
-            Select(connection_type_element).select_by_value(connection_type)
-
-            row_id += 1
-
-        # Save new table
-        submit_button = self.__selenium.find_element(
-            By.CSS_SELECTOR,
-            Location.Network.ConfigPanel.Switch.VlanPanel.SUBMIT_BUTTON.selector,
-        )
-        submit_button.click()
+            submit_button.click()
 
     def submit(self):
         """Submit configuration."""

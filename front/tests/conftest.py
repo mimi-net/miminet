@@ -121,25 +121,30 @@ class MiminetTester(WebDriver):
         """Waits for a given condition to be true.
 
         Args:
-            condition: A function that returns True when the condition is met.  This function have WebDriver instance as its only argument.
+            condition: A function that returns True when the condition is met. This function have WebDriver instance as its only argument.
             timeout (int): The maximum time in seconds to wait (default: 20).
         """
         WebDriverWait(self, timeout=timeout).until(condition)
 
     @contextmanager
     def run_in_modal_context(
-        selenium, by: str, element: str
+        self, by: str, element: str
     ) -> Generator[WebElement, None, None]:
         """
         Allow to do actions in the context of modal window.
         """
         try:
-            selenium.wait_until_appear(by, element)
-            yield selenium.find_element(by, element)
+            self.wait_until_appear(by, element, timeout=5)
+
+            yield self.find_element(by, element)
         except TimeoutException:
             raise Exception(f"Modal dialog {element} wasn't opened.")
         finally:
-            selenium.wait_until_disappear(by, element)
+            # TODO change it to wait_until_disappear when modal dialog will be fixed
+            self.wait_for(
+                lambda driver: not driver.find_element(by, element).is_displayed()
+                , timeout=5
+            )
 
     def select_by_value(self, by: str, element: str, value: str):
         """Selects an option in a select element by its value.

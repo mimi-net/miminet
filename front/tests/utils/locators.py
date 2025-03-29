@@ -135,7 +135,7 @@ class Location:
                     @staticmethod
                     def get_modal_dialog_selector(switch_name: str):
                         """CSS Selector for specific switch modal dialog."""
-                        return f"#VlanModal_{switch_name}"
+                        return f"#VlanModal_{switch_name} > div"
 
                     @staticmethod
                     def get_table_row_xpath(switch_name: str, id: int):
@@ -143,8 +143,6 @@ class Location:
                         Args:
                             id (int): Position of row in VLAN table. Starts from 0."""
                         assert id >= 0, "Row can't have index less than 0."
-                        # /html/body/div[15]/div/div/div[2]/div[2]/table/tbody/tr[1]
-                        # /html/body/div[15]/div/div/div[2]/div[2]/table/tbody/tr[2]
                         return f'//*[@id="config_table_vlan_{switch_name}"]/table/tbody/tr[{id+1}]'
 
             class Host(CommonDevice):
