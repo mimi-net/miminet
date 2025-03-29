@@ -114,6 +114,7 @@ class Location:
                 SUBMIT_BUTTON = Locator(
                     "#config_switch_main_form_submit_button", text="Сохранить"
                 )
+
                 RSTP_BUTTON = Locator("#config_button_rstp")
                 VLAN_BUTTON = Locator("#config_button_vlan")
 
