@@ -18,7 +18,7 @@ def run_simulation():
 
     if not network_guid:
         ret = {
-            "simulation_id": 0,
+            "simulation_id": -1,
             "message": "Пропущен параметр GUID. И какую сеть мне симулировать?!",
         }
         return make_response(jsonify(ret), 400)
@@ -30,7 +30,7 @@ def run_simulation():
     )
 
     if not net:
-        ret = {"simulation_id": 0, "message": "Нет такой сети"}
+        ret = {"simulation_id": -1, "message": "Нет такой сети."}
         return make_response(jsonify(ret), 400)
 
     if request.method == "POST":
@@ -61,7 +61,7 @@ def run_simulation():
             headers={"network_task_name": "tasks.save_simulate_result"},
         )
 
-        ret = {"simulation_id": str(task_guid)}
+        ret = {"simulation_id": sim.id}
         return make_response(jsonify(ret), 201)
 
     return redirect(url_for("home"))
@@ -69,21 +69,21 @@ def run_simulation():
 
 @login_required
 def check_simulation():
-    task_guid = request.args.get("simulation_id", type=str)
+    sim_id = request.args.get("simulation_id", type=int)
     network_guid = request.args.get("network_guid", type=str)
 
-    if not task_guid:
-        ret = {"message": "Пропущен параметр task_guid."}
+    if not sim_id:
+        ret = {"message": "Пропущен параметр simulation_id."}
         return make_response(jsonify(ret), 400)
 
     if not network_guid:
         ret = {"message": "Пропущен параметр network_guid."}
         return make_response(jsonify(ret), 400)
 
-    sim = Simulate.query.filter(Simulate.task_guid == task_guid).first()
+    sim = Simulate.query.filter(Simulate.id == sim_id).first()
 
     if not sim:
-        ret = {"message": "Нет такой симуляции"}
+        ret = {"message": "Нет такой симуляции."}
         return make_response(jsonify(ret), 400)
 
     if sim.ready:
