@@ -4,7 +4,7 @@
 [![License: Apache](https://img.shields.io/badge/License-Apache-yellow.svg)](https://opensource.org/licenses/Apache)
 [![GitHub last commit](https://img.shields.io/github/last-commit/mimi-net/miminet)](#)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/mimi-net/miminet)
-# Miminet ![Group 3 (3)](https://github.com/user-attachments/assets/f5ea166c-03ed-43bb-9f9b-92543fa97ba2)
+# Miminet
 
 **Miminet** — эмулятор компьютерных сетей на базе ОС Linux, предназначенный для образовательных целей.
 
@@ -23,7 +23,7 @@
 
 В каталогах `back` и `front` находятся примеры файлов `.env`, используемых в docker-compose и Ansible.
 
-### Важно:
+### Важно: 
 - Развёртка бэкенда на ***WSL*** — плохая идея, используйте нормальный линукс.
 - Фронтенд можно разворачивать где угодно, в случае, если эмуляция не обязательна для разработки.
 - Для удобного запуска всех контейнеров можно воспользоваться скриптом [start_all_containers.sh](./start_all_containers.sh).
@@ -53,6 +53,24 @@ export numberOfBoxes=N
 export provider=vbox/vmware
 . vagrant_vms.sh
 ```
+
+## ☁️ Архитектура
+
+- RabbitMQ: Система обмена сообщениями, обеспечивающая взаимодействие между фронтендом и бэкендом.
+- Miminet использует контейнеризацию для управления своими компонентами. 
+
+### Frontend (фронтенд, front)
+- Клиентская часть, предоставляющая веб-интерфейс для взаимодействия пользователей с системой (авторизация, настройка сетей и так далее).
+- Файлы, относящиеся к этой части приложения, находятся в каталоге ```front```.
+- За эту часть приложения ответственны контейнеры: miminet (основной веб-сервис), [nginx](https://nginx.org/ru/) (HTTP-сервер для балансировки нагрузки) и rabbitmq.
+- В Miminet есть [тесты](https://github.com/d-zaytsev/miminet/tree/main/front/tests) на фронтенд, позволяющие имитировать действия реального пользователя при конфигурации сетей. Реализовано это с помощью [Selenium](https://www.selenium.dev/).
+
+### Backend (бэкенд, back) 
+
+- Серверная часть приложения, реализующая логику эмуляции сети.
+- Файлы, относящиеся к этой части приложения, находятся в каталоге ```back```.
+- За эту часть приложения ответственнен контейнер celery, принимающий задачи от фронтенда и обрабатывающий их.
+- В Miminet есть [тесты](https://github.com/mimi-net/miminet/blob/main/back/src/test_miminet_example_works.py) для бэкенда, проверяющие качество эмуляции заданной сети. Конфигурация тестов происходит через [JSON-файлы](https://github.com/mimi-net/miminet/tree/main/back/src/test_json).
 
 ## ☑️ Тестирование
 1. В ```front/.env``` файле должно быть выставлено: ```MODE=dev```.
