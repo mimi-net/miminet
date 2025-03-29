@@ -43,10 +43,12 @@ class TestSTP:
         switch1_config.enable_stp()  # ON stp
         switch1_config.disable_stp()  # OFF stp (just for test)
         switch1_config.submit()
+        selenium.refresh()
 
         switch2_config = network.open_node_config(3)
         switch2_config.enable_stp()  # ON stp
         switch2_config.submit()
+        selenium.refresh()
 
         switch3_config = network.open_node_config(4)
         switch3_config.enable_stp()  # ON stp
