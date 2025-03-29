@@ -35,6 +35,7 @@ FILE_NAMES = [
     ("vlan_with_access_switches_network.json", "vlan_with_access_switches_answer.json"),
     ("rstp_simple_network.json", "rstp_simple_answer.json"),
     ("rstp_four_switch_network.json", "rstp_four_switch_answer.json"),
+    ("arp_proxy_network.json", "arp_proxy_answer.json")
 ]
 
 DINAMYC_PORT_FILE_NAMES = [
@@ -82,7 +83,7 @@ EXCLUDE_PACKETS_FILE_NAMES = [
 ]
 
 TEST_CASES = [
-    Case(network, answer)
+    Case(network, answer)п
     for (network, answer) in [read_files(file[0], file[1]) for file in FILE_NAMES]
 ]
 
