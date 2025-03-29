@@ -15,7 +15,7 @@
       </div>
       <div class="d-flex" style="justify-content: end; width: 500px; margin-right: 50px; margin-left: 50px;">
         <div class="nav-item ">
-            <a class="me-2" style="text-decoration: none;" href="{{ file_path }}" download>Download</a>
+            <a class="me-2" style="text-decoration: none;" href="{{ file_path }}" download="{{ file_path }}">Download</a>
           <a style = "text-decoration: none;" href="{{ url_for('web_network', guid=network.guid) }}">Return</a>
         </div>
       </div>

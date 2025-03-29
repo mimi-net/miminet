@@ -50,9 +50,7 @@ def mimishark_page():
 
     # Do we have a json file?
     if not os.path.exists(pcap_dir + "/" + iface + ".json"):
-        from_pcap_to_json(
-            file_path, pcap_dir + "/" + iface + ".json"
-        )
+        from_pcap_to_json(file_path, pcap_dir + "/" + iface + ".json")
 
     # Get JSON file
     if not os.path.isfile(pcap_dir + "/" + iface + ".json"):
@@ -69,5 +67,5 @@ def mimishark_page():
         pcap_data=json_pcap_data,
         mimishark_nav=1,
         network=net,
-        file_path=file_path
+        file_path=file_path,
     )
