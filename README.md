@@ -4,7 +4,7 @@
 [![License: Apache](https://img.shields.io/badge/License-Apache-yellow.svg)](https://opensource.org/licenses/Apache)
 [![GitHub last commit](https://img.shields.io/github/last-commit/mimi-net/miminet)](#)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/mimi-net/miminet)
-# 🐈‍⬛ Miminet
+# Miminet ![Group 3 (3)](https://github.com/user-attachments/assets/f5ea166c-03ed-43bb-9f9b-92543fa97ba2)
 
 **Miminet** — эмулятор компьютерных сетей на базе ОС Linux, предназначенный для образовательных целей.
 
