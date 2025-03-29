@@ -120,7 +120,7 @@
     var pcaps = {{ pcaps | safe }};
     var ns = null;
 
-    SetNetworkPlayerState({% if simulating %} {% if simulating.ready %} 0 {% else %} {{simulating.id}} {% endif%} {% else %} 0 {% endif%})
+    SetNetworkPlayerState({% if simulating %} {% if simulating.ready %} 0 {% else %} {{simulating.id}} {% endif%} {% else %} -1 {% endif%})
     DrawGraph();
 </script>
 

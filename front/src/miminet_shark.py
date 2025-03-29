@@ -41,16 +41,16 @@ def mimishark_page():
         flash("Нет PCAP файлов")
         return redirect("home")
 
+    file_path = pcap_dir + "/" + iface + ".pcap"
+
     # Do we have a pcap file for a given iface?
-    if not os.path.exists(pcap_dir + "/" + iface + ".pcap"):
+    if not os.path.exists(file_path):
         flash("Нет PCAP файла для интерфейса " + iface)
         return redirect("home")
 
     # Do we have a json file?
     if not os.path.exists(pcap_dir + "/" + iface + ".json"):
-        from_pcap_to_json(
-            pcap_dir + "/" + iface + ".pcap", pcap_dir + "/" + iface + ".json"
-        )
+        from_pcap_to_json(file_path, pcap_dir + "/" + iface + ".json")
 
     # Get JSON file
     if not os.path.isfile(pcap_dir + "/" + iface + ".json"):
@@ -63,5 +63,9 @@ def mimishark_page():
         json_pcap_data = json.load(json_data)
 
     return render_template(
-        "mimishark.html", pcap_data=json_pcap_data, mimishark_nav=1, network=net
+        "mimishark.html",
+        pcap_data=json_pcap_data,
+        mimishark_nav=1,
+        network=net,
+        file_path=file_path,
     )

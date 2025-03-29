@@ -1853,16 +1853,16 @@ const SetNetworkPlayerState = function(simultaion_id)
             return;
         }
 
-	if (nodes.length > 80)
-	{
+        if (nodes.length > 80)
+        {
             $('#tooManyHostModal').modal('toggle');
-	    return;
-	}
+            return;
+        }
 
-	if (typeof window.ym != 'undefined')
-	{
-	    ym(92293993,'reachGoal','NetworkEmulate');
-	}
+        if (typeof window.ym != 'undefined')
+        {
+            ym(92293993,'reachGoal','NetworkEmulate');
+        }
 
         RunSimulation(network_guid);
 
@@ -1882,7 +1882,7 @@ const SetNetworkPlayerState = function(simultaion_id)
 const SetSharedNetworkPlayerState = function()
 {
 
-    // If we have packets, than we're ready to run
+    // If we have packets, then we're ready to run
     if (packets)
     {
         $('#NetworkPlayer').empty();
@@ -2102,12 +2102,12 @@ const CopyNetwork = function ()
 
 
 const NumWord = function (value, words){
-	value = Math.abs(value) % 100;
-	var num = value % 10;
-	if(value > 10 && value < 20) return words[2];
-	if(num > 1 && num < 5) return words[1];
-	if(num == 1) return words[0];
-	return words[2];
+    value = Math.abs(value) % 100;
+    var num = value % 10;
+    if(value > 10 && value < 20) return words[2];
+    if(num > 1 && num < 5) return words[1];
+    if(num == 1) return words[0];
+    return words[2];
 }
 
 const SaveNetworkObject = function (){
