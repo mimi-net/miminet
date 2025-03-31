@@ -1,9 +1,18 @@
 import dataclasses
 import re
 import json
+from pathlib import Path
 
 import pytest
 from tasks import simulate
+
+
+# Test directory
+TEST_JSON_DIR = Path("test_json/")
+
+# Common regex patterns
+TIMESTAMP_REGEX = r'"timestamp": "\d+"'
+ID_REGEX = r'"id": "\w+"'
 
 
 @dataclasses.dataclass
@@ -16,14 +25,88 @@ class Case:
     exclude_regex: str = r""
 
 
-DEFAULT_JSON_TEST_DIRECTORY = "test_json/"
-
-
 def read_files(network_filename: str, answer_filename: str):
-    with open(DEFAULT_JSON_TEST_DIRECTORY + network_filename, "r") as file1, open(
-        DEFAULT_JSON_TEST_DIRECTORY + answer_filename, "r"
-    ) as file2:
-        return file1.read(), file2.read().rstrip()
+    """Read both expected and actual json files."""
+    expected_path = TEST_JSON_DIR / network_filename
+    answer_path = TEST_JSON_DIR / answer_filename
+
+    with expected_path.open("r") as exp_file, answer_path.open("r") as act_file:
+        return exp_file.read(), act_file.read()
+
+
+def sanitize_animation(animation: str) -> str:
+    """Apply common regex substitutions to remove volatile parts from the simulation output."""
+    animation = re.sub(TIMESTAMP_REGEX, r'"timestamp": ""', animation)
+    animation = re.sub(ID_REGEX, r'"id": ""', animation)
+    return animation
+
+
+def extract_important_fields(packets_json, exclude_regex=None) -> list[dict[str, str]]:
+    """
+    Extracts important (don't change every simulation) fields from packets, excluding packets that match the given regular expression.
+
+    :param packets_json: JSON string with the simulation results.
+    :param exclude_regex: Regular expression to exclude packets by label and type.
+    """
+    packets = json.loads(packets_json)
+    important_packets = []
+    exclude_pattern = re.compile(exclude_regex) if exclude_regex else None
+
+    for packet_group in packets:
+        for packet in packet_group:
+            pkg_label = packet["data"]["label"]
+            pkg_type = packet["config"]["type"]
+
+            if exclude_pattern and exclude_pattern.match(pkg_label):
+                continue  # Skip unimportant packages
+
+            # Убираем порты которые генерируются динамически
+            pkg_label = re.sub(r"(UDP )\d+ > \d+", r"\1PORT > PORT", pkg_label)
+            pkg_label = re.sub(r"(TCP .*?)\d+ > \d+", r"\1PORT > PORT", pkg_label)
+            pkg_type = re.sub(r"(UDP )\d+ > \d+", r"\1PORT > PORT", pkg_type)
+            pkg_type = re.sub(r"(TCP .*?)\d+ > \d+", r"\1PORT > PORT", pkg_type)
+
+            important_packet = {
+                "type": pkg_type,
+                "label": pkg_label,
+                "path": packet["config"]["path"],
+                "source": packet["config"]["source"],
+                "target": packet["config"]["target"],
+            }
+
+            important_packets.append(important_packet)
+
+    return important_packets
+
+
+def compare_animations(actual_json: str, expected_json: str) -> bool:
+    """
+    Compare two animation JSON strings, ensuring they contain the same structured packet data.
+    """
+    try:
+        expected_packets = json.loads(expected_json)
+        actual_packets = json.loads(actual_json)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON format: {e}.")
+
+    if len(expected_packets) != len(actual_packets):
+        return False
+
+    for group_index, (expected_group, actual_group) in enumerate(
+        zip(expected_packets, actual_packets)
+    ):
+        # Sort in the same order
+        sorted_expected = sorted(
+            expected_group, key=lambda x: (x["config"]["path"], x["config"]["source"])
+        )
+        sorted_actual = sorted(
+            actual_group, key=lambda x: (x["config"]["path"], x["config"]["source"])
+        )
+
+        if sorted_actual != sorted_expected:
+            return False
+
+    return True
 
 
 FILE_NAMES = [
@@ -81,10 +164,7 @@ EXCLUDE_PACKETS_FILE_NAMES = [
     ("vxlan_simple_network.json", "vxlan_simple_answer.json", r"^ARP"),
 ]
 
-TEST_CASES = [
-    Case(network, answer)
-    for (network, answer) in [read_files(file[0], file[1]) for file in FILE_NAMES]
-]
+TEST_CASES = [Case(*read_files(network, answer)) for network, answer in FILE_NAMES]
 
 DINAMYC_PORT_TEST_CASES = [
     Case(network, answer, pattern, length, replace)
@@ -118,68 +198,19 @@ EXCLUDE_PACKETS_TEST_CASES = [
 ]
 
 
-def extract_important_fields(packets_json, exclude_regex=None):
-    """
-    Извлекает важные(которые не меняются каждую симуляцию) поля из пакетов, исключая пакеты, соответствующие заданному регулярному выражению.
-
-    :param packets_json: JSON-строка с результатами симуляции.
-    :param exclude_regex: Регулярное выражение для исключения пакетов по label и type.
-    """
-    packets = json.loads(packets_json)
-    important_packets = []
-    pattern = re.compile(exclude_regex) if exclude_regex else None
-    for packet_group in packets:
-        for packet in packet_group:
-            label = packet["data"]["label"]
-            pkg_type = packet["config"]["type"]
-            if pattern and pattern.match(label):
-                continue
-            # Убираем порты которые генерируются динамически
-            label = re.sub(r"(UDP )\d+ > \d+", r"\1PORT > PORT", label)
-            label = re.sub(r"(TCP .*?)\d+ > \d+", r"\1PORT > PORT", label)
-            pkg_type = re.sub(r"(UDP )\d+ > \d+", r"\1PORT > PORT", pkg_type)
-            pkg_type = re.sub(r"(TCP .*?)\d+ > \d+", r"\1PORT > PORT", pkg_type)
-            important_packet = {
-                "type": pkg_type,
-                "label": label,
-                "path": packet["config"]["path"],
-                "source": packet["config"]["source"],
-                "target": packet["config"]["target"],
-            }
-            important_packets.append(important_packet)
-    return important_packets
-
-
-def compare_animations(actual, expected) -> bool:
-    expected_packets = json.loads(expected)
-    actual_packets = json.loads(actual)
-    if len(expected_packets) != len(actual_packets):
-        return False
-    for expected_group, actual_group in zip(expected_packets, actual_packets):
-        sorted_expected = sorted(
-            expected_group, key=lambda x: (x["config"]["path"], x["config"]["source"])
-        )
-        sorted_actual = sorted(
-            actual_group, key=lambda x: (x["config"]["path"], x["config"]["source"])
-        )
-        if sorted_actual != sorted_expected:
-            return False
-    return True
-
-
 @pytest.mark.parametrize("test", TEST_CASES)
 def test_miminet_work(test: Case) -> None:
     animation, pcaps = simulate(test.json_network)
-    animation = re.sub(r'"timestamp": "\d+"', r'"timestamp": ""', animation)
-    animation = re.sub(r'"id": "\w+"', r'"id": ""', animation)
+    animation = sanitize_animation(animation)
+
     assert compare_animations(animation, test.json_answer)
 
 
 @pytest.mark.parametrize("test", DINAMYC_PORT_TEST_CASES)
 def test_miminet_work_for_dinamyc_port_test_cases(test: Case) -> None:
     animation, pcaps = simulate(test.json_network)
-    animation = re.sub(r'"timestamp": "\d+"', r'"timestamp": ""', animation)
-    animation = re.sub(r'"id": "\w+"', r'"id": ""', animation)
+    animation = sanitize_animation(animation)
+
     port_string = re.search(test.pattern_in_network, animation)
     assert port_string is not None
     port = port_string.group(0)[test.pattern_len :]
@@ -190,8 +221,7 @@ def test_miminet_work_for_dinamyc_port_test_cases(test: Case) -> None:
 @pytest.mark.parametrize("test", DINAMYC_ARP_AND_PORT_TEST_CASES)
 def test_miminet_work_for_dinamyc_arp_and_port_test_cases(test: Case) -> None:
     animation, pcaps = simulate(test.json_network)
-    animation = re.sub(r'"timestamp": "\d+"', r'"timestamp": ""', animation)
-    animation = re.sub(r'"id": "\w+"', r'"id": ""', animation)
+    animation = sanitize_animation(animation)
     animation = re.sub(
         r'"ARP-response.+? at .+?"', r'"ARP-response"', animation, flags=re.S
     )
@@ -205,8 +235,7 @@ def test_miminet_work_for_dinamyc_arp_and_port_test_cases(test: Case) -> None:
 @pytest.mark.parametrize("test", DINAMYC_ARP_TEST_CASES)
 def test_miminet_work_for_dinamyc_arp_test_cases(test: Case) -> None:
     animation, pcaps = simulate(test.json_network)
-    animation = re.sub(r'"timestamp": "\d+"', r'"timestamp": ""', animation)
-    animation = re.sub(r'"id": "\w+"', r'"id": ""', animation)
+    animation = sanitize_animation(animation)
     animation = re.sub(
         r'"ARP-response.+? at .+?"', r'"ARP-response"', animation, flags=re.S
     )
@@ -217,8 +246,7 @@ def test_miminet_work_for_dinamyc_arp_test_cases(test: Case) -> None:
 def test_miminet_work_with_excluded_packages(test: Case) -> None:
     animation, pcaps = simulate(test.json_network)
 
-    animation = re.sub(r'"timestamp": "\d+"', r'"timestamp": ""', animation)
-    animation = re.sub(r'"id": "\w+"', r'"id": ""', animation)
+    animation = sanitize_animation(animation)
 
     expected_animation = re.sub(
         r'"timestamp": "\d+"', r'"timestamp": ""', test.json_answer
@@ -227,7 +255,6 @@ def test_miminet_work_with_excluded_packages(test: Case) -> None:
 
     exclude_regex = getattr(test, "exclude_regex", None)
 
-    # Извлекаем важные поля, исключая пакеты по регулярному выражению
     actual_packets = extract_important_fields(animation, exclude_regex)
     expected_packets = extract_important_fields(expected_animation, exclude_regex)
 
