@@ -48,6 +48,9 @@ class TestVLAN:
         )
         l2sw1_config.submit()
 
+        # selenium (or VLAN code) doesn't allow re-interaction with vlan form without refreshing
+        selenium.refresh()
+
         # configure right switch
         l2sw2_config = network.open_node_config(l2sw2_id)
         l2sw2_config.configure_vlan(
