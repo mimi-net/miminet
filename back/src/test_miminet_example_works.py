@@ -83,6 +83,8 @@ def compare_animations(actual_json: str, expected_json: str) -> bool:
     """
     Compare two animation JSON strings, ensuring they contain the same structured packet data.
     """
+    assert actual_json, "Simulation failed, no reasonable result was obtained."
+
     try:
         expected_packets = json.loads(expected_json)
         actual_packets = json.loads(actual_json)
