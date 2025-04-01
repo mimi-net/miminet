@@ -35,6 +35,8 @@
   - [Frontend](#frontend)
   - [Backend](#backend)
 - [Тестирование](#testing)
+  - [Frontend](#frontend-test)
+  - [Backend](#backend-test)
 
 ---
 
@@ -109,7 +111,7 @@ export provider=vbox/vmware
 
 ## ☑️ <a name="testing"></a> Тестирование
 
-### Frontend
+### <a name="frontend-test"></a> Frontend
 Тестирование фронтенда работает путем имитации действий пользователя (кликов, ввода текста, навигации) с помощью автоматизированного управления браузером. Браузер(ы) находятся в специальном докер-контейнере(ах), ими управляет другой докер-контейнер (*selenium-hub*).
 
 #### Основное:
@@ -126,7 +128,7 @@ export provider=vbox/vmware
 2. Запуск контейнеров: ```sh front/tests/docker/run.sh```
 3. Запуск тестов: ```pytest front/tests```.
 
-### Backend
+### <a name="backend-test"></a> Backend
 1. Установка необходимых пакетов:
 ```bash
 pyhton -m venv .venv
