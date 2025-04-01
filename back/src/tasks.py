@@ -40,11 +40,11 @@ def simulate(network: str):
             animation, pcaps = run_mininet(network)
 
             return json.dumps(animation), pcaps
-        except ValueError:
-            continue
         except Exception as e:
+            # Sometimes mininet doesn't work correctly and simulation needs to be redone,
+            # Example of mininet error: https://github.com/mininet/mininet/issues/737.
             error(e)
-            break
+            continue
 
     return "", []
 
