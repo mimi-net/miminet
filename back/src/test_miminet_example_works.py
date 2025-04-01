@@ -163,24 +163,35 @@ DYNAMIC_TEST_CASES = [Case(*read_files(n, a)) for n, a in DYNAMIC_TEST_FILES]
 @pytest.mark.parametrize("test", DYNAMIC_TEST_CASES)
 def test_miminet_work_for_dynamic_cases(test: Case, request) -> None:
     info(f"Running test: {request.node.name}.")
+
+    # Emulate network behavior based on the test case
     animation, pcaps = simulate(test.json_network)
     animation = sanitize_animation(animation)
 
+    # Extract and replace dynamic TCP port values in the expected answer
+    # (they generated dynamically)
     tcp_pattern = re.search(r"TCP \(SYN\) \d+", animation)
     if tcp_pattern:
         pattern = tcp_pattern.group(0)[len("TCP (SYN) ") :]
         test.json_answer = re.sub(r"port", pattern, test.json_answer)
 
+    # Extract and replace dynamic ARP MAC addresses in the expected answer
+    # (they generated dynamically)
     arp_pattern = re.search(r"ARP-response\\n.+ at ([0-9a-fA-F]{2}[:]){6}", animation)
     if arp_pattern:
         pattern = arp_pattern.group(0)[len("TCP (SYN) ") :]
         test.json_answer = re.sub(r"mac", pattern, test.json_answer)
 
+    # Remove dynamic ARP response addresses from the animation output
     animation = re.sub(
         r'"ARP-response.+? at .+?"', '"ARP-response"', animation, flags=re.S
     )
+
+    # Normalize timestamps and unique IDs for consistent comparison
     animation = re.sub(r'"timestamp": "\d+"', '"timestamp": ""', test.json_answer)
     animation = re.sub(r'"id": "\w+"', '"id": ""', animation)
+
+    # Extract important packet fields while ignoring excluded packets
     actual_packets = extract_important_fields(animation, r"^ARP")
     expected_packets = extract_important_fields(test.json_answer, r"^ARP")
 
