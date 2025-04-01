@@ -63,16 +63,15 @@ def packet_to_static(x: str):
     x = re.sub(r'"ARP-response.+? at .+?"', '"ARP-response"', x, flags=re.S)
 
 
-def extract_important_fields(packets_json, exclude_regex=None) -> list[dict[str, str]]:
+def extract_important_fields(packets_json) -> list[dict[str, str]]:
     """
     Extracts important (don't change every simulation) fields from packets, excluding packets that match the given regular expression.
 
     :param packets_json: JSON string with the simulation results.
-    :param exclude_regex: Regular expression to exclude packets by label and type.
     """
     packets = json.loads(packets_json)
     important_packets = []
-    exclude_pattern = re.compile(exclude_regex) if exclude_regex else None
+    exclude_pattern = re.compile(r"^ARP") if r"^ARP" else None
 
     for packet_group in packets:
         for packet in packet_group:
@@ -85,15 +84,19 @@ def extract_important_fields(packets_json, exclude_regex=None) -> list[dict[str,
             important_packet = {
                 "type": packet_to_static(pkg_type),
                 "label": packet_to_static(pkg_label),
-                "path": packet["config"]["path"],
                 "source": packet["config"]["source"],
                 "target": packet["config"]["target"],
+                "path": packet["config"]["path"],
             }
 
             important_packets.append(important_packet)
 
+    sorted_important_packets = sorted(
+        important_packets, key=lambda x: (x["path"], x["source"])
+    )
+
     info("Important fields extracted from packets.")
-    return important_packets
+    return sorted_important_packets
 
 
 def compare_animations(actual_json: str, expected_json: str) -> bool:
@@ -140,7 +143,7 @@ def compare_animations(actual_json: str, expected_json: str) -> bool:
     return True
 
 
-STATIC_TEST_FILES = [
+TEST_FILES = [
     ("switch_and_hub_network.json", "switch_and_hub_answer.json"),
     ("first_and_last_ip_address_network.json", "first_and_last_ip_address_answer.json"),
     ("vlan_access_network.json", "vlan_access_answer.json"),
@@ -149,9 +152,6 @@ STATIC_TEST_FILES = [
     ("vlan_with_access_switches_network.json", "vlan_with_access_switches_answer.json"),
     ("rstp_simple_network.json", "rstp_simple_answer.json"),
     ("rstp_four_switch_network.json", "rstp_four_switch_answer.json"),
-]
-
-DYNAMIC_TEST_FILES = [
     ("tcp_connection_setup_1_network.json", "tcp_connection_setup_1_answer.json"),
     ("router_network.json", "router_answer.json"),
     ("icmp_network_unavailable_network.json", "icmp_network_unavailable_answer.json"),
@@ -162,30 +162,19 @@ DYNAMIC_TEST_FILES = [
 ]
 
 # Generate test cases
-TEST_CASES = [Case(*read_files(n, a)) for n, a in STATIC_TEST_FILES]
-DYNAMIC_TEST_CASES = [Case(*read_files(n, a)) for n, a in DYNAMIC_TEST_FILES]
-
-# @pytest.mark.parametrize("test", TEST_CASES)
-# def test_miminet_work(test: Case, request) -> None:
-#     info(f"Running test: {request.node.name}.")
-#     animation, pcaps = simulate(test.json_network)
-#     animation = sanitize_animation(animation)
-
-#     assert compare_animations(animation, test.json_answer)
-#     info(f"Finish test {request.node.name}.")
+TEST_CASES = [Case(*read_files(n, a)) for n, a in TEST_FILES]
 
 
-@pytest.mark.parametrize("test", DYNAMIC_TEST_CASES)
-def test_miminet_work_for_dynamic_cases(test: Case, request) -> None:
+@pytest.mark.parametrize("test", TEST_CASES)
+def test_miminet_work(test: Case, request) -> None:
     info(f"Running test: {request.node.name}.")
 
     # Emulate network behavior based on the test case
     animation, _ = simulate(test.json_network)
-    animation = sanitize_animation(animation)
 
     # Extract important packet fields while ignoring excluded packets
-    actual_packets = extract_important_fields(animation, r"^ARP")
-    expected_packets = extract_important_fields(test.json_answer, r"^ARP")
+    actual_packets = extract_important_fields(animation)
+    expected_packets = extract_important_fields(test.json_answer)
 
     assert actual_packets == expected_packets
 
