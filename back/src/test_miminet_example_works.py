@@ -130,13 +130,13 @@ def compare_animations(actual_json: str, expected_json: str) -> bool:
 
 
 FILE_NAMES = [
-    # ("switch_and_hub_network.json", "switch_and_hub_answer.json"),
-    # ("first_and_last_ip_address_network.json", "first_and_last_ip_address_answer.json"),
-    # ("vlan_access_network.json", "vlan_access_answer.json"),
-    # ("vlan_trunk_network.json", "vlan_trunk_answer.json"),
-    # ("vlan_with_stp_network.json", "vlan_with_stp_answer.json"),
-    # ("vlan_with_access_switches_network.json", "vlan_with_access_switches_answer.json"),
-    # ("rstp_simple_network.json", "rstp_simple_answer.json"),
+    ("switch_and_hub_network.json", "switch_and_hub_answer.json"),
+    ("first_and_last_ip_address_network.json", "first_and_last_ip_address_answer.json"),
+    ("vlan_access_network.json", "vlan_access_answer.json"),
+    ("vlan_trunk_network.json", "vlan_trunk_answer.json"),
+    ("vlan_with_stp_network.json", "vlan_with_stp_answer.json"),
+    ("vlan_with_access_switches_network.json", "vlan_with_access_switches_answer.json"),
+    ("rstp_simple_network.json", "rstp_simple_answer.json"),
     ("rstp_four_switch_network.json", "rstp_four_switch_answer.json"),
 ]
 
@@ -228,65 +228,65 @@ def test_miminet_work(test: Case, request) -> None:
     info(f"Finish test {request.node.name}.")
 
 
-# @pytest.mark.parametrize("test", DINAMYC_PORT_TEST_CASES)
-# def test_miminet_work_for_dinamyc_port_test_cases(test: Case, request) -> None:
-#     info(f"Running test: {request.node.name}.")
-#     animation, pcaps = simulate(test.json_network)
-#     animation = sanitize_animation(animation)
-#     info(f"Finish test {request.node.name}.")
+@pytest.mark.parametrize("test", DINAMYC_PORT_TEST_CASES)
+def test_miminet_work_for_dinamyc_port_test_cases(test: Case, request) -> None:
+    info(f"Running test: {request.node.name}.")
+    animation, pcaps = simulate(test.json_network)
+    animation = sanitize_animation(animation)
+    info(f"Finish test {request.node.name}.")
 
-#     port_string = re.search(test.pattern_in_network, animation)
-#     assert port_string is not None
-#     port = port_string.group(0)[test.pattern_len :]
-#     test.json_answer = re.sub(test.pattern_for_replace, port, test.json_answer)
-#     assert compare_animations(animation, test.json_answer)
-#     info(f"Finish test {request.node.name}.")
-
-
-# @pytest.mark.parametrize("test", DINAMYC_ARP_AND_PORT_TEST_CASES)
-# def test_miminet_work_for_dinamyc_arp_and_port_test_cases(test: Case, request) -> None:
-#     info(f"Running test: {request.node.name}.")
-#     animation, pcaps = simulate(test.json_network)
-#     animation = sanitize_animation(animation)
-#     animation = re.sub(
-#         r'"ARP-response.+? at .+?"', r'"ARP-response"', animation, flags=re.S
-#     )
-#     port_string = re.search(test.pattern_in_network, animation)
-#     assert port_string is not None
-#     port = port_string.group(0)[test.pattern_len :]
-#     test.json_answer = re.sub(test.pattern_for_replace, port, test.json_answer)
-#     assert compare_animations(animation, test.json_answer)
-#     info(f"Finish test {request.node.name}.")
+    port_string = re.search(test.pattern_in_network, animation)
+    assert port_string is not None
+    port = port_string.group(0)[test.pattern_len :]
+    test.json_answer = re.sub(test.pattern_for_replace, port, test.json_answer)
+    assert compare_animations(animation, test.json_answer)
+    info(f"Finish test {request.node.name}.")
 
 
-# @pytest.mark.parametrize("test", DINAMYC_ARP_TEST_CASES)
-# def test_miminet_work_for_dinamyc_arp_test_cases(test: Case, request) -> None:
-#     info(f"Running test: {request.node.name}.")
-#     animation, pcaps = simulate(test.json_network)
-#     animation = sanitize_animation(animation)
-#     animation = re.sub(
-#         r'"ARP-response.+? at .+?"', r'"ARP-response"', animation, flags=re.S
-#     )
-#     assert compare_animations(animation, test.json_answer)
-#     info(f"Finish test {request.node.name}.")
+@pytest.mark.parametrize("test", DINAMYC_ARP_AND_PORT_TEST_CASES)
+def test_miminet_work_for_dinamyc_arp_and_port_test_cases(test: Case, request) -> None:
+    info(f"Running test: {request.node.name}.")
+    animation, pcaps = simulate(test.json_network)
+    animation = sanitize_animation(animation)
+    animation = re.sub(
+        r'"ARP-response.+? at .+?"', r'"ARP-response"', animation, flags=re.S
+    )
+    port_string = re.search(test.pattern_in_network, animation)
+    assert port_string is not None
+    port = port_string.group(0)[test.pattern_len :]
+    test.json_answer = re.sub(test.pattern_for_replace, port, test.json_answer)
+    assert compare_animations(animation, test.json_answer)
+    info(f"Finish test {request.node.name}.")
 
 
-# @pytest.mark.parametrize("test", EXCLUDE_PACKETS_TEST_CASES)
-# def test_miminet_work_with_excluded_packages(test: Case, request) -> None:
-#     info(f"Running test: {request.node.name}.")
-#     animation, pcaps = simulate(test.json_network)
+@pytest.mark.parametrize("test", DINAMYC_ARP_TEST_CASES)
+def test_miminet_work_for_dinamyc_arp_test_cases(test: Case, request) -> None:
+    info(f"Running test: {request.node.name}.")
+    animation, pcaps = simulate(test.json_network)
+    animation = sanitize_animation(animation)
+    animation = re.sub(
+        r'"ARP-response.+? at .+?"', r'"ARP-response"', animation, flags=re.S
+    )
+    assert compare_animations(animation, test.json_answer)
+    info(f"Finish test {request.node.name}.")
 
-#     animation = sanitize_animation(animation)
 
-#     expected_animation = re.sub(
-#         r'"timestamp": "\d+"', r'"timestamp": ""', test.json_answer
-#     )
-#     expected_animation = re.sub(r'"id": "\w+"', r'"id": ""', expected_animation)
+@pytest.mark.parametrize("test", EXCLUDE_PACKETS_TEST_CASES)
+def test_miminet_work_with_excluded_packages(test: Case, request) -> None:
+    info(f"Running test: {request.node.name}.")
+    animation, pcaps = simulate(test.json_network)
 
-#     exclude_regex = getattr(test, "exclude_regex", None)
+    animation = sanitize_animation(animation)
 
-#     actual_packets = extract_important_fields(animation, exclude_regex)
-#     expected_packets = extract_important_fields(expected_animation, exclude_regex)
+    expected_animation = re.sub(
+        r'"timestamp": "\d+"', r'"timestamp": ""', test.json_answer
+    )
+    expected_animation = re.sub(r'"id": "\w+"', r'"id": ""', expected_animation)
 
-#     assert actual_packets == expected_packets
-#     info(f"Finish test {request.node.name}.")
+    exclude_regex = getattr(test, "exclude_regex", None)
+
+    actual_packets = extract_important_fields(animation, exclude_regex)
+    expected_packets = extract_important_fields(expected_animation, exclude_regex)
+
+    assert actual_packets == expected_packets
+    info(f"Finish test {request.node.name}.")
