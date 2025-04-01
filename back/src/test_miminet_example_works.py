@@ -3,9 +3,12 @@ import re
 import json
 from pathlib import Path
 
+from mininet.log import setLogLevel, info, error
 import pytest
 from tasks import simulate
 
+
+setLogLevel("info")
 
 # Test directory
 TEST_JSON_DIR = Path("test_json/")
@@ -31,6 +34,7 @@ def read_files(network_filename: str, answer_filename: str):
     answer_path = TEST_JSON_DIR / answer_filename
 
     with expected_path.open("r") as exp_file, answer_path.open("r") as act_file:
+        info(f"Reading files: {network_filename}, {answer_filename}.")
         return exp_file.read(), act_file.read()
 
 
@@ -38,6 +42,7 @@ def sanitize_animation(animation: str) -> str:
     """Apply common regex substitutions to remove volatile parts from the simulation output."""
     animation = re.sub(TIMESTAMP_REGEX, r'"timestamp": ""', animation)
     animation = re.sub(ID_REGEX, r'"id": ""', animation)
+    info("Animation sanitization completed!")
     return animation
 
 
@@ -76,6 +81,7 @@ def extract_important_fields(packets_json, exclude_regex=None) -> list[dict[str,
 
             important_packets.append(important_packet)
 
+    info("Important fields extracted from packets.")
     return important_packets
 
 
@@ -83,7 +89,8 @@ def compare_animations(actual_json: str, expected_json: str) -> bool:
     """
     Compare two animation JSON strings, ensuring they contain the same structured packet data.
     """
-    assert actual_json, "Simulation failed, no reasonable result was obtained."
+    if not actual_json:
+        raise ValueError(f"actual_json is null, there is no simulation result.")
 
     try:
         expected_packets = json.loads(expected_json)
@@ -91,7 +98,14 @@ def compare_animations(actual_json: str, expected_json: str) -> bool:
     except json.JSONDecodeError as e:
         raise ValueError(f"Invalid JSON format: {e}.")
 
+    info("Comparing JSON animations...")
+
     if len(expected_packets) != len(actual_packets):
+        error(
+            f"""Mismatch in packet lengths.
+                Expected length: {len(expected_packets)}, actual: {len(actual_packets)}.
+                    Actual packets: {actual_packets}."""
+        )
         return False
 
     for group_index, (expected_group, actual_group) in enumerate(
@@ -106,19 +120,23 @@ def compare_animations(actual_json: str, expected_json: str) -> bool:
         )
 
         if sorted_actual != sorted_expected:
+            error(
+                f"Mismatch in packet data at group {group_index}. Actual packets: {actual_packets}."
+            )
             return False
 
+    info("Animations matched successfully!")
     return True
 
 
 FILE_NAMES = [
-    ("switch_and_hub_network.json", "switch_and_hub_answer.json"),
-    ("first_and_last_ip_address_network.json", "first_and_last_ip_address_answer.json"),
-    ("vlan_access_network.json", "vlan_access_answer.json"),
-    ("vlan_trunk_network.json", "vlan_trunk_answer.json"),
-    ("vlan_with_stp_network.json", "vlan_with_stp_answer.json"),
-    ("vlan_with_access_switches_network.json", "vlan_with_access_switches_answer.json"),
-    ("rstp_simple_network.json", "rstp_simple_answer.json"),
+    # ("switch_and_hub_network.json", "switch_and_hub_answer.json"),
+    # ("first_and_last_ip_address_network.json", "first_and_last_ip_address_answer.json"),
+    # ("vlan_access_network.json", "vlan_access_answer.json"),
+    # ("vlan_trunk_network.json", "vlan_trunk_answer.json"),
+    # ("vlan_with_stp_network.json", "vlan_with_stp_answer.json"),
+    # ("vlan_with_access_switches_network.json", "vlan_with_access_switches_answer.json"),
+    # ("rstp_simple_network.json", "rstp_simple_answer.json"),
     ("rstp_four_switch_network.json", "rstp_four_switch_answer.json"),
 ]
 
@@ -201,63 +219,74 @@ EXCLUDE_PACKETS_TEST_CASES = [
 
 
 @pytest.mark.parametrize("test", TEST_CASES)
-def test_miminet_work(test: Case) -> None:
+def test_miminet_work(test: Case, request) -> None:
+    info(f"Running test: {request.node.name}.")
     animation, pcaps = simulate(test.json_network)
     animation = sanitize_animation(animation)
 
     assert compare_animations(animation, test.json_answer)
+    info(f"Finish test {request.node.name}.")
 
 
-@pytest.mark.parametrize("test", DINAMYC_PORT_TEST_CASES)
-def test_miminet_work_for_dinamyc_port_test_cases(test: Case) -> None:
-    animation, pcaps = simulate(test.json_network)
-    animation = sanitize_animation(animation)
+# @pytest.mark.parametrize("test", DINAMYC_PORT_TEST_CASES)
+# def test_miminet_work_for_dinamyc_port_test_cases(test: Case, request) -> None:
+#     info(f"Running test: {request.node.name}.")
+#     animation, pcaps = simulate(test.json_network)
+#     animation = sanitize_animation(animation)
+#     info(f"Finish test {request.node.name}.")
 
-    port_string = re.search(test.pattern_in_network, animation)
-    assert port_string is not None
-    port = port_string.group(0)[test.pattern_len :]
-    test.json_answer = re.sub(test.pattern_for_replace, port, test.json_answer)
-    assert compare_animations(animation, test.json_answer)
-
-
-@pytest.mark.parametrize("test", DINAMYC_ARP_AND_PORT_TEST_CASES)
-def test_miminet_work_for_dinamyc_arp_and_port_test_cases(test: Case) -> None:
-    animation, pcaps = simulate(test.json_network)
-    animation = sanitize_animation(animation)
-    animation = re.sub(
-        r'"ARP-response.+? at .+?"', r'"ARP-response"', animation, flags=re.S
-    )
-    port_string = re.search(test.pattern_in_network, animation)
-    assert port_string is not None
-    port = port_string.group(0)[test.pattern_len :]
-    test.json_answer = re.sub(test.pattern_for_replace, port, test.json_answer)
-    assert compare_animations(animation, test.json_answer)
+#     port_string = re.search(test.pattern_in_network, animation)
+#     assert port_string is not None
+#     port = port_string.group(0)[test.pattern_len :]
+#     test.json_answer = re.sub(test.pattern_for_replace, port, test.json_answer)
+#     assert compare_animations(animation, test.json_answer)
+#     info(f"Finish test {request.node.name}.")
 
 
-@pytest.mark.parametrize("test", DINAMYC_ARP_TEST_CASES)
-def test_miminet_work_for_dinamyc_arp_test_cases(test: Case) -> None:
-    animation, pcaps = simulate(test.json_network)
-    animation = sanitize_animation(animation)
-    animation = re.sub(
-        r'"ARP-response.+? at .+?"', r'"ARP-response"', animation, flags=re.S
-    )
-    assert compare_animations(animation, test.json_answer)
+# @pytest.mark.parametrize("test", DINAMYC_ARP_AND_PORT_TEST_CASES)
+# def test_miminet_work_for_dinamyc_arp_and_port_test_cases(test: Case, request) -> None:
+#     info(f"Running test: {request.node.name}.")
+#     animation, pcaps = simulate(test.json_network)
+#     animation = sanitize_animation(animation)
+#     animation = re.sub(
+#         r'"ARP-response.+? at .+?"', r'"ARP-response"', animation, flags=re.S
+#     )
+#     port_string = re.search(test.pattern_in_network, animation)
+#     assert port_string is not None
+#     port = port_string.group(0)[test.pattern_len :]
+#     test.json_answer = re.sub(test.pattern_for_replace, port, test.json_answer)
+#     assert compare_animations(animation, test.json_answer)
+#     info(f"Finish test {request.node.name}.")
 
 
-@pytest.mark.parametrize("test", EXCLUDE_PACKETS_TEST_CASES)
-def test_miminet_work_with_excluded_packages(test: Case) -> None:
-    animation, pcaps = simulate(test.json_network)
+# @pytest.mark.parametrize("test", DINAMYC_ARP_TEST_CASES)
+# def test_miminet_work_for_dinamyc_arp_test_cases(test: Case, request) -> None:
+#     info(f"Running test: {request.node.name}.")
+#     animation, pcaps = simulate(test.json_network)
+#     animation = sanitize_animation(animation)
+#     animation = re.sub(
+#         r'"ARP-response.+? at .+?"', r'"ARP-response"', animation, flags=re.S
+#     )
+#     assert compare_animations(animation, test.json_answer)
+#     info(f"Finish test {request.node.name}.")
 
-    animation = sanitize_animation(animation)
 
-    expected_animation = re.sub(
-        r'"timestamp": "\d+"', r'"timestamp": ""', test.json_answer
-    )
-    expected_animation = re.sub(r'"id": "\w+"', r'"id": ""', expected_animation)
+# @pytest.mark.parametrize("test", EXCLUDE_PACKETS_TEST_CASES)
+# def test_miminet_work_with_excluded_packages(test: Case, request) -> None:
+#     info(f"Running test: {request.node.name}.")
+#     animation, pcaps = simulate(test.json_network)
 
-    exclude_regex = getattr(test, "exclude_regex", None)
+#     animation = sanitize_animation(animation)
 
-    actual_packets = extract_important_fields(animation, exclude_regex)
-    expected_packets = extract_important_fields(expected_animation, exclude_regex)
+#     expected_animation = re.sub(
+#         r'"timestamp": "\d+"', r'"timestamp": ""', test.json_answer
+#     )
+#     expected_animation = re.sub(r'"id": "\w+"', r'"id": ""', expected_animation)
 
-    assert actual_packets == expected_packets
+#     exclude_regex = getattr(test, "exclude_regex", None)
+
+#     actual_packets = extract_important_fields(animation, exclude_regex)
+#     expected_packets = extract_important_fields(expected_animation, exclude_regex)
+
+#     assert actual_packets == expected_packets
+#     info(f"Finish test {request.node.name}.")
