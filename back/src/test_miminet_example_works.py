@@ -35,11 +35,32 @@ def read_files(network_filename: str, answer_filename: str):
 
 
 def sanitize_animation(animation: str) -> str:
-    """Apply common regex substitutions to remove volatile parts from the simulation output."""
+    """Apply common regex substitutions to remove volatile parts from the emulation output."""
     animation = re.sub(TIMESTAMP_REGEX, r'"timestamp": ""', animation)
     animation = re.sub(ID_REGEX, r'"id": ""', animation)
     info("Animation sanitization completed!")
     return animation
+
+
+def packet_to_static(x: str):
+    """Apply common regex substitutions to remove volatile parts from the packet key (label or type)."""
+    x = re.sub(r"(UDP )\d+ > \d+", r"\1PORT > PORT", x)
+    x = re.sub(r"(TCP .*?)\d+ > \d+", r"\1PORT > PORT", x)
+
+    # Extract and replace dynamic TCP port values in the expected answer
+    tcp_pattern = re.search(r"TCP \(SYN\) \d+", x)
+    if tcp_pattern:
+        pattern = tcp_pattern.group(0)[len("TCP (SYN) ") :]
+        x = re.sub(r"port", pattern, x)
+
+    # Extract and replace dynamic ARP MAC addresses in the expected answer
+    arp_pattern = re.search(r"ARP-response\\n.+ at ([0-9a-fA-F]{2}[:]){6}", x)
+    if arp_pattern:
+        pattern = arp_pattern.group(0)[len("TCP (SYN) ") :]
+        x = re.sub(r"mac", pattern, x)
+
+    # Remove dynamic ARP response addresses from the package
+    x = re.sub(r'"ARP-response.+? at .+?"', '"ARP-response"', x, flags=re.S)
 
 
 def extract_important_fields(packets_json, exclude_regex=None) -> list[dict[str, str]]:
@@ -61,15 +82,9 @@ def extract_important_fields(packets_json, exclude_regex=None) -> list[dict[str,
             if exclude_pattern and exclude_pattern.match(pkg_label):
                 continue  # Skip unimportant packages
 
-            # Убираем порты которые генерируются динамически
-            pkg_label = re.sub(r"(UDP )\d+ > \d+", r"\1PORT > PORT", pkg_label)
-            pkg_label = re.sub(r"(TCP .*?)\d+ > \d+", r"\1PORT > PORT", pkg_label)
-            pkg_type = re.sub(r"(UDP )\d+ > \d+", r"\1PORT > PORT", pkg_type)
-            pkg_type = re.sub(r"(TCP .*?)\d+ > \d+", r"\1PORT > PORT", pkg_type)
-
             important_packet = {
-                "type": pkg_type,
-                "label": pkg_label,
+                "type": packet_to_static(pkg_type),
+                "label": packet_to_static(pkg_label),
                 "path": packet["config"]["path"],
                 "source": packet["config"]["source"],
                 "target": packet["config"]["target"],
@@ -165,31 +180,8 @@ def test_miminet_work_for_dynamic_cases(test: Case, request) -> None:
     info(f"Running test: {request.node.name}.")
 
     # Emulate network behavior based on the test case
-    animation, pcaps = simulate(test.json_network)
+    animation, _ = simulate(test.json_network)
     animation = sanitize_animation(animation)
-
-    # Extract and replace dynamic TCP port values in the expected answer
-    # (they generated dynamically)
-    tcp_pattern = re.search(r"TCP \(SYN\) \d+", animation)
-    if tcp_pattern:
-        pattern = tcp_pattern.group(0)[len("TCP (SYN) ") :]
-        test.json_answer = re.sub(r"port", pattern, test.json_answer)
-
-    # Extract and replace dynamic ARP MAC addresses in the expected answer
-    # (they generated dynamically)
-    arp_pattern = re.search(r"ARP-response\\n.+ at ([0-9a-fA-F]{2}[:]){6}", animation)
-    if arp_pattern:
-        pattern = arp_pattern.group(0)[len("TCP (SYN) ") :]
-        test.json_answer = re.sub(r"mac", pattern, test.json_answer)
-
-    # Remove dynamic ARP response addresses from the animation output
-    animation = re.sub(
-        r'"ARP-response.+? at .+?"', '"ARP-response"', animation, flags=re.S
-    )
-
-    # Normalize timestamps and unique IDs for consistent comparison
-    animation = re.sub(r'"timestamp": "\d+"', '"timestamp": ""', test.json_answer)
-    animation = re.sub(r'"id": "\w+"', '"id": ""', animation)
 
     # Extract important packet fields while ignoring excluded packets
     actual_packets = extract_important_fields(animation, r"^ARP")
