@@ -1,10 +1,19 @@
-![Test Status](https://github.com/mimi-net/miminet/actions/workflows/full_test.yml/badge.svg)
-![Test Status](https://github.com/mimi-net/miminet/actions/workflows/back_test.yml/badge.svg)
-![OS](https://img.shields.io/badge/OS-linux-0078D4)
-[![License: Apache](https://img.shields.io/badge/License-Apache-yellow.svg)](https://opensource.org/licenses/Apache)
-[![GitHub last commit](https://img.shields.io/github/last-commit/mimi-net/miminet)](#)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/mimi-net/miminet)
-![Website](https://img.shields.io/website?url=https%3A%2F%2Fmiminet.ru%2F)
+<p align="center">
+    <a href="https://github.com/mimi-net/miminet/actions" alt="Miminet Github Actions">
+    <img src="https://github.com/mimi-net/miminet/actions/workflows/full_test.yml/badge.svg" /></a>
+    <a href="https://github.com/mimi-net/miminet/actions" alt="Miminet Github Actions">
+    <img src="https://github.com/mimi-net/miminet/actions/workflows/back_test.yml/badge.svg" /></a>
+    <a href="https://en.wikipedia.org/wiki/Linux" alt="OS Linux">
+    <img src="https://img.shields.io/badge/OS-linux-0078D4" /></a>
+    <a href="https://opensource.org/licenses/Apache" alt="License">
+    <img src="https://img.shields.io/badge/License-Apache-yellow.svg" /></a>
+    <a href="https://github.com/mimi-net/miminet/commits/main/" alt="Last Commit">
+    <img src="https://img.shields.io/github/last-commit/mimi-net/miminet" /></a>
+    <a href="https://github.com/mimi-net/miminet/commits/main/" alt="GitHub commit activity">
+    <img src="https://img.shields.io/github/commit-activity/m/mimi-net/miminet" /></a>
+    <a href="https://miminet.ru/" alt="Site">
+    <img src="https://img.shields.io/website?url=https%3A%2F%2Fmiminet.ru%2F" /></a>
+</p>
 
 # Miminet
 
