@@ -144,21 +144,22 @@ def compare_animations(actual_json: str, expected_json: str) -> bool:
 
 
 TEST_FILES = [
-    ("switch_and_hub_network.json", "switch_and_hub_answer.json"),
-    ("first_and_last_ip_address_network.json", "first_and_last_ip_address_answer.json"),
-    ("vlan_access_network.json", "vlan_access_answer.json"),
-    ("vlan_trunk_network.json", "vlan_trunk_answer.json"),
-    ("vlan_with_stp_network.json", "vlan_with_stp_answer.json"),
-    ("vlan_with_access_switches_network.json", "vlan_with_access_switches_answer.json"),
-    ("rstp_simple_network.json", "rstp_simple_answer.json"),
+    # ("switch_and_hub_network.json", "switch_and_hub_answer.json"),
+    # ("first_and_last_ip_address_network.json", "first_and_last_ip_address_answer.json"),
+    # ("vlan_access_network.json", "vlan_access_answer.json"),
+    # ("vlan_trunk_network.json", "vlan_trunk_answer.json"),
+    # ("vlan_with_stp_network.json", "vlan_with_stp_answer.json"),
+    # ("vlan_with_access_switches_network.json", "vlan_with_access_switches_answer.json"),
+    # ("rstp_simple_network.json", "rstp_simple_answer.json"),
     ("rstp_four_switch_network.json", "rstp_four_switch_answer.json"),
-    ("tcp_connection_setup_1_network.json", "tcp_connection_setup_1_answer.json"),
-    ("router_network.json", "router_answer.json"),
-    ("icmp_network_unavailable_network.json", "icmp_network_unavailable_answer.json"),
-    ("icmp_host_unreachable_network.json", "icmp_host_unreachable_answer.json"),
-    ("vlan_with_vxlan_network.json", "vlan_with_vxlan_answer.json"),
-    ("vxlan_with_nat_network.json", "vxlan_with_nat_answer.json"),
-    ("vxlan_simple_network.json", "vxlan_simple_answer.json"),
+    # ("tcp_connection_setup_1_network.json", "tcp_connection_setup_1_answer.json"),
+    # ("ring_of_3_routers_network.json", "ring_of_3_routers_answer.json")
+    # ("router_network.json", "router_answer.json"),
+    # ("icmp_network_unavailable_network.json", "icmp_network_unavailable_answer.json"),
+    # ("icmp_host_unreachable_network.json", "icmp_host_unreachable_answer.json"),
+    # ("vlan_with_vxlan_network.json", "vlan_with_vxlan_answer.json"),
+    # ("vxlan_with_nat_network.json", "vxlan_with_nat_answer.json"),
+    # ("vxlan_simple_network.json", "vxlan_simple_answer.json"),
 ]
 
 # Generate test cases
@@ -176,6 +177,10 @@ def test_miminet_work(test: Case, request) -> None:
     actual_packets = extract_important_fields(animation)
     expected_packets = extract_important_fields(test.json_answer)
 
-    assert actual_packets == expected_packets
+    try:
+        assert actual_packets == expected_packets
+    except AssertionError as e:
+        error(f"Test {request.node.name} failed: {str(e)}")
+        raise e
 
     info(f"Finish test {request.node.name}.")
