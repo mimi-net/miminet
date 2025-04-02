@@ -142,8 +142,8 @@ class MiminetTester(WebDriver):
         finally:
             # TODO change it to wait_until_disappear when modal dialog will be fixed
             self.wait_for(
-                lambda driver: not driver.find_element(by, element).is_displayed()
-                , timeout=5
+                lambda driver: not driver.find_element(by, element).is_displayed(),
+                timeout=5,
             )
 
     def select_by_value(self, by: str, element: str, value: str):
