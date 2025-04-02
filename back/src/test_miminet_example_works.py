@@ -34,6 +34,33 @@ def read_files(network_filename: str, answer_filename: str):
         return exp_file.read(), act_file.read()
 
 
+def load_test_files(directory: Path):
+    """
+    Reads all JSON files in the specified directory and pairs test and answer files.
+
+    Args:
+        directory (str): The directory containing the test and answer JSON files.
+
+    Returns:
+        list of tuples: Each tuple contains the paths to the test and answer JSON files.
+    """
+    test_dir = Path(directory)
+
+    if not test_dir.is_dir():
+        raise FileNotFoundError(f"Directory '{directory}' not found")
+
+    json_files = [file.name for file in test_dir.glob("*.json")]
+
+    network_files, answer_files = [], []
+    for test_file in json_files:
+        if test_file.endswith("_network.json"):
+            network_files.append(test_file)
+        elif test_file.endswith("_answer.json"):
+            answer_files.append(test_file)
+
+    return list(zip(network_files, answer_files))
+
+
 def packet_to_static(x: str):
     """Apply common regex substitutions to remove volatile parts from the packet key (label or type)."""
 
@@ -63,7 +90,7 @@ def extract_important_fields(packets_json) -> list[dict[str, str]]:
     packets = json.loads(packets_json)
 
     important_packets = []
-    exclude_pattern = re.compile(r"^ARP") if r"^ARP" else None
+    exclude_patterns = [r"^ARP", r"RSTP"]
 
     for packet_group in packets:
         for packet in packet_group:
@@ -73,7 +100,7 @@ def extract_important_fields(packets_json) -> list[dict[str, str]]:
             pkg_label = pkg_data["label"]
             pkg_type = pkg_config["type"]
 
-            if exclude_pattern and exclude_pattern.match(pkg_label):
+            if any([re.match(pat, pkg_label) for pat in exclude_patterns]):
                 continue  # Skip unimportant packages
 
             important_packet = {
@@ -94,25 +121,8 @@ def extract_important_fields(packets_json) -> list[dict[str, str]]:
     return sorted_important_packets
 
 
-TEST_FILES = [
-    # ("switch_and_hub_network.json", "switch_and_hub_answer.json"),
-    # ("first_and_last_ip_address_network.json", "first_and_last_ip_address_answer.json"),
-    # ("vlan_access_network.json", "vlan_access_answer.json"),
-    # ("vlan_trunk_network.json", "vlan_trunk_answer.json"),
-    # ("vlan_with_stp_network.json", "vlan_with_stp_answer.json"),
-    # ("vlan_with_access_switches_network.json", "vlan_with_access_switches_answer.json"),
-    # ("rstp_simple_network.json", "rstp_simple_answer.json"),
-    ("rstp_four_switch_network.json", "rstp_four_switch_answer.json"),
-    # ("tcp_connection_setup_1_network.json", "tcp_connection_setup_1_answer.json"),
-    # ("router_network.json", "router_answer.json"),
-    # ("icmp_network_unavailable_network.json", "icmp_network_unavailable_answer.json"),
-    # ("icmp_host_unreachable_network.json", "icmp_host_unreachable_answer.json"),
-    # ("vlan_with_vxlan_network.json", "vlan_with_vxlan_answer.json"),
-    # ("vxlan_with_nat_network.json", "vxlan_with_nat_answer.json"),
-    # ("vxlan_simple_network.json", "vxlan_simple_answer.json"),
-]
-
 # Generate test cases
+TEST_FILES = load_test_files(TEST_JSON_DIR)
 TEST_CASES = [Case(*read_files(n, a)) for n, a in TEST_FILES]
 
 
