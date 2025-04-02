@@ -2,203 +2,113 @@
     [
         {
             "data": {
-                "id": "",
-                "label": "ARP-request\nWho has 192.168.1.100? Tell 192.168.1.1",
+                "id": "pkt_2XH56TAJ",
+                "label": "ARP-request\\nWho has 192.168.1.1? Tell 192.168.1.100",
                 "type": "packet"
             },
             "config": {
-                "type": "ARP-request\nWho has 192.168.1.100? Tell 192.168.1.1",
-                "path": "edge_lpcrcot949xfvva444q",
+                "type": "ARP-request\\nWho has 192.168.1.1? Tell 192.168.1.100",
+                "path": "edge_m900dto20o98bj6vlkj",
                 "source": "host_1",
                 "target": "router_1"
             },
-            "timestamp": ""
+            "timestamp": "1743604275912000"
         }
     ],
     [
         {
             "data": {
-                "id": "",
-                "label": "ARP-response",
+                "id": "pkt_YVUB8IC3",
+                "label": "ARP-response\\n192.168.1.1 at 66:86:2f:3b:17:d3",
                 "type": "packet"
             },
             "config": {
-                "type": "ARP-response",
-                "path": "edge_lpcrcot949xfvva444q",
+                "type": "ARP-response\\n192.168.1.1 at 66:86:2f:3b:17:d3",
+                "path": "edge_m900dto20o98bj6vlkj",
                 "source": "router_1",
                 "target": "host_1"
             },
-            "timestamp": ""
+            "timestamp": "1743604275927921"
         }
     ],
     [
         {
             "data": {
-                "id": "",
-                "label": "TCP (SYN) 1234 > 5555\n192.168.1.1 > 172.16.12.22",
+                "id": "pkt_V3Z4TVQN",
+                "label": "ICMP echo-request\\n192.168.1.100 > 172.168.1.99",
                 "type": "packet"
             },
             "config": {
-                "type": "TCP (SYN) 1234 > 5555\n192.168.1.1 > 172.16.12.22",
-                "path": "edge_lpcrcot949xfvva444q",
+                "type": "ICMP echo-request\\n192.168.1.100 > 172.168.1.99",
+                "path": "edge_m900dto20o98bj6vlkj",
                 "source": "host_1",
                 "target": "router_1"
             },
-            "timestamp": ""
+            "timestamp": "1743604275943078"
         }
     ],
     [
         {
             "data": {
-                "id": "",
-                "label": "ARP-request\nWho has 172.16.12.22? Tell 172.16.12.100",
+                "id": "pkt_CZ516BL4",
+                "label": "ARP-request\\nWho has 172.168.1.99? Tell 172.168.1.1",
                 "type": "packet"
             },
             "config": {
-                "type": "ARP-request\nWho has 172.16.12.22? Tell 172.16.12.100",
-                "path": "edge_lpcrcmmpd396igta3ct",
+                "type": "ARP-request\\nWho has 172.168.1.99? Tell 172.168.1.1",
+                "path": "edge_m900duxw191mskhmh59",
                 "source": "router_1",
                 "target": "host_2"
             },
-            "timestamp": ""
+            "timestamp": "1743604275958790"
         }
     ],
     [
         {
             "data": {
-                "id": "",
-                "label": "TCP (SYN) 1234 > 5555\n192.168.1.1 > 172.16.12.22",
+                "id": "pkt_AECU6AAJ",
+                "label": "ARP-request\\nWho has 172.168.1.99? Tell 172.168.1.1",
                 "type": "packet"
             },
             "config": {
-                "type": "TCP (SYN) 1234 > 5555\n192.168.1.1 > 172.16.12.22",
-                "path": "edge_lpcrcot949xfvva444q",
-                "source": "host_1",
-                "target": "router_1"
-            },
-            "timestamp": ""
-        }
-    ],
-    [
-        {
-            "data": {
-                "id": "",
-                "label": "ARP-request\nWho has 172.16.12.22? Tell 172.16.12.100",
-                "type": "packet"
-            },
-            "config": {
-                "type": "ARP-request\nWho has 172.16.12.22? Tell 172.16.12.100",
-                "path": "edge_lpcrcmmpd396igta3ct",
+                "type": "ARP-request\\nWho has 172.168.1.99? Tell 172.168.1.1",
+                "path": "edge_m900duxw191mskhmh59",
                 "source": "router_1",
                 "target": "host_2"
             },
-            "timestamp": ""
+            "timestamp": "1743604277012081"
         }
     ],
     [
         {
             "data": {
-                "id": "",
-                "label": "TCP (SYN) 1234 > 5555\n192.168.1.1 > 172.16.12.22",
+                "id": "pkt_5OPRM6H3",
+                "label": "ARP-request\\nWho has 172.168.1.99? Tell 172.168.1.1",
                 "type": "packet"
             },
             "config": {
-                "type": "TCP (SYN) 1234 > 5555\n192.168.1.1 > 172.16.12.22",
-                "path": "edge_lpcrcot949xfvva444q",
-                "source": "host_1",
-                "target": "router_1"
-            },
-            "timestamp": ""
-        }
-    ],
-    [
-        {
-            "data": {
-                "id": "",
-                "label": "ARP-request\nWho has 172.16.12.22? Tell 172.16.12.100",
-                "type": "packet"
-            },
-            "config": {
-                "type": "ARP-request\nWho has 172.16.12.22? Tell 172.16.12.100",
-                "path": "edge_lpcrcmmpd396igta3ct",
+                "type": "ARP-request\\nWho has 172.168.1.99? Tell 172.168.1.1",
+                "path": "edge_m900duxw191mskhmh59",
                 "source": "router_1",
                 "target": "host_2"
             },
-            "timestamp": ""
+            "timestamp": "1743604278036246"
         }
     ],
     [
         {
             "data": {
-                "id": "",
-                "label": "TCP (SYN) 1111 > 5555\n192.168.1.1 > 172.16.12.22",
+                "id": "pkt_ASMRDT1N",
+                "label": "ICMP destination host unreachable\\n192.168.1.1 > 192.168.1.100",
                 "type": "packet"
             },
             "config": {
-                "type": "TCP (SYN) 1111 > 5555\n192.168.1.1 > 172.16.12.22",
-                "path": "edge_lpcrcot949xfvva444q",
-                "source": "host_1",
-                "target": "router_1"
-            },
-            "timestamp": ""
-        }
-    ],
-    [
-        {
-            "data": {
-                "id": "",
-                "label": "ICMP destination host unreachable\n192.168.1.100 > 192.168.1.1",
-                "type": "packet"
-            },
-            "config": {
-                "type": "ICMP destination host unreachable\n192.168.1.100 > 192.168.1.1",
-                "path": "edge_lpcrcot949xfvva444q",
+                "type": "ICMP destination host unreachable\\n192.168.1.1 > 192.168.1.100",
+                "path": "edge_m900dto20o98bj6vlkj",
                 "source": "router_1",
                 "target": "host_1"
             },
-            "timestamp": ""
-        },
-        {
-            "data": {
-                "id": "",
-                "label": "ICMP destination host unreachable\n192.168.1.100 > 192.168.1.1",
-                "type": "packet"
-            },
-            "config": {
-                "type": "ICMP destination host unreachable\n192.168.1.100 > 192.168.1.1",
-                "path": "edge_lpcrcot949xfvva444q",
-                "source": "router_1",
-                "target": "host_1"
-            },
-            "timestamp": ""
-        },
-        {
-            "data": {
-                "id": "",
-                "label": "ICMP destination host unreachable\n192.168.1.100 > 192.168.1.1",
-                "type": "packet"
-            },
-            "config": {
-                "type": "ICMP destination host unreachable\n192.168.1.100 > 192.168.1.1",
-                "path": "edge_lpcrcot949xfvva444q",
-                "source": "router_1",
-                "target": "host_1"
-            },
-            "timestamp": ""
-        },
-        {
-            "data": {
-                "id": "",
-                "label": "ICMP destination host unreachable\n192.168.1.100 > 192.168.1.1",
-                "type": "packet"
-            },
-            "config": {
-                "type": "ICMP destination host unreachable\n192.168.1.100 > 192.168.1.1",
-                "path": "edge_lpcrcot949xfvva444q",
-                "source": "router_1",
-                "target": "host_1"
-            },
-            "timestamp": ""
+            "timestamp": "1743604279060206"
         }
     ]
 ]
