@@ -1,9 +1,4 @@
 <p align="center">
-    <img src="https://github.com/user-attachments/assets/72e7216b-53d4-4ff3-8857-d98f0f69b238"
-        height="130">
-</p>
-
-<p align="center">
     <a href="https://github.com/mimi-net/miminet/actions" alt="Miminet Github Actions">
     <img src="https://github.com/mimi-net/miminet/actions/workflows/full_test.yml/badge.svg" /></a>
     <a href="https://github.com/mimi-net/miminet/actions" alt="Miminet Github Actions">
@@ -19,6 +14,8 @@
     <a href="https://miminet.ru/" alt="Site">
     <img src="https://img.shields.io/website?url=https%3A%2F%2Fmiminet.ru%2F" /></a>
 </p>
+
+# Miminet
 
 **Miminet** — эмулятор компьютерных сетей на базе ОС Linux, предназначенный для образовательных целей.
 
