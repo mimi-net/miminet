@@ -29,6 +29,7 @@
 - [Требования](#requirements)
 - [Локальное развёртывание](#deployment)
   - [Установка](#installation)
+  - [Database migrations](#migration)
   - [Vagrant (не обязательно)](#vagrant)
 - [Архитектура](#arch)
   - [Общая информация](#arch-info)
@@ -66,7 +67,16 @@
 2. Копируем ```vk_auth.json``` из группового чата в ```front/src```, чтобы можно было авторизоваться на сайте.
 3. Создаём файл ```miminet_secret.conf``` в ```front/src``` и пишем туда случайные буквы/цифры, чтобы не авторизовываться после каждого перезапуска докера.
 4. Запускаем приложение (например, через [start_all_containers.sh](./start_all_containers.sh)).
-5. Заходим на localhost и проверяем, что всё работает.
+6. Заходим на localhost и проверяем, что всё работает.
+
+## <a name="migration"></a>Database migrations
+> Следующие действия необходимо выполнять в случае, если вы обновили модель базы данных ([SQLAlchemy](https://www.sqlalchemy.org/)) и теперь хотите, чтобы изменения появились в реальной базе данных.
+```
+docker exec -it miminet bash
+flask db init
+flask db migrate
+flask db upgrade
+```
 
 ### <a name="vagrant"></a>Vagrant (не обязательно)
 NFS(для полной автоматизации vagrant up):
