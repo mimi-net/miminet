@@ -1,6 +1,9 @@
 import pytest
 import requests
+from typing import Generator
 from requests import Session
+from contextlib import contextmanager
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.options import Options
@@ -72,6 +75,7 @@ class MiminetTester(WebDriver):
             by (str): The locator strategy (e.g., By.ID, By.XPATH).
             element (str): The element locator (e.g., "myElementId", "//button[text()='Click Me']").
         """
+
         return len(self.find_elements(by, element)) > 0
 
     def wait_until_appear(self, by: str, element: str, timeout=20):
@@ -117,10 +121,30 @@ class MiminetTester(WebDriver):
         """Waits for a given condition to be true.
 
         Args:
-            condition: A function that returns True when the condition is met.  This function have WebDriver instance as its only argument.
+            condition: A function that returns True when the condition is met. This function have WebDriver instance as its only argument.
             timeout (int): The maximum time in seconds to wait (default: 20).
         """
         WebDriverWait(self, timeout=timeout).until(condition)
+
+    @contextmanager
+    def run_in_modal_context(
+        self, by: str, element: str
+    ) -> Generator[WebElement, None, None]:
+        """
+        Allow to do actions in the context of modal window.
+        """
+        try:
+            self.wait_until_appear(by, element, timeout=5)
+
+            yield self.find_element(by, element)
+        except TimeoutException:
+            raise Exception(f"Modal dialog {element} wasn't opened.")
+        finally:
+            # TODO change it to wait_until_disappear when modal dialog will be fixed
+            self.wait_for(
+                lambda driver: not driver.find_element(by, element).is_displayed(),
+                timeout=5,
+            )
 
     def select_by_value(self, by: str, element: str, value: str):
         """Selects an option in a select element by its value.
