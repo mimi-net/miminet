@@ -34,33 +34,24 @@ def read_files(network_filename: str, answer_filename: str):
         return exp_file.read(), act_file.read()
 
 
-def sanitize_animation(animation: str) -> str:
-    """Apply common regex substitutions to remove volatile parts from the emulation output."""
-    animation = re.sub(TIMESTAMP_REGEX, r'"timestamp": ""', animation)
-    animation = re.sub(ID_REGEX, r'"id": ""', animation)
-    info("Animation sanitization completed!")
-    return animation
-
-
 def packet_to_static(x: str):
     """Apply common regex substitutions to remove volatile parts from the packet key (label or type)."""
+
+    # Extract and replace dynamic TCP port values in the expected answer
     x = re.sub(r"(UDP )\d+ > \d+", r"\1PORT > PORT", x)
     x = re.sub(r"(TCP .*?)\d+ > \d+", r"\1PORT > PORT", x)
 
-    # Extract and replace dynamic TCP port values in the expected answer
-    tcp_pattern = re.search(r"TCP \(SYN\) \d+", x)
-    if tcp_pattern:
-        pattern = tcp_pattern.group(0)[len("TCP (SYN) ") :]
-        x = re.sub(r"port", pattern, x)
+    x = re.sub(r"TCP \(SYN\) \d+", r"port", x)
 
     # Extract and replace dynamic ARP MAC addresses in the expected answer
-    arp_pattern = re.search(r"ARP-response\\n.+ at ([0-9a-fA-F]{2}[:]){6}", x)
-    if arp_pattern:
-        pattern = arp_pattern.group(0)[len("TCP (SYN) ") :]
-        x = re.sub(r"mac", pattern, x)
+    x = re.sub(r"ARP-response\n.+ at ([0-9a-fA-F]{2}[:]){6}", r"mac", x)
 
     # Remove dynamic ARP response addresses from the package
     x = re.sub(r'"ARP-response.+? at .+?"', '"ARP-response"', x, flags=re.S)
+
+    x = x.replace("\n", "\\n").strip()
+
+    return x
 
 
 def extract_important_fields(packets_json) -> list[dict[str, str]]:
@@ -70,13 +61,17 @@ def extract_important_fields(packets_json) -> list[dict[str, str]]:
     :param packets_json: JSON string with the simulation results.
     """
     packets = json.loads(packets_json)
+
     important_packets = []
     exclude_pattern = re.compile(r"^ARP") if r"^ARP" else None
 
     for packet_group in packets:
         for packet in packet_group:
-            pkg_label = packet["data"]["label"]
-            pkg_type = packet["config"]["type"]
+            pkg_data = packet["data"]
+            pkg_config = packet["config"]
+
+            pkg_label = pkg_data["label"]
+            pkg_type = pkg_config["type"]
 
             if exclude_pattern and exclude_pattern.match(pkg_label):
                 continue  # Skip unimportant packages
@@ -84,9 +79,9 @@ def extract_important_fields(packets_json) -> list[dict[str, str]]:
             important_packet = {
                 "type": packet_to_static(pkg_type),
                 "label": packet_to_static(pkg_label),
-                "source": packet["config"]["source"],
-                "target": packet["config"]["target"],
-                "path": packet["config"]["path"],
+                "source": pkg_config["source"],
+                "target": pkg_config["target"],
+                "path": pkg_config["path"],
             }
 
             important_packets.append(important_packet)
@@ -99,50 +94,6 @@ def extract_important_fields(packets_json) -> list[dict[str, str]]:
     return sorted_important_packets
 
 
-def compare_animations(actual_json: str, expected_json: str) -> bool:
-    """
-    Compare two animation JSON strings, ensuring they contain the same structured packet data.
-    """
-    if not actual_json:
-        raise ValueError(f"actual_json is null, there is no simulation result.")
-
-    try:
-        expected_packets = json.loads(expected_json)
-        actual_packets = json.loads(actual_json)
-    except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON format: {e}.")
-
-    info("Comparing JSON animations...")
-
-    if len(expected_packets) != len(actual_packets):
-        error(
-            f"""Mismatch in packet lengths.
-                Expected length: {len(expected_packets)}, actual: {len(actual_packets)}.
-                    Actual packets: {actual_packets}."""
-        )
-        return False
-
-    for group_index, (expected_group, actual_group) in enumerate(
-        zip(expected_packets, actual_packets)
-    ):
-        # Sort in the same order
-        sorted_expected = sorted(
-            expected_group, key=lambda x: (x["config"]["path"], x["config"]["source"])
-        )
-        sorted_actual = sorted(
-            actual_group, key=lambda x: (x["config"]["path"], x["config"]["source"])
-        )
-
-        if sorted_actual != sorted_expected:
-            error(
-                f"Mismatch in packet data at group {group_index}. Actual packets: {actual_packets}."
-            )
-            return False
-
-    info("Animations matched successfully!")
-    return True
-
-
 TEST_FILES = [
     # ("switch_and_hub_network.json", "switch_and_hub_answer.json"),
     # ("first_and_last_ip_address_network.json", "first_and_last_ip_address_answer.json"),
@@ -153,7 +104,6 @@ TEST_FILES = [
     # ("rstp_simple_network.json", "rstp_simple_answer.json"),
     ("rstp_four_switch_network.json", "rstp_four_switch_answer.json"),
     # ("tcp_connection_setup_1_network.json", "tcp_connection_setup_1_answer.json"),
-    # ("ring_of_3_routers_network.json", "ring_of_3_routers_answer.json")
     # ("router_network.json", "router_answer.json"),
     # ("icmp_network_unavailable_network.json", "icmp_network_unavailable_answer.json"),
     # ("icmp_host_unreachable_network.json", "icmp_host_unreachable_answer.json"),
@@ -180,7 +130,7 @@ def test_miminet_work(test: Case, request) -> None:
     try:
         assert actual_packets == expected_packets
     except AssertionError as e:
-        error(f"Test {request.node.name} failed: {str(e)}")
+        error(f"Test {request.node.name} failed: {str(e)}.")
         raise e
 
     info(f"Finish test {request.node.name}.")
