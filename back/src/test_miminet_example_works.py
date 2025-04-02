@@ -7,21 +7,14 @@ from mininet.log import setLogLevel, info, error
 import pytest
 from tasks import simulate
 
-
 setLogLevel("info")
 
-# Test directory
+# Directory with test files
 TEST_JSON_DIR = Path("test_json/")
 
-# Common regex patterns
-TIMESTAMP_REGEX = r'"timestamp": "\d+"'
-ID_REGEX = r'"id": "\w+"'
-
-
-@dataclasses.dataclass
-class Case:
-    json_network: str  # Network that we should emulate
-    json_answer: str  # Answer that emulation should return
+# Suffixes of test files
+NETWORK_FILE_SUFFIX = "_network.json"
+ANSWER_FILE_SUFFIX = "_answer.json"
 
 
 def read_files(network_filename: str, answer_filename: str):
@@ -49,36 +42,45 @@ def load_test_files(directory: Path):
     if not test_dir.is_dir():
         raise FileNotFoundError(f"Directory '{directory}' not found")
 
-    json_files = [file.name for file in test_dir.glob("*.json")]
+    json_files = sorted([file.name for file in test_dir.glob("*.json")])
 
     network_files, answer_files = [], []
     for test_file in json_files:
-        if test_file.endswith("_network.json"):
+        if test_file.endswith(NETWORK_FILE_SUFFIX):
             network_files.append(test_file)
-        elif test_file.endswith("_answer.json"):
+        elif test_file.endswith(ANSWER_FILE_SUFFIX):
             answer_files.append(test_file)
+        else:
+            raise ValueError(f"Find inappropriate file {test_file} in {test_dir.name}.")
 
-    return list(zip(network_files, answer_files))
+    result_files = list(zip(network_files, answer_files))
+    info(f"Find {len(result_files)} in {test_dir.name}.")
+
+    return result_files
 
 
-def packet_to_static(x: str):
-    """Apply common regex substitutions to remove volatile parts from the packet key (label or type)."""
+def normalize_packet_data(packet_data: str):
+    """Apply common regex substitutions to remove volatile parts from the packet data (e.g. label or type).
 
-    # Extract and replace dynamic TCP port values in the expected answer
-    x = re.sub(r"(UDP )\d+ > \d+", r"\1PORT > PORT", x)
-    x = re.sub(r"(TCP .*?)\d+ > \d+", r"\1PORT > PORT", x)
+    Args:
+        packet_data (str): Part of packet that should be normalized.
+    Returns:
+        Normalized part of packet.
+    """
+    # Common regex patterns that are randomly generated and should be replaced
+    subs = [
+        (r"(UDP )\d+ > \d+", r"\1PORT > PORT"),
+        (r"(TCP .*?)\d+ > \d+", r"\1PORT > PORT"),
+        (r"TCP \(SYN\) \d+", r"port"),
+        (r"ARP-response\n.+ at ([0-9a-fA-F]{2}[:]){6}", r"mac"),
+        (r'"ARP-response.+? at .+?"', r'"ARP-response"'),
+    ]
 
-    x = re.sub(r"TCP \(SYN\) \d+", r"port", x)
+    for pattern, repl in subs:
+        packet_data = re.sub(pattern, repl, packet_data)
 
-    # Extract and replace dynamic ARP MAC addresses in the expected answer
-    x = re.sub(r"ARP-response\n.+ at ([0-9a-fA-F]{2}[:]){6}", r"mac", x)
-
-    # Remove dynamic ARP response addresses from the package
-    x = re.sub(r'"ARP-response.+? at .+?"', '"ARP-response"', x, flags=re.S)
-
-    x = x.replace("\n", "\\n").strip()
-
-    return x
+    packet_data = packet_data.replace("\n", "\\n").strip()
+    return packet_data
 
 
 def extract_important_fields(packets_json) -> list[dict[str, str]]:
@@ -87,10 +89,12 @@ def extract_important_fields(packets_json) -> list[dict[str, str]]:
 
     :param packets_json: JSON string with the simulation results.
     """
-    packets = json.loads(packets_json)
 
+    # Packets with such patterns is not very informative(or they break tests) and can be skipped
+    EXCLUDE_PATTERNS = [r"^ARP", r"RSTP"]
+
+    packets = json.loads(packets_json)
     important_packets = []
-    exclude_patterns = [r"^ARP", r"RSTP"]
 
     for packet_group in packets:
         for packet in packet_group:
@@ -100,12 +104,12 @@ def extract_important_fields(packets_json) -> list[dict[str, str]]:
             pkg_label = pkg_data["label"]
             pkg_type = pkg_config["type"]
 
-            if any([re.match(pat, pkg_label) for pat in exclude_patterns]):
+            if any(re.match(pattern, pkg_label) for pattern in EXCLUDE_PATTERNS):
                 continue  # Skip unimportant packages
 
             important_packet = {
-                "type": packet_to_static(pkg_type),
-                "label": packet_to_static(pkg_label),
+                "type": normalize_packet_data(pkg_type),
+                "label": normalize_packet_data(pkg_label),
                 "source": pkg_config["source"],
                 "target": pkg_config["target"],
                 "path": pkg_config["path"],
@@ -119,6 +123,12 @@ def extract_important_fields(packets_json) -> list[dict[str, str]]:
 
     info("Important fields extracted from packets.")
     return sorted_important_packets
+
+
+@dataclasses.dataclass
+class Case:
+    json_network: str  # Network that we should emulate
+    json_answer: str  # Answer that emulation should return
 
 
 # Generate test cases
