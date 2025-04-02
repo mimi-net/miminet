@@ -138,6 +138,7 @@ pip install -r back/requirements.txt
 2. Запуск тестов:
 ```bash
 sudo bash
+source .venv/bin/activate
 export PYTHONPATH=$PYTHONPATH:back
 cd back/src
 pytest .
