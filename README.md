@@ -112,7 +112,7 @@ export provider=vbox/vmware
 - Серверная часть приложения, реализующая логику эмуляции сети.
 - Файлы, относящиеся к этой части приложения, находятся в каталоге ```back```.
 - За эту часть приложения ответственнен контейнер celery, принимающий задачи от фронтенда и обрабатывающий их.
-- В Miminet есть [тесты](https://github.com/mimi-net/miminet/blob/main/back/src/test_miminet_example_works.py) для бэкенда, проверяющие качество эмуляции заданной сети. Конфигурация тестов происходит через [JSON-файлы](https://github.com/mimi-net/miminet/tree/main/back/src/test_json).
+- В Miminet есть [тесты](https://github.com/mimi-net/miminet/blob/main/back/tests) для бэкенда, проверяющие качество эмуляции заданной сети. Конфигурация тестов происходит через [JSON-файлы](https://github.com/mimi-net/miminet/tree/main/back/tests/test_json).
   
 ---
 
@@ -146,8 +146,8 @@ pip install -r back/requirements.txt
 ```bash
 sudo bash
 source .venv/bin/activate
-export PYTHONPATH=$PYTHONPATH:back
-cd back/src
+cd back/tests
+export PYTHONPATH=$PYTHONPATH:../src
 pytest .
 ```
 > Для mininet обязательно нужен root!
