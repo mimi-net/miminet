@@ -60,14 +60,17 @@ jobs:
           sudo /usr/share/openvswitch/scripts/ovs-ctl start
           sudo ovs-vswitchd &
 
-      - name: Install dependencies
+      - name: Install python dependencies
         run: |
           sudo python -m pip install pip
           sudo python -m pip install wheel
+          sudo python -m pip install pytest
           sudo python -m pip install -r back/requirements.txt
 
       - name: Test with pytest
         run: |
-          sudo python -m pip install pytest
-          cd back/src
-          sudo python -m pytest -vv .
+          sudo bash -c '
+            cd back/tests
+            export PYTHONPATH=$PYTHONPATH:../src
+            pytest .
+          '

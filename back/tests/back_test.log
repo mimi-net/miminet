@@ -1,0 +1,2065 @@
+INFO     mininet:log.py:153 Find 15 in test_json.
+INFO     mininet:log.py:153 Reading files: first_and_last_ip_address_network.json, first_and_last_ip_address_answer.json.
+INFO     mininet:log.py:153 Reading files: icmp_host_unreachable_network.json, icmp_host_unreachable_answer.json.
+INFO     mininet:log.py:153 Reading files: icmp_network_unavailable_network.json, icmp_network_unavailable_answer.json.
+INFO     mininet:log.py:153 Reading files: router_network.json, router_answer.json.
+INFO     mininet:log.py:153 Reading files: rstp_four_switch_network.json, rstp_four_switch_answer.json.
+INFO     mininet:log.py:153 Reading files: rstp_simple_network.json, rstp_simple_answer.json.
+INFO     mininet:log.py:153 Reading files: switch_and_hub_network.json, switch_and_hub_answer.json.
+INFO     mininet:log.py:153 Reading files: tcp_connection_setup_1_network.json, tcp_connection_setup_1_answer.json.
+INFO     mininet:log.py:153 Reading files: vlan_access_network.json, vlan_access_answer.json.
+INFO     mininet:log.py:153 Reading files: vlan_trunk_network.json, vlan_trunk_answer.json.
+INFO     mininet:log.py:153 Reading files: vlan_with_access_switches_network.json, vlan_with_access_switches_answer.json.
+INFO     mininet:log.py:153 Reading files: vlan_with_stp_network.json, vlan_with_stp_answer.json.
+INFO     mininet:log.py:153 Reading files: vlan_with_vxlan_network.json, vlan_with_vxlan_answer.json.
+INFO     mininet:log.py:153 Reading files: vxlan_simple_network.json, vxlan_simple_answer.json.
+INFO     mininet:log.py:153 Reading files: vxlan_with_nat_network.json, vxlan_with_nat_answer.json.
+INFO     mininet:log.py:153 Running test: test_miminet_work[test0].
+INFO     mininet:log.py:153 
+*** Adding Routers:
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Creating network
+
+INFO     mininet:log.py:153 *** Adding hosts:
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 
+*** Adding switches:
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 
+*** Adding links:
+
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_1, mimiswsw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_2, mimiswsw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_3, mimiswsw3) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw1, l2sw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw2, l2sw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw3, l2sw1) 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Configuring hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Found 1 broadcast domains
+
+INFO     mininet:log.py:153 *** Starting controller
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Starting 4 switches
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 ...
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Starting,  0 routers
+
+INFO     mininet:log.py:155 *** Starting,  3 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Setting default host routes
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Stopping 0 routers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 0 controllers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 6 links
+
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 4 switches
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 3 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 
+*** Done
+
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Finish test test_miminet_work[test0].
+INFO     mininet:log.py:153 Running test: test_miminet_work[test1].
+INFO     mininet:log.py:153 
+*** Adding Routers:
+
+INFO     mininet:log.py:153 router_1 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Creating network
+
+INFO     mininet:log.py:153 *** Adding hosts:
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 
+*** Adding switches:
+
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 
+*** Adding links:
+
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_1, mimiswsw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_2, mimiswsw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw1, router_1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw2, router_1) 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Configuring hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Found 3 broadcast domains
+
+INFO     mininet:log.py:153 *** Starting controller
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Starting 2 switches
+
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Starting,  1 routers
+
+INFO     mininet:log.py:153 router_1 
+INFO     mininet:log.py:155 *** Starting,  2 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Setting default host routes
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Stopping 1 routers
+
+INFO     mininet:log.py:153 router_1 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 0 controllers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 4 links
+
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_1 exited - ignoring cmd('ip link del iface_43447824',))
+
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_1 exited - ignoring cmd('ip link del iface_81071172',))
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 2 switches
+
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 2 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 
+*** Done
+
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Finish test test_miminet_work[test1].
+INFO     mininet:log.py:153 Running test: test_miminet_work[test2].
+INFO     mininet:log.py:153 
+*** Adding Routers:
+
+INFO     mininet:log.py:153 router_1 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Creating network
+
+INFO     mininet:log.py:153 *** Adding hosts:
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 
+*** Adding switches:
+
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 
+*** Adding links:
+
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw1, host_1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (router_1, mimiswsw1) 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Configuring hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Found 2 broadcast domains
+
+INFO     mininet:log.py:153 *** Starting controller
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Starting 1 switches
+
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Starting,  1 routers
+
+INFO     mininet:log.py:153 router_1 
+INFO     mininet:log.py:155 *** Starting,  1 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Setting default host routes
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Stopping 1 routers
+
+INFO     mininet:log.py:153 router_1 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 0 controllers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 2 links
+
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_1 exited - ignoring cmd('ip link del iface_51142263',))
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 1 switches
+
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 1 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 
+*** Done
+
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Finish test test_miminet_work[test2].
+INFO     mininet:log.py:153 Running test: test_miminet_work[test3].
+INFO     mininet:log.py:153 
+*** Adding Routers:
+
+INFO     mininet:log.py:153 router_1 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Creating network
+
+INFO     mininet:log.py:153 *** Adding hosts:
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 
+*** Adding switches:
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 l2sw2 
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 
+*** Adding links:
+
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_1, mimiswsw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (l2sw2, mimiswsw3) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (l2sw2, mimiswsw4) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw1, l2sw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw2, l2sw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw3, router_1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw4, host_2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (router_1, mimiswsw2) 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Configuring hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Found 3 broadcast domains
+
+INFO     mininet:log.py:153 *** Starting controller
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Starting 6 switches
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 l2sw2 
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 ...
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Starting,  1 routers
+
+INFO     mininet:log.py:153 router_1 
+INFO     mininet:log.py:155 *** Starting,  2 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Setting default host routes
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Stopping 1 routers
+
+INFO     mininet:log.py:153 router_1 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 0 controllers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 8 links
+
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_1 exited - ignoring cmd('ip link del iface_56021351',))
+
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_1 exited - ignoring cmd('ip link del iface_82100511',))
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 6 switches
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 l2sw2 
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 2 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 
+*** Done
+
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Finish test test_miminet_work[test3].
+INFO     mininet:log.py:153 Running test: test_miminet_work[test4].
+INFO     mininet:log.py:153 
+*** Adding Routers:
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Creating network
+
+INFO     mininet:log.py:153 *** Adding hosts:
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+*** Adding switches:
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 l2sw2 
+INFO     mininet:log.py:153 l2sw3 
+INFO     mininet:log.py:153 l2sw4 
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 mimiswsw6 
+INFO     mininet:log.py:153 mimiswsw7 
+INFO     mininet:log.py:153 mimiswsw8 
+INFO     mininet:log.py:153 mimiswsw9 
+INFO     mininet:log.py:153 mimiswsw10 
+INFO     mininet:log.py:153 
+*** Adding links:
+
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_1, mimiswsw7) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_2, mimiswsw8) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_3, mimiswsw9) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_4, mimiswsw10) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (l2sw1, mimiswsw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (l2sw1, mimiswsw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (l2sw1, mimiswsw3) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (l2sw2, mimiswsw4) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (l2sw2, mimiswsw5) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (l2sw3, mimiswsw6) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw1, l2sw3) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw2, l2sw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw3, l2sw4) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw4, l2sw4) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw5, l2sw3) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw6, l2sw4) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw7, l2sw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw8, l2sw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw9, l2sw3) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw10, l2sw4) 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Configuring hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Found 1 broadcast domains
+
+INFO     mininet:log.py:153 *** Starting controller
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Starting 14 switches
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 l2sw2 
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 l2sw3 
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 l2sw4 
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 mimiswsw6 
+INFO     mininet:log.py:153 mimiswsw7 
+INFO     mininet:log.py:153 mimiswsw8 
+INFO     mininet:log.py:153 mimiswsw9 
+INFO     mininet:log.py:153 mimiswsw10 
+INFO     mininet:log.py:153 ...
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Starting,  0 routers
+
+INFO     mininet:log.py:155 *** Starting,  4 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Setting default host routes
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Stopping 0 routers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 0 controllers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 20 links
+
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 14 switches
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 l2sw2 
+INFO     mininet:log.py:153 l2sw3 
+INFO     mininet:log.py:153 l2sw4 
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 mimiswsw6 
+INFO     mininet:log.py:153 mimiswsw7 
+INFO     mininet:log.py:153 mimiswsw8 
+INFO     mininet:log.py:153 mimiswsw9 
+INFO     mininet:log.py:153 mimiswsw10 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 4 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+*** Done
+
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Finish test test_miminet_work[test4].
+INFO     mininet:log.py:153 Running test: test_miminet_work[test5].
+INFO     mininet:log.py:153 
+*** Adding Routers:
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Creating network
+
+INFO     mininet:log.py:153 *** Adding hosts:
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 
+*** Adding switches:
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 l2sw2 
+INFO     mininet:log.py:153 l2sw3 
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 mimiswsw6 
+INFO     mininet:log.py:153 
+*** Adding links:
+
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_1, mimiswsw4) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_2, mimiswsw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_3, mimiswsw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (l2sw1, mimiswsw6) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (l2sw2, mimiswsw3) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (l2sw2, mimiswsw5) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw1, l2sw3) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw2, l2sw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw3, l2sw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw4, l2sw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw5, l2sw3) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw6, l2sw3) 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Configuring hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Found 1 broadcast domains
+
+INFO     mininet:log.py:153 *** Starting controller
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Starting 9 switches
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 l2sw2 
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 l2sw3 
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 mimiswsw6 
+INFO     mininet:log.py:153 ...
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Starting,  0 routers
+
+INFO     mininet:log.py:155 *** Starting,  3 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Setting default host routes
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Stopping 0 routers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 0 controllers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 12 links
+
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 9 switches
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 l2sw2 
+INFO     mininet:log.py:153 l2sw3 
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 mimiswsw6 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 3 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 
+*** Done
+
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Finish test test_miminet_work[test5].
+INFO     mininet:log.py:153 Running test: test_miminet_work[test6].
+INFO     mininet:log.py:153 
+*** Adding Routers:
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Creating network
+
+INFO     mininet:log.py:153 *** Adding hosts:
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+*** Adding switches:
+
+INFO     mininet:log.py:153 l1hub1 
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 
+*** Adding links:
+
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_1, mimiswsw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_2, mimiswsw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_3, mimiswsw4) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_4, mimiswsw5) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (l2sw1, mimiswsw3) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw1, l2sw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw2, l1hub1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw3, l1hub1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw4, l1hub1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw5, l2sw1) 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Configuring hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Found 1 broadcast domains
+
+INFO     mininet:log.py:153 *** Starting controller
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Starting 7 switches
+
+INFO     mininet:log.py:153 l1hub1 
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 ...
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Starting,  0 routers
+
+INFO     mininet:log.py:155 *** Starting,  4 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Setting default host routes
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Stopping 0 routers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 0 controllers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 10 links
+
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 7 switches
+
+INFO     mininet:log.py:153 l1hub1 
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 4 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+*** Done
+
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Finish test test_miminet_work[test6].
+INFO     mininet:log.py:153 Running test: test_miminet_work[test7].
+INFO     mininet:log.py:153 
+*** Adding Routers:
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Creating network
+
+INFO     mininet:log.py:153 *** Adding hosts:
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 server_1 
+INFO     mininet:log.py:153 
+*** Adding switches:
+
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 
+*** Adding links:
+
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_1, mimiswsw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw1, server_1) 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Configuring hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 server_1 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Found 1 broadcast domains
+
+INFO     mininet:log.py:153 *** Starting controller
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Starting 1 switches
+
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Starting,  0 routers
+
+INFO     mininet:log.py:155 *** Starting,  2 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 server_1 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Setting default host routes
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Stopping 0 routers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 0 controllers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 2 links
+
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 1 switches
+
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 2 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 server_1 
+INFO     mininet:log.py:153 
+*** Done
+
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Finish test test_miminet_work[test7].
+INFO     mininet:log.py:153 Running test: test_miminet_work[test8].
+INFO     mininet:log.py:153 
+*** Adding Routers:
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Creating network
+
+INFO     mininet:log.py:153 *** Adding hosts:
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+*** Adding switches:
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 
+*** Adding links:
+
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_1, mimiswsw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_2, mimiswsw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_3, mimiswsw3) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_4, mimiswsw4) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw1, l2sw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw2, l2sw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw3, l2sw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw4, l2sw1) 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Configuring hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Found 1 broadcast domains
+
+INFO     mininet:log.py:153 *** Starting controller
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Starting 5 switches
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 ...
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Starting,  0 routers
+
+INFO     mininet:log.py:155 *** Starting,  4 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Setting default host routes
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Stopping 0 routers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 0 controllers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 8 links
+
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 5 switches
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 4 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+*** Done
+
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Finish test test_miminet_work[test8].
+INFO     mininet:log.py:153 Running test: test_miminet_work[test9].
+INFO     mininet:log.py:153 
+*** Adding Routers:
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Creating network
+
+INFO     mininet:log.py:153 *** Adding hosts:
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+*** Adding switches:
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 l2sw2 
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 
+*** Adding links:
+
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_1, mimiswsw4) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_2, mimiswsw5) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_3, mimiswsw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_4, mimiswsw3) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (l2sw1, mimiswsw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw1, l2sw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw2, l2sw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw3, l2sw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw4, l2sw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw5, l2sw1) 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Configuring hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Found 1 broadcast domains
+
+INFO     mininet:log.py:153 *** Starting controller
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Starting 7 switches
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 l2sw2 
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 ...
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Starting,  0 routers
+
+INFO     mininet:log.py:155 *** Starting,  4 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Setting default host routes
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Stopping 0 routers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 0 controllers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 10 links
+
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 7 switches
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 l2sw2 
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 4 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+*** Done
+
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Finish test test_miminet_work[test9].
+INFO     mininet:log.py:153 Running test: test_miminet_work[test10].
+INFO     mininet:log.py:153 
+*** Adding Routers:
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Creating network
+
+INFO     mininet:log.py:153 *** Adding hosts:
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+*** Adding switches:
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 l2sw2 
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 mimiswsw6 
+INFO     mininet:log.py:153 
+*** Adding links:
+
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_1, mimiswsw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_2, mimiswsw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_3, mimiswsw4) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_4, mimiswsw6) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (l2sw1, mimiswsw3) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (l2sw1, mimiswsw5) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw1, l2sw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw2, l2sw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw3, l2sw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw4, l2sw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw5, l2sw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw6, l2sw2) 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Configuring hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Found 1 broadcast domains
+
+INFO     mininet:log.py:153 *** Starting controller
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Starting 8 switches
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 l2sw2 
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 mimiswsw6 
+INFO     mininet:log.py:153 ...
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Starting,  0 routers
+
+INFO     mininet:log.py:155 *** Starting,  4 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Setting default host routes
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Stopping 0 routers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 0 controllers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 12 links
+
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 8 switches
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 l2sw2 
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 mimiswsw6 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 4 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+*** Done
+
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Finish test test_miminet_work[test10].
+INFO     mininet:log.py:153 Running test: test_miminet_work[test11].
+INFO     mininet:log.py:153 
+*** Adding Routers:
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Creating network
+
+INFO     mininet:log.py:153 *** Adding hosts:
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+*** Adding switches:
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 l2sw2 
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 
+*** Adding links:
+
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_1, mimiswsw4) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_2, mimiswsw5) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_3, mimiswsw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_4, mimiswsw3) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (l2sw1, mimiswsw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw1, l2sw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw2, l2sw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw3, l2sw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw4, l2sw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw5, l2sw1) 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Configuring hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Found 1 broadcast domains
+
+INFO     mininet:log.py:153 *** Starting controller
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Starting 7 switches
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 l2sw2 
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 ...
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Starting,  0 routers
+
+INFO     mininet:log.py:155 *** Starting,  4 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Setting default host routes
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Stopping 0 routers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 0 controllers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 10 links
+
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 7 switches
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 l2sw2 
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 4 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+*** Done
+
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Finish test test_miminet_work[test11].
+INFO     mininet:log.py:153 Running test: test_miminet_work[test12].
+INFO     mininet:log.py:153 
+*** Adding Routers:
+
+INFO     mininet:log.py:153 router_1 
+INFO     mininet:log.py:153 router_2 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Creating network
+
+INFO     mininet:log.py:153 *** Adding hosts:
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+*** Adding switches:
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 l2sw2 
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 mimiswsw6 
+INFO     mininet:log.py:153 mimiswsw7 
+INFO     mininet:log.py:153 
+*** Adding links:
+
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_1, mimiswsw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_2, mimiswsw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_3, mimiswsw7) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_4, mimiswsw6) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (l2sw1, mimiswsw3) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw1, l2sw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw2, l2sw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw3, router_1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw4, router_2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw5, l2sw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw6, l2sw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw7, l2sw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (router_1, mimiswsw4) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (router_2, mimiswsw5) 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Configuring hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Found 5 broadcast domains
+
+INFO     mininet:log.py:153 *** Starting controller
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Starting 9 switches
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 l2sw2 
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 mimiswsw6 
+INFO     mininet:log.py:153 mimiswsw7 
+INFO     mininet:log.py:153 ...
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Starting,  2 routers
+
+INFO     mininet:log.py:153 router_1 
+INFO     mininet:log.py:153 router_2 
+INFO     mininet:log.py:155 *** Starting,  4 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Setting default host routes
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Stopping 2 routers
+
+INFO     mininet:log.py:153 router_1 
+INFO     mininet:log.py:153 router_2 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 0 controllers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 14 links
+
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_1 exited - ignoring cmd('ip link del iface_00636633',))
+
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_2 exited - ignoring cmd('ip link del iface_64070650',))
+
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_1 exited - ignoring cmd('ip link del iface_86617834',))
+
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_2 exited - ignoring cmd('ip link del iface_62443166',))
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 9 switches
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 l2sw2 
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 mimiswsw6 
+INFO     mininet:log.py:153 mimiswsw7 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 4 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 host_4 
+INFO     mininet:log.py:153 
+*** Done
+
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Finish test test_miminet_work[test12].
+INFO     mininet:log.py:153 Running test: test_miminet_work[test13].
+INFO     mininet:log.py:153 
+*** Adding Routers:
+
+INFO     mininet:log.py:153 router_1 
+INFO     mininet:log.py:153 router_2 
+INFO     mininet:log.py:153 router_3 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Creating network
+
+INFO     mininet:log.py:153 *** Adding hosts:
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 
+*** Adding switches:
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 mimiswsw6 
+INFO     mininet:log.py:153 
+*** Adding links:
+
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_1, mimiswsw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_2, mimiswsw2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_3, mimiswsw3) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (l2sw1, mimiswsw4) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (l2sw1, mimiswsw5) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (l2sw1, mimiswsw6) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw1, router_1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw2, router_2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw3, router_3) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw4, router_3) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw5, router_1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw6, router_2) 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Configuring hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Found 7 broadcast domains
+
+INFO     mininet:log.py:153 *** Starting controller
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Starting 7 switches
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 We already run tcpdump on this interface
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 mimiswsw6 
+INFO     mininet:log.py:153 ...
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Starting,  3 routers
+
+INFO     mininet:log.py:153 router_1 
+INFO     mininet:log.py:153 router_2 
+INFO     mininet:log.py:153 router_3 
+INFO     mininet:log.py:155 *** Starting,  3 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Setting default host routes
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Stopping 3 routers
+
+INFO     mininet:log.py:153 router_1 
+INFO     mininet:log.py:153 router_2 
+INFO     mininet:log.py:153 router_3 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 0 controllers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 12 links
+
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_1 exited - ignoring cmd('ip link del iface_32318658',))
+
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_2 exited - ignoring cmd('ip link del iface_32365871',))
+
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_3 exited - ignoring cmd('ip link del iface_07682608',))
+
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_3 exited - ignoring cmd('ip link del iface_72724155',))
+
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_1 exited - ignoring cmd('ip link del iface_50106104',))
+
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_2 exited - ignoring cmd('ip link del iface_35316364',))
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 7 switches
+
+INFO     mininet:log.py:153 l2sw1 
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 mimiswsw6 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 3 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 
+*** Done
+
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Finish test test_miminet_work[test13].
+INFO     mininet:log.py:153 Running test: test_miminet_work[test14].
+INFO     mininet:log.py:153 
+*** Adding Routers:
+
+INFO     mininet:log.py:153 router_1 
+INFO     mininet:log.py:153 router_2 
+INFO     mininet:log.py:153 router_3 
+INFO     mininet:log.py:153 router_4 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Creating network
+
+INFO     mininet:log.py:153 *** Adding hosts:
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 
+*** Adding switches:
+
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 mimiswsw6 
+INFO     mininet:log.py:153 
+*** Adding links:
+
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (host_1, mimiswsw6) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw1, host_3) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw2, router_3) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw3, router_1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw4, router_2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw5, host_2) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (mimiswsw6, router_1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (router_2, mimiswsw5) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (router_3, mimiswsw3) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (router_3, mimiswsw4) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (router_4, mimiswsw1) 
+INFO     mininet:log.py:153 (15ms delay) 
+INFO     mininet:log.py:153 (router_4, mimiswsw2) 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Configuring hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Found 10 broadcast domains
+
+INFO     mininet:log.py:153 *** Starting controller
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Starting 6 switches
+
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 mimiswsw6 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Starting,  4 routers
+
+INFO     mininet:log.py:153 router_1 
+INFO     mininet:log.py:153 router_2 
+INFO     mininet:log.py:153 router_3 
+INFO     mininet:log.py:153 router_4 
+INFO     mininet:log.py:155 *** Starting,  3 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Setting default host routes
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:155 *** Stopping 4 routers
+
+INFO     mininet:log.py:153 router_1 
+INFO     mininet:log.py:153 router_2 
+INFO     mininet:log.py:153 router_3 
+INFO     mininet:log.py:153 router_4 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 0 controllers
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 12 links
+
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_3 exited - ignoring cmd('ip link del iface_26706252',))
+
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_1 exited - ignoring cmd('ip link del iface_35801044',))
+
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_2 exited - ignoring cmd('ip link del iface_30707174',))
+
+INFO     mininet:log.py:153 .
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_1 exited - ignoring cmd('ip link del iface_38534763',))
+
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_2 exited - ignoring cmd('ip link del iface_62870248',))
+
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_3 exited - ignoring cmd('ip link del iface_34285731',))
+
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_3 exited - ignoring cmd('ip link del iface_44426073',))
+
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_4 exited - ignoring cmd('ip link del iface_75514788',))
+
+INFO     mininet:log.py:153 .
+WARNING  mininet:log.py:153 (router_4 exited - ignoring cmd('ip link del iface_37426404',))
+
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 6 switches
+
+INFO     mininet:log.py:153 mimiswsw1 
+INFO     mininet:log.py:153 mimiswsw2 
+INFO     mininet:log.py:153 mimiswsw3 
+INFO     mininet:log.py:153 mimiswsw4 
+INFO     mininet:log.py:153 mimiswsw5 
+INFO     mininet:log.py:153 mimiswsw6 
+INFO     mininet:log.py:153 
+
+INFO     mininet:log.py:153 *** Stopping 3 hosts
+
+INFO     mininet:log.py:153 host_1 
+INFO     mininet:log.py:153 host_2 
+INFO     mininet:log.py:153 host_3 
+INFO     mininet:log.py:153 
+*** Done
+
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Important fields extracted from packets.
+INFO     mininet:log.py:153 Finish test test_miminet_work[test14].
