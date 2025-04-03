@@ -5,7 +5,7 @@ from pathlib import Path
 
 from mininet.log import setLogLevel, info, error
 import pytest
-from tasks import simulate
+from src.tasks import simulate
 
 setLogLevel("info")
 
