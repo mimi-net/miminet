@@ -69,5 +69,6 @@ jobs:
       - name: Test with pytest
         run: |
           sudo python -m pip install pytest
-          cd back/src
+          cd back/tests
+          export PYTHONPATH=$PYTHONPATH:../src
           sudo python -m pytest -vv .
