@@ -69,8 +69,7 @@ jobs:
 
       - name: Test with pytest
         run: |
-          sudo bash -c '
+          sudo bash
           cd back/tests
           export PYTHONPATH=$PYTHONPATH:../src
           pytest .
-          '
