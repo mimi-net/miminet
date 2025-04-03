@@ -1,6 +1,6 @@
 """
-    This module provides functions necessary to check the correctness of the networks built in tests.
-    You can compare nodes, edges and jobs to convince that what you have done is right.
+This module provides functions necessary to check the correctness of the networks built in tests.
+You can compare nodes, edges and jobs to convince that what you have done is right.
 """
 
 import re
