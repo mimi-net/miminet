@@ -200,6 +200,7 @@ def web_network_shared():
         jobs=jnet["jobs"],
         network_config=jnet["config"],
         pcaps=jnet["pcap"],
+        mimishark_nav=1,
     )
 
 
@@ -284,6 +285,7 @@ def web_network():
         simulating=sim,
         network_config=jnet["config"],
         pcaps=jnet["pcap"],
+        mimishark_nav=1,
     )
 
 
