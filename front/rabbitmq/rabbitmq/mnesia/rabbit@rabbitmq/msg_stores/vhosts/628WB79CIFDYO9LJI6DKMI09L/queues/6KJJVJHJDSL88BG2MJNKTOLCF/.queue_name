@@ -1,0 +1,3 @@
+VHOST: /
+QUEUE: celery@889f0039ea3b.celery.pidbox
+INDEX: v2

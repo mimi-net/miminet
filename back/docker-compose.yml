@@ -5,14 +5,24 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-    container_name: celery
-    network_mode: "host"
+    # container_name: celery
+    # network_mode: "host"
     restart: always
+    networks:
+      - rabbitmq_network
+      - miminet_network
     env_file:
       - .env
     environment:
       - celery_concurrency=${celery_concurrency}
       - queue_names=${queue_names}
-    command: celery -A app.celery worker --loglevel=info
+    # command: celery -A app.celery worker --loglevel=info
     privileged: true
+    deploy:
+      replicas: 4
 
+networks:
+  rabbitmq_network:
+    external: true
+  miminet_network:
+    external: true
