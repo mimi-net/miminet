@@ -11,7 +11,7 @@
 }
 
 .ws-menu-devices {
-    max-height: calc(75vh - 85px);
+    max-height: calc(80vh - 140px);
     padding: 10px;
     width: 130px;
     background-color: white;
