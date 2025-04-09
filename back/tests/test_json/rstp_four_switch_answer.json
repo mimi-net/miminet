@@ -1,0 +1,1726 @@
+[
+    [
+        {
+            "data": {
+                "id": "pkt_U0DMWOXT",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3"
+            },
+            "timestamp": "1743593428819208"
+        },
+        {
+            "data": {
+                "id": "pkt_6CKI2XO1",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1"
+            },
+            "timestamp": "1743593428819231"
+        },
+        {
+            "data": {
+                "id": "pkt_TXZ7VJ69",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2"
+            },
+            "timestamp": "1743593428819240"
+        },
+        {
+            "data": {
+                "id": "pkt_217DSMH5",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593428819249"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_Y4C4CTC6",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw2",
+                "target": "l2sw1"
+            },
+            "timestamp": "1743593428883236"
+        },
+        {
+            "data": {
+                "id": "pkt_BUFDFV23",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2"
+            },
+            "timestamp": "1743593428883255"
+        },
+        {
+            "data": {
+                "id": "pkt_8FEKWATB",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593428883268"
+        },
+        {
+            "data": {
+                "id": "pkt_OD8XD7QE",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3"
+            },
+            "timestamp": "1743593428883280"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_4MRK7QJA",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw3",
+                "target": "l2sw1"
+            },
+            "timestamp": "1743593428952365"
+        },
+        {
+            "data": {
+                "id": "pkt_G4LCMA27",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3"
+            },
+            "timestamp": "1743593428952385"
+        },
+        {
+            "data": {
+                "id": "pkt_IPAW7I58",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw3",
+                "target": "l2sw2"
+            },
+            "timestamp": "1743593428952402"
+        },
+        {
+            "data": {
+                "id": "pkt_Z6B7BPS0",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593428952412"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_ZJ34BLIN",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw4",
+                "target": "l2sw1"
+            },
+            "timestamp": "1743593429019822"
+        },
+        {
+            "data": {
+                "id": "pkt_W71GBZP1",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4"
+            },
+            "timestamp": "1743593429019842"
+        },
+        {
+            "data": {
+                "id": "pkt_70Z4RTQA",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw4",
+                "target": "l2sw2"
+            },
+            "timestamp": "1743593429019857"
+        },
+        {
+            "data": {
+                "id": "pkt_4A5FTALQ",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw4",
+                "target": "l2sw3"
+            },
+            "timestamp": "1743593429019867"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_4HGE3SW4",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw4",
+                "target": "l2sw1"
+            },
+            "timestamp": "1743593431038380"
+        },
+        {
+            "data": {
+                "id": "pkt_Y7HMLS74",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw4",
+                "target": "l2sw3"
+            },
+            "timestamp": "1743593431038410"
+        },
+        {
+            "data": {
+                "id": "pkt_0UM8E7KX",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4"
+            },
+            "timestamp": "1743593431038418"
+        },
+        {
+            "data": {
+                "id": "pkt_H6QPPXV2",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw4",
+                "target": "l2sw2"
+            },
+            "timestamp": "1743593431038426"
+        },
+        {
+            "data": {
+                "id": "pkt_98ODRADC",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw3",
+                "target": "l2sw1"
+            },
+            "timestamp": "1743593431038498"
+        },
+        {
+            "data": {
+                "id": "pkt_OHO5X76F",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593431038505"
+        },
+        {
+            "data": {
+                "id": "pkt_FGGKMACU",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3"
+            },
+            "timestamp": "1743593431038510"
+        },
+        {
+            "data": {
+                "id": "pkt_PH0QENMU",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw3",
+                "target": "l2sw2"
+            },
+            "timestamp": "1743593431038516"
+        },
+        {
+            "data": {
+                "id": "pkt_IATTKF5O",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw2",
+                "target": "l2sw1"
+            },
+            "timestamp": "1743593431038552"
+        },
+        {
+            "data": {
+                "id": "pkt_36O4DUZE",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593431038561"
+        },
+        {
+            "data": {
+                "id": "pkt_C3SWOHLL",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2"
+            },
+            "timestamp": "1743593431038567"
+        },
+        {
+            "data": {
+                "id": "pkt_Y4Q6VR33",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3"
+            },
+            "timestamp": "1743593431038574"
+        },
+        {
+            "data": {
+                "id": "pkt_9I32UELX",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2"
+            },
+            "timestamp": "1743593431038611"
+        },
+        {
+            "data": {
+                "id": "pkt_MTS35TZG",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1"
+            },
+            "timestamp": "1743593431038617"
+        },
+        {
+            "data": {
+                "id": "pkt_C2EBI9KC",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593431038624"
+        },
+        {
+            "data": {
+                "id": "pkt_KEX9TWX0",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3"
+            },
+            "timestamp": "1743593431038629"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_CVG5Q00J",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw4",
+                "target": "l2sw1"
+            },
+            "timestamp": "1743593431054245"
+        },
+        {
+            "data": {
+                "id": "pkt_UDB1NK75",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4"
+            },
+            "timestamp": "1743593431054262"
+        },
+        {
+            "data": {
+                "id": "pkt_L04K0MZO",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw4",
+                "target": "l2sw2"
+            },
+            "timestamp": "1743593431054270"
+        },
+        {
+            "data": {
+                "id": "pkt_8AT6HZV1",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw4",
+                "target": "l2sw3"
+            },
+            "timestamp": "1743593431054277"
+        },
+        {
+            "data": {
+                "id": "pkt_OQ7YRYEE",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw4",
+                "target": "l2sw3"
+            },
+            "timestamp": "1743593431054284"
+        },
+        {
+            "data": {
+                "id": "pkt_AYC9G2Q2",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw4",
+                "target": "l2sw1"
+            },
+            "timestamp": "1743593431054299"
+        },
+        {
+            "data": {
+                "id": "pkt_PICYNE5Z",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw4",
+                "target": "l2sw3"
+            },
+            "timestamp": "1743593431054303"
+        },
+        {
+            "data": {
+                "id": "pkt_XXK8HJXE",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4"
+            },
+            "timestamp": "1743593431054306"
+        },
+        {
+            "data": {
+                "id": "pkt_EPENPMJV",
+                "label": "RSTP (Designated)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Designated)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw4",
+                "target": "l2sw3"
+            },
+            "timestamp": "1743593431054310"
+        },
+        {
+            "data": {
+                "id": "pkt_9MBWQ35L",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw4",
+                "target": "l2sw2"
+            },
+            "timestamp": "1743593431054315"
+        },
+        {
+            "data": {
+                "id": "pkt_JJ37X8BL",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw4",
+                "target": "l2sw2"
+            },
+            "timestamp": "1743593431054319"
+        },
+        {
+            "data": {
+                "id": "pkt_JZV3IYGG",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw3",
+                "target": "l2sw1"
+            },
+            "timestamp": "1743593431054328"
+        },
+        {
+            "data": {
+                "id": "pkt_2AZ4YDX4",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593431054333"
+        },
+        {
+            "data": {
+                "id": "pkt_6ATAP0AS",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3"
+            },
+            "timestamp": "1743593431054339"
+        },
+        {
+            "data": {
+                "id": "pkt_3DT1TWTS",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw3",
+                "target": "l2sw2"
+            },
+            "timestamp": "1743593431054346"
+        },
+        {
+            "data": {
+                "id": "pkt_J7XNEMNT",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw3",
+                "target": "l2sw2"
+            },
+            "timestamp": "1743593431054351"
+        },
+        {
+            "data": {
+                "id": "pkt_DQ987H0S",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593431054359"
+        },
+        {
+            "data": {
+                "id": "pkt_HJPBRAST",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2"
+            },
+            "timestamp": "1743593431054364"
+        },
+        {
+            "data": {
+                "id": "pkt_6TTV0NR0",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3"
+            },
+            "timestamp": "1743593431054371"
+        },
+        {
+            "data": {
+                "id": "pkt_IBUBTOXF",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw2",
+                "target": "l2sw1"
+            },
+            "timestamp": "1743593431054381"
+        },
+        {
+            "data": {
+                "id": "pkt_2H7DQK83",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw2",
+                "target": "l2sw1"
+            },
+            "timestamp": "1743593431054387"
+        },
+        {
+            "data": {
+                "id": "pkt_X7RM7ILV",
+                "label": "RSTP (Designated)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Designated)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw4",
+                "target": "l2sw3"
+            },
+            "timestamp": "1743593431054394"
+        },
+        {
+            "data": {
+                "id": "pkt_A13MU4C5",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4"
+            },
+            "timestamp": "1743593431054398"
+        },
+        {
+            "data": {
+                "id": "pkt_3VITR9XK",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw4",
+                "target": "l2sw2"
+            },
+            "timestamp": "1743593431054401"
+        },
+        {
+            "data": {
+                "id": "pkt_Y57XVAT8",
+                "label": "RSTP (Designated)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Designated)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw4",
+                "target": "l2sw2"
+            },
+            "timestamp": "1743593431054406"
+        },
+        {
+            "data": {
+                "id": "pkt_4HHOHWUM",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw4",
+                "target": "l2sw1"
+            },
+            "timestamp": "1743593431054410"
+        },
+        {
+            "data": {
+                "id": "pkt_BH5BBA1Y",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw4",
+                "target": "l2sw1"
+            },
+            "timestamp": "1743593431054414"
+        },
+        {
+            "data": {
+                "id": "pkt_QYK8HL2X",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593431054421"
+        },
+        {
+            "data": {
+                "id": "pkt_8GDCZH8R",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3"
+            },
+            "timestamp": "1743593431054425"
+        },
+        {
+            "data": {
+                "id": "pkt_38OP34P2",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw3",
+                "target": "l2sw2"
+            },
+            "timestamp": "1743593431054429"
+        },
+        {
+            "data": {
+                "id": "pkt_29SGJAUJ",
+                "label": "RSTP (Designated)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Designated)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw3",
+                "target": "l2sw2"
+            },
+            "timestamp": "1743593431054433"
+        },
+        {
+            "data": {
+                "id": "pkt_WBZPBU3L",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw3",
+                "target": "l2sw1"
+            },
+            "timestamp": "1743593431054437"
+        },
+        {
+            "data": {
+                "id": "pkt_PWBWC525",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw3",
+                "target": "l2sw1"
+            },
+            "timestamp": "1743593431054442"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_CL07U6Q7",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593431070736"
+        },
+        {
+            "data": {
+                "id": "pkt_K8N8TTM8",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593431070767"
+        },
+        {
+            "data": {
+                "id": "pkt_Q146AG20",
+                "label": "RSTP (Designated)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Designated)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593431070776"
+        },
+        {
+            "data": {
+                "id": "pkt_IKM9MHEC",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593431070790"
+        },
+        {
+            "data": {
+                "id": "pkt_93WZJ8QH",
+                "label": "RSTP (Designated)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Designated)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593431070798"
+        },
+        {
+            "data": {
+                "id": "pkt_D139A9AN",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3"
+            },
+            "timestamp": "1743593431070813"
+        },
+        {
+            "data": {
+                "id": "pkt_MUH6ZAXU",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3"
+            },
+            "timestamp": "1743593431070831"
+        },
+        {
+            "data": {
+                "id": "pkt_QE2DKB05",
+                "label": "RSTP (Designated)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Designated)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3"
+            },
+            "timestamp": "1743593431070838"
+        },
+        {
+            "data": {
+                "id": "pkt_7PQLZAVO",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2"
+            },
+            "timestamp": "1743593431070854"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_XJRTOOXE",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw4",
+                "target": "l2sw1"
+            },
+            "timestamp": "1743593433100622"
+        },
+        {
+            "data": {
+                "id": "pkt_TR69VE97",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4"
+            },
+            "timestamp": "1743593433100646"
+        },
+        {
+            "data": {
+                "id": "pkt_OXOWXBYE",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw3",
+                "target": "l2sw1"
+            },
+            "timestamp": "1743593433100720"
+        },
+        {
+            "data": {
+                "id": "pkt_GDWDSMCM",
+                "label": "RSTP (Designated)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Designated)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593433100728"
+        },
+        {
+            "data": {
+                "id": "pkt_ZCMCVMY4",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3"
+            },
+            "timestamp": "1743593433100734"
+        },
+        {
+            "data": {
+                "id": "pkt_FBU4RBFD",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw2",
+                "target": "l2sw1"
+            },
+            "timestamp": "1743593433100777"
+        },
+        {
+            "data": {
+                "id": "pkt_P2DC0MWY",
+                "label": "RSTP (Designated)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Designated)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593433100784"
+        },
+        {
+            "data": {
+                "id": "pkt_NI9MZDF2",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2"
+            },
+            "timestamp": "1743593433100791"
+        },
+        {
+            "data": {
+                "id": "pkt_XK0E2KJ1",
+                "label": "RSTP (Designated)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Designated)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3"
+            },
+            "timestamp": "1743593433100797"
+        },
+        {
+            "data": {
+                "id": "pkt_AZLIM1WD",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2"
+            },
+            "timestamp": "1743593433100835"
+        },
+        {
+            "data": {
+                "id": "pkt_AO71G39P",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1"
+            },
+            "timestamp": "1743593433100841"
+        },
+        {
+            "data": {
+                "id": "pkt_DIR07XCF",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593433100847"
+        },
+        {
+            "data": {
+                "id": "pkt_QLBNUQ2U",
+                "label": "RSTP (Alternate/Backup)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Alternate/Backup)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3"
+            },
+            "timestamp": "1743593433100854"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_TQN3H352",
+                "label": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "host_1",
+                "target": "l2sw1"
+            },
+            "timestamp": "1743593434796184"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_22P9AZBM",
+                "label": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3"
+            },
+            "timestamp": "1743593434812548"
+        },
+        {
+            "data": {
+                "id": "pkt_VSL2LMTV",
+                "label": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2"
+            },
+            "timestamp": "1743593434812552"
+        },
+        {
+            "data": {
+                "id": "pkt_HSIGS3AK",
+                "label": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593434812554"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_W9Q87797",
+                "label": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593434828690"
+        },
+        {
+            "data": {
+                "id": "pkt_2PLA0DUD",
+                "label": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3"
+            },
+            "timestamp": "1743593434828712"
+        },
+        {
+            "data": {
+                "id": "pkt_LU9ZHFJM",
+                "label": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2"
+            },
+            "timestamp": "1743593434828971"
+        },
+        {
+            "data": {
+                "id": "pkt_SGANXZSL",
+                "label": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3"
+            },
+            "timestamp": "1743593434828991"
+        },
+        {
+            "data": {
+                "id": "pkt_DECWVT5F",
+                "label": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593434829010"
+        },
+        {
+            "data": {
+                "id": "pkt_CF6MII0X",
+                "label": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4"
+            },
+            "timestamp": "1743593434829081"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_2O2YRRKM",
+                "label": "ARP-response\\n192.168.1.4 at 00:00:00:00:00:04",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-response\\n192.168.1.4 at 00:00:00:00:00:04",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "host_4",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593434844780"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_GJJTPA4M",
+                "label": "ARP-response\\n192.168.1.4 at 00:00:00:00:00:04",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-response\\n192.168.1.4 at 00:00:00:00:00:04",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw4",
+                "target": "l2sw1"
+            },
+            "timestamp": "1743593434860610"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_VALVI83M",
+                "label": "ARP-response\\n192.168.1.4 at 00:00:00:00:00:04",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-response\\n192.168.1.4 at 00:00:00:00:00:04",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1"
+            },
+            "timestamp": "1743593434876299"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_QSNB38LJ",
+                "label": "ICMP echo-request\\n192.168.1.1 > 192.168.1.4",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ICMP echo-request\\n192.168.1.1 > 192.168.1.4",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "host_1",
+                "target": "l2sw1"
+            },
+            "timestamp": "1743593434891949"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_55A28WKH",
+                "label": "ICMP echo-request\\n192.168.1.1 > 192.168.1.4",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ICMP echo-request\\n192.168.1.1 > 192.168.1.4",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593434907897"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_WCX7YUTW",
+                "label": "ICMP echo-request\\n192.168.1.1 > 192.168.1.4",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ICMP echo-request\\n192.168.1.1 > 192.168.1.4",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4"
+            },
+            "timestamp": "1743593434923479"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_HJ3TA6RW",
+                "label": "ICMP echo-reply\\n192.168.1.4 > 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ICMP echo-reply\\n192.168.1.4 > 192.168.1.1",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "host_4",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593434940342"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_JT26GJNB",
+                "label": "ICMP echo-reply\\n192.168.1.4 > 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ICMP echo-reply\\n192.168.1.4 > 192.168.1.1",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw4",
+                "target": "l2sw1"
+            },
+            "timestamp": "1743593434957240"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_8C1QZ8Q8",
+                "label": "ICMP echo-reply\\n192.168.1.4 > 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ICMP echo-reply\\n192.168.1.4 > 192.168.1.1",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1"
+            },
+            "timestamp": "1743593434974516"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_GN2EMEV1",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4"
+            },
+            "timestamp": "1743593435130287"
+        },
+        {
+            "data": {
+                "id": "pkt_OISFEEU3",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593435130376"
+        },
+        {
+            "data": {
+                "id": "pkt_MK0LYRYJ",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3"
+            },
+            "timestamp": "1743593435130384"
+        },
+        {
+            "data": {
+                "id": "pkt_WC4JI2RH",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593435130423"
+        },
+        {
+            "data": {
+                "id": "pkt_7VEQ8QIE",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2"
+            },
+            "timestamp": "1743593435130431"
+        },
+        {
+            "data": {
+                "id": "pkt_1KYI539D",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3"
+            },
+            "timestamp": "1743593435130437"
+        },
+        {
+            "data": {
+                "id": "pkt_4O3M7ZJA",
+                "label": "RSTP (Unknown)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Unknown)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2"
+            },
+            "timestamp": "1743593435130478"
+        },
+        {
+            "data": {
+                "id": "pkt_M05O4JM0",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1"
+            },
+            "timestamp": "1743593435130484"
+        },
+        {
+            "data": {
+                "id": "pkt_7Q2FX7Z9",
+                "label": "RSTP (Unknown)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Unknown)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4"
+            },
+            "timestamp": "1743593435130491"
+        },
+        {
+            "data": {
+                "id": "pkt_CA6H6JU0",
+                "label": "RSTP (Unknown)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Unknown)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3"
+            },
+            "timestamp": "1743593435130497"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_7Y6PM6Z5",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4"
+            },
+            "timestamp": "1743593437141751"
+        },
+        {
+            "data": {
+                "id": "pkt_ZI2TCKZ6",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3"
+            },
+            "timestamp": "1743593437141846"
+        },
+        {
+            "data": {
+                "id": "pkt_MHTPKOWE",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2"
+            },
+            "timestamp": "1743593437141895"
+        },
+        {
+            "data": {
+                "id": "pkt_0PECED11",
+                "label": "RSTP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "RSTP (Root)",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1"
+            },
+            "timestamp": "1743593437141969"
+        }
+    ]
+]

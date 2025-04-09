@@ -38,15 +38,15 @@ def simulate(network: str):
     for _ in range(4):
         try:
             animation, pcaps = run_mininet(network)
-        except ValueError:
-            continue
-        except Exception as e:
-            error(e)
-            break
-        else:
-            break
 
-    return json.dumps(animation), pcaps
+            return json.dumps(animation), pcaps
+        except Exception as e:
+            # Sometimes mininet doesn't work correctly and simulation needs to be redone,
+            # Example of mininet error: https://github.com/mininet/mininet/issues/737.
+            error(e)
+            continue
+
+    return "", []
 
 
 @app.task(bind=True)

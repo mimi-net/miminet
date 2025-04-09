@@ -7,7 +7,7 @@ from network import Job
 def ping_handler(job: Job, job_host: Any) -> None:
     """Execute ping -c 1"""
     arg_ip = job.arg_1
-    job_host.cmd("ping -c 1 " + str(arg_ip))
+    job_host.cmd(f"ping -c 1 {arg_ip}")
 
 
 def ping_with_options_handler(job: Job, job_host: Any) -> None:
@@ -18,7 +18,7 @@ def ping_with_options_handler(job: Job, job_host: Any) -> None:
 
     if len(arg_opt) > 0:
         arg_opt = re.sub(r"[^\x00-\x7F]", "", str(arg_opt))
-    job_host.cmd("ping -c 1 " + str(arg_opt) + " " + str(arg_ip))
+    job_host.cmd(f"ping -c 1 {arg_opt} {arg_ip}")
 
 
 def get_sending_data_argument(job: Job) -> tuple[str | int, str | int, str | int]:
@@ -37,12 +37,7 @@ def sending_udp_data_handler(job: Job, job_host: Any) -> None:
     arg_size, arg_ip, arg_port = get_sending_data_argument(job)
 
     job_host.cmd(
-        "dd if=/dev/urandom bs="
-        + str(arg_size)
-        + " count=1 | nc -uq1 "
-        + str(arg_ip)
-        + " "
-        + str(arg_port)
+        f"dd if=/dev/urandom bs={arg_size} count=1 | nc -uq1 {arg_ip} {arg_port}"
     )
 
 
@@ -52,12 +47,7 @@ def sending_tcp_data_handler(job: Job, job_host: Any) -> None:
     arg_size, arg_ip, arg_port = get_sending_data_argument(job)
 
     job_host.cmd(
-        "dd if=/dev/urandom bs="
-        + str(arg_size)
-        + " count=1 | nc -w 30 -q1 "
-        + str(arg_ip)
-        + " "
-        + str(arg_port)
+        f"dd if=/dev/urandom bs={arg_size} count=1 | nc -w 30 -q1 {arg_ip} {arg_port}"
     )
 
 
@@ -70,7 +60,7 @@ def traceroute_handler(job: Job, job_host: Any) -> None:
     if len(arg_opt) > 0:
         arg_opt = re.sub(r"[^\x00-\x7F]", "", str(arg_opt))
 
-    job_host.cmd("traceroute -n " + str(arg_opt) + " " + str(arg_ip))
+    job_host.cmd(f"traceroute -n {arg_opt} {arg_ip}")
 
 
 def ip_addr_add_handler(job: Job, job_host: Any) -> None:
@@ -83,9 +73,7 @@ def ip_addr_add_handler(job: Job, job_host: Any) -> None:
     if arg_ip is None or arg_dev is None:
         return
 
-    job_host.cmd(
-        "ip addr add " + str(arg_ip) + "/" + str(arg_mask) + " dev " + str(arg_dev)
-    )
+    job_host.cmd(f"ip addr add {arg_ip}/{arg_mask} dev {arg_dev}")
 
 
 def iptables_handler(job: Job, job_host: Any) -> None:
@@ -96,7 +84,7 @@ def iptables_handler(job: Job, job_host: Any) -> None:
     if not arg_dev:
         return
 
-    job_host.cmd("iptables -t nat -A POSTROUTING -o ", arg_dev, "-j MASQUERADE")
+    job_host.cmd(f"iptables -t nat -A POSTROUTING -o {arg_dev} -j MASQUERADE")
 
 
 def ip_route_add_handler(job: Job, job_host: Any) -> None:
@@ -105,17 +93,15 @@ def ip_route_add_handler(job: Job, job_host: Any) -> None:
     arg_mask = job.arg_2
     arg_router = job.arg_3
 
-    job_host.cmd(
-        "ip route add " + str(arg_ip) + "/" + str(arg_mask) + " via " + str(arg_router)
-    )
+    job_host.cmd(f"ip route add {arg_ip}/{arg_mask} via {arg_router}")
 
 
 def block_tcp_udp_port(job: Job, job_host: Any) -> None:
     """ "Method for executing Block TCP/UDP port"""
     arg_port = job.arg_1
 
-    job_host.cmd("iptables -A INPUT -p tcp --dport " + str(arg_port) + " -j DROP")
-    job_host.cmd("iptables -A INPUT -p udp --dport " + str(arg_port) + " -j DROP")
+    job_host.cmd(f"iptables -A INPUT -p tcp --dport {arg_port} -j DROP")
+    job_host.cmd(f"iptables -A INPUT -p udp --dport {arg_port} -j DROP")
 
 
 def open_tcp_server_handler(job: Job, job_host: Any) -> None:
@@ -124,11 +110,7 @@ def open_tcp_server_handler(job: Job, job_host: Any) -> None:
     arg_port = job.arg_2
 
     job_host.cmd(
-        "nohup nc -k -d "
-        + str(arg_ip)
-        + " -l "
-        + str(arg_port)
-        + " > /tmp/tcpserver 2>&1 < /dev/null &"
+        f"nohup nc -k -d {arg_ip} -l {arg_port} > /tmp/tcpserver 2>&1 < /dev/null &"
     )
 
 
@@ -138,11 +120,7 @@ def open_udp_server_handler(job: Job, job_host: Any) -> None:
     arg_port = job.arg_2
 
     job_host.cmd(
-        "nohup nc -d -u "
-        + str(arg_ip)
-        + " -l "
-        + str(arg_port)
-        + " > /tmp/udpserver 2>&1 < /dev/null &"
+        f"nohup nc -d -u {arg_ip} -l {arg_port} > /tmp/udpserver 2>&1 < /dev/null &"
     )
 
 
@@ -151,21 +129,22 @@ def arp_handler(job: Job, job_host: Any) -> None:
     arg_ip = job.arg_1
     arg_mac = job.arg_2
 
-    job_host.cmd("arp -s " + str(arg_ip) + " " + str(arg_mac))
+    job_host.cmd(f"arp -s {arg_ip} {arg_mac}")
 
 
 def subinterface_with_vlan(job: Job, job_host: Any) -> None:
-    """ "Method for adding subinterface with vlan"""
+    """Method for adding subinterface with vlan"""
     arg_intf = job.arg_1
     arg_ip = job.arg_2
     arg_mask = job.arg_3
     arg_vlan = job.arg_4
+    arg_intf_name = arg_intf[6:]
 
     job_host.cmd(
-        f"ip link add link {arg_intf} name {arg_intf[6:]}.{arg_vlan} type vlan id {arg_vlan}"
+        f"ip link add link {arg_intf} name {arg_intf_name}.{arg_vlan} type vlan id {arg_vlan}"
     )
-    job_host.cmd(f"ip addr add {arg_ip}/{arg_mask} dev {arg_intf[6:]}.{arg_vlan}")
-    job_host.cmd(f"ip link set dev {arg_intf[6:]}.{arg_vlan} up")
+    job_host.cmd(f"ip addr add {arg_ip}/{arg_mask} dev {arg_intf_name}.{arg_vlan}")
+    job_host.cmd(f"ip link set dev {arg_intf_name}.{arg_vlan} up")
 
 
 def add_ipip_interface(job: Job, job_host: Any) -> None:
