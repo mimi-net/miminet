@@ -66,7 +66,7 @@ const ConfigHostForm = function(host_id){
     $('#host_id').val(host_id);
     $('#net_guid').val(network_guid);
 
-    $('#config_host_main_form_submit_button').click(function(event) {
+    function handleHostClick(event) {
         event.preventDefault();
         let data = $('#config_main_form').serialize();
 
@@ -74,11 +74,13 @@ const ConfigHostForm = function(host_id){
         $("#config_main_form :input").prop("disabled", true);
 
         // Set loading spinner
-        $(this).text('');
-        $(this).append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
+        $('#config_host_main_form_submit_button').text('');
+        $('#config_host_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
 
         UpdateHostConfiguration(data, host_id);
-    });
+    }
+
+    $('#config_host_main_form_submit_button, #config_host_end_form').on('click', handleHostClick);
 }
 
 const ConfigRouterForm = function (router_id) {
@@ -99,7 +101,7 @@ const ConfigRouterForm = function (router_id) {
     $('#router_id').val(router_id);
     $('#net_guid').val(network_guid);
 
-    $('#config_router_main_form_submit_button').click(function (event) {
+    function handleRouterClick(event) {
         event.preventDefault();
         let data = $('#config_main_form').serialize();
 
@@ -107,11 +109,13 @@ const ConfigRouterForm = function (router_id) {
         $("#config_main_form :input").prop("disabled", true);
 
         // Set loading spinner
-        $(this).text('');
-        $(this).append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
+        $('#config_router_main_form_submit_button').text('');
+        $('#config_router_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
 
         UpdateRouterConfiguration(data, router_id);
-    });
+    }
+
+    $('#config_router_main_form_submit_button, #config_router_end_form').on('click', handleRouterClick);
 }
 
 const ConfigServerForm = function (server_id) {
@@ -132,7 +136,7 @@ const ConfigServerForm = function (server_id) {
     $('#server_id').val(server_id);
     $('#net_guid').val(network_guid);
 
-    $('#config_server_main_form_submit_button').click(function (event) {
+    function handleServerClick(event) {
         event.preventDefault();
         let data = $('#config_main_form').serialize();
 
@@ -140,11 +144,13 @@ const ConfigServerForm = function (server_id) {
         $("#config_main_form :input").prop("disabled", true);
 
         // Set loading spinner
-        $(this).text('');
-        $(this).append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
+        $('#config_server_main_form_submit_button').text('');
+        $('#config_server_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
 
         UpdateServerConfiguration(data, server_id);
-    });
+    }
+
+    $('#config_server_main_form_submit_button, #config_server_end_form').on('click', handleServerClick);
 }
 
 const ConfigHubForm = function (hub_id) {
@@ -165,7 +171,7 @@ const ConfigHubForm = function (hub_id) {
     $('#hub_id').val(hub_id);
     $('#net_guid').val(network_guid);
 
-    $('#config_hub_main_form_submit_button').click(function (event) {
+    function handleHubClick(event) {
         event.preventDefault();
         let data = $('#config_hub_main_form').serialize();
 
@@ -173,11 +179,13 @@ const ConfigHubForm = function (hub_id) {
         $("#config_hub_main_form :input").prop("disabled", true);
 
         // Set loading spinner
-        $(this).text('');
-        $(this).append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
+        $('#config_hub_main_form_submit_button').text('');
+        $('#config_hub_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
 
         UpdateHubConfiguration(data, hub_id);
-    });
+    }
+
+    $('#config_hub_main_form_submit_button, #config_hub_end_form').on('click', handleHubClick);
 }
 
 const ConfigSwitchForm = function (switch_id) {
@@ -202,7 +210,7 @@ const ConfigSwitchForm = function (switch_id) {
     $('#switch_id').val(switch_id);
     $('#net_guid').val(network_guid);
 
-    $('#config_switch_main_form_submit_button').click(function (event) {
+    function handleSwitchClick(event) {
         $("#config_switch_main_form [name='config_rstp_stp']").val($('#config_button_rstp').val());
         event.preventDefault();
         let data = $('#config_switch_main_form').serialize();
@@ -211,11 +219,13 @@ const ConfigSwitchForm = function (switch_id) {
         $("#config_switch_main_form :input").prop("disabled", true);
 
         // Set loading spinner
-        $(this).text('');
-        $(this).append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
+        $('#config_switch_main_form_submit_button').text('');
+        $('#config_switch_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
 
         UpdateSwitchConfiguration(data, switch_id);
-    });
+    }
+
+    $('#config_switch_main_form_submit_button, #config_switch_end_form').on('click', handleSwitchClick);
 }
 
 const ConfigHubName = function (hostname) {
