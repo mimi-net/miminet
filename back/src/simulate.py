@@ -3,6 +3,7 @@ import os.path
 import random
 import string
 import time
+import subprocess
 
 from ipmininet.ipnet import IPNet
 from ipmininet.ipswitch import IPSwitch
@@ -14,8 +15,7 @@ from network import Job, Network, Node, NodeConfig, NodeData, NodeInterface
 from pkt_parser import create_pkt_animation, is_ipv4_address
 from net_utils.vlan import setup_vlans, clean_bridges
 from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
-import subprocess
-from mininet.log import setLogLevel
+from mininet.log import setLogLevel, info
 
 
 class MyTopology(IPTopo):
@@ -432,6 +432,20 @@ def run_mininet(
         raise e
 
     time.sleep(2)
+
+    import psutil
+
+    info("Processes: ")
+    current_process = psutil.Process()
+    children = current_process.children(recursive=True)
+
+    for child in children:
+        info(child.name() + " " + str(child.pid))
+
+        if not (child.name() in ["mimidump", "bash"]):
+            child.kill()
+            child.wait()
+
     clean_bridges(net)
     teardown_vtep_bridges(net, network.nodes)
 
@@ -474,7 +488,7 @@ def run_mininet(
     time.sleep(2)
 
     # Shut down running services
-    os.system("ps -C nc -o pid=|xargs kill -9")
+    # os.system("ps -C nc -o pid=|xargs kill -9")
 
     # Return animation
     return animation, pcap_list
