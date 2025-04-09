@@ -1,10 +1,10 @@
 #!/bin/sh
 #Starting all containers
 
-cd back || exit
+cd front || exit
 docker compose up -d --build
 cd ..
-cd front || exit
+cd back || exit
 docker compose up -d --build
 cd ..
 docker ps -a
