@@ -1,0 +1,82 @@
+.ws-menu-devices-name {
+    margin-bottom: 10px;
+    padding: 10px;
+    width: 130px;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-weight: 500;
+    color: #222;
+}
+
+.ws-menu-devices {
+    max-height: calc(80vh - 140px);
+    padding: 10px;
+    width: 130px;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    color: #222;
+    overflow-y: auto;
+}
+
+.ws-menu-settings-name {
+    margin-bottom: 10px;
+    padding: 10px;
+    width: 270px;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-weight: 500;
+    color: #222;
+}
+
+.ws-menu-settings {
+    max-height: calc(75vh - 160px);
+    padding: 10px;
+    width: 270px;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+    color: #222;
+}
+
+.ws-ask-link {
+    text-decoration: none;
+    color: #222;
+    padding: 17px;
+    font-weight: 500;
+    transition: 0.5s ease;
+}
+
+.ws-ask-link:hover {
+    color: black;
+}
+
+.ws-ask-button {
+    padding: 10px;
+    width: 180px;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+
+.ws-name-case {
+    padding: 10px;
+    padding-left: 25px;
+    padding-right: 25px;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+    font-weight: 500;
+    color: #222;
+}
+
+.ws-shadow {
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+}

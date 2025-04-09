@@ -1832,7 +1832,7 @@ const SetNetworkPlayerState = function(simultaion_id)
         $('#NetworkPlayer').empty();
         $('#PacketSliderInput').hide();
         $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" disabled>Эмулируется...</button>');
-        $('#NetworkPlayerLabel').text("Ожидание 10-20 сек.");
+        $('#NetworkPlayerLabel').text("Ожидание 10-30 сек.");
         CheckSimulation(simultaion_id);
         return;
     }
@@ -1842,7 +1842,7 @@ const SetNetworkPlayerState = function(simultaion_id)
     $('#NetworkPlayer').empty();
     $('#PacketSliderInput').hide();
     $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton">Эмулировать</button>');
-    $('#NetworkPlayerLabel').text("Ожидание 10-20 сек.");
+    $('#NetworkPlayerLabel').text("Ожидание 10-30 сек.");
 
     $('#NetworkEmulateButton').click(function() {
 
@@ -1868,7 +1868,7 @@ const SetNetworkPlayerState = function(simultaion_id)
 
         $('#NetworkPlayer').empty();
         $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" disabled>Эмулируется...</button>');
-        $('#NetworkPlayerLabel').text("Ожидание 10-20 сек.");
+        $('#NetworkPlayerLabel').text("Ожидание 10-30 сек.");
         return;
     });
 
