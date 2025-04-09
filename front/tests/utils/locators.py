@@ -31,7 +31,7 @@ class Location:
         MY_NETWORKS_BUTTON = Locator("#my-networks-nav-item")
         # "Примеры сетей"
         NETWORK_EXAMPLES_BUTTON = Locator("#examples-nav-item")
-        # "Тренажер"
+        # "Тестирование"
         TRAINER_BUTTON = Locator("#trainer-nav-item")
         # "Учебные курсы"
         TRAINING_COURSES_BUTTON = Locator("#courses-nav-item")
