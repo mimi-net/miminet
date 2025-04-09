@@ -53,7 +53,9 @@ def check_subnet_mask(answer, device, target, expected_mask):
             if str(mask) == str(expected_mask):
                 return True, []
             else:
-                hints.append(f"Подсеть {mask} на интерфейсе устройства {device} не соответствует ожидаемой {expected_mask}.")
+                hints.append(
+                    f"Подсеть {mask} на интерфейсе устройства {device} не соответствует ожидаемой {expected_mask}."
+                )
 
     return False, hints
 
