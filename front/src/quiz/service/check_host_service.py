@@ -1,4 +1,5 @@
 import ipaddress
+import logging
 
 
 def check_subnet_mask(answer, device, target, expected_mask):
@@ -44,14 +45,15 @@ def check_subnet_mask(answer, device, target, expected_mask):
         return False, hints
 
     for interface in host_node["interface"]:
-        mask = interface.get("netmask")
+        edge = interface["connect"]
 
-        if str(mask) == str(expected_mask):
-            return True, []
-        else:
-            hints.append(
-                f"Подсеть {mask} на интерфейсе устройства {device} не соответствует ожидаемой {expected_mask}."
-            )
+        if edge == target_edge:
+            mask = interface.get("netmask")
+
+            if str(mask) == str(expected_mask):
+                return True, []
+            else:
+                hints.append(f"Подсеть {mask} на интерфейсе устройства {device} не соответствует ожидаемой {expected_mask}.")
 
     return False, hints
 
@@ -248,80 +250,65 @@ def check_echo_request(answer, source_device, target_device, direction="two-way"
     hints = []
     packets = answer.get("packets", [])
 
-    if not packets or len(packets) == 0:
+    if not packets:
         return False, ["Вы не отправляете пакетов по сети."]
 
     request_path = []
     reply_path = []
 
     for packet in packets:
-        packet_type = packet[0]["config"]["type"]
-        source = packet[0]["config"]["source"]
-        target = packet[0]["config"]["target"]
+        config = packet[0]["config"]
+        packet_type = config["type"]
+        source = config["source"]
+        target = config["target"]
 
         if "ICMP echo-request" in packet_type:
-            if request_path and request_path[-1] == target_device:
-                if source == target_device:
-                    request_path = [source, target]
-            elif not request_path and source == source_device:
-                request_path = [source, target]
-            elif request_path:
-                if request_path[-1] == source:
-                    request_path.append(target)
-
+            if source == source_device and (
+                not request_path or request_path[-1] != target_device
+            ):
+                request_path = [source]
+                reply_path = []
+            if source == request_path[-1] if request_path else False:
+                request_path.append(target)
         elif "ICMP echo-reply" in packet_type:
-            if reply_path and reply_path[-1] == source_device:
-                if source == source_device:
-                    reply_path = [source, target]
-            elif not reply_path and source == target_device:
-                reply_path = [source, target]
-            elif reply_path:
-                if reply_path[-1] == source:
-                    reply_path.append(target)
+            if not reply_path and source == target_device:
+                reply_path = [source]
+            if reply_path and source == reply_path[-1]:
+                reply_path.append(target)
 
     if direction == "one-way":
-        if (
+        valid = (
             request_path
             and request_path[0] == source_device
             and request_path[-1] == target_device
-        ):
-            return True, []
-        else:
-            if not request_path:
-                hints.append(
-                    f"Устройство {source_device} не отправляет запросы к {target_device}."
-                )
-            else:
-                if request_path[0] != source_device:
-                    hints.append(f"Запрос начался не с устройства {source_device}.")
-                if request_path[-1] != target_device:
-                    hints.append(f"Запрос не завершился на устройстве {target_device}.")
-
-    elif direction == "two-way":
-        if (
+        )
+    else:
+        valid = (
             request_path
             and reply_path
             and request_path[0] == source_device
             and request_path[-1] == target_device
             and reply_path[0] == target_device
             and reply_path[-1] == source_device
-        ):
-            return True, []
-        else:
-            if not request_path:
-                hints.append(f"Запрос не достиг устройства {target_device}.")
+        )
+
+    if valid:
+        return True, []
+    else:
+        if not request_path:
+            hints.append(f"Запрос от {source_device} к {target_device} не обнаружен.")
+        elif request_path[0] != source_device:
+            hints.append(f"Запрос начинается не с {source_device}.")
+        elif request_path[-1] != target_device:
+            hints.append(f"Запрос не достиг {target_device}.")
+
+        if direction == "two-way":
             if not reply_path:
-                hints.append(f"Ответ не достиг устройства {source_device}.")
-            if request_path:
-                if request_path[0] != source_device:
-                    hints.append(f"Запрос начался не с устройства {source_device}.")
-                if request_path[-1] != target_device:
-                    hints.append(f"Запрос не завершился на устройстве {target_device}.")
-            if reply_path:
-                if reply_path[0] != target_device:
-                    hints.append(f"Ответ начался не с устройства {target_device}.")
-                if reply_path[-1] != source_device:
-                    hints.append(f"Ответ не завершился на устройстве {source_device}.")
+                hints.append(f"Ответ от {target_device} не обнаружен.")
+            elif reply_path[0] != target_device:
+                hints.append(f"Ответ начинается не с {target_device}.")
+            elif reply_path[-1] != source_device:
+                hints.append(f"Ответ не вернулся к {source_device}.")
 
     return False, hints
 
