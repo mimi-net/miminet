@@ -1,5 +1,4 @@
 import ipaddress
-import logging
 
 
 def check_subnet_mask(answer, device, target, expected_mask):
