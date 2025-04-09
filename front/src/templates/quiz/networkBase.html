@@ -72,7 +72,7 @@
             {% if current_user.is_authenticated %}
                 <div class="navbar-nav">
                     <li id="trainer-nav-item" class="nav-item">
-                        <a class="nav-link" href="{{ url_for('get_all_tests_endpoint') }}">Тренажер</a>
+                        <a class="nav-link" href="{{ url_for('get_all_tests_endpoint') }}">Тестирование</a>
                     </li>
                     <li id="examples-nav-item" class="nav-item">
                         <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
@@ -85,7 +85,7 @@
                 {% if request.path != url_for('login_index') %}
                     <div class="navbar-nav">
                         <li id="trainer-nav-item" class="nav-item">
-                            <a class="nav-link" href="{{ url_for('login_index') }}">Тренажер</a>
+                            <a class="nav-link" href="{{ url_for('login_index') }}">Тестирование</a>
                         </li>
                         <li id="examples-nav-item" class="nav-item">
                             <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>

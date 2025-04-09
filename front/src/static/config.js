@@ -14,6 +14,8 @@ const config_server_main_form_id = "#config_server_main_form";
 const config_hub_main_form_id = "#config_hub_main_form";
 const config_switch_main_form_id = "#config_switch_main_form";
 const config_edge_main_form_id = "#config_edge_main_form";
+const config_content_save_tag = "#config_content_save";
+const config_content_save_id = "config_content_save";
 
 const ClearConfigForm = function (text) {
 
@@ -25,7 +27,9 @@ const ClearConfigForm = function (text) {
 
     // Clear all child
     $(config_content_id).empty();
-    $(config_content_id).append('<h4>' + txt + '</h4>');
+    $(config_content_save_tag).empty();
+    $(config_content_id).append('<span>' + txt + '</span>');
+    document.getElementById(config_content_save_id).style.display='none';
 }
 
 const HostWarningMsg = function (msg) {
@@ -45,19 +49,24 @@ const ServerWarningMsg = function (msg) {
 }
 
 const ConfigHostForm = function(host_id){
-    let form = document.getElementById('config_host_main_form_script').innerHTML;
+    var form = document.getElementById('config_host_main_form_script').innerHTML;
+    var button = document.getElementById('config_host_save_script').innerHTML;
 
     // Clear all child
     $(config_content_id).empty();
+    $(config_content_save_tag).empty();
+
+    document.getElementById(config_content_save_id).style.display='block';
 
     // Add new form
     $(config_content_id).append(form);
+    $(config_content_save_tag).append(button);
 
     // Set host_id
     $('#host_id').val(host_id);
     $('#net_guid').val(network_guid);
 
-    $('#config_host_main_form_submit_button').click(function(event) {
+    function handleHostClick(event) {
         event.preventDefault();
         let data = $('#config_main_form').serialize();
 
@@ -65,27 +74,34 @@ const ConfigHostForm = function(host_id){
         $("#config_main_form :input").prop("disabled", true);
 
         // Set loading spinner
-        $(this).text('');
-        $(this).append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
+        $('#config_host_main_form_submit_button').text('');
+        $('#config_host_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
 
         UpdateHostConfiguration(data, host_id);
-    });
+    }
+
+    $('#config_host_main_form_submit_button, #config_host_end_form').on('click', handleHostClick);
 }
 
 const ConfigRouterForm = function (router_id) {
-    let form = document.getElementById('config_router_main_form_script').innerHTML;
+    var form = document.getElementById('config_router_main_form_script').innerHTML;
+    var button = document.getElementById('config_router_save_script').innerHTML;
 
     // Clear all child
     $(config_content_id).empty();
+    $(config_content_save_tag).empty();
+
+    document.getElementById(config_content_save_id).style.display='block';
 
     // Add new form
     $(config_content_id).append(form);
+    $(config_content_save_tag).append(button);
 
     // Set host_id
     $('#router_id').val(router_id);
     $('#net_guid').val(network_guid);
 
-    $('#config_router_main_form_submit_button').click(function (event) {
+    function handleRouterClick(event) {
         event.preventDefault();
         let data = $('#config_main_form').serialize();
 
@@ -93,27 +109,34 @@ const ConfigRouterForm = function (router_id) {
         $("#config_main_form :input").prop("disabled", true);
 
         // Set loading spinner
-        $(this).text('');
-        $(this).append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
+        $('#config_router_main_form_submit_button').text('');
+        $('#config_router_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
 
         UpdateRouterConfiguration(data, router_id);
-    });
+    }
+
+    $('#config_router_main_form_submit_button, #config_router_end_form').on('click', handleRouterClick);
 }
 
 const ConfigServerForm = function (server_id) {
-    let form = document.getElementById('config_server_main_form_script').innerHTML;
+    var form = document.getElementById('config_server_main_form_script').innerHTML;
+    var button = document.getElementById('config_server_save_script').innerHTML;
 
     // Clear all child
     $(config_content_id).empty();
+    $(config_content_save_tag).empty();
+
+    document.getElementById(config_content_save_id).style.display='block';
 
     // Add new form
     $(config_content_id).append(form);
+    $(config_content_save_tag).append(button);
 
     // Set host_id
     $('#server_id').val(server_id);
     $('#net_guid').val(network_guid);
 
-    $('#config_server_main_form_submit_button').click(function (event) {
+    function handleServerClick(event) {
         event.preventDefault();
         let data = $('#config_main_form').serialize();
 
@@ -121,27 +144,34 @@ const ConfigServerForm = function (server_id) {
         $("#config_main_form :input").prop("disabled", true);
 
         // Set loading spinner
-        $(this).text('');
-        $(this).append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
+        $('#config_server_main_form_submit_button').text('');
+        $('#config_server_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
 
         UpdateServerConfiguration(data, server_id);
-    });
+    }
+
+    $('#config_server_main_form_submit_button, #config_server_end_form').on('click', handleServerClick);
 }
 
 const ConfigHubForm = function (hub_id) {
     var form = document.getElementById('config_hub_main_form_script').innerHTML;
+    var button = document.getElementById('config_hub_save_script').innerHTML;
 
     // Clear all child
     $(config_content_id).empty();
+    $(config_content_save_tag).empty();
+
+    document.getElementById(config_content_save_id).style.display='block';
 
     // Add new form
     $(config_content_id).append(form);
+    $(config_content_save_tag).append(button);
 
     // Set host_id
     $('#hub_id').val(hub_id);
     $('#net_guid').val(network_guid);
 
-    $('#config_hub_main_form_submit_button').click(function (event) {
+    function handleHubClick(event) {
         event.preventDefault();
         let data = $('#config_hub_main_form').serialize();
 
@@ -149,21 +179,28 @@ const ConfigHubForm = function (hub_id) {
         $("#config_hub_main_form :input").prop("disabled", true);
 
         // Set loading spinner
-        $(this).text('');
-        $(this).append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
+        $('#config_hub_main_form_submit_button').text('');
+        $('#config_hub_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
 
         UpdateHubConfiguration(data, hub_id);
-    });
+    }
+
+    $('#config_hub_main_form_submit_button, #config_hub_end_form').on('click', handleHubClick);
 }
 
 const ConfigSwitchForm = function (switch_id) {
     var form = document.getElementById('config_switch_main_form_script').innerHTML;
+    var button = document.getElementById('config_switch_save_script').innerHTML;
 
     // Clear all child
     $(config_content_id).empty();
+    $(config_content_save_tag).empty();
+
+    document.getElementById(config_content_save_id).style.display='block';
 
     // Add new form
     $(config_content_id).append(form);
+    $(config_content_save_tag).append(button);
 
     // Add href for mimishark
     // var url = "/MimiShark?guid="+network_guid
@@ -173,7 +210,7 @@ const ConfigSwitchForm = function (switch_id) {
     $('#switch_id').val(switch_id);
     $('#net_guid').val(network_guid);
 
-    $('#config_switch_main_form_submit_button').click(function (event) {
+    function handleSwitchClick(event) {
         $("#config_switch_main_form [name='config_rstp_stp']").val($('#config_button_rstp').val());
         event.preventDefault();
         let data = $('#config_switch_main_form').serialize();
@@ -182,11 +219,13 @@ const ConfigSwitchForm = function (switch_id) {
         $("#config_switch_main_form :input").prop("disabled", true);
 
         // Set loading spinner
-        $(this).text('');
-        $(this).append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
+        $('#config_switch_main_form_submit_button').text('');
+        $('#config_switch_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
 
         UpdateSwitchConfiguration(data, switch_id);
-    });
+    }
+
+    $('#config_switch_main_form_submit_button, #config_switch_end_form').on('click', handleSwitchClick);
 }
 
 const ConfigHubName = function (hostname) {
@@ -203,6 +242,9 @@ const ConfigEdgeForm = function (edge_id) {
 
     // Clear all child
     $(config_content_id).empty();
+    $(config_content_save_tag).empty();
+
+    document.getElementById(config_content_save_id).style.display='none';
 
     // Add new form
     $(config_content_id).append(form);
@@ -232,7 +274,7 @@ const ConfigSwitchName = function (hostname) {
 const ConfigSwtichSTP = function (stp) {
     var elem = document.getElementById('config_switch_checkbox_stp_script');
 
-    $(elem.innerHTML).insertBefore('#config_switch_main_form_submit_button');
+    $(elem.innerHTML).insertBefore('#config_switch_end_form');
 
     if (stp === 1) {
         $('#config_switch_stp').attr('checked', 'checked');
@@ -241,7 +283,7 @@ const ConfigSwtichSTP = function (stp) {
     var warning_text = document.getElementById('config_switch_warning_stp_script').innerHTML;
     $('#config_switch_stp').on('click', function () {
         if ($(this).is(':checked')) {
-            $(warning_text).insertBefore('#config_switch_main_form_submit_button');
+            $(warning_text).insertBefore('#config_switch_end_form');
         } else {
             $('#config_warning_stp').remove();
         }
@@ -251,7 +293,7 @@ const ConfigSwtichSTP = function (stp) {
 const ConfigSwtichRSTP = function (rstp) {
     var elem = document.getElementById('config_switch_checkbox_rstp_script');
 
-    $(elem.innerHTML).insertBefore('#config_switch_main_form_submit_button');
+    $(elem.innerHTML).insertBefore('#config_switch_end_form');
 
     if (rstp === 1) {
         $('#config_switch_rstp').attr('checked', 'checked');
@@ -260,7 +302,7 @@ const ConfigSwtichRSTP = function (rstp) {
     var warning_text = document.getElementById('config_switch_warning_rstp_script').innerHTML;
     $('#config_switch_rstp').on('click', function () {
         if ($(this).is(':checked')) {
-            $(warning_text).insertBefore('#config_switch_main_form_submit_button');
+            $(warning_text).insertBefore('#config_switch_end_form');
         } else {
             $('#config_warning_rstp').remove();
         }
@@ -272,6 +314,8 @@ const SharedConfigHostForm = function(host_id){
 
     // Clear all child
     $(config_content_id).empty();
+    $(config_content_save_tag).empty();
+    document.getElementById(config_content_save_id).style.display='none';
 
     // Add new form
     $(config_content_id).append(form);
@@ -287,6 +331,8 @@ const SharedConfigRouterForm = function (router_id) {
 
     // Clear all child
     $(config_content_id).empty();
+    $(config_content_save_tag).empty();
+    document.getElementById(config_content_save_id).style.display='none';
 
     // Add new form
     $(config_content_id).append(form);
@@ -303,6 +349,8 @@ const SharedConfigServerForm = function (router_id) {
 
     // Clear all child
     $(config_content_id).empty();
+    $(config_content_save_tag).empty();
+    document.getElementById(config_content_save_id).style.display='none';
 
     // Add new form
     $(config_content_id).append(form);
@@ -319,6 +367,8 @@ const SharedConfigHubForm = function (hub_id) {
 
     // Clear all child
     $(config_content_id).empty();
+    $(config_content_save_tag).empty();
+    document.getElementById(config_content_save_id).style.display='none';
 
     // Add new form
     $(config_content_id).append(form);
@@ -330,6 +380,8 @@ const SharedConfigSwitchForm = function (switch_id) {
 
     // Clear all child
     $(config_content_id).empty();
+    $(config_content_save_tag).empty();
+    document.getElementById(config_content_save_id).style.display='none';
 
     // Add new form
     $(config_content_id).append(form);
@@ -377,7 +429,7 @@ const ConfigItemInterface = function (name, ip, netmask, connected_to, item) {
 
     let tag = '#' + conf_item;
     let text = eth.innerHTML;
-    $(text).insertBefore(tag + '_main_form_submit_button');
+    $(text).insertBefore(tag + '_end_form');
 
     $('<input type="hidden" name="' + conf_item + '_iface_ids[]" value="' + name + '"/>').insertBefore(tag + ids[1] + name);
     $(tag + ids[1] + name).attr("placeholder", connected_to);
@@ -414,7 +466,7 @@ const ConfigSwitchInterface = function (name, ip, netmask, connected_to) {
 const ConfigItemIndent = function (item) {
     let conf_item = 'config_' + item
     let text = document.getElementById(conf_item + '_indent_script').innerHTML;
-    $(text).insertBefore('#' + conf_item + '_main_form_submit_button');
+    $(text).insertBefore('#' + conf_item + '_end_form');
 }
 
 const ConfigHubIndent = function () {
@@ -586,7 +638,7 @@ const ConfigHostGateway = function (gw) {
 
     var text = document.getElementById('config_host_default_gw_script').innerHTML;
 
-    $(text).insertBefore('#config_host_main_form_submit_button');
+    $(text).insertBefore('#config_host_end_form');
     $('#config_host_default_gw').val(gw);
 }
 
@@ -594,7 +646,7 @@ const ConfigRouterGateway = function (gw) {
 
     var text = document.getElementById('config_router_default_gw_script').innerHTML;
 
-    $(text).insertBefore('#config_router_main_form_submit_button');
+    $(text).insertBefore('#config_router_end_form');
     $('#config_router_default_gw').val(gw);
 }
 
@@ -602,7 +654,7 @@ const ConfigServerGateway = function (gw) {
 
     var text = document.getElementById('config_server_default_gw_script').innerHTML;
 
-    $(text).insertBefore('#config_server_main_form_submit_button');
+    $(text).insertBefore('#config_server_end_form');
     $('#config_server_default_gw').val(gw);
 }
 
@@ -839,6 +891,7 @@ const ConfigServerJobOnChange = function (evnt) {
 const DisableFormInputs = function () {
     let s = config_content_id + ' :input';
     $(s).prop("disabled", true);
+    $(config_content_save_tag + ' :input').prop("disabled", true);
 }
 
 const DisableVLANInputs = function (n) {

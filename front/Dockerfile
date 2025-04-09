@@ -1,6 +1,7 @@
 FROM python:3.11
 
 WORKDIR /app
+RUN pip install setuptools --upgrade
 RUN pip install wheel uwsgi
 ADD ./requirements.txt /app/requirements.txt
 

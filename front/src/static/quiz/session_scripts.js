@@ -114,18 +114,14 @@ async function getAnswer() {
         }
     }
     if (questionType === "practice") {
-        if (packets === "null" || packets === undefined || packets === null || packets === "") {
-            // simulate and get packets
-            if (!jobs.length) {
-                $('#noJobsModal').modal('toggle');
-                return;
-            }
-
-            await RunAndWaitSimulation(network_guid).catch((error) => console.log(error))
-            return {'nodes': nodes, 'edges': edges, 'packets': packets}
-        } else {
-            return {'nodes': nodes, 'edges': edges, 'packets': packets}
+        // simulate and get packets
+        if (!jobs.length) {
+            $('#noJobsModal').modal('toggle');
+            return;
         }
+
+        await RunAndWaitSimulation(network_guid).catch((error) => console.log(error))
+        return {'nodes': nodes, 'edges': edges, 'packets': packets}
     }
 }
 
