@@ -11,7 +11,7 @@ from celery_app import (
 from mininet.log import setLogLevel, error
 
 from network_schema import Network
-from emulate import emulate
+from emulator import emulate
 
 
 def run_network(network_json: str):
