@@ -1,7 +1,7 @@
 import re
 from typing import Any, Callable
 
-from network import Job
+from network_schema import Job
 
 
 def ping_handler(job: Job, job_host: Any) -> None:

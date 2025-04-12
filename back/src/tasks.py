@@ -10,7 +10,7 @@ from celery_app import (
 )
 from mininet.log import setLogLevel, error
 
-from network import Network
+from network_schema import Network
 from simulate import run_mininet
 
 

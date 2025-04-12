@@ -2,7 +2,7 @@ import re
 
 from ipmininet.ipnet import IPNet
 
-from network import Node
+from network_schema import Node
 
 
 def setup_vtep_interfaces(net: IPNet, nodes: list[Node]) -> None:
