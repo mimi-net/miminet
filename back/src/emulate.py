@@ -16,18 +16,14 @@ from network_topology import MiminetTopology
 def create_animation(
     topo: MiminetTopology,
 ) -> tuple[list[list] | list, list | list[tuple[bytes, str]]]:
-    """Functions for create animations
-
-    Args:
-        topo (MiminetTopology): topo for creating animation
+    """Creates an animation using network topology.
 
     Returns:
-        tuple: animation list and pcap, pcap_name list
-
+        tuple: A tuple containing the animation list and a list of packet captures with their names.
     """
 
     pcap_list = []
-    animation = []
+    animation_frames = []
 
     for link1, link2, edge_id, edge_source, edge_target in topo.iface_pairs:
         pcap_out_file1 = "/tmp/capture_" + link1 + "_out.pcapng"
@@ -46,44 +42,33 @@ def create_animation(
             pcap_list.append((file1.read(), link1))
             pcap_list.append((file2.read(), link2))
 
-        pkts = create_pkt_animation(
+        packets = create_pkt_animation(
             pcap_out_file1, pcap_out_file2, edge_id, edge_source, edge_target
         )
 
-        animation += pkts
+        animation_frames += packets
 
-    topo.clear_files()
-
-    return animation, pcap_list
+    return animation_frames, pcap_list
 
 
-def do_job(job: Job, net: IPNet) -> None:
-    """Execute job for network
+def execute_job(job: Job, net: IPNet) -> None:
+    """Execute network job (ping, nc, ...)."""
+    job_host = net.get(job.host_id)
 
-    Args:
-        job (Job): current job instance
-        net (IPNet): current ipmininet net
-
-    """
-
-    host_id = job.host_id
-    # get host from network by it's ID
-    job_host = net.get(host_id)
-    # initialize new Job by host and job type
-    current_job = Jobs(job, job_host)
-    current_job.handler()
+    new_job = Jobs(job, job_host)
+    new_job.handler()
 
 
-def run_mininet(
+def emulate(
     network: Network,
 ) -> tuple[list[list] | list, list | list[tuple[bytes, str]]]:
-    """Function for start mininet emulation
+    """Run mininet emulation.
 
     Args:
-        network (str): Network for emulation
+        network (str): Network for emulation.
 
     Returns:
-        tuple: animation list and pcap, pcap_name list
+        tuple: animation list and pcap, pcap_name list.
     """
 
     setLogLevel("info")
@@ -110,7 +95,7 @@ def run_mininet(
                 continue
 
             try:
-                do_job(job, net)
+                execute_job(job, net)
             except Exception:
                 continue
 
@@ -122,7 +107,7 @@ def run_mininet(
                 continue
 
             try:
-                do_job(job, net)
+                execute_job(job, net)
             except Exception:
                 continue
     except Exception as e:
@@ -152,6 +137,7 @@ def run_mininet(
     net.stop()
 
     animation, pcap_list = create_animation(topo)
+    topo.clear_files()  # clear after animation
     animation_s = sorted(animation, key=lambda k: k.get("timestamp", 0))
 
     if animation_s:
