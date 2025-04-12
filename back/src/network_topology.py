@@ -1,5 +1,6 @@
 import os
 import os.path
+from typing import List
 
 from ipmininet.ipnet import IPNet
 from ipmininet.ipswitch import IPSwitch
@@ -14,22 +15,26 @@ class MiminetTopology(IPTopo):
     """Class representing topology for miminet networks"""
 
     def __init__(self, *args, **kwargs):
-        # List with useful information about every link:
-        # - name of source node interface,
-        # - name of target node interface,
-        # - edge id,
-        # - source node id,
-        # - target node id
-        self.iface_pairs = []
+        # List with useful information about every link
+        self.__iface_pairs = []
+        # Used to generate unique names
         self.__switch_count = 0
-        self.__network: Network = kwargs["network"]
         # Minimum suitable time for which the network is configured
         self.__network_configuration_time = 3
+
+        self.__network: Network = kwargs["network"]
         self.__nodes = {}
         self.__id_to_node: dict[str, Node] = {}
+
         super().__init__(*args, **kwargs)
 
-    def get_network_configuration_time(self) -> int:
+    @property
+    def interfaces(self) -> List:
+        """Available interfaces in the topology."""
+        return self.__iface_pairs.copy()
+
+    @property
+    def network_configuration_time(self) -> int:
         """Get amount of time it takes to properly configure the network (in seconds)."""
         return self.__network_configuration_time
 
@@ -153,7 +158,7 @@ class MiminetTopology(IPTopo):
             src_iface = self.__find_interface(edge_id, src_node.interface)
             trg_iface = self.__find_interface(edge_id, trg_node.interface)
 
-            self.iface_pairs.append(
+            self.__iface_pairs.append(
                 (src_iface.name, trg_iface.name, edge_id, source_id, target_id)
             )
 
@@ -264,7 +269,7 @@ class MiminetTopology(IPTopo):
         super().post_build(net)
 
     def clear_files(self):
-        for link1, link2, _, _, _ in self.iface_pairs:
+        for link1, link2, _, _, _ in self.__iface_pairs:
             pcap_out_file1 = f"/tmp/capture_{link1}_out.pcapng"
             pcap_out_file2 = f"/tmp/capture_{link2}_out.pcapng"
             pcap_file1 = f"/tmp/capture_{link2}.pcapng"
@@ -275,7 +280,7 @@ class MiminetTopology(IPTopo):
                     os.remove(filename)
 
     def check(self):
-        for link1, link2, _, _, _ in self.iface_pairs:
+        for link1, link2, _, _, _ in self.__iface_pairs:
             pcap_out_file1 = f"/tmp/capture_{link1}_out.pcapng"
             pcap_out_file2 = f"/tmp/capture_{link2}_out.pcapng"
 

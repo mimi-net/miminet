@@ -25,7 +25,7 @@ def create_animation(
     pcap_list = []
     animation_frames = []
 
-    for link1, link2, edge_id, edge_source, edge_target in topo.iface_pairs:
+    for link1, link2, edge_id, edge_source, edge_target in topo.interfaces:
         pcap_out_file1 = "/tmp/capture_" + link1 + "_out.pcapng"
         pcap_out_file2 = "/tmp/capture_" + link2 + "_out.pcapng"
 
@@ -84,7 +84,7 @@ def emulate(
 
         setup_vlans(net, network.nodes)
         setup_vtep_interfaces(net, network.nodes)
-        time.sleep(topo.get_network_configuration_time())
+        time.sleep(topo.network_configuration_time)
         topo.check()
 
         # Don only 100+ jobs
