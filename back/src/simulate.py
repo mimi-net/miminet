@@ -11,7 +11,7 @@ from ipmininet.ipovs_switch import IPOVSSwitch
 from ipmininet.iptopo import IPTopo
 from ipmininet.router.config import RouterConfig
 from jobs import Jobs
-from network import Job, Network, Node, NodeConfig, NodeData, NodeInterface
+from network import Job, Network, Node, NodeConfig, NodeInterface
 from pkt_parser import create_pkt_animation, is_ipv4_address
 from net_utils.vlan import setup_vlans, clean_bridges
 from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
@@ -25,81 +25,75 @@ class MyTopology(IPTopo):
         self.link_pair = []
         self.switch_count = 0
         self.network: Network = kwargs["network"]
-        self._time_to_wait_before_emulation = kwargs["time_to_wait_before_emulation"]
-        self._nodes = {}
-        self._id_node_map: dict[str, Node] = {}
+        # Minimum suitable time for which the network is configured
+        self.__network_configuration_time = 3
+        self.__nodes = {}
+        self.__id_to_node: dict[str, Node] = {}
         super().__init__(*args, **kwargs)
 
-    @property
-    def time_to_wait_before_emulation(self) -> int:
-        """Get current strategy
+    def get_network_configuration_time(self) -> int:
+        """Get amount of time it takes to properly configure the network (in seconds)."""
+        return self.__network_configuration_time
 
-        Returns:
-            int: time to wait before emulation
-        """
+    def __set_network_configuration_time(self, value: int):
+        """Set amount of time it takes to properly configure the network (in seconds)."""
+        return max(value, self.__network_configuration_time)
 
-        return self._time_to_wait_before_emulation
-
-    @time_to_wait_before_emulation.setter
-    def time_to_wait_before_emulation(self, new_time_wait_before_emulation: int):
-        """Change the execution strategy
-
-        Args:
-            new_time_wait_before_emulation (int): time wait before emulation
-
-        """
-        self._time_to_wait_before_emulation = new_time_wait_before_emulation
-
-    def _node_handler(self, node: Node):
+    def __handle_node(self, node: Node):
         config: NodeConfig = node.config
-        data: NodeData = node.data
-        node_id = data.id
+        node_type: str = config.type  # network device type
+        node_id: str = node.data.id  # network device name(label)
 
-        match config.type:
-            case "l2_switch":
-                stp = config.stp == 1
-                rstp = config.stp == 2
-                priority = config.priority
-                self._nodes[node_id] = self.addSwitch(
-                    node_id,
-                    cls=IPOVSSwitch,
-                    stp=stp,
-                    rstp=rstp,
-                    cwd="/tmp",
-                    priority=priority,
-                )
-                if rstp:
-                    self.time_to_wait_before_emulation = max(
-                        5, self.time_to_wait_before_emulation
-                    )
-                elif stp:
-                    self.time_to_wait_before_emulation = 33
-            case "host" | "server":
-                default_gw = config.default_gw
-                if default_gw:
-                    self._nodes[node_id] = self.addHost(
-                        node_id, defaultRoute="via " + str(default_gw)
-                    )
-                else:
-                    self._nodes[node_id] = self.addHost(node_id, defaultRoute="")
-            case "l1_hub":
-                self._nodes[node_id] = self.addSwitch(
-                    node_id, cls=IPSwitch, stp=False, hub=True
-                )
-            case "router":
-                default_gw = config.default_gw
+        if node_type == "l2_switch":
+            self.__handle_l2_switch(node_id, config)
+        elif node_type in ("host", "server"):
+            self.__handle_host_or_server(node_id, config)
+        elif node_type == "l1_hub":
+            self.__handle_l1_hub(node_id)
+        elif node_type == "router":
+            self.__handle_router(node_id, config)
 
-                if default_gw:
-                    self._nodes[node_id] = self.addRouter(
-                        node_id,
-                        use_v6=False,
-                        routerDefaultRoute="via " + str(default_gw),
-                        config=RouterConfig,
-                    )
-                else:
-                    self._nodes[node_id] = self.addRouter(
-                        node_id, use_v6=False, config=RouterConfig
-                    )
+    def __handle_l2_switch(self, node_id: str, config: NodeConfig):
+        assert config.stp in (0, 1, 2), "Incorrect STP mode"
+        is_stp_enabled = config.stp == 1  # Check switch mode
+        is_rstp_enabled = config.stp == 2
+
+        self.__nodes[node_id] = self.addSwitch(
+            node_id,
+            cls=IPOVSSwitch,
+            stp=is_stp_enabled,
+            rstp=is_rstp_enabled,
+            cwd="/tmp",
+            priority=config.priority,
+        )
+
+        # Set emulation delay based on STP mode
+        if is_rstp_enabled:
+            self.__set_network_configuration_time(5)
+        elif is_stp_enabled:
+            self.__set_network_configuration_time(33)
+
+    def __handle_host_or_server(self, node_id: str, config: NodeConfig):
+        default_gw = config.default_gw
+        route = f"via {default_gw}" if default_gw else ""
+        self.__nodes[node_id] = self.addHost(node_id, defaultRoute=route)
+
+    def __handle_l1_hub(self, node_id: str):
+        self.__nodes[node_id] = self.addSwitch(
+            node_id, cls=IPSwitch, stp=False, hub=True
+        )
+
+    def __handle_router(self, node_id: str, config: NodeConfig):
+        default_gw = config.default_gw
+        kwargs = {
+            "use_v6": False,
+            "config": RouterConfig,
+        }
+
+        if default_gw:
+            kwargs["routerDefaultRoute"] = f"via {default_gw}"
+
+        self.__nodes[node_id] = self.addRouter(node_id, **kwargs)
 
     @staticmethod
     def _find_interface(edge_id, interfaces: list[NodeInterface]):
@@ -113,8 +107,8 @@ class MyTopology(IPTopo):
 
         # Add hosts and switches
         for node in self.network.nodes:
-            self._id_node_map[node.data.id] = node
-            self._node_handler(node)
+            self.__id_to_node[node.data.id] = node
+            self.__handle_node(node)
 
         # Add links
         for edge in self.network.edges:
@@ -122,20 +116,20 @@ class MyTopology(IPTopo):
             edge_source = edge.data.source
             edge_target = edge.data.target
 
-            host_source = self._nodes[edge_source]
-            host_target = self._nodes[edge_target]
+            host_source = self.__nodes[edge_source]
+            host_target = self.__nodes[edge_target]
 
             if not host_source or not host_target:
                 continue
 
-            source_node = self._id_node_map[edge_source]
+            source_node = self.__id_to_node[edge_source]
             (
                 interface_name_source,
                 interface_name_source_ip,
                 interface_name_source_netmask,
             ) = self._find_interface(edge_id, source_node.interface)
 
-            target_node = self._id_node_map[edge_target]
+            target_node = self.__id_to_node[edge_target]
             (
                 interface_name_target,
                 interface_name_target_ip,
@@ -228,7 +222,7 @@ class MyTopology(IPTopo):
         ), super().addLink(s, h_target, intfName2=interface_name_2, **opts2)
 
     def post_build(self, net: IPNet):
-        for node in self._id_node_map.values():
+        for node in self.__id_to_node.values():
             config = node.config
             if config.type == "router":
                 net[node.data.id].cmd(f"route add default gw {config.default_gw}")
@@ -327,9 +321,7 @@ def create_animation(
     pcap_list = []
     animation = []
 
-    for lp in topo.link_pair:
-        link1, link2, edge_id, edge_source, edge_target = lp
-
+    for link1, link2, edge_id, edge_source, edge_target in topo.link_pair:
         pcap_out_file1 = "/tmp/capture_" + link1 + "_out.pcapng"
         pcap_out_file2 = "/tmp/capture_" + link2 + "_out.pcapng"
 
@@ -392,14 +384,14 @@ def run_mininet(
         return [], []
 
     try:
-        topo = MyTopology(network=network, time_to_wait_before_emulation=3)
+        topo = MyTopology(network=network)
         net = IPNet(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
 
         net.start()
 
         setup_vlans(net, network.nodes)
         setup_vtep_interfaces(net, network.nodes)
-        time.sleep(topo.time_to_wait_before_emulation)
+        time.sleep(topo.get_network_configuration_time())
         topo.check()
 
         # Don only 100+ jobs
