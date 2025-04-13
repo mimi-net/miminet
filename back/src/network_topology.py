@@ -1,5 +1,3 @@
-import os
-import os.path
 from typing import List
 
 from ipmininet.ipnet import IPNet
@@ -15,7 +13,7 @@ class MiminetTopology(IPTopo):
     """Class representing topology for miminet networks"""
 
     def __init__(self, *args, **kwargs):
-        # List with useful information about every link
+        # List with useful information about every interface
         self.__iface_pairs = []
         # Used to generate unique names
         self.__switch_count = 0
@@ -30,7 +28,9 @@ class MiminetTopology(IPTopo):
 
     @property
     def interfaces(self) -> List:
-        """Available interfaces in the topology."""
+        """Available interfaces in the topology.
+
+        Return: List with useful information about every interface."""
         return self.__iface_pairs.copy()
 
     @property
@@ -267,27 +267,3 @@ class MiminetTopology(IPTopo):
             sw.cmd("sysctl -w net.ipv6.conf.lo.disable_ipv6=1")
 
         super().post_build(net)
-
-    def clear_files(self):
-        for link1, link2, _, _, _ in self.__iface_pairs:
-            pcap_out_file1 = f"/tmp/capture_{link1}_out.pcapng"
-            pcap_out_file2 = f"/tmp/capture_{link2}_out.pcapng"
-            pcap_file1 = f"/tmp/capture_{link2}.pcapng"
-            pcap_file2 = f"/tmp/capture_{link2}.pcapng"
-
-            for filename in (pcap_out_file1, pcap_out_file2, pcap_file1, pcap_file2):
-                if os.path.exists(filename):
-                    os.remove(filename)
-
-    def check(self):
-        for link1, link2, _, _, _ in self.__iface_pairs:
-            pcap_out_file1 = f"/tmp/capture_{link1}_out.pcapng"
-            pcap_out_file2 = f"/tmp/capture_{link2}_out.pcapng"
-
-            if not os.path.exists(pcap_out_file1):
-                self.clear_files()
-                raise ValueError(f"No capture for interface '{link1}'.")
-
-            if not os.path.exists(pcap_out_file2):
-                self.clear_files()
-                raise ValueError(f"No capture for interface '{link2}'.")
