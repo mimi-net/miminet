@@ -108,14 +108,14 @@ def group_packets_by_time(packets, time_slice_us: int = 14000):
     if not packets:
         return []
 
-    packets = sorted(packets, key=lambda k: k.get("timestamp", 0))
+    animation_packets = sorted(packets, key=lambda k: k.get("timestamp", 0))
 
     grouped = []
     current_group: list = []
-    first_packet_time = int(packets[0]["timestamp"])
+    first_packet_time = int(animation_packets[0]["timestamp"])
     time_limit = first_packet_time + time_slice_us
 
-    for pkt in packets:
+    for pkt in animation_packets:
         pkt_time = int(pkt["timestamp"])
 
         if pkt_time > time_limit:
