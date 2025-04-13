@@ -1,13 +1,12 @@
 import os
 import os.path
 import subprocess
-from psutil import Process
 
 from ipmininet.ipnet import IPNet
 from jobs import Jobs
 from network_schema import Job, Network
 from pkt_parser import create_pkt_animation
-from mininet.log import setLogLevel, info, error
+from mininet.log import setLogLevel, error
 from network_topology import MiminetTopology
 from network import MiminetNetwork
 
@@ -30,14 +29,12 @@ def emulate(
         return [], []
 
     try:
-        # Build topology using network schema
         topo = MiminetTopology(network=network)
-        # Build runnable network using topology and network schema
         net = MiminetNetwork(topo, network)
 
         net.start()
 
-        # jobs with high ID have priority over low ones
+        # Jobs with high ID have priority over low ones
         ordered_jobs = sorted(network.jobs, key=lambda job: job.job_id, reverse=True)
 
         for job in ordered_jobs:
@@ -51,40 +48,10 @@ def emulate(
 
         raise e
 
-    animation, pcap_list = create_animation(topo.interfaces)
-    animation_s = sorted(animation, key=lambda k: k.get("timestamp", 0))
+    animation, pcaps = create_animation(topo.interfaces)
+    animation = group_packets_by_time(animation)
 
-    if animation_s:
-        animation = []
-        animation_m = []
-        first_packet = None
-        limit = 0
-
-        # Magic constant.
-        # Number of microseconds * 100000
-        # Depends on 'opts1["params2"] = {"delay": delay' in addLink function
-        pkt_speed = 14000
-
-        for pkt in animation_s:
-            if not first_packet:
-                first_packet = pkt
-                animation_m = [pkt]
-                limit = int(first_packet["timestamp"]) + pkt_speed
-                continue
-
-            if int(pkt["timestamp"]) > limit:
-                animation.append(animation_m)
-                first_packet = pkt
-                animation_m = [pkt]
-                limit = int(first_packet["timestamp"]) + pkt_speed
-                continue
-
-            animation_m.append(pkt)
-
-        # Append last packet
-        animation.append(animation_m)
-
-    return animation, pcap_list
+    return animation, pcaps
 
 
 def create_animation(
@@ -100,7 +67,7 @@ def create_animation(
     """
 
     pcap_list = []
-    animation_frames = []
+    animation = []
 
     for link1, link2, edge_id, edge_source, edge_target in interfaces_info:
         pcap_out_file1 = "/tmp/capture_" + link1 + "_out.pcapng"
@@ -123,9 +90,46 @@ def create_animation(
             pcap_out_file1, pcap_out_file2, edge_id, edge_source, edge_target
         )
 
-        animation_frames += packets
+        animation += packets
 
-    return animation_frames, pcap_list
+    return animation, pcap_list
+
+
+def group_packets_by_time(packets, time_slice_us: int = 14000):
+    """Group packets into animation frames by time intervals.
+
+    Args:
+        packets: List of packets.
+        time_slice_us (int): Time interval (in microseconds) to group packets.
+
+    Returns:
+        list: Grouped animation frames.
+    """
+    if not packets:
+        return []
+
+    packets = sorted(packets, key=lambda k: k.get("timestamp", 0))
+
+    grouped = []
+    current_group: list = []
+    first_packet_time = int(packets[0]["timestamp"])
+    time_limit = first_packet_time + time_slice_us
+
+    for pkt in packets:
+        pkt_time = int(pkt["timestamp"])
+
+        if pkt_time > time_limit:
+            # Add packet to new group based on its time
+            grouped.append(current_group)
+            current_group = [pkt]
+            time_limit = pkt_time + time_slice_us
+        else:
+            current_group.append(pkt)
+
+    if current_group:
+        grouped.append(current_group)
+
+    return grouped
 
 
 def execute_job(job: Job, net: IPNet) -> None:
@@ -134,24 +138,3 @@ def execute_job(job: Job, net: IPNet) -> None:
 
     new_job = Jobs(job, job_host)
     new_job.handler()
-
-
-def clean_processes():
-    """
-    Processes running in virtual devices aren't deleted by themselves.
-
-    This function kill them manually.
-    """
-    info("Starting processes cleanup... ")
-
-    current_process = Process()
-    children_processes = current_process.children(recursive=True)
-
-    # Mininet can kill this processes by itself
-    good_process_names = ("mimidump", "bash")
-
-    for child in children_processes:
-        if child.name() not in good_process_names:
-            info(f"Killed: {child.name()} {str(child.pid)}")
-            child.kill()
-            child.wait()
