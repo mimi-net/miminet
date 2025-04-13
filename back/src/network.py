@@ -55,6 +55,7 @@ class MiminetNetwork(IPNet):
                 raise ValueError(f"No capture for interface '{link2}'.")
 
     def __clear_files(self):
+        """Remove pcap files."""
         for link1, link2, *_ in self.__network_topology.interfaces:
             files = [
                 f"/tmp/capture_{link1}_out.pcapng",

@@ -20,7 +20,7 @@ def emulate(
         network (str): Network schema for emulation.
 
     Returns:
-        tuple: animation list and pcap, pcap_name list.
+        tuple: animation list and pcap files.
     """
 
     setLogLevel("info")

@@ -14,8 +14,8 @@ from network_schema import Network
 from emulator import emulate
 
 
-def run_network(network_json: str):
-    """Load network from JSON and start safe emulation.
+def run_miminet(network_json: str):
+    """Load network from JSON and start emulation safely.
 
     Args:
         network_json (str): JSON network from queue.
@@ -61,7 +61,7 @@ def mininet_worker(self, network_json: str):
 
     """
 
-    animation, pcaps = run_network(network_json)
+    animation, pcaps = run_miminet(network_json)
 
     network_task = self.request.headers["network_task_name"]
     task_id = self.request.id
