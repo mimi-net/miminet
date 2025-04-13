@@ -3,6 +3,7 @@ import time
 from psutil import Process
 from ipmininet.ipnet import IPNet
 from mininet.log import info
+import psutil
 
 from network_topology import MiminetTopology
 from network_schema import Network
@@ -79,7 +80,11 @@ class MiminetNetwork(IPNet):
         allowed = ("mimidump", "bash")
 
         for child in children:
-            if child.name() not in allowed:
+            if child.status() == psutil.STATUS_ZOMBIE:
+                # in case we already have zombies
+                child.wait()
+            elif child.name() not in allowed:
+                # finish other processes
                 info(f"Killed: {child.name()} {child.pid}")
                 child.kill()
                 child.wait()
