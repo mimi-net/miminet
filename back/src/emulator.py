@@ -29,7 +29,7 @@ def emulate(
         return [], []
 
     try:
-        topo = MiminetTopology(network=network)
+        topo = MiminetTopology(network)
         net = MiminetNetwork(topo, network)
 
         net.start()

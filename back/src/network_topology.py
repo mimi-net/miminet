@@ -10,21 +10,21 @@ from pkt_parser import is_ipv4_address
 
 
 class MiminetTopology(IPTopo):
-    """Class representing topology for miminet networks"""
+    """Class representing topology for miminet networks."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, network: Network):
         # List with useful information about every interface
-        self.__iface_pairs = []
+        self.__iface_pairs: list = []
         # Used to generate unique names
         self.__switch_count = 0
         # Minimum suitable time for which the network is configured
         self.__network_configuration_time = 3
 
-        self.__network: Network = kwargs["network"]
-        self.__nodes = {}
+        self.__network: Network = network
+        self.__nodes: dict = {}
         self.__id_to_node: dict[str, Node] = {}
 
-        super().__init__(*args, **kwargs)
+        super().__init__()
 
     @property
     def interfaces(self) -> List:
