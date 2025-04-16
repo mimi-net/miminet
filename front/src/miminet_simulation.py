@@ -9,17 +9,19 @@ from celery_app import (
 from flask import jsonify, make_response, redirect, request, url_for
 from flask_login import current_user, login_required
 from miminet_model import Network, Simulate, SimulateLog, db
+from werkzeug.wrappers import Response
 
 
 @login_required
-def run_simulation():
+def run_simulation() -> Response:
+    """Add new celery task and create record (for emulation result) in database."""
     user = current_user
     network_guid = request.args.get("guid", type=str)
 
     if not network_guid:
         ret = {
             "simulation_id": -1,
-            "message": "Пропущен параметр GUID. И какую сеть мне симулировать?!",
+            "message": "Пропущен параметр GUID. И какую сеть мне эмулировать?!",
         }
         return make_response(jsonify(ret), 400)
 
@@ -34,23 +36,29 @@ def run_simulation():
         return make_response(jsonify(ret), 400)
 
     if request.method == "POST":
+        # Put new network to database
+
+        # Get saved emulations
         sims = Simulate.query.filter(Simulate.network_id == net.id).all()
 
-        # Remove all previous simulations
+        # Remove all previous emulations
         for s in sims:
             db.session.delete(s)
             db.session.commit()
 
+        # Write log
         simlog = SimulateLog(
             author_id=net.author_id, network=net.network, network_guid=net.guid
         )
 
+        # Add new network
         task_guid = uuid.uuid4()
         sim = Simulate(network_id=net.id, packets="", task_guid=str(task_guid))
         db.session.add(sim)
         db.session.add(simlog)
         db.session.commit()
 
+        # Send emulation task to celery
         app.send_task(
             "tasks.mininet_worker",
             (net.network,),
@@ -61,6 +69,7 @@ def run_simulation():
             headers={"network_task_name": "tasks.save_simulate_result"},
         )
 
+        # Return network id to check emulation result
         ret = {"simulation_id": sim.id}
         return make_response(jsonify(ret), 201)
 
