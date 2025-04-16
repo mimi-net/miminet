@@ -5,7 +5,7 @@ from pathlib import Path
 
 from mininet.log import setLogLevel, info, error
 import pytest
-from src.tasks import simulate
+from src.tasks import run_miminet
 
 setLogLevel("info")
 
@@ -116,7 +116,7 @@ def test_miminet_work(test: Case, request) -> None:
     info(f"Running test: {request.node.name}.")
 
     # Emulate network behavior based on the test case
-    animation, _ = simulate(test.json_network)
+    animation, _ = run_miminet(test.json_network)
 
     # Extract important packet fields while ignoring excluded packets
     actual_packets = extract_important_fields(animation)

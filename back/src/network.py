@@ -1,195 +1,90 @@
-"""Classes for deserializing a Miminet network"""
+import os
+import time
+from psutil import Process
+from ipmininet.ipnet import IPNet
+from mininet.log import info
+import psutil
 
-from dataclasses import dataclass
-from typing import Union, Optional
+from network_topology import MiminetTopology
+from network_schema import Network
 
-
-@dataclass
-class NodeData:
-    """
-    Represents data associated with a network node.
-
-    Attributes:
-        id (str): Unique identifier for the node.
-        label (str): Human-readable label for the node.
-    """
-
-    id: str
-    label: str
+from net_utils.vlan import setup_vlans, clean_bridges
+from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
 
 
-@dataclass
-class NodeConfig:
-    """
-    Configuration settings for a network node.
+class MiminetNetwork(IPNet):
+    def __init__(self, topo: MiminetTopology, network: Network):
+        super().__init__(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
+        self.__network_topology = topo
+        self.__network_schema = network
 
-    Attributes:
-        label (str): Label for the node (e.g., "l2sw1").
-        type (str): Node type (e.g., "l2_switch").
-        stp (int): 1 if spanning tree protocol (STP) is enabled; 2 if rapid spanning tree protocol (RSTP) is enabled; 0 otherwise.
-        priority (Optional[int]): stp or rstp priority
-        default_gw (str): Default gateway for the node.
-    """
+    def start(self):
+        # Start network
+        super().start()
 
-    label: str = ""
-    type: str = ""
-    stp: int = 0
-    priority: Optional[int] = None
-    default_gw: str = ""
+        # Additional settings
+        setup_vlans(self, self.__network_schema.nodes)
+        setup_vtep_interfaces(self, self.__network_schema.nodes)
 
+        # Waiting for network setup
+        time.sleep(self.__network_topology.network_configuration_time)
 
-@dataclass
-class NodeInterface:
-    """
-    Represents an interface of a network node.
+        self.__check_files()
 
-    Attributes:
-        connect (str): Label of the node the interface connects to (e.g., "l2sw1").
-        id (str): Unique identifier for the interface (e.g., "l2sw1_1").
-        name (str): Name of the interface (e.g., "l2sw1_1").
-        ip (str): IP address (e.g., "10.0.0.1").
-        netmask (int): Netmask.
-        vlan (Union[int, List[int], None]): VLAN ID or list of VLANs.
-        type_connection (Optional[int]): Type of connection (0 - Access, 1 - Trunk).
+    def stop(self):
+        # Wait before stop
+        time.sleep(2)
 
-    """
+        clean_bridges(self)
+        teardown_vtep_bridges(self, self.__network_schema.nodes)
 
-    connect: str
-    id: str
-    name: str = ""
-    ip: str = ""
-    netmask: int = 0
-    vlan: Union[int, list[int], None] = None
-    type_connection: Optional[int] = None
-    vxlan_vni: Optional[int] = None
-    vxlan_connection_type: Optional[int] = None
-    vxlan_vni_to_target_ip: Optional[list[list[str]]] = None
+        self.__clean_services()
+        super().stop()
 
+    def __check_files(self):
+        """Checking for the existence of pcap files."""
+        for link1, link2, *_ in self.__network_topology.interfaces:
+            pcap_out_file1 = f"/tmp/capture_{link1}_out.pcapng"
+            pcap_out_file2 = f"/tmp/capture_{link2}_out.pcapng"
 
-@dataclass
-class NodePosition:
-    """
-    Represents the graphical position of a node.
+            if not os.path.exists(pcap_out_file1):
+                self.__clear_files()
+                raise ValueError(f"No capture for interface '{link1}'.")
 
-    Attributes:
-        x (float): X-coordinate.
-        y (float): Y-coordinate.
-    """
+            if not os.path.exists(pcap_out_file2):
+                self.__clear_files()
+                raise ValueError(f"No capture for interface '{link2}'.")
 
-    x: float
-    y: float
+    def __clear_files(self):
+        """Remove pcap files."""
+        for link1, link2, *_ in self.__network_topology.interfaces:
+            files = [
+                f"/tmp/capture_{link1}_out.pcapng",
+                f"/tmp/capture_{link2}_out.pcapng",
+                f"/tmp/capture_{link1}.pcapng",
+                f"/tmp/capture_{link2}.pcapng",
+            ]
+            for f in files:
+                if os.path.exists(f):
+                    os.remove(f)
 
+    def __clean_services(self):
+        """
+        Processes running inside virtual devices don't terminate using default mininet functions.
 
-@dataclass
-class Node:
-    """
-    Represents a network node with its configuration, data, interfaces, position, and classes.
+        This function kill them manually.
+        """
+        info("Starting processes cleanup... ")
+        current_process = Process()
+        children = current_process.children(recursive=True)
+        allowed = ("mimidump", "bash")
 
-    Attributes:
-        config (NodeConfig): Configuration settings.
-        data (NodeData): Data associated.
-        interface (list[NodeInterface]): List of interfaces.
-        position (NodePosition): Graphical position.
-        classes (list[str]): Node classes (e.g., ["l2_switch"]).
-    """
-
-    config: NodeConfig
-    data: NodeData
-    interface: list[NodeInterface]
-    classes: list[str]
-    position: NodePosition
-
-
-@dataclass
-class EdgeData:
-    """Represents data associated with an edge connecting two nodes.
-
-    Args:
-        id (str): Unique identifier for the edge.
-        source (str) : Label of the source node.(e.g., "host_2")
-        target (str): Label of the target node. (e.g., "l1hub1")
-
-    """
-
-    id: str
-    source: str
-    target: str
-
-
-@dataclass
-class Edge:
-    """
-    Represents an edge connecting two nodes.
-
-    Attributes:
-        data (EdgeData): Data associated with the edge.
-    """
-
-    data: EdgeData
-
-
-@dataclass
-class Job:
-    """
-    Represents a job to be executed on the network (e.g., ping).
-
-    Args:
-        id (str): str job id
-        level (int): job level
-        job_id (int): int job id (for execute)
-        host_id (str): host id for job executing (e.g., host_1)
-        arg_1 (str): parameter for job executing (e.g., example, ip, port, netmask, ...)
-        arg_2 (str): parameter for job executing
-        arg_3 (str): parameter for job executing
-        arg_4 (str): parameter for job executing
-    """
-
-    id: str
-    level: int
-    job_id: int
-    host_id: str
-    print_cmd: str
-    arg_1: str | int = ""
-    arg_2: str | int = ""
-    arg_3: str | int = ""
-    arg_4: str | int = ""
-
-
-@dataclass
-class NetworkConfig:
-    """
-    Configuration settings for the overall network visualization.
-
-    Args:
-        zoom (float): Zoom level for the network view.
-        pan_x (float): Horizontal pan offset for the view.
-        pan_y (float): Vertical pan offset for the view.
-
-    """
-
-    zoom: float
-    pan_x: float
-    pan_y: float
-
-
-@dataclass
-class Network:
-    """
-    Represents the complete Mininet network with nodes, edges, jobs, configuration, and network traffic data.
-
-    Args:
-        nodes (list[Node]): list of network nodes.
-        edges (list[Edge]): list of connections between nodes.
-        jobs (list[Job]): List of jobs to be executed on the network.
-        config (NetworkConfig): Network visualization configuration.
-        packets (str): packets
-        pcap (list[str]): List of PCAP files containing network traffic data.
-
-    """
-
-    nodes: list[Node]
-    edges: list[Edge]
-    jobs: list[Job]
-    config: NetworkConfig
-    pcap: list[str] | None
-    packets: str = ""
+        for child in children:
+            if child.status() == psutil.STATUS_ZOMBIE:
+                # in case we already have zombies
+                child.wait()
+            elif child.name() not in allowed:
+                # finish other processes
+                info(f"Killed: {child.name()} {child.pid}")
+                child.kill()
+                child.wait()

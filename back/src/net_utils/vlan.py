@@ -2,7 +2,7 @@ from ipmininet.ipnet import IPNet
 from ipmininet.ipswitch import IPSwitch
 from ipmininet.ipovs_switch import IPOVSSwitch
 
-from network import Node, NodeInterface
+from network_schema import Node, NodeInterface
 
 
 def setup_vlans(net: IPNet, nodes: list[Node]) -> None:

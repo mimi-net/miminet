@@ -10,18 +10,18 @@ from celery_app import (
 )
 from mininet.log import setLogLevel, error
 
-from network import Network
-from simulate import run_mininet
+from network_schema import Network
+from emulator import emulate
 
 
-def simulate(network: str):
-    """Worker for start mininet simulation
+def run_miminet(network_json: str):
+    """Load network from JSON and start emulation safely.
 
     Args:
-        network (str): str network from queue
+        network_json (str): JSON network from queue.
 
     Returns:
-        tuple: Tuple (json emulation results, List[pcap, pcap name])
+        tuple: Tuple (json emulation results, List[pcap, pcap name]).
 
     """
 
@@ -31,13 +31,13 @@ def simulate(network: str):
         print("Set default handler to SIGCHLD")
         signal.signal(signal.SIGCHLD, signal.SIG_IGN)
 
-    jnet = json.loads(network)
+    jnet = json.loads(network_json)
     network_schema = marshmallow_dataclass.class_schema(Network)()
-    network = network_schema.load(jnet)
+    network_json = network_schema.load(jnet)
 
     for _ in range(4):
         try:
-            animation, pcaps = run_mininet(network)
+            animation, pcaps = emulate(network_json)
 
             return json.dumps(animation), pcaps
         except Exception as e:
@@ -50,18 +50,18 @@ def simulate(network: str):
 
 
 @app.task(bind=True)
-def mininet_worker(self, network: str):
-    """Worker for start mininet simulation
+def mininet_worker(self, network_json: str):
+    """Celery worker for starting Miminet emulation.
 
     Args:
-        network (str): str network from queue
+        network_json (str): JSON network from queue.
 
     Returns:
         tuple: Tuple (json emulation results, List[pcap, pcap name])
 
     """
 
-    animation, pcaps = simulate(network)
+    animation, pcaps = run_miminet(network_json)
 
     network_task = self.request.headers["network_task_name"]
     task_id = self.request.id
