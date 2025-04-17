@@ -42,7 +42,6 @@ def check_host(requirement, answer, device):
         points_for_host += points
         points = 0
 
-
     # Checking for different VLANs
     all_vlan_conditions_passed = True
 
@@ -164,7 +163,7 @@ def check_host(requirement, answer, device):
 
             connected_edge = next(
                 (edge for edge in answer["edges"] if edge["data"]["id"] == edge_id),
-                None
+                None,
             )
 
             if not connected_edge:
@@ -191,8 +190,6 @@ def check_host(requirement, answer, device):
             hints.append(
                 f"Не найден интерфейс на устройстве {device}, подключённый к {target_node_id} с IP {expected_ip}."
             )
-
-
 
     return points_for_host, hints
 
