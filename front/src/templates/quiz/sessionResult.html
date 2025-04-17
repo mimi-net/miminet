@@ -31,7 +31,11 @@
                             {% if question['max_score'] > 0 %}
                                 <p class="card-text mt-2"><strong>Баллы:</strong> {{ question['score'] }} из {{ question['max_score'] }}</p>
                             {% else %}
-                                <p class="card-text mt-2"><strong>Баллы:</strong> 1 из 1</p>
+                                {% if question['is_correct'] %}
+                                    <p class="card-text mt-2"><strong>Баллы:</strong> 1 из 1</p>
+                                {% else %}
+                                    <p class="card-text mt-2"><strong>Баллы:</strong> 0 из 1</p>
+                                {% endif %}
                             {% endif %}
                         </div>
                     </div>

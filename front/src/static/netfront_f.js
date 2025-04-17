@@ -1263,6 +1263,11 @@ const CheckSimulation = function (simulation_id)
                 packets = JSON.parse(data.packets);
                 pcaps = data.pcaps;
                 SetNetworkPlayerState(0);
+
+                const answerButton = document.querySelector('button[name="answerQuestion"]');
+                if (answerButton) {
+                    answerButton.disabled = false;
+                }
             }
         },
         error: function(xhr) {
