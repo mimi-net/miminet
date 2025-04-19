@@ -41,6 +41,7 @@ def validate_requirements(requirements):
                         {"required": ["equal_vlan_id"]},
                         {"required": ["no_equal_vlan_id"]},
                         {"required": ["default_gw"]},
+                        {"required": ["ip_equal"]},
                     ],
                     "properties": {
                         "cmd": {
@@ -126,6 +127,16 @@ def validate_requirements(requirements):
                             "type": "object",
                             "properties": {"points": {"type": "integer", "minimum": 1}},
                             "required": ["points"],
+                            "additionalProperties": False,
+                        },
+                        "ip_equal": {
+                            "type": "object",
+                            "properties": {
+                                "to": {"type": "string"},
+                                "expected_ip": {"type": "string", "format": "ipv4"},
+                                "points": {"type": "integer", "minimum": 1},
+                            },
+                            "required": ["to", "expected_ip", "points"],
                             "additionalProperties": False,
                         },
                     },
