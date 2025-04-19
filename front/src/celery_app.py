@@ -23,14 +23,19 @@ SEND_NETWORK_EXCHANGE_NAME = os.getenv("exchange_name")
 SEND_NETWORK_EXCHANGE = Exchange(SEND_NETWORK_EXCHANGE_NAME, type=EXCHANGE_TYPE)
 
 NETWORK_RESULTS_EXCHANGE = Exchange("network-results-exchange", type="direct")
-
-RESULT_QUEUES_NAMES = ["common-results-queue"]
-
-RESULT_ROUTING_KEY = "result-routing-key"
+TASK_CHECKING_EXCHANGE = Exchange("task-checking-exchange", type="direct")
 
 QUEUES = [
-    Queue(name, exchange=NETWORK_RESULTS_EXCHANGE, routing_key=RESULT_ROUTING_KEY)
-    for name in RESULT_QUEUES_NAMES
+    Queue(
+        "common-results-queue",
+        exchange=NETWORK_RESULTS_EXCHANGE,
+        routing_key="result-routing-key",
+    ),
+    Queue(
+        "task-checking-queue",
+        exchange=TASK_CHECKING_EXCHANGE,
+        routing_key="task-checking-routing-key",
+    ),
 ]
 
 app.conf.task_queues = QUEUES

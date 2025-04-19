@@ -24,7 +24,7 @@ def answer_on_session_question_endpoint():
     return make_response(json.dumps(res[0].to_dict(), default=str), res[1])
 
 
-@login_required
+# @login_required
 def upload_network_endpoint():
     res_code = upload_task_network()
 

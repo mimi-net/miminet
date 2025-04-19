@@ -1,11 +1,8 @@
 from miminet_model import Network
 from sqlalchemy import func
-
-# from celery_app import (
-#     SEND_NETWORK_EXCHANGE,
-#     EXCHANGE_TYPE,
-#     app,
-# )
+from celery_app import (
+    app,
+)
 
 
 def upload_task_network():
@@ -15,22 +12,21 @@ def upload_task_network():
     # You need to pass into 'prepare_task_network' user's network schema and task requirements
     # I just use test data for example
     net = Network.query.order_by(func.random()).first()
+    schema = net.network
     req = "*here should be requirements*"
 
-    prepare_task_network(net, req)
+    res_data = prepare_task_network(schema, req)
 
     # send task
-    # app.send_task(
-    #         "tasks.mininet_worker",
-    #         (net.network,),
-    #         routing_key=str(uuid.uuid4()),
-    #         exchange=SEND_NETWORK_EXCHANGE,
-    #         exchange_type=EXCHANGE_TYPE,
-    #         task_id=str(task_guid),
-    #         headers={"network_task_name": "tasks.save_simulate_result"},
-    #     )
+    app.send_task(
+        "tasks.check_task_network",
+        [res_data],
+        routing_key="task-checking-routing-key",
+        exchange="task-checking-exchange",
+        exchange_type="direct",
+    )
 
-    # return status code
+    # return "OK" code
     return 200
 
 

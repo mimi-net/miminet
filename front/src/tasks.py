@@ -8,7 +8,7 @@ from app import app as flask_app
 from miminet_model import Simulate, SimulateLog, db, Network
 
 
-@app.task(bind=True)
+@app.task(bind=True, queue="common-results-queue")
 def save_simulate_result(self, animation, pcaps):
     task_guid = self.request.id
 
@@ -54,3 +54,15 @@ def save_simulate_result(self, animation, pcaps):
             db.session.commit()
         except StaleDataError:
             return
+
+
+@app.task(queue="task-checking-queue")
+def check_task_network(data_list):
+    """Check network building task and write results to database.
+
+    Args:
+        data_list (List[Tuple]): List of tuples (network schema, requirements).
+    """
+
+    for net_schema, req in data_list:
+        print(f"schema: {net_schema}, requirements: {req}")
