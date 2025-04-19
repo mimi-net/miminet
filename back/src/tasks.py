@@ -64,9 +64,9 @@ def mininet_worker(self, network_json: str):
     animation, pcaps = run_miminet(network_json)
 
     # Task that starts emulation proccess may specify where we should send the result
-    network_task = self.request.headers["network_task_name"]
 
-    if network_task:
+    if self.request.headers:
+        network_task = self.request.headers["network_task_name"]
         task_id = self.request.id
 
         app.send_task(
