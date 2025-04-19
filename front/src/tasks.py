@@ -1,14 +1,22 @@
 import os
 import shutil
+import uuid
 
+from celery import shared_task
 from sqlalchemy.orm.exc import StaleDataError
 
-from celery_app import app
+from celery_app import (
+    SEND_NETWORK_EXCHANGE,
+    EXCHANGE_TYPE,
+    app,
+)
 from app import app as flask_app
 from miminet_model import Simulate, SimulateLog, db, Network
+from celery.result import AsyncResult, allow_join_result
+from celery.exceptions import TimeoutError
 
 
-@app.task(bind=True)
+@app.task(bind=True, queue="common-results-queue")
 def save_simulate_result(self, animation, pcaps):
     task_guid = self.request.id
 
@@ -54,3 +62,46 @@ def save_simulate_result(self, animation, pcaps):
             db.session.commit()
         except StaleDataError:
             return
+
+
+@shared_task(queue="task-checking-queue")
+def check_task_network(data_list):
+    """Check network building task and write results to database.
+
+    Args:
+        data_list (List[Tuple]): List of tuples (network schema, requirements).
+    """
+
+    for net_schema, req in data_list:
+        print(req)
+        send_emulation_task(net_schema)
+
+        # ... check logic ...
+
+
+def send_emulation_task(net_schema):
+    async_obj = app.send_task(
+        "tasks.mininet_worker",
+        [net_schema],
+        routing_key=str(uuid.uuid4()),
+        exchange=SEND_NETWORK_EXCHANGE,
+        exchange_type=EXCHANGE_TYPE,
+    )
+
+    async_res = AsyncResult(
+        id=async_obj.id,
+        task_name="tasks.mininet_worker",
+        app=app,
+        backend=app.backend,
+    )
+
+    try:
+        animation = ""
+
+        with allow_join_result():
+            animation, _ = async_res.wait(timeout=60)
+
+        return animation
+    except TimeoutError:
+        # You need to improve the message, perhaps add information about the user or the network name
+        raise Exception(f"""Check task failed!\nNetwork Schema: {net_schema}.""")

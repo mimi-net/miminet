@@ -63,19 +63,22 @@ def mininet_worker(self, network_json: str):
 
     animation, pcaps = run_miminet(network_json)
 
-    network_task = self.request.headers["network_task_name"]
-    task_id = self.request.id
+    # Task that starts emulation proccess may specify where we should send the result
 
-    app.send_task(
-        network_task,
-        (
-            animation,
-            pcaps,
-        ),
-        routing_key=SEND_NETWORK_RESPONSE_ROUTING_KEY,
-        exchange=SEND_NETWORK_RESPONSE_EXCHANGE.name,
-        exchange_type=SEND_NETWORK_RESPONSE_EXCHANGE.type,
-        task_id=task_id,
-    )
+    if self.request.headers:
+        network_task = self.request.headers["network_task_name"]
+        task_id = self.request.id
+
+        app.send_task(
+            network_task,
+            (
+                animation,
+                pcaps,
+            ),
+            routing_key=SEND_NETWORK_RESPONSE_ROUTING_KEY,
+            exchange=SEND_NETWORK_RESPONSE_EXCHANGE.name,
+            exchange_type=SEND_NETWORK_RESPONSE_EXCHANGE.type,
+            task_id=task_id,
+        )
 
     return json.dumps(animation), pcaps
