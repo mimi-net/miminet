@@ -2,7 +2,6 @@ import os
 import shutil
 import uuid
 
-from celery import shared_task
 from sqlalchemy.orm.exc import StaleDataError
 
 from celery_app import (
@@ -64,8 +63,8 @@ def save_simulate_result(self, animation, pcaps):
             return
 
 
-@shared_task(queue="task-checking-queue")
-def check_task_network(data_list):
+@app.task(name="tasks.check_task_network", queue="task-checking-queue")
+def perform_task_check(data_list):
     """Check network building task and write results to database.
 
     Args:
@@ -74,12 +73,12 @@ def check_task_network(data_list):
 
     for net_schema, req in data_list:
         print(req)
-        send_emulation_task(net_schema)
+        create_emulation_task(net_schema)
 
         # ... check logic ...
 
 
-def send_emulation_task(net_schema):
+def create_emulation_task(net_schema):
     async_obj = app.send_task(
         "tasks.mininet_worker",
         [net_schema],
@@ -96,12 +95,12 @@ def send_emulation_task(net_schema):
     )
 
     try:
-        animation = ""
-
         with allow_join_result():
+            print(async_res.status)
             animation, _ = async_res.wait(timeout=60)
+            print("here")
 
-        return animation
+            return animation
     except TimeoutError:
         # You need to improve the message, perhaps add information about the user or the network name
         raise Exception(f"""Check task failed!\nNetwork Schema: {net_schema}.""")

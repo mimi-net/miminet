@@ -1,21 +1,17 @@
 from miminet_model import Network
-from sqlalchemy import func
-from celery_app import (
-    app,
-)
+from celery_app import app
+import json
 
 
-def upload_task_network():
+def create_check_task():
     """
-    Prepare task and send it.
+    Prepare task and send it for processing.
     """
     # You need to pass into 'prepare_task_network' user's network schema and task requirements
     # I just use test data for example
-    net = Network.query.order_by(func.random()).first()
-    schema = net.network
-    req = "*here should be requirements*"
-
-    res_data = prepare_task_network(schema, req)
+    res_data = prepare_network(
+        json.dumps(TEST_NETWORK_DATA), "*here should be requirements*"
+    )
 
     # send task
     app.send_task(
@@ -30,7 +26,7 @@ def upload_task_network():
     return 200
 
 
-def prepare_task_network(user_network: Network, task_req: str):
+def prepare_network(user_network: Network, task_req: str):
     """
     Prepare task according to requirements:
     - Split task to several separate network schemas,
@@ -47,3 +43,59 @@ def prepare_task_network(user_network: Network, task_req: str):
     # ... all task prepare logic should be here ...
 
     return [(user_network, task_req)]
+
+
+TEST_NETWORK_DATA = {
+    "nodes": [
+        {
+            "data": {"id": "host_1", "label": "host_1"},
+            "position": {"x": 22, "y": 150.5},
+            "classes": ["host"],
+            "config": {"type": "host", "label": "host_1", "default_gw": ""},
+            "interface": [
+                {
+                    "id": "iface_16775240",
+                    "name": "iface_16775240",
+                    "connect": "edge_m3qcgwpcn8sunskeewe",
+                    "ip": "192.168.1.1",
+                    "netmask": 24,
+                }
+            ],
+        },
+        {
+            "data": {"id": "host_2", "label": "host_2"},
+            "position": {"x": 330.5, "y": 343},
+            "classes": ["host"],
+            "config": {"type": "host", "label": "host_2", "default_gw": ""},
+            "interface": [
+                {
+                    "id": "iface_45420688",
+                    "name": "iface_45420688",
+                    "connect": "edge_m3qcgwpcn8sunskeewe",
+                    "ip": "192.168.1.2",
+                    "netmask": 24,
+                }
+            ],
+        },
+    ],
+    "edges": [
+        {
+            "data": {
+                "id": "edge_m3qcgwpcn8sunskeewe",
+                "source": "host_1",
+                "target": "host_2",
+            }
+        }
+    ],
+    "jobs": [
+        {
+            "id": "e9853215a9ce47069dad4fd6ba4971e9",
+            "job_id": 1,
+            "print_cmd": "ping -c 1 192.168.1.2",
+            "arg_1": "192.168.1.2",
+            "level": 0,
+            "host_id": "host_1",
+        }
+    ],
+    "config": {"zoom": 2, "pan_x": 0, "pan_y": 0},
+}
