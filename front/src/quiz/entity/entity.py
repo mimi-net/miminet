@@ -128,6 +128,7 @@ class Section(
     test_id = db.Column(db.Integer, db.ForeignKey("test.id"))
     is_exam = db.Column(db.Boolean, default=False)
     meta_description = db.Column(db.String(512), default="")
+    results_available_from = db.Column(db.DateTime, nullable=True)
 
     test = db.relationship("Test", back_populates="sections")
     questions = db.relationship("Question", back_populates="section")

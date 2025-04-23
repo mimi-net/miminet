@@ -77,6 +77,7 @@
                                 <input type="hidden" name="question_index" value="0">
                                 <input type="hidden" name="section_name" value="{{ section.section_name }}">
                                 <input type="hidden" name="timer" value="{{ section.timer }}">
+                                
                             <h4 class="h4" style="margin-right: 8px; margin-bottom: 4px; vertical-align: middle;" 
                                 onmouseover="this.style.color='#6366f1';" 
                                 onmouseout="this.style.color='';" 
@@ -100,13 +101,18 @@
                         <div class="card-body d-flex flex-column" style="row-gap: 4px;max-width: max-content;">
 
                             {% if section.session_guid is defined and section.last_correct_count is defined %}
-                                {# Button for last result #}
+                                {# Button for last result, possibly pending check #}
                                 <a class="btn btn-outline-primary lastResult" id="{{ section.section_id }}link"
-                                   data-bs-toggle="tooltip" title="Посмотреть последний результат"
-                                   href="{{ url_for('get_result_by_session_guid_endpoint') }}?guid={{ section.session_guid }}"
-                                   style="text-align: right;">
-                                    {{ section.last_correct_count }}/{{ section.question_count }} верно
-                                </a>
+                                data-bs-toggle="tooltip" 
+                                title="{% if section.is_exam and not section.answer_available %}На страницу результатов{% else %}Посмотреть последний результат{% endif %}"
+                                href="{{ url_for('get_result_by_session_guid_endpoint') }}?guid={{ section.session_guid }}"
+                                style="text-align: right;">
+                                    {% if section.is_exam and not section.answer_available %}
+                                        На проверке
+                                    {% else %}
+                                        {{ section.last_correct_count }}/{{ section.question_count }} верно
+                                    {% endif %}
+                                </a>                     
                             {% elif section.last_correct_count is defined %}
                                 {# Last result just text #}
                                 <p class="lastResult" id="{{ section.section_id }}text">

@@ -1,6 +1,7 @@
 from sqlalchemy import func
 
 from miminet_model import User, db
+from quiz.service.session_question_service import is_answer_available
 from quiz.entity.entity import (
     Question,
     QuizSession,
@@ -11,7 +12,6 @@ from quiz.entity.entity import (
 from quiz.util.dto import SessionResultDto
 import json
 import random
-
 
 def start_session(section_id: str, user: User):
     section = Section.query.filter_by(id=section_id).first()
@@ -108,12 +108,20 @@ def session_result(quiz_session_id: str):
 
     time_spent = str(quiz_session.finished_at - quiz_session.created_on).split(".")[0]
 
+    is_exam = quiz_session.section.is_exam
+    answer_available = is_answer_available(quiz_session.section)
+    available_from = quiz_session.section.results_available_from
+
     return {
         "time_spent": time_spent,
         "theory_correct": theory_correct,
         "theory_count": theory_count,
         "practice_results": practice_results,
+        "is_exam": is_exam,
+        "answer_available": answer_available,
+        "results_available_from": available_from
     }, 200
+
 
 
 def get_result_by_session_guid(session_guid: str):
@@ -138,6 +146,10 @@ def get_result_by_session_guid(session_guid: str):
         for sq in results
     ]
 
+    is_exam = quiz_session.section.is_exam
+    answer_available = is_answer_available(quiz_session.section)
+    available_from = quiz_session.section.results_available_from
+
     session_data = SessionResultDto(
         test_name=quiz_session.section.test.name,
         section_name=quiz_session.section.name,
@@ -147,6 +159,9 @@ def get_result_by_session_guid(session_guid: str):
         results=question_results,
         start_time=quiz_session.created_on.strftime("%m/%d/%Y, %H:%M:%S"),
         time_spent=result["time_spent"],
+        is_exam=is_exam,
+        answer_available=answer_available,
+        available_from=available_from
     )
 
     return session_data, status

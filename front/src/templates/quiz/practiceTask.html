@@ -132,12 +132,21 @@
                         </div>                                             
                         
                         {# Control buttons #}
-                        <div class="card-body d-flex justify-content-center" style="padding: 0 12px 0 12px">
-                            <button name="answerQuestion" class="btn btn-primary" disabled>Ответить</button>
+                        <div class="card-body d-flex flex-column align-items-center" style="padding: 0 12px 0 12px">
+                            {% if is_exam and not available_answer %}
+                                <button name="answerExamQuestion" class="btn btn-primary">Ответить</button>
+                            {% else %}
+                                <button name="answerQuestion" class="btn btn-primary">Ответить</button>
+                            {% endif %}
+                            
                             <button name="nextQuestion" class="btn w-100 px-0" hidden>Следующий вопрос</button>
                             <button name="seeResults" class="btn w-100 px-0"
-                                    style="word-wrap: break-word;white-space: initial;" hidden></button>
-                        </div>
+                                    style="word-wrap: break-word; white-space: initial;" hidden></button>
+                        
+                            <span id="answerSavedBanner" class="mt-2 text-success" style="display: none; font-weight: bold;">
+                                ✔ Ответ сохранён
+                            </span>
+                        </div>                        
 
                         {# Explanation #}
                         <div class="card-body d-flex">
@@ -182,3 +191,15 @@
 </script>
 <script src="/quiz/practice_question_scripts.js"></script>
 <script src="/quiz/drop_node.js"></script>
+
+<style>
+    #answerSavedBanner {
+            animation: fadeInOut 1.5s ease-in-out;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+</style>

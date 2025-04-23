@@ -1,6 +1,8 @@
 import json
 from datetime import datetime
 
+import logging
+
 from flask import request, make_response, jsonify, abort, render_template
 from flask_login import login_required, current_user
 

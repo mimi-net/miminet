@@ -67,10 +67,18 @@
         </div>
 
         {# Control buttons#}
-        <div class="card-body d-flex justify-content-left pt-0 pb-1" style="margin-left: 12px">
-            <button name="answerQuestion" class="btn btn-primary">Ответить</button>
+        <div class="card-body d-flex justify-content-left align-items-center pt-0 pb-1" style="margin-left: 12px">
+            {% if is_exam and not available_answer %}
+                <button name="answerExamQuestion" class="btn btn-primary">Ответить</button>
+            {% else %}
+                <button name="answerQuestion" class="btn btn-primary">Ответить</button>
+            {% endif %}
             <button name="nextQuestion" class="btn" hidden></button>
             <button name="seeResults" class="btn" hidden></button>
+
+            <span id="answerSavedBanner" class="ms-3 text-success" style="display: none; font-weight: bold;">
+                ✔ Ответ сохранён
+            </span>
         </div>
 
         <div class="container" id="explanation" hidden></div>
@@ -125,6 +133,16 @@
             max-width: 100%; 
             max-height: 90vh; 
             border-radius: 8px;
+        }
+
+        #answerSavedBanner {
+            animation: fadeInOut 1.5s ease-in-out;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
         }
 </style>
 

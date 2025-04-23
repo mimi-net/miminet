@@ -8,7 +8,7 @@ from flask_admin.form import Select2Widget
 from flask_admin.model import typefmt
 from flask_login import current_user
 from markupsafe import Markup
-from wtforms import SelectField, TextAreaField, BooleanField
+from wtforms import SelectField, TextAreaField, BooleanField, DateTimeField
 
 from miminet_model import db, User
 from quiz.entity.entity import Test, Section, Question, QuestionCategory
@@ -117,6 +117,7 @@ class SectionView(MiminetAdminModelView):
         "description",
         "timer",
         "is_exam",
+        "results_available_from",
         "created_on",
         "created_by_id",
         "meta",
@@ -129,6 +130,7 @@ class SectionView(MiminetAdminModelView):
         "timer": "Время на прохождение (в минутах)",
         "test_id": "Раздел теста",
         "is_exam": "Контрольная работа",
+        "results_available_from": "Открыть результаты с",
         "created_on": "Дата создания",
         "created_by_id": "Автор",
         "meta": "Мета раздел",
@@ -141,6 +143,11 @@ class SectionView(MiminetAdminModelView):
 
     form_extra_fields = {
         "is_exam": BooleanField(default=False),
+        "results_available_from": DateTimeField(
+            label="Дата открытия результатов",
+            format="%d-%m-%Y %H:%M",
+            description="Формат: d-m-Y, H:M. Время в мск. Обратите внимание, что без is_exam, ответы будут доступны в любом случае.",
+        ),
         "test_id": QuerySelectField(
             "Раздел теста",
             query_factory=lambda: Test.query.filter(

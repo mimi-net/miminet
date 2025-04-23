@@ -3,6 +3,9 @@ import uuid
 from typing import List
 import json
 
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 from flask_login import current_user
 from markupsafe import Markup
 
@@ -27,6 +30,23 @@ def calculate_question_count(section: Section) -> int:
     return len(section.questions)
 
 
+MOSCOW_TZ = ZoneInfo("Europe/Moscow")
+
+
+def is_answer_available(section):
+    available_answer = True
+    if section and section.results_available_from:
+        now_moscow = datetime.now(MOSCOW_TZ)
+
+        if section.results_available_from.tzinfo is None:
+            results_time = section.results_available_from.replace(tzinfo=MOSCOW_TZ)
+        else:
+            results_time = section.results_available_from.astimezone(MOSCOW_TZ)
+
+        available_answer = results_time <= now_moscow
+    
+    return available_answer
+
 def to_section_dto_list(sections: List[Section]):
     dto_list: List[SectionDto] = list(
         map(
@@ -37,6 +57,7 @@ def to_section_dto_list(sections: List[Section]):
                 description=our_section.description,
                 question_count=calculate_question_count(our_section),
                 is_exam=our_section.is_exam,
+                is_answer_available=is_answer_available(our_section)
             ),
             sections,
         )
@@ -250,6 +271,7 @@ class SectionDto:
         description: str,
         question_count: int,
         is_exam: bool,
+        is_answer_available: bool
     ):
         self.section_id = section_id
         self.section_name = section_name
@@ -257,6 +279,7 @@ class SectionDto:
         self.description = description
         self.question_count = question_count
         self.is_exam = is_exam
+        self.answer_available = is_answer_available
 
         current_user_sessions = QuizSession.query.filter(
             QuizSession.created_by_id == current_user.id
@@ -310,6 +333,9 @@ class SessionResultDto:
         results: list,  # Добавили поле для списка вопросов
         start_time: str,
         time_spent: str,
+        is_exam: bool,
+        answer_available: bool,
+        available_from,
     ):
         self.test_name = test_name
         self.section_name = section_name
@@ -319,6 +345,9 @@ class SessionResultDto:
         self.results = results
         self.start_time = start_time
         self.time_spent = time_spent
+        self.is_exam=is_exam
+        self.answer_available=answer_available
+        self.available_from=available_from
 
     def to_dict(self):
         return {
@@ -330,4 +359,7 @@ class SessionResultDto:
             "results": self.results,
             "start_time": self.start_time,
             "time_spent": self.time_spent,
+            "is_exam": self.is_exam,
+            "answer_available": self.answer_available,
+            "results_available_from": self.available_from
         }

@@ -1,5 +1,7 @@
 import json
 from markupsafe import Markup
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from miminet_model import User, db
 from quiz.service.check_practice_service import check_task
@@ -16,17 +18,42 @@ from quiz.util.dto import (
 )
 
 
+MOSCOW_TZ = ZoneInfo("Europe/Moscow")
+
+
+def is_answer_available(section):
+    available_answer = True
+    if section and section.results_available_from:
+        now_moscow = datetime.now(MOSCOW_TZ)
+
+        if section.results_available_from.tzinfo is None:
+            results_time = section.results_available_from.replace(tzinfo=MOSCOW_TZ)
+        else:
+            results_time = section.results_available_from.astimezone(MOSCOW_TZ)
+
+        available_answer = results_time <= now_moscow
+    
+    return available_answer
+
+
 def get_question_by_session_question_id(session_question_id: str):
     session_question = SessionQuestion.query.filter_by(id=session_question_id).first()
     question = session_question.question
 
     if question is None or question.is_deleted:
-        return None, 404
+        return None, False, False, 404
 
     section = question.section
     is_exam = section.is_exam if section else False
 
-    return QuestionDto(session_question.created_by_id, question), is_exam, 200
+    available_answer = is_answer_available(section)
+
+    return (
+        QuestionDto(session_question.created_by_id, question),
+        is_exam,
+        available_answer,
+        200,
+    )
 
 
 def answer_on_session_question(

@@ -1,5 +1,4 @@
 import json
-
 from flask import request, make_response, jsonify, abort, render_template
 from flask_login import login_required, current_user
 
@@ -22,16 +21,27 @@ def answer_on_session_question_endpoint():
         abort(res[1])
     return make_response(json.dumps(res[0].to_dict(), default=str), res[1])
 
+@login_required
+def answer_on_session_exam_question_endpoint():
+    return make_response("получено", 200)
 
 @login_required
 def get_question_by_session_question_id_endpoint():
-    res, is_exam, status_code = get_question_by_session_question_id(
+    res, is_exam, available_answer, status_code = get_question_by_session_question_id(
         request.args["question_id"]
     )
+
+    logging.info(available_answer)
+
     if status_code == 404:
         abort(status_code)
     return make_response(
-        render_template("quiz/sessionQuestion.html", question=res, is_exam=is_exam),
+        render_template(
+            "quiz/sessionQuestion.html",
+            question=res,
+            is_exam=is_exam,
+            available_answer=available_answer,
+        ),
         status_code,
     )
 
@@ -71,6 +81,9 @@ def session_result_endpoint():
 
 def get_result_by_session_guid_endpoint():
     res = get_result_by_session_guid(request.args["guid"])
+
+    data=res[0].to_dict()
+
     return make_response(
         render_template(
             "quiz/sessionResult.html", data=res[0].to_dict(), questions_result=res[1]

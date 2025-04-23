@@ -76,6 +76,43 @@ function RunAndWaitSimulation(network_guid) {
     })
 }
 
+function getExamAnswer() {
+    switch (questionType) {
+        case 'variable':
+            const checked = $('input.form-check-input:checked');
+            if ($('input[type=radio].form-check-input').length !== 0) {
+                return [{'variant': checked.siblings('label').text()}];
+            }
+            return checked.map(function () {
+                return {'variant': $(this).siblings('label').text()};
+            }).get();
+        case 'matching':
+            const leftSide = $('#sortContainer div').map(function () {
+                return $(this).text();
+            }).get();
+            const rightSide = $('#rightSide div').map(function () {
+                return $(this).text();
+            }).get();
+            let resultArray = [];
+            leftSide.forEach((leftValue, index) => {
+                resultArray.push({
+                    "left": leftValue,
+                    "right": rightSide[index]
+                });
+            });
+            return resultArray;
+        case 'sorting':
+            let sortableArray = $('#sortContainer div').map(function () {
+                return $(this).text();
+            }).get();
+            let dictionary = {};
+            sortableArray.forEach((value, index) => {
+                dictionary[index] = value;
+            });
+            return dictionary;
+    }
+}
+
 async function getAnswer() {
     if (questionType !== "practice") {
         switch (questionType) {
@@ -145,7 +182,7 @@ function changeVisibility(is_correct) {
         document.querySelector('button[name="seeResults"]').hidden = false;
 
         document.querySelector('button[name="seeResults"]').classList.add(is_correct ? 'btn-outline-success' : 'btn-outline-danger');
-        document.querySelector('button[name="seeResults"]').textContent = is_correct ? 'Верно! Посмотреть резульататы' : 'Неверно! Посмотреть резульататы';
+        document.querySelector('button[name="seeResults"]').textContent = is_correct ? 'Верно! Посмотреть результаты' : 'Неверно! Посмотреть результаты';
     } else {
         document.querySelector('button[name="nextQuestion"]').classList.add(is_correct ? 'btn-outline-success' : 'btn-outline-danger');
         document.querySelector('button[name="nextQuestion"]').textContent = is_correct ? 'Верно! Следующий вопрос' : 'Неверно! Следующий вопрос';
@@ -221,7 +258,51 @@ function displayHintsInModal(hints) {
     }
 }
 
-async function answerQuestion() {
+function handleExamScoreBasedVisibility() {
+    const answerButton = document.querySelector('button[name="answerExamQuestion"]');
+    const nextButton = document.querySelector('button[name="nextQuestion"]');
+    const finishButton = document.querySelector('button[name="finishQuiz"]');
+    const resultsButton = document.querySelector('button[name="seeResults"]');
+
+    if (answerButton) {
+        answerButton.hidden = true;
+    }
+
+    if (isLastQuestion) {
+        if (nextButton) {
+            nextButton.hidden = true;
+        }
+        if (finishButton) {
+            finishButton.hidden = true;
+        }
+        if (resultsButton) {
+            resultsButton.hidden = false;
+            resultsButton.textContent = "На страницу результатов";
+            resultsButton.classList.add('btn-outline-primary'); 
+        }
+    } else {
+        if (nextButton) {
+            nextButton.hidden = false;
+            nextButton.textContent = "Следующий вопрос";
+            nextButton.classList.add('btn-outline-primary'); 
+        }
+        if (resultsButton) {
+            resultsButton.hidden = true;
+        }
+    }
+}
+
+function showAnswerSavedBanner() {
+    const banner = document.getElementById("answerSavedBanner");
+    if (banner) {
+        banner.style.display = "inline";
+        setTimeout(() => {
+            banner.style.display = "none";
+        }, 1500);
+    }
+}
+
+function answerExamQuestion() {
     const questionId = questionIds[questionIndex];
 
     let playerDiv = document.getElementById("NetworkPlayerDiv");
@@ -229,21 +310,60 @@ async function answerQuestion() {
         playerDiv.hidden = true;
     }
 
+    let answer
+    if (questionType === "practice") {
+        answer = network_guid;
+    } else {
+        answer = getExamAnswer();
+    }
+
+    fetch(answerExamQuestionURL + '?id=' + questionId, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ answer })
+    })
+    .catch(error => {
+        console.error('Ошибка при отправке ответа:', error);
+    });
+
+    showAnswerSavedBanner()
+    handleExamScoreBasedVisibility()
+}
+
+let isAnswering = false;
+
+async function answerQuestion() {
+    const questionId = questionIds[questionIndex];
     const answerButton = document.querySelector('button[name="answerQuestion"]');
-    answerButton.textContent = "Проверка...";
-    answerButton.disabled = true;
+
+    if (isAnswering) return;
+    isAnswering = true;
 
     if (sessionStorage.getItem('answer')) {
+        answerButton.textContent = "Ответ уже отправлен";
+        answerButton.disabled = true;
         return;
     }
 
+    let playerDiv = document.getElementById("NetworkPlayerDiv");
+    if (playerDiv) {
+        playerDiv.hidden = true;
+    }
+
+    answerButton.textContent = "Проверка...";
+    answerButton.disabled = true;
+
     const answer = await getAnswer();
+
     if (!answer) {
         if (playerDiv) {
             playerDiv.hidden = false;
         }
         answerButton.textContent = "Ответить";
         answerButton.disabled = false;
+        isAnswering = false;
         return;
     }
 
@@ -254,36 +374,42 @@ async function answerQuestion() {
         },
         body: JSON.stringify({ answer })
     })
-        .then(response => response.json())
-        .then(data => {
-            console.log(data);
+    .then(response => response.json())
+    .then(data => {
+        sessionStorage.setItem('answer', JSON.stringify(answer)); // Сохраняем факт ответа
 
-            if (questionType === "practice") {
-                handlePracticeAnswerResult(data);
+        if (questionType === "practice") {
+            handlePracticeAnswerResult(data);
 
-                if (data.hints && Array.isArray(data.hints) && data.hints.length > 0) {
-                    displayHintsInModal(data.hints);
-                    if (hintIcon) {
-                        hintIcon.style.display = "inline";
-                    }
-                } else {
-                    if (hintIcon) {
-                        hintIcon.style.display = "none";
-                    }
-                }                           
-
-                handleScoreBasedVisibility();
+            if (data.hints && Array.isArray(data.hints) && data.hints.length > 0) {
+                displayHintsInModal(data.hints);
+                if (hintIcon) {
+                    hintIcon.style.display = "inline";
+                }
             } else {
-                sessionStorage.setItem('is_correct', data['is_correct']);
-                sessionStorage.setItem('explanation', data['explanation']);
-                changeVisibility(data['is_correct']);
-                displayExplanation(data);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+                if (hintIcon) {
+                    hintIcon.style.display = "none";
+                }
+            }                           
+
+            handleScoreBasedVisibility();
+        } else {
+            sessionStorage.setItem('is_correct', data['is_correct']);
+            sessionStorage.setItem('explanation', data['explanation']);
+            changeVisibility(data['is_correct']);
+            displayExplanation(data);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        answerButton.textContent = "Ошибка. Повторить?";
+        answerButton.disabled = false;
+    })
+    .finally(() => {
+        isAnswering = false;
+    });
 }
+
 
 function displayExplanation(data) {
     if (!data['explanation']) {
@@ -358,6 +484,7 @@ if (timer !== null) {
 document.querySelector('button[name="finishQuiz"]')?.addEventListener('click', finishQuiz);
 document.querySelector('button[name="seeResults"]')?.addEventListener('click', seeResults);
 document.querySelector('button[name="answerQuestion"]')?.addEventListener('click', answerQuestion);
+document.querySelector('button[name="answerExamQuestion"]')?.addEventListener('click', answerExamQuestion);
 document.querySelector('button[name="nextQuestion"]')?.addEventListener('click', nextQuestion);
 
 // Display data
