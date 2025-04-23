@@ -65,7 +65,7 @@ def save_simulate_result(self, animation, pcaps):
 
 @app.task(name="tasks.check_task_network", queue="task-checking-queue")
 def perform_task_check(data_list):
-    """Check network building task and write results to database.
+    """Celery task for checking practice tasks. Write results to database.
 
     Args:
         data_list (List[Tuple]): List of tuples (network schema, requirements).
@@ -96,5 +96,5 @@ def create_emulation_task(net_schema):
 
             return animation
     except TimeoutError:
-        # You need to improve the message, perhaps add information about the user or the network name
+        # TODO improve error message (add user info)
         raise Exception(f"""Check task failed!\nNetwork Schema: {net_schema}.""")

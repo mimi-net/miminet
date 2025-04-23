@@ -4,9 +4,7 @@ import json
 
 
 def create_check_task(network_json: str, requirements_json: str):
-    """
-    Prepare task and send it for processing.
-    """
+    """Prepare task network and send it to checking service."""
 
     network = json.loads(network_json)
     requirements = json.loads(requirements_json)
@@ -51,7 +49,7 @@ EXCLUDED_JOB_IDS = (1, 2, 3, 4, 200, 201)
 
 
 def clean_schema(user_schema: Dict[str, Any]) -> Dict[str, Any]:
-    """Remove unnecessary jobs (user pings, netcats) from the user's network schema."""
+    """Remove unnecessary jobs from the user's network schema."""
     if not isinstance(user_schema, dict):
         raise TypeError("Expected user_network to be a dictionary.")
 
