@@ -1,6 +1,7 @@
 import json
 from flask import request, make_response, jsonify, abort, render_template
 from flask_login import login_required, current_user
+import logging
 
 from quiz.facade.quiz_session_facade import (
     start_session,
@@ -22,14 +23,10 @@ def answer_on_session_question_endpoint():
         abort(res[1])
     return make_response(json.dumps(res[0].to_dict(), default=str), res[1])
 
-@login_required
-def answer_on_session_exam_question_endpoint():
-    return make_response("получено", 200)
-
 # @login_required
 def check_network_task_endpoint():
     """Just call function and errors handler."""
-    res_code = create_check_task()
+    res_code = create_check_task(request.args["id"], request.json, current_user)
 
     if res_code == 404 or res_code == 403:
         abort(res_code)
@@ -42,8 +39,6 @@ def get_question_by_session_question_id_endpoint():
     res, is_exam, available_answer, status_code = get_question_by_session_question_id(
         request.args["question_id"]
     )
-
-    logging.info(available_answer)
 
     if status_code == 404:
         abort(status_code)

@@ -3,7 +3,9 @@ from celery_app import app
 import json
 
 
-def create_check_task():
+# Сейчас тут не приходят netwiork и requiremetns,
+# но эндпоинт пришлет их в формате json 
+def create_check_task(network, requirements):
     """
     Prepare task and send it for processing.
     """
