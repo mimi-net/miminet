@@ -72,8 +72,8 @@ def perform_task_check(data_list):
     """
 
     for net_schema, req in data_list:
-        print(req)
-        create_emulation_task(net_schema)
+        animation = create_emulation_task(net_schema)
+        print(animation)
 
         # ... check logic ...
 
@@ -87,18 +87,11 @@ def create_emulation_task(net_schema):
         exchange_type=EXCHANGE_TYPE,
     )
 
-    async_res = AsyncResult(
-        id=async_obj.id,
-        task_name="tasks.mininet_worker",
-        app=app,
-        backend=app.backend,
-    )
+    async_res = AsyncResult(id=async_obj.id, app=app)
 
     try:
         with allow_join_result():
-            print(async_res.status)
             animation, _ = async_res.wait(timeout=60)
-            print("here")
 
             return animation
     except TimeoutError:
