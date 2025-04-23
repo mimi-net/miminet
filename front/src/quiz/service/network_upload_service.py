@@ -1,103 +1,74 @@
-from miminet_model import Network
+from typing import Dict, Any
 from celery_app import app
 import json
 
 
-# Сейчас тут не приходят netwiork и requiremetns,
-# но эндпоинт пришлет их в формате json 
-def create_check_task(network, requirements):
+def create_check_task(network_json: str, requirements_json: str):
     """
     Prepare task and send it for processing.
     """
-    # You need to pass into 'prepare_task_network' user's network schema and task requirements
-    # I just use test data for example
-    res_data = prepare_network(
-        json.dumps(TEST_NETWORK_DATA), "*here should be requirements*"
-    )
+
+    network = json.loads(network_json)
+    requirements = json.loads(requirements_json)
+
+    prepared_data = prepare_network(network, requirements)
+    prepared_data_json = [
+        (json.dumps(net), json.dumps(req)) for net, req in prepared_data
+    ]
 
     # send task
     app.send_task(
         "tasks.check_task_network",
-        [res_data],
+        [prepared_data_json],
         routing_key="task-checking-routing-key",
         exchange="task-checking-exchange",
         exchange_type="direct",
     )
 
-    # return "OK" code
-    return 200
 
-
-def prepare_network(user_network: Network, task_req: str):
+def prepare_network(user_network: dict, task_req: dict):
     """
     Prepare task according to requirements:
     - Split task to several separate network schemas,
     - Modify these schemas.
 
     Args:
-        user_network (Network): Network schema developed by user.
-        task_req (str): Task requirements (description of what we need to check).
+        user_network (dict): Network schema created by user.
+        task_req (dict): Task requirements (description of what we need to check).
 
     Returns:
         List[Tuple]: List of tuples (network schema, requirements).
     """
 
     # ... all task prepare logic should be here ...
+    cleaned_network = clean_schema(user_network)
 
-    return [(user_network, task_req)]
+    return [(cleaned_network, task_req)]
 
 
-TEST_NETWORK_DATA = {
-    "nodes": [
-        {
-            "data": {"id": "host_1", "label": "host_1"},
-            "position": {"x": 22, "y": 150.5},
-            "classes": ["host"],
-            "config": {"type": "host", "label": "host_1", "default_gw": ""},
-            "interface": [
-                {
-                    "id": "iface_16775240",
-                    "name": "iface_16775240",
-                    "connect": "edge_m3qcgwpcn8sunskeewe",
-                    "ip": "192.168.1.1",
-                    "netmask": 24,
-                }
-            ],
-        },
-        {
-            "data": {"id": "host_2", "label": "host_2"},
-            "position": {"x": 330.5, "y": 343},
-            "classes": ["host"],
-            "config": {"type": "host", "label": "host_2", "default_gw": ""},
-            "interface": [
-                {
-                    "id": "iface_45420688",
-                    "name": "iface_45420688",
-                    "connect": "edge_m3qcgwpcn8sunskeewe",
-                    "ip": "192.168.1.2",
-                    "netmask": 24,
-                }
-            ],
-        },
-    ],
-    "edges": [
-        {
-            "data": {
-                "id": "edge_m3qcgwpcn8sunskeewe",
-                "source": "host_1",
-                "target": "host_2",
-            }
-        }
-    ],
-    "jobs": [
-        {
-            "id": "e9853215a9ce47069dad4fd6ba4971e9",
-            "job_id": 1,
-            "print_cmd": "ping -c 1 192.168.1.2",
-            "arg_1": "192.168.1.2",
-            "level": 0,
-            "host_id": "host_1",
-        }
-    ],
-    "config": {"zoom": 2, "pan_x": 0, "pan_y": 0},
-}
+# Unnecessary for task checking: (ping, ping with options, TCP/UDP ping, TCP/UDP server)
+EXCLUDED_JOB_IDS = (1, 2, 3, 4, 200, 201)
+
+
+def clean_schema(user_schema: Dict[str, Any]) -> Dict[str, Any]:
+    """Remove unnecessary jobs (user pings, netcats) from the user's network schema."""
+    if not isinstance(user_schema, dict):
+        raise TypeError("Expected user_network to be a dictionary.")
+
+    jobs = user_schema.get("jobs")
+    if not isinstance(jobs, list):
+        raise ValueError("Expected 'jobs' to be a list in the network schema.")
+
+    cleaned_jobs = [
+        job
+        for job in jobs
+        if isinstance(job, dict) and job.get("job_id") not in EXCLUDED_JOB_IDS
+    ]
+
+    if len(cleaned_jobs) == len(jobs):
+        return user_schema
+
+    cleaned_schema = user_schema.copy()
+    cleaned_schema["jobs"] = cleaned_jobs
+
+    return cleaned_schema

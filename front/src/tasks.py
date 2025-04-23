@@ -71,8 +71,9 @@ def perform_task_check(data_list):
         data_list (List[Tuple]): List of tuples (network schema, requirements).
     """
 
-    for net_schema, req in data_list:
-        animation = create_emulation_task(net_schema)
+    for network_json, req_json in data_list:
+        print(f"Emulate: {network_json}")
+        animation = create_emulation_task(network_json)
         print(animation)
 
         # ... check logic ...
