@@ -67,6 +67,7 @@ from quiz.controller.quiz_session_controller import (
     answer_on_session_exam_question_endpoint,
     session_result_endpoint,
     get_result_by_session_guid_endpoint,
+    check_network_task_endpoint,
 )
 from quiz.controller.section_controller import (
     get_sections_by_test_endpoint,
@@ -200,6 +201,13 @@ app.add_url_rule(
     methods=["POST"],
     view_func=answer_on_session_question_endpoint,
 )
+
+app.add_url_rule(
+    "/quiz/session/check_network_task",
+    methods=["POST"],
+    view_func=check_network_task_endpoint,
+)
+
 app.add_url_rule(
     "/quiz/session/answerExam",
     methods=["POST"],

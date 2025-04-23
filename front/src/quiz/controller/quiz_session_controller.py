@@ -12,6 +12,7 @@ from quiz.service.session_question_service import (
     answer_on_session_question,
     get_question_by_session_question_id,
 )
+from quiz.service.network_upload_service import create_check_task
 
 
 @login_required
@@ -24,6 +25,17 @@ def answer_on_session_question_endpoint():
 @login_required
 def answer_on_session_exam_question_endpoint():
     return make_response("получено", 200)
+
+# @login_required
+def check_network_task_endpoint():
+    """Just call function and errors handler."""
+    res_code = create_check_task()
+
+    if res_code == 404 or res_code == 403:
+        abort(res_code)
+
+    return make_response("Network task was uploaded!", res_code)
+
 
 @login_required
 def get_question_by_session_question_id_endpoint():
