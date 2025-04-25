@@ -50,7 +50,7 @@ def ip_protocol_prop(self, indent=1):
                 add_field("Destination port", getattr(self, field_name))
                 continue
             if "flags" == field_name:
-                add_field(field_name, flag)
+                add_field(field_name, getattr(self, field_name))
                 continue
             if "pro" == field_name:
                 add_field("Protocol type", getattr(self, field_name))

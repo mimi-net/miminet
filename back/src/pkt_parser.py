@@ -62,6 +62,13 @@ def ip_packet_type(pkt) -> str:
 
         return "TCP (" + str(flags_str) + ") " + str(tcp.sport) + " > " + str(tcp.dport)
 
+    # If it's IPIP tunnel ?
+    if isinstance(pkt.data, dpkt.ip.IP):
+        return "IPIP tunnel"
+
+    if isinstance(pkt.data, dpkt.gre.GRE):
+        return "GRE tunnel"
+
     return "IP packet"
 
 
