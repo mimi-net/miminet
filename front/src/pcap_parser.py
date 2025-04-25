@@ -6,6 +6,7 @@ import dpkt
 from dpkt import utils
 from dpkt.utils import inet_to_str, mac_to_str
 
+
 def create_mimishark_json(pcap, to_json):
     json_file = []
     start_timestamp = 0
