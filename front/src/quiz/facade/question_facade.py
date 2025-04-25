@@ -40,47 +40,52 @@ def create_single_question(section_id: str, question_dict, user: User):
     question.text = question_dict["text"]
     question.explanation = question_dict.get("explanation", "")
 
-    if "category" in question_dict:
-        category = QuestionCategory.query.filter_by(
-            name=question_dict["category"]
-        ).first()
+    category_name = question_dict.get("category")
+    if category_name:
+        category = QuestionCategory.query.filter_by(name=category_name).first()
         if category:
             question.category_id = category.id
 
-    if question_dict["question_type"] == "variable":
+    qtype = question_dict["question_type"]
+
+    if qtype == "variable":
         question.question_type = 1
         for variant in question_dict["variants"]:
-            answer = Answer()
-            answer.variant = variant["answer_text"]
-            answer.is_correct = variant.get("is_correct", False)
-            answer.question = question
-            answer.created_by_id = user.id
+            answer = Answer(
+                variant=variant["answer_text"],
+                is_correct=variant.get("is_correct", False),
+                question=question,
+                created_by_id=user.id,
+            )
             db.session.add(answer)
 
-    elif question_dict["question_type"] == "sorting":
+    elif qtype == "sorting":
         question.question_type = 2
         for sorting_answer in question_dict["sorting_answers"]:
-            answer = Answer()
-            answer.variant = sorting_answer["answer_text"]
-            answer.position = sorting_answer["position"]
-            answer.question = question
-            answer.created_by_id = user.id
+            answer = Answer(
+                variant=sorting_answer["answer_text"],
+                position=sorting_answer["position"],
+                question=question,
+                created_by_id=user.id,
+            )
             db.session.add(answer)
 
-    elif question_dict["question_type"] == "matching":
+    elif qtype == "matching":
         question.question_type = 3
         for pair in question_dict["matching_pairs"]:
-            answer = Answer()
-            answer.left = pair["left"]
-            answer.right = pair["right"]
-            answer.question = question
-            answer.created_by_id = user.id
+            answer = Answer(
+                left=pair["left"],
+                right=pair["right"],
+                question=question,
+                created_by_id=user.id,
+            )
             db.session.add(answer)
 
-    elif question_dict["question_type"] == "practice":
+    elif qtype == "practice":
         question.question_type = 0
         practice_question = PracticeQuestion()
-        attributes = [
+
+        for attr in [
             "description",
             "explanation",
             "available_host",
@@ -88,9 +93,8 @@ def create_single_question(section_id: str, question_dict, user: User):
             "available_l1_hub",
             "available_l3_router",
             "available_server",
-        ]
-        for attribute in attributes:
-            setattr(practice_question, attribute, question_dict[attribute])
+        ]:
+            setattr(practice_question, attr, question_dict.get(attr, ""))
 
         net = Network.query.filter(
             Network.guid == question_dict["start_configuration"]
@@ -104,13 +108,11 @@ def create_single_question(section_id: str, question_dict, user: User):
         modified_network = deepcopy(original_network)
         modified_network.pop("packets", None)
         modified_network.pop("pcap", None)
-        modified_network_json = json.dumps(modified_network)
-        u = uuid.uuid4()
 
         net_copy = Network(
-            guid=str(u),
+            guid=str(uuid.uuid4()),
             author_id=user.id,
-            network=modified_network_json,
+            network=json.dumps(modified_network),
             title=net.title,
             description="Task start configuration copy",
             preview_uri=net.preview_uri,
@@ -122,7 +124,12 @@ def create_single_question(section_id: str, question_dict, user: User):
 
         practice_question.start_configuration = net_copy.guid
         practice_question.created_by_id = user.id
-        practice_question.requirements = question_dict["requirements"]
+
+        requirements = question_dict.get("requirements")
+        if requirements:
+            practice_question.requirements = requirements
+        else:
+            practice_question.requirements = question_dict["network_scenarios"]
 
         question.practice_question = practice_question
         db.session.add(practice_question)

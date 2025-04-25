@@ -1,6 +1,8 @@
 import os
 import shutil
 import uuid
+import logging
+import json
 
 from sqlalchemy.orm.exc import StaleDataError
 
@@ -14,6 +16,7 @@ from miminet_model import Simulate, SimulateLog, db, Network
 from celery.result import AsyncResult, allow_join_result
 from celery.exceptions import TimeoutError
 
+from quiz.service.session_question_service import answer_on_exam_question
 
 @app.task(bind=True, queue="common-results-queue")
 def save_simulate_result(self, animation, pcaps):
@@ -64,19 +67,54 @@ def save_simulate_result(self, animation, pcaps):
 
 
 @app.task(name="tasks.check_task_network", queue="task-checking-queue")
-def perform_task_check(data_list):
+def perform_task_check(session_question_id, data_list):
     """Celery task for checking practice tasks. Write results to database.
 
     Args:
+        session_question_id: Id of the current task in the db
         data_list (List[Tuple]): List of tuples (network schema, requirements).
     """
 
-    for network_json, req_json in data_list:
-        print(f"Emulate: {network_json}")
-        animation = create_emulation_task(network_json)
-        print(animation)
+    networks_to_check = []
 
-        # ... check logic ...
+    for network_json, req_json in data_list:
+        try:
+            
+            # Добавка заглушечных jobs, чтобы работало
+            # Удали, как сделаешь свою часть, пожалуйста
+            # Отсюдова
+            if isinstance(network_json, str):
+                network_json = json.loads(network_json)
+
+            if "jobs" in network_json and not network_json["jobs"]:
+                network_json["jobs"] = [
+                    {
+                        "id": "e9853215a9ce47069dad4fd6ba4971e9",
+                        "job_id": 1,
+                        "print_cmd": "ping -c 1 192.168.1.2",
+                        "arg_1": "192.168.1.2",
+                        "level": 0,
+                        "host_id": "host_1",
+                    }
+                ]
+            
+            network_json = json.dumps(network_json)
+
+            # Досюдова. И импорт json в начале тоже пожалуйста
+
+            logging.info(f"Network_json: {network_json}")
+            animation = create_emulation_task(network_json)
+            logging.info(f"Animation: {animation}")
+            requirements_to_task = json.loads(req_json)[0]["requirements"]
+            logging.info(type(requirements_to_task))
+            logging.info(requirements_to_task)
+            networks_to_check.append((network_json, animation, requirements_to_task))
+        except Exception as e:
+            logging.error(f"Ошибка при создании задачи эмуляции: {e}")
+
+    logging.info(f"Networks to check: {networks_to_check}")
+    with flask_app.app_context():
+        answer_on_exam_question(session_question_id, networks_to_check)
 
 
 def create_emulation_task(net_schema):
