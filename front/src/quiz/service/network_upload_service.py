@@ -1,6 +1,7 @@
-from typing import Dict, Any
+from typing import Dict, List, Tuple, Any
 from celery_app import app
 import json
+import uuid
 
 
 def create_check_task(network_json: str, requirements_json: str):
@@ -9,7 +10,7 @@ def create_check_task(network_json: str, requirements_json: str):
     network = json.loads(network_json)
     requirements = json.loads(requirements_json)
 
-    prepared_data = prepare_network(network, requirements)
+    prepared_data = prepare_task(network, requirements)
     prepared_data_json = [
         (json.dumps(net), json.dumps(req)) for net, req in prepared_data
     ]
@@ -24,7 +25,11 @@ def create_check_task(network_json: str, requirements_json: str):
     )
 
 
-def prepare_network(user_network: dict, task_req: dict):
+# Unnecessary for task checking: (ping, ping with options, TCP/UDP ping, TCP/UDP server)
+EXCLUDED_JOB_IDS = (1, 2, 3, 4, 200, 201)
+
+
+def prepare_task(user_network: dict, task_req: dict):
     """
     Prepare task according to requirements:
     - Split task to several separate network schemas,
@@ -40,12 +45,66 @@ def prepare_network(user_network: dict, task_req: dict):
 
     # ... all task prepare logic should be here ...
     cleaned_network = clean_schema(user_network)
+    network_scenarios = task_req["network_scenarios"]
 
-    return [(cleaned_network, task_req)]
+    return get_configured_tasks(cleaned_network, network_scenarios)
 
 
-# Unnecessary for task checking: (ping, ping with options, TCP/UDP ping, TCP/UDP server)
-EXCLUDED_JOB_IDS = (1, 2, 3, 4, 200, 201)
+def get_configured_tasks(schema: Dict[str, Any], scenarios: List[Dict]) -> List[Tuple]:
+    """Divide single schema into several separated schemas according to requirements."""
+    results: List[Tuple] = []
+
+    for scenario in scenarios:
+        modifications = scenario["modifications"]
+
+        # Every scenario generates new schema and requirements,
+        # we need it in additional checks
+        scenario_schema = schema.copy()
+        scenario_requirements = scenario["requirements"].copy()
+
+        for modification in modifications:
+            modification_keys = modification.keys()
+
+            if len(modification.keys()) != 1:
+                raise ValueError(
+                    f"Incorrect requirements modification keys: {modification_keys}."
+                )
+
+            modification_name: str = modification_keys[0]
+            modification_arg: Dict[str, str] = modification[modification_name]
+
+            if modification_name == "remove_edge":
+                edge_id: str = modification_arg["id"]
+
+                # Break edge
+                scenario_schema["edges"] = [
+                    edge
+                    for edge in scenario_schema["edges"]
+                    if edge["data"]["id"] != edge_id
+                ]
+            elif modification_name == "add_ping":
+                from_host_name: str = modification_arg["from"]
+                ip: str = modification_arg["ip"]
+
+                # Add ping job
+                scenario_schema["jobs"].append(
+                    {
+                        "id": uuid.uuid4().hex,
+                        "job_id": 1,
+                        "print_cmd": f"ping -c 1 {ip}",
+                        "arg_1": f"{ip}",
+                        "level": -1,
+                        "host_id": from_host_name,
+                    }
+                )
+            else:
+                raise ValueError(
+                    f"Unknown requirements modifier name: {modification_name}."
+                )
+
+        results.append((scenario_schema, scenario_requirements))
+
+    return results
 
 
 def clean_schema(user_schema: Dict[str, Any]) -> Dict[str, Any]:
