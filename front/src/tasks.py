@@ -80,28 +80,7 @@ def perform_task_check(session_question_id, data_list):
 
     for network_json, req_json in data_list:
         try:
-
-            # Добавка заглушечных jobs, чтобы работало
-            # Удали, как сделаешь свою часть, пожалуйста
-            # Отсюдова
-            if isinstance(network_json, str):
-                network_json = json.loads(network_json)
-
-            if "jobs" in network_json and not network_json["jobs"]:
-                network_json["jobs"] = [
-                    {
-                        "id": "e9853215a9ce47069dad4fd6ba4971e9",
-                        "job_id": 1,
-                        "print_cmd": "ping -c 1 192.168.1.2",
-                        "arg_1": "192.168.1.2",
-                        "level": 0,
-                        "host_id": "host_1",
-                    }
-                ]
-
-            network_json = json.dumps(network_json)
-
-            # Досюдова. И импорт json в начале тоже пожалуйста
+            network_json = json.loads(network_json)
 
             logging.info(f"Network_json: {network_json}")
             animation = create_emulation_task(network_json)
@@ -111,7 +90,7 @@ def perform_task_check(session_question_id, data_list):
             logging.info(requirements_to_task)
             networks_to_check.append((network_json, animation, requirements_to_task))
         except Exception as e:
-            logging.error(f"Ошибка при создании задачи эмуляции: {e}")
+            logging.error(f"Ошибка при создании задачи эмуляции: {e}.")
 
     logging.info(f"Networks to check: {networks_to_check}")
     with flask_app.app_context():

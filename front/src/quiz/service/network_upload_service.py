@@ -5,21 +5,18 @@ import json
 import uuid
 
 
-def create_check_task(network_json, requirements_json, session_question_id):
+def create_check_task(network: Dict, requirements: Dict, session_question_id):
     """Prepare task network and send it to checking service."""
 
-    network = json.loads(network_json)
-    requirements = json.loads(requirements_json)
-
-    prepared_data = prepare_task(network, requirements)
-    prepared_data_json = [
-        (json.dumps(net), json.dumps(req)) for net, req in prepared_data
+    prepared_task = prepare_task(network, requirements)
+    prepared_task_json = [
+        (json.dumps(net), json.dumps(req)) for net, req in prepared_task
     ]
 
     # send task
     app.send_task(
         "tasks.check_task_network",
-        args=[session_question_id, prepared_data_json],
+        args=[session_question_id, prepared_task_json],
         routing_key="task-checking-routing-key",
         exchange="task-checking-exchange",
         exchange_type="direct",

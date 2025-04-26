@@ -24,9 +24,8 @@ def answer_on_session_question_endpoint():
     return make_response(json.dumps(res[0].to_dict(), default=str), res[1])
 
 
-# @login_required
+@login_required
 def check_network_task_endpoint():
-    """Just call function and errors handler."""
     session_question_id = request.args["id"]
     answer = request.json
     user = current_user
@@ -42,10 +41,7 @@ def check_network_task_endpoint():
 
     requirements, network = result, aux
 
-    requirements_json = json.dumps(requirements)
-    network_json = json.dumps(network)
-
-    res_code = create_check_task(network_json, requirements_json, session_question_id)
+    res_code = create_check_task(network, requirements, session_question_id)
 
     if res_code == 404 or res_code == 403:
         abort(res_code)
