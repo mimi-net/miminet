@@ -11,6 +11,7 @@ from quiz.facade.quiz_session_facade import (
 from quiz.service.session_question_service import (
     answer_on_session_question,
     get_question_by_session_question_id,
+    handle_exam_answer,
 )
 from quiz.service.network_upload_service import create_check_task
 
@@ -26,12 +27,30 @@ def answer_on_session_question_endpoint():
 # @login_required
 def check_network_task_endpoint():
     """Just call function and errors handler."""
-    create_check_task(
-        json.dumps(""),
-        json.dumps(""),
-    )
+    session_question_id = request.args["id"]
+    answer = request.json
+    user = current_user
 
-    return make_response("Network task was uploaded!", 200)
+    result, aux, status = handle_exam_answer(session_question_id, answer, user)
+
+    if status != 200:
+        abort(status)
+
+    if aux is None:
+        # Теория — сразу отправляем результат
+        return make_response("Вопрос проверен", 200)
+
+    requirements, network = result, aux
+
+    requirements_json = json.dumps(requirements)
+    network_json = json.dumps(network)
+
+    res_code = create_check_task(network_json, requirements_json, session_question_id)
+
+    if res_code == 404 or res_code == 403:
+        abort(res_code)
+
+    return make_response("Практическая задача отправлена на проверку", res_code)
 
 
 @login_required

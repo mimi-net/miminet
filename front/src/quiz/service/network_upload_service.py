@@ -5,7 +5,7 @@ import json
 import uuid
 
 
-def create_check_task(network_json: str, requirements_json: str):
+def create_check_task(network_json, requirements_json, session_question_id):
     """Prepare task network and send it to checking service."""
 
     network = json.loads(network_json)
@@ -19,7 +19,7 @@ def create_check_task(network_json: str, requirements_json: str):
     # send task
     app.send_task(
         "tasks.check_task_network",
-        [prepared_data_json],
+        args=[session_question_id, prepared_data_json],
         routing_key="task-checking-routing-key",
         exchange="task-checking-exchange",
         exchange_type="direct",

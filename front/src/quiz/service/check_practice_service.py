@@ -194,11 +194,11 @@ def check_host(requirement, answer, device):
     return points_for_host, hints
 
 
-def check_task(task_dict, answer):
+def check_task(requirements, answer):
     total_points = 0
     hints = []
 
-    for requirement in task_dict:
+    for requirement in requirements:
         for device, requirements in requirement.items():
             if (
                 device.startswith("host")
