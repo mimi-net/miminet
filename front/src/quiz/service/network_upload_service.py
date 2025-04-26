@@ -1,5 +1,6 @@
 from typing import Dict, List, Tuple, Any
 from celery_app import app
+from copy import deepcopy
 import json
 import uuid
 
@@ -43,11 +44,11 @@ def prepare_task(user_network: dict, task_req: dict):
         List[Tuple]: List of tuples (network schema, requirements).
     """
 
-    # ... all task prepare logic should be here ...
     cleaned_network = clean_schema(user_network)
     network_scenarios = task_req["network_scenarios"]
+    tasks = get_configured_tasks(cleaned_network, network_scenarios)
 
-    return get_configured_tasks(cleaned_network, network_scenarios)
+    return tasks
 
 
 def get_configured_tasks(schema: Dict[str, Any], scenarios: List[Dict]) -> List[Tuple]:
@@ -59,13 +60,13 @@ def get_configured_tasks(schema: Dict[str, Any], scenarios: List[Dict]) -> List[
 
         # Every scenario generates new schema and requirements,
         # we need it in additional checks
-        scenario_schema = schema.copy()
-        scenario_requirements = scenario["requirements"].copy()
+        scenario_schema = deepcopy(schema)
+        scenario_requirements = deepcopy(scenario["requirements"])
 
         for modification in modifications:
-            modification_keys = modification.keys()
+            modification_keys: List = list(modification.keys())
 
-            if len(modification.keys()) != 1:
+            if len(modification_keys) != 1:
                 raise ValueError(
                     f"Incorrect requirements modification keys: {modification_keys}."
                 )
@@ -82,6 +83,7 @@ def get_configured_tasks(schema: Dict[str, Any], scenarios: List[Dict]) -> List[
                     for edge in scenario_schema["edges"]
                     if edge["data"]["id"] != edge_id
                 ]
+
             elif modification_name == "add_ping":
                 from_host_name: str = modification_arg["from"]
                 to_host_name: str = modification_arg["to"]
