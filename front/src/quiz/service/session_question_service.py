@@ -32,7 +32,7 @@ def is_answer_available(section):
             results_time = section.results_available_from.astimezone(MOSCOW_TZ)
 
         available_answer = results_time <= now_moscow
-    
+
     return available_answer
 
 

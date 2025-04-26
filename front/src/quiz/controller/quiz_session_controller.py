@@ -1,7 +1,6 @@
 import json
 from flask import request, make_response, jsonify, abort, render_template
 from flask_login import login_required, current_user
-import logging
 
 from quiz.facade.quiz_session_facade import (
     start_session,
@@ -23,15 +22,16 @@ def answer_on_session_question_endpoint():
         abort(res[1])
     return make_response(json.dumps(res[0].to_dict(), default=str), res[1])
 
+
 # @login_required
 def check_network_task_endpoint():
     """Just call function and errors handler."""
-    res_code = create_check_task(request.args["id"], request.json, current_user)
+    create_check_task(
+        json.dumps(""),
+        json.dumps(""),
+    )
 
-    if res_code == 404 or res_code == 403:
-        abort(res_code)
-
-    return make_response("Network task was uploaded!", res_code)
+    return make_response("Network task was uploaded!", 200)
 
 
 @login_required
@@ -88,8 +88,6 @@ def session_result_endpoint():
 
 def get_result_by_session_guid_endpoint():
     res = get_result_by_session_guid(request.args["guid"])
-
-    data=res[0].to_dict()
 
     return make_response(
         render_template(

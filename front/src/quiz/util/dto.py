@@ -44,8 +44,9 @@ def is_answer_available(section):
             results_time = section.results_available_from.astimezone(MOSCOW_TZ)
 
         available_answer = results_time <= now_moscow
-    
+
     return available_answer
+
 
 def to_section_dto_list(sections: List[Section]):
     dto_list: List[SectionDto] = list(
@@ -57,7 +58,7 @@ def to_section_dto_list(sections: List[Section]):
                 description=our_section.description,
                 question_count=calculate_question_count(our_section),
                 is_exam=our_section.is_exam,
-                is_answer_available=is_answer_available(our_section)
+                is_answer_available=is_answer_available(our_section),
             ),
             sections,
         )
@@ -271,7 +272,7 @@ class SectionDto:
         description: str,
         question_count: int,
         is_exam: bool,
-        is_answer_available: bool
+        is_answer_available: bool,
     ):
         self.section_id = section_id
         self.section_name = section_name
@@ -345,9 +346,9 @@ class SessionResultDto:
         self.results = results
         self.start_time = start_time
         self.time_spent = time_spent
-        self.is_exam=is_exam
-        self.answer_available=answer_available
-        self.available_from=available_from
+        self.is_exam = is_exam
+        self.answer_available = answer_available
+        self.available_from = available_from
 
     def to_dict(self):
         return {
@@ -361,5 +362,5 @@ class SessionResultDto:
             "time_spent": self.time_spent,
             "is_exam": self.is_exam,
             "answer_available": self.answer_available,
-            "results_available_from": self.available_from
+            "results_available_from": self.available_from,
         }

@@ -13,6 +13,7 @@ from quiz.util.dto import SessionResultDto
 import json
 import random
 
+
 def start_session(section_id: str, user: User):
     section = Section.query.filter_by(id=section_id).first()
     test = section.test
@@ -119,9 +120,8 @@ def session_result(quiz_session_id: str):
         "practice_results": practice_results,
         "is_exam": is_exam,
         "answer_available": answer_available,
-        "results_available_from": available_from
+        "results_available_from": available_from,
     }, 200
-
 
 
 def get_result_by_session_guid(session_guid: str):
@@ -161,7 +161,7 @@ def get_result_by_session_guid(session_guid: str):
         time_spent=result["time_spent"],
         is_exam=is_exam,
         answer_available=answer_available,
-        available_from=available_from
+        available_from=available_from,
     )
 
     return session_data, status
