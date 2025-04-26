@@ -84,15 +84,23 @@ def get_configured_tasks(schema: Dict[str, Any], scenarios: List[Dict]) -> List[
                 ]
             elif modification_name == "add_ping":
                 from_host_name: str = modification_arg["from"]
-                ip: str = modification_arg["ip"]
+                to_host_name: str = modification_arg["to"]
+
+                # Get first IP address in "to" host
+                # (Not smart enough, but usually host has only 1 address)
+                to_host_ip: str = [
+                    node["interface"][0]["ip"]
+                    for node in scenario_schema["nodes"]
+                    if node["data"]["id"] == to_host_name
+                ][0]
 
                 # Add ping job
                 scenario_schema["jobs"].append(
                     {
                         "id": uuid.uuid4().hex,
                         "job_id": 1,
-                        "print_cmd": f"ping -c 1 {ip}",
-                        "arg_1": f"{ip}",
+                        "print_cmd": f"ping -c 1 {to_host_ip}",
+                        "arg_1": f"{to_host_ip}",
                         "level": -1,
                         "host_id": from_host_name,
                     }
