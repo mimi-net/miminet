@@ -150,30 +150,17 @@ def answer_on_exam_question(session_question_id: str, networks_to_check):
     total_max_score = 0
 
     for network_json, animation_json, requirements_json in networks_to_check:
-        if isinstance(network_json, str):
-            network_data = json.loads(network_json)
-        else:
-            network_data = network_json
-
-        if isinstance(animation_json, str):
-            animation_data = json.loads(animation_json)
-        else:
-            animation_data = animation_json
-
-        if isinstance(requirements_json, str):
-            requirements = json.loads(requirements_json)
-        else:
-            requirements = requirements_json
+        network_data = json.loads(network_json) if isinstance(network_json, str) else network_json
+        animation_data = json.loads(animation_json) if isinstance(animation_json, str) else animation_json
+        requirements = json.loads(requirements_json) if isinstance(requirements_json, str) else requirements_json
 
         network_data["packets"] = animation_data
 
-        logging.info(requirements)
+        max_score = calculate_max_score(requirements)
+        score, _ = check_task(requirements, network_data)
 
-        # max_score = calculate_max_score(requirements)
-        # score, _ = check_task(requirements, network_data)
-
-        # total_score += score
-        # total_max_score += max_score
+        total_score += score
+        total_max_score += max_score
 
     session_question.is_correct = total_score == total_max_score
     session_question.score = total_score

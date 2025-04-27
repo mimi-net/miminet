@@ -4,7 +4,6 @@ from copy import deepcopy
 import json
 import uuid
 
-
 def create_check_task(network: Dict, requirements: Dict, session_question_id):
     """Prepare task network and send it to checking service."""
 
@@ -42,8 +41,7 @@ def prepare_task(user_network: dict, task_req: dict):
     """
 
     cleaned_network = clean_schema(user_network)
-    network_scenarios = task_req["network_scenarios"]
-    tasks = get_configured_tasks(cleaned_network, network_scenarios)
+    tasks = get_configured_tasks(cleaned_network, task_req)
 
     return tasks
 
@@ -53,12 +51,12 @@ def get_configured_tasks(schema: Dict[str, Any], scenarios: List[Dict]) -> List[
     results: List[Tuple] = []
 
     for scenario in scenarios:
-        modifications = scenario["modifications"]
+        modifications = scenario.get("modifications", [])
 
         # Every scenario generates new schema and requirements,
         # we need it in additional checks
         scenario_schema = deepcopy(schema)
-        scenario_requirements = deepcopy(scenario["requirements"])
+        scenario_requirements = deepcopy(scenario.get("requirements", {}))
 
         for modification in modifications:
             modification_keys: List = list(modification.keys())
@@ -77,33 +75,51 @@ def get_configured_tasks(schema: Dict[str, Any], scenarios: List[Dict]) -> List[
                 # Break edge
                 scenario_schema["edges"] = [
                     edge
-                    for edge in scenario_schema["edges"]
-                    if edge["data"]["id"] != edge_id
+                    for edge in scenario_schema.get("edges", [])
+                    if edge.get("data", {}).get("id") != edge_id
                 ]
 
             elif modification_name == "add_ping":
-                from_host_name: str = modification_arg["from"]
-                to_host_name: str = modification_arg["to"]
+                from_host_name: str = modification_arg.get("from")
+                to_host_name: str = modification_arg.get("to")
 
-                # Get first IP address in "to" host
-                # (Not smart enough, but usually host has only 1 address)
-                to_host_ip: str = [
-                    node["interface"][0]["ip"]
-                    for node in scenario_schema["nodes"]
-                    if node["data"]["id"] == to_host_name
-                ][0]
+                # Find the 'to' host node
+                node = next(
+                    (
+                        n for n in scenario_schema.get("nodes", [])
+                        if n.get("data", {}).get("id") == to_host_name
+                    ),
+                    None,
+                )
+
+                # Validate node and interface/ip availability
+                if not node:
+                    # No such host: skip adding ping
+                    continue
+
+                interfaces = node.get("interface") or []
+                if not isinstance(interfaces, list) or len(interfaces) == 0:
+                    # No interfaces configured: skip
+                    continue
+
+                first_if = interfaces[0] or {}
+                to_host_ip = first_if.get("ip")
+                if not to_host_ip:
+                    # IP not configured: skip
+                    continue
 
                 # Add ping job
-                scenario_schema["jobs"].append(
+                scenario_schema.setdefault("jobs", []).append(
                     {
                         "id": uuid.uuid4().hex,
                         "job_id": 1,
                         "print_cmd": f"ping -c 1 {to_host_ip}",
-                        "arg_1": f"{to_host_ip}",
+                        "arg_1": to_host_ip,
                         "level": -1,
                         "host_id": from_host_name,
                     }
                 )
+
             else:
                 raise ValueError(
                     f"Unknown requirements modifier name: {modification_name}."

@@ -80,24 +80,23 @@ def perform_task_check(session_question_id, data_list):
 
     for network_json, req_json in data_list:
         try:
-            network_json = json.loads(network_json)
+            network_json = json.loads(network_json) if isinstance(network_json, str) else network_json
+            req_json = json.loads(req_json) if isinstance(req_json, str) else req_json
 
-            logging.info(f"Network_json: {network_json}")
             animation = create_emulation_task(network_json)
-            logging.info(f"Animation: {animation}")
-            requirements_to_task = json.loads(req_json)[0]["requirements"]
-            logging.info(type(requirements_to_task))
-            logging.info(requirements_to_task)
-            networks_to_check.append((network_json, animation, requirements_to_task))
+            networks_to_check.append((network_json, animation, req_json))
+            
         except Exception as e:
-            logging.error(f"Ошибка при создании задачи эмуляции: {e}.")
+            logging.error(f"Ошибка при создании задачи: {e}.")
 
-    logging.info(f"Networks to check: {networks_to_check}")
     with flask_app.app_context():
         answer_on_exam_question(session_question_id, networks_to_check)
 
 
 def create_emulation_task(net_schema):
+    if not net_schema.get('jobs'):
+        return [] 
+
     async_obj = app.send_task(
         "tasks.mininet_worker",
         [net_schema],
