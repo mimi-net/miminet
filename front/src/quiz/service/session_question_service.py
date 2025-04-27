@@ -150,9 +150,19 @@ def answer_on_exam_question(session_question_id: str, networks_to_check):
     total_max_score = 0
 
     for network_json, animation_json, requirements_json in networks_to_check:
-        network_data = json.loads(network_json) if isinstance(network_json, str) else network_json
-        animation_data = json.loads(animation_json) if isinstance(animation_json, str) else animation_json
-        requirements = json.loads(requirements_json) if isinstance(requirements_json, str) else requirements_json
+        network_data = (
+            json.loads(network_json) if isinstance(network_json, str) else network_json
+        )
+        animation_data = (
+            json.loads(animation_json)
+            if isinstance(animation_json, str)
+            else animation_json
+        )
+        requirements = (
+            json.loads(requirements_json)
+            if isinstance(requirements_json, str)
+            else requirements_json
+        )
 
         network_data["packets"] = animation_data
 

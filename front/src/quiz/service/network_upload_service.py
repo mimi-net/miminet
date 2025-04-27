@@ -4,6 +4,7 @@ from copy import deepcopy
 import json
 import uuid
 
+
 def create_check_task(network: Dict, requirements: Dict, session_question_id):
     """Prepare task network and send it to checking service."""
 
@@ -86,7 +87,8 @@ def get_configured_tasks(schema: Dict[str, Any], scenarios: List[Dict]) -> List[
                 # Find the 'to' host node
                 node = next(
                     (
-                        n for n in scenario_schema.get("nodes", [])
+                        n
+                        for n in scenario_schema.get("nodes", [])
                         if n.get("data", {}).get("id") == to_host_name
                     ),
                     None,
