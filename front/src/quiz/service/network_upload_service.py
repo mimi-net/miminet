@@ -5,7 +5,7 @@ import json
 import uuid
 
 
-def create_check_task(network: Dict, requirements: Dict, session_question_id):
+def create_check_task(network: dict, requirements: list[dict], session_question_id):
     """Prepare task network and send it to checking service."""
 
     prepared_task = prepare_task(network, requirements)
