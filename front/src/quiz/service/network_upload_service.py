@@ -27,7 +27,7 @@ def create_check_task(network: Dict, requirements: Dict, session_question_id):
 EXCLUDED_JOB_IDS = (1, 2, 3, 4, 200, 201)
 
 
-def prepare_task(user_network: dict, task_req: dict):
+def prepare_task(user_network: dict, task_req: list[dict]):
     """
     Prepare task according to requirements:
     - Split task to several separate network schemas,
@@ -81,8 +81,13 @@ def get_configured_tasks(schema: Dict[str, Any], scenarios: List[Dict]) -> List[
                 ]
 
             elif modification_name == "add_ping":
-                from_host_name: str = modification_arg.get("from")
-                to_host_name: str = modification_arg.get("to")
+                from_host_name = modification_arg.get("from")
+                to_host_name = modification_arg.get("to")
+
+                if from_host_name is None or to_host_name is None:
+                    raise ValueError(
+                        "'from' and 'to' must be specified for add_ping modification"
+                    )
 
                 # Find the 'to' host node
                 node = next(
