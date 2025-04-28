@@ -1,5 +1,4 @@
-let newdata = data.replace(/&#39;/g, '"');
-// .replace(/&#34;/g,"'"); 
+let newdata = data.replace(/&#39;/g, '"'); 
 let pcap_data = JSON.parse(newdata);
 let tds = document.querySelectorAll('tbody tr');
 let input = document.querySelector('#bytes');
@@ -7,11 +6,11 @@ let rows = document.querySelector('#rows');
 let ascii = document.querySelector('#ascii');
 let decode = document.querySelector('#decode');
 {
-    tds[0].classList.toggle('selected');
-    tds[0].classList.add('no-hover');
+	tds[0].classList.toggle('selected');
+	tds[0].classList.add('no-hover');
 	decode_packet(pcap_data[0].bytes);
 
-    var string = pcap_data[0]['bytes'];
+	var string = pcap_data[0]['bytes'];
 
     for (var b = 0; b < (string.length) / 47; b++) {
         var elem1 = document.createElement("p");
@@ -21,6 +20,7 @@ let decode = document.querySelector('#decode');
         elem2.innerHTML = pcap_data[0]['bytes'].substring(b * 47 + b, (b * 47) + 47 + b);
         input.appendChild(elem2);
         var elem3 = document.createElement("p");
+        elem3.style.whiteSpace="nowrap";
         var ascii_with_prime = pcap_data[0]['ascii'].replace('doublePrime', '"').replace('singlePrime', "'");
         elem3.innerHTML = ascii_with_prime.substring(b * 16 + b, (b * 16) + 16 + b);
         ascii.appendChild(elem3);
@@ -49,6 +49,7 @@ tds.forEach(function (item) {
             elem2.innerHTML = pcap_data[i - 1]['bytes'].substring(b * 47 + b, (b * 47) + 47 + b);
             input.appendChild(elem2);
             var elem3 = document.createElement("p");
+	    elem3.style.whiteSpace="nowrap";
             var ascii_with_prime = pcap_data[i - 1]['ascii'].replace('doublePrime', '"').replace('singlePrime', "'");
             elem3.innerHTML = ascii_with_prime.substring(b * 16 + b, (b * 16) + 16 + b);
             ascii.appendChild(elem3);
@@ -262,9 +263,14 @@ function decode_ip_header (ip_hdr) {
 		ip_protocol_string = "TCP (06)";
 	} else if (ip_protocol === "11") {
 		ip_protocol_string = "UDP (17)";
+	} else if (ip_protocol === "04") {	
+		ip_protocol_string = "IPv4 encapsulation (04)";
+	} else if (ip_protocol === "2f") {
+		ip_protocol_string = "GRE (47)";
+	} else {
+		ip_protocol_string = "Uknown protocol";
 	}
 	
-
 	return {
 		"xxxx .... = " : ip_ver_string,
 		".... xxxx = " : ip_hdr_len_string,
@@ -419,6 +425,221 @@ function decode_tcp_header (tcp_hdr) {
 	};
 }
 
+function decode_gre_header (gre_hdr) {
+
+	// By default
+	let gre_hdr_length = 4;
+
+	if (gre_hdr.length < gre_hdr_length) {
+		console.log("Mimishark: GRE header is too small");
+		return {};
+	}
+
+	let flags_and_version = gre_hdr.slice(0,2);
+	const C = flags_and_version & 32768;
+	const R = flags_and_version & 16384;
+	const K = flags_and_version & 8192;
+	const S = flags_and_version & 4096;
+	const s = flags_and_version & 2048;
+	const Recur = flags_and_version & 1792;
+	const Flags = flags_and_version & 240;
+	const Version = flags_and_version & 15;
+
+	const ProtocolType = gre_hdr.slice(2,4).join("");
+
+	let protocol_type_string = "";
+
+	if (ProtocolType === "0800") {
+		protocol_type_string = "IPv4 (0x0800)";
+	} else {
+		protocol_type_string = "Unknown protocol";
+	}
+
+
+	let ret_val =  {
+		"x... .... .... .... = checksum bit: " : Boolean(C).toString(),
+		".X.. .... .... .... = routing bit: " : Boolean(R).toString(),
+		"..X. .... .... .... = key bit: " : Boolean(K).toString(),
+		"...X .... .... .... = sequence number bit: " : Boolean(S).toString(),
+		".... X... .... .... = strict source route bit: " : Boolean(s).toString(),
+		".... .XXX .... .... = recursion control: " : Recur.toString(),
+		".... .... XXXX X... = flags: " : Flags.toString(),
+		".... .... .... .XXX = version: " : Version.toString(),
+		"Protocol type: " : protocol_type_string,
+	};
+
+	if (C) {
+		ret_val["Checksum"] = parseInt(gre_hdr.slice(4,6).join(""), 16).toString();
+		ret_val["Offset"] = parseInt(gre_hdr.slice(6,8).join(""), 16).toString();
+		gre_hdr_length += 8;
+	}
+
+	if (K) {
+		ret_val["Key"] = parseInt(gre_hdr.slice(8,12).join(""), 16).toString();
+		gre_hdr_length += 4;
+	}
+
+	if (S) {
+		ret_val["Sequence number"] = parseInt(gre_hdr.slice(12,16).join(""), 16).toString();
+		gre_hdr_length += 4;
+	}
+	
+	ret_val["GRE_header_length"] = gre_hdr_length;
+	return ret_val;
+}
+
+function add_llc_header (pkt, header_number) {
+
+	make_pa("Logical-Link Control", header_number);
+	decode_div = document.createElement("div");
+	decode_div.classList.add("collapse", "decode_body", "decode_width");
+	decode_div.id = "collapseDecode" + header_number;
+
+	pkt_decode = decode_llc_header(pkt);
+
+	for (var k in pkt_decode) {
+		let decode_p = document.createElement("p");
+		decode_p.innerHTML = k + " " + pkt_decode[k];
+		decode_div.appendChild(decode_p);
+	}
+
+	decode.appendChild(decode_div);
+}
+
+function add_stp_header (pkt, header_number) {
+
+	make_pa("Spanning Tree Protocol", header_number);
+	decode_div = document.createElement("div");
+	decode_div.classList.add("collapse", "decode_body", "decode_width");
+	decode_div.id = "collapseDecode" + header_number;
+
+	pkt_decode = decode_stp_header(pkt);
+
+	for (var k in pkt_decode) {
+		let decode_p = document.createElement("p");
+		decode_p.innerHTML = k + " " + pkt_decode[k];
+		decode_div.appendChild(decode_p);
+	}
+
+	decode.appendChild(decode_div);
+}
+
+function add_arp_header(pkt, header_number) {
+
+	make_pa("Address Resolution Protocol", header_number);
+	decode_div = document.createElement("div");
+	decode_div.classList.add("collapse", "decode_body", "decode_width");
+	decode_div.id = "collapseDecode" + header_number;
+
+	pkt_decode = decode_arp_header(pkt);
+
+	for (var k in pkt_decode) {
+		let decode_p = document.createElement("p");
+		decode_p.innerHTML = k + " " + pkt_decode[k];
+		decode_div.appendChild(decode_p);
+	}
+	
+	decode.appendChild(decode_div);
+}
+
+function add_ipv4_header (pkt, header_number) {
+
+	make_pa("Internet Protocol Version 4", header_number);
+	decode_div = document.createElement("div");
+	decode_div.classList.add("collapse", "decode_body", "decode_width");
+	decode_div.id = "collapseDecode" + header_number;
+	pkt_decode = decode_ip_header(pkt);
+
+	for (var k in pkt_decode) {
+		let decode_p = document.createElement("p");
+		decode_p.innerHTML = k + " " + pkt_decode[k];
+		decode_div.appendChild(decode_p);
+	}
+
+	decode.appendChild(decode_div);
+}
+
+function add_icmp_header (pkt, header_number) {
+
+	make_pa("Internet Control Message Protocol", header_number);
+	decode_div = document.createElement("div");
+	decode_div.classList.add("collapse", "decode_body", "decode_width");
+	decode_div.id = "collapseDecode" + header_number;
+
+	pkt_decode = decode_icmp_header(pkt);
+
+	for (var k in pkt_decode) {
+		let decode_p = document.createElement("p");
+		decode_p.innerHTML = k + " " + pkt_decode[k];
+		decode_div.appendChild(decode_p);
+	}
+
+	decode.appendChild(decode_div);
+}
+
+function add_tcp_header (pkt, header_number) {
+
+	make_pa("Transmission Control Protocol", header_number);
+	decode_div = document.createElement("div");
+	decode_div.classList.add("collapse", "decode_body", "decode_width");
+	decode_div.id = "collapseDecode" + header_number;
+
+	pkt_decode = decode_tcp_header(pkt);
+
+	for (var k in pkt_decode) {
+		let decode_p = document.createElement("p");
+		decode_p.innerHTML = k + " " + pkt_decode[k];
+		decode_div.appendChild(decode_p);
+	}
+
+	decode.appendChild(decode_div);
+}
+
+function add_udp_header (pkt, header_number) {
+
+	make_pa("User Datagram Protocol", header_number);
+	decode_div = document.createElement("div");
+	decode_div.classList.add("collapse", "decode_body", "decode_width");
+	decode_div.id = "collapseDecode" + header_number;
+
+	pkt_decode = decode_udp_header(pkt);
+
+	for (var k in pkt_decode) {
+		let decode_p = document.createElement("p");
+		decode_p.innerHTML = k + " " + pkt_decode[k];
+		decode_div.appendChild(decode_p);
+	}
+
+	decode.appendChild(decode_div);
+}
+
+function add_gre_header (pkt, header_number) {
+
+	make_pa("Generic routing encapsulation (GRE)", header_number);
+	decode_div = document.createElement("div");
+	decode_div.classList.add("collapse", "decode_body", "decode_width");
+	decode_div.id = "collapseDecode" + header_number;
+
+	pkt_decode = decode_gre_header(pkt);
+
+	let gre_hdr_len = 8;
+
+	for (var k in pkt_decode) {
+
+		if (k === "GRE_header_length") {
+			gre_hdr_len = pkt_decode[k];
+			continue;
+		}
+
+		let decode_p = document.createElement("p");
+		decode_p.innerHTML = k + " " + pkt_decode[k];
+		decode_div.appendChild(decode_p);
+	}
+
+	decode.appendChild(decode_div);
+
+	return gre_hdr_len;
+}
 
 function decode_packet(pkt) {
 	
@@ -450,145 +671,90 @@ function decode_packet(pkt) {
 	header_number = header_number + 1;
 
 	let eth_type = pkt.slice(12,14).join("");
+	let next_header = eth_type;
+
+	// Drop Ethernet header.
+	pkt = pkt.slice(14);
 
 	// LLC
-	if (parseInt(eth_type, 16) < 1500) {
-
-		make_pa("Logical-Link Control", header_number);
-		decode_div = document.createElement("div");
-		decode_div.classList.add("collapse", "decode_body", "decode_width");
-		decode_div.id = "collapseDecode" + header_number;
-		pkt_decode = decode_llc_header(pkt.slice(14, pkt.length));
-
-		for (var k in pkt_decode) {
-			let decode_p = document.createElement("p");
-			decode_p.innerHTML = k + " " + pkt_decode[k];
-			decode_div.appendChild(decode_p);
-		}
-
-		decode.appendChild(decode_div);
+	if (parseInt(next_header, 16) < 1500) {
+		add_llc_header(pkt, header_number);
 		header_number = header_number + 1;
 
-		let dsap = pkt.slice(14, 15).join("");
+		let dsap = pkt.slice(0,1).join("");
 
 		// STP
 		if (dsap === "42"){
-
-			make_pa("Spanning Tree Protocol", header_number);
-			decode_div = document.createElement("div");
-			decode_div.classList.add("collapse", "decode_body", "decode_width");
-			decode_div.id = "collapseDecode" + header_number;
-			pkt_decode = decode_stp_header(pkt.slice(17, pkt.length));
-
-			for (var k in pkt_decode) {
-				let decode_p = document.createElement("p");
-				decode_p.innerHTML = k + " " + pkt_decode[k];
-				decode_div.appendChild(decode_p);
-			}
-
-			decode.appendChild(decode_div);
+			add_stp_header(pkt.slice(3), header_number);
 		}
+
+		return 0;
 
 	// ARP
-	} else if (eth_type === "0806") {
+	} else if (next_header === "0806") {
+		add_arp_header(pkt, header_number);
+		return 0;
+	} 
 
-		make_pa("Address Resolution Protocol", header_number);
-		decode_div = document.createElement("div");
-		decode_div.classList.add("collapse", "decode_body", "decode_width");
-		decode_div.id = "collapseDecode" + header_number;
-		pkt_decode = decode_arp_header(pkt.slice(14, pkt.length));
+	while (true) {
 
-		for (var k in pkt_decode) {
-			let decode_p = document.createElement("p");
-			decode_p.innerHTML = k + " " + pkt_decode[k];
-			decode_div.appendChild(decode_p);
-		}
-
-		decode.appendChild(decode_div);
-
-	// IPv4 
-	} else if (eth_type === "0800") {
-	
-		make_pa("Internet Protocol Version 4", header_number);
-		decode_div = document.createElement("div");
-		decode_div.classList.add("collapse", "decode_body", "decode_width");
-		decode_div.id = "collapseDecode" + header_number;
-		pkt_decode = decode_ip_header(pkt.slice(14, pkt.length));
-
-		for (var k in pkt_decode) {
-			let decode_p = document.createElement("p");
-			decode_p.innerHTML = k + " " + pkt_decode[k];
-			decode_div.appendChild(decode_p);
-		}
-
-		decode.appendChild(decode_div);
-		header_number = header_number + 1;
+		// IPv4 or IP tunnel
+		if (next_header === "0800" || next_header === "04") {
+			add_ipv4_header(pkt, header_number);
+			header_number = header_number + 1;
 			
-		let ip_protocol = pkt.slice(23,24).join("");
-		let ip_hdr_len = parseInt(pkt.slice(14,15).toString().split("")[1], 16) * 4;
-		let ip_offset = parseInt(pkt.slice(20, 22).join(""), 16) & 8191;
+			let ip_protocol = pkt.slice(9,10).join("");
+			let ip_hdr_len = parseInt(pkt.slice(0,1).toString().split("")[1], 16) * 4;
+			let ip_offset = parseInt(pkt.slice(6, 8).join(""), 16) & 8191;
 
-		// Don't parse if IP offset not 0.
-		if (ip_offset) {
-			return;
+			// Don't parse if IP offset not 0.
+			if (ip_offset) {
+				return 0;
+			}
+
+			// Drop IP header
+			pkt = pkt.slice(ip_hdr_len);
+
+			// ICMP
+			if (ip_protocol === "01") {
+				add_icmp_header(pkt, header_number);
+				header_number = header_number + 1;
+				break;
+			
+			// TCP
+			} else if (ip_protocol === "06") {
+				add_tcp_header(pkt, header_number);
+				header_number = header_number + 1;
+				break;
+			
+			// UDP
+			} else if (ip_protocol === "11") {
+				add_udp_header(pkt, header_number);
+				header_number = header_number + 1;
+				break;
+			
+			// IP
+			} else if (ip_protocol === "04") {
+				next_header = ip_protocol;
+				continue;
+
+			// GRE
+			} else if (ip_protocol === "2f") {
+				let h_len = add_gre_header(pkt, header_number);
+				header_number = header_number + 1;
+
+				// Who is next?
+				next_header = pkt.slice(2,4).join("");
+				pkt = pkt.slice(h_len);
+				continue;
+
+			// Unknown protocol
+			} else {
+				break;
+			}
+		} else {
+			break;
 		}
-
-		// ICMP
-		if (ip_protocol === "01") {
-
-			make_pa("Internet Control Message Protocol", header_number);
-			decode_div = document.createElement("div");
-			decode_div.classList.add("collapse", "decode_body", "decode_width");
-			decode_div.id = "collapseDecode" + header_number;
-
-			pkt_decode = decode_icmp_header(pkt.slice(14 + ip_hdr_len, pkt.length));
-
-			for (var k in pkt_decode) {
-				let decode_p = document.createElement("p");
-				decode_p.innerHTML = k + " " + pkt_decode[k];
-				decode_div.appendChild(decode_p);
-			}
-
-			decode.appendChild(decode_div);
-
-		// TCP
-		} else if (ip_protocol === "06") {
-
-			make_pa("Transmission Control Protocol", header_number);
-			decode_div = document.createElement("div");
-			decode_div.classList.add("collapse", "decode_body", "decode_width");
-			decode_div.id = "collapseDecode" + header_number;
-
-			pkt_decode = decode_tcp_header(pkt.slice(14 + ip_hdr_len, pkt.length));
-
-			for (var k in pkt_decode) {
-				let decode_p = document.createElement("p");
-				decode_p.innerHTML = k + " " + pkt_decode[k];
-				decode_div.appendChild(decode_p);
-			}
-
-			decode.appendChild(decode_div);
-
-		
-		// UDP
-		} else if (ip_protocol === "11") {
-
-			make_pa("User Datagram Protocol", header_number);
-			decode_div = document.createElement("div");
-			decode_div.classList.add("collapse", "decode_body", "decode_width");
-			decode_div.id = "collapseDecode" + header_number;
-
-			pkt_decode = decode_udp_header(pkt.slice(14 + ip_hdr_len, pkt.length));
-
-			for (var k in pkt_decode) {
-				let decode_p = document.createElement("p");
-				decode_p.innerHTML = k + " " + pkt_decode[k];
-				decode_div.appendChild(decode_p);
-			}
-
-			decode.appendChild(decode_div);
-		}
-
 	}
 	
 	return 0;
