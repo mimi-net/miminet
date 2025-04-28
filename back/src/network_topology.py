@@ -72,7 +72,7 @@ class MiminetTopology(IPTopo):
 
         # Set emulation delay based on STP mode
         if is_rstp_enabled:
-            self.__set_network_configuration_time(5)
+            self.__set_network_configuration_time(7)
         elif is_stp_enabled:
             self.__set_network_configuration_time(33)
 
