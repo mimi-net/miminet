@@ -57,7 +57,11 @@ def start_session(section_id: str, user: User):
 
     db.session.commit()
 
-    return quiz_session.id, [sq.id for sq in quiz_session.sessions], 201
+    return (
+        quiz_session.id,
+        [sq.id for sq in quiz_session.sessions],
+        201,
+    )  # type:ignore[attr-defined]
 
 
 def finish_session(quiz_session_id: str, user: User):

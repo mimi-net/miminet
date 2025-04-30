@@ -156,9 +156,7 @@ class AnswerDto:
 
 
 class PracticeQuestionDto:
-    def __init__(
-        self, user_id, practice_question: PracticeQuestion, session_question_id: str
-    ) -> None:
+    def __init__(self, user_id, practice_question, session_question_id: str) -> None:
         attributes = [
             "description",
             "available_host",
