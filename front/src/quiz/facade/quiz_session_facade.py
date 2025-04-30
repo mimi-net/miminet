@@ -59,9 +59,9 @@ def start_session(section_id: str, user: User):
 
     return (
         quiz_session.id,
-        [sq.id for sq in quiz_session.sessions],
+        [sq.id for sq in quiz_session.sessions], # type:ignore[attr-defined]
         201,
-    )  # type:ignore[attr-defined]
+    )  
 
 
 def finish_session(quiz_session_id: str, user: User):
