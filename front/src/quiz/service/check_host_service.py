@@ -314,6 +314,38 @@ def check_echo_request(answer, source_device, target_device, direction="two-way"
     return False, hints
 
 
+def check_no_echo_request(answer, source_device, target_device):
+    hints = []
+    packets = answer.get("packets", [])
+
+    if not packets:
+        return False, ["Вы не отправляете пакетов по сети."]
+
+    request_reached_target = False
+
+    for packet in packets:
+        config = packet[0]["config"]
+        packet_type = config["type"]
+        source = config["source"]
+        target = config["target"]
+
+        if (
+            "ICMP echo-request" in packet_type
+            and source == source_device
+            and target == target_device
+        ):
+            request_reached_target = True
+            break
+
+    if request_reached_target:
+        hints.append(
+            f"Обнаружен ping от {source_device} к {target_device}, хотя он не должен был проходить"
+        )
+        return False, hints
+    else:
+        return True, []
+
+
 def process_host_command(cmd, answer, device):
     points_for_host = 0
     hints = []
@@ -351,5 +383,14 @@ def process_host_command(cmd, answer, device):
                     points_for_host += different_paths_points.get("points", 1)
                 else:
                     hints.extend(path_hints)
+
+        elif command == "no-echo-request":
+            points = cmd.get("points", 1)
+            check_result, no_echo_hints = check_no_echo_request(answer, device, target)
+
+            if check_result:
+                points_for_host += points
+            else:
+                hints.extend(no_echo_hints)
 
     return points_for_host, hints

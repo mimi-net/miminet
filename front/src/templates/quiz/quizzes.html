@@ -23,10 +23,11 @@
                             <h4 class="h4" style="margin-top: 20px;margin-bottom: 4px">
                                 <a href="{{ url_for('get_sections_by_test_endpoint', test_id=quiz.test_id) }}">{{ quiz.test_name }}</a>
                             </h4>
-                            {% if quiz.description is not none %}
+                            {% if quiz.description %}
                                 <p style="margin-bottom: 4px">{{ quiz.description }}</p>
-                            {% endif %}
-                            <p style="opacity: 50%">{{ quiz.author_name }}</p>
+                            {% else %}
+                                <p style="margin-bottom: 20px;"></p> 
+                            {% endif %}                        
                         </div>
                     </div>
                     <div class="col-sm-4">
@@ -44,17 +45,6 @@
                 }
 
                 document.getElementById('{{quiz.test_id}}').innerHTML = {{ quiz.section_count }} + ' ' + morph({{ quiz.section_count}});
-                sessionId = sessionStorage.getItem('session_id');
-                if (sessionId) {
-                    fetch('{{ url_for('finish_session_endpoint') }}' + '?id=' + sessionId, {
-                        method: 'PUT'
-                    })
-                        .then(response => response.json())
-                        .catch(error => {
-                            console.error('Error:', error);
-                        });
-                    sessionStorage.clear();
-                }
             </script>
         {% endfor %}
 

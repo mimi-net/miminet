@@ -9,7 +9,9 @@
         <div class="col-auto d-flex align-items-center" 
              style="font-size: 24px; opacity: 85%; white-space: nowrap; align-self: center; gap: 16px;">
             <p id="counter" style="margin: 0;">Вопрос <span id="currentQuestion">1</span> из <span id="totalQuestions">10</span></p>
-            <span id="timer" style="display: inline-block; width: 80px; text-align: center;">00:00:00</span>
+            {% if timer != 0 %}
+                <span id="timer" style="display: inline-block; width: 80px; text-align: center;">00:00:00</span>
+            {% endif %}
         </div>
 
         {# Task text #}
@@ -132,12 +134,21 @@
                         </div>                                             
                         
                         {# Control buttons #}
-                        <div class="card-body d-flex justify-content-center" style="padding: 0 12px 0 12px">
-                            <button name="answerQuestion" class="btn btn-primary" disabled>Ответить</button>
+                        <div class="card-body d-flex flex-column align-items-center" style="padding: 0 12px 0 12px">
+                            {% if is_exam and not available_answer %}
+                                <button name="answerExamQuestion" class="btn btn-primary">Ответить</button>
+                            {% else %}
+                                <button name="answerQuestion" class="btn btn-primary">Ответить</button>
+                            {% endif %}
+                            
                             <button name="nextQuestion" class="btn w-100 px-0" hidden>Следующий вопрос</button>
                             <button name="seeResults" class="btn w-100 px-0"
-                                    style="word-wrap: break-word;white-space: initial;" hidden></button>
-                        </div>
+                                    style="word-wrap: break-word; white-space: initial;" hidden></button>
+                        
+                            <span id="answerSavedBanner" class="mt-2 text-success" style="display: none; font-weight: bold;">
+                                ✔ Ответ сохранён
+                            </span>
+                        </div>                        
 
                         {# Explanation #}
                         <div class="card-body d-flex">

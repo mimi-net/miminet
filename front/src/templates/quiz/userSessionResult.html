@@ -4,32 +4,91 @@
 
 {% block content %}
 <section class="container" style="margin-top: 48px; padding-top: 48px">
-    <div class="row align-items-baseline">
+    <div class="row align-items-baseline mb-4">
         <div class="col-auto">
             <h1 class="mb-0" id="test_name"></h1>
         </div>
         <div class="col-auto text-center">
-            <h3 class="mb-0" style="font-weight: normal" id="section_name"></h3>
+            <h3 class="mb-0 text-muted" id="section_name" style="font-weight: normal;"></h3>
         </div>
     </div>
-    <div class="mt-4">
+
+    {% if data['is_exam'] and not data['answer_available'] %}
+        {% if data['results_available_from'] %}
+        <div class="card border-info mb-4 shadow-sm w-100" style="background-color: #f5fbff; border-radius: 1rem;">
+            <div class="card-body">
+                <h5 class="card-title text-info">
+                    <i class="bx bx-time-five" style="vertical-align: middle; margin-right: 0.5rem;"></i>
+                    Ответы появятся позже
+                </h5>
+                <p class="card-text mb-0" style="font-size: 1.1rem;">
+                    Вы завершили экзамен. Результаты станут доступны <strong>{{ data['results_available_from'].strftime('%d.%m.%Y %H:%M') }}</strong>.
+                </p>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info mb-4" role="alert">
+            Ваши ответы находятся на проверке. Пожалуйста, ожидайте результатов.
+        </div>
+        {% endif %}
+
+        {% if data['practice_results'] %}
+        <div id="practicePreview" class="mb-4">
+            <h4 class="mb-3">Практические задания:</h4>
+            <div class="row">
+                {% for pr in data['practice_results'] %}
+                    {% if pr.network_guid %}
+                    <div class="col-12 mb-2">
+                        <div class="card">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <span>Практическое задание {{ pr.question_id }}</span>
+                                <a href="{{ url_for('web_network') }}?guid={{ pr.network_guid }}"
+                                   target="_blank"
+                                   class="btn btn-outline-primary btn-sm">
+                                    Посмотреть мой ответ
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+    {% else %}
         {% if data['theory_count'] > 0 %}
         <div id="theoryResults" class="mb-3">
-            <h4 style="color: black;">Результаты теоретического теста:</h4>
+            <h4>Результаты теоретического теста:</h4>
             <p style="font-size: 1.2rem;">
-                <strong>Правильных ответов:</strong> {{ data['theory_correct'] }} из {{ data['theory_count'] }}
+                <strong>Правильных ответов:</strong>
+                {{ data['theory_correct'] if data['theory_correct'] is not none else 'Ответ на проверке' }}
+                из {{ data['theory_count'] }}
             </p>
         </div>
         {% endif %}
 
         {% if data['practice_results'] %}
         <div id="practiceResults" class="mb-3">
-            <h4 style="color: black;">Результаты практических заданий:</h4>
+            <h4>Результаты практических заданий:</h4>
             <ul style="font-size: 1.2rem;">
                 {% for practice in data['practice_results'] %}
-                <li>
-                    <strong>Практическое задание {{ practice['question_id'] }}:</strong> 
-                    {{ practice['score'] }} из {{ practice['max_score'] }}
+                <li class="d-flex justify-content-between align-items-center mb-2">
+                    <span>
+                        <strong>Практическое задание {{ practice['question_id'] }}:</strong>
+                        {% if practice['score'] is not none and practice['max_score'] is not none %}
+                            {{ practice['score'] }} из {{ practice['max_score'] }}
+                        {% else %}
+                            Ответ на проверке
+                        {% endif %}
+                    </span>
+                    {% if practice['network_guid'] %}
+                    <a href="{{ url_for('web_network') }}?guid={{ practice['network_guid'] }}"
+                       target="_blank"
+                       class="btn btn-outline-primary btn-sm">
+                        Посмотреть мой ответ
+                    </a>
+                    {% endif %}
                 </li>
                 {% endfor %}
             </ul>
@@ -39,6 +98,7 @@
         {% set total_score = data['theory_correct'] + data['practice_results']|sum(attribute='score') %}
         {% set total_max = data['theory_count'] + data['practice_results']|sum(attribute='max_score') %}
 
+        {% if total_max > 0 %}
         <div class="mb-3">
             <p id="timeCount" style="font-size: 1.2rem;">
                 <strong>Тест пройден за:</strong> {{ data['time_spent'] }}
@@ -47,29 +107,41 @@
 
         <div class="mb-3">
             <p style="font-size: 1.2rem;">
-                <strong>Итог:</strong> {{ total_score }} из {{ total_max }} баллов
+                <strong>Итог:</strong>
+                {% if total_score is not none %}
+                    {{ total_score }} из {{ total_max }} баллов
+                {% else %}
+                    Ответ на проверке
+                {% endif %}
             </p>
         </div>
+        {% endif %}
+    {% endif %}
 
-        <div class="d-flex align-items-center text-start">
-            <button class="btn btn-primary me-3" name="backToTests" style="font-size: 1rem; height: 2.5rem;">
-                Назад к тестам
-            </button>
-        </div>
+    <div class="d-flex align-items-center text-start mt-4">
+        <button class="btn btn-primary me-3" id="backToTests" style="font-size: 1rem; height: 2.5rem;">
+            Назад к тестам
+        </button>
     </div>
 </section>
 
 <script>
-    document.getElementById("test_name").innerHTML = sessionStorage.getItem('test_name');
-    document.getElementById("section_name").innerHTML = sessionStorage.getItem('section_name');
+    window.addEventListener("DOMContentLoaded", function () {
+        const testName = sessionStorage.getItem('test_name');
+        const sectionName = sessionStorage.getItem('section_name');
 
-    document.querySelector('button[name="backToTests"]').addEventListener('click', backToTests);
+        if (testName) document.getElementById("test_name").textContent = testName;
+        if (sectionName) document.getElementById("section_name").textContent = sectionName;
 
-    console.log({{ data | tojson | safe }});
+        const backBtn = document.getElementById("backToTests");
+        if (backBtn) {
+            backBtn.addEventListener('click', function () {
+                sessionStorage.clear();
+                window.location.href = '/quiz/test/all';
+            });
+        }
 
-    function backToTests() {
-        sessionStorage.clear();
-        window.location.href = '/quiz/test/all';
-    }
+        console.log({{ data | tojson | safe }});
+    });
 </script>
 {% endblock %}
