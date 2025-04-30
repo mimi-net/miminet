@@ -14,7 +14,7 @@ from flask import (
 )
 from flask_login import current_user, login_required
 from miminet_config import check_image_with_pil
-from miminet_model import Network, Simulate, db
+from miminet_model import Network, Simulate, db, SimulateLog
 
 
 @login_required
@@ -512,3 +512,18 @@ def copy_network():
         db.session.commit()
         ret = {"message": "Сделана копия.", "new_url": "/web_network?guid=" + str(u)}
         return make_response(jsonify(ret), 200)
+
+
+@login_required
+def emulation_waiting_time():
+    emulated_networks_count: int = SimulateLog.query.filter(
+        SimulateLog.ready == 0
+    ).count()
+
+    AVERAGE_EMULATION_TIME = 15
+
+    result_time = max(
+        AVERAGE_EMULATION_TIME, AVERAGE_EMULATION_TIME * emulated_networks_count
+    )
+
+    return make_response(jsonify({"time": str(result_time)}), 200)
