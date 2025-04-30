@@ -46,7 +46,11 @@ def get_question_by_session_question_id(session_question_id: str):
     if question is None or question.is_deleted:
         return 404
 
-    section = question.section
+    section = session_question.quiz_session.section
+
+    if section is None:
+        return 404
+
     is_exam = section.is_exam
     timer = section.timer
     available_from = section.results_available_from
