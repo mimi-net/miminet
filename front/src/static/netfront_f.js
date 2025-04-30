@@ -1279,6 +1279,34 @@ const CheckSimulation = function (simulation_id)
     });
 }
 
+
+const GetWaitingTime = function (network_guid)
+{
+    $.ajax({
+        type: 'GET',
+        url: '/waiting_time?network_guid=' + network_guid,
+        data: '',
+        success: function(data) {
+            waiting_time = parseInt(data.time);
+
+            if (isNaN(waiting_time)) {
+                throw new Error("Invalid time input");
+            }
+        
+            const time_offset = 5
+            const min = waiting_time - time_offset;
+            const max = waiting_time + time_offset;
+
+            $('#NetworkPlayerLabel').text(`Ожидание ${min}—${max} сек.`);
+        },
+        error: function(xhr) {
+            console.log("Can't get waiting time: " + JSON.stringify(xhr.responseText));
+        },
+        contentType: "application/json",
+        dataType: 'json'
+    });
+}
+
 // Update host configuration
 const UpdateHostConfiguration = function (data, host_id)
 {
@@ -1837,7 +1865,7 @@ const SetNetworkPlayerState = function(simultaion_id)
         $('#NetworkPlayer').empty();
         $('#PacketSliderInput').hide();
         $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" disabled>Эмулируется...</button>');
-        $('#NetworkPlayerLabel').text("Ожидание 10-30 сек.");
+        GetWaitingTime(network_guid)
         CheckSimulation(simultaion_id);
         return;
     }
@@ -1847,7 +1875,7 @@ const SetNetworkPlayerState = function(simultaion_id)
     $('#NetworkPlayer').empty();
     $('#PacketSliderInput').hide();
     $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton">Эмулировать</button>');
-    $('#NetworkPlayerLabel').text("Ожидание 10-30 сек.");
+    $('#NetworkPlayerLabel').empty();
 
     $('#NetworkEmulateButton').click(function() {
 
@@ -1873,7 +1901,7 @@ const SetNetworkPlayerState = function(simultaion_id)
 
         $('#NetworkPlayer').empty();
         $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" disabled>Эмулируется...</button>');
-        $('#NetworkPlayerLabel').text("Ожидание 10-30 сек.");
+        GetWaitingTime(network_guid);
         return;
     });
 
@@ -1991,6 +2019,7 @@ const SetSharedNetworkPlayerState = function()
     // Add info button
     $('#NetworkPlayer').empty();
     $('#PacketSliderInput').hide();
+    $('#NetworkPlayerLabel').empty();
     $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" disabled>Нет эмуляции</button>');
     return;
 }
