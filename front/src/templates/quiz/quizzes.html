@@ -45,17 +45,6 @@
                 }
 
                 document.getElementById('{{quiz.test_id}}').innerHTML = {{ quiz.section_count }} + ' ' + morph({{ quiz.section_count}});
-                sessionId = sessionStorage.getItem('session_id');
-                if (sessionId) {
-                    fetch('{{ url_for('finish_session_endpoint') }}' + '?id=' + sessionId, {
-                        method: 'PUT'
-                    })
-                        .then(response => response.json())
-                        .catch(error => {
-                            console.error('Error:', error);
-                        });
-                    sessionStorage.clear();
-                }
             </script>
         {% endfor %}
 

@@ -2,18 +2,26 @@ import json
 from flask import request, make_response, jsonify, abort, render_template
 from flask_login import login_required, current_user
 
+from miminet_model import User, Network, db
+from quiz.service.check_practice_service import check_task
+from quiz.entity.entity import (
+    QuizSession,
+)
+
 from quiz.facade.quiz_session_facade import (
     start_session,
     finish_session,
     session_result,
     get_result_by_session_guid,
+    finish_old_session,
 )
 from quiz.service.session_question_service import (
     answer_on_session_question,
     get_question_by_session_question_id,
     handle_exam_answer,
 )
-from quiz.service.network_upload_service import create_check_task
+
+# from quiz.service.network_upload_service import create_check_task
 
 
 @login_required
@@ -39,29 +47,32 @@ def check_network_task_endpoint():
         # Теория — сразу отправляем результат
         return make_response("Вопрос проверен", 200)
 
-    requirements, network = result, aux
+    ### Раскомментировать, когда снова потребуется проверять сразу же!!!
 
-    res_code = create_check_task(network, requirements, session_question_id)
+    # requirements, network = result, aux
+    # res_code = create_check_task(network, requirements, session_question_id)
+    # if res_code == 404 or res_code == 403:
+    #     abort(res_code)
 
-    if res_code == 404 or res_code == 403:
-        abort(res_code)
-
-    return make_response("Практическая задача отправлена на проверку", res_code)
+    return make_response("Практическая задача отправлена на проверку", 200)
 
 
 @login_required
 def get_question_by_session_question_id_endpoint():
-    res, is_exam, available_answer, status_code = get_question_by_session_question_id(
-        request.args["question_id"]
-    )
+    result = get_question_by_session_question_id(request.args["question_id"])
 
-    if status_code == 404:
-        abort(status_code)
+    if result == 404:
+        abort(404)
+
+    res, is_exam, timer, available_answer, available_from, status_code = result
+
     return make_response(
         render_template(
             "quiz/sessionQuestion.html",
             question=res,
+            timer=timer,
             is_exam=is_exam,
+            available_from=available_from,
             available_answer=available_answer,
         ),
         status_code,
@@ -91,6 +102,15 @@ def finish_session_endpoint():
 
 
 @login_required
+def finish_old_session_endpoint():
+    code = finish_old_session(request.args["id"], current_user)
+    if code == 404 or code == 403:
+        abort(code)
+    ret = {"message": "Сессия завершена", "id": request.args["id"]}
+    return make_response(ret, code)
+
+
+@login_required
 def session_result_endpoint():
     res, status = session_result(request.args["id"])
     if status != 200:
@@ -102,11 +122,23 @@ def session_result_endpoint():
 
 
 def get_result_by_session_guid_endpoint():
-    res = get_result_by_session_guid(request.args["guid"])
+    result, status = get_result_by_session_guid(request.args["guid"])
+
+    if result is None:
+        return make_response(
+            render_template("quiz/noResult.html", error="no_results"),
+            status,
+        )
+
+    data = result
+    questions_result = data.results
 
     return make_response(
         render_template(
-            "quiz/sessionResult.html", data=res[0].to_dict(), questions_result=res[1]
+            "quiz/sessionResult.html",
+            data=data.to_dict(),
+            questions_result=questions_result,
+            error=None,
         ),
-        res[1],
+        status,
     )

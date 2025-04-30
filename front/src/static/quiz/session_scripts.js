@@ -296,9 +296,6 @@ function showAnswerSavedBanner() {
     const banner = document.getElementById("answerSavedBanner");
     if (banner) {
         banner.style.display = "inline";
-        setTimeout(() => {
-            banner.style.display = "none";
-        }, 1500);
     }
 }
 
@@ -367,12 +364,17 @@ async function answerQuestion() {
         return;
     }
 
+    const safe_network_guid = typeof network_guid !== 'undefined' ? network_guid : null;
+
     fetch(answerQuestionURL + '?id=' + questionId, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ answer })
+        body: JSON.stringify({ 
+            answer, 
+            network_guid: safe_network_guid 
+        })
     })
     .then(response => response.json())
     .then(data => {
@@ -431,11 +433,17 @@ window.onload = function () {
 }
 
 function handleUnload(e) {
+    window.removeEventListener('beforeunload', handleUnload);
     e.preventDefault();
     e.returnValue = '';
+    finishQuiz();
 }
 
-window.addEventListener('beforeunload', handleUnload);
+const hasTimer = document.querySelector('[id$="timer"]') !== null;
+
+if (hasTimer) {
+    window.addEventListener('beforeunload', handleUnload);
+}
 
 // Markdown convert
 let questionText = document.querySelector('div[id="question_text"]')?.innerHTML;
@@ -469,7 +477,7 @@ const questionIds = JSON.parse(sessionStorage.getItem('question_ids'));
 const questionIndex = parseInt(sessionStorage.getItem('question_index'));
 const isLastQuestion = questionIndex + 1 >= questionsCount;
 
-if (timer !== null) {
+if (timer !== null && parseInt(timer) !== 0) {
     setInterval(updateTimer, 1000);
 
     document.getElementById("timer").innerHTML = timer;

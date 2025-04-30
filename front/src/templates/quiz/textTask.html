@@ -13,9 +13,11 @@
                 <div class="col-auto">
                     <p id="counter"></p>
                 </div>
-                <div class="col-auto text-center">
-                    <span id="timer">00:00:00</span>
-                </div>
+                {% if timer != 0 %}
+                    <div class="col-auto text-center">
+                        <span id="timer">00:00:00</span>
+                    </div>
+                {% endif %}
             </div>
         </div>
 
@@ -133,16 +135,6 @@
             max-width: 100%; 
             max-height: 90vh; 
             border-radius: 8px;
-        }
-
-        #answerSavedBanner {
-            animation: fadeInOut 1.5s ease-in-out;
-        }
-
-        @keyframes fadeInOut {
-            0% { opacity: 0; }
-            50% { opacity: 1; }
-            100% { opacity: 0; }
         }
 </style>
 

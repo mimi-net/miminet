@@ -17,6 +17,7 @@ from quiz.entity.entity import (
     Answer,
     PracticeQuestion,
     QuizSession,
+    SessionQuestion,
 )
 
 
@@ -59,6 +60,7 @@ def to_section_dto_list(sections: List[Section]):
                 question_count=calculate_question_count(our_section),
                 is_exam=our_section.is_exam,
                 is_answer_available=is_answer_available(our_section),
+                results_available_from=our_section.results_available_from,
             ),
             sections,
         )
@@ -154,7 +156,9 @@ class AnswerDto:
 
 
 class PracticeQuestionDto:
-    def __init__(self, user_id, practice_question: PracticeQuestion) -> None:
+    def __init__(
+        self, user_id, practice_question: PracticeQuestion, session_question_id: str
+    ) -> None:
         attributes = [
             "description",
             "available_host",
@@ -167,24 +171,35 @@ class PracticeQuestionDto:
         for attribute in attributes:
             setattr(self, attribute, getattr(practice_question, attribute))
 
-        net = Network.query.filter(
-            Network.guid == practice_question.start_configuration
+        session_question = SessionQuestion.query.filter_by(
+            id=session_question_id
         ).first()
-        escaped_string = net.network.replace('\\"', '"').replace('"', '\\"')
 
-        u = uuid.uuid4()
-        net_copy = Network(
-            guid=str(u),
-            author_id=user_id,
-            network=net.network,
-            title=net.title,
-            description="Network copy",
-            preview_uri=net.preview_uri,
-            is_task=True,
-        )
-        db.session.add(net_copy)
-        db.session.commit()
+        if session_question.network_guid:
+            net_copy = Network.query.filter_by(
+                guid=session_question.network_guid
+            ).first()
+        else:
+            net = Network.query.filter(
+                Network.guid == practice_question.start_configuration
+            ).first()
 
+            u = uuid.uuid4()
+            net_copy = Network(
+                guid=str(u),
+                author_id=user_id,
+                network=net.network,
+                title=net.title,
+                description="Network copy",
+                preview_uri=net.preview_uri,
+                is_task=True,
+            )
+            db.session.add(net_copy)
+
+            session_question.network_guid = net_copy.guid
+            db.session.commit()
+
+        escaped_string = net_copy.network.replace('\\"', '"').replace('"', '\\"')
         self.start_configuration = escaped_string
         self.network_guid = net_copy.guid
 
@@ -209,7 +224,7 @@ def get_question_type(question_type: int):
 
 
 class QuestionDto:
-    def __init__(self, user_id, question: Question) -> None:
+    def __init__(self, user_id, question: Question, session_question_id) -> None:
         self.question_type = get_question_type(question.question_type)
         self.question_text = Markup.unescape(question.text)
         self.correct_count = 0
@@ -217,7 +232,9 @@ class QuestionDto:
         self.images = [img.file_path for img in question.images]  # type: ignore
 
         if self.question_type == "practice":
-            self.practice_question = PracticeQuestionDto(user_id, question.practice_question).to_dict()  # type: ignore
+            self.practice_question = PracticeQuestionDto(
+                user_id, question.practice_question, session_question_id
+            ).to_dict()
             return
 
         filtered_answers = Answer.query.filter_by(
@@ -273,6 +290,7 @@ class SectionDto:
         question_count: int,
         is_exam: bool,
         is_answer_available: bool,
+        results_available_from,
     ):
         self.section_id = section_id
         self.section_name = section_name
@@ -281,6 +299,7 @@ class SectionDto:
         self.question_count = question_count
         self.is_exam = is_exam
         self.answer_available = is_answer_available
+        self.results_available_from = results_available_from
 
         current_user_sessions = QuizSession.query.filter(
             QuizSession.created_by_id == current_user.id
@@ -295,6 +314,30 @@ class SectionDto:
             )
             if session.guid:
                 self.session_guid = session.guid
+
+        section = Section.query.get(section_id)
+        test = section.test
+
+        unfinished_session = (
+            current_user_sessions.filter(QuizSession.finished_at.is_(None))
+            .order_by(QuizSession.created_on.desc())
+            .first()
+        )
+
+        self.there_is_unfinished = False
+
+        if unfinished_session and is_exam and not test.is_retakeable:
+            self.there_is_unfinished = True
+
+            unanswered = (
+                SessionQuestion.query.filter_by(quiz_session_id=unfinished_session.id)
+                .filter(SessionQuestion.is_correct.is_(None))
+                .order_by(SessionQuestion.id.asc())
+                .first()
+            )
+
+            if unanswered:
+                self.last_question = unanswered.id
 
 
 class TestDto:

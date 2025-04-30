@@ -9,7 +9,9 @@
         <div class="col-auto d-flex align-items-center" 
              style="font-size: 24px; opacity: 85%; white-space: nowrap; align-self: center; gap: 16px;">
             <p id="counter" style="margin: 0;">Вопрос <span id="currentQuestion">1</span> из <span id="totalQuestions">10</span></p>
-            <span id="timer" style="display: inline-block; width: 80px; text-align: center;">00:00:00</span>
+            {% if timer != 0 %}
+                <span id="timer" style="display: inline-block; width: 80px; text-align: center;">00:00:00</span>
+            {% endif %}
         </div>
 
         {# Task text #}
@@ -191,15 +193,3 @@
 </script>
 <script src="/quiz/practice_question_scripts.js"></script>
 <script src="/quiz/drop_node.js"></script>
-
-<style>
-    #answerSavedBanner {
-            animation: fadeInOut 1.5s ease-in-out;
-        }
-
-        @keyframes fadeInOut {
-            0% { opacity: 0; }
-            50% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-</style>

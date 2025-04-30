@@ -17,8 +17,6 @@ from quiz.util.dto import (
     calculate_max_score,
 )
 
-import logging
-
 MOSCOW_TZ = ZoneInfo("Europe/Moscow")
 
 
@@ -39,20 +37,27 @@ def is_answer_available(section):
 
 def get_question_by_session_question_id(session_question_id: str):
     session_question = SessionQuestion.query.filter_by(id=session_question_id).first()
+
+    if session_question is None:
+        return 404
+
     question = session_question.question
 
     if question is None or question.is_deleted:
-        return None, False, False, 404
+        return 404
 
     section = question.section
-    is_exam = section.is_exam if section else False
-
+    is_exam = section.is_exam
+    timer = section.timer
+    available_from = section.results_available_from
     available_answer = is_answer_available(section)
 
     return (
-        QuestionDto(session_question.created_by_id, question),
+        QuestionDto(session_question.created_by_id, question, session_question.id),
         is_exam,
+        timer,
         available_answer,
+        available_from,
         200,
     )
 
@@ -75,6 +80,8 @@ def check_theory_answer(session_question, question, answer):
         ).count()
         correct = is_correct and len(answers) == correct_count
         session_question.is_correct = correct
+        session_question.score = 1 if session_question.is_correct else 0
+        session_question.max_score = 1
         db.session.add(session_question)
         db.session.commit()
 
@@ -93,6 +100,8 @@ def check_theory_answer(session_question, question, answer):
             else False
         )
         session_question.is_correct = correct
+        session_question.score = 1 if session_question.is_correct else 0
+        session_question.max_score = 1
         db.session.add(session_question)
         db.session.commit()
 
@@ -106,6 +115,8 @@ def check_theory_answer(session_question, question, answer):
 
         correct = set1 == set2
         session_question.is_correct = correct
+        session_question.score = 1 if session_question.is_correct else 0
+        session_question.max_score = 1
         db.session.add(session_question)
         db.session.commit()
 
@@ -130,10 +141,16 @@ def handle_exam_answer(session_question_id: str, answer, user: User):
         )
 
         network = Network.query.filter_by(guid=answer["answer"]).first()
+        network.author_id = 0
         network_data = json.loads(network.network) if network else None
 
         if not requirements or not network_data:
             return None, None, 403
+
+        session_question.is_correct = False
+        db.session.add(network)
+        db.session.add(session_question)
+        db.session.commit()
 
         return requirements, network_data, 200
 

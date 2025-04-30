@@ -222,6 +222,8 @@ class SessionQuestion(
     score = db.Column(db.Integer, default=0)
     max_score = db.Column(db.Integer, default=0)
 
+    network_guid = db.Column(db.String(512), nullable=True)
+
     quiz_session = db.relationship("QuizSession", back_populates="sessions")
     question = db.relationship("Question", back_populates="session_questions")
 
