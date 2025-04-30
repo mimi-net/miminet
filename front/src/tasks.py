@@ -41,6 +41,9 @@ def save_simulate_result(self, animation, pcaps):
             .first()
         )
 
+        if not simlog:
+            return
+
         pcap_dir = "static/pcaps/" + net.guid
 
         if not os.path.exists(pcap_dir):
@@ -58,9 +61,7 @@ def save_simulate_result(self, animation, pcaps):
         try:
             sim.packets = animation
             sim.ready = True
-
-            if simlog:
-                simlog.ready = True
+            simlog.ready = True
 
             db.session.commit()
         except StaleDataError:
