@@ -2,12 +2,6 @@ import json
 from flask import request, make_response, jsonify, abort, render_template
 from flask_login import login_required, current_user
 
-from miminet_model import User, Network, db
-from quiz.service.check_practice_service import check_task
-from quiz.entity.entity import (
-    QuizSession,
-)
-
 from quiz.facade.quiz_session_facade import (
     start_session,
     finish_session,
@@ -47,7 +41,7 @@ def check_network_task_endpoint():
         # Теория — сразу отправляем результат
         return make_response("Вопрос проверен", 200)
 
-    ### Раскомментировать, когда снова потребуется проверять сразу же!!!
+    # Раскомментировать, когда снова потребуется проверять сразу же!!!
 
     # requirements, network = result, aux
     # res_code = create_check_task(network, requirements, session_question_id)

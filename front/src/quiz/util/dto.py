@@ -15,7 +15,6 @@ from quiz.entity.entity import (
     Test,
     Question,
     Answer,
-    PracticeQuestion,
     QuizSession,
     SessionQuestion,
 )
