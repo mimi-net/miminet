@@ -1301,7 +1301,7 @@ const InsertWaitingTime = function ()
 }
 
 const InsertWaitingTimeHelper = function(time_filter) {
-
+    // Insert field with queue size
     $.ajax({
         type: 'GET',
         url: 'emulation_queue/size?time-filter=' + time_filter.toString(),
@@ -1309,7 +1309,9 @@ const InsertWaitingTimeHelper = function(time_filter) {
         success: function(data) {
             const queue_size = parseInt(data.size);
 
-            if (queue_size <= 1) {
+            if ($('#NetworkPlayerLabel').text().startsWith("Шаг:")) {
+                return;
+            } else if (queue_size <= 1) {
                 $('#NetworkPlayerLabel').text("Ожидание 10-15 сек.");
             } else {
                 $('#NetworkPlayerLabel').text(`Место в очереди ${queue_size}`);
