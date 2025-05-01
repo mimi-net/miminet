@@ -15,7 +15,6 @@ from flask import (
 from flask_login import current_user, login_required
 from miminet_config import check_image_with_pil
 from miminet_model import Network, Simulate, db, SimulateLog
-from sqlalchemy.orm import load_only
 
 
 @login_required
@@ -518,20 +517,18 @@ def copy_network():
 @login_required
 def get_last_emulation_time():
     """Answer with current last emulation starting time."""
-    last_emulation = (
-        SimulateLog.query.options(load_only(SimulateLog.simulate_start))
+    last_emulation_time = (
+        db.session.query(SimulateLog.simulate_start)
         .order_by(SimulateLog.simulate_start.desc())
         .limit(1)
-        .first()
+        .scalar()
     )
 
-    if not last_emulation:
+    if not last_emulation_time:
         return make_response(jsonify({"message": "Никаких эмуляций не найдено."}), 404)
 
-    last_emulation_time = last_emulation.simulate_start.isoformat()
-
     return make_response(
-        jsonify({"time": str(last_emulation_time)}),
+        jsonify({"time": last_emulation_time}),
         200,
     )
 
@@ -553,6 +550,6 @@ def get_emulation_queue_size():
     )
 
     return make_response(
-        jsonify({"size": str(emulated_networks_count)}),
+        jsonify({"size": emulated_networks_count}),
         200,
     )
