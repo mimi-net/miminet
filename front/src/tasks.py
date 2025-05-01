@@ -35,11 +35,7 @@ def save_simulate_result(self, animation, pcaps):
         if not net:
             return
 
-        simlog = (
-            SimulateLog.query.filter(SimulateLog.network_guid == net.guid)
-            .order_by(SimulateLog.id.desc())
-            .first()
-        )
+        simlog = SimulateLog.query.filter(SimulateLog.network_guid == net.guid)
 
         if not simlog:
             return
@@ -61,7 +57,7 @@ def save_simulate_result(self, animation, pcaps):
         try:
             sim.packets = animation
             sim.ready = True
-            simlog.ready = True
+            simlog.update({"ready": 1})
 
             db.session.commit()
         except StaleDataError:
