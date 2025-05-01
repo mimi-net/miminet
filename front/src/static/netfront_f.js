@@ -1280,27 +1280,47 @@ const CheckSimulation = function (simulation_id)
 }
 
 
-const GetWaitingTime = function (network_guid)
+const InsertWaitingTime = function ()
 {
+    // Get last emulation task time
+    // and send request to get count of emulating networks before this time
     $.ajax({
         type: 'GET',
-        url: '/waiting_time?network_guid=' + network_guid,
+        url: 'emulation_queue/time',
         data: '',
         success: function(data) {
-            waiting_time = parseInt(data.time);
-
-            if (isNaN(waiting_time)) {
-                throw new Error("Invalid time input");
-            }
-        
-            const time_offset = 5
-            const min = waiting_time - time_offset;
-            const max = waiting_time + time_offset;
-
-            $('#NetworkPlayerLabel').text(`Ожидание ${min}—${max} сек.`);
+            // Run helper function with time param
+            InsertWaitingTimeHelper(data.time)
         },
-        error: function(xhr) {
-            console.log("Can't get waiting time: " + JSON.stringify(xhr.responseText));
+        error: function(err) {
+            console.error("Failed to fetch queue time:", err);
+        },
+        contentType: "application/json",
+        dataType: 'json'
+    });
+}
+
+const InsertWaitingTimeHelper = function(time_filter) {
+
+    $.ajax({
+        type: 'GET',
+        url: 'emulation_queue/size?time-filter=' + time_filter.toString(),
+        data: '',
+        success: function(data) {
+            const queue_size = parseInt(data.size);
+
+            if (queue_size <= 1) {
+                $('#NetworkPlayerLabel').text("Ожидание 10-15 сек.");
+            } else {
+                $('#NetworkPlayerLabel').text(`Место в очереди ${queue_size}`);
+
+                // Update waiting time
+                setTimeout(() => InsertWaitingTimeHelper(time_filter), 500);
+            }
+
+        },
+        error: function(err) {
+            console.error("Failed to fetch queue size:", err);
         },
         contentType: "application/json",
         dataType: 'json'
@@ -1865,7 +1885,7 @@ const SetNetworkPlayerState = function(simultaion_id)
         $('#NetworkPlayer').empty();
         $('#PacketSliderInput').hide();
         $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" disabled>Эмулируется...</button>');
-        GetWaitingTime(network_guid)
+        InsertWaitingTime()
         CheckSimulation(simultaion_id);
         return;
     }
@@ -1901,7 +1921,7 @@ const SetNetworkPlayerState = function(simultaion_id)
 
         $('#NetworkPlayer').empty();
         $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" disabled>Эмулируется...</button>');
-        GetWaitingTime(network_guid);
+        InsertWaitingTime();
         return;
     });
 
