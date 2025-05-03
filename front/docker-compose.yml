@@ -16,6 +16,8 @@ services:
     expose:
       - 80
     volumes:
+      - ./src/static:/app/static
+      - ./src/templates:/app/templates
       - databases:/app/instance
       - ./src/static/images:/app/static/images
       - ./src/static/svg:/app/static/svg

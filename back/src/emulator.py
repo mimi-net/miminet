@@ -69,7 +69,7 @@ def create_animation(
     pcap_list = []
     animation = []
 
-    for link1, link2, edge_id, edge_source, edge_target in interfaces_info:
+    for link1, link2, edge_id, edge_source, edge_target, loss_percentage in interfaces_info:
         pcap_out_file1 = "/tmp/capture_" + link1 + "_out.pcapng"
         pcap_out_file2 = "/tmp/capture_" + link2 + "_out.pcapng"
 
@@ -87,7 +87,7 @@ def create_animation(
             pcap_list.append((file2.read(), link2))
 
         packets = create_pkt_animation(
-            pcap_out_file1, pcap_out_file2, edge_id, edge_source, edge_target
+            pcap_out_file1, pcap_out_file2, edge_id, edge_source, edge_target, loss_percentage
         )
 
         animation += packets

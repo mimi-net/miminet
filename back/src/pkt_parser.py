@@ -97,7 +97,7 @@ def arp_packet_type(pkt) -> str:
 
 
 def create_pkt_animation(
-    file1: str, file2: str, edge_id: str, e_source: str, e_target: str
+    file1: str, file2: str, edge_id: str, e_source: str, e_target: str, loss_percentage: int,
 ):
     if not os.path.exists(file1) or not os.path.exists(file2):
         return None
@@ -105,13 +105,13 @@ def create_pkt_animation(
     with open(file1, "rb") as f1, open(file2, "rb") as f2:
         pcap1 = dpkt.pcap.Reader(f1)
         pcap2 = dpkt.pcap.Reader(f2)
-        pkts = packet_parser(pcap1, edge_id, e_source, e_target)
-        pkts2 = packet_parser(pcap2, edge_id, e_target, e_source)
+        pkts = packet_parser(pcap1, edge_id, e_source, e_target, loss_percentage)
+        pkts2 = packet_parser(pcap2, edge_id, e_target, e_source, loss_percentage)
 
     return pkts + pkts2
 
 
-def packet_parser(pcap1: Reader, edge_id: str, e_source: str, e_target: str):
+def packet_parser(pcap1: Reader, edge_id: str, e_source: str, e_target: str, loss_percentage: int):
     pkts = []
 
     # For each packet in the pcap1 process the contents
@@ -136,6 +136,7 @@ def packet_parser(pcap1: Reader, edge_id: str, e_source: str, e_target: str):
                         "path": edge_id,
                         "source": e_source,
                         "target": e_target,
+                        "loss_percentage": loss_percentage
                     },
                     "timestamp": ts,
                 }
@@ -187,6 +188,7 @@ def packet_parser(pcap1: Reader, edge_id: str, e_source: str, e_target: str):
                         "path": edge_id,
                         "source": e_source,
                         "target": e_target,
+                        "loss_percentage": loss_percentage,
                     },
                     "timestamp": ts,
                 }
@@ -234,6 +236,7 @@ def packet_parser(pcap1: Reader, edge_id: str, e_source: str, e_target: str):
                         "path": edge_id,
                         "source": e_source,
                         "target": e_target,
+                        "loss_percentage": loss_percentage,
                     },
                     "timestamp": ts,
                 }

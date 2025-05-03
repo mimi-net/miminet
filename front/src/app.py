@@ -39,6 +39,7 @@ from miminet_host import (
     save_router_config,
     save_server_config,
     save_switch_config,
+    save_edge_config
 )
 from miminet_model import Network, db, init_db, fix_nonemulated_networks
 from miminet_network import (
@@ -178,6 +179,9 @@ app.add_url_rule(
 app.add_url_rule(
     "/host/switch_save_config", methods=["GET", "POST"], view_func=save_switch_config
 )
+app.add_url_rule(
+    "/edge/save_config", methods=["GET", "POST"], view_func=save_edge_config
+)
 
 # MimiShark
 app.add_url_rule("/host/mimishark", methods=["GET"], view_func=mimishark_page)
@@ -260,6 +264,7 @@ admin = Admin(
     name="Miminet Admin",
     template_mode="bootstrap4",
 )
+
 
 admin.add_view(TestView(Test, db.session))
 admin.add_view(SectionView(Section, db.session))

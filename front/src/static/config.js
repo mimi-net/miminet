@@ -228,6 +228,55 @@ const ConfigSwitchForm = function (switch_id) {
     $('#config_switch_main_form_submit_button, #config_switch_end_form').on('click', handleSwitchClick);
 }
 
+const ConfigEdgeForm = function (edge_id) {
+    let edgeSaveXHR = null;
+
+    var form = document.getElementById('config_edge_main_form_script').innerHTML;
+    var button = document.getElementById('config_edge_save_script').innerHTML;
+
+
+    // Clear all child
+    $(config_content_id).empty();
+    $(config_content_save_tag).empty();
+
+    document.getElementById(config_content_save_id).style.display='block';
+
+    // Add new form
+    $(config_content_id).append(form);
+    $(config_content_save_tag).append(button);
+
+    // Set host_id
+    $('#edge_id').val(edge_id);
+    $('#net_guid').val(network_guid);
+
+    function handleEdgeClick(event) {
+        event.preventDefault();
+
+        if (edgeSaveXHR) {
+            edgeSaveXHR.abort();
+        }
+
+        let data = $('#config_edge_main_form').serialize();
+        const edge = edges.find(e => e.data.id === edge_id);
+        const lossValue = $("#edge_loss").val();
+
+        if (edge)
+            edge.data.loss_percentage = lossValue;
+
+        const inputsToDisable = $('#edge_loss, #config_edge_main_form_submit_button');
+        inputsToDisable.prop("disabled", true);
+
+        $('#config_edge_main_form_submit_button').html(
+            '<span class="spinner-border spinner-border-sm" role="status"></span> Сохранение...'
+        );
+
+        edgeSaveXHR = UpdateEdgeConfiguration(data);
+        inputsToDisable.prop("disabled", false);
+    }
+
+    $('#config_edge_main_form_submit_button, #config_edge_end_form').off('click').on('click', handleEdgeClick);
+}
+
 const ConfigHubName = function (hostname) {
 
     var text = document.getElementById('config_hub_name_script').innerHTML;
@@ -236,22 +285,12 @@ const ConfigHubName = function (hostname) {
     $('#config_hub_name').val(hostname);
 }
 
-const ConfigEdgeForm = function (edge_id) {
+const ConfigEdgePercentage = function (edge_loss) {
 
-    var form = document.getElementById('config_edge_main_form_script').innerHTML;
+    var text = document.getElementById('config_edge_save_loss_script').innerHTML;
 
-    // Clear all child
-    $(config_content_id).empty();
-    $(config_content_save_tag).empty();
-
-    document.getElementById(config_content_save_id).style.display='none';
-
-    // Add new form
-    $(config_content_id).append(form);
-
-    // Set host_id
-    $('#edge_id').val(edge_id);
-    $('#net_guid').val(network_guid);
+    $(config_edge_main_form_id).prepend(text);
+    $('#edge_loss').val(edge_loss);
 }
 
 const ConfigEdgeEndpoints = function (edge_source, edge_target) {
