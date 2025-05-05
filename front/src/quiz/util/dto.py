@@ -118,9 +118,11 @@ class PracticeAnswerResultDto:
 def calculate_max_score(requirements: list) -> int:
     def recursive_sum(data):
         if isinstance(data, dict):
-            return data.get("points", 0) + sum(
-                recursive_sum(value) for value in data.values()
+            points = data.get("points", 0)
+            valid_points = (
+                points if isinstance(points, (int, float)) and points > 0 else 0
             )
+            return valid_points + sum(recursive_sum(value) for value in data.values())
         elif isinstance(data, list):
             return sum(recursive_sum(item) for item in data)
         return 0
