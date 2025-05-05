@@ -2,7 +2,7 @@ import json
 
 from datetime import date
 
-from flask import request, flash, redirect, url_for, render_template
+from flask import request, flash, redirect, url_for
 from flask_admin import AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.fields import QuerySelectField
