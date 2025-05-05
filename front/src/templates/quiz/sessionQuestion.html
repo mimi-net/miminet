@@ -31,7 +31,8 @@
 {% block network %}
     {% if question.question_type == "practice" %}
         <script>
-            let start_configuration = JSON.parse(practiceQuestion["start_configuration"])
+            const fixedJson = practiceQuestion["start_configuration"].replace(/\n/g, '\\n');
+            let start_configuration = JSON.parse(fixedJson)
             const network_guid = practiceQuestion["network_guid"];
             let network_title = "Practice Task Net";
             let network_description = ""

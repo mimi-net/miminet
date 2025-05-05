@@ -1,0 +1,8 @@
+{% extends 'admin/model/list.html' %}
+
+{% block page_actions %}
+  <a href="{{ url_for('.check_by_question_view') }}" class="btn btn-primary me-2">
+    Проверить по вопросу
+  </a>
+  {{ super() }}
+{% endblock %}

@@ -101,6 +101,8 @@ def create_emulation_task(net_schema):
     if not net_schema.get("jobs"):
         return []
 
+    net_schema = json.dumps(net_schema)
+
     async_obj = app.send_task(
         "tasks.mininet_worker",
         [net_schema],

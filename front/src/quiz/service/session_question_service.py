@@ -185,7 +185,7 @@ def answer_on_exam_question(session_question_id: str, networks_to_check):
             else requirements_json
         )
 
-        network_data["packets"] = animation_data
+        network_data["packets"] = json.loads(animation_data)
 
         max_score = calculate_max_score(requirements)
         score, _ = check_task(requirements, network_data)
