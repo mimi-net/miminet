@@ -222,6 +222,10 @@ def answer_on_session_question(session_question_id: str, answer, user: User):
         if score != max_score and len(hints) == 0:
             hints.append("По вашему решению не предусмотрены подсказки.")
 
+        network = Network.query.filter_by(guid=session_question.network_guid).first()
+        network.author_id = 0
+        db.session.add(network)
+
         session_question.is_correct = score == max_score
         session_question.score = score
         session_question.max_score = max_score
