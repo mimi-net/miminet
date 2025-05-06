@@ -11,12 +11,7 @@ function findParent(element) {
 }
 
 function finishOldQuiz() {
-    const sessionId = sessionStorage.getItem('session_id');
-    if (!sessionId) {
-        return;
-    }
-
-    fetch(finishOldSessionUrl + '?id=' + sessionId, {
+    fetch(finishOldSessionUrl, {
         method: 'PUT'
     })
         .then(response => response.json())
@@ -37,9 +32,8 @@ function submitForm(event) {
     const timer = form.querySelector(`[name="timer"]`).value
 
     // Finish old session
-    if (sessionStorage.session_id) {
-        finishOldQuiz();
-    }
+    finishOldQuiz();
+
 
     fetch(form.action, {
         method: form.method,

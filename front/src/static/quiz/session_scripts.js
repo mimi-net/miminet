@@ -468,6 +468,27 @@ if (codeElement) {
     codeElement.textContent = _.unescape(codeElement.textContent)
 }
 
+if (!sessionStorage.getItem('question_ids')) {
+    fetch(getQuestionJsonUrl + '?question_id=' + sessionQuestionId)
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Ошибка получения вопроса:', data.error);
+                return;
+            }
+
+            sessionStorage.setItem('session_id', JSON.stringify(data.quiz_session_id));
+            sessionStorage.setItem('question_ids', JSON.stringify(data.question_ids));
+            sessionStorage.setItem('question_index', data.question_index);
+            sessionStorage.setItem('test_name', data.test_name);
+            sessionStorage.setItem('section_name', data.section_name);
+            sessionStorage.setItem('timer', data.timer);
+
+            location.reload();
+        })
+        .catch(err => console.error('Ошибка загрузки вопроса:', err));
+}
+
 // Saving data about session
 const testName = sessionStorage.getItem('test_name');
 const sectionName = sessionStorage.getItem('section_name');

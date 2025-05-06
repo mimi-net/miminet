@@ -55,6 +55,7 @@ def get_question_by_session_question_id(session_question_id: str):
     timer = section.timer
     available_from = section.results_available_from
     available_answer = is_answer_available(section)
+    session_question_id = session_question.id
 
     return (
         QuestionDto(session_question.created_by_id, question, session_question.id),
@@ -62,8 +63,52 @@ def get_question_by_session_question_id(session_question_id: str):
         timer,
         available_answer,
         available_from,
+        session_question_id,
         200,
     )
+
+
+def get_session_question_data(session_question_id: str):
+    if not session_question_id:
+        return None, 400
+
+    sq = SessionQuestion.query.filter_by(
+        id=session_question_id, is_deleted=False
+    ).first()
+    if not sq or sq.question is None or sq.question.is_deleted:
+        return None, 404
+
+    section = sq.quiz_session.section
+    test = section.test
+
+    all_sqs = (
+        SessionQuestion.query.filter_by(
+            quiz_session_id=sq.quiz_session_id, is_deleted=False
+        )
+        .order_by(SessionQuestion.id)
+        .all()
+    )
+    question_ids = [x.id for x in all_sqs]
+    current_index = question_ids.index(sq.id)
+
+    result = {
+        "id": sq.id,
+        "quiz_session_id": sq.quiz_session_id,
+        "test_name": test.name,
+        "section_name": section.name,
+        "question_ids": question_ids,
+        "question_index": current_index,
+        "is_exam": section.is_exam,
+        "timer": section.timer,
+        "available_from": (
+            str(section.results_available_from)
+            if section.results_available_from
+            else None
+        ),
+        "available_answer": is_answer_available(section),
+    }
+
+    return result, 200
 
 
 def check_theory_answer(session_question, question, answer):
