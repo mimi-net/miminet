@@ -79,26 +79,25 @@ def finish_session(quiz_session_id: str, user: User):
     return 200
 
 
-def finish_old_session(quiz_session_id: str, user: User):
-    quiz_session = QuizSession.query.filter_by(id=quiz_session_id).first()
+def finish_old_sessions(user):
+    unfinished_sessions = (
+        QuizSession.query.filter_by(created_by_id=user.id, is_deleted=False)
+        .filter(QuizSession.finished_at.is_(None))
+        .all()
+    )
 
-    if not quiz_session:
-        return 404
-    elif quiz_session.created_by_id != user.id:
-        return 403
-    elif quiz_session is None:
-        return 404
+    if not unfinished_sessions:
+        return 204
 
-    section = quiz_session.section
-    test = section.test
+    for qs in unfinished_sessions:
+        section = qs.section
+        test = section.test
 
-    if quiz_session.finished_at is None and section.timer == 0:
-        if not test.is_retakeable:
-            db.session.delete(quiz_session)
-            db.session.commit()
-            return 200
+        if section.timer == 0 and not test.is_retakeable:
+            db.session.delete(qs)
+        else:
+            qs.finished_at = func.now()
 
-    quiz_session.finished_at = func.now()
     db.session.commit()
     return 200
 

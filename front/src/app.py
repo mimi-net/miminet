@@ -68,6 +68,7 @@ from quiz.controller.quiz_session_controller import (
     get_result_by_session_guid_endpoint,
     check_network_task_endpoint,
     finish_old_session_endpoint,
+    get_session_question_json,
 )
 from quiz.controller.section_controller import (
     get_sections_by_test_endpoint,
@@ -186,6 +187,10 @@ app.add_url_rule(
 
 app.add_url_rule(
     "/quiz/question/all", methods=["GET"], view_func=get_questions_by_section_endpoint
+)
+
+app.add_url_rule(
+    "/quiz/session/question/json", methods=["GET"], view_func=get_session_question_json
 )
 
 app.add_url_rule(

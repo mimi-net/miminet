@@ -7,12 +7,13 @@ from quiz.facade.quiz_session_facade import (
     finish_session,
     session_result,
     get_result_by_session_guid,
-    finish_old_session,
+    finish_old_sessions,
 )
 from quiz.service.session_question_service import (
     answer_on_session_question,
     get_question_by_session_question_id,
     handle_exam_answer,
+    get_session_question_data,
 )
 
 # from quiz.service.network_upload_service import create_check_task
@@ -24,6 +25,19 @@ def answer_on_session_question_endpoint():
     if res[1] == 404 or res[1] == 403:
         abort(res[1])
     return make_response(json.dumps(res[0].to_dict(), default=str), res[1])
+
+
+@login_required
+def get_session_question_json():
+    session_question_id = request.args.get("question_id")
+    data, status = get_session_question_data(session_question_id)
+    if status != 200:
+        return (
+            jsonify({"error": "Not found" if status == 404 else "Missing question_id"}),
+            status,
+        )
+
+    return jsonify(data)
 
 
 @login_required
@@ -58,7 +72,15 @@ def get_question_by_session_question_id_endpoint():
     if result == 404:
         abort(404)
 
-    res, is_exam, timer, available_answer, available_from, status_code = result
+    (
+        res,
+        is_exam,
+        timer,
+        available_answer,
+        available_from,
+        session_question_id,
+        status_code,
+    ) = result
 
     return make_response(
         render_template(
@@ -67,6 +89,7 @@ def get_question_by_session_question_id_endpoint():
             timer=timer,
             is_exam=is_exam,
             available_from=available_from,
+            session_question_id=session_question_id,
             available_answer=available_answer,
         ),
         status_code,
@@ -89,6 +112,7 @@ def start_session_endpoint():
 @login_required
 def finish_session_endpoint():
     code = finish_session(request.args["id"], current_user)
+
     if code == 404 or code == 403:
         abort(code)
     ret = {"message": "Сессия завершена", "id": request.args["id"]}
@@ -97,11 +121,13 @@ def finish_session_endpoint():
 
 @login_required
 def finish_old_session_endpoint():
-    code = finish_old_session(request.args["id"], current_user)
-    if code == 404 or code == 403:
-        abort(code)
-    ret = {"message": "Сессия завершена", "id": request.args["id"]}
-    return make_response(ret, code)
+    code = finish_old_sessions(current_user)
+
+    if code == 404:
+        abort(404)
+    return make_response(
+        jsonify({"message": "Старые сессии завершены или удалены"}), code
+    )
 
 
 @login_required

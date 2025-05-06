@@ -68,7 +68,11 @@
                   <h5 class="mb-1">
                     {% if q.is_correct %}✅{% else %}❌{% endif %} {{ q.question_text }}
                   </h5>
-                  <p class="card-text mb-0"><strong>Баллы:</strong> {{ q.score }} из {{ q.max_score }}</p>
+                  {% if q.max_score == 0 %}
+                    <p class="card-text mb-0"><strong>Ответ на проверке</strong></p>
+                  {% else %}
+                    <p class="card-text mb-0"><strong>Баллы:</strong> {{ q.score }} из {{ q.max_score }}</p>
+                  {% endif %}
                 </div>
                 {% if q.network_guid %}
                   <a href="{{ url_for('web_network') }}?guid={{ q.network_guid }}"
