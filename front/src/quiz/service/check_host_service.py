@@ -387,22 +387,26 @@ def check_tunnel_echo_request(
 
     if not ok_req:
         if len(req_path) == 1:
-            hints.append(f"Запрос от {source_device} не стартовал.")
+            hints.append(f"Запрос от {source_device} к {target_device} не стартовал.")
         else:
             hints.append(
-                f"Запрос дошёл только до {req_path[-1]}, а не до {target_device}."
+                f"Запрос от {source_device} дошёл только до {req_path[-1]}, а не до {target_device}."
             )
     if not req_tunnel:
-        hints.append(f"Запрос не прошёл через туннель {tunnel_start}→{tunnel_end}.")
+        hints.append(
+            f"Запрос от {source_device} к {target_device} не прошёл через туннель {tunnel_start}→{tunnel_end}."
+        )
     if not ok_rep:
         if len(rep_path) == 1:
-            hints.append(f"Ответ от {target_device} не стартовал.")
+            hints.append(f"Ответ от {target_device} к {source_device} не стартовал.")
         else:
             hints.append(
-                f"Ответ дошёл только до {rep_path[-1]}, а не до {source_device}."
+                f"Ответ от {target_device} дошёл только до {rep_path[-1]}, а не до {source_device}."
             )
     if not rep_tunnel:
-        hints.append(f"Ответ не прошёл через туннель {tunnel_end}→{tunnel_start}.")
+        hints.append(
+            f"Ответ от {target_device} к {source_device} не прошёл через туннель {tunnel_end}→{tunnel_start}."
+        )
     if req_type != rep_type:
         hints.append("Тип туннеля различается для запроса и ответа.")
 
