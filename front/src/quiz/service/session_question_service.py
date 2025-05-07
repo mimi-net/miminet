@@ -229,7 +229,7 @@ def answer_on_exam_without_session(networks_to_check, guid, output_file="results
         network_data["packets"] = json.loads(animation_data)
 
         max_score = calculate_max_score(requirements)
-        score, _ = check_task(requirements, network_data)
+        score, hints = check_task(requirements, network_data)
 
         total_score += score
         total_max_score += max_score
@@ -239,6 +239,7 @@ def answer_on_exam_without_session(networks_to_check, guid, output_file="results
         "score": total_score,
         "max_score": total_max_score,
         "is_correct": total_score == total_max_score,
+        "hints": json.dumps(hints),
     }
 
     with open(output_file, "a", encoding="utf-8") as f:
