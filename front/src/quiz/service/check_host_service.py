@@ -164,33 +164,91 @@ def check_different_paths(answer, source_device, target_device):
     hints = []
     packets = answer.get("packets", [])
 
+    if not packets:
+        return False, ["Вы не отправляете пакетов по сети."]
+
+    request_path = []
+    reply_path = []
     request_edges = []
     reply_edges = []
 
+    def is_request(pkt_type):
+        return (
+            "ICMP echo-request" in pkt_type
+            or ("UDP" in pkt_type and "> 4789" in pkt_type)
+            or "GRE tunnel" in pkt_type
+            or "IPIP tunnel" in pkt_type
+        )
+
+    def is_reply(pkt_type):
+        return (
+            "ICMP echo-reply" in pkt_type
+            or ("UDP" in pkt_type and "> 4789" in pkt_type)
+            or "GRE tunnel" in pkt_type
+            or "IPIP tunnel" in pkt_type
+        )
+
     for packet in packets:
-        cfg = packet[0].get("config", {})
-        pkt_type = cfg.get("type", "")
-        edge_id = cfg.get("path")
-        src = cfg.get("source")
+        config = packet[0].get("config", {})
+        pkt_type = config.get("type", "")
+        src = config.get("source")
+        tgt = config.get("target")
+        edge_id = config.get("path")
 
-        if "ICMP echo-request" in pkt_type or "IPIP tunnel" in pkt_type:
-            if src == source_device or request_edges:
-                request_edges.append(edge_id)
+        if is_request(pkt_type):
+            if not request_path:
+                if src == source_device:
+                    request_path = [src, tgt]
+                    request_edges = [edge_id]
+            else:
+                if src == request_path[-1]:
+                    request_path.append(tgt)
+                    request_edges.append(edge_id)
 
-        elif "ICMP echo-reply" in pkt_type or "IPIP tunnel" in pkt_type:
-            if src == target_device or reply_edges:
-                reply_edges.append(edge_id)
+        if is_reply(pkt_type):
+            if not reply_path:
+                if src == target_device:
+                    reply_path = [src, tgt]
+                    reply_edges = [edge_id]
+            else:
+                if src == reply_path[-1]:
+                    reply_path.append(tgt)
+                    reply_edges.append(edge_id)
 
-    if not request_edges:
-        hints.append("Не удалось собрать путь ICMP Echo Request.")
-        return False, hints
-    if not reply_edges:
-        hints.append("Не удалось собрать путь ICMP Echo Reply.")
+    if not request_path:
+        hints.append(
+            f"Невозможно проверить разность путей: запрос от {source_device} к {target_device} не обнаружен."
+        )
+    elif request_path[0] != source_device:
+        hints.append(
+            f"Невозможно проверить разность путей: запрос начинается не с {source_device}."
+        )
+    elif request_path[-1] != target_device:
+        hints.append(
+            f"Невозможно проверить разность путей: запрос не достиг {target_device}."
+        )
+
+    if not reply_path:
+        hints.append(
+            f"Невозможно проверить разность путей: ответ от {target_device} к {source_device} не обнаружен."
+        )
+    elif reply_path[0] != target_device:
+        hints.append(
+            f"Невозможно проверить разность путей: ответ начинается не с {target_device}."
+        )
+    elif reply_path[-1] != source_device:
+        hints.append(
+            f"Невозможно проверить разность путей: ответ не вернулся к {source_device}."
+        )
+
+    if hints:
         return False, hints
 
     if request_edges == reply_edges[::-1]:
-        hints.append("Пути ICMP Echo Request и Echo Reply совпадают, хотя не должны.")
-        return False, hints
+        return False, [
+            "Путь ICMP Echo Reply полностью совпадает с ICMP Echo Request (в обратную сторону), а должен быть другим."
+        ]
+
     return True, []
 
 
@@ -521,13 +579,13 @@ def check_no_echo_request(answer, source_device, target_device):
     packets = answer.get("packets", [])
 
     if not packets:
-        return False, ["Вы не отправляете пакетов по сети."]
+        return True, []
 
     def has_request_reached():
         current = source_device
         for packet in packets:
             cfg = packet[0].get("config", {})
-            ptype = cfg.get("type", "")
+            ptype = cfg.get("type")
             src = cfg.get("source")
             dst = cfg.get("target")
 
@@ -535,6 +593,9 @@ def check_no_echo_request(answer, source_device, target_device):
             is_ipip = "IPIP tunnel" in ptype
             is_gre = "GRE tunnel" in ptype
             is_vxlan = "UDP" in ptype and "> 4789" in ptype
+
+            if src == source_device and current != source_device:
+                current = source_device
 
             if src == current and (is_icmp or is_ipip or is_gre or is_vxlan):
                 current = dst
@@ -614,6 +675,9 @@ def process_host_command(cmd, answer, device):
 
             different_paths_points = cmd.get("different_paths")
             if different_paths_points and result:
+                import logging
+
+                logging.info("Ща проверим")
                 path_result, path_hints = check_different_paths(answer, device, target)
                 if path_result:
                     points_for_host += different_paths_points.get("points", 1)

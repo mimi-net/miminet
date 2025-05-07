@@ -111,7 +111,7 @@ def check_abstract_ip_equal(abstract_equal, answer, device):
 
     common_ips = device_ips_to_to_node.intersection(compare_ips)
     if common_ips:
-        points = points_awarded
+        points = max(points_awarded, 0)
     else:
         hints.append(
             f"IP-адреса интерфейсов {device}, направленных к {to_node_id}, не совпадают ни с одним IP-адресом интерфейсов {expected_equal_with}."
@@ -350,10 +350,5 @@ def check_task(requirements, answer):
                 )
                 total_points += points
                 hints.extend(network_hints)
-
-    logging.info(hints)
-
-    if total_points < 0:
-        total_points = 0
 
     return total_points, hints
