@@ -14,7 +14,7 @@ def check_in_one_network_with(requirement, answer, device):
     points_awarded = requirement.get("points", 1)
 
     if not target_id:
-        hints.append(f"Целевое устройство не указано.")
+        hints.append("Целевое устройство не указано.")
         return points, hints
 
     nodes = answer.get("nodes", [])
