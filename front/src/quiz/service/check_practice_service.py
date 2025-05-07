@@ -1,8 +1,59 @@
+import ipaddress
+import logging
+
 import quiz.service.check_host_service as chs
 
 from quiz.service.check_network_service import check_network_configuration
 
-import logging
+
+def check_in_one_network_with(requirement, answer, device):
+    points = 0
+    hints = []
+
+    target_id = requirement.get("target")
+    points_awarded = requirement.get("points", 1)
+
+    if not target_id:
+        hints.append(f"Целевое устройство не указано.")
+        return points, hints
+
+    nodes = answer.get("nodes", [])
+    host_node = next((n for n in nodes if n["data"]["id"] == device), None)
+    target_node = next((n for n in nodes if n["data"]["id"] == target_id), None)
+
+    if not host_node or not target_node:
+        hints.append(f"Не удалось найти одно из устройств: {device}, {target_id}.")
+        return points, hints
+
+    def get_networks(node):
+        networks = set()
+        for interface in node.get("interface", []):
+            ip = interface.get("ip")
+            mask = interface.get("netmask")
+
+            if ip and mask:
+                try:
+                    cidr = ipaddress.IPv4Network(f"{ip}/{mask}", strict=False)
+                    networks.add(cidr)
+                except Exception:
+                    hints.append(f"Некорректный IP или маска: {ip}/{mask}")
+        return networks
+
+    host_networks = get_networks(host_node)
+    target_networks = get_networks(target_node)
+
+    if not host_networks or not target_networks:
+        hints.append("Не удалось определить IP-сети одного из устройств.")
+        return points, hints
+
+    for net1 in host_networks:
+        for net2 in target_networks:
+            if net1.overlaps(net2):
+                points = points_awarded
+                return points, hints
+
+    hints.append(f"{device} и {target_id} не находятся в одной сети.")
+    return points, hints
 
 
 def check_abstract_ip_equal(abstract_equal, answer, device):
@@ -266,6 +317,13 @@ def check_host(requirement, answer, device):
         points, abstract_hints = check_abstract_ip_equal(abstract_equal, answer, device)
         points_for_host += points
         hints.extend(abstract_hints)
+
+    # Check if two hosts are in the same network
+    in_one_network_with = requirement.get("in_one_network_with")
+    if in_one_network_with:
+        p, net_hints = check_in_one_network_with(in_one_network_with, answer, device)
+        points_for_host += p
+        hints.extend(net_hints)
 
     return points_for_host, hints
 

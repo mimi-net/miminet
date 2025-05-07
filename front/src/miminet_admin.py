@@ -11,9 +11,19 @@ from flask_admin.model import typefmt
 from flask_admin.actions import action
 from flask_login import current_user
 from markupsafe import Markup
-from wtforms import SelectField, TextAreaField, BooleanField, DateTimeField, Form
+from wtforms import (
+    SelectField,
+    TextAreaField,
+    BooleanField,
+    DateTimeField,
+    Form,
+    SubmitField,
+)
 
-from quiz.service.network_upload_service import create_check_task
+from quiz.service.network_upload_service import (
+    create_check_task,
+    create_check_task_json,
+)
 from miminet_model import db, User, Network
 from quiz.entity.entity import (
     Test,
@@ -22,7 +32,6 @@ from quiz.entity.entity import (
     QuestionCategory,
     SessionQuestion,
 )
-
 
 ADMIN_ROLE_LEVEL = 1
 
@@ -440,6 +449,7 @@ class SessionQuestionView(MiminetAdminModelView):
                 .filter(
                     SessionQuestion.question_id == form.question_id.data,
                     SessionQuestion.max_score == 0,
+                    SessionQuestion.quiz_session_id.isnot(None),
                 )
                 .all()
             )
@@ -477,3 +487,38 @@ class SessionQuestionView(MiminetAdminModelView):
             return redirect(url_for(".index_view"))
 
         return self.render("admin/check_by_question.html", form=form)
+
+
+class CreateCheckTaskForm(Form):
+    guids = TextAreaField("GUID-ы сетей (по одному на строку)")
+    requirements = TextAreaField("Requirements (JSON)")
+    submit = SubmitField("Создать задачу проверки")
+
+
+class CreateCheckTaskView(MiminetAdminModelView):
+    @expose("/", methods=["GET", "POST"])
+    def index(self):
+        form = CreateCheckTaskForm(request.form)
+        if request.method == "POST" and form.validate():
+            try:
+                guids = [
+                    line.strip()
+                    for line in form.guids.data.strip().splitlines()
+                    if line.strip()
+                ]
+
+                networks = []
+                for guid in guids:
+                    network = Network.query.filter(Network.guid == guid).first()
+                    if not network:
+                        raise ValueError(f"Сеть с GUID {guid} не найдена.")
+                    networks.append((json.loads(network.network), guid))
+
+                reqs = json.loads(form.requirements.data)
+                create_check_task_json(networks, reqs)
+                flash("Задача проверки успешно создана.", "success")
+                return redirect(url_for(".index"))
+            except Exception as e:
+                flash(f"Ошибка: {str(e)}", "error")
+
+        return self.render("admin/create_check_task.html", form=form)

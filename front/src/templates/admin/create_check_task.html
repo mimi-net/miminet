@@ -1,0 +1,19 @@
+{% extends 'admin/master.html' %}
+{% block body %}
+  <div class="container">
+    <h3>Создать задачу проверки</h3>
+    <form method="post">
+      <div class="form-group">
+        {{ form.guids.label }}<br>
+        {{ form.guids(rows=6, class="form-control") }}
+      </div>
+      <div class="form-group">
+        {{ form.requirements.label }}<br>
+        {{ form.requirements(rows=10, class="form-control") }}
+      </div>
+      <div class="form-group">
+        {{ form.submit(class="btn btn-primary") }}
+      </div>
+    </form>
+  </div>
+{% endblock %}

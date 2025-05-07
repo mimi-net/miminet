@@ -14,6 +14,7 @@ from miminet_admin import (
     AnswerView,
     QuestionCategoryView,
     SessionQuestionView,
+    CreateCheckTaskView,
 )
 from miminet_auth import (
     google_callback,
@@ -255,6 +256,14 @@ admin.add_view(QuestionView(Question, db.session))
 admin.add_view(AnswerView(Answer, db.session))
 admin.add_view(QuestionCategoryView(QuestionCategory, db.session))
 admin.add_view(SessionQuestionView(SessionQuestion, db.session))
+admin.add_view(
+    CreateCheckTaskView(
+        Network,
+        db.session,
+        name="Создать задачу проверки",
+        endpoint="create_check_task",
+    )
+)
 
 
 @app.route("/")
