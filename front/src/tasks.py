@@ -16,7 +16,10 @@ from miminet_model import Simulate, SimulateLog, db, Network
 from celery.result import AsyncResult, allow_join_result
 from celery.exceptions import TimeoutError
 
-from quiz.service.session_question_service import answer_on_exam_question
+from quiz.service.session_question_service import (
+    answer_on_exam_question,
+    answer_on_exam_without_session,
+)
 
 
 @app.task(bind=True, queue="common-results-queue")
@@ -78,28 +81,53 @@ def perform_task_check(session_question_id, data_list):
 
     networks_to_check = []
 
-    for network_json, req_json in data_list:
-        try:
-            network_json = (
-                json.loads(network_json)
-                if isinstance(network_json, str)
-                else network_json
-            )
-            req_json = json.loads(req_json) if isinstance(req_json, str) else req_json
+    if len(data_list[0]) == 3:
+        for network_json, req_json, guid in data_list:
+            try:
+                network_json = (
+                    json.loads(network_json)
+                    if isinstance(network_json, str)
+                    else network_json
+                )
+                req_json = (
+                    json.loads(req_json) if isinstance(req_json, str) else req_json
+                )
 
-            animation = create_emulation_task(network_json)
-            networks_to_check.append((network_json, animation, req_json))
+                animation = create_emulation_task(network_json)
+                networks_to_check.append((network_json, animation, req_json))
 
-        except Exception as e:
-            logging.error(f"Ошибка при создании задачи: {e}.")
+            except Exception as e:
+                logging.error(f"Ошибка при создании задачи: {e}.")
 
-    with flask_app.app_context():
-        answer_on_exam_question(session_question_id, networks_to_check)
+        answer_on_exam_without_session(networks_to_check, guid)
+
+    else:
+        for network_json, req_json in data_list:
+            try:
+                network_json = (
+                    json.loads(network_json)
+                    if isinstance(network_json, str)
+                    else network_json
+                )
+                req_json = (
+                    json.loads(req_json) if isinstance(req_json, str) else req_json
+                )
+
+                animation = create_emulation_task(network_json)
+                networks_to_check.append((network_json, animation, req_json))
+
+            except Exception as e:
+                logging.error(f"Ошибка при создании задачи: {e}.")
+
+        with flask_app.app_context():
+            answer_on_exam_question(session_question_id, networks_to_check)
 
 
 def create_emulation_task(net_schema):
     if not net_schema.get("jobs"):
         return []
+
+    net_schema = json.dumps(net_schema)
 
     async_obj = app.send_task(
         "tasks.mininet_worker",

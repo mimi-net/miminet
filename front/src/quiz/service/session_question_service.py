@@ -207,13 +207,8 @@ def handle_exam_answer(session_question_id: str, answer, user: User):
     return result_dto, None, status
 
 
-def answer_on_exam_question(session_question_id: str, networks_to_check):
-    session_question = SessionQuestion.query.filter_by(id=session_question_id).first()
-    if not session_question or session_question.question.question_type != 0:
-        return
-
-    total_score = 0
-    total_max_score = 0
+def answer_on_exam_without_session(networks_to_check, guid, output_file="results.json"):
+    total_score = total_max_score = 0
 
     for network_json, animation_json, requirements_json in networks_to_check:
         network_data = (
@@ -230,7 +225,51 @@ def answer_on_exam_question(session_question_id: str, networks_to_check):
             else requirements_json
         )
 
-        network_data["packets"] = animation_data
+        network_data["packets"] = json.loads(animation_data)
+
+        max_score = calculate_max_score(requirements)
+        score, hints = check_task(requirements, network_data)
+
+        total_score += score
+        total_max_score += max_score
+
+    result = {
+        "guid": guid,
+        "score": total_score,
+        "max_score": total_max_score,
+        "is_correct": total_score == total_max_score,
+        "hints": json.dumps(hints),
+    }
+
+    with open(output_file, "a", encoding="utf-8") as f:
+        f.write(json.dumps(result, ensure_ascii=False) + "\n")
+
+    return result
+
+
+def answer_on_exam_question(session_question_id: str, networks_to_check):
+    session_question = SessionQuestion.query.filter_by(id=session_question_id).first()
+    if not session_question or session_question.question.question_type != 0:
+        return
+
+    total_score = total_max_score = 0
+
+    for network_json, animation_json, requirements_json in networks_to_check:
+        network_data = (
+            json.loads(network_json) if isinstance(network_json, str) else network_json
+        )
+        animation_data = (
+            json.loads(animation_json)
+            if isinstance(animation_json, str)
+            else animation_json
+        )
+        requirements = (
+            json.loads(requirements_json)
+            if isinstance(requirements_json, str)
+            else requirements_json
+        )
+
+        network_data["packets"] = json.loads(animation_data)
 
         max_score = calculate_max_score(requirements)
         score, _ = check_task(requirements, network_data)

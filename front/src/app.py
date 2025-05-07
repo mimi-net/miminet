@@ -13,6 +13,8 @@ from miminet_admin import (
     QuestionView,
     AnswerView,
     QuestionCategoryView,
+    SessionQuestionView,
+    CreateCheckTaskView,
 )
 from miminet_auth import (
     google_callback,
@@ -78,7 +80,14 @@ from quiz.controller.test_controller import (
     get_tests_by_owner_endpoint,
     get_test_endpoint,
 )
-from quiz.entity.entity import Section, Test, Question, Answer, QuestionCategory
+from quiz.entity.entity import (
+    Section,
+    Test,
+    Question,
+    Answer,
+    QuestionCategory,
+    SessionQuestion,
+)
 
 from quiz.controller.image_controller import image_routes
 
@@ -246,6 +255,15 @@ admin.add_view(SectionView(Section, db.session))
 admin.add_view(QuestionView(Question, db.session))
 admin.add_view(AnswerView(Answer, db.session))
 admin.add_view(QuestionCategoryView(QuestionCategory, db.session))
+admin.add_view(SessionQuestionView(SessionQuestion, db.session))
+admin.add_view(
+    CreateCheckTaskView(
+        Network,
+        db.session,
+        name="Создать задачу проверки",
+        endpoint="create_check_task",
+    )
+)
 
 
 @app.route("/")

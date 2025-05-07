@@ -71,7 +71,6 @@ def get_question_by_session_question_id_endpoint():
 
     if result == 404:
         abort(404)
-
     (
         res,
         is_exam,

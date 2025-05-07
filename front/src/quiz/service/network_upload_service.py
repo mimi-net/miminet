@@ -23,6 +23,24 @@ def create_check_task(network: dict, requirements: list[dict], session_question_
     )
 
 
+def create_check_task_json(networks, requirements: list[dict]):
+    for network in networks:
+        prepared_task = prepare_task(network[0], requirements)
+        prepared_task_json = [
+            (json.dumps(net), json.dumps(req), json.dumps(network[1]))
+            for net, req in prepared_task
+        ]
+
+        # send task
+        app.send_task(
+            "tasks.check_task_network",
+            args=[None, prepared_task_json],
+            routing_key="task-checking-routing-key",
+            exchange="task-checking-exchange",
+            exchange_type="direct",
+        )
+
+
 # Unnecessary for task checking: (ping, ping with options, TCP/UDP ping, TCP/UDP server)
 EXCLUDED_JOB_IDS = (1, 2, 3, 4, 200, 201)
 

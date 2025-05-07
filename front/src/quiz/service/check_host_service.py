@@ -162,41 +162,36 @@ def is_private_ip(ip):
 
 def check_different_paths(answer, source_device, target_device):
     hints = []
-    packets = answer["packets"]
+    packets = answer.get("packets", [])
 
-    request_path = []
-    reply_path = []
+    request_edges = []
+    reply_edges = []
 
     for packet in packets:
-        packet_type = packet[0]["config"]["type"]
-        source = packet[0]["config"]["source"]
-        target = packet[0]["config"]["target"]
+        cfg = packet[0].get("config", {})
+        pkt_type = cfg.get("type", "")
+        edge_id = cfg.get("path")
+        src = cfg.get("source")
 
-        if "ICMP echo-request" in packet_type:
-            if not request_path and source == source_device:
-                request_path = [source, target]
-            elif request_path and request_path[-1] == source:
-                request_path.append(target)
+        if "ICMP echo-request" in pkt_type or "IPIP tunnel" in pkt_type:
+            if src == source_device or request_edges:
+                request_edges.append(edge_id)
 
-        elif "ICMP echo-reply" in packet_type:
-            if not reply_path and source == target_device:
-                reply_path = [source, target]
-            elif reply_path and reply_path[-1] == source:
-                reply_path.append(target)
+        elif "ICMP echo-reply" in pkt_type or "IPIP tunnel" in pkt_type:
+            if src == target_device or reply_edges:
+                reply_edges.append(edge_id)
 
-    if not request_path or not reply_path:
-        hints.append("Не удалось найти полный путь для ICMP Echo Request.")
+    if not request_edges:
+        hints.append("Не удалось собрать путь ICMP Echo Request.")
+        return False, hints
+    if not reply_edges:
+        hints.append("Не удалось собрать путь ICMP Echo Reply.")
         return False, hints
 
-    elif not reply_path:
-        hints.append("Не удалось найти полный путь для ICMP Echo Reply.")
-        return False, hints
-
-    if request_path == reply_path[::-1]:
+    if request_edges == reply_edges[::-1]:
         hints.append("Пути ICMP Echo Request и Echo Reply совпадают, хотя не должны.")
         return False, hints
-    else:
-        return True, []
+    return True, []
 
 
 def check_path(answer, device, target, required_path):
@@ -245,6 +240,213 @@ def check_path(answer, device, target, required_path):
             f"Путь до целевого устройства не совпадает с требуемым. Требуемый:{required_path}. А Ваш: {trimmed_actual_path}."
         )
         return False, hints
+
+
+def check_tunnel_echo_request(
+    answer, source_device, target_device, tunnel_start, tunnel_end
+):
+    packets = answer.get("packets", [])
+    hints = []
+
+    if not packets:
+        return False, ["Вы не отправляете запросов по сети."]
+
+    def extract_packet_info(pkt):
+        cfg = pkt[0]["config"]
+        return cfg["type"], cfg["source"], cfg["target"]
+
+    def trace_path(start, end, is_request=True):
+        path = [start]
+        reached = False
+        current = start
+
+        expected_type = "ICMP echo-request" if is_request else "ICMP echo-reply"
+        for pkt in packets:
+            ptype, src, dst = extract_packet_info(pkt)
+            if src != current:
+                continue
+
+            if (
+                expected_type in ptype
+                or "IPIP tunnel" in ptype
+                or "GRE tunnel" in ptype
+            ):
+                path.append(dst)
+                current = dst
+                if current == end:
+                    reached = True
+                    break
+
+        return path, reached
+
+    def tunnel_used_correctly(is_request=True):
+        tunnel_src = tunnel_start if is_request else tunnel_end
+        tunnel_dst = tunnel_end if is_request else tunnel_start
+
+        visited = set()
+        current = tunnel_src
+        max_hops = 20
+        tunnel_type_used = None
+
+        for _ in range(max_hops):
+            found = False
+            for pkt in packets:
+                ptype, src, dst = extract_packet_info(pkt)
+                if src == current and dst not in visited:
+                    if "IPIP tunnel" in ptype:
+                        if tunnel_type_used and tunnel_type_used != "IPIP tunnel":
+                            return False, None
+                        tunnel_type_used = "IPIP tunnel"
+                    elif "GRE tunnel" in ptype:
+                        if tunnel_type_used and tunnel_type_used != "GRE tunnel":
+                            return False, None
+                        tunnel_type_used = "GRE tunnel"
+                    else:
+                        continue
+
+                    visited.add(src)
+                    current = dst
+                    found = True
+                    if current == tunnel_dst:
+                        return True, tunnel_type_used
+                    break
+            if not found:
+                break
+        return False, None
+
+    req_path, req_reached = trace_path(source_device, target_device, is_request=True)
+    rep_path, rep_reached = trace_path(target_device, source_device, is_request=False)
+
+    req_tunnel, req_type = tunnel_used_correctly(is_request=True)
+    rep_tunnel, rep_type = tunnel_used_correctly(is_request=False)
+
+    ok_req = req_reached
+    ok_rep = rep_reached
+    ok_tun = req_tunnel and rep_tunnel and req_type == rep_type and req_type is not None
+
+    if ok_req and ok_rep and ok_tun:
+        return True, []
+
+    if not ok_req:
+        if len(req_path) == 1:
+            hints.append(f"Запрос от {source_device} не стартовал.")
+        else:
+            hints.append(
+                f"Запрос дошёл только до {req_path[-1]}, а не до {target_device}."
+            )
+    if not req_tunnel:
+        hints.append(f"Запрос не прошёл через туннель {tunnel_start}→{tunnel_end}.")
+    if not ok_rep:
+        if len(rep_path) == 1:
+            hints.append(f"Ответ от {target_device} не стартовал.")
+        else:
+            hints.append(
+                f"Ответ дошёл только до {rep_path[-1]}, а не до {source_device}."
+            )
+    if not rep_tunnel:
+        hints.append(f"Ответ не прошёл через туннель {tunnel_end}→{tunnel_start}.")
+    if req_type != rep_type:
+        hints.append("Тип туннеля различается для запроса и ответа.")
+
+    return False, hints
+
+
+def check_vxlan_echo_request(
+    answer, source_device, target_device, tunnel_start, tunnel_end
+):
+    packets = answer.get("packets", [])
+    hints = []
+
+    if not packets:
+        return False, ["Вы не отправляете запросов по сети."]
+
+    def extract_packet_info(pkt):
+        cfg = pkt[0]["config"]
+        return cfg["type"], cfg["source"], cfg["target"]
+
+    def trace_path(start, end, is_request=True):
+        path = [start]
+        reached = False
+        current = start
+
+        expected_type = "ICMP echo-request" if is_request else "ICMP echo-reply"
+        for pkt in packets:
+            ptype, src, dst = extract_packet_info(pkt)
+            if src != current:
+                continue
+
+            if expected_type in ptype or ("UDP" in ptype and "> 4789 in ptype"):
+                path.append(dst)
+                current = dst
+                if current == end:
+                    reached = True
+                    break
+
+        return path, reached
+
+    def tunnel_used_correctly(is_request=True):
+        tunnel_src = tunnel_start if is_request else tunnel_end
+        tunnel_dst = tunnel_end if is_request else tunnel_start
+
+        visited = set()
+        current = tunnel_src
+        max_hops = 20
+        vxlan_used = False
+
+        for _ in range(max_hops):
+            found = False
+            for pkt in packets:
+                ptype, src, dst = extract_packet_info(pkt)
+                if src == current and dst not in visited:
+                    if "UDP" in ptype and "> 4789" in ptype:
+                        vxlan_used = True
+                        visited.add(src)
+                        current = dst
+                        found = True
+                        if current == tunnel_dst:
+                            return True, vxlan_used
+                        break
+            if not found:
+                break
+        return False, vxlan_used
+
+    req_path, req_reached = trace_path(source_device, target_device, is_request=True)
+    rep_path, rep_reached = trace_path(target_device, source_device, is_request=False)
+
+    req_tunnel, req_vxlan = tunnel_used_correctly(is_request=True)
+    rep_tunnel, rep_vxlan = tunnel_used_correctly(is_request=False)
+
+    ok_req = req_reached
+    ok_rep = rep_reached
+    ok_tun = req_tunnel and rep_tunnel and req_vxlan and rep_vxlan
+
+    if ok_req and ok_rep and ok_tun:
+        return True, []
+
+    if not ok_req:
+        if len(req_path) == 1:
+            hints.append(f"Запрос от {source_device} не стартовал.")
+        else:
+            hints.append(
+                f"Запрос дошёл только до {req_path[-1]}, а не до {target_device}."
+            )
+    if not req_tunnel:
+        hints.append(
+            f"Запрос не прошёл через VXLAN-туннель {tunnel_start}→{tunnel_end}."
+        )
+    if not ok_rep:
+        if len(rep_path) == 1:
+            hints.append(f"Ответ от {target_device} не стартовал.")
+        else:
+            hints.append(
+                f"Ответ дошёл только до {rep_path[-1]}, а не до {source_device}."
+            )
+    if not rep_tunnel:
+        hints.append(
+            f"Ответ не прошёл через VXLAN-туннель {tunnel_end}→{tunnel_start}."
+        )
+
+    return False, hints
 
 
 def check_echo_request(answer, source_device, target_device, direction="two-way"):
@@ -321,25 +523,28 @@ def check_no_echo_request(answer, source_device, target_device):
     if not packets:
         return False, ["Вы не отправляете пакетов по сети."]
 
-    request_reached_target = False
+    def has_request_reached():
+        current = source_device
+        for packet in packets:
+            cfg = packet[0].get("config", {})
+            ptype = cfg.get("type", "")
+            src = cfg.get("source")
+            dst = cfg.get("target")
 
-    for packet in packets:
-        config = packet[0]["config"]
-        packet_type = config["type"]
-        source = config["source"]
-        target = config["target"]
+            is_icmp = "ICMP echo-request" in ptype
+            is_ipip = "IPIP tunnel" in ptype
+            is_gre = "GRE tunnel" in ptype
+            is_vxlan = "UDP" in ptype and "> 4789" in ptype
 
-        if (
-            "ICMP echo-request" in packet_type
-            and source == source_device
-            and target == target_device
-        ):
-            request_reached_target = True
-            break
+            if src == current and (is_icmp or is_ipip or is_gre or is_vxlan):
+                current = dst
+                if current == target_device:
+                    return True
+        return False
 
-    if request_reached_target:
+    if has_request_reached():
         hints.append(
-            f"Обнаружен ping от {source_device} к {target_device}, хотя он не должен был проходить"
+            f"Обнаружен ping от {source_device} к {target_device} (включая туннели), хотя он не должен был проходить"
         )
         return False, hints
     else:
@@ -392,5 +597,49 @@ def process_host_command(cmd, answer, device):
                 points_for_host += points
             else:
                 hints.extend(no_echo_hints)
+
+        elif command == "tunnel-echo-request":
+            points = cmd.get("points", 1)
+            tunnel_start = cmd.get("tunnel_start")
+            tunnel_end = cmd.get("tunnel_end")
+
+            result, tunnel_hints = check_tunnel_echo_request(
+                answer, device, target, tunnel_start, tunnel_end
+            )
+
+            if result:
+                points_for_host += points
+            else:
+                hints.extend(tunnel_hints)
+
+            different_paths_points = cmd.get("different_paths")
+            if different_paths_points and result:
+                path_result, path_hints = check_different_paths(answer, device, target)
+                if path_result:
+                    points_for_host += different_paths_points.get("points", 1)
+                else:
+                    hints.extend(path_hints)
+
+        elif command == "vxlan-echo-request":
+            points = cmd.get("points", 1)
+            tunnel_start = cmd.get("tunnel_start")
+            tunnel_end = cmd.get("tunnel_end")
+
+            result, vxlan_hints = check_vxlan_echo_request(
+                answer, device, target, tunnel_start, tunnel_end
+            )
+
+            if result:
+                points_for_host += points
+            else:
+                hints.extend(vxlan_hints)
+
+            different_paths_points = cmd.get("different_paths")
+            if different_paths_points and result:
+                path_result, path_hints = check_different_paths(answer, device, target)
+                if path_result:
+                    points_for_host += different_paths_points.get("points", 1)
+                else:
+                    hints.extend(path_hints)
 
     return points_for_host, hints
