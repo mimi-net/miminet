@@ -351,6 +351,4 @@ def check_task(requirements, answer):
                 total_points += points
                 hints.extend(network_hints)
 
-    logging.info(hints)
-
     return total_points, hints

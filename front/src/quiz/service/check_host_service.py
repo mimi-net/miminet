@@ -19,42 +19,38 @@ def check_subnet_mask(answer, device, target, expected_mask):
         )
         return False, hints
 
-    target_edge = next(
-        (
-            edge["data"]["id"]
-            for edge in edges
-            if (edge["data"]["source"] == device and edge["data"]["target"] == target)
-            or (edge["data"]["source"] == target and edge["data"]["target"] == device)
-        ),
-        None,
-    )
+    target_edges = [
+        edge["data"]["id"]
+        for edge in edges
+        if (edge["data"]["source"] == device and edge["data"]["target"] == target)
+        or (edge["data"]["source"] == target and edge["data"]["target"] == device)
+    ]
 
-    if not target_edge:
+    if not target_edges:
         hints.append(
-            f"Соединение между {device} и {target} отсутствует, проверка маски невозможна."
+            f"Соединения между {device} и {target} отсутствуют, проверка маски невозможна."
         )
         return False, hints
 
-    if not any(
-        interface.get("connect") == target_edge for interface in host_node["interface"]
-    ):
-        hints.append(
-            f"Интерфейс устройства {device} не подключён к {target}, проверка маски невозможна."
-        )
-        return False, hints
-
+    found_any = False
     for interface in host_node["interface"]:
-        edge = interface["connect"]
-
-        if edge == target_edge:
+        edge_id = interface.get("connect")
+        if edge_id in target_edges:
+            found_any = True
             mask = interface.get("netmask")
-
-            if str(mask) == str(expected_mask):
-                return True, []
-            else:
+            if str(mask) != str(expected_mask):
                 hints.append(
-                    f"Подсеть {mask} на интерфейсе устройства {device} не соответствует ожидаемой {expected_mask}."
+                    f"Подсеть {mask} на интерфейсе устройства {device} (соединение с {target}) не соответствует ожидаемой {expected_mask}."
                 )
+
+    if not found_any:
+        hints.append(
+            f"Ни один интерфейс устройства {device} не подключён к {target}, проверка маски невозможна."
+        )
+        return False, hints
+
+    if not hints:
+        return True, []
 
     return False, hints
 
