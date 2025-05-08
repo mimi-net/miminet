@@ -81,8 +81,8 @@ def perform_task_check(session_question_id, data_list):
 
     networks_to_check = []
 
-    if len(data_list[0]) == 3:
-        for network_json, req_json, guid in data_list:
+    if session_question_id is None:
+        for network_json, req_json, modifications_json, guid in data_list:
             try:
                 network_json = (
                     json.loads(network_json)
@@ -92,9 +92,16 @@ def perform_task_check(session_question_id, data_list):
                 req_json = (
                     json.loads(req_json) if isinstance(req_json, str) else req_json
                 )
+                modifications_json = (
+                    json.loads(modifications_json)
+                    if isinstance(modifications_json, str)
+                    else modifications_json
+                )
 
                 animation = create_emulation_task(network_json)
-                networks_to_check.append((network_json, animation, req_json))
+                networks_to_check.append(
+                    (network_json, animation, req_json, modifications_json)
+                )
 
             except Exception as e:
                 logging.error(f"Ошибка при создании задачи: {e}.")
@@ -102,7 +109,7 @@ def perform_task_check(session_question_id, data_list):
         answer_on_exam_without_session(networks_to_check, guid)
 
     else:
-        for network_json, req_json in data_list:
+        for network_json, req_json, modifications_json in data_list:
             try:
                 network_json = (
                     json.loads(network_json)
@@ -112,9 +119,16 @@ def perform_task_check(session_question_id, data_list):
                 req_json = (
                     json.loads(req_json) if isinstance(req_json, str) else req_json
                 )
+                modifications_json = (
+                    json.loads(modifications_json)
+                    if isinstance(modifications_json, str)
+                    else modifications_json
+                )
 
                 animation = create_emulation_task(network_json)
-                networks_to_check.append((network_json, animation, req_json))
+                networks_to_check.append(
+                    (network_json, animation, req_json, modifications_json)
+                )
 
             except Exception as e:
                 logging.error(f"Ошибка при создании задачи: {e}.")

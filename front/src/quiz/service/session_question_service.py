@@ -1,4 +1,5 @@
 import json
+import logging
 from markupsafe import Markup
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -211,7 +212,12 @@ def answer_on_exam_without_session(networks_to_check, guid, output_file="results
     total_score = total_max_score = 0
     hints = []
 
-    for network_json, animation_json, requirements_json in networks_to_check:
+    for (
+        network_json,
+        animation_json,
+        requirements_json,
+        modifications,
+    ) in networks_to_check:
         network_data = (
             json.loads(network_json) if isinstance(network_json, str) else network_json
         )
@@ -225,6 +231,11 @@ def answer_on_exam_without_session(networks_to_check, guid, output_file="results
             if isinstance(requirements_json, str)
             else requirements_json
         )
+        modifications = (
+            json.loads(modifications)
+            if isinstance(modifications, str)
+            else modifications
+        )
 
         network_data["packets"] = json.loads(animation_data)
 
@@ -233,9 +244,17 @@ def answer_on_exam_without_session(networks_to_check, guid, output_file="results
 
         total_score += score
         total_max_score += max_score
+
+        if modifications:
+            prefix = f"Для сети с изменениями {modifications}: "
+            local_hints = [prefix + hint for hint in local_hints]
+
         hints.extend(local_hints)
 
     total_score = max(total_score, 0)
+
+    logging.info(f"Сеть {guid}")
+    logging.info(hints)
 
     result = {
         "guid": guid,
@@ -257,8 +276,14 @@ def answer_on_exam_question(session_question_id: str, networks_to_check):
         return
 
     total_score = total_max_score = 0
+    hints = []
 
-    for network_json, animation_json, requirements_json in networks_to_check:
+    for (
+        network_json,
+        animation_json,
+        requirements_json,
+        modifications,
+    ) in networks_to_check:
         network_data = (
             json.loads(network_json) if isinstance(network_json, str) else network_json
         )
@@ -272,14 +297,29 @@ def answer_on_exam_question(session_question_id: str, networks_to_check):
             if isinstance(requirements_json, str)
             else requirements_json
         )
+        modifications = (
+            json.loads(modifications)
+            if isinstance(modifications, str)
+            else modifications
+        )
 
         network_data["packets"] = json.loads(animation_data)
 
         max_score = calculate_max_score(requirements)
-        score, _ = check_task(requirements, network_data)
+        score, local_hints = check_task(requirements, network_data)
+
+        if modifications:
+            prefix = f"Для сети с изменениями {modifications}: "
+            local_hints = [prefix + hint for hint in local_hints]
 
         total_score += score
         total_max_score += max_score
+        hints.extend(local_hints)
+
+    logging.info(f"Сеть {session_question.network_guid}")
+    logging.info(hints)
+
+    total_score = max(total_score, 0)
 
     session_question.is_correct = total_score == total_max_score
     session_question.score = total_score
