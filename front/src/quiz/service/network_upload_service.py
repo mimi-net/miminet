@@ -10,7 +10,8 @@ def create_check_task(network: dict, requirements: list[dict], session_question_
 
     prepared_task = prepare_task(network, requirements)
     prepared_task_json = [
-        (json.dumps(net), json.dumps(req)) for net, req in prepared_task
+        (json.dumps(net), json.dumps(req), json.dumps(mods))
+        for net, req, mods in prepared_task
     ]
 
     # send task
@@ -27,8 +28,8 @@ def create_check_task_json(networks, requirements: list[dict]):
     for network in networks:
         prepared_task = prepare_task(network[0], requirements)
         prepared_task_json = [
-            (json.dumps(net), json.dumps(req), json.dumps(network[1]))
-            for net, req in prepared_task
+            (json.dumps(net), json.dumps(req), json.dumps(mods), json.dumps(network[1]))
+            for net, req, mods in prepared_task
         ]
 
         # send task
@@ -77,6 +78,8 @@ def get_configured_tasks(schema: Dict[str, Any], scenarios: List[Dict]) -> List[
         scenario_schema = deepcopy(schema)
         scenario_requirements = deepcopy(scenario.get("requirements", {}))
 
+        applied_modifications = []
+
         for modification in modifications:
             modification_keys: List = list(modification.keys())
 
@@ -90,6 +93,27 @@ def get_configured_tasks(schema: Dict[str, Any], scenarios: List[Dict]) -> List[
 
             if modification_name == "remove_edge":
                 edge_id: str = modification_arg["id"]
+
+                edge = next(
+                    (
+                        e
+                        for e in scenario_schema.get("edges", [])
+                        if e.get("data", {}).get("id") == edge_id
+                    ),
+                    None,
+                )
+
+                if edge:
+                    from_node = edge["data"].get("source", "unknown")
+                    to_node = edge["data"].get("target", "unknown")
+                    applied_modifications.append(
+                        {
+                            "remove_edge": {
+                                "id": edge_id,
+                                "between": f"{from_node} ↔ {to_node}",
+                            }
+                        }
+                    )
 
                 # Break edge
                 scenario_schema["edges"] = [
@@ -150,7 +174,7 @@ def get_configured_tasks(schema: Dict[str, Any], scenarios: List[Dict]) -> List[
                     f"Unknown requirements modifier name: {modification_name}."
                 )
 
-        results.append((scenario_schema, scenario_requirements))
+        results.append((scenario_schema, scenario_requirements, applied_modifications))
 
     return results
 
