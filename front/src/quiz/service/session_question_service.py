@@ -236,8 +236,11 @@ def answer_on_exam_without_session(networks_to_check, guid, output_file="results
             if isinstance(modifications, str)
             else modifications
         )
-
-        network_data["packets"] = json.loads(animation_data)
+        network_data["packets"] = (
+            json.loads(animation_data)
+            if isinstance(animation_data, str)
+            else animation_data
+        )
 
         max_score = calculate_max_score(requirements)
         score, local_hints = check_task(requirements, network_data)
@@ -303,7 +306,11 @@ def answer_on_exam_question(session_question_id: str, networks_to_check):
             else modifications
         )
 
-        network_data["packets"] = json.loads(animation_data)
+        network_data["packets"] = (
+            json.loads(animation_data)
+            if isinstance(animation_data, str)
+            else animation_data
+        )
 
         max_score = calculate_max_score(requirements)
         score, local_hints = check_task(requirements, network_data)
