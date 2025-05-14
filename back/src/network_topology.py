@@ -40,7 +40,7 @@ class MiminetTopology(IPTopo):
 
     def __set_network_configuration_time(self, value: int):
         """Set amount of time it takes to properly configure the network (in seconds)."""
-        return max(value, self.__network_configuration_time)
+        self.__network_configuration_time = value
 
     def __handle_node(self, node: Node):
         config: NodeConfig = node.config
@@ -72,7 +72,7 @@ class MiminetTopology(IPTopo):
 
         # Set emulation delay based on STP mode
         if is_rstp_enabled:
-            self.__set_network_configuration_time(5)
+            self.__set_network_configuration_time(7)
         elif is_stp_enabled:
             self.__set_network_configuration_time(33)
 

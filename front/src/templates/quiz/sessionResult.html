@@ -4,72 +4,118 @@
 
 {% block content %}
 <section class="container" style="margin-top: 48px; padding-top: 48px">
-    <div class="row align-items-baseline">
-        <div class="col-auto">
-            <h1 class="mb-0" id="test_name"></h1>
-        </div>
-        <div class="col-auto text-center">
-            <h3 class="mb-0 text-muted" id="section_name"></h3>
-        </div>
+  <div class="row align-items-baseline">
+    <div class="col-auto">
+      <h1 class="mb-0" id="test_name"></h1>
     </div>
+    <div class="col-auto text-center">
+      <h3 class="mb-0 text-muted" id="section_name"></h3>
+    </div>
+  </div>
 
-    <div class="mt-4">
-        <h2 class="mb-3">Результаты теста</h2>
+  <div class="mt-4">
 
-        <div class="row">
-            {% for question in data['results'] %}
-                <div class="card mb-3 h-100">
-                    <div class="card-body d-flex align-items-center">
-                        <div>
-                            <h5 class="card-title">
-                                {% if question['is_correct'] %}
-                                    ✅ {{ question['question_text'] }}
-                                {% else %}
-                                    ❌ {{ question['question_text'] }}
-                                {% endif %}
-                            </h5>
-                            {% if question['max_score'] > 0 %}
-                                <p class="card-text mt-2"><strong>Баллы:</strong> {{ question['score'] }} из {{ question['max_score'] }}</p>
-                            {% else %}
-                                {% if question['is_correct'] %}
-                                    <p class="card-text mt-2"><strong>Баллы:</strong> 1 из 1</p>
-                                {% else %}
-                                    <p class="card-text mt-2"><strong>Баллы:</strong> 0 из 1</p>
-                                {% endif %}
-                            {% endif %}
-                        </div>
-                    </div>
+    {# — Ветка: экзамен и ответы ещё не доступны — #}
+    {% if data.is_exam and not data.answer_available %}
+      
+      {# уведомление о том, когда будут ответы #}
+      {% if data.results_available_from %}
+        <div class="card border-info mb-4 shadow-sm w-100" style="background-color: #f5fbff; border-radius: 1rem;">
+          <div class="card-body">
+            <h5 class="card-title text-info">
+              <i class="bx bx-time-five" style="vertical-align: middle; margin-right: 0.5rem;"></i>
+              Ответы появятся позже
+            </h5>
+            <p class="card-text mb-0" style="font-size: 1.1rem;">
+              Вы завершили экзамен. Результаты станут доступны
+              <strong>{{ data.results_available_from.strftime('%d.%m.%Y %H:%M') }}</strong>.
+            </p>
+          </div>
+        </div>
+      {% else %}
+        <div class="alert alert-info" role="alert">
+          <i class="bx bx-hourglass" style="vertical-align: middle; margin-right: 0.5rem;"></i>
+          Ваши ответы находятся на проверке. Пожалуйста, ожидайте результатов.
+        </div>
+      {% endif %}
+
+      <div class="row">
+        {% for q in data.results if q.network_guid %}
+          <div class="col-12 mb-3">
+            <div class="card">
+              <div class="card-body d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">{{ q.question_text }}</h5>
+                <a href="{{ url_for('web_network') }}?guid={{ q.network_guid }}"
+                   target="_blank"
+                   class="btn btn-outline-primary btn-sm">
+                  Посмотреть мой ответ
+                </a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+    {% else %}
+      <h2 class="mb-4">Результаты теста</h2>
+
+      <div class="row">
+        {% for q in data.results %}
+          <div class="col-12 mb-3">
+            <div class="card">
+              <div class="card-body d-flex justify-content-between align-items-start">
+                <div>
+                  <h5 class="mb-1">
+                    {% if q.is_correct %}✅{% else %}❌{% endif %} {{ q.question_text }}
+                  </h5>
+                  {% if q.max_score == 0 %}
+                    <p class="card-text mb-0"><strong>Ответ на проверке</strong></p>
+                  {% else %}
+                    <p class="card-text mb-0"><strong>Баллы:</strong> {{ q.score }} из {{ q.max_score }}</p>
+                  {% endif %}
                 </div>
-            {% endfor %}
-        </div>
+                {% if q.network_guid %}
+                  <a href="{{ url_for('web_network') }}?guid={{ q.network_guid }}"
+                     target="_blank"
+                     class="btn btn-outline-primary btn-sm">
+                    Посмотреть мой ответ
+                  </a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
 
-        <div class="mt-4">
-            <p class="fs-5">
-                <strong>Тест пройден за:</strong> {{ data['time_spent'] }}
-            </p>
-            <p class="fs-5 mt-2">
-                <strong>Итоговый результат:</strong> {{ data['theory_correct'] + data['practice_results']|sum(attribute='score') }} /
-                {{ data['theory_count'] + data['practice_results']|sum(attribute='max_score') }} баллов
-            </p>
-        </div>
+      <div class="mt-4">
+        <p class="fs-5"><strong>Тест пройден за:</strong> {{ data.time_spent }}</p>
+        <p class="fs-5 mt-2">
+          <strong>Итоговый результат:</strong>
+          {% set total_score = data.theory_correct + data.practice_results|sum(attribute='score') %}
+          {% set total_max = data.theory_count + data.practice_results|sum(attribute='max_score') %}
+          {{ total_score }} / {{ total_max }} баллов
+        </p>
+      </div>
+    {% endif %}
 
-        <div class="d-flex align-items-center text-start mt-4">
-            <button class="btn btn-primary me-3" name="backToTests">
-                Назад к тестам
-            </button>
-        </div>
+    <div class="d-flex align-items-center text-start mt-4">
+      <button class="btn btn-primary me-3" name="backToTests">
+        Назад к тестам
+      </button>
     </div>
+  </div>
 </section>
 
 <script>
-    document.getElementById("test_name").innerHTML = sessionStorage.getItem('test_name');
-    document.getElementById("section_name").innerHTML = sessionStorage.getItem('section_name');
+  document.getElementById("test_name").innerHTML = sessionStorage.getItem('test_name') || '';
+  document.getElementById("section_name").innerHTML = sessionStorage.getItem('section_name') || '';
 
-    document.querySelector('button[name="backToTests"]').addEventListener('click', backToTests);
-
-    function backToTests() {
-        sessionStorage.clear();
-        window.location.href = '/quiz/test/all';
-    }
+  const backBtn = document.querySelector('button[name="backToTests"]');
+  if (backBtn) {
+    backBtn.addEventListener('click', function() {
+      sessionStorage.clear();
+      window.location.href = '/quiz/test/all';
+    });
+  }
 </script>
 {% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="card shadow-lg p-4" style="max-width: 600px; margin-top: 100px;">
+        <div class="card-body text-center">
+            <h1 class="card-title text-danger">Вы не завершили тест</h1>
+            <p class="card-text">Похоже, вы начали тест, но не завершили его.</p>
+            <a class="btn btn-primary mt-3" href="/quiz/test/all">Вернуться к тестам</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

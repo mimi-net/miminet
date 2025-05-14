@@ -1,8 +1,9 @@
 import os
 import shutil
 import uuid
+import logging
+import json
 
-from celery import shared_task
 from sqlalchemy.orm.exc import StaleDataError
 
 from celery_app import (
@@ -14,6 +15,11 @@ from app import app as flask_app
 from miminet_model import Simulate, SimulateLog, db, Network
 from celery.result import AsyncResult, allow_join_result
 from celery.exceptions import TimeoutError
+
+from quiz.service.session_question_service import (
+    answer_on_exam_question,
+    answer_on_exam_without_session,
+)
 
 
 @app.task(bind=True, queue="common-results-queue")
@@ -64,22 +70,81 @@ def save_simulate_result(self, animation, pcaps):
             return
 
 
-@shared_task(queue="task-checking-queue")
-def check_task_network(data_list):
-    """Check network building task and write results to database.
+@app.task(name="tasks.check_task_network", queue="task-checking-queue")
+def perform_task_check(session_question_id, data_list):
+    """Celery task for checking practice tasks. Write results to database.
 
     Args:
+        session_question_id: Id of the current task in the db
         data_list (List[Tuple]): List of tuples (network schema, requirements).
     """
 
-    for net_schema, req in data_list:
-        print(req)
-        send_emulation_task(net_schema)
+    networks_to_check = []
 
-        # ... check logic ...
+    if session_question_id is None:
+        for network_json, req_json, modifications_json, guid in data_list:
+            try:
+                network_json = (
+                    json.loads(network_json)
+                    if isinstance(network_json, str)
+                    else network_json
+                )
+                req_json = (
+                    json.loads(req_json) if isinstance(req_json, str) else req_json
+                )
+                modifications_json = (
+                    json.loads(modifications_json)
+                    if isinstance(modifications_json, str)
+                    else modifications_json
+                )
+
+                animation = create_emulation_task(network_json)
+                networks_to_check.append(
+                    (network_json, animation, req_json, modifications_json)
+                )
+
+            except Exception as e:
+                logging.error(f"Ошибка при создании задачи: {e}.")
+
+        answer_on_exam_without_session(networks_to_check, guid)
+
+    else:
+        for network_json, req_json, modifications_json in data_list:
+            try:
+                network_json = (
+                    json.loads(network_json)
+                    if isinstance(network_json, str)
+                    else network_json
+                )
+                req_json = (
+                    json.loads(req_json) if isinstance(req_json, str) else req_json
+                )
+                modifications_json = (
+                    json.loads(modifications_json)
+                    if isinstance(modifications_json, str)
+                    else modifications_json
+                )
+
+                animation = create_emulation_task(network_json)
+                networks_to_check.append(
+                    (network_json, animation, req_json, modifications_json)
+                )
+
+            except Exception as e:
+                logging.error(f"Ошибка при создании задачи: {e}.")
+
+        with flask_app.app_context():
+            answer_on_exam_question(session_question_id, networks_to_check)
 
 
-def send_emulation_task(net_schema):
+def create_emulation_task(net_schema):
+    if not net_schema.get("jobs"):
+        return []
+
+    net_schema = (
+        json.dumps(net_schema) if not isinstance(net_schema, str) else net_schema
+    )
+
     async_obj = app.send_task(
         "tasks.mininet_worker",
         [net_schema],
@@ -88,20 +153,13 @@ def send_emulation_task(net_schema):
         exchange_type=EXCHANGE_TYPE,
     )
 
-    async_res = AsyncResult(
-        id=async_obj.id,
-        task_name="tasks.mininet_worker",
-        app=app,
-        backend=app.backend,
-    )
+    async_res = AsyncResult(id=async_obj.id, app=app)
 
     try:
-        animation = ""
-
         with allow_join_result():
-            animation, _ = async_res.wait(timeout=60)
+            animation, _ = async_res.wait(timeout=120)
 
-        return animation
+            return animation
     except TimeoutError:
-        # You need to improve the message, perhaps add information about the user or the network name
+        # TODO improve error message (add user info)
         raise Exception(f"""Check task failed!\nNetwork Schema: {net_schema}.""")

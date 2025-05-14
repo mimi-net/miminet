@@ -1,0 +1,18 @@
+{% extends 'admin/master.html' %}
+{% block body %}
+  <div class="container my-4">
+    <h3>Проверка заданий по вопросу</h3>
+    <form method="post">
+      <div class="form-group mb-3">
+        {{ form.question_id.label }}
+        {{ form.question_id(class="form-select") }}
+      </div>
+      <div class="form-group mb-3">
+        {{ form.requirements.label }}
+        {{ form.requirements(class="form-control", rows="8") }}
+      </div>
+      <button type="submit" class="btn btn-primary">Запустить проверку</button>
+      <a href="{{ url_for('.index_view') }}" class="btn btn-secondary">Отмена</a>
+    </form>
+  </div>
+{% endblock %}

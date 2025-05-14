@@ -1,17 +1,37 @@
+import json
+
 from datetime import date
 
-from flask import redirect, url_for
+from flask import request, flash, redirect, url_for
 from flask_admin import AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.fields import QuerySelectField
 from flask_admin.form import Select2Widget
 from flask_admin.model import typefmt
+from flask_admin.actions import action
 from flask_login import current_user
 from markupsafe import Markup
-from wtforms import SelectField, TextAreaField, BooleanField
+from wtforms import (
+    SelectField,
+    TextAreaField,
+    BooleanField,
+    DateTimeField,
+    Form,
+    SubmitField,
+)
 
-from miminet_model import db, User
-from quiz.entity.entity import Test, Section, Question, QuestionCategory
+from quiz.service.network_upload_service import (
+    create_check_task,
+    create_check_task_json,
+)
+from miminet_model import db, User, Network
+from quiz.entity.entity import (
+    Test,
+    Section,
+    Question,
+    QuestionCategory,
+    SessionQuestion,
+)
 
 ADMIN_ROLE_LEVEL = 1
 
@@ -117,6 +137,7 @@ class SectionView(MiminetAdminModelView):
         "description",
         "timer",
         "is_exam",
+        "results_available_from",
         "created_on",
         "created_by_id",
         "meta",
@@ -129,6 +150,7 @@ class SectionView(MiminetAdminModelView):
         "timer": "Время на прохождение (в минутах)",
         "test_id": "Раздел теста",
         "is_exam": "Контрольная работа",
+        "results_available_from": "Открыть результаты с",
         "created_on": "Дата создания",
         "created_by_id": "Автор",
         "meta": "Мета раздел",
@@ -141,6 +163,11 @@ class SectionView(MiminetAdminModelView):
 
     form_extra_fields = {
         "is_exam": BooleanField(default=False),
+        "results_available_from": DateTimeField(
+            label="Дата открытия результатов",
+            format="%d-%m-%Y %H:%M",
+            description="Формат: d-m-Y, H:M. Время в мск. Обратите внимание, что без is_exam, ответы будут доступны в любом случае.",
+        ),
         "test_id": QuerySelectField(
             "Раздел теста",
             query_factory=lambda: Test.query.filter(
@@ -350,3 +377,148 @@ class QuestionCategoryView(MiminetAdminModelView):
     }
 
     pass
+
+
+class CheckByQuestionForm(Form):
+    question_id = SelectField("Вопрос", coerce=int)
+    requirements = TextAreaField("Requirements JSON")
+
+
+class SessionQuestionView(MiminetAdminModelView):
+    list_template = "admin/sessionQuestionList.html"
+
+    can_create = False
+    can_delete = False
+
+    column_list = (
+        "id",
+        "quiz_session_id",
+        "question_id",
+        "question_text",
+        "is_correct",
+        "score",
+        "max_score",
+    )
+
+    column_labels = {
+        "id": "ID записи",
+        "quiz_session_id": "Сессия",
+        "question_id": "Вопрос (ID)",
+        "question_text": "Текст вопроса",
+        "is_correct": "Ответ верный",
+        "score": "Набрано баллов",
+        "max_score": "Максимум",
+    }
+
+    @staticmethod
+    def fmt_question_text(view, context, model, name):
+        q = Question.query.get(model.question_id)
+        return q.text if q else "<вопрос не найден>"
+
+    column_formatters = {
+        "question_text": fmt_question_text,
+    }
+
+    @expose("/")
+    def index_view(self, **kwargs):
+        return super().index_view(**kwargs)
+
+    @action("check_by_question", "Проверить по вопросу", None)
+    def action_dummy(self, ids):
+        return redirect(url_for(".check_by_question_view"))
+
+    @expose("/check-by-question/", methods=["GET", "POST"])
+    def check_by_question_view(self, **kwargs):
+        all_q = db.session.query(Question.id, Question.text).distinct().all()
+        choices = [
+            (q.id, q.text[:50] + "…" if len(q.text) > 50 else q.text) for q in all_q
+        ]
+
+        form = CheckByQuestionForm(request.form)
+        form.question_id.choices = choices
+
+        if request.method == "POST" and form.validate():
+            try:
+                requirements = json.loads(form.requirements.data)
+            except json.JSONDecodeError:
+                flash("Некорректный JSON в requirements.", "error")
+                return self.render("admin/check_by_question.html", form=form)
+
+            sq_entries = (
+                db.session.query(SessionQuestion)
+                .filter(
+                    SessionQuestion.question_id == form.question_id.data,
+                    SessionQuestion.max_score == 0,
+                    SessionQuestion.quiz_session_id.isnot(None),
+                )
+                .all()
+            )
+            if not sq_entries:
+                flash("Нет новых записей для этого вопроса.", "warning")
+                return self.render("admin/check_by_question.html", form=form)
+
+            for sq in sq_entries:
+                nm = Network.query.filter_by(guid=sq.network_guid).first()
+                if not nm:
+                    flash(f"Сеть с GUID {sq.network_guid} не найдена.", "error")
+                    continue
+
+                raw_data = nm.network
+                if isinstance(raw_data, dict):
+                    network = raw_data
+                else:
+                    try:
+                        network = json.loads(raw_data)
+                    except json.JSONDecodeError:
+                        flash(
+                            f"Сеть для записи {sq.id} не может быть прочитана.", "error"
+                        )
+                        continue
+
+                try:
+                    create_check_task(network, requirements, sq.id)
+                except Exception as e:
+                    flash(f"Ошибка при проверке записи {sq.id}: {e}", "error")
+
+            flash(
+                f"Запросы на проверку отправлены для {len(sq_entries)} записей.",
+                "success",
+            )
+            return redirect(url_for(".index_view"))
+
+        return self.render("admin/check_by_question.html", form=form)
+
+
+class CreateCheckTaskForm(Form):
+    guids = TextAreaField("GUID-ы сетей (по одному на строку)")
+    requirements = TextAreaField("Requirements (JSON)")
+    submit = SubmitField("Создать задачу проверки")
+
+
+class CreateCheckTaskView(MiminetAdminModelView):
+    @expose("/", methods=["GET", "POST"])
+    def index(self):
+        form = CreateCheckTaskForm(request.form)
+        if request.method == "POST" and form.validate():
+            try:
+                guids = [
+                    line.strip()
+                    for line in form.guids.data.strip().splitlines()
+                    if line.strip()
+                ]
+
+                networks = []
+                for guid in guids:
+                    network = Network.query.filter(Network.guid == guid).first()
+                    if not network:
+                        raise ValueError(f"Сеть с GUID {guid} не найдена.")
+                    networks.append((json.loads(network.network), guid))
+
+                reqs = json.loads(form.requirements.data)
+                create_check_task_json(networks, reqs)
+                flash("Задача проверки успешно создана.", "success")
+                return redirect(url_for(".index"))
+            except Exception as e:
+                flash(f"Ошибка: {str(e)}", "error")
+
+        return self.render("admin/create_check_task.html", form=form)

@@ -13,6 +13,8 @@ from miminet_admin import (
     QuestionView,
     AnswerView,
     QuestionCategoryView,
+    SessionQuestionView,
+    CreateCheckTaskView,
 )
 from miminet_auth import (
     google_callback,
@@ -66,7 +68,9 @@ from quiz.controller.quiz_session_controller import (
     answer_on_session_question_endpoint,
     session_result_endpoint,
     get_result_by_session_guid_endpoint,
-    upload_network_endpoint,
+    check_network_task_endpoint,
+    finish_old_session_endpoint,
+    get_session_question_json,
 )
 from quiz.controller.section_controller import (
     get_sections_by_test_endpoint,
@@ -76,7 +80,14 @@ from quiz.controller.test_controller import (
     get_tests_by_owner_endpoint,
     get_test_endpoint,
 )
-from quiz.entity.entity import Section, Test, Question, Answer, QuestionCategory
+from quiz.entity.entity import (
+    Section,
+    Test,
+    Question,
+    Answer,
+    QuestionCategory,
+    SessionQuestion,
+)
 
 from quiz.controller.image_controller import image_routes
 
@@ -188,6 +199,10 @@ app.add_url_rule(
 )
 
 app.add_url_rule(
+    "/quiz/session/question/json", methods=["GET"], view_func=get_session_question_json
+)
+
+app.add_url_rule(
     "/quiz/session/start", methods=["POST"], view_func=start_session_endpoint
 )
 app.add_url_rule(
@@ -202,13 +217,16 @@ app.add_url_rule(
 )
 
 app.add_url_rule(
-    "/quiz/session/upload_task_network",
+    "/quiz/session/check_network_task",
     methods=["POST"],
-    view_func=upload_network_endpoint,
+    view_func=check_network_task_endpoint,
 )
 
 app.add_url_rule(
     "/quiz/session/finish", methods=["PUT"], view_func=finish_session_endpoint
+)
+app.add_url_rule(
+    "/quiz/session/finishold", methods=["PUT"], view_func=finish_old_session_endpoint
 )
 app.add_url_rule(
     "/quiz/session/result", methods=["GET"], view_func=session_result_endpoint
@@ -237,6 +255,15 @@ admin.add_view(SectionView(Section, db.session))
 admin.add_view(QuestionView(Question, db.session))
 admin.add_view(AnswerView(Answer, db.session))
 admin.add_view(QuestionCategoryView(QuestionCategory, db.session))
+admin.add_view(SessionQuestionView(SessionQuestion, db.session))
+admin.add_view(
+    CreateCheckTaskView(
+        Network,
+        db.session,
+        name="Создать задачу проверки",
+        endpoint="create_check_task",
+    )
+)
 
 
 @app.route("/")
