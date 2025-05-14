@@ -15,6 +15,7 @@ from quiz.service.session_question_service import (
     handle_exam_answer,
     get_session_question_data,
 )
+from quiz.service.network_upload_service import upload_task_network
 
 # from quiz.service.network_upload_service import create_check_task
 
@@ -25,6 +26,15 @@ def answer_on_session_question_endpoint():
     if res[1] == 404 or res[1] == 403:
         abort(res[1])
     return make_response(json.dumps(res[0].to_dict(), default=str), res[1])
+
+
+# @login_required
+def upload_network_endpoint():
+    res_code = upload_task_network()
+
+    if res_code == 404 or res_code == 403:
+        abort(res_code)
+    return make_response("Network was uploaded!", res_code)
 
 
 @login_required
