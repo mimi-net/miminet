@@ -40,7 +40,7 @@ from miminet_host import (
     save_server_config,
     save_switch_config,
 )
-from miminet_model import Network, db, init_db
+from miminet_model import Network, db, init_db, fix_nonemulated_networks
 from miminet_network import (
     copy_network,
     create_network,
@@ -52,6 +52,8 @@ from miminet_network import (
     upload_network_picture,
     web_network,
     web_network_shared,
+    get_emulation_queue_size,
+    get_last_emulation_time,
 )
 from miminet_shark import mimishark_page
 from miminet_simulation import check_simulation, run_simulation
@@ -149,6 +151,15 @@ app.add_url_rule("/network/copy_network", methods=["POST"], view_func=copy_netwo
 # Simulation
 app.add_url_rule("/run_simulation", methods=["POST"], view_func=run_simulation)
 app.add_url_rule("/check_simulation", methods=["GET"], view_func=check_simulation)
+
+# Emulation queue
+app.add_url_rule(
+    "/emulation_queue/size", methods=["GET"], view_func=get_emulation_queue_size
+)
+app.add_url_rule(
+    "/emulation_queue/time", methods=["GET"], view_func=get_last_emulation_time
+)
+
 
 # Hosts
 app.add_url_rule(
@@ -370,5 +381,7 @@ if __name__ == "__main__":
             insert_test_user(app)
         elif sys.argv[1] == "prod":
             remove_test_user(app)
+
+        fix_nonemulated_networks(app)
     else:
         app.run()
