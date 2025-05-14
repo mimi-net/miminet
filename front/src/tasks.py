@@ -141,7 +141,9 @@ def create_emulation_task(net_schema):
     if not net_schema.get("jobs"):
         return []
 
-    net_schema = json.dumps(net_schema)
+    net_schema = (
+        json.dumps(net_schema) if not isinstance(net_schema, str) else net_schema
+    )
 
     async_obj = app.send_task(
         "tasks.mininet_worker",
@@ -155,7 +157,7 @@ def create_emulation_task(net_schema):
 
     try:
         with allow_join_result():
-            animation, _ = async_res.wait(timeout=60)
+            animation, _ = async_res.wait(timeout=120)
 
             return animation
     except TimeoutError:
