@@ -1,5 +1,7 @@
 import sys
+import os
 from datetime import datetime
+from dotenv import load_dotenv
 
 from flask import Flask, make_response, render_template
 from flask_admin import Admin
@@ -98,10 +100,12 @@ app = Flask(
 )
 
 # SQLAlchimy config
-POSTGRES_HOST = "172.18.0.4"
-POSTGRES_USER = "postgres"
-POSTGRES_PASSWORD = "my_postgres"
-POSTGRES_DB_NAME = "miminet"
+load_dotenv()
+
+POSTGRES_HOST = os.getenv("POSTGRES_HOST")
+POSTGRES_USER = os.getenv("POSTGRES_DEFAULT_USER")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_DEFAULT_PASSWORD")
+POSTGRES_DB_NAME = os.getenv("POSTGRES_DATABASE_NAME")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = (
     f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB_NAME}"
