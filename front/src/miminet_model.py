@@ -22,7 +22,7 @@ db = SQLAlchemy(metadata=metadata)
 
 
 class User(db.Model, UserMixin):  # type:ignore[name-defined]
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, unique=True, autoincrement=True)
 
     role = db.Column(db.Integer, default=0, nullable=False)
 
@@ -39,7 +39,7 @@ class User(db.Model, UserMixin):  # type:ignore[name-defined]
 
 
 class Network(db.Model):  # type:ignore[name-defined]
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     author_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
     guid = db.Column(db.String(512), nullable=False, unique=True)
@@ -58,7 +58,7 @@ class Network(db.Model):  # type:ignore[name-defined]
 
 
 class Simulate(db.Model):  # type:ignore[name-defined]
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     network_id = db.Column(db.Integer, db.ForeignKey("network.id"), nullable=False)
     task_guid = db.Column(db.String(512), nullable=True, default="")
     # Do we finish? (False - new, True - simulation is finished)

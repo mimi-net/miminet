@@ -51,3 +51,4 @@ python-dotenv==1.1.0
 wtforms>=2.3.3, <3.1.0
 jsonschema==4.23.0
 Flask-Admin==1.6.1
+psycopg2-binary==2.9.10

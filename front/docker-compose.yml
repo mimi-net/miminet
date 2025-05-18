@@ -86,6 +86,7 @@ services:
       restart: unless-stopped
       volumes:
         - pgdata:/var/lib/postgresql/data/pgdata
+        - databases:/app/instance
       networks:
         miminet_network:
           ipv4_address: 172.18.0.4

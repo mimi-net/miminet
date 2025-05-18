@@ -537,7 +537,7 @@ def get_last_emulation_time():
 @login_required
 def get_emulation_queue_size():
     """Answer with current emulation queue size filtered by emulation time."""
-    time_filter_req: str = request.args.get("time-filter", type=str)
+    time_filter_req: str = request.args.get("time-filter", type=str).replace(" ", "+")
     time_filter: datetime.datetime = datetime.datetime.fromisoformat(time_filter_req)
 
     if not time_filter:
