@@ -546,7 +546,7 @@ def get_emulation_queue_size():
         )
 
     emulated_networks_count = (
-        SimulateLog.query.filter(SimulateLog.ready == 0)
+        SimulateLog.query.filter(not SimulateLog.ready)
         .filter(SimulateLog.simulate_start <= time_filter)
         .count()
     )

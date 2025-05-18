@@ -1,16 +1,13 @@
-import shutil
 from os import urandom
-from pathlib import Path
 
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from miminet_config import (
-    SQLITE_DATABASE_BACKUP_NAME,
-    SQLITE_DATABASE_NAME,
     make_empty_network,
 )
 from sqlalchemy import MetaData
 from werkzeug.security import generate_password_hash
+import psycopg2
 
 convention = {
     "ix": "ix_%(column_0_label)s",
@@ -45,7 +42,7 @@ class Network(db.Model):  # type:ignore[name-defined]
     id = db.Column(db.Integer, primary_key=True)
     author_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
-    guid = db.Column(db.String(512), nullable=False)
+    guid = db.Column(db.String(512), nullable=False, unique=True)
     title = db.Column(db.String(1024), default="Новая сеть", nullable=False)
 
     description = db.Column(db.String(4096), default="", nullable=True)
@@ -84,40 +81,55 @@ class SimulateLog(db.Model):  # type:ignore[name-defined]
     ready = db.Column(db.Boolean, default=False, nullable=False)
 
 
-def fix_nonemulated_networks(app):
-    """
-    Some networks can be marked as non-emulated in the database, we should fix them.
-    """
-    with app.app_context():
-        SimulateLog.query.filter(SimulateLog.ready == 0).update({"ready": 1})
-        db.session.commit()
+def ensure_db_exists(host, user, password, target_db):
+    """Check if the target database exists."""
+    try:
+        with psycopg2.connect(
+            dbname="postgres", user=user, password=password, host=host, port=5432
+        ) as conn:
+            print(f"[✓] Checking if database '{target_db}' exists...")
+            conn.autocommit = True
+
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT 1 FROM pg_database WHERE datname = %s", (target_db,)
+                )
+
+                if not cur.fetchone():
+                    print(f"[!] Database '{target_db}' not found. Creating...")
+                    cur.execute(f"CREATE DATABASE {target_db}")
+                    return False
+                else:
+                    print(f"[Ok] Database '{target_db}' exists.")
+                    return True
+    except Exception as e:
+        print(f"[X] Error ensuring database exists: {e}")
+        raise
 
 
 def init_db(app):
-    # Data
-    users = []
-
-    # Check if db file already exists. If so, backup it
-    db_file = Path(SQLITE_DATABASE_NAME)
-    if db_file.is_file():
-        shutil.copyfile(SQLITE_DATABASE_NAME, SQLITE_DATABASE_BACKUP_NAME)
-
     # Init DB
     with app.app_context():
-        print("Create DB: " + app.config["SQLALCHEMY_DATABASE_URI"])
-        db.session.commit()  # https://stackoverflow.com/questions/24289808/drop-all-freezes-in-flask-with-sqlalchemy
-        db.drop_all()
-        db.create_all()
-
-    # Create users
-    print("Create users")
-    for user in users:
-        u = User(
-            email=user["email"],
-            password_hash=generate_password_hash(urandom(16).hex()),
-            nick=user["nick"],
-        )
-
-        with app.app_context():
-            db.session.add(u)
+        try:
+            # Some networks can be marked as non-emulated in the database, we should fix them.
+            print("[!] Fix nonemulated networks...")
+            SimulateLog.query.filter(not SimulateLog.ready).update({"ready": True})
             db.session.commit()
+        except Exception:
+            print("[!] Database not found. Creating...")
+            db.session.commit()  # https://stackoverflow.com/questions/24289808/drop-all-freezes-in-flask-with-sqlalchemy
+            db.drop_all()
+            db.create_all()
+
+            print("[!] Create users...")
+            users = []
+
+            for user in users:
+                u = User(
+                    email=user["email"],
+                    password_hash=generate_password_hash(urandom(16).hex()),
+                    nick=user["nick"],
+                )
+
+                db.session.add(u)
+                db.session.commit()
