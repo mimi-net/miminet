@@ -16,6 +16,7 @@ from flask_login import current_user, login_required
 from miminet_config import check_image_with_pil
 from miminet_model import Network, Simulate, db, SimulateLog
 import datetime
+from sqlalchemy import not_
 
 
 @login_required
@@ -546,7 +547,7 @@ def get_emulation_queue_size():
         )
 
     emulated_networks_count = (
-        SimulateLog.query.filter(not SimulateLog.ready)
+        SimulateLog.query.filter(not_(SimulateLog.ready))
         .filter(SimulateLog.simulate_start <= time_filter)
         .count()
     )
