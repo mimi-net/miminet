@@ -291,14 +291,14 @@ def vk_callback():
     if "error" in access_token_json:
         return redirect(url_for("login_index"))
 
-    vk_id = access_token_json.get("user_id")
+    vk_id = str(access_token_json.get("user_id"))
     access_token = access_token_json.get("access_token")
     vk_email = access_token_json.get("email")
 
     # Get user name
     response = requests.get(
         "https://api.vk.com/method/users.get?user_ids="
-        + str(vk_id)
+        + vk_id
         + "&fields=photo_100&access_token="
         + str(access_token)
         + "&v=5.130"

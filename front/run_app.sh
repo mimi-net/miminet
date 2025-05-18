@@ -1,8 +1,4 @@
 #!/bin/sh
-# Check if the database file exists
-if [ ! -f /app/instance/miminet.db ]; then
-   python3 app.py init
-fi
 
 # Use default 'prod' if MODE is not set
 MODE="${MODE:-prod}"
