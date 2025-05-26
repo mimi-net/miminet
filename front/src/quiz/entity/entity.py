@@ -1,23 +1,23 @@
 import json
 import uuid
 
-from sqlalchemy import types, func
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import func, BigInteger, Text, Boolean, TIMESTAMP, ForeignKey
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import declared_attr
-from sqlalchemy.types import TypeDecorator, CHAR
+from sqlalchemy.types import TypeDecorator
 
 from miminet_model import db
 
 
 class GUID(TypeDecorator):
-    impl = CHAR
+    impl = Text
     cache_ok = True
 
     def load_dialect_impl(self, dialect):
         if dialect.name == "postgresql":
-            return dialect.type_descriptor(UUID())
+            return dialect.type_descriptor(JSONB())
         else:
-            return dialect.type_descriptor(CHAR(32))
+            return dialect.type_descriptor(Text())
 
     def process_bind_param(self, value, dialect):
         if value is None:
@@ -44,7 +44,7 @@ class Json(TypeDecorator):
     def python_type(self):
         return object
 
-    impl = types.String
+    impl = Text
 
     def process_bind_param(self, value, dialect):
         return json.dumps(value)
@@ -62,20 +62,22 @@ class Json(TypeDecorator):
 class IdMixin(object):
     __table_args__ = ({"extend_existing": True},)
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(BigInteger, primary_key=True)
 
 
 class SoftDeleteMixin(object):
     __table_args__ = ({"extend_existing": True},)
 
-    is_deleted = db.Column(db.Boolean, default=False)
+    is_deleted = db.Column(Boolean, default=False)
 
 
 class TimeMixin(object):
     __table_args__ = ({"extend_existing": True},)
 
-    created_on = db.Column(db.DateTime, default=func.now())
-    updated_on = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
+    created_on = db.Column(TIMESTAMP(timezone=True), default=func.now())
+    updated_on = db.Column(
+        TIMESTAMP(timezone=True), default=func.now(), onupdate=func.now()
+    )
 
 
 class CreatedByMixin(object):
@@ -83,7 +85,7 @@ class CreatedByMixin(object):
 
     @declared_attr
     def created_by_id(cls):
-        return db.Column("created_by_id", db.ForeignKey("user.id"))
+        return db.Column("created_by_id", ForeignKey("user.id"))
 
     @declared_attr
     def created_by_user(cls):
@@ -99,10 +101,10 @@ class Test(
 ):
     __tablename__ = "test"
 
-    name = db.Column(db.String(512), default="Название теста")
-    description = db.Column(db.String(512), default="")
-    is_ready = db.Column(db.Boolean, default=False)
-    is_retakeable = db.Column(db.Boolean, default=False)
+    name = db.Column(Text, default="Название теста")
+    description = db.Column(Text, default="")
+    is_ready = db.Column(Boolean, default=False)
+    is_retakeable = db.Column(Boolean, default=False)
 
     sections = db.relationship("Section", back_populates="test")
 
@@ -122,13 +124,13 @@ class Section(
 ):
     __tablename__ = "section"
 
-    name = db.Column(db.String(512), default="Название раздела")
-    description = db.Column(db.String(512), default="")
-    timer = db.Column(db.Integer, default=30)
-    test_id = db.Column(db.Integer, db.ForeignKey("test.id"))
-    is_exam = db.Column(db.Boolean, default=False)
-    meta_description = db.Column(db.String(512), default="")
-    results_available_from = db.Column(db.DateTime, nullable=True)
+    name = db.Column(Text, default="Название раздела")
+    description = db.Column(Text, default="")
+    timer = db.Column(BigInteger, default=30)
+    test_id = db.Column(BigInteger, ForeignKey("test.id"))
+    is_exam = db.Column(Boolean, default=False)
+    meta_description = db.Column(Text, default="")
+    results_available_from = db.Column(TIMESTAMP(timezone=True), nullable=True)
 
     test = db.relationship("Test", back_populates="sections")
     questions = db.relationship("Question", back_populates="section")
@@ -145,9 +147,9 @@ class Section(
 
 class QuestionImage(db.Model):  # type:ignore[name-defined]
     __tablename__ = "question_image"
-    id = db.Column(db.Integer, primary_key=True)
-    question_id = db.Column(db.Integer, db.ForeignKey("question.id"))
-    file_path = db.Column(db.String(1024))
+    id = db.Column(BigInteger, primary_key=True)
+    question_id = db.Column(BigInteger, ForeignKey("question.id"))
+    file_path = db.Column(Text)
 
     question = db.relationship("Question", back_populates="images")
 
@@ -161,16 +163,16 @@ class Question(
 ):
     __tablename__ = "question"
 
-    text = db.Column(db.String(1024), default="", nullable=False)
+    text = db.Column(Text, default="", nullable=False)
 
     # 0 -- practice
     # 1 -- variable
     # 2 -- sorting
     # 3 -- matching
-    question_type = db.Column(db.Integer, default=1, nullable=False)
-    section_id = db.Column(db.Integer, db.ForeignKey(Section.id))
+    question_type = db.Column(BigInteger, default=1, nullable=False)
+    section_id = db.Column(BigInteger, ForeignKey(Section.id))
 
-    explanation = db.Column(db.String(512), default="")
+    explanation = db.Column(Text, default="")
 
     section = db.relationship("Section", uselist=False, back_populates="questions")
 
@@ -182,7 +184,7 @@ class Question(
     answers = db.relationship("Answer", back_populates="question")
     images = db.relationship("QuestionImage", back_populates="question")
 
-    category_id = db.Column(db.Integer, db.ForeignKey("question_category.id"))
+    category_id = db.Column(BigInteger, ForeignKey("question_category.id"))
 
     __table_args__ = (
         db.Index("question_section_id_is_deleted_ind", "section_id", "is_deleted"),
@@ -198,10 +200,10 @@ class QuizSession(
 ):
     __tablename__ = "quiz_session"
 
-    guid = db.Column(db.String(512), default=lambda: str(uuid.uuid4()))
+    guid = db.Column(Text, default=lambda: str(uuid.uuid4()))
 
-    section_id = db.Column(db.Integer, db.ForeignKey(Section.id))
-    finished_at = db.Column(db.DateTime)
+    section_id = db.Column(BigInteger, ForeignKey(Section.id))
+    finished_at = db.Column(TIMESTAMP(timezone=True))
 
     section = db.relationship("Section", back_populates="quiz_sessions")
     sessions = db.relationship("SessionQuestion", back_populates="quiz_session")
@@ -216,13 +218,13 @@ class SessionQuestion(
 ):
     __tablename__ = "session_question"
 
-    quiz_session_id = db.Column(db.Integer, db.ForeignKey(QuizSession.id))
-    question_id = db.Column(db.Integer, db.ForeignKey(Question.id))
-    is_correct = db.Column(db.Boolean)
-    score = db.Column(db.Integer, default=0)
-    max_score = db.Column(db.Integer, default=0)
+    quiz_session_id = db.Column(BigInteger, ForeignKey(QuizSession.id))
+    question_id = db.Column(BigInteger, ForeignKey(Question.id))
+    is_correct = db.Column(Boolean)
+    score = db.Column(BigInteger, default=0)
+    max_score = db.Column(BigInteger, default=0)
 
-    network_guid = db.Column(db.String(512), nullable=True)
+    network_guid = db.Column(Text, nullable=True)
 
     quiz_session = db.relationship("QuizSession", back_populates="sessions")
     question = db.relationship("Question", back_populates="session_questions")
@@ -237,13 +239,13 @@ class Answer(
 ):
     __tablename__ = "answer"
 
-    variant = db.Column(db.String(512), default="", nullable=False)
-    is_correct = db.Column(db.Boolean, default=False)
-    position = db.Column(db.Integer, nullable=True)
-    left = db.Column(db.String(512), default="", nullable=True)
-    right = db.Column(db.String(512), default="", nullable=True)
+    variant = db.Column(Text, default="", nullable=False)
+    is_correct = db.Column(Boolean, default=False)
+    position = db.Column(BigInteger, nullable=True)
+    left = db.Column(Text, default="", nullable=True)
+    right = db.Column(Text, default="", nullable=True)
 
-    question_id = db.Column(db.Integer, db.ForeignKey(Question.id))
+    question_id = db.Column(BigInteger, ForeignKey(Question.id))
 
     question = db.relationship("Question", back_populates="answers")
 
@@ -257,15 +259,15 @@ class PracticeQuestion(
 ):
     __tablename__ = "practice_question"
 
-    id = db.Column(db.Integer, db.ForeignKey("question.id"), primary_key=True)
-    start_configuration = db.Column(db.String(512), db.ForeignKey("network.guid"))
+    id = db.Column(BigInteger, ForeignKey("question.id"), primary_key=True)
+    start_configuration = db.Column(Text, ForeignKey("network.guid"))
 
-    description = db.Column(db.String(512), default="")
-    available_host = db.Column(db.Integer, default=0)
-    available_l2_switch = db.Column(db.Integer, default=0)
-    available_l1_hub = db.Column(db.Integer, default=0)
-    available_l3_router = db.Column(db.Integer, default=0)
-    available_server = db.Column(db.Integer, default=0)
+    description = db.Column(Text, default="")
+    available_host = db.Column(BigInteger, default=0)
+    available_l2_switch = db.Column(BigInteger, default=0)
+    available_l1_hub = db.Column(BigInteger, default=0)
+    available_l3_router = db.Column(BigInteger, default=0)
+    available_server = db.Column(BigInteger, default=0)
     requirements = db.Column(db.JSON, default={})
 
     question = db.relationship(
@@ -275,8 +277,8 @@ class PracticeQuestion(
 
 # Table for question categories.
 class QuestionCategory(db.Model):  # type:ignore[name-defined]
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(1024), nullable=False, default="Тестовая категория")
+    id = db.Column(BigInteger, primary_key=True)
+    name = db.Column(Text, nullable=False, default="Тестовая категория")
 
     def __repr__(self):
         return self.id
