@@ -2,7 +2,7 @@ import json
 import uuid
 
 from sqlalchemy import func, BigInteger, Text, Boolean, TIMESTAMP, ForeignKey
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import declared_attr
 from sqlalchemy.types import TypeDecorator
 
@@ -15,7 +15,7 @@ class GUID(TypeDecorator):
 
     def load_dialect_impl(self, dialect):
         if dialect.name == "postgresql":
-            return dialect.type_descriptor(JSONB())
+            return dialect.type_descriptor(UUID())
         else:
             return dialect.type_descriptor(Text())
 
