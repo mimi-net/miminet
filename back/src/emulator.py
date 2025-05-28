@@ -24,7 +24,7 @@ def emulate(
     """
 
     setLogLevel("info")
-    print(f"{network=}")
+
     if len(network.jobs) == 0:
         return [], []
 
