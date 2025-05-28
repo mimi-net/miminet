@@ -3,6 +3,10 @@
 {% block description %}Сетевой тренажер для обучения компьютерным сетям{% endblock %}
 
 {% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
 <section class="container" style="margin-top: 48px; padding-top: 48px">
   <div class="row align-items-baseline">
     <div class="col-auto">
@@ -14,11 +18,7 @@
   </div>
 
   <div class="mt-4">
-
-    {# — Ветка: экзамен и ответы ещё не доступны — #}
     {% if data.is_exam and not data.answer_available %}
-      
-      {# уведомление о том, когда будут ответы #}
       {% if data.results_available_from %}
         <div class="card border-info mb-4 shadow-sm w-100" style="background-color: #f5fbff; border-radius: 1rem;">
           <div class="card-body">
@@ -44,7 +44,7 @@
           <div class="col-12 mb-3">
             <div class="card">
               <div class="card-body d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">{{ q.question_text }}</h5>
+                <h5 class="mb-0 markdown-content">{{ q.question_text }}</h5>
                 <a href="{{ url_for('web_network') }}?guid={{ q.network_guid }}"
                    target="_blank"
                    class="btn btn-outline-primary btn-sm">
@@ -66,7 +66,11 @@
               <div class="card-body d-flex justify-content-between align-items-start">
                 <div>
                   <h5 class="mb-1">
-                    {% if q.is_correct %}✅{% else %}❌{% endif %} {{ q.question_text }}
+                    {% if q.max_score == 0 %} ⏳
+                    {% elif q.score == q.max_score %}✅
+                    {% elif (q.score == 0) and (q.max_score != 0) %} ❌ 
+                    {% else %} ⭕ {% endif %} 
+                    <span class="markdown-content">{{ q.question_text }}</span>
                   </h5>
                   {% if q.max_score == 0 %}
                     <p class="card-text mb-0"><strong>Ответ на проверке</strong></p>
@@ -107,6 +111,25 @@
 </section>
 
 <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const converter = new showdown.Converter({
+      tables: true,
+      tasklists: true,
+      strikethrough: true,
+      simpleLineBreaks: true
+    });
+
+  document.querySelectorAll('.markdown-content').forEach(el => {
+    const markdown = el.textContent;
+    let html = converter.makeHtml(markdown);
+    html = html.replace(/^<p>|<\/p>$/g, '');
+    
+    el.innerHTML = html;
+  });
+
+    hljs.highlightAll();
+  });
+
   document.getElementById("test_name").innerHTML = sessionStorage.getItem('test_name') || '';
   document.getElementById("section_name").innerHTML = sessionStorage.getItem('section_name') || '';
 
