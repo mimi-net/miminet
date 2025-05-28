@@ -76,7 +76,7 @@ function RunAndWaitSimulation(network_guid) {
     })
 }
 
-function getExamAnswer() {
+function getAnswer() {
     switch (questionType) {
         case 'variable':
             const checked = $('input.form-check-input:checked');
@@ -110,55 +110,6 @@ function getExamAnswer() {
                 dictionary[index] = value;
             });
             return dictionary;
-    }
-}
-
-async function getAnswer() {
-    if (questionType !== "practice") {
-        switch (questionType) {
-            case 'variable':
-                const checked = $('input.form-check-input:checked');
-                if ($('input[type=radio].form-check-input').length !== 0) {
-                    return [{'variant': checked.siblings('label').text()}];
-                }
-                return checked.map(function () {
-                    return {'variant': $(this).siblings('label').text()};
-                }).get();
-            case 'matching':
-                const leftSide = $('#sortContainer div').map(function () {
-                    return $(this).text();
-                }).get();
-                const rightSide = $('#rightSide div').map(function () {
-                    return $(this).text();
-                }).get();
-                let resultArray = [];
-                leftSide.forEach((leftValue, index) => {
-                    resultArray.push({
-                        "left": leftValue,
-                        "right": rightSide[index]
-                    });
-                });
-                return resultArray;
-            case 'sorting':
-                let sortableArray = $('#sortContainer div').map(function () {
-                    return $(this).text();
-                }).get();
-                let dictionary = {};
-                sortableArray.forEach((value, index) => {
-                    dictionary[index] = value;
-                });
-                return dictionary;
-        }
-    }
-    if (questionType === "practice") {
-        // simulate and get packets
-        if (!jobs.length) {
-            $('#noJobsModal').modal('toggle');
-            return;
-        }
-
-        await RunAndWaitSimulation(network_guid).catch((error) => console.log(error))
-        return {'nodes': nodes, 'edges': edges, 'packets': packets}
     }
 }
 
@@ -311,7 +262,7 @@ function answerExamQuestion() {
     if (questionType === "practice") {
         answer = network_guid;
     } else {
-        answer = getExamAnswer();
+        answer = getAnswer();
     }
 
     fetch(answerExamQuestionURL + '?id=' + questionId, {
@@ -352,7 +303,14 @@ async function answerQuestion() {
     answerButton.textContent = "Проверка...";
     answerButton.disabled = true;
 
-    const answer = await getAnswer();
+    let answer;
+    const safe_network_guid = typeof network_guid !== 'undefined' ? network_guid : null;
+
+    if (questionType === "practice") {
+        answer = safe_network_guid;
+    } else {
+        answer = getAnswer();
+    }
 
     if (!answer) {
         if (playerDiv) {
@@ -364,17 +322,12 @@ async function answerQuestion() {
         return;
     }
 
-    const safe_network_guid = typeof network_guid !== 'undefined' ? network_guid : null;
-
     fetch(answerQuestionURL + '?id=' + questionId, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ 
-            answer, 
-            network_guid: safe_network_guid 
-        })
+        body: JSON.stringify({ answer })
     })
     .then(response => response.json())
     .then(data => {

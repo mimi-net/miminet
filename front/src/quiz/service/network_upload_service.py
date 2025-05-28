@@ -92,35 +92,79 @@ def get_configured_tasks(schema: Dict[str, Any], scenarios: List[Dict]) -> List[
             modification_arg: Dict[str, str] = modification[modification_name]
 
             if modification_name == "remove_edge":
-                edge_id: str = modification_arg["id"]
+                edge_id = modification_arg.get("id")
+                from_node = modification_arg.get("from")
+                to_node = modification_arg.get("to")
 
-                edge = next(
-                    (
-                        e
-                        for e in scenario_schema.get("edges", [])
-                        if e.get("data", {}).get("id") == edge_id
-                    ),
-                    None,
-                )
+                if edge_id:
+                    edge = next(
+                        (
+                            e
+                            for e in scenario_schema.get("edges", [])
+                            if e.get("data", {}).get("id") == edge_id
+                        ),
+                        None,
+                    )
 
-                if edge:
-                    from_node = edge["data"].get("source", "unknown")
-                    to_node = edge["data"].get("target", "unknown")
+                    if edge:
+                        from_node = edge["data"].get("source", "unknown")
+                        to_node = edge["data"].get("target", "unknown")
+                        applied_modifications.append(
+                            {
+                                "remove_edge": {
+                                    "id": edge_id or "unknown",
+                                    "between": f"{from_node} ↔ {to_node}",
+                                }
+                            }
+                        )
+
+                    scenario_schema["edges"] = [
+                        edge
+                        for edge in scenario_schema.get("edges", [])
+                        if edge.get("data", {}).get("id") != edge_id
+                    ]
+
+                elif from_node and to_node:
+                    matching_edges = [
+                        edge
+                        for edge in scenario_schema.get("edges", [])
+                        if (
+                            edge.get("data", {}).get("source") == from_node
+                            and edge.get("data", {}).get("target") == to_node
+                        )
+                        or (
+                            edge.get("data", {}).get("source") == to_node
+                            and edge.get("data", {}).get("target") == from_node
+                        )
+                    ]
+
+                    if not matching_edges:
+                        raise ValueError(
+                            f"No edge found between '{from_node}' and '{to_node}'."
+                        )
+
+                    edge = matching_edges[0]
+                    edge_id = edge["data"].get("id")
+
                     applied_modifications.append(
                         {
                             "remove_edge": {
-                                "id": edge_id,
+                                "id": edge_id or "unknown",
                                 "between": f"{from_node} ↔ {to_node}",
                             }
                         }
                     )
 
-                # Break edge
-                scenario_schema["edges"] = [
-                    edge
-                    for edge in scenario_schema.get("edges", [])
-                    if edge.get("data", {}).get("id") != edge_id
-                ]
+                    scenario_schema["edges"] = [
+                        e
+                        for e in scenario_schema.get("edges", [])
+                        if e.get("data", {}).get("id") != edge_id
+                    ]
+
+                else:
+                    raise ValueError(
+                        "Either 'id' or both 'from' and 'to' must be provided for remove_edge."
+                    )
 
             elif modification_name == "add_ping":
                 from_host_name = modification_arg.get("from")
