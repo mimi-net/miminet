@@ -112,7 +112,7 @@ def get_configured_tasks(schema: Dict[str, Any], scenarios: List[Dict]) -> List[
                         applied_modifications.append(
                             {
                                 "remove_edge": {
-                                    "id": edge_id,
+                                    "id": edge_id or "unknown",
                                     "between": f"{from_node} ↔ {to_node}",
                                 }
                             }
@@ -149,7 +149,7 @@ def get_configured_tasks(schema: Dict[str, Any], scenarios: List[Dict]) -> List[
                     applied_modifications.append(
                         {
                             "remove_edge": {
-                                "id": edge_id,
+                                "id": edge_id or "unknown",
                                 "between": f"{from_node} ↔ {to_node}",
                             }
                         }
