@@ -1279,6 +1279,56 @@ const CheckSimulation = function (simulation_id)
     });
 }
 
+
+const InsertWaitingTime = function ()
+{
+    // Get last emulation task time
+    // and send request to get count of emulating networks before this time
+    $.ajax({
+        type: 'GET',
+        url: 'emulation_queue/time',
+        data: '',
+        success: function(data) {
+            // Run helper function with time param
+            InsertWaitingTimeHelper(data.time)
+        },
+        error: function(err) {
+            console.error("Failed to fetch queue time:", err);
+        },
+        contentType: "application/json",
+        dataType: 'json'
+    });
+}
+
+const InsertWaitingTimeHelper = function(time_filter) {
+    // Insert field with queue size
+    $.ajax({
+        type: 'GET',
+        url: 'emulation_queue/size?time-filter=' + time_filter.toString(),
+        data: '',
+        success: function(data) {
+            const queue_size = parseInt(data.size);
+
+            if ($('#NetworkPlayerLabel').text().startsWith("Шаг:")) {
+                return;
+            } else if (queue_size <= 1) {
+                $('#NetworkPlayerLabel').text("Ожидание 10-15 сек.");
+            } else {
+                $('#NetworkPlayerLabel').text(`Место в очереди ${queue_size}`);
+
+                // Update waiting time
+                setTimeout(() => InsertWaitingTimeHelper(time_filter), 500);
+            }
+
+        },
+        error: function(err) {
+            console.error("Failed to fetch queue size:", err);
+        },
+        contentType: "application/json",
+        dataType: 'json'
+    });
+}
+
 // Update host configuration
 const UpdateHostConfiguration = function (data, host_id)
 {
@@ -1837,7 +1887,7 @@ const SetNetworkPlayerState = function(simultaion_id)
         $('#NetworkPlayer').empty();
         $('#PacketSliderInput').hide();
         $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" disabled>Эмулируется...</button>');
-        $('#NetworkPlayerLabel').text("Ожидание 10-30 сек.");
+        InsertWaitingTime()
         CheckSimulation(simultaion_id);
         return;
     }
@@ -1847,7 +1897,7 @@ const SetNetworkPlayerState = function(simultaion_id)
     $('#NetworkPlayer').empty();
     $('#PacketSliderInput').hide();
     $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton">Эмулировать</button>');
-    $('#NetworkPlayerLabel').text("Ожидание 10-30 сек.");
+    $('#NetworkPlayerLabel').empty();
 
     $('#NetworkEmulateButton').click(function() {
 
@@ -1873,7 +1923,7 @@ const SetNetworkPlayerState = function(simultaion_id)
 
         $('#NetworkPlayer').empty();
         $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" disabled>Эмулируется...</button>');
-        $('#NetworkPlayerLabel').text("Ожидание 10-30 сек.");
+        InsertWaitingTime();
         return;
     });
 
@@ -1991,6 +2041,7 @@ const SetSharedNetworkPlayerState = function()
     // Add info button
     $('#NetworkPlayer').empty();
     $('#PacketSliderInput').hide();
+    $('#NetworkPlayerLabel').empty();
     $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" disabled>Нет эмуляции</button>');
     return;
 }

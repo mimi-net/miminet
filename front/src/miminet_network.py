@@ -14,7 +14,8 @@ from flask import (
 )
 from flask_login import current_user, login_required
 from miminet_config import check_image_with_pil
-from miminet_model import Network, Simulate, db
+from miminet_model import Network, Simulate, db, SimulateLog
+import datetime
 
 
 @login_required
@@ -512,3 +513,45 @@ def copy_network():
         db.session.commit()
         ret = {"message": "Сделана копия.", "new_url": "/web_network?guid=" + str(u)}
         return make_response(jsonify(ret), 200)
+
+
+@login_required
+def get_last_emulation_time():
+    """Answer with current last emulation starting time."""
+    last_emulation_time = (
+        db.session.query(SimulateLog.simulate_start)
+        .order_by(SimulateLog.simulate_start.desc())
+        .limit(1)
+        .scalar()
+    )
+
+    if not last_emulation_time:
+        return make_response(jsonify({"message": "Никаких эмуляций не найдено."}), 404)
+
+    return make_response(
+        jsonify({"time": str(last_emulation_time.isoformat())}),
+        200,
+    )
+
+
+@login_required
+def get_emulation_queue_size():
+    """Answer with current emulation queue size filtered by emulation time."""
+    time_filter_req: str = request.args.get("time-filter", type=str)
+    time_filter: datetime.datetime = datetime.datetime.fromisoformat(time_filter_req)
+
+    if not time_filter:
+        return make_response(
+            jsonify({"message": "Пропущен параметр 'time-filter'."}), 400
+        )
+
+    emulated_networks_count = (
+        SimulateLog.query.filter(SimulateLog.ready == 0)
+        .filter(SimulateLog.simulate_start <= time_filter)
+        .count()
+    )
+
+    return make_response(
+        jsonify({"size": emulated_networks_count}),
+        200,
+    )

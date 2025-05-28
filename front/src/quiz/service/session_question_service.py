@@ -279,6 +279,9 @@ def answer_on_exam_question(session_question_id: str, networks_to_check, return_
     if not session_question or session_question.question.question_type != 0:
         return
 
+    logging.info(f"Сеть {session_question.network_guid}")
+    logging.info(f"Проверяем следующие сети: {networks_to_check}")
+
     total_score = total_max_score = 0
     hints = []
 
@@ -323,7 +326,6 @@ def answer_on_exam_question(session_question_id: str, networks_to_check, return_
         total_max_score += max_score
         hints.extend(local_hints)
 
-    logging.info(f"Сеть {session_question.network_guid}")
     logging.info(hints)
 
     total_score = max(total_score, 0)
