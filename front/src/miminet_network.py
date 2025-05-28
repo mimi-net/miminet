@@ -125,7 +125,9 @@ def delete_network():
         # Remove all previous simulations
         for s in sims:
             db.session.delete(s)
-            db.session.commit()
+
+        db.session.delete(net)
+        db.session.commit()
 
         db.session.delete(net)
         db.session.commit()
