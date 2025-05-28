@@ -10,7 +10,8 @@
                 "type": "ARP-request\nWho has 10.0.0.1? Tell 10.0.0.2",
                 "path": "edge_lp2ua51l0n315sl7btb",
                 "source": "host_1",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -26,7 +27,8 @@
                 "type": "ARP-request\nWho has 10.0.0.1? Tell 10.0.0.2",
                 "path": "edge_lp2ub9tsq7acx5sm2nc",
                 "source": "l2sw1",
-                "target": "router_1"
+                "target": "router_1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -42,7 +44,8 @@
                 "type": "ARP-response",
                 "path": "edge_lp2ub9tsq7acx5sm2nc",
                 "source": "router_1",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -58,7 +61,8 @@
                 "type": "ARP-response",
                 "path": "edge_lp2ua51l0n315sl7btb",
                 "source": "l2sw1",
-                "target": "host_1"
+                "target": "host_1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -74,7 +78,8 @@
                 "type": "ICMP echo-request\n10.0.0.2 > 10.0.1.2",
                 "path": "edge_lp2ua51l0n315sl7btb",
                 "source": "host_1",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -90,7 +95,8 @@
                 "type": "ICMP echo-request\n10.0.0.2 > 10.0.1.2",
                 "path": "edge_lp2ub9tsq7acx5sm2nc",
                 "source": "l2sw1",
-                "target": "router_1"
+                "target": "router_1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -106,7 +112,8 @@
                 "type": "ARP-request\nWho has 10.0.1.2? Tell 10.0.1.1",
                 "path": "edge_lp2udq0fo51tepirr1",
                 "source": "router_1",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -122,7 +129,8 @@
                 "type": "ARP-request\nWho has 10.0.1.2? Tell 10.0.1.1",
                 "path": "edge_lp2ueine2bekv3zxonu",
                 "source": "l2sw2",
-                "target": "host_2"
+                "target": "host_2",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -138,7 +146,8 @@
                 "type": "ARP-response",
                 "path": "edge_lp2ueine2bekv3zxonu",
                 "source": "host_2",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -154,7 +163,8 @@
                 "type": "ARP-response",
                 "path": "edge_lp2udq0fo51tepirr1",
                 "source": "l2sw2",
-                "target": "router_1"
+                "target": "router_1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -170,7 +180,8 @@
                 "type": "ICMP echo-request\n10.0.0.2 > 10.0.1.2",
                 "path": "edge_lp2udq0fo51tepirr1",
                 "source": "router_1",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -186,7 +197,8 @@
                 "type": "ICMP echo-request\n10.0.0.2 > 10.0.1.2",
                 "path": "edge_lp2ueine2bekv3zxonu",
                 "source": "l2sw2",
-                "target": "host_2"
+                "target": "host_2",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -202,7 +214,8 @@
                 "type": "ICMP echo-reply\n10.0.1.2 > 10.0.0.2",
                 "path": "edge_lp2ueine2bekv3zxonu",
                 "source": "host_2",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -218,7 +231,8 @@
                 "type": "ICMP echo-reply\n10.0.1.2 > 10.0.0.2",
                 "path": "edge_lp2udq0fo51tepirr1",
                 "source": "l2sw2",
-                "target": "router_1"
+                "target": "router_1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -234,7 +248,8 @@
                 "type": "ICMP echo-reply\n10.0.1.2 > 10.0.0.2",
                 "path": "edge_lp2ub9tsq7acx5sm2nc",
                 "source": "router_1",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -250,7 +265,8 @@
                 "type": "ICMP echo-reply\n10.0.1.2 > 10.0.0.2",
                 "path": "edge_lp2ua51l0n315sl7btb",
                 "source": "l2sw1",
-                "target": "host_1"
+                "target": "host_1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }

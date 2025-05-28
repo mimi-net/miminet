@@ -136,7 +136,11 @@ class MiminetTopology(IPTopo):
             edge_id = edge.data.id
             source_id = edge.data.source
             target_id = edge.data.target
-            loss_percentage = edge.data.loss_percentage if edge.data.loss_percentage is not None else 0
+            loss_percentage = (
+                edge.data.loss_percentage
+                if edge.data.loss_percentage is not None
+                else 0
+            )
 
             if source_id not in self.__nodes:
                 raise ValueError(
@@ -159,7 +163,14 @@ class MiminetTopology(IPTopo):
             trg_iface = self.__find_interface(edge_id, trg_node.interface)
 
             self.__iface_pairs.append(
-                (src_iface.name, trg_iface.name, edge_id, source_id, target_id, loss_percentage)
+                (
+                    src_iface.name,
+                    trg_iface.name,
+                    edge_id,
+                    source_id,
+                    target_id,
+                    loss_percentage,
+                )
             )
 
             # Put virtual switch between nodes and return link between them
@@ -199,7 +210,7 @@ class MiminetTopology(IPTopo):
         interface_name_2,
         delay="2ms",
         max_queue_size=None,
-        loss_percentage = 0
+        loss_percentage=0,
     ):
         """Connects two hosts through a virtual switch."""
         # Create unique switch name

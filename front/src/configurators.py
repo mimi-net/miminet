@@ -186,11 +186,11 @@ class AbstractDeviceConfigurator:
         # find all matches with device in nodes
         filt_nodes = list(filter(lambda n: n["data"]["id"] == device_id, self._nodes))
 
-        if not filt_nodes and self._device_type != 'edge':
+        if not filt_nodes and self._device_type != "edge":
             raise ConfigurationError(f"Такого '{self._device_type}' не существует")
 
         # current device's node
-        if self._device_type != 'edge':
+        if self._device_type != "edge":
             self._device_node = filt_nodes[0]
 
     def _conf_label_update(self):
@@ -407,7 +407,7 @@ class EdgeConfigurator(AbstractDeviceConfigurator):
             "edges": self._json_network["edges"],
             "nodes": self._nodes,
             "jobs": self._json_network["jobs"],
-            }
+        }
 
     def _update_loss_percentage(self):
         loss_percent = get_data("edge_loss")

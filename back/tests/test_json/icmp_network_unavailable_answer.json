@@ -10,7 +10,8 @@
                 "type": "ARP-request\nWho has 192.168.1.100? Tell 192.168.1.1",
                 "path": "edge_lpcqpdxeglsy53l451k",
                 "source": "host_1",
-                "target": "router_1"
+                "target": "router_1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -26,7 +27,8 @@
                 "type": "ARP-response",
                 "path": "edge_lpcqpdxeglsy53l451k",
                 "source": "router_1",
-                "target": "host_1"
+                "target": "host_1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -42,7 +44,8 @@
                 "type": "TCP (SYN) 1234 > 5555\n192.168.1.1 > 8.8.4.4",
                 "path": "edge_lpcqpdxeglsy53l451k",
                 "source": "host_1",
-                "target": "router_1"
+                "target": "router_1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -58,7 +61,8 @@
                 "type": "ICMP destination net unreachable\n192.168.1.100 > 192.168.1.1",
                 "path": "edge_lpcqpdxeglsy53l451k",
                 "source": "router_1",
-                "target": "host_1"
+                "target": "host_1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }

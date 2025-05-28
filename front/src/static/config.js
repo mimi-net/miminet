@@ -230,7 +230,6 @@ const ConfigSwitchForm = function (switch_id) {
 
 const ConfigEdgeForm = function (edge_id) {
     let edgeSaveXHR = null;
-
     var form = document.getElementById('config_edge_main_form_script').innerHTML;
     var button = document.getElementById('config_edge_save_script').innerHTML;
 
@@ -258,6 +257,7 @@ const ConfigEdgeForm = function (edge_id) {
 
         let data = $('#config_edge_main_form').serialize();
         const edge = edges.find(e => e.data.id === edge_id);
+        console.log(edge);
         const lossValue = $("#edge_loss").val();
 
         if (edge)

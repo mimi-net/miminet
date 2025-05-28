@@ -39,7 +39,7 @@ from miminet_host import (
     save_router_config,
     save_server_config,
     save_switch_config,
-    save_edge_config
+    save_edge_config,
 )
 from miminet_model import Network, db, init_db, fix_nonemulated_networks
 from miminet_network import (

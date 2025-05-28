@@ -10,7 +10,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztt8n6a7g6mu5pyst",
                 "source": "l2sw1",
-                "target": "l2sw3"
+                "target": "l2sw3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593428819208"
         },
@@ -24,7 +25,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztwicxert5cnkbhgp",
                 "source": "l2sw1",
-                "target": "host_1"
+                "target": "host_1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593428819231"
         },
@@ -38,7 +40,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztt9pc1qt4n4rxxef",
                 "source": "l2sw1",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593428819240"
         },
@@ -52,7 +55,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8zttbcte972khv21hl",
                 "source": "l2sw1",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593428819249"
         }
@@ -68,7 +72,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztt9pc1qt4n4rxxef",
                 "source": "l2sw2",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593428883236"
         },
@@ -82,7 +87,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztwl50r9b0kur5wfq",
                 "source": "l2sw2",
-                "target": "host_2"
+                "target": "host_2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593428883255"
         },
@@ -96,7 +102,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztupam4ynz8247t7x",
                 "source": "l2sw2",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593428883268"
         },
@@ -110,7 +117,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztur165ghw77ndpix",
                 "source": "l2sw2",
-                "target": "l2sw3"
+                "target": "l2sw3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593428883280"
         }
@@ -126,7 +134,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztt8n6a7g6mu5pyst",
                 "source": "l2sw3",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593428952365"
         },
@@ -140,7 +149,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztwn54zgzkhc252ub",
                 "source": "l2sw3",
-                "target": "host_3"
+                "target": "host_3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593428952385"
         },
@@ -154,7 +164,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztur165ghw77ndpix",
                 "source": "l2sw3",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593428952402"
         },
@@ -168,7 +179,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztvyhrz0r2rmmgr0c",
                 "source": "l2sw3",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593428952412"
         }
@@ -184,7 +196,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8zttbcte972khv21hl",
                 "source": "l2sw4",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593429019822"
         },
@@ -198,7 +211,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztxl35ufghlsrwdl",
                 "source": "l2sw4",
-                "target": "host_4"
+                "target": "host_4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593429019842"
         },
@@ -212,7 +226,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztupam4ynz8247t7x",
                 "source": "l2sw4",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593429019857"
         },
@@ -226,7 +241,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztvyhrz0r2rmmgr0c",
                 "source": "l2sw4",
-                "target": "l2sw3"
+                "target": "l2sw3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593429019867"
         }
@@ -242,7 +258,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8zttbcte972khv21hl",
                 "source": "l2sw4",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431038380"
         },
@@ -256,7 +273,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztvyhrz0r2rmmgr0c",
                 "source": "l2sw4",
-                "target": "l2sw3"
+                "target": "l2sw3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431038410"
         },
@@ -270,7 +288,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztxl35ufghlsrwdl",
                 "source": "l2sw4",
-                "target": "host_4"
+                "target": "host_4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431038418"
         },
@@ -284,7 +303,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztupam4ynz8247t7x",
                 "source": "l2sw4",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431038426"
         },
@@ -298,7 +318,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztt8n6a7g6mu5pyst",
                 "source": "l2sw3",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431038498"
         },
@@ -312,7 +333,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztvyhrz0r2rmmgr0c",
                 "source": "l2sw3",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431038505"
         },
@@ -326,7 +348,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztwn54zgzkhc252ub",
                 "source": "l2sw3",
-                "target": "host_3"
+                "target": "host_3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431038510"
         },
@@ -340,7 +363,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztur165ghw77ndpix",
                 "source": "l2sw3",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431038516"
         },
@@ -354,7 +378,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztt9pc1qt4n4rxxef",
                 "source": "l2sw2",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431038552"
         },
@@ -368,7 +393,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztupam4ynz8247t7x",
                 "source": "l2sw2",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431038561"
         },
@@ -382,7 +408,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztwl50r9b0kur5wfq",
                 "source": "l2sw2",
-                "target": "host_2"
+                "target": "host_2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431038567"
         },
@@ -396,7 +423,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztur165ghw77ndpix",
                 "source": "l2sw2",
-                "target": "l2sw3"
+                "target": "l2sw3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431038574"
         },
@@ -410,7 +438,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztt9pc1qt4n4rxxef",
                 "source": "l2sw1",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431038611"
         },
@@ -424,7 +453,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztwicxert5cnkbhgp",
                 "source": "l2sw1",
-                "target": "host_1"
+                "target": "host_1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431038617"
         },
@@ -438,7 +468,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8zttbcte972khv21hl",
                 "source": "l2sw1",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431038624"
         },
@@ -452,7 +483,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztt8n6a7g6mu5pyst",
                 "source": "l2sw1",
-                "target": "l2sw3"
+                "target": "l2sw3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431038629"
         }
@@ -468,7 +500,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8zttbcte972khv21hl",
                 "source": "l2sw4",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054245"
         },
@@ -482,7 +515,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztxl35ufghlsrwdl",
                 "source": "l2sw4",
-                "target": "host_4"
+                "target": "host_4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054262"
         },
@@ -496,7 +530,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztupam4ynz8247t7x",
                 "source": "l2sw4",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054270"
         },
@@ -510,7 +545,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8ztvyhrz0r2rmmgr0c",
                 "source": "l2sw4",
-                "target": "l2sw3"
+                "target": "l2sw3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054277"
         },
@@ -524,7 +560,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8ztvyhrz0r2rmmgr0c",
                 "source": "l2sw4",
-                "target": "l2sw3"
+                "target": "l2sw3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054284"
         },
@@ -538,7 +575,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8zttbcte972khv21hl",
                 "source": "l2sw4",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054299"
         },
@@ -552,7 +590,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8ztvyhrz0r2rmmgr0c",
                 "source": "l2sw4",
-                "target": "l2sw3"
+                "target": "l2sw3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054303"
         },
@@ -566,7 +605,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztxl35ufghlsrwdl",
                 "source": "l2sw4",
-                "target": "host_4"
+                "target": "host_4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054306"
         },
@@ -580,7 +620,8 @@
                 "type": "RSTP (Designated)",
                 "path": "edge_m8ztvyhrz0r2rmmgr0c",
                 "source": "l2sw4",
-                "target": "l2sw3"
+                "target": "l2sw3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054310"
         },
@@ -594,7 +635,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8ztupam4ynz8247t7x",
                 "source": "l2sw4",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054315"
         },
@@ -608,7 +650,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8ztupam4ynz8247t7x",
                 "source": "l2sw4",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054319"
         },
@@ -622,7 +665,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztt8n6a7g6mu5pyst",
                 "source": "l2sw3",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054328"
         },
@@ -636,7 +680,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztvyhrz0r2rmmgr0c",
                 "source": "l2sw3",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054333"
         },
@@ -650,7 +695,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztwn54zgzkhc252ub",
                 "source": "l2sw3",
-                "target": "host_3"
+                "target": "host_3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054339"
         },
@@ -664,7 +710,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8ztur165ghw77ndpix",
                 "source": "l2sw3",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054346"
         },
@@ -678,7 +725,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8ztur165ghw77ndpix",
                 "source": "l2sw3",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054351"
         },
@@ -692,7 +740,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztupam4ynz8247t7x",
                 "source": "l2sw2",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054359"
         },
@@ -706,7 +755,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztwl50r9b0kur5wfq",
                 "source": "l2sw2",
-                "target": "host_2"
+                "target": "host_2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054364"
         },
@@ -720,7 +770,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztur165ghw77ndpix",
                 "source": "l2sw2",
-                "target": "l2sw3"
+                "target": "l2sw3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054371"
         },
@@ -734,7 +785,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8ztt9pc1qt4n4rxxef",
                 "source": "l2sw2",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054381"
         },
@@ -748,7 +800,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8ztt9pc1qt4n4rxxef",
                 "source": "l2sw2",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054387"
         },
@@ -762,7 +815,8 @@
                 "type": "RSTP (Designated)",
                 "path": "edge_m8ztvyhrz0r2rmmgr0c",
                 "source": "l2sw4",
-                "target": "l2sw3"
+                "target": "l2sw3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054394"
         },
@@ -776,7 +830,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztxl35ufghlsrwdl",
                 "source": "l2sw4",
-                "target": "host_4"
+                "target": "host_4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054398"
         },
@@ -790,7 +845,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8ztupam4ynz8247t7x",
                 "source": "l2sw4",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054401"
         },
@@ -804,7 +860,8 @@
                 "type": "RSTP (Designated)",
                 "path": "edge_m8ztupam4ynz8247t7x",
                 "source": "l2sw4",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054406"
         },
@@ -818,7 +875,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8zttbcte972khv21hl",
                 "source": "l2sw4",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054410"
         },
@@ -832,7 +890,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8zttbcte972khv21hl",
                 "source": "l2sw4",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054414"
         },
@@ -846,7 +905,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztvyhrz0r2rmmgr0c",
                 "source": "l2sw3",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054421"
         },
@@ -860,7 +920,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztwn54zgzkhc252ub",
                 "source": "l2sw3",
-                "target": "host_3"
+                "target": "host_3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054425"
         },
@@ -874,7 +935,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8ztur165ghw77ndpix",
                 "source": "l2sw3",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054429"
         },
@@ -888,7 +950,8 @@
                 "type": "RSTP (Designated)",
                 "path": "edge_m8ztur165ghw77ndpix",
                 "source": "l2sw3",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054433"
         },
@@ -902,7 +965,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8ztt8n6a7g6mu5pyst",
                 "source": "l2sw3",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054437"
         },
@@ -916,7 +980,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8ztt8n6a7g6mu5pyst",
                 "source": "l2sw3",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431054442"
         }
@@ -932,7 +997,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8zttbcte972khv21hl",
                 "source": "l2sw1",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431070736"
         },
@@ -946,7 +1012,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8ztupam4ynz8247t7x",
                 "source": "l2sw2",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431070767"
         },
@@ -960,7 +1027,8 @@
                 "type": "RSTP (Designated)",
                 "path": "edge_m8ztupam4ynz8247t7x",
                 "source": "l2sw2",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431070776"
         },
@@ -974,7 +1042,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8ztvyhrz0r2rmmgr0c",
                 "source": "l2sw3",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431070790"
         },
@@ -988,7 +1057,8 @@
                 "type": "RSTP (Designated)",
                 "path": "edge_m8ztvyhrz0r2rmmgr0c",
                 "source": "l2sw3",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431070798"
         },
@@ -1002,7 +1072,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8ztt8n6a7g6mu5pyst",
                 "source": "l2sw1",
-                "target": "l2sw3"
+                "target": "l2sw3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431070813"
         },
@@ -1016,7 +1087,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8ztur165ghw77ndpix",
                 "source": "l2sw2",
-                "target": "l2sw3"
+                "target": "l2sw3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431070831"
         },
@@ -1030,7 +1102,8 @@
                 "type": "RSTP (Designated)",
                 "path": "edge_m8ztur165ghw77ndpix",
                 "source": "l2sw2",
-                "target": "l2sw3"
+                "target": "l2sw3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431070838"
         },
@@ -1044,7 +1117,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8ztt9pc1qt4n4rxxef",
                 "source": "l2sw1",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593431070854"
         }
@@ -1060,7 +1134,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8zttbcte972khv21hl",
                 "source": "l2sw4",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593433100622"
         },
@@ -1074,7 +1149,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztxl35ufghlsrwdl",
                 "source": "l2sw4",
-                "target": "host_4"
+                "target": "host_4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593433100646"
         },
@@ -1088,7 +1164,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8ztt8n6a7g6mu5pyst",
                 "source": "l2sw3",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593433100720"
         },
@@ -1102,7 +1179,8 @@
                 "type": "RSTP (Designated)",
                 "path": "edge_m8ztvyhrz0r2rmmgr0c",
                 "source": "l2sw3",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593433100728"
         },
@@ -1116,7 +1194,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztwn54zgzkhc252ub",
                 "source": "l2sw3",
-                "target": "host_3"
+                "target": "host_3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593433100734"
         },
@@ -1130,7 +1209,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8ztt9pc1qt4n4rxxef",
                 "source": "l2sw2",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593433100777"
         },
@@ -1144,7 +1224,8 @@
                 "type": "RSTP (Designated)",
                 "path": "edge_m8ztupam4ynz8247t7x",
                 "source": "l2sw2",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593433100784"
         },
@@ -1158,7 +1239,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztwl50r9b0kur5wfq",
                 "source": "l2sw2",
-                "target": "host_2"
+                "target": "host_2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593433100791"
         },
@@ -1172,7 +1254,8 @@
                 "type": "RSTP (Designated)",
                 "path": "edge_m8ztur165ghw77ndpix",
                 "source": "l2sw2",
-                "target": "l2sw3"
+                "target": "l2sw3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593433100797"
         },
@@ -1186,7 +1269,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8ztt9pc1qt4n4rxxef",
                 "source": "l2sw1",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593433100835"
         },
@@ -1200,7 +1284,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztwicxert5cnkbhgp",
                 "source": "l2sw1",
-                "target": "host_1"
+                "target": "host_1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593433100841"
         },
@@ -1214,7 +1299,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8zttbcte972khv21hl",
                 "source": "l2sw1",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593433100847"
         },
@@ -1228,7 +1314,8 @@
                 "type": "RSTP (Alternate/Backup)",
                 "path": "edge_m8ztt8n6a7g6mu5pyst",
                 "source": "l2sw1",
-                "target": "l2sw3"
+                "target": "l2sw3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593433100854"
         }
@@ -1244,7 +1331,8 @@
                 "type": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
                 "path": "edge_m8ztwicxert5cnkbhgp",
                 "source": "host_1",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593434796184"
         }
@@ -1260,7 +1348,8 @@
                 "type": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
                 "path": "edge_m8ztt8n6a7g6mu5pyst",
                 "source": "l2sw1",
-                "target": "l2sw3"
+                "target": "l2sw3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593434812548"
         },
@@ -1274,7 +1363,8 @@
                 "type": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
                 "path": "edge_m8ztt9pc1qt4n4rxxef",
                 "source": "l2sw1",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593434812552"
         },
@@ -1288,7 +1378,8 @@
                 "type": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
                 "path": "edge_m8zttbcte972khv21hl",
                 "source": "l2sw1",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593434812554"
         }
@@ -1304,7 +1395,8 @@
                 "type": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
                 "path": "edge_m8ztvyhrz0r2rmmgr0c",
                 "source": "l2sw3",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593434828690"
         },
@@ -1318,7 +1410,8 @@
                 "type": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
                 "path": "edge_m8ztwn54zgzkhc252ub",
                 "source": "l2sw3",
-                "target": "host_3"
+                "target": "host_3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593434828712"
         },
@@ -1332,7 +1425,8 @@
                 "type": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
                 "path": "edge_m8ztwl50r9b0kur5wfq",
                 "source": "l2sw2",
-                "target": "host_2"
+                "target": "host_2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593434828971"
         },
@@ -1346,7 +1440,8 @@
                 "type": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
                 "path": "edge_m8ztur165ghw77ndpix",
                 "source": "l2sw2",
-                "target": "l2sw3"
+                "target": "l2sw3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593434828991"
         },
@@ -1360,7 +1455,8 @@
                 "type": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
                 "path": "edge_m8ztupam4ynz8247t7x",
                 "source": "l2sw2",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593434829010"
         },
@@ -1374,7 +1470,8 @@
                 "type": "ARP-request\\nWho has 192.168.1.4? Tell 192.168.1.1",
                 "path": "edge_m8ztxl35ufghlsrwdl",
                 "source": "l2sw4",
-                "target": "host_4"
+                "target": "host_4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593434829081"
         }
@@ -1390,7 +1487,8 @@
                 "type": "ARP-response\\n192.168.1.4 at 00:00:00:00:00:04",
                 "path": "edge_m8ztxl35ufghlsrwdl",
                 "source": "host_4",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593434844780"
         }
@@ -1406,7 +1504,8 @@
                 "type": "ARP-response\\n192.168.1.4 at 00:00:00:00:00:04",
                 "path": "edge_m8zttbcte972khv21hl",
                 "source": "l2sw4",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593434860610"
         }
@@ -1422,7 +1521,8 @@
                 "type": "ARP-response\\n192.168.1.4 at 00:00:00:00:00:04",
                 "path": "edge_m8ztwicxert5cnkbhgp",
                 "source": "l2sw1",
-                "target": "host_1"
+                "target": "host_1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593434876299"
         }
@@ -1438,7 +1538,8 @@
                 "type": "ICMP echo-request\\n192.168.1.1 > 192.168.1.4",
                 "path": "edge_m8ztwicxert5cnkbhgp",
                 "source": "host_1",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593434891949"
         }
@@ -1454,7 +1555,8 @@
                 "type": "ICMP echo-request\\n192.168.1.1 > 192.168.1.4",
                 "path": "edge_m8zttbcte972khv21hl",
                 "source": "l2sw1",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593434907897"
         }
@@ -1470,7 +1572,8 @@
                 "type": "ICMP echo-request\\n192.168.1.1 > 192.168.1.4",
                 "path": "edge_m8ztxl35ufghlsrwdl",
                 "source": "l2sw4",
-                "target": "host_4"
+                "target": "host_4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593434923479"
         }
@@ -1486,7 +1589,8 @@
                 "type": "ICMP echo-reply\\n192.168.1.4 > 192.168.1.1",
                 "path": "edge_m8ztxl35ufghlsrwdl",
                 "source": "host_4",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593434940342"
         }
@@ -1502,7 +1606,8 @@
                 "type": "ICMP echo-reply\\n192.168.1.4 > 192.168.1.1",
                 "path": "edge_m8zttbcte972khv21hl",
                 "source": "l2sw4",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593434957240"
         }
@@ -1518,7 +1623,8 @@
                 "type": "ICMP echo-reply\\n192.168.1.4 > 192.168.1.1",
                 "path": "edge_m8ztwicxert5cnkbhgp",
                 "source": "l2sw1",
-                "target": "host_1"
+                "target": "host_1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593434974516"
         }
@@ -1534,7 +1640,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztxl35ufghlsrwdl",
                 "source": "l2sw4",
-                "target": "host_4"
+                "target": "host_4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593435130287"
         },
@@ -1548,7 +1655,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztvyhrz0r2rmmgr0c",
                 "source": "l2sw3",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593435130376"
         },
@@ -1562,7 +1670,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztwn54zgzkhc252ub",
                 "source": "l2sw3",
-                "target": "host_3"
+                "target": "host_3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593435130384"
         },
@@ -1576,7 +1685,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztupam4ynz8247t7x",
                 "source": "l2sw2",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593435130423"
         },
@@ -1590,7 +1700,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztwl50r9b0kur5wfq",
                 "source": "l2sw2",
-                "target": "host_2"
+                "target": "host_2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593435130431"
         },
@@ -1604,7 +1715,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztur165ghw77ndpix",
                 "source": "l2sw2",
-                "target": "l2sw3"
+                "target": "l2sw3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593435130437"
         },
@@ -1618,7 +1730,8 @@
                 "type": "RSTP (Unknown)",
                 "path": "edge_m8ztt9pc1qt4n4rxxef",
                 "source": "l2sw1",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593435130478"
         },
@@ -1632,7 +1745,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztwicxert5cnkbhgp",
                 "source": "l2sw1",
-                "target": "host_1"
+                "target": "host_1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593435130484"
         },
@@ -1646,7 +1760,8 @@
                 "type": "RSTP (Unknown)",
                 "path": "edge_m8zttbcte972khv21hl",
                 "source": "l2sw1",
-                "target": "l2sw4"
+                "target": "l2sw4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593435130491"
         },
@@ -1660,7 +1775,8 @@
                 "type": "RSTP (Unknown)",
                 "path": "edge_m8ztt8n6a7g6mu5pyst",
                 "source": "l2sw1",
-                "target": "l2sw3"
+                "target": "l2sw3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593435130497"
         }
@@ -1676,7 +1792,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztxl35ufghlsrwdl",
                 "source": "l2sw4",
-                "target": "host_4"
+                "target": "host_4",
+                "loss_percentage": 0
             },
             "timestamp": "1743593437141751"
         },
@@ -1690,7 +1807,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztwn54zgzkhc252ub",
                 "source": "l2sw3",
-                "target": "host_3"
+                "target": "host_3",
+                "loss_percentage": 0
             },
             "timestamp": "1743593437141846"
         },
@@ -1704,7 +1822,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztwl50r9b0kur5wfq",
                 "source": "l2sw2",
-                "target": "host_2"
+                "target": "host_2",
+                "loss_percentage": 0
             },
             "timestamp": "1743593437141895"
         },
@@ -1718,7 +1837,8 @@
                 "type": "RSTP (Root)",
                 "path": "edge_m8ztwicxert5cnkbhgp",
                 "source": "l2sw1",
-                "target": "host_1"
+                "target": "host_1",
+                "loss_percentage": 0
             },
             "timestamp": "1743593437141969"
         }

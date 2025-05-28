@@ -94,14 +94,16 @@
             "data": {
                 "id": "edge_m900dto20o98bj6vlkj",
                 "source": "host_1",
-                "target": "router_1"
+                "target": "router_1",
+                "loss_percentage": 0
             }
         },
         {
             "data": {
                 "id": "edge_m900duxw191mskhmh59",
                 "source": "host_2",
-                "target": "router_1"
+                "target": "router_1",
+                "loss_percentage": 0
             }
         }
     ],

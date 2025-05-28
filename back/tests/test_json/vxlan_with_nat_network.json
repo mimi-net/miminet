@@ -301,42 +301,48 @@
         "data": {
             "id": "edge_m1axtatih1awgnzd4v",
             "source": "router_4",
-            "target": "host_3"
+            "target": "host_3",
+            "loss_percentage": 0
         }
     },
     {
         "data": {
             "id": "edge_m1axtbw1jx6tubd5ph",
             "source": "router_4",
-            "target": "router_3"
+            "target": "router_3",
+            "loss_percentage": 0
         }
     },
     {
         "data": {
             "id": "edge_m1axtcrrylopd6kn7z8",
             "source": "router_3",
-            "target": "router_1"
+            "target": "router_1",
+            "loss_percentage": 0
         }
     },
     {
         "data": {
             "id": "edge_m1axtggs5fp2pntnefr",
             "source": "router_3",
-            "target": "router_2"
+            "target": "router_2",
+            "loss_percentage": 0
         }
     },
     {
         "data": {
             "id": "edge_m1axtzqsdzur0ranhbs",
             "source": "router_2",
-            "target": "host_2"
+            "target": "host_2",
+            "loss_percentage": 0
         }
     },
     {
         "data": {
             "id": "edge_m1ay2lmctetvcyqkub",
             "source": "host_1",
-            "target": "router_1"
+            "target": "router_1",
+            "loss_percentage": 0
         }
     }
 ],

@@ -162,28 +162,32 @@
             "data": {
                 "id": "edge_lpjv9qpsbe3ms3ol0nc",
                 "source": "host_1",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             }
         },
         {
             "data": {
                 "id": "edge_lpjv9t0l562eo0wd8xp",
                 "source": "host_2",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             }
         },
         {
             "data": {
                 "id": "edge_lpjv9tt1menkapg8yt",
                 "source": "host_3",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             }
         },
         {
             "data": {
                 "id": "edge_lpjv9upbo33dp67a0ar",
                 "source": "host_4",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             }
         }
     ],

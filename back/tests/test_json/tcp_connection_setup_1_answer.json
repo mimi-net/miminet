@@ -10,7 +10,8 @@
                 "type": "ARP-request\nWho has 192.168.1.100? Tell 192.168.1.1",
                 "path": "edge_lpcnptovr9fnlgbuape",
                 "source": "host_1",
-                "target": "server_1"
+                "target": "server_1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -26,7 +27,8 @@
                 "type": "ARP-response\n192.168.1.100 at 00:00:00:00:00:02",
                 "path": "edge_lpcnptovr9fnlgbuape",
                 "source": "server_1",
-                "target": "host_1"
+                "target": "host_1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -42,7 +44,8 @@
                 "type": "TCP (SYN) 1111 > 5555\n192.168.1.1 > 192.168.1.100",
                 "path": "edge_lpcnptovr9fnlgbuape",
                 "source": "host_1",
-                "target": "server_1"
+                "target": "server_1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -58,7 +61,8 @@
                 "type": "TCP (SYN + ACK) 5555 > 1111\n192.168.1.100 > 192.168.1.1",
                 "path": "edge_lpcnptovr9fnlgbuape",
                 "source": "server_1",
-                "target": "host_1"
+                "target": "host_1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -74,7 +78,8 @@
                 "type": "TCP (ACK) 1111 > 5555\n192.168.1.1 > 192.168.1.100",
                 "path": "edge_lpcnptovr9fnlgbuape",
                 "source": "host_1",
-                "target": "server_1"
+                "target": "server_1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         },
@@ -88,7 +93,8 @@
                 "type": "TCP (PUSH + ACK) 1111 > 5555\n192.168.1.1 > 192.168.1.100",
                 "path": "edge_lpcnptovr9fnlgbuape",
                 "source": "host_1",
-                "target": "server_1"
+                "target": "server_1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         },
@@ -102,7 +108,8 @@
                 "type": "TCP (FIN + ACK) 1111 > 5555\n192.168.1.1 > 192.168.1.100",
                 "path": "edge_lpcnptovr9fnlgbuape",
                 "source": "host_1",
-                "target": "server_1"
+                "target": "server_1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -118,7 +125,8 @@
                 "type": "TCP (ACK) 5555 > 1111\n192.168.1.100 > 192.168.1.1",
                 "path": "edge_lpcnptovr9fnlgbuape",
                 "source": "server_1",
-                "target": "host_1"
+                "target": "host_1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         },
@@ -132,7 +140,8 @@
                 "type": "TCP (FIN + ACK) 5555 > 1111\n192.168.1.100 > 192.168.1.1",
                 "path": "edge_lpcnptovr9fnlgbuape",
                 "source": "server_1",
-                "target": "host_1"
+                "target": "host_1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }
@@ -148,7 +157,8 @@
                 "type": "TCP (ACK) 1111 > 5555\n192.168.1.1 > 192.168.1.100",
                 "path": "edge_lpcnptovr9fnlgbuape",
                 "source": "host_1",
-                "target": "server_1"
+                "target": "server_1",
+                "loss_percentage": 0
             },
             "timestamp": ""
         }

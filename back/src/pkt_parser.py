@@ -97,7 +97,12 @@ def arp_packet_type(pkt) -> str:
 
 
 def create_pkt_animation(
-    file1: str, file2: str, edge_id: str, e_source: str, e_target: str, loss_percentage: int,
+    file1: str,
+    file2: str,
+    edge_id: str,
+    e_source: str,
+    e_target: str,
+    loss_percentage: int = 0,
 ):
     if not os.path.exists(file1) or not os.path.exists(file2):
         return None
@@ -111,7 +116,9 @@ def create_pkt_animation(
     return pkts + pkts2
 
 
-def packet_parser(pcap1: Reader, edge_id: str, e_source: str, e_target: str, loss_percentage: int):
+def packet_parser(
+    pcap1: Reader, edge_id: str, e_source: str, e_target: str, loss_percentage: int
+):
     pkts = []
 
     # For each packet in the pcap1 process the contents
@@ -136,7 +143,7 @@ def packet_parser(pcap1: Reader, edge_id: str, e_source: str, e_target: str, los
                         "path": edge_id,
                         "source": e_source,
                         "target": e_target,
-                        "loss_percentage": loss_percentage
+                        "loss_percentage": loss_percentage,
                     },
                     "timestamp": ts,
                 }
