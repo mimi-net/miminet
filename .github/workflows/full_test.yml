@@ -31,9 +31,7 @@ jobs:
    
       - name: Install dependencies
         run: |
-            sudo python -m pip install pip
-            sudo python3 -m pip install pytest
-            sudo python3 -m pip install selenium
+            sudo python -m pip install pip pytest selenium --ignore-installed urllib3
 
       - name: Check availability
         run: |

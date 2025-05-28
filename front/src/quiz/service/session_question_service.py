@@ -17,6 +17,7 @@ from quiz.util.dto import (
     PracticeAnswerResultDto,
     calculate_max_score,
 )
+from quiz.service.network_upload_service import prepare_task
 
 MOSCOW_TZ = ZoneInfo("Europe/Moscow")
 
@@ -273,7 +274,9 @@ def answer_on_exam_without_session(networks_to_check, guid, output_file="results
     return result
 
 
-def answer_on_exam_question(session_question_id: str, networks_to_check):
+def answer_on_exam_question(
+    session_question_id: str, networks_to_check, return_result=False
+):
     session_question = SessionQuestion.query.filter_by(id=session_question_id).first()
     if not session_question or session_question.question.question_type != 0:
         return
@@ -336,6 +339,9 @@ def answer_on_exam_question(session_question_id: str, networks_to_check):
     db.session.add(session_question)
     db.session.commit()
 
+    if return_result:
+        return (total_score, total_max_score, hints)
+
 
 def answer_on_session_question(session_question_id: str, answer, user: User):
     session_question = SessionQuestion.query.filter_by(id=session_question_id).first()
@@ -345,6 +351,12 @@ def answer_on_session_question(session_question_id: str, answer, user: User):
 
     # practice
     if question.question_type == 0:
+        network = Network.query.filter(
+            Network.guid == session_question.network_guid
+        ).first()
+        network = network.network
+        network = json.loads(network)
+
         practice_question = PracticeQuestion.query.get(question.id)
         requirements = (
             json.loads(practice_question.requirements)
@@ -352,8 +364,42 @@ def answer_on_session_question(session_question_id: str, answer, user: User):
             else practice_question.requirements
         )
 
-        max_score = calculate_max_score(requirements)
-        score, hints = check_task(requirements, answer["answer"])
+        prepared_task = prepare_task(network, requirements)
+        prepared_task_json = [
+            (json.dumps(net), json.dumps(req), json.dumps(mods))
+            for net, req, mods in prepared_task
+        ]
+
+        networks_to_check = []
+        for network_json, req_json, modifications_json in prepared_task_json:
+            try:
+                network_json = (
+                    json.loads(network_json)
+                    if isinstance(network_json, str)
+                    else network_json
+                )
+                req_json = (
+                    json.loads(req_json) if isinstance(req_json, str) else req_json
+                )
+                modifications_json = (
+                    json.loads(modifications_json)
+                    if isinstance(modifications_json, str)
+                    else modifications_json
+                )
+
+                from tasks import create_emulation_task
+
+                animation = create_emulation_task(network_json)
+                networks_to_check.append(
+                    (network_json, animation, req_json, modifications_json)
+                )
+
+            except Exception as e:
+                logging.error(f"Ошибка при создании задачи: {e}.")
+
+        score, max_score, hints = answer_on_exam_question(
+            session_question_id, networks_to_check, True
+        )
 
         if score != max_score and len(hints) == 0:
             hints.append("По вашему решению не предусмотрены подсказки.")
