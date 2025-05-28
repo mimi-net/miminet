@@ -126,18 +126,22 @@ def get_configured_tasks(schema: Dict[str, Any], scenarios: List[Dict]) -> List[
 
                 elif from_node and to_node:
                     matching_edges = [
-                        edge for edge in scenario_schema.get("edges", [])
+                        edge
+                        for edge in scenario_schema.get("edges", [])
                         if (
                             edge.get("data", {}).get("source") == from_node
                             and edge.get("data", {}).get("target") == to_node
-                        ) or (
+                        )
+                        or (
                             edge.get("data", {}).get("source") == to_node
                             and edge.get("data", {}).get("target") == from_node
                         )
                     ]
 
                     if not matching_edges:
-                        raise ValueError(f"No edge found between '{from_node}' and '{to_node}'.")
+                        raise ValueError(
+                            f"No edge found between '{from_node}' and '{to_node}'."
+                        )
 
                     edge = matching_edges[0]
                     edge_id = edge["data"].get("id")
@@ -152,12 +156,15 @@ def get_configured_tasks(schema: Dict[str, Any], scenarios: List[Dict]) -> List[
                     )
 
                     scenario_schema["edges"] = [
-                        e for e in scenario_schema.get("edges", [])
+                        e
+                        for e in scenario_schema.get("edges", [])
                         if e.get("data", {}).get("id") != edge_id
                     ]
 
                 else:
-                    raise ValueError("Either 'id' or both 'from' and 'to' must be provided for remove_edge.")
+                    raise ValueError(
+                        "Either 'id' or both 'from' and 'to' must be provided for remove_edge."
+                    )
 
             elif modification_name == "add_ping":
                 from_host_name = modification_arg.get("from")
