@@ -16,6 +16,7 @@ from flask_login import current_user, login_required
 from miminet_config import check_image_with_pil
 from miminet_model import Network, Simulate, db, SimulateLog
 import datetime
+from sqlalchemy import not_
 
 
 @login_required
@@ -119,15 +120,17 @@ def delete_network():
         return redirect("home")
 
     if request.method == "POST":
-        db.session.delete(net)
-        db.session.commit()
-
         sims = Simulate.query.filter(Simulate.network_id == net.id).all()
 
         # Remove all previous simulations
         for s in sims:
             db.session.delete(s)
-            db.session.commit()
+
+        db.session.delete(net)
+        db.session.commit()
+
+        db.session.delete(net)
+        db.session.commit()
 
     return redirect(url_for("home"))
 
@@ -541,7 +544,7 @@ def get_last_emulation_time():
 @login_required
 def get_emulation_queue_size():
     """Answer with current emulation queue size filtered by emulation time."""
-    time_filter_req: str = request.args.get("time-filter", type=str)
+    time_filter_req: str = request.args.get("time-filter", type=str).replace(" ", "+")
     time_filter: datetime.datetime = datetime.datetime.fromisoformat(time_filter_req)
 
     if not time_filter:
@@ -550,7 +553,7 @@ def get_emulation_queue_size():
         )
 
     emulated_networks_count = (
-        SimulateLog.query.filter(SimulateLog.ready == 0)
+        SimulateLog.query.filter(not_(SimulateLog.ready))
         .filter(SimulateLog.simulate_start <= time_filter)
         .count()
     )

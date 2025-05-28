@@ -16,9 +16,6 @@ services:
     expose:
       - 80
     volumes:
-      - ./src/static:/app/static
-      - ./src/templates:/app/templates
-      - databases:/app/instance
       - ./src/static/images:/app/static/images
       - ./src/static/svg:/app/static/svg
       - ./src/static/avatar:/app/static/avatar
@@ -28,6 +25,9 @@ services:
       - ./src/static/quiz_images:/app/static/quiz_images
     environment:
       - RABBITMQ_URL=amqp://rabbitmq:5672
+    depends_on:
+      postgres:
+        condition: service_healthy
   rabbitmq:
     image: rabbitmq:latest
     hostname: rabbitmq
@@ -66,9 +66,34 @@ services:
     networks:
       miminet_network:
         ipv4_address: 172.18.0.2
+  postgres:
+      image: postgres:latest
+      container_name: postgres
+      environment:
+        POSTGRES_USER: ${POSTGRES_DEFAULT_USER}
+        POSTGRES_PASSWORD: ${POSTGRES_DEFAULT_PASSWORD}
+        POSTGRES_DB: ${POSTGRES_DATABASE_NAME}
+        PGDATA: /var/lib/postgresql/data/pgdata
+      ports:
+        - "5430:5432"
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U postgres -d miminet"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+        start_period: 10s
+      restart: unless-stopped
+      env_file:
+      - .env
+      volumes:
+        - pgdata:/var/lib/postgresql/data/pgdata
+      networks:
+        miminet_network:
+          ipv4_address: 172.18.0.4
 
 volumes:
-  databases:
+  pgdata:
+    driver: local
 
 networks:
   miminet_network:

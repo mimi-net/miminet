@@ -1,5 +1,7 @@
 import sys
+import os
 from datetime import datetime
+from dotenv import load_dotenv
 
 from flask import Flask, make_response, render_template
 from flask_admin import Admin
@@ -31,7 +33,7 @@ from miminet_auth import (
     yandex_callback,
     tg_callback,
 )
-from miminet_config import SECRET_KEY, SQLITE_DATABASE_NAME
+from miminet_config import SECRET_KEY
 from miminet_host import (
     delete_job,
     save_host_config,
@@ -41,7 +43,7 @@ from miminet_host import (
     save_switch_config,
     save_edge_config,
 )
-from miminet_model import Network, db, init_db, fix_nonemulated_networks
+from miminet_model import Network, db, init_db
 from miminet_network import (
     copy_network,
     create_network,
@@ -99,7 +101,15 @@ app = Flask(
 )
 
 # SQLAlchimy config
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + SQLITE_DATABASE_NAME
+load_dotenv()
+
+POSTGRES_HOST = os.getenv("POSTGRES_HOST")
+POSTGRES_USER = os.getenv("POSTGRES_DEFAULT_USER")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_DEFAULT_PASSWORD")
+POSTGRES_DB_NAME = os.getenv("POSTGRES_DATABASE_NAME")
+POSTGRES_URL = f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB_NAME}"
+
+app.config["SQLALCHEMY_DATABASE_URI"] = POSTGRES_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 app.config["SECRET_KEY"] = SECRET_KEY
 app.config["SESSION_COOKIE_NAME"] = "mimi_session"
@@ -378,15 +388,12 @@ def sitemap():
 
 
 if __name__ == "__main__":
+    init_db(app)
 
     if len(sys.argv) > 1:
-        if sys.argv[1] == "init":
-            init_db(app)
-        elif sys.argv[1] == "dev":
+        if sys.argv[1] == "dev":
             insert_test_user(app)
         elif sys.argv[1] == "prod":
             remove_test_user(app)
-
-        fix_nonemulated_networks(app)
     else:
         app.run()
