@@ -16,7 +16,7 @@ from quiz.service.session_question_service import (
     get_session_question_data,
 )
 
-# from quiz.service.network_upload_service import create_check_task
+from quiz.service.network_upload_service import create_check_task
 
 
 @login_required
@@ -52,15 +52,12 @@ def check_network_task_endpoint():
         abort(status)
 
     if aux is None:
-        # Теория — сразу отправляем результат
         return make_response("Вопрос проверен", 200)
 
-    # Раскомментировать, когда снова потребуется проверять сразу же!!!
-
-    # requirements, network = result, aux
-    # res_code = create_check_task(network, requirements, session_question_id)
-    # if res_code == 404 or res_code == 403:
-    #     abort(res_code)
+    requirements, network = result, aux
+    res_code = create_check_task(network, requirements, session_question_id)
+    if res_code == 404 or res_code == 403:
+        abort(res_code)
 
     return make_response("Практическая задача отправлена на проверку", 200)
 
