@@ -84,6 +84,15 @@ class SimulateLog(db.Model):  # type:ignore[name-defined]
     ready = db.Column(db.Boolean, default=False, nullable=False)
 
 
+def fix_nonemulated_networks(app):
+    """
+    Some networks can be marked as non-emulated in the database, we should fix them.
+    """
+    with app.app_context():
+        SimulateLog.query.filter(SimulateLog.ready == 0).update({"ready": 1})
+        db.session.commit()
+
+
 def init_db(app):
     # Data
     users = []
