@@ -706,7 +706,7 @@ const prepareStylesheet = function() {
         if (ele.group() === "edges") {
             const loss = ele.data('loss_percentage') || 0;
             if (loss > 0)
-                return '#D4FF00';
+                return '#FF8C00';
         }
         return ele.data('color') || '#9FBFE5';
     };
