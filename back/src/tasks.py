@@ -33,7 +33,7 @@ def run_miminet(network_json: str):
 
     jnet = json.loads(network_json)
     network_schema = marshmallow_dataclass.class_schema(Network)()
-    network_json = network_schema.load(jnet)
+    network_json = network_schema.load(jnet, unknown="include")
 
     for _ in range(4):
         try:

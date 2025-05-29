@@ -22,49 +22,56 @@
       "data": {
         "id": "edge_m17mpmv85f2c8ntuzi4",
         "source": "host_1",
-        "target": "l2sw1"
+        "target": "l2sw1",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m17mpocu33awllp073b",
         "source": "host_2",
-        "target": "l2sw1"
+        "target": "l2sw1",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m17mpq1jgpbcxeleswi",
         "source": "l2sw1",
-        "target": "router_1"
+        "target": "router_1",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m17mpsgp9pu6tna2yu8",
         "source": "router_1",
-        "target": "router_2"
+        "target": "router_2",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m17mptdhlrazfsjzxt9",
         "source": "router_2",
-        "target": "l2sw2"
+        "target": "l2sw2",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m17mpwflvlq0x4p78v",
         "source": "host_4",
-        "target": "l2sw2"
+        "target": "l2sw2",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m17mpya1fug823kvgjh",
         "source": "host_3",
-        "target": "l2sw2"
+        "target": "l2sw2",
+        "loss_percentage": 0
       }
     }
   ],

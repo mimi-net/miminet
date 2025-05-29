@@ -122,21 +122,25 @@
             "data": {
                 "id": "edge_lpcmdbysi3nchn5c4co",
                 "source": "host_1",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             }
         },
         {
             "data": {
                 "id": "edge_lpcmdd31mral0mfcbc",
                 "source": "host_2",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             }
         },
         {
             "data": {
                 "id": "edge_lpcmdeirza434jdhoj",
                 "source": "host_3",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
+
             }
         }
     ],

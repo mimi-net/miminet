@@ -357,6 +357,10 @@ def post_nodes_edges():
         nodes = request.json[0]
         edges = request.json[1]
 
+        for edge in edges:
+            edge_data = edge.get("data", {})
+            edge_data["loss_percentage"] = edge_data.get("loss_percentage", 0)
+
         jnet = json.loads(net.network)
         jnet["edges"] = edges
         jnet["nodes"] = nodes

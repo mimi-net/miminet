@@ -11,6 +11,7 @@ from configurators import (
     HubConfigurator,
     ServerConfigurator,
     RouterConfigurator,
+    EdgeConfigurator,
     get_data,
 )
 
@@ -117,6 +118,7 @@ switch = SwitchConfigurator()
 host = HostConfigurator()
 router = RouterConfigurator()
 server = ServerConfigurator()
+edge = EdgeConfigurator()
 
 # --- Jobs ---
 
@@ -362,6 +364,11 @@ def save_router_config():
 @login_required
 def save_server_config():
     return server.configure()
+
+
+@login_required
+def save_edge_config():
+    return edge.configure()
 
 
 @login_required
