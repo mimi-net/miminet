@@ -69,7 +69,9 @@ jobs:
 
       - name: Test with pytest
         run: |
-          source venv/bin/activate
-          cd back/tests
-          export PYTHONPATH=$PYTHONPATH:../src
-          pytest .
+          sudo bash -c '
+            source venv/bin/activate
+            cd back/tests
+            export PYTHONPATH=$PYTHONPATH:../src
+            pytest .
+          '
