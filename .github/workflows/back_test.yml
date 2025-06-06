@@ -63,8 +63,8 @@ jobs:
 
       - name: Install python dependencies
         run: |
-          sudo python -m pip install pip pytest selenium
-          sudo python -m pip install -r requirements.txt --ignore-installed urllib3
+          sudo python -m pip install pip pytest selenium --ignore-installed urllib3
+          sudo python -m pip install -r requirements.txt
 
       - name: Test with pytest
         run: |
