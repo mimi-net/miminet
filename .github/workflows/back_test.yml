@@ -65,13 +65,12 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
+          python -m pip install pip wheel pytest mininet
           pip install -r front/requirements.txt
 
       - name: Test with pytest
         run: |
-          sudo bash -c '
-            source venv/bin/activate
-            cd back/tests
-            export PYTHONPATH=$PYTHONPATH:../src
-            pytest .
-          '
+          source venv/bin/activate
+          cd back/tests
+          export PYTHONPATH=$PYTHONPATH:../src
+          pytest .
