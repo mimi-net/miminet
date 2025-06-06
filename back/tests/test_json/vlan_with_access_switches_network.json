@@ -210,42 +210,48 @@
             "data": {
                 "id": "edge_lpjyynqdtnj124ie5p",
                 "source": "host_1",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             }
         },
         {
             "data": {
                 "id": "edge_lpjyyooj2fsdasz4acv",
                 "source": "host_2",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             }
         },
         {
             "data": {
                 "id": "edge_lpk0dpzbwtrfo3g4h5c",
                 "source": "l2sw1",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             }
         },
         {
             "data": {
                 "id": "edge_lpk0e8949rb63oqovgl",
                 "source": "host_3",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             }
         },
         {
             "data": {
                 "id": "edge_lpk0huy40a64r6xzldhe",
                 "source": "l2sw1",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             }
         },
         {
             "data": {
                 "id": "edge_lpk0liymi9s2yesado",
                 "source": "host_4",
-                "target": "l2sw2"
+                "target": "l2sw2",
+                "loss_percentage": 0
             }
         }
     ],

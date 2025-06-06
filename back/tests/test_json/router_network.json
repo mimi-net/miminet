@@ -154,28 +154,32 @@
             "data": {
                 "id": "edge_lp2ua51l0n315sl7btb",
                 "source": "host_1",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             }
         },
         {
             "data": {
                 "id": "edge_lp2ub9tsq7acx5sm2nc",
                 "source": "router_1",
-                "target": "l2sw1"
+                "target": "l2sw1",
+                "loss_percentage": 0
             }
         },
         {
             "data": {
                 "id": "edge_lp2udq0fo51tepirr1",
                 "source": "l2sw2",
-                "target": "router_1"
+                "target": "router_1",
+                "loss_percentage": 0
             }
         },
         {
             "data": {
                 "id": "edge_lp2ueine2bekv3zxonu",
                 "source": "l2sw2",
-                "target": "host_2"
+                "target": "host_2",
+                "loss_percentage": 0
             }
         }
     ],
