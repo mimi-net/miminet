@@ -130,9 +130,6 @@ def delete_network():
         db.session.delete(net)
         db.session.commit()
 
-        db.session.delete(net)
-        db.session.commit()
-
     return redirect(url_for("home"))
 
 
