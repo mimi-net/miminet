@@ -65,7 +65,7 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-          python -m pip install pip wheel pytest mininet
+          python -m pip install pip wheel pytest mininet marshmallow-dataclass
           pip install -r front/requirements.txt
 
       - name: Test with pytest
