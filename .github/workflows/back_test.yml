@@ -61,15 +61,15 @@ jobs:
           sudo /usr/share/openvswitch/scripts/ovs-ctl start
           sudo ovs-vswitchd &
 
-      - name: Install python dependencies
+      - name: Set up virtualenv
         run: |
-          sudo python -m pip install pip pytest selenium --break-system-packages
-          sudo python -m pip install -r --break-system-packages front/requirements.txt
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r front/requirements.txt
 
       - name: Test with pytest
         run: |
-          sudo bash -c '
-            cd back/tests
-            export PYTHONPATH=$PYTHONPATH:../src
-            pytest .
-          '
+          source venv/bin/activate
+          cd back/tests
+          export PYTHONPATH=$PYTHONPATH:../src
+          pytest .
