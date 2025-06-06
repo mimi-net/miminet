@@ -130,6 +130,9 @@ def delete_network():
         db.session.delete(net)
         db.session.commit()
 
+        db.session.delete(net)
+        db.session.commit()
+
     return redirect(url_for("home"))
 
 
@@ -354,6 +357,10 @@ def post_nodes_edges():
     if request.method == "POST":
         nodes = request.json[0]
         edges = request.json[1]
+
+        for edge in edges:
+            edge_data = edge.get("data", {})
+            edge_data["loss_percentage"] = edge_data.get("loss_percentage", 0)
 
         jnet = json.loads(net.network)
         jnet["edges"] = edges

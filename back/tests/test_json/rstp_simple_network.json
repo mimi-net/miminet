@@ -213,42 +213,48 @@
       "data": {
         "id": "edge_m818s7r9hjbehpj44ng",
         "source": "host_3",
-        "target": "l2sw3"
+        "target": "l2sw3",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m818s8o2rdmp8mzcqk8",
         "source": "host_2",
-        "target": "l2sw2"
+        "target": "l2sw2",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m818s9t7fw38a8kd6t",
         "source": "l2sw2",
-        "target": "l2sw1"
+        "target": "l2sw1",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m818sg2iommd0mmeodp",
         "source": "host_1",
-        "target": "l2sw1"
+        "target": "l2sw1",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m85z7c81x99s7l7twm9",
         "source": "l2sw2",
-        "target": "l2sw3"
+        "target": "l2sw3",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m879ddqonv6dtsuov3m",
         "source": "l2sw1",
-        "target": "l2sw3"
+        "target": "l2sw3",
+        "loss_percentage": 0
       }
     }
   ],

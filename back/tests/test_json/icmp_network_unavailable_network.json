@@ -60,7 +60,8 @@
             "data": {
                 "id": "edge_lpcqpdxeglsy53l451k",
                 "source": "router_1",
-                "target": "host_1"
+                "target": "host_1",
+                "loss_percentage": 0
             }
         }
     ],

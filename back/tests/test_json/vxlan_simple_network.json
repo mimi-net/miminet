@@ -293,42 +293,48 @@
       "data": {
         "id": "edge_m16twm43olzwv46wkug",
         "source": "host_1",
-        "target": "router_1"
+        "target": "router_1",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m16twnvluzzkhq36f98",
         "source": "host_2",
-        "target": "router_2"
+        "target": "router_2",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m17h53pkx2xumye3ri",
         "source": "host_3",
-        "target": "router_3"
+        "target": "router_3",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m17hohl88xajhp678a8",
         "source": "l2sw1",
-        "target": "router_3"
+        "target": "router_3",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m17hop2bb5acpbzd9ns",
         "source": "l2sw1",
-        "target": "router_1"
+        "target": "router_1",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m17hoq0gj9yvlwif8y",
         "source": "l2sw1",
-        "target": "router_2"
+        "target": "router_2",
+        "loss_percentage": 0
       }
     }
   ],
