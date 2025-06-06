@@ -5,9 +5,10 @@ from flask_sqlalchemy import SQLAlchemy
 from miminet_config import (
     make_empty_network,
 )
-from sqlalchemy import MetaData, BigInteger, Text, Boolean, TIMESTAMP, ForeignKey
+from sqlalchemy import MetaData, BigInteger, Text, Boolean, TIMESTAMP, ForeignKey, not_
 from werkzeug.security import generate_password_hash
 import psycopg2
+
 
 convention = {
     "ix": "ix_%(column_0_label)s",
@@ -113,7 +114,7 @@ def init_db(app):
         try:
             # Some networks can be marked as non-emulated in the database, we should fix them.
             print("[!] Fix nonemulated networks...")
-            SimulateLog.query.filter(not SimulateLog.ready).update({"ready": True})
+            SimulateLog.query.filter(not_(SimulateLog.ready)).update({"ready": True})
             db.session.commit()
         except Exception:
             print("[!] Database not found. Creating...")
