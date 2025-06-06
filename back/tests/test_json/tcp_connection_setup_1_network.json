@@ -60,7 +60,8 @@
             "data": {
                 "id": "edge_lpcnptovr9fnlgbuape",
                 "source": "host_1",
-                "target": "server_1"
+                "target": "server_1",
+                "loss_percentage": 0
             }
         }
     ],

@@ -334,9 +334,13 @@ const ShowEdgeConfig = function(edge_id, shared = 0){
 
     let edge_source = ed.data.source;
     let edge_target = ed.data.target;
+    let edge_loss = ed.data.loss_percentage || 0
 
     // Create form
     ConfigEdgeForm(edge_id);
+
+    // Add loss percentage info
+    ConfigEdgePercentage(edge_loss)
 
     // Add source and target info
     ConfigEdgeEndpoints(edge_source, edge_target);
@@ -699,7 +703,12 @@ const MoveNodes = function(){
 
 const prepareStylesheet = function() {
     const getColor = function(ele) {
-      return ele.data('color') || '#9FBFE5';
+        if (ele.group() === "edges") {
+            const loss = ele.data('loss_percentage') || 0;
+            if (loss > 0)
+                return '#FF8C00';
+        }
+        return ele.data('color') || '#9FBFE5';
     };
     const getEdgeLabel = function(ele) {
       return ele.data('label') || '';
@@ -1278,6 +1287,26 @@ const CheckSimulation = function (simulation_id)
         dataType: 'json'
     });
 }
+
+// Update edge configuration
+const UpdateEdgeConfiguration = (data) => {
+    SetNetworkPlayerState(-1);
+
+    return $.ajax({
+        type: 'POST',
+        url: '/edge/save_config',
+        data: data,
+        complete: function() {
+            DrawGraph();
+            $('#config_edge_main_form_submit_button').html('Сохранить');
+        },
+        error: function(xhr) {
+            console.log('Не удалось обновить конфигурацию ребра');
+            console.log(xhr);
+        },
+        dataType: 'json'
+    });
+};
 
 
 const InsertWaitingTime = function ()

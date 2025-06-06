@@ -114,6 +114,7 @@ class EdgeData:
     id: str
     source: str
     target: str
+    loss_percentage: int = 0
 
 
 @dataclass

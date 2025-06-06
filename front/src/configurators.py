@@ -186,11 +186,12 @@ class AbstractDeviceConfigurator:
         # find all matches with device in nodes
         filt_nodes = list(filter(lambda n: n["data"]["id"] == device_id, self._nodes))
 
-        if not filt_nodes:
+        if not filt_nodes and self._device_type != "edge":
             raise ConfigurationError(f"Такого '{self._device_type}' не существует")
 
         # current device's node
-        self._device_node = filt_nodes[0]
+        if self._device_type != "edge":
+            self._device_node = filt_nodes[0]
 
     def _conf_label_update(self):
         """Update device label(name). Typically used at the end of the configuration"""
@@ -391,3 +392,33 @@ class ServerConfigurator(HostConfigurator):
     def __init__(self):
         super().__init__()
         self._device_type = "server"
+
+
+class EdgeConfigurator(AbstractDeviceConfigurator):
+    def __init__(self):
+        super().__init__(device_type="edge")
+
+    def _configure(self):
+        self._conf_prepare()
+        self._update_loss_percentage()
+
+        return {
+            "message": "Конфигурация обновлена",
+            "edges": self._json_network["edges"],
+            "nodes": self._nodes,
+            "jobs": self._json_network["jobs"],
+        }
+
+    def _update_loss_percentage(self):
+        loss_percent = get_data("edge_loss")
+
+        loss = int(loss_percent)
+
+        edge_id = get_data("edge_id")
+
+        for edge in self._json_network["edges"]:
+            if edge["data"]["id"] == edge_id:
+                edge["data"]["loss_percentage"] = loss
+                break
+        else:
+            raise ConfigurationError("Ребро не найдено")

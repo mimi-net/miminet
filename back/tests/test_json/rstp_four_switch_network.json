@@ -310,70 +310,80 @@
       "data": {
         "id": "edge_m8ztt8n6a7g6mu5pyst",
         "source": "l2sw1",
-        "target": "l2sw3"
+        "target": "l2sw3",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m8ztt9pc1qt4n4rxxef",
         "source": "l2sw1",
-        "target": "l2sw2"
+        "target": "l2sw2",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m8zttbcte972khv21hl",
         "source": "l2sw1",
-        "target": "l2sw4"
+        "target": "l2sw4",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m8ztupam4ynz8247t7x",
         "source": "l2sw2",
-        "target": "l2sw4"
+        "target": "l2sw4",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m8ztur165ghw77ndpix",
         "source": "l2sw2",
-        "target": "l2sw3"
+        "target": "l2sw3",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m8ztvyhrz0r2rmmgr0c",
         "source": "l2sw3",
-        "target": "l2sw4"
+        "target": "l2sw4",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m8ztwicxert5cnkbhgp",
         "source": "host_1",
-        "target": "l2sw1"
+        "target": "l2sw1",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m8ztwl50r9b0kur5wfq",
         "source": "host_2",
-        "target": "l2sw2"
+        "target": "l2sw2",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m8ztwn54zgzkhc252ub",
         "source": "host_3",
-        "target": "l2sw3"
+        "target": "l2sw3",
+        "loss_percentage": 0
       }
     },
     {
       "data": {
         "id": "edge_m8ztxl35ufghlsrwdl",
         "source": "host_4",
-        "target": "l2sw4"
+        "target": "l2sw4",
+        "loss_percentage": 0
       }
     }
   ],

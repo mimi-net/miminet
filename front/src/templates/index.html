@@ -4,7 +4,7 @@
 {% block content %}
 
 <main>
-    <section class="py-5 my-lg-5">
+    <section class="py-5 position-relative overflow-hidden">
        <div class="container my-lg-5">
              <div class="row">
                 <div class="col-md-5">
@@ -23,24 +23,78 @@
         </div>
     </section>
 
- <section class="pt-4 pt-lg-0 pb-4 pb-lg-5 bg-secondary border-bottom border-light">
+ <section class="pt-4 pt-lg-0 pb-4 pb-lg-5 bg-secondary">
 	 <div class="container pb-4 pt-5">
-		 <h2 class="h1 text-center pb-3 pb-md-0 mb-md-5">Yadro Импульс 2025</h2>
-		 <div class="row pt-xl-3 align-items-center">
-			 <div class="col-md-6 text-center text-md-start pb-5">
-				 <p class="fs-lg pb-lg-2 mb-3">Привет! В разделе <a href="https://miminet.ru/quiz/test/all">"Тестирование"</a> появилось тестовое задание по сетям. Оно состоит из 3-х этапов. На каждом этапе необходимо решить одну практическую задачу.</p>
-
-				 <p class="fs-lg pb-lg-2 mb-3">Перед решением тестового задания рекомендуется порешать задачи из теста <a href="https://miminet.ru/quiz/section/test/all?test_id=3" target="_blank">"10 практических задач"</a>. Это поможет вам понять, как работает Miminet.</p>
-
-				 <p class="fs-lg pb-lg-2 mb-3">Если у вас возникнут вопросы по работе Miminet &mdash; смело задавайте их в нашем уютном сообществе <a href="https://t.me/MimiNetCommunity" target="_blank">MiminetCommunity</a>.<p>
-				 <a href="{{ url_for('get_all_tests_endpoint') }}" class="btn btn-success shadow-primary btn-lg">Открыть тестирование</a>
+		 <h2 class="h1 text-center text-md-start pb-3 pb-md-0 mb-md-5">Возможности</h2>
+		 <div class="row row-cols-1 row-cols-md-2">
+			 <div class="col py-4 my-2 my-sm-3">
+				 <div class="card card-hover h-100 border-0 shadow-sm text-decoration-none pt-5 px-sm-3 px-md-0 px-lg-3 pb-sm-3 pb-md-0 pb-lg-3 me-xl-2">
+					 <div class="d-inline-block bg-info shadow-primary rounded-3 position-absolute top-0 translate-middle-y p-3">
+						 <img src="/assets/icons/cms.svg" class="d-block m-1" width="40" alt="Icon">
+					</div>
+				 	<div class="card-body pt-3">
+						<h2 class="h4 d-inline-flex align-items-center">Вся работа в браузере</h2>
+						<p class="fs-sm text-body mb-0">Нет нужды устанавливать дополнительные программы. Создание и настройка сети выполняется прямо в браузере.</p>
+					</div>
+				 </div>
 			 </div>
-			 <div class="col-md-6 col-6 pb-4 pb-sm-3 pb-5">
-				 <img src="/images/yadro2025_net.png" class="rounded-3 shadow-sm" alt="Image">
+
+			 <div class="col py-4 my-2 my-sm-3">
+				 <div class="card card-hover h-100 border-0 shadow-sm text-decoration-none pt-5 px-sm-3 px-md-0 px-lg-3 pb-sm-3 pb-md-0 pb-lg-3 me-xl-2">
+					 <div class="d-inline-block bg-info shadow-primary rounded-3 position-absolute top-0 translate-middle-y p-3">
+						 <img src="/assets/icons/timer.svg" class="d-block m-1" width="40" alt="Icon">
+					</div>
+				 	<div class="card-body pt-3">
+						<h2 class="h4 d-inline-flex align-items-center">Точная эмуляция сети</h2>
+						<p class="fs-sm text-body mb-0">Во время эмуляции сети используется сетевой стек ОС Linux. Эмуляция происходит всего 10-15 секунд, в зависимости от настроек сети.</p>
+					</div>
+				 </div>
 			 </div>
-		 </div>
+
+			 <div class="col py-4 my-2 my-sm-3">
+				 <div class="card card-hover h-100 border-0 shadow-sm text-decoration-none pt-5 px-sm-3 px-md-0 px-lg-3 pb-sm-3 pb-md-0 pb-lg-3 me-xl-2">
+					 <div class="d-inline-block bg-info shadow-primary rounded-3 position-absolute top-0 translate-middle-y p-3">
+						 <img src="/assets/icons/analytics.svg" class="d-block m-1" width="40" alt="Icon">
+					</div>
+				 	<div class="card-body pt-3">
+						<h2 class="h4 d-inline-flex align-items-center">Анимация сети</h2>
+						<p class="fs-sm text-body mb-0">Детальная анимация помогает досконально изучать работу сети и конкретных протоколов. Анимацию можно проматывать до конкретного шага.</p>
+					</div>
+				 </div>
+			 </div>
+
+			 <div class="col py-4 my-2 my-sm-3">
+				 <div class="card card-hover h-100 border-0 shadow-sm text-decoration-none pt-5 px-sm-3 px-md-0 px-lg-3 pb-sm-3 pb-md-0 pb-lg-3 me-xl-2">
+					 <div class="d-inline-block bg-info shadow-primary rounded-3 position-absolute top-0 translate-middle-y p-3">
+						 <img src="/assets/icons/rocket.svg" class="d-block m-1" width="40" alt="Icon">
+					</div>
+				 	<div class="card-body pt-3">
+						<h2 class="h4 d-inline-flex align-items-center">Разнообразие сетевых настроек</h2>
+						<p class="fs-sm text-body mb-0">Можно запускать TCP/UDP сервер и клиент, детально изучать работу всего TCP/IP стека, устанавливать потери в канале. Есть поддержка NAT, VLAN, IPIP, GRE, VxLAN, STP/RSTP.</p>
+					</div>
+				 </div>
+			 </div>
+
+			 <div class="col py-4 my-2 my-sm-3">
+				 <div class="card card-hover h-100 border-0 shadow-sm text-decoration-none pt-5 px-sm-3 px-md-0 px-lg-3 pb-sm-3 pb-md-0 pb-lg-3 me-xl-2">
+					 <div class="d-inline-block bg-info shadow-primary rounded-3 position-absolute top-0 translate-middle-y p-3">
+						 <img src="/assets/icons/insurance.svg" class="d-block m-1" width="40" alt="Icon">
+					</div>
+				 	<div class="card-body pt-3">
+						<h2 class="h4 d-inline-flex align-items-center">Проверка знаний (тестирование)</h2>
+						<p class="fs-sm text-body mb-0">Можно проводить автоматическое тестирование по теории и практике. Свяжитесь с нами для добавления своих вопросов!</p>
+					</div>
+				 </div>
+			 </div>
+
+		 </div>		 
 	 </div>
  </section>
+
+ <section class="container pt-4 pt-lg-0 pb-4 pb-lg-5">
+	 <h2 class="h1 text-center py-5 pb-md-0">Примеры использования</h2>
+
+
 
  <section class="container pt-4 pt-lg-0 pb-4 pb-lg-5">
         <h2 class="h1 text-center py-5 pb-md-0">Как это работает?</h2>
