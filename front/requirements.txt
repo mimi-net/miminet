@@ -31,7 +31,7 @@ PySocks==1.7.1
 pytest==8.3.5
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.0
-requests==2.32.3
+requests==2.32.4
 requests-oauthlib==2.0.0
 rsa==4.9.1
 six==1.17.0
