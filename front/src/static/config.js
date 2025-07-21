@@ -437,6 +437,20 @@ const SharedConfigSwitchForm = function (switch_id) {
     $('#config_switch_main_form_submit_button').prop('disabled', true);
 }
 
+const SharedConfigEdgeForm = function (edge_id) {
+    var form = document.getElementById('config_edge_main_form_script').innerHTML;
+
+    // Clear all child
+    $(config_content_id).empty();
+    $(config_content_save_tag).empty();
+    document.getElementById(config_content_save_id).style.display='none';
+
+    // Add new form
+    $(config_content_id).append(form);
+    $('#config_edge_main_form_submit_button').prop('disabled', true);
+}
+
+
 const ConfigHostName = function (hostname) {
 
     var text = document.getElementById('config_host_name_script').innerHTML;

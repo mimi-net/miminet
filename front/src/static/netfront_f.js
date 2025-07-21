@@ -337,7 +337,12 @@ const ShowEdgeConfig = function(edge_id, shared = 0){
     let edge_loss = ed.data.loss_percentage || 0
 
     // Create form
-    ConfigEdgeForm(edge_id);
+    if (shared){
+        SharedConfigEdgeForm(edge_id);
+    } else {
+        ConfigEdgeForm(edge_id);
+    }
+
 
     // Add loss percentage info
     ConfigEdgePercentage(edge_loss)
@@ -1196,7 +1201,7 @@ const DrawSharedGraph = function(nodes, edges) {
         // Is this edge ?
         if (evtTarget.group() === 'edges'){
             selected_edge_id = evtTarget.data().id;
-            ShowEdgeConfig(selected_edge_id);
+            ShowEdgeConfig(selected_edge_id, 1);
             selecteed_node_id = 0;
             return;
         }
