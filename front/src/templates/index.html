@@ -14,7 +14,7 @@
                     <div class="d-flex align-items-center justify-content-center text-center" style="height: 300px;">
                         <p class="fs-2">Эмулятор компьютерной сети для образовательных целей на базе ОС Linux
                             <br>
-                            <a href="{{ url_for('home') }}" class="btn btn-primary">Создать сеть</a>
+                            <a href="{{ url_for('home') }}" class="mt-5 btn btn-primary">Создать сеть</a>
                         </p>
                     </div>
 
@@ -28,7 +28,7 @@
 		 <h2 class="h1 text-center text-md-start pb-3 pb-md-0 mb-md-5">Возможности</h2>
 		 <div class="row row-cols-1 row-cols-md-2">
 			 <div class="col py-4 my-2 my-sm-3">
-				 <div class="card card-hover h-100 border-0 shadow-sm text-decoration-none pt-5 px-sm-3 px-md-0 px-lg-3 pb-sm-3 pb-md-0 pb-lg-3 me-xl-2">
+				 <div class="card h-100 border-0 shadow-sm text-decoration-none pt-5 px-sm-3 px-md-0 px-lg-3 pb-sm-3 pb-md-0 pb-lg-3 me-xl-2">
 					 <div class="d-inline-block bg-info shadow-primary rounded-3 position-absolute top-0 translate-middle-y p-3">
 						 <img src="/assets/icons/cms.svg" class="d-block m-1" width="40" alt="Icon">
 					</div>
@@ -40,19 +40,19 @@
 			 </div>
 
 			 <div class="col py-4 my-2 my-sm-3">
-				 <div class="card card-hover h-100 border-0 shadow-sm text-decoration-none pt-5 px-sm-3 px-md-0 px-lg-3 pb-sm-3 pb-md-0 pb-lg-3 me-xl-2">
+				 <div class="card h-100 border-0 shadow-sm text-decoration-none pt-5 px-sm-3 px-md-0 px-lg-3 pb-sm-3 pb-md-0 pb-lg-3 me-xl-2">
 					 <div class="d-inline-block bg-info shadow-primary rounded-3 position-absolute top-0 translate-middle-y p-3">
 						 <img src="/assets/icons/timer.svg" class="d-block m-1" width="40" alt="Icon">
 					</div>
 				 	<div class="card-body pt-3">
 						<h2 class="h4 d-inline-flex align-items-center">Точная эмуляция сети</h2>
-						<p class="fs-sm text-body mb-0">Во время эмуляции сети используется сетевой стек ОС Linux. Эмуляция происходит всего 10-15 секунд, в зависимости от настроек сети.</p>
+						<p class="fs-sm text-body mb-0">Для эмуляции сети используется сетевой стек ОС Linux. Весь процесс занимает всего 10-15 секунд, в зависимости от настроек сети.</p>
 					</div>
 				 </div>
 			 </div>
 
 			 <div class="col py-4 my-2 my-sm-3">
-				 <div class="card card-hover h-100 border-0 shadow-sm text-decoration-none pt-5 px-sm-3 px-md-0 px-lg-3 pb-sm-3 pb-md-0 pb-lg-3 me-xl-2">
+				 <div class="card h-100 border-0 shadow-sm text-decoration-none pt-5 px-sm-3 px-md-0 px-lg-3 pb-sm-3 pb-md-0 pb-lg-3 me-xl-2">
 					 <div class="d-inline-block bg-info shadow-primary rounded-3 position-absolute top-0 translate-middle-y p-3">
 						 <img src="/assets/icons/analytics.svg" class="d-block m-1" width="40" alt="Icon">
 					</div>
@@ -64,7 +64,7 @@
 			 </div>
 
 			 <div class="col py-4 my-2 my-sm-3">
-				 <div class="card card-hover h-100 border-0 shadow-sm text-decoration-none pt-5 px-sm-3 px-md-0 px-lg-3 pb-sm-3 pb-md-0 pb-lg-3 me-xl-2">
+				 <div class="card h-100 border-0 shadow-sm text-decoration-none pt-5 px-sm-3 px-md-0 px-lg-3 pb-sm-3 pb-md-0 pb-lg-3 me-xl-2">
 					 <div class="d-inline-block bg-info shadow-primary rounded-3 position-absolute top-0 translate-middle-y p-3">
 						 <img src="/assets/icons/rocket.svg" class="d-block m-1" width="40" alt="Icon">
 					</div>
@@ -76,13 +76,13 @@
 			 </div>
 
 			 <div class="col py-4 my-2 my-sm-3">
-				 <div class="card card-hover h-100 border-0 shadow-sm text-decoration-none pt-5 px-sm-3 px-md-0 px-lg-3 pb-sm-3 pb-md-0 pb-lg-3 me-xl-2">
+				 <div class="card h-100 border-0 shadow-sm text-decoration-none pt-5 px-sm-3 px-md-0 px-lg-3 pb-sm-3 pb-md-0 pb-lg-3 me-xl-2">
 					 <div class="d-inline-block bg-info shadow-primary rounded-3 position-absolute top-0 translate-middle-y p-3">
 						 <img src="/assets/icons/insurance.svg" class="d-block m-1" width="40" alt="Icon">
 					</div>
 				 	<div class="card-body pt-3">
 						<h2 class="h4 d-inline-flex align-items-center">Проверка знаний (тестирование)</h2>
-						<p class="fs-sm text-body mb-0">Можно проводить автоматическое тестирование по теории и практике. Свяжитесь с нами для добавления своих вопросов!</p>
+						<p class="fs-sm text-body mb-0">Автоматическое тестирование по теории и практике. Свяжитесь с нами для добавления своих вопросов и задач!</p>
 					</div>
 				 </div>
 			 </div>
@@ -91,10 +91,110 @@
 	 </div>
  </section>
 
- <section class="container pt-4 pt-lg-0 pb-4 pb-lg-5">
-	 <h2 class="h1 text-center py-5 pb-md-0">Примеры использования</h2>
+ <section class="pt-4 pt-lg-0 pb-lg-5 pb-4 pb-3">
+	 <div class="container pb-4 pt-5">
+		 <h2 class="h1 mb-lg-4 mb-3 text-center">Кто использует Miminet?</h2>
+		 <p class="mb-lg-5 mb-4 pb-lg-0 pb-md-2 mx-auto text-center" style="max-width: 40.75rem;">Miminet уже воспользовались 15 000+ обучающихся.</p>
 
+		 <div class="row">
+			 <div class="col-lg-4 col-md-4 col-sm-4 text-center pb-md-2 mb-3 mb-lg-4">
+				 <a href="https://spbu.ru/" target="_blank" class="card-hover h-100 py-sm-4 py-3 px-3 mx-2 border-0 shadow-sm rounded-pill d-flex align-items-center">
+					 <img src="/images/spbu_logo.png" class="d-block my-sm-0 my-1 my-auto mx-auto" width="175" alt="SPBU brand">
+				 </a>
+			 </div>
 
+			 <div class="col-lg-4 col-md-4 col-sm-4 text-center pb-md-2 mb-3 mb-lg-4">
+				 <a href="https://itmo.ru/" target="_blank" class="card-hover h-100 py-sm-4 py-3 px-3 mx-2 border-0 shadow-sm rounded-pill d-flex align-items-center">
+					 <img src="/images/itmo_logo.png" class="d-block my-sm-0 my-1 mx-auto" width="175" alt="ITMO brand">
+				 </a>
+			 </div>
+
+			 <div class="col-lg-4 col-md-4 col-sm-4 text-center pb-md-2 mb-3 mb-lg-4">
+				 <a href="https://tsu.ru/" target="_blank" class="card-hover h-100 py-sm-4 py-3 px-3 mx-2 border-0 shadow-sm rounded-pill d-flex align-items-center">
+					 <img src="/images/tsu_logo.png" class="d-block my-sm-0 my-1 mx-auto" width="175" alt="TSU brand">
+				 </a>
+			 </div>
+		 </div>
+	 </div>
+</section>
+
+ <section class="pt-4 pt-lg-0 bg-secondary">
+	 <div class="container pb-4 pt-5">
+
+		 <h2 class="h1 text-center pb-md-0">Примеры использования</h2>
+
+		 <div class="row gy-4 pb-xl-5 pb-md-4 pb-3">
+			 <div class="col-lg-5 col-md-6 order-md-1 order-2 d-flex">
+				 <div class="align-self-center pe-lg-0 pe-md-4">
+					 <h3 class="mb-md-4">На лекциях</h3>
+					 <p class="mb-md-4 mb-3 fs-lg">Интерактивный инструмент для лектора. Можно прямо в браузере рисовать схемы сетей и сразу анимировать их, демонстрируя работу различных протоколов и устройств.</p>
+					 <hr class="my-md-4 my-3">
+					 <ul class="list-unstyled d-flex flex-wrap mt-md-n3 mt-n2 ms-md-n4 ms-n3 mb-0 pb-lg-4 pb-md-2 fw-bold">
+						 <li class="mt-md-3 mt-2 ms-md-4 ms-3">Хост</li>
+						 <li class="mt-md-3 mt-2 ms-md-4 ms-3">Коммутатор</li>
+						 <li class="mt-md-3 mt-2 ms-md-4 ms-3">Маршрутизатор</li>
+						 <li class="mt-md-3 mt-2 ms-md-4 ms-3">Сервер</li>
+					 </ul>
+				 </div>
+			 </div>
+
+			 <div class="col-md-6 offset-lg-1 order-md-2 order-1 rellax" data-rellax-percentage="0.5" data-rellax-speed="0.5" data-disable-parallax-down="md">
+
+				 <div class="bg-secondary rounded-3">
+					 <img src="/images/lecture.png" alt="Lecture image" class="d-block">
+				 </div>
+			 </div>
+		 </div>
+
+		 <div class="row gy-4 pb-xl-5 pb-md-4 pb-3">
+
+			 <div class="col-md-6 offset-lg-1 order-md-2 order-1 rellax" data-rellax-percentage="0.5" data-rellax-speed="0.5" data-disable-parallax-down="md">
+
+				 <div class="bg-secondary rounded-3">
+					 <img src="/images/practice.png" alt="Practice image" class="d-block">
+				 </div>
+			 </div>
+
+			 <div class="col-lg-5 col-md-6 order-md-1 order-2 d-flex">
+				 <div class="align-self-center pe-lg-0 pe-md-4">
+
+					 <h3 class="mb-md-4">На практиках</h3>
+					 <p class="mb-md-4 mb-3 fs-lg">Большой набор конфигурируемых параметров. Вы можете собирать простые и сложные конфигурации, эмулировать их и детально изучать работу отдельных протоколов: ARP, IP, TCP, ICMP, GRE и многих других.</p>
+					 <hr class="my-md-4 my-3">
+					 <ul class="list-unstyled d-flex flex-wrap mt-md-n3 mt-n2 ms-md-n4 ms-n3 mb-0 pb-lg-4 pb-md-2 fw-bold">
+
+						 <li class="mt-md-3 mt-2 ms-md-4 ms-3">TCP/IP</li>
+						 <li class="mt-md-3 mt-2 ms-md-4 ms-3">VLAN</li>
+						 <li class="mt-md-3 mt-2 ms-md-4 ms-3">STP/RSTP</li>
+						 <li class="mt-md-3 mt-2 ms-md-4 ms-3">VPN (IPIP, GRE)</li>
+						 <li class="mt-md-3 mt-2 ms-md-4 ms-3">NAT</li>
+					 </ul>
+				 </div>
+			 </div>
+		 </div>
+
+		 <div class="row gy-4">
+			 <div class="col-lg-5 col-md-6 order-md-1 order-2 d-flex">
+				 <div class="align-self-center pe-lg-0 pe-md-4">
+					 <h3 class="mb-md-4">Проверка знаний</h3>
+					 <p class="mb-md-4 mb-3 fs-lg">Раздел "Тестирование" помогает проводить собеседования и проверку знаний у обучающихся. Можно создавать свои наборы тестов из теоретических вопросов и практических заданий с автоматической проверкой.</p>
+
+					 <hr class="my-md-4 my-3">
+					 <ul class="list-unstyled d-flex flex-wrap mt-md-n3 mt-n2 ms-md-n4 ms-n3 mb-0 pb-lg-4 pb-md-2 fw-bold">
+						 <li class="mt-md-3 mt-2 ms-md-4 ms-3">100+ Вопросов в базе</li>
+						 <li class="mt-md-3 mt-2 ms-md-4 ms-3">10+ Практических задач</li>
+					 </ul>
+				 </div>
+			 </div>
+
+			 <div class="col-md-6 offset-lg-1 order-md-2 order-1 rellax" data-rellax-percentage="0.5" data-rellax-speed="0.5" data-disable-parallax-down="md">
+				 <div class="bg-secondary rounded-3">
+					 <img src="/images/test.png" alt="Test image" class="d-block">
+				 </div>
+			 </div>
+		 </div>
+	 </div>
+ </section>
 
  <section class="container pt-4 pt-lg-0 pb-4 pb-lg-5">
         <h2 class="h1 text-center py-5 pb-md-0">Как это работает?</h2>
