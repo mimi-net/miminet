@@ -49,57 +49,59 @@
 <!-- End Google Tag Manager (noscript) -->
 
 {% if mimishark_nav is not defined %}
-    <nav class="header navbar navbar-expand-lg position-absolute navbar-sticky">
-        <div class="container">
-            <a href="/" class="navbar-brand" style="min-width: 170px">
-                <img src="{{ url_for('static', filename='/images/logo.png') }}" width="170" alt="Miminet">
-            </a>
+    {% if question.question_type != "practice" %}
+        <nav class="header navbar navbar-expand-lg position-absolute navbar-sticky">
+            <div class="container">
+                <a href="/" class="navbar-brand" style="min-width: 170px">
+                    <img src="{{ url_for('static', filename='/images/logo.png') }}" width="170" alt="Miminet">
+                </a>
 
-            {# Test name and section name #}
-            <div class="align-items-baseline"
-                 style="display: flex; flex-direction: row;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">
-                <div class="col-auto mx-1">
-                    <b class="mb-0" id="test_name"></b>
+                {# Test name and section name #}
+                <div class="align-items-baseline"
+                    style="display: flex; flex-direction: row;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">
+                    <div class="col-auto mx-1">
+                        <b class="mb-0" id="test_name"></b>
+                    </div>
+                    <div class="col-auto mx-1">
+                        <b class="mb-0" id="slash_symbol"></b>
+                    </div>
+                    <div class="col-auto mx-1">
+                        <p class="mb-0" style="font-weight: normal" id="section_name"></p>
+                    </div>
                 </div>
-                <div class="col-auto mx-1">
-                    <b class="mb-0" id="slash_symbol"></b>
-                </div>
-                <div class="col-auto mx-1">
-                    <p class="mb-0" style="font-weight: normal" id="section_name"></p>
-                </div>
-            </div>
 
-            {% if current_user.is_authenticated %}
-                <div class="navbar-nav">
-                    <li id="trainer-nav-item" class="nav-item">
-                        <a class="nav-link" href="{{ url_for('get_all_tests_endpoint') }}">Тестирование</a>
-                    </li>
-                    <li id="examples-nav-item" class="nav-item">
-                        <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
-                    </li>
-                    <li id="my-networks-nav-item" class="nav-item">
-                        <a class="nav-link" href="{{ url_for('home') }}">Мои сети</a>
-                    </li>
-                </div>
-            {% else %}
-                {% if request.path != url_for('login_index') %}
+                {% if current_user.is_authenticated %}
                     <div class="navbar-nav">
                         <li id="trainer-nav-item" class="nav-item">
-                            <a class="nav-link" href="{{ url_for('login_index') }}">Тестирование</a>
+                            <a class="nav-link" href="{{ url_for('get_all_tests_endpoint') }}">Тестирование</a>
                         </li>
                         <li id="examples-nav-item" class="nav-item">
                             <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
                         </li>
-                        <li id="auth-nav-item" class="nav-item">
-                            <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary">
-                                <i class="bx fs-5 lh-1 me-1"></i>Вход
-                            </a>
+                        <li id="my-networks-nav-item" class="nav-item">
+                            <a class="nav-link" href="{{ url_for('home') }}">Мои сети</a>
                         </li>
                     </div>
+                {% else %}
+                    {% if request.path != url_for('login_index') %}
+                        <div class="navbar-nav">
+                            <li id="trainer-nav-item" class="nav-item">
+                                <a class="nav-link" href="{{ url_for('login_index') }}">Тестирование</a>
+                            </li>
+                            <li id="examples-nav-item" class="nav-item">
+                                <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
+                            </li>
+                            <li id="auth-nav-item" class="nav-item">
+                                <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary">
+                                    <i class="bx fs-5 lh-1 me-1"></i>Вход
+                                </a>
+                            </li>
+                        </div>
+                    {% endif %}
                 {% endif %}
-            {% endif %}
-        </div>
-    </nav>
+            </div>
+        </nav>
+    {% endif %}
 
     <div class="modal" id="noJobsModal" tabindex="-1" role="dialog" aria-labelledby="noJobsModalLabel"
          aria-hidden="true" data-focus-on="input:first">
