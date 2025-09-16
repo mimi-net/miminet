@@ -8,7 +8,6 @@ from typing import Any, Callable
 
 
 
-
 def ping_handler(job: Job, job_host: Any) -> None:
     """Execute ping -c 1"""
     arg_ip = job.arg_1
