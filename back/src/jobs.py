@@ -8,6 +8,10 @@ from network_schema import Job
 
 from typing import Any, Callable, Optional, Tuple
 
+from net_utils.switches import IPSwitch, IPOVSSwitch
+
+
+
 
 def filter_arg_for_options(
     arg: str, flags_without_args: List[str], flags_with_args: Dict[str, str]
