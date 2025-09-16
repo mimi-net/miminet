@@ -17,6 +17,8 @@ from mininet.link import Link
 
 from mininet.node import Host
 from mininet.net import Mininet
+from mininet.net import Mininet
+from net_utils.arp_proxy import configure_vlan_subinterface  
 class MiminetNetwork(IPNet):
     def __init__(self, topo: MiminetTopology, network: Network):
         super().__init__(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
@@ -30,6 +32,15 @@ class MiminetNetwork(IPNet):
         # Additional settings
         setup_vlans(self, self.__network_schema.nodes)
         setup_vtep_interfaces(self, self.__network_schema.nodes)
+        
+        # Enable ARP Proxy for VLAN subinterfaces dynamically
+        for host in self.hosts:
+            node_info = self.__network_schema.nodes.get(host.name, {})
+            vlan_id = node_info.get("vlan_id")
+            if vlan_id is not None:
+                configure_vlan_subinterface(host, vlan_id=vlan_id)
+                info(f"Configured VLAN {vlan_id} on host {host.name}\n")
+
 
         # Waiting for network setup
         time.sleep(self.__network_topology.network_configuration_time)
@@ -93,64 +104,3 @@ class MiminetNetwork(IPNet):
                 info(f"Killed: {child.name()} {child.pid}")
                 child.kill()
                 child.wait()
-
-
-
-
-def setup_arp_proxy_on_subinterface(node, sub_intf):
-    """Configure ARP Proxying for a given subinterface"""
-    # Enable ARP Proxying
-    node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
-    node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
-
-    # Enable global forwarding
-    node.cmd("sysctl -w net.ipv4.ip_forward=1")
-
-    # More relaxed ARP behaviour for proxying
-    node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.arp_ignore=0")
-    node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.arp_announce=0")
-
-    # Also configure parent interface
-    parent_iface = sub_intf.split('.')[0]
-    node.cmd(f"sysctl -w net.ipv4.conf.{parent_iface}.proxy_arp=1")
-    node.cmd(f"sysctl -w net.ipv4.conf.{parent_iface}.forwarding=1")
-
-    print(f"[OK] ARP Proxy enabled on {sub_intf} (parent={parent_iface})")
-
-
-
-def setup_arp_proxy_on_subinterface(node: Host, sub_intf: str) -> None:
-    node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
-    node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
-    node.cmd("sysctl -w net.ipv4.ip_forward=1")
-    node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.arp_ignore=0")
-    node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.arp_announce=0")
-
-    parent_iface: str = sub_intf.split('.')[0]
-    node.cmd(f"sysctl -w net.ipv4.conf.{parent_iface}.proxy_arp=1")
-    node.cmd(f"sysctl -w net.ipv4.conf.{parent_iface}.forwarding=1")
-
-    print(f"[OK] ARP Proxy enabled on {sub_intf} (parent={parent_iface})")
-
-
-def configure_network(net: Mininet, vlan_id: int = 10, base_subnet: str = "192.168.10.0/24") -> None:
-    for host in net.hosts:
-        host.cmd("sysctl -w net.ipv4.conf.all.proxy_arp=1")
-        host.cmd("sysctl -w net.ipv4.conf.default.proxy_arp=1")
-
-        ifaces: list[str] = host.intfNames()
-        if len(ifaces) < 1:
-            continue
-        parent: str = ifaces[0]
-
-        sub_intf: str = f"{parent}.{vlan_id}"
-        host.cmd(f"ip link add link {parent} name {sub_intf} type vlan id {vlan_id}")
-        host.cmd(f"ip link set {sub_intf} up")
-
-        ip_suffix: str = host.IP().split('.')[-1]
-        host.cmd(f"ip addr add 192.168.{vlan_id}.{ip_suffix}/24 dev {sub_intf}")
-
-        setup_arp_proxy_on_subinterface(host, sub_intf)
-
-    print(f"Network ARP Proxy configuration completed for VLAN {vlan_id}.")
-
