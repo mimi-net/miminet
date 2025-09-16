@@ -15,11 +15,6 @@ from mininet.net import Mininet
 from mininet.node import Host
 from mininet.link import Link
 
-from mininet.node import Host
-from mininet.net import Mininet
-from mininet.net import Mininet
-from net_utils.arp_proxy import configure_vlan_subinterface
-
 class MiminetNetwork(IPNet):
     def __init__(self, topo: MiminetTopology, network: Network):
         super().__init__(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
@@ -33,13 +28,13 @@ class MiminetNetwork(IPNet):
         # Additional settings
         setup_vlans(self, self.__network_schema.nodes)
         setup_vtep_interfaces(self, self.__network_schema.nodes)
-        
+                
         # Enable ARP Proxy for VLAN subinterfaces dynamically
         for host in self.hosts:
             node_info = self.__network_schema.nodes.get(host.name, {})
             vlan_id = node_info.get("vlan_id")
             if vlan_id is not None:
-                configure_vlan_subinterface(host, vlan_id=vlan_id)
+                self.create_vlan_subinterface(host, parent="eth0", vlan_id=vlan_id)
                 info(f"Configured VLAN {vlan_id} on host {host.name}\n")
 
 
@@ -47,6 +42,14 @@ class MiminetNetwork(IPNet):
         time.sleep(self.__network_topology.network_configuration_time)
 
         self.__check_files()
+    @staticmethod
+    def create_vlan_subinterface(host, parent, vlan_id):
+        """Create VLAN subinterface and enable ARP proxy."""
+        sub_intf = f"{parent}.{vlan_id}"
+        host.cmd(f"ip link add link {parent} name {sub_intf} type vlan id {vlan_id}")
+        host.cmd(f"ip link set dev {sub_intf} up")
+        host.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
+        return sub_intf    
 
     def stop(self):
         # Wait before stop

@@ -188,7 +188,6 @@ def valid_iface(iface) -> bool:
         return False
     return True
 
-
 def ping_handler(job: Job, job_host: Any) -> None:
     """Execute ping -c 1"""
     arg_ip = job.arg_1
