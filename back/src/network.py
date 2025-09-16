@@ -15,6 +15,8 @@ from mininet.net import Mininet
 from mininet.node import Host
 from mininet.link import Link
 
+from mininet.node import Host
+from mininet.net import Mininet
 class MiminetNetwork(IPNet):
     def __init__(self, topo: MiminetTopology, network: Network):
         super().__init__(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
@@ -115,25 +117,36 @@ def setup_arp_proxy_on_subinterface(node, sub_intf):
     print(f"[OK] ARP Proxy enabled on {sub_intf} (parent={parent_iface})")
 
 
-def configure_network(net: Mininet, vlan_id=10, base_subnet="192.168.10.0/24"):
-    """Configure VLAN subinterfaces with ARP Proxying for all hosts"""
+
+def setup_arp_proxy_on_subinterface(node: Host, sub_intf: str) -> None:
+    node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
+    node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
+    node.cmd("sysctl -w net.ipv4.ip_forward=1")
+    node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.arp_ignore=0")
+    node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.arp_announce=0")
+
+    parent_iface: str = sub_intf.split('.')[0]
+    node.cmd(f"sysctl -w net.ipv4.conf.{parent_iface}.proxy_arp=1")
+    node.cmd(f"sysctl -w net.ipv4.conf.{parent_iface}.forwarding=1")
+
+    print(f"[OK] ARP Proxy enabled on {sub_intf} (parent={parent_iface})")
+
+
+def configure_network(net: Mininet, vlan_id: int = 10, base_subnet: str = "192.168.10.0/24") -> None:
     for host in net.hosts:
-        # Enable global proxy_arp
         host.cmd("sysctl -w net.ipv4.conf.all.proxy_arp=1")
         host.cmd("sysctl -w net.ipv4.conf.default.proxy_arp=1")
 
-        # Pick first interface of the host (or adjust)
-        ifaces = host.intfNames()
+        ifaces: list[str] = host.intfNames()
         if len(ifaces) < 1:
             continue
-        parent = ifaces[0]   # e.g. h1-eth0
+        parent: str = ifaces[0]
 
-        sub_intf = f"{parent}.{vlan_id}"
+        sub_intf: str = f"{parent}.{vlan_id}"
         host.cmd(f"ip link add link {parent} name {sub_intf} type vlan id {vlan_id}")
         host.cmd(f"ip link set {sub_intf} up")
 
-        # Assign IP (based on host ID, last octet from Mininet default IP)
-        ip_suffix = host.IP().split('.')[-1]
+        ip_suffix: str = host.IP().split('.')[-1]
         host.cmd(f"ip addr add 192.168.{vlan_id}.{ip_suffix}/24 dev {sub_intf}")
 
         setup_arp_proxy_on_subinterface(host, sub_intf)
