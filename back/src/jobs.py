@@ -463,3 +463,47 @@ class Jobs:
 
     def handler(self) -> None:
         self._strategy(self._job, self._job_host)
+
+
+
+def create_vlan_subinterface(job_host, parent: str, vlan: int, ip: str = None, mask: int = None) -> str:
+    """Create VLAN subinterface and bring it up. Returns subinterface name."""
+    sub_intf = f"{parent}.{vlan}"
+
+    # Avoid duplicates (delete if already exists)
+    job_host.cmd(f"ip link del {sub_intf} 2>/dev/null || true")
+
+    job_host.cmd(f"ip link add link {parent} name {sub_intf} type vlan id {vlan}")
+    job_host.cmd(f"ip link set dev {sub_intf} up")
+
+    if ip and mask:
+        job_host.cmd(f"ip addr add {ip}/{mask} dev {sub_intf}")
+
+    return sub_intf
+
+
+def enable_arp_proxy(job: Job, job_host: Any) -> None:
+    """Enable ARP proxying on an interface (parent or VLAN subinterface)."""
+    arg_iface = job.arg_1  # Parent or subinterface
+    sub_intf = arg_iface
+
+    if "." not in arg_iface:
+        # Need to create VLAN subinterface
+        vlan = int(job.arg_2)
+        ip = job.arg_3
+        mask = job.arg_4
+        sub_intf = create_vlan_subinterface(job_host, arg_iface, vlan, ip, mask)
+
+    # Enable ARP proxy on subinterface
+    job_host.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
+    job_host.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
+    job_host.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.arp_ignore=0")
+    job_host.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.arp_announce=0")
+
+    # Enable on parent too
+    parent = sub_intf.split('.')[0]
+    job_host.cmd(f"sysctl -w net.ipv4.conf.{parent}.proxy_arp=1")
+    job_host.cmd(f"sysctl -w net.ipv4.conf.{parent}.forwarding=1")
+
+    print(f"[OK] ARP Proxy enabled on {sub_intf} (parent={parent})")
+ 
