@@ -1,9 +1,8 @@
 from ipmininet.ipnet import IPNet
 from ipmininet.ipswitch import IPSwitch
+from ipmininet.ipovs_switch import IPOVSSwitch
 
 from network_schema import Node, NodeInterface
-
-
 
 
 def setup_vlans(net: IPNet, nodes: list[Node]) -> None:
@@ -83,13 +82,14 @@ def add_bridge(switch: IPSwitch, interface: list[NodeInterface]) -> None:
     switch.cmd(f'ip link set dev {f"br-{switch.name}"} type bridge vlan_filtering 1')
 
     
-# Enable ARP Proxy on this interface
-    switch.cmd(f"sysctl -w net.ipv4.conf.{intf}.proxy_arp=1")
-    switch.cmd(f"sysctl -w net.ipv4.conf.{intf}.forwarding=1")  # Enable forwarding
+
+def configure_access_with_arp(switch: IPSwitch, intf: str, vlan: int) -> None:
+    """Configure access VLAN and enable ARP proxying."""
+    switch.cmd(f'ip link set {intf} master {f"br-{switch.name}"}')
+    switch.cmd(f"bridge vlan del dev {intf} vid 1")
+    switch.cmd(f"bridge vlan add dev {intf} vid {vlan} pvid untagged")
 
     # Enable ARP Proxy for VLAN sub-interface (if created)
     sub_intf = f"{intf}.{vlan}"
     switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
     switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
-    
-    
