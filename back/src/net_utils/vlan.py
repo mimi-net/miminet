@@ -98,7 +98,7 @@ def configure_access(switch: IPSwitch, intf: str, vlan: int) -> None:
     switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
 
 
-def configure_trunk(switch: IPSwitch, intf: str, vlans: list[int]) -> None:
+def configure_trunk_vlan(switch: IPSwitch, intf: str, vlans: list[int]) -> None:
     switch.cmd(f'ip link set {intf} master {f"br-{switch.name}"}')
     switch.cmd(f"bridge vlan del dev {intf} vid 1")
 
