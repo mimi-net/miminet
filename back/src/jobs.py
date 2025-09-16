@@ -5,6 +5,10 @@ from network_schema import Job
 
 from typing import Any, Callable, Optional, Tuple
 
+from net_utils.switches import IPSwitch, IPOVSSwitch
+
+
+
 
 def ping_handler(job: Job, job_host: Any) -> None:
     """Execute ping -c 1"""

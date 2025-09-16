@@ -127,6 +127,7 @@ def configure_access(switch: IPSwitch, intf: str, vlan: int) -> None:
     switch.cmd(f"sysctl -w net.ipv4.conf.br-{switch.name}.forwarding=1")
 
 
+
 # Optional: second function renamed to avoid mypy redefinition error
 def configure_access_vlan(switch: IPSwitch, intf: str, vlan: int, ip: Optional[str] = None, mask: Optional[int] = None) -> None:
     """Optional variant for VLAN subinterface with optional IP assignment."""
