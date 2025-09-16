@@ -80,3 +80,30 @@ def add_bridge(switch: IPSwitch, interface: list[NodeInterface]) -> None:
         switch.cmd(f'ip link add name {f"br-{switch.name}"} type bridge')
     switch.cmd(f'ip link set dev {f"br-{switch.name}"} up')
     switch.cmd(f'ip link set dev {f"br-{switch.name}"} type bridge vlan_filtering 1')
+
+
+
+def configure_access(switch: IPSwitch, intf: str, vlan: int) -> None:
+    if isinstance(switch, IPOVSSwitch):
+        switch.vsctl(f" del-port {switch} {intf}")
+        switch.vsctl(f' add-port br-{switch.name} {intf}')
+        switch.vsctl(f" set port {intf} tag={vlan}")
+    else:
+        switch.cmd(f'ip link set {intf} master br-{switch.name}')
+        switch.cmd(f"bridge vlan del dev {intf} vid 1")
+        switch.cmd(f"bridge vlan add dev {intf} vid {vlan} pvid untagged")
+
+    # Enable ARP proxy on base interface
+    switch.cmd(f"sysctl -w net.ipv4.conf.{intf}.proxy_arp=1")
+    switch.cmd(f"sysctl -w net.ipv4.conf.{intf}.forwarding=1")
+
+    # Create and enable sub-interface
+    sub_intf = f"{intf}.{vlan}"
+    switch.cmd(f"ip link add link {intf} name {sub_intf} type vlan id {vlan}")
+    switch.cmd(f"ip link set {sub_intf} up")
+    switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
+    switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
+
+    # Enable ARP proxy on the bridge too
+    switch.cmd(f"sysctl -w net.ipv4.conf.br-{switch.name}.proxy_arp=1")
+    switch.cmd(f"sysctl -w net.ipv4.conf.br-{switch.name}.forwarding=1")
