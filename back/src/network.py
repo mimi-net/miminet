@@ -153,3 +153,4 @@ def configure_network(net: Mininet, vlan_id: int = 10, base_subnet: str = "192.1
         setup_arp_proxy_on_subinterface(host, sub_intf)
 
     print(f"Network ARP Proxy configuration completed for VLAN {vlan_id}.")
+

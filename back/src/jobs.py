@@ -1,5 +1,4 @@
 import re
-from typing import Any, Callable
 
 from network_schema import Job
 
@@ -179,6 +178,9 @@ def add_gre(job: Job, job_host: Any) -> None:
     job_host.cmd(f"ip link set {arg_name_iface} up")
 
 
+
+
+
 def arp_proxy_enable(job: Job, job_host: Any) -> None:
     """Enable ARP proxying on the interface"""
     arg_iface = job.arg_1
@@ -248,6 +250,13 @@ class Jobs:
 
 
 
+
+
+
+
+
+
+
 def ping_handler(job: Job, job_host: Any) -> None:
     arg_ip = job.arg_1
     job_host.cmd(f"ping -c 1 {arg_ip}")
@@ -256,7 +265,6 @@ def ping_handler(job: Job, job_host: Any) -> None:
 def ping_with_options_handler(job: Job, job_host: Any) -> None:
     arg_opt = job.arg_1
     arg_ip = job.arg_2
-
     if arg_opt:
         arg_opt = re.sub(r"[^\x00-\x7F]", "", str(arg_opt))
     job_host.cmd(f"ping -c 1 {arg_opt} {arg_ip}")
@@ -282,7 +290,6 @@ def sending_tcp_data_handler(job: Job, job_host: Any) -> None:
 def traceroute_handler(job: Job, job_host: Any) -> None:
     arg_opt = job.arg_1
     arg_ip = job.arg_2
-
     if arg_opt:
         arg_opt = re.sub(r"[^\x00-\x7F]", "", str(arg_opt))
     job_host.cmd(f"traceroute -n {arg_opt} {arg_ip}")
@@ -292,10 +299,8 @@ def ip_addr_add_handler(job: Job, job_host: Any) -> None:
     arg_dev = job.arg_1
     arg_ip = job.arg_2
     arg_mask = job.arg_3
-
     if arg_dev is None or arg_ip is None or arg_mask is None:
         return
-
     job_host.cmd(f"ip addr add {arg_ip}/{arg_mask} dev {arg_dev}")
 
 
@@ -337,92 +342,37 @@ def arp_handler(job: Job, job_host: Any) -> None:
     job_host.cmd(f"arp -s {arg_ip} {arg_mac}")
 
 
-def subinterface_with_vlan(job: Job, job_host: Any) -> None:
-    arg_intf = job.arg_1
-    arg_ip = job.arg_2
-    arg_mask = job.arg_3
-    arg_vlan = job.arg_4
-    arg_intf_name = arg_intf[6:]
-
-    job_host.cmd(f"ip link add link {arg_intf} name {arg_intf_name}.{arg_vlan} type vlan id {arg_vlan}")
-    job_host.cmd(f"ip addr add {arg_ip}/{arg_mask} dev {arg_intf_name}.{arg_vlan}")
-    job_host.cmd(f"ip link set dev {arg_intf_name}.{arg_vlan} up")
 
 
-def add_ipip_interface(job: Job, job_host: Any) -> None:
-    arg_ip_start = job.arg_1
-    arg_ip_end = job.arg_2
-    arg_ip_int = job.arg_3
-    arg_name_int = job.arg_4
-
-    job_host.cmd(f"ip tunnel add {arg_name_int} mode ipip remote {arg_ip_end} local {arg_ip_start}")
-    job_host.cmd(f"ifconfig {arg_name_int} {arg_ip_int}")
 
 
-def add_gre(job: Job, job_host: Any) -> None:
-    arg_ip_start = job.arg_1
-    arg_ip_end = job.arg_2
-    arg_ip_iface = job.arg_3
-    arg_name_iface = job.arg_4
 
-    job_host.cmd(f"ip tunnel add {arg_name_iface} mode gre remote {arg_ip_end} local {arg_ip_start} ttl 255")
-    job_host.cmd(f"ip addr add {arg_ip_iface}/24 dev {arg_name_iface}")
-    job_host.cmd(f"ip link set {arg_name_iface} up")
+# VLAN helpers
 
 
-def arp_proxy_enable(job: Job, job_host: Any) -> None:
-    arg_iface = job.arg_1
-    job_host.cmd(f"sysctl -w net.ipv4.conf.{arg_iface}.proxy_arp=1")
-
-
-# -----------------------
-# Jobs class
-# -----------------------
-
-class Jobs:
-    def __init__(self, job: Job, job_host: Any, **kwargs) -> None:
-        self._dct: dict[int, Callable[[Job, Any], None]] = {
-            1: ping_handler,
-            2: ping_with_options_handler,
-            3: sending_udp_data_handler,
-            4: sending_tcp_data_handler,
-            5: traceroute_handler,
-            100: ip_addr_add_handler,
-            101: iptables_handler,
-            102: ip_route_add_handler,
-            103: arp_handler,
-            104: subinterface_with_vlan,
-            105: add_ipip_interface,
-            106: add_gre,
-            107: arp_proxy_enable,
-            200: open_udp_server_handler,
-            201: open_tcp_server_handler,
-            202: block_tcp_udp_port,
-        }
-        self._job: Job = job
-        self._job_host = job_host
-        self._strategy: Callable[[Job, Any], None] = self._dct[self._job.job_id]
-
-    @property
-    def strategy(self) -> Callable[[Job, Any], None]:
-        return self._strategy
-
-    @strategy.setter
-    def strategy(self, job_id: int) -> None:
-        self._strategy = self._dct[job_id]
-
-    def handler(self) -> None:
-        self._strategy(self._job, self._job_host)
-
-
-# -----------------------
-# VLAN / ARP helpers
-# -----------------------
 
 def create_vlan_subinterface(
-    job_host: Any, parent: str, vlan: int, ip: Optional[str] = None, mask: Optional[int] = None
+    job_host: Any,
+    parent: str,
+    vlan: int,
+    ip: Optional[str] = None,
+    mask: Optional[int] = None
 ) -> str:
+    """
+    Create a VLAN subinterface on a host or switch.
+
+    Args:
+        job_host: Mininet host or switch.
+        parent: Parent interface name.
+        vlan: VLAN ID.
+        ip: Optional IP address.
+        mask: Optional subnet mask.
+
+    Returns:
+        Name of the subinterface created.
+    """
     sub_intf = f"{parent}.{vlan}"
+    # Remove if already exists
     job_host.cmd(f"ip link del {sub_intf} 2>/dev/null || true")
     job_host.cmd(f"ip link add link {parent} name {sub_intf} type vlan id {vlan}")
     job_host.cmd(f"ip link set dev {sub_intf} up")
@@ -431,39 +381,59 @@ def create_vlan_subinterface(
     return sub_intf
 
 
-def enable_arp_proxy(job: Job, job_host: Any) -> None:
-    arg_iface = job.arg_1
-    sub_intf = arg_iface
+def enable_arp_proxy(job_host: Any, iface: str) -> None:
+    """
+    Enable ARP proxying and IP forwarding on the interface.
 
-    if "." not in arg_iface:
-        vlan = int(job.arg_2)
-        ip = job.arg_3
-        mask = job.arg_4
-        sub_intf = create_vlan_subinterface(job_host, arg_iface, vlan, ip, mask)
-
-    job_host.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
-    job_host.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
-    job_host.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.arp_ignore=0")
-    job_host.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.arp_announce=0")
-
-    parent = sub_intf.split(".")[0]
-    job_host.cmd(f"sysctl -w net.ipv4.conf.{parent}.proxy_arp=1")
-    job_host.cmd(f"sysctl -w net.ipv4.conf.{parent}.forwarding=1")
-
-    print(f"[OK] ARP Proxy enabled on {sub_intf} (parent={parent})")
+    Args:
+        job_host: Mininet host or switch.
+        iface: Interface name.
+    """
+    job_host.cmd(f"sysctl -w net.ipv4.conf.{iface}.proxy_arp=1")
+    job_host.cmd(f"sysctl -w net.ipv4.conf.{iface}.forwarding=1")
+    job_host.cmd(f"sysctl -w net.ipv4.conf.{iface}.arp_ignore=0")
+    job_host.cmd(f"sysctl -w net.ipv4.conf.{iface}.arp_announce=0")
 
 
-# -----------------------
-# Optional renamed configure_access to avoid mypy redefinition
-# -----------------------
+def configure_access(
+    switch: IPSwitch,
+    intf: str,
+    vlan: int,
+    ip: Optional[str] = None,
+    mask: Optional[int] = None
+) -> str:
+    """
+    Configure a switch port for a VLAN and enable ARP proxying.
 
-def configure_access_vlan(
-    switch: IPSwitch, intf: str, vlan: int, ip: Optional[str] = None, mask: Optional[int] = None
-) -> None:
-    sub_intf = f"{intf}.{vlan}"
-    switch.cmd(f"ip link add link {intf} name {sub_intf} type vlan id {vlan}")
-    switch.cmd(f"ip link set {sub_intf} up")
-    if ip is not None and mask is not None:
-        switch.cmd(f"ip addr add {ip}/{mask} dev {sub_intf}")
-    switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
-    switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
+    Args:
+        switch: Switch object (IPSwitch or IPOVSSwitch)
+        intf: Interface name
+        vlan: VLAN ID
+        ip: Optional IP address for subinterface
+        mask: Optional subnet mask for subinterface
+
+    Returns:
+        Name of the created subinterface
+    """
+    # Configure VLAN on base interface
+    if isinstance(switch, IPOVSSwitch):
+        switch.vsctl(f"del-port {switch} {intf}")
+        switch.vsctl(f"add-port br-{switch.name} {intf}")
+        switch.vsctl(f"set port {intf} tag={vlan}")
+    else:
+        switch.cmd(f"ip link set {intf} master br-{switch.name}")
+        switch.cmd(f"bridge vlan del dev {intf} vid 1")
+        switch.cmd(f"bridge vlan add dev {intf} vid {vlan} pvid untagged")
+
+    # Enable ARP proxy on base interface
+    enable_arp_proxy(switch, intf)
+
+    # Create subinterface
+    sub_intf = create_vlan_subinterface(switch, intf, vlan, ip, mask)
+    enable_arp_proxy(switch, sub_intf)
+
+    # Enable ARP proxy on bridge too
+    switch.cmd(f"sysctl -w net.ipv4.conf.br-{switch.name}.proxy_arp=1")
+    switch.cmd(f"sysctl -w net.ipv4.conf.br-{switch.name}.forwarding=1")
+
+    return sub_intf
