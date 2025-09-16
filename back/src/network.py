@@ -14,7 +14,7 @@ from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
 from mininet.net import Mininet
 from mininet.node import Host
 from mininet.link import Link
-from net_utils.arp_proxy import configure_vlan_subinterface  
+from net_utils.arp_proxy import configure_vlan_subinterface
 
 class MiminetNetwork(IPNet):
     def __init__(self, topo: MiminetTopology, network: Network):

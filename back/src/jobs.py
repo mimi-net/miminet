@@ -10,184 +10,6 @@ from typing import Any, Callable, Optional, Tuple
 from net_utils.switches import IPSwitch, IPOVSSwitch
 
 
-def filter_arg_for_options(
-    arg: str, flags_without_args: List[str], flags_with_args: Dict[str, str]
-) -> str:
-    """Get from str only whitelist options"""
-    parts = shlex.split(re.sub(r"[^A-Za-z0-9._\-]+", " ", arg))
-
-    res = ""
-
-    for idx, token in enumerate(parts):
-        if token in res:
-            continue
-
-        if token in flags_with_args and idx + 1 < len(parts):
-            next_arg = parts[idx + 1]
-            if re.fullmatch(flags_with_args[token], next_arg):
-                res += f"{token} {next_arg} "
-
-        elif token in flags_without_args:
-            res += f"{token} "
-
-    return res
-
-
-def ping_options_filter(arg: str) -> str:
-    """Get only whitelist options from ping options"""
-    flags_without_args = ["-b"]
-    flags_with_args = {"-c": r"([1-9]|10)", "-t": r"\d+", "-i": r"\d+", "-s": r"\d+"}
-
-    return filter_arg_for_options(arg, flags_without_args, flags_with_args)
-
-
-def traceroute_options_filter(arg: str) -> str:
-    """Get only whitelist options from traceout options"""
-    flags_without_args = ["-F", "-n"]
-    flags_with_args = {
-        "-i": r"\d+",
-        "-f": r"\d+",
-        "-g": r"\d+",
-        "-m": r"\d+",
-        "-p": r"\d+",
-    }
-    return filter_arg_for_options(arg, flags_without_args, flags_with_args)
-
-
-def udp_tcp_args_checker(ip, size, port) -> bool:
-    """Check all args in tcp and udp data handler on correct"""
-    if not valid_ip(ip):
-        return False
-
-    try:
-        _ = int(size)
-        _ = int(port)
-    except (ValueError, TypeError):
-        return False
-
-    return True
-
-
-def net_dev_checker(dev) -> bool:
-    """Checker for net interface"""
-    if not re.match(r"^[a-z][a-z0-9:_\-\.]{,14}$", dev):
-        return False
-    return True
-
-
-def ip_addr_add_checker(ip, mask, dev) -> bool:
-    """Checker all args in ip addr add job"""
-
-    if not valid_ip(ip):
-        return False
-
-    try:
-        _ = int(mask)
-    except (ValueError, TypeError):
-        return False
-    if not net_dev_checker(dev):
-        return False
-    return True
-
-
-def ip_route_add_checker(ip, mask, router) -> bool:
-    """Checker all args in ip route add job"""
-
-    if not valid_ip(ip):
-        return False
-
-    try:
-        _ = int(mask)
-    except (ValueError, TypeError):
-        return False
-
-    if not valid_ip(router):
-        return False
-
-    return True
-
-
-def subinterface_vlan_checker(intf, ip, mask, vlan, intf_name) -> bool:
-    """Checker for subinterface_vlan args"""
-
-    if not net_dev_checker(intf):
-        return False
-
-    if not valid_ip(ip):
-        return False
-
-    try:
-        _ = int(mask)
-        _ = int(vlan)
-    except (ValueError, TypeError):
-        return False
-
-    if not intf_name:
-        return False
-
-    return True
-
-
-def ipip_interface_checker(ip_start, ip_end, ip_int, name_int) -> bool:
-    """Checker args for ipip_interface"""
-
-    if not valid_ip(ip_start) or not valid_ip(ip_end) or not valid_ip(ip_int):
-        return False
-
-    if not valid_iface(name_int):
-        return False
-
-    return True
-
-
-def add_gre_checker(ip_start, ip_end, ip_iface, name_iface) -> bool:
-    """Checker args for add_gre"""
-
-    if not valid_ip(ip_start) or not valid_ip(ip_iface) or not valid_ip(ip_end):
-        return False
-
-    if not valid_iface(name_iface):
-        return False
-
-    return True
-
-
-def valid_port(port) -> bool:
-    """Check if given arg is port or not"""
-    try:
-        _ = int(port)
-    except (ValueError, TypeError):
-        return False
-
-    return True
-
-
-def valid_ip(ip) -> bool:
-    """Check if given arg is ip or not"""
-
-    try:
-        ipaddress.ip_address(str(ip))
-        return True
-    except ValueError:
-        return False
-
-
-def valid_mac(mac) -> bool:
-    """Check if given arg is mac or not"""
-    try:
-        EUI(mac)
-    except AddrFormatError:
-        return False
-
-    return True
-
-
-def valid_iface(iface) -> bool:
-    """Check if arg have only valid symbols for iface"""
-    if not re.match(r"^[a-z][a-z0-9_-]{0,14}$", iface):
-        return False
-    return True
-
 def ping_handler(job: Job, job_host: Any) -> None:
     """Execute ping -c 1"""
     arg_ip = job.arg_1
@@ -196,6 +18,7 @@ def ping_handler(job: Job, job_host: Any) -> None:
         return
 
     job_host.cmd(f"ping -c 1 {arg_ip}")
+    
 
 
 def ping_with_options_handler(job: Job, job_host: Any) -> None:
@@ -466,43 +289,33 @@ class Jobs:
     def handler(self) -> None:
         self._strategy(self._job, self._job_host)
 
-
+    
 # VLAN helpers
-
 def enable_arp_proxy(job: Job, job_host: Any) -> None:
-    """Enable ARP proxying on an interface (either a VLAN subinterface or a direct subinterface)."""
+    """Enable ARP proxying on an interface (VLAN subinterface or direct)."""
 
-    arg_iface = job.arg_1  # Could be a parent interface or a subinterface
+    arg_iface = str(job.arg_1)  
+
     if "." in arg_iface:
-        # Case: Already a subinterface
+        # Already a subinterface
         subinterface = arg_iface
     else:
-        # Case: Need to create VLAN subinterface
-        arg_vlan = job.arg_2  # VLAN ID
-        arg_ip = job.arg_3  # IP Address
-        arg_mask = job.arg_4  # Subnet Mask
+        # Need to create VLAN subinterface
+        arg_vlan = str(job.arg_2)  # VLAN ID
+        arg_ip = str(job.arg_3)    # IP Address
+        arg_mask = str(job.arg_4)  # Subnet Mask
 
-        subinterface = f"{arg_iface}.{arg_vlan}"  
+        subinterface = f"{arg_iface}.{arg_vlan}"
 
-        # Create VLAN subinterface
-        job_host.cmd(
-            f"ip link add link {arg_iface} name {subinterface} type vlan id {arg_vlan}"
-        )
-
-
-        job_host.cmd(f"ip addr add {arg_ip}/{arg_mask} dev {subinterface}")
-
-
+        
+        job_host.cmd(f"ip link add link {arg_iface} name {subinterface} type vlan id {arg_vlan}")
         job_host.cmd(f"ip link set dev {subinterface} up")
 
-
+   
     job_host.cmd(f"sysctl -w net.ipv4.conf.{subinterface}.proxy_arp=1")
 
-    # Enable ARP proxying on the parent interface (if not already a subinterface)
+    # Enable ARP proxying on parent interface if it’s not a subinterface
     if "." not in arg_iface:
         job_host.cmd(f"sysctl -w net.ipv4.conf.{arg_iface}.proxy_arp=1")
 
     print(f"ARP Proxy enabled on {subinterface}")
-
-
-
