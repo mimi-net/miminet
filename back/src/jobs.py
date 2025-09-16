@@ -5,9 +5,6 @@ from network_schema import Job
 from typing import Any, Callable
 
 
-
-
-
 def ping_handler(job: Job, job_host: Any) -> None:
     """Execute ping -c 1"""
     arg_ip = job.arg_1
@@ -177,9 +174,6 @@ def add_gre(job: Job, job_host: Any) -> None:
     job_host.cmd(f"ip link set {arg_name_iface} up")
 
 
-
-
-
 def arp_proxy_enable(job: Job, job_host: Any) -> None:
     """Enable ARP proxying on the interface"""
     arg_iface = job.arg_1
@@ -244,24 +238,12 @@ class Jobs:
         self._strategy(self._job, self._job_host)
 
 
-
- 
-
-
-
-
-
-
-
-
-
-
-
 # VLAN helpers
+
 
 def enable_arp_proxy(job: Job, job_host: Any) -> None:
     """Enable ARP proxying on an interface (either a VLAN subinterface or a direct subinterface)."""
-    
+
     arg_iface = job.arg_1  # Could be a parent interface or a subinterface
     if "." in arg_iface:
         # Case: Already a subinterface
@@ -275,11 +257,13 @@ def enable_arp_proxy(job: Job, job_host: Any) -> None:
         subinterface = f"{arg_iface}.{arg_vlan}"  # Example: eth0.10
 
         # Create VLAN subinterface
-        job_host.cmd(f"ip link add link {arg_iface} name {subinterface} type vlan id {arg_vlan}")
-        
+        job_host.cmd(
+            f"ip link add link {arg_iface} name {subinterface} type vlan id {arg_vlan}"
+        )
+
         # Assign IP address to the VLAN subinterface
         job_host.cmd(f"ip addr add {arg_ip}/{arg_mask} dev {subinterface}")
-        
+
         # Bring the subinterface up
         job_host.cmd(f"ip link set dev {subinterface} up")
 
@@ -291,5 +275,3 @@ def enable_arp_proxy(job: Job, job_host: Any) -> None:
         job_host.cmd(f"sysctl -w net.ipv4.conf.{arg_iface}.proxy_arp=1")
 
     print(f"ARP Proxy enabled on {subinterface}")
-
-
