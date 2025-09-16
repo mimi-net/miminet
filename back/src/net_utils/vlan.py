@@ -81,7 +81,6 @@ def add_bridge(switch: IPSwitch, interface: list[NodeInterface]) -> None:
     switch.cmd(f'ip link set dev {f"br-{switch.name}"} up')
     switch.cmd(f'ip link set dev {f"br-{switch.name}"} type bridge vlan_filtering 1')
 
-    
 def configure_access_with_arp(switch: IPSwitch, intf: str, vlan: int) -> None:
     """Configure access VLAN and enable ARP proxying."""
     switch.cmd(f'ip link set {intf} master {f"br-{switch.name}"}')
