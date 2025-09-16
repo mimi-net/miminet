@@ -83,13 +83,31 @@ def add_bridge(switch: IPSwitch, interface: list[NodeInterface]) -> None:
 
 
 
+
+
+
+
+from typing import Any, Optional
+
+# Assuming these are your switch types
+class IPSwitch:
+    name: str
+    def cmd(self, command: str) -> None:
+        ...
+
+class IPOVSSwitch(IPSwitch):
+    def vsctl(self, command: str) -> None:
+        ...
+
 def configure_access(switch: IPSwitch, intf: str, vlan: int) -> None:
+    """Configure a switch port for a VLAN and enable ARP proxying."""
+
     if isinstance(switch, IPOVSSwitch):
-        switch.vsctl(f" del-port {switch} {intf}")
-        switch.vsctl(f' add-port br-{switch.name} {intf}')
-        switch.vsctl(f" set port {intf} tag={vlan}")
+        switch.vsctl(f"del-port {switch} {intf}")
+        switch.vsctl(f"add-port br-{switch.name} {intf}")
+        switch.vsctl(f"set port {intf} tag={vlan}")
     else:
-        switch.cmd(f'ip link set {intf} master br-{switch.name}')
+        switch.cmd(f"ip link set {intf} master br-{switch.name}")
         switch.cmd(f"bridge vlan del dev {intf} vid 1")
         switch.cmd(f"bridge vlan add dev {intf} vid {vlan} pvid untagged")
 
@@ -107,3 +125,18 @@ def configure_access(switch: IPSwitch, intf: str, vlan: int) -> None:
     # Enable ARP proxy on the bridge too
     switch.cmd(f"sysctl -w net.ipv4.conf.br-{switch.name}.proxy_arp=1")
     switch.cmd(f"sysctl -w net.ipv4.conf.br-{switch.name}.forwarding=1")
+
+
+# Optional: second function renamed to avoid mypy redefinition error
+def configure_access_vlan(switch: IPSwitch, intf: str, vlan: int, ip: Optional[str] = None, mask: Optional[int] = None) -> None:
+    """Optional variant for VLAN subinterface with optional IP assignment."""
+    sub_intf = f"{intf}.{vlan}"
+    switch.cmd(f"ip link add link {intf} name {sub_intf} type vlan id {vlan}")
+    switch.cmd(f"ip link set {sub_intf} up")
+    
+    if ip is not None and mask is not None:
+        switch.cmd(f"ip addr add {ip}/{mask} dev {sub_intf}")
+
+    # Enable ARP proxy on sub-interface
+    switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
+    switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
