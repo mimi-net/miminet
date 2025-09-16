@@ -4,6 +4,9 @@ from ipmininet.ipovs_switch import IPOVSSwitch
 
 from network_schema import Node, NodeInterface
 
+from typing import Optional
+from net_utils.switches import IPSwitch, IPOVSSwitch
+
 
 def setup_vlans(net: IPNet, nodes: list[Node]) -> None:
     """Function to configure VLANs on the presented network
@@ -87,21 +90,15 @@ def add_bridge(switch: IPSwitch, interface: list[NodeInterface]) -> None:
 
 
 
-from typing import Any, Optional
 
-# Assuming these are your switch types
-class IPSwitch:
-    name: str
-    def cmd(self, command: str) -> None:
-        ...
 
-class IPOVSSwitch(IPSwitch):
-    def vsctl(self, command: str) -> None:
-        ...
 
 def configure_access(switch: IPSwitch, intf: str, vlan: int) -> None:
-    """Configure a switch port for a VLAN and enable ARP proxying."""
+    """
+    Configure a switch port for a VLAN and enable ARP proxying.
 
+    Works for both OVS and Linux bridge switches.
+    """
     if isinstance(switch, IPOVSSwitch):
         switch.vsctl(f"del-port {switch} {intf}")
         switch.vsctl(f"add-port br-{switch.name} {intf}")
@@ -127,17 +124,29 @@ def configure_access(switch: IPSwitch, intf: str, vlan: int) -> None:
     switch.cmd(f"sysctl -w net.ipv4.conf.br-{switch.name}.forwarding=1")
 
 
+def configure_access_vlan(
+    switch: IPSwitch, intf: str, vlan: int, ip: Optional[str] = None, mask: Optional[int] = None
+) -> str:
+    """
+    Configure a VLAN sub-interface with optional IP assignment and ARP proxying.
 
-# Optional: second function renamed to avoid mypy redefinition error
-def configure_access_vlan(switch: IPSwitch, intf: str, vlan: int, ip: Optional[str] = None, mask: Optional[int] = None) -> None:
-    """Optional variant for VLAN subinterface with optional IP assignment."""
+    Returns the name of the created sub-interface.
+    """
     sub_intf = f"{intf}.{vlan}"
+
+    # Remove if already exists
+    switch.cmd(f"ip link del {sub_intf} 2>/dev/null || true")
+
+    # Create VLAN sub-interface
     switch.cmd(f"ip link add link {intf} name {sub_intf} type vlan id {vlan}")
     switch.cmd(f"ip link set {sub_intf} up")
-    
+
+    # Assign IP if provided
     if ip is not None and mask is not None:
         switch.cmd(f"ip addr add {ip}/{mask} dev {sub_intf}")
 
     # Enable ARP proxy on sub-interface
     switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
     switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
+
+    return sub_intf
