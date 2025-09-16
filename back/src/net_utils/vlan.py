@@ -1,9 +1,8 @@
 from ipmininet.ipnet import IPNet
 from ipmininet.ipswitch import IPSwitch
+from ipmininet.ipovs_switch import IPOVSSwitch
 
 from network_schema import Node, NodeInterface
-
-
 
 
 def setup_vlans(net: IPNet, nodes: list[Node]) -> None:
@@ -84,8 +83,6 @@ def add_bridge(switch: IPSwitch, interface: list[NodeInterface]) -> None:
 
 
 
-
-
 def configure_access(switch: IPSwitch, intf: str, vlan: int) -> None:
     switch.cmd(f'ip link set {intf} master {f"br-{switch.name}"}')
     switch.cmd(f"bridge vlan del dev {intf} vid 1")
@@ -99,8 +96,8 @@ def configure_access(switch: IPSwitch, intf: str, vlan: int) -> None:
     sub_intf = f"{intf}.{vlan}"
     switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
     switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
-    
-    
+
+
 def configure_trunk(switch: IPSwitch, intf: str, vlans: list[int]) -> None:
     switch.cmd(f'ip link set {intf} master {f"br-{switch.name}"}')
     switch.cmd(f"bridge vlan del dev {intf} vid 1")
