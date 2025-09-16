@@ -83,12 +83,19 @@ def add_bridge(switch: IPSwitch, interface: list[NodeInterface]) -> None:
 
 
 
-def configure_access(switch: IPSwitch, intf: str, vlan: int) -> None:
+
+
+
+
+
+
+def configure_access_with_arp(switch: IPSwitch, intf: str, vlan: int) -> None:
+    """Configure access VLAN and enable ARP proxying."""
     switch.cmd(f'ip link set {intf} master {f"br-{switch.name}"}')
     switch.cmd(f"bridge vlan del dev {intf} vid 1")
     switch.cmd(f"bridge vlan add dev {intf} vid {vlan} pvid untagged")
     
-# Enable ARP Proxy on this interface
+    # Enable ARP Proxy on this interface
     switch.cmd(f"sysctl -w net.ipv4.conf.{intf}.proxy_arp=1")
     switch.cmd(f"sysctl -w net.ipv4.conf.{intf}.forwarding=1")  # Enable forwarding
 
@@ -96,20 +103,3 @@ def configure_access(switch: IPSwitch, intf: str, vlan: int) -> None:
     sub_intf = f"{intf}.{vlan}"
     switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
     switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
-
-
-def configure_trunk_vlan(switch: IPSwitch, intf: str, vlans: list[int]) -> None:
-    switch.cmd(f'ip link set {intf} master {f"br-{switch.name}"}')
-    switch.cmd(f"bridge vlan del dev {intf} vid 1")
-
-    for vlan in vlans:
-        switch.cmd(f"bridge vlan add dev {intf} vid {vlan}")
-
-        # Enable ARP Proxy for each VLAN sub-interface on the trunk
-        sub_intf = f"{intf}.{vlan}"
-        switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
-        switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
-
-    # Enable ARP Proxy on the trunk interface itself
-    switch.cmd(f"sysctl -w net.ipv4.conf.{intf}.proxy_arp=1")
-    switch.cmd(f"sysctl -w net.ipv4.conf.{intf}.forwarding=1")  
