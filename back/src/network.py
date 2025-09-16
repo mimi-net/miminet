@@ -12,8 +12,6 @@ from net_utils.vlan import setup_vlans, clean_bridges
 from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
 
 from mininet.net import Mininet
-from mininet.node import Host
-from mininet.link import Link
 
 
 class MiminetNetwork(IPNet):
@@ -98,26 +96,24 @@ def setup_arp_proxy_on_subinterface(node, sub_intf):
     """Configure ARP Proxying for a given subinterface"""
 
     # Enable ARP Proxying on the subinterface
-    node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
+    node.cmd("sysctl -w net.ipv4.conf.{}.proxy_arp=1".format(sub_intf))
 
     # Enable IP Forwarding to allow packets to be forwarded between interfaces
-    node.cmd(f"sysctl -w net.ipv4.ip_forward=1")
+    node.cmd("sysctl -w net.ipv4.ip_forward=1")
 
     # Enable forwarding on the specific subinterface
-    node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
+    node.cmd("sysctl -w net.ipv4.conf.{}.forwarding=1".format(sub_intf))
 
     # Disable ARP filtering to allow proxy ARP to function properly
-    node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.arp_ignore=0")
-    node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.arp_announce=2")
+    node.cmd("sysctl -w net.ipv4.conf.{}.arp_ignore=0".format(sub_intf))
+    node.cmd("sysctl -w net.ipv4.conf.{}.arp_announce=2".format(sub_intf))
 
     # Also enable ARP proxying on the parent interface (for bidirectional forwarding)
-    parent_iface = sub_intf.split(".")[
-        0
-    ]  # Extract parent interface (e.g., eth0 from eth0.10)
-    node.cmd(f"sysctl -w net.ipv4.conf.{parent_iface}.proxy_arp=1")
-    node.cmd(f"sysctl -w net.ipv4.conf.{parent_iface}.forwarding=1")
+    parent_iface = sub_intf.split(".")[0]  # Extract parent interface (e.g., eth0 from eth0.10)
+    node.cmd("sysctl -w net.ipv4.conf.{}.proxy_arp=1".format(parent_iface))
+    node.cmd("sysctl -w net.ipv4.conf.{}.forwarding=1".format(parent_iface))
 
-    print(f"ARP Proxy configured on {sub_intf} and {parent_iface}")
+    print("ARP Proxy configured on {} and {}".format(sub_intf, parent_iface))
 
 
 def configure_network(net: Mininet):
@@ -127,12 +123,16 @@ def configure_network(net: Mininet):
         host.cmd("sysctl -w net.ipv4.conf.default.proxy_arp=1")
 
         # Create a VLAN subinterface
-        sub_intf = f"{host.name}-eth1.10"  # Example for VLAN 10
-        host.cmd(f"ip link add link {host.name}-eth1 name {sub_intf} type vlan id 10")
-        host.cmd(f"ip link set {sub_intf} up")
+        sub_intf = "{}-eth1.10".format(host.name)  # Example for VLAN 10
+        host.cmd("ip link add link {}-eth1 name {} type vlan id 10".format(host.name, sub_intf))
+        host.cmd("ip link set {} up".format(sub_intf))
 
         # Assign an IP address to the subinterface (optional, adjust as needed)
-        host.cmd(f"ip addr add 192.168.10.{host.IP().split('.')[-1]}/24 dev {sub_intf}")
+        host.cmd(
+            "ip addr add 192.168.10.{}/24 dev {}".format(
+                host.IP().split(".")[-1], sub_intf
+            )
+        )
 
         setup_arp_proxy_on_subinterface(host, sub_intf)
 
