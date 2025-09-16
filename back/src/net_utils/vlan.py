@@ -4,8 +4,7 @@ from ipmininet.ipovs_switch import IPOVSSwitch
 
 from network_schema import Node, NodeInterface
 
-from typing import Optional
-from net_utils.switches import IPSwitch, IPOVSSwitch
+
 
 
 def setup_vlans(net: IPNet, nodes: list[Node]) -> None:
@@ -84,69 +83,14 @@ def add_bridge(switch: IPSwitch, interface: list[NodeInterface]) -> None:
     switch.cmd(f'ip link set dev {f"br-{switch.name}"} up')
     switch.cmd(f'ip link set dev {f"br-{switch.name}"} type bridge vlan_filtering 1')
 
-
-
-
-
-
-
-
-
-
-def configure_access(switch: IPSwitch, intf: str, vlan: int) -> None:
-    """
-    Configure a switch port for a VLAN and enable ARP proxying.
-
-    Works for both OVS and Linux bridge switches.
-    """
-    if isinstance(switch, IPOVSSwitch):
-        switch.vsctl(f"del-port {switch} {intf}")
-        switch.vsctl(f"add-port br-{switch.name} {intf}")
-        switch.vsctl(f"set port {intf} tag={vlan}")
-    else:
-        switch.cmd(f"ip link set {intf} master br-{switch.name}")
-        switch.cmd(f"bridge vlan del dev {intf} vid 1")
-        switch.cmd(f"bridge vlan add dev {intf} vid {vlan} pvid untagged")
-
-    # Enable ARP proxy on base interface
+    
+# Enable ARP Proxy on this interface
     switch.cmd(f"sysctl -w net.ipv4.conf.{intf}.proxy_arp=1")
-    switch.cmd(f"sysctl -w net.ipv4.conf.{intf}.forwarding=1")
+    switch.cmd(f"sysctl -w net.ipv4.conf.{intf}.forwarding=1")  # Enable forwarding
 
-    # Create and enable sub-interface
+    # Enable ARP Proxy for VLAN sub-interface (if created)
     sub_intf = f"{intf}.{vlan}"
-    switch.cmd(f"ip link add link {intf} name {sub_intf} type vlan id {vlan}")
-    switch.cmd(f"ip link set {sub_intf} up")
     switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
     switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
-
-    # Enable ARP proxy on the bridge too
-    switch.cmd(f"sysctl -w net.ipv4.conf.br-{switch.name}.proxy_arp=1")
-    switch.cmd(f"sysctl -w net.ipv4.conf.br-{switch.name}.forwarding=1")
-
-
-def configure_access_vlan(
-    switch: IPSwitch, intf: str, vlan: int, ip: Optional[str] = None, mask: Optional[int] = None
-) -> str:
-    """
-    Configure a VLAN sub-interface with optional IP assignment and ARP proxying.
-
-    Returns the name of the created sub-interface.
-    """
-    sub_intf = f"{intf}.{vlan}"
-
-    # Remove if already exists
-    switch.cmd(f"ip link del {sub_intf} 2>/dev/null || true")
-
-    # Create VLAN sub-interface
-    switch.cmd(f"ip link add link {intf} name {sub_intf} type vlan id {vlan}")
-    switch.cmd(f"ip link set {sub_intf} up")
-
-    # Assign IP if provided
-    if ip is not None and mask is not None:
-        switch.cmd(f"ip addr add {ip}/{mask} dev {sub_intf}")
-
-    # Enable ARP proxy on sub-interface
-    switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
-    switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
-
-    return sub_intf
+    
+    

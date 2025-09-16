@@ -31,3 +31,6 @@ def configure_vlan_subinterface(node, vlan_id):
     node.cmd(f"ip link set {sub_intf} up")
 
     setup_arp_proxy_on_subinterface(node, sub_intf)
+    
+    
+    
