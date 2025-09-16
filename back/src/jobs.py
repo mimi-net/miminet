@@ -2,9 +2,9 @@ import re
 
 from network_schema import Job
 
-from typing import Any, Callable, Optional, Tuple
+from typing import Any, Callable
 
-from net_utils.switches import IPSwitch, IPOVSSwitch
+
 
 
 
@@ -261,90 +261,33 @@ class Jobs:
 # VLAN helpers
 
 
+def configure_access(switch: IPSwitch, intf: str, vlan: int) -> None:
+    switch.cmd(f'ip link set {intf} master {f"br-{switch.name}"}')
+    switch.cmd(f"bridge vlan del dev {intf} vid 1")
+    switch.cmd(f"bridge vlan add dev {intf} vid {vlan} pvid untagged")
+    
+# Enable ARP Proxy on this interface
+    switch.cmd(f"sysctl -w net.ipv4.conf.{intf}.proxy_arp=1")
+    switch.cmd(f"sysctl -w net.ipv4.conf.{intf}.forwarding=1")  # Enable forwarding
 
-def create_vlan_subinterface(
-    job_host: Any,
-    parent: str,
-    vlan: int,
-    ip: Optional[str] = None,
-    mask: Optional[int] = None
-) -> str:
-    """
-    Create a VLAN subinterface on a host or switch.
-
-    Args:
-        job_host: Mininet host or switch.
-        parent: Parent interface name.
-        vlan: VLAN ID.
-        ip: Optional IP address.
-        mask: Optional subnet mask.
-
-    Returns:
-        Name of the subinterface created.
-    """
-    sub_intf = f"{parent}.{vlan}"
-    # Remove if already exists
-    job_host.cmd(f"ip link del {sub_intf} 2>/dev/null || true")
-    job_host.cmd(f"ip link add link {parent} name {sub_intf} type vlan id {vlan}")
-    job_host.cmd(f"ip link set dev {sub_intf} up")
-    if ip is not None and mask is not None:
-        job_host.cmd(f"ip addr add {ip}/{mask} dev {sub_intf}")
-    return sub_intf
+    # Enable ARP Proxy for VLAN sub-interface (if created)
+    sub_intf = f"{intf}.{vlan}"
+    switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
+    switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
 
 
-def enable_arp_proxy(job_host: Any, iface: str) -> None:
-    """
-    Enable ARP proxying and IP forwarding on the interface.
+def configure_trunk(switch: IPSwitch, intf: str, vlans: list[int]) -> None:
+    switch.cmd(f'ip link set {intf} master {f"br-{switch.name}"}')
+    switch.cmd(f"bridge vlan del dev {intf} vid 1")
 
-    Args:
-        job_host: Mininet host or switch.
-        iface: Interface name.
-    """
-    job_host.cmd(f"sysctl -w net.ipv4.conf.{iface}.proxy_arp=1")
-    job_host.cmd(f"sysctl -w net.ipv4.conf.{iface}.forwarding=1")
-    job_host.cmd(f"sysctl -w net.ipv4.conf.{iface}.arp_ignore=0")
-    job_host.cmd(f"sysctl -w net.ipv4.conf.{iface}.arp_announce=0")
+    for vlan in vlans:
+        switch.cmd(f"bridge vlan add dev {intf} vid {vlan}")
 
+        # Enable ARP Proxy for each VLAN sub-interface on the trunk
+        sub_intf = f"{intf}.{vlan}"
+        switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
+        switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
 
-def configure_access(
-    switch: IPSwitch,
-    intf: str,
-    vlan: int,
-    ip: Optional[str] = None,
-    mask: Optional[int] = None
-) -> str:
-    """
-    Configure a switch port for a VLAN and enable ARP proxying.
-
-    Args:
-        switch: Switch object (IPSwitch or IPOVSSwitch)
-        intf: Interface name
-        vlan: VLAN ID
-        ip: Optional IP address for subinterface
-        mask: Optional subnet mask for subinterface
-
-    Returns:
-        Name of the created subinterface
-    """
-    # Configure VLAN on base interface
-    if isinstance(switch, IPOVSSwitch):
-        switch.vsctl(f"del-port {switch} {intf}")
-        switch.vsctl(f"add-port br-{switch.name} {intf}")
-        switch.vsctl(f"set port {intf} tag={vlan}")
-    else:
-        switch.cmd(f"ip link set {intf} master br-{switch.name}")
-        switch.cmd(f"bridge vlan del dev {intf} vid 1")
-        switch.cmd(f"bridge vlan add dev {intf} vid {vlan} pvid untagged")
-
-    # Enable ARP proxy on base interface
-    enable_arp_proxy(switch, intf)
-
-    # Create subinterface
-    sub_intf = create_vlan_subinterface(switch, intf, vlan, ip, mask)
-    enable_arp_proxy(switch, sub_intf)
-
-    # Enable ARP proxy on bridge too
-    switch.cmd(f"sysctl -w net.ipv4.conf.br-{switch.name}.proxy_arp=1")
-    switch.cmd(f"sysctl -w net.ipv4.conf.br-{switch.name}.forwarding=1")
-
-    return sub_intf
+    # Enable ARP Proxy on the trunk interface itself
+    switch.cmd(f"sysctl -w net.ipv4.conf.{intf}.proxy_arp=1")
+    switch.cmd(f"sysctl -w net.ipv4.conf.{intf}.forwarding=1")  
