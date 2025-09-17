@@ -12,8 +12,6 @@ from net_utils.vlan import setup_vlans, clean_bridges
 from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
 
 from mininet.net import Mininet
-from mininet.node import Host
-from mininet.link import Link
 
 
 class MiminetNetwork(IPNet):
@@ -96,7 +94,6 @@ class MiminetNetwork(IPNet):
 
 def setup_arp_proxy_on_subinterface(node, sub_intf):
     """Configure ARP Proxying for a given subinterface"""
-
     # Enable ARP Proxying on the subinterface
     node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
 
@@ -117,7 +114,7 @@ def setup_arp_proxy_on_subinterface(node, sub_intf):
     node.cmd(f"sysctl -w net.ipv4.conf.{parent_iface}.proxy_arp=1")
     node.cmd(f"sysctl -w net.ipv4.conf.{parent_iface}.forwarding=1")
 
-    print(f"ARP Proxy configured on {sub_intf} and {parent_iface}")
+    print("ARP Proxy configured on " + sub_intf + " and " + parent_iface)
 
 
 def configure_network(net: Mininet):
