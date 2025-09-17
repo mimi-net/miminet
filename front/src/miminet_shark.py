@@ -67,5 +67,5 @@ def mimishark_page():
         pcap_data=json_pcap_data,
         mimishark_nav=1,
         network=net,
-        file_path=file_path,
+        iface=iface,
     )

@@ -1,5 +1,4 @@
 def setup_arp_proxy_on_subinterface(node, sub_intf):
-    
 
     node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
 
@@ -30,4 +29,4 @@ def configure_vlan_subinterface(node, vlan_id):
     node.cmd(f"ip link add link {parent_intf} name {sub_intf} type vlan id {vlan_id}")
     node.cmd(f"ip link set {sub_intf} up")
 
-    setup_arp_proxy_on_subinterface(node, sub_intf)
+

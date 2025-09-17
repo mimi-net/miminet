@@ -1,14 +1,26 @@
 import re
 
+from netaddr import EUI, AddrFormatError
+from typing import Any, Callable, List, Dict
 from network_schema import Job
 
+
 from typing import Any, Callable
+from typing import Any, Callable, Optional, Tuple
+
+from net_utils.switches import IPSwitch, IPOVSSwitch
+
 
 
 def ping_handler(job: Job, job_host: Any) -> None:
     """Execute ping -c 1"""
     arg_ip = job.arg_1
+
+    if not valid_ip(arg_ip):
+        return
+
     job_host.cmd(f"ping -c 1 {arg_ip}")
+    
 
 
 def ping_with_options_handler(job: Job, job_host: Any) -> None:
@@ -17,8 +29,12 @@ def ping_with_options_handler(job: Job, job_host: Any) -> None:
     arg_opt = job.arg_1
     arg_ip = job.arg_2
 
+    if not valid_ip(arg_ip):
+        return
+
     if len(arg_opt) > 0:
-        arg_opt = re.sub(r"[^\x00-\x7F]", "", str(arg_opt))
+        arg_opt = ping_options_filter(arg_opt)
+
     job_host.cmd(f"ping -c 1 {arg_opt} {arg_ip}")
 
 
@@ -37,6 +53,9 @@ def sending_udp_data_handler(job: Job, job_host: Any) -> None:
 
     arg_size, arg_ip, arg_port = get_sending_data_argument(job)
 
+    if not udp_tcp_args_checker(arg_ip, arg_size, arg_port):
+        return
+
     job_host.cmd(
         f"dd if=/dev/urandom bs={arg_size} count=1 | nc -uq1 {arg_ip} {arg_port}"
     )
@@ -46,6 +65,9 @@ def sending_tcp_data_handler(job: Job, job_host: Any) -> None:
     """Method for sending TCP data sending"""
 
     arg_size, arg_ip, arg_port = get_sending_data_argument(job)
+
+    if not udp_tcp_args_checker(arg_ip, arg_size, arg_port):
+        return
 
     job_host.cmd(
         f"dd if=/dev/urandom bs={arg_size} count=1 | nc -w 30 -q1 {arg_ip} {arg_port}"
@@ -58,8 +80,11 @@ def traceroute_handler(job: Job, job_host: Any) -> None:
     arg_opt = job.arg_1
     arg_ip = job.arg_2
 
+    if not valid_ip(arg_ip):
+        return
+
     if len(arg_opt) > 0:
-        arg_opt = re.sub(r"[^\x00-\x7F]", "", str(arg_opt))
+        arg_opt = traceroute_options_filter(arg_opt)
 
     job_host.cmd(f"traceroute -n {arg_opt} {arg_ip}")
 
@@ -71,7 +96,7 @@ def ip_addr_add_handler(job: Job, job_host: Any) -> None:
     arg_mask = job.arg_3
     arg_dev = job.arg_1
 
-    if arg_ip is None or arg_dev is None:
+    if not ip_addr_add_checker(arg_ip, arg_mask, arg_dev):
         return
 
     job_host.cmd(f"ip addr add {arg_ip}/{arg_mask} dev {arg_dev}")
@@ -82,7 +107,7 @@ def iptables_handler(job: Job, job_host: Any) -> None:
 
     arg_dev = job.arg_1
 
-    if not arg_dev:
+    if not net_dev_checker(arg_dev):
         return
 
     job_host.cmd(f"iptables -t nat -A POSTROUTING -o {arg_dev} -j MASQUERADE")
@@ -94,12 +119,18 @@ def ip_route_add_handler(job: Job, job_host: Any) -> None:
     arg_mask = job.arg_2
     arg_router = job.arg_3
 
+    if not ip_route_add_checker(arg_ip, arg_mask, arg_router):
+        return
+
     job_host.cmd(f"ip route add {arg_ip}/{arg_mask} via {arg_router}")
 
 
 def block_tcp_udp_port(job: Job, job_host: Any) -> None:
     """ "Method for executing Block TCP/UDP port"""
     arg_port = job.arg_1
+
+    if not valid_port(arg_port):
+        return
 
     job_host.cmd(f"iptables -A INPUT -p tcp --dport {arg_port} -j DROP")
     job_host.cmd(f"iptables -A INPUT -p udp --dport {arg_port} -j DROP")
@@ -109,6 +140,9 @@ def open_tcp_server_handler(job: Job, job_host: Any) -> None:
     """ "Method for open tcp server"""
     arg_ip = job.arg_1
     arg_port = job.arg_2
+
+    if not valid_port(arg_port) or not valid_ip(arg_ip):
+        return
 
     job_host.cmd(
         f"nohup nc -k -d {arg_ip} -l {arg_port} > /tmp/tcpserver 2>&1 < /dev/null &"
@@ -120,6 +154,9 @@ def open_udp_server_handler(job: Job, job_host: Any) -> None:
     arg_ip = job.arg_1
     arg_port = job.arg_2
 
+    if not valid_ip(arg_ip) or not valid_port(arg_port):
+        return
+
     job_host.cmd(
         f"nohup nc -d -u {arg_ip} -l {arg_port} > /tmp/udpserver 2>&1 < /dev/null &"
     )
@@ -129,6 +166,9 @@ def arp_handler(job: Job, job_host: Any) -> None:
     """ "Method for executing arp -s"""
     arg_ip = job.arg_1
     arg_mac = job.arg_2
+
+    if not valid_ip(arg_ip) or not valid_mac(arg_mac):
+        return
 
     job_host.cmd(f"arp -s {arg_ip} {arg_mac}")
 
@@ -140,6 +180,11 @@ def subinterface_with_vlan(job: Job, job_host: Any) -> None:
     arg_mask = job.arg_3
     arg_vlan = job.arg_4
     arg_intf_name = arg_intf[6:]
+
+    if not subinterface_vlan_checker(
+        arg_intf, arg_ip, arg_mask, arg_vlan, arg_intf_name
+    ):
+        return
 
     job_host.cmd(
         f"ip link add link {arg_intf} name {arg_intf_name}.{arg_vlan} type vlan id {arg_vlan}"
@@ -155,6 +200,9 @@ def add_ipip_interface(job: Job, job_host: Any) -> None:
     arg_ip_int = job.arg_3
     arg_name_int = job.arg_4
 
+    if not ipip_interface_checker(arg_ip_start, arg_ip_end, arg_ip_int, arg_name_int):
+        return
+
     job_host.cmd(
         f"ip tunnel add {arg_name_int} mode ipip remote {arg_ip_end} local {arg_ip_start}"
     )
@@ -167,6 +215,9 @@ def add_gre(job: Job, job_host: Any) -> None:
     arg_ip_iface = job.arg_3  # New virtual interface (IP)
     arg_name_iface = job.arg_4  # New virtual interface (Name) + TTL value
 
+    if not add_gre_checker(arg_ip_start, arg_ip_end, arg_ip_iface, arg_name_iface):
+        return
+
     job_host.cmd(
         f"ip tunnel add {arg_name_iface} mode gre remote {arg_ip_end} local {arg_ip_start} ttl 255"
     )
@@ -177,6 +228,9 @@ def add_gre(job: Job, job_host: Any) -> None:
 def arp_proxy_enable(job: Job, job_host: Any) -> None:
     """Enable ARP proxying on the interface"""
     arg_iface = job.arg_1
+
+    if not valid_iface(arg_iface):
+        return
 
     job_host.cmd(f"sysctl -w net.ipv4.conf.{arg_iface}.proxy_arp=1")
 
@@ -237,40 +291,27 @@ class Jobs:
     def handler(self) -> None:
         self._strategy(self._job, self._job_host)
 
-
+    
 # VLAN helpers
-
 def enable_arp_proxy(job: Job, job_host: Any) -> None:
-    """Enable ARP proxying on an interface (either a VLAN subinterface or a direct subinterface)."""
+    """Enable ARP proxying on an interface (VLAN subinterface or direct)."""
 
-    arg_iface = job.arg_1  # Could be a parent interface or a subinterface
+    arg_iface = str(job.arg_1)  
+
     if "." in arg_iface:
-        # Case: Already a subinterface
+        # Already a subinterface
         subinterface = arg_iface
     else:
-        # Case: Need to create VLAN subinterface
-        arg_vlan = job.arg_2  # VLAN ID
-        arg_ip = job.arg_3  # IP Address
-        arg_mask = job.arg_4  # Subnet Mask
+        # Need to create VLAN subinterface
+        arg_vlan = str(job.arg_2)  # VLAN ID
+        arg_ip = str(job.arg_3)    # IP Address
+        arg_mask = str(job.arg_4)  # Subnet Mask
 
-        subinterface = f"{arg_iface}.{arg_vlan}"  
-
-        # Create VLAN subinterface
-        job_host.cmd(
-            f"ip link add link {arg_iface} name {subinterface} type vlan id {arg_vlan}"
-        )
+        subinterface = f"{arg_iface}.{arg_vlan}"
 
         
-        job_host.cmd(f"ip addr add {arg_ip}/{arg_mask} dev {subinterface}")
-
-
+        job_host.cmd(f"ip link add link {arg_iface} name {subinterface} type vlan id {arg_vlan}")
         job_host.cmd(f"ip link set dev {subinterface} up")
 
-    
+   
     job_host.cmd(f"sysctl -w net.ipv4.conf.{subinterface}.proxy_arp=1")
-
-    # Enable ARP proxying on the parent interface (if not already a subinterface)
-    if "." not in arg_iface:
-        job_host.cmd(f"sysctl -w net.ipv4.conf.{arg_iface}.proxy_arp=1")
-
-    print(f"ARP Proxy enabled on {subinterface}")

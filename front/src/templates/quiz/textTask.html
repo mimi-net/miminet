@@ -71,9 +71,17 @@
         {# Control buttons#}
         <div class="card-body d-flex justify-content-left align-items-center pt-0 pb-1" style="margin-left: 12px">
             {% if is_exam and not available_answer %}
-                <button name="answerExamQuestion" class="btn btn-primary">Ответить</button>
+                {% if question.question_type == 'variable' %}
+                    <button name="answerExamQuestion" class="btn btn-primary" disabled>Ответить</button>
+                {% else %}
+                    <button name="answerExamQuestion" class="btn btn-primary">Ответить</button>
+                {% endif %}
             {% else %}
-                <button name="answerQuestion" class="btn btn-primary">Ответить</button>
+                {% if question.question_type == 'variable' %}
+                    <button name="answerQuestion" class="btn btn-primary" disabled>Ответить</button>
+                {% else %}
+                    <button name="answerQuestion" class="btn btn-primary">Ответить</button>
+                {% endif %}
             {% endif %}
             <button name="nextQuestion" class="btn" hidden></button>
             <button name="seeResults" class="btn" hidden></button>
@@ -145,7 +153,7 @@
         'matching': displayMatching,
         'sorting': displaySorting
     };
-    const answers = '{{ question.answers | replace("'", '"') | safe }}';
+    const answers = '{{ question.answers | tojson }}';
     const correctCount = '{{ question.correct_count }}';
     const textType = '{{ question.question_type }}';
     displayFunctions[textType](JSON.parse(answers));
@@ -154,4 +162,24 @@
             document.getElementById('modalImage').src = src;
             new bootstrap.Modal(document.getElementById('imageModal')).show();
     }
+
+    // Enable answer button only when option is selected
+    document.addEventListener('DOMContentLoaded', function () {
+        let answerBtn = document.querySelector('button[name="answerQuestion"]');
+        let examBtn = document.querySelector('button[name="answerExamQuestion"]');
+
+        const variantsContainer = document.getElementById('variants');
+        if (variantsContainer) {
+            variantsContainer.addEventListener('change', function (e) {
+                const checked = variantsContainer.querySelectorAll('input.form-check-input:checked');
+                if (answerBtn) answerBtn.disabled = checked.length === 0;
+                if (examBtn) examBtn.disabled = checked.length === 0;
+            });
+        }
+
+        if (textType === 'matching' || textType === 'sorting') {
+            if (answerBtn) answerBtn.disabled = false;
+            if (examBtn) examBtn.disabled = false;
+        }
+    });
 </script>
