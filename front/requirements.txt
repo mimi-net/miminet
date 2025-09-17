@@ -5,11 +5,7 @@ charset-normalizer==3.4.3
 click==8.1.8
 colorama==0.4.6
 dpkt==1.9.8
-<<<<<<< HEAD
-Flask==3.1.0
-=======
 Flask==3.1.2
->>>>>>> main
 Flask-Login==0.6.3
 Flask-Migrate==4.1.0
 Flask-SQLAlchemy==3.1.1
@@ -52,10 +48,6 @@ zipp==3.23.0
 celery==5.5.3
 python-dotenv==1.1.1
 wtforms>=2.3.3, <3.1.0
-<<<<<<< HEAD
-jsonschema==4.24.0
-=======
 jsonschema==4.25.1
->>>>>>> main
 Flask-Admin==1.6.1
 psycopg2-binary==2.9.10
