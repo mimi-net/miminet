@@ -96,7 +96,7 @@ class MiminetNetwork(IPNet):
 
 def setup_arp_proxy_on_subinterface(node, sub_intf):
     """Configure ARP Proxying for a given subinterface"""
-    
+
     # Enable ARP Proxying on the subinterface
     node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
 
@@ -111,11 +111,12 @@ def setup_arp_proxy_on_subinterface(node, sub_intf):
     node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.arp_announce=2")
 
     # Also enable ARP proxying on the parent interface (for bidirectional forwarding)
-    parent_iface = sub_intf.split('.')[0]  # Extract parent interface (e.g., eth0 from eth0.10)
+    parent_iface = sub_intf.split(".")[
+        0
+    ]  # Extract parent interface (e.g., eth0 from eth0.10)
     node.cmd(f"sysctl -w net.ipv4.conf.{parent_iface}.proxy_arp=1")
     node.cmd(f"sysctl -w net.ipv4.conf.{parent_iface}.forwarding=1")
 
-    
     print(f"ARP Proxy configured on {sub_intf} and {parent_iface}")
 
 
@@ -134,9 +135,5 @@ def configure_network(net: Mininet):
         host.cmd(f"ip addr add 192.168.10.{host.IP().split('.')[-1]}/24 dev {sub_intf}")
 
         setup_arp_proxy_on_subinterface(host, sub_intf)
-    
+
     print("Network ARP Proxy configuration completed.")
-
-
-
-
