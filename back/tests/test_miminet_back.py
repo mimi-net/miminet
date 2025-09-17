@@ -70,10 +70,10 @@ def normalize_packet_data(packet_data: str) -> str:
 
 def extract_important_fields(packets_json: str) -> list[dict[str, str]]:
     """Extracts relevant fields from emulation packets, excluding uninformative ones."""
-    
-    if not packets_json.strip(): 
+
+    if not packets_json.strip():
         raise ValueError("Empty JSON string provided to extract_important_fields")
-    
+
     packets = json.loads(packets_json)
     important_packets = []
 
