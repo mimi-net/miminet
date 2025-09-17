@@ -11,7 +11,9 @@ from network_schema import Network
 from net_utils.vlan import setup_vlans, clean_bridges
 from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
 
-
+from mininet.net import Mininet
+from mininet.node import Host
+from mininet.link import Link
 
 
 class MiminetNetwork(IPNet):
@@ -129,9 +131,6 @@ def configure_network(net: Mininet):
         host.cmd(f"ip link add link {host.name}-eth1 name {sub_intf} type vlan id 10")
         host.cmd(f"ip link set {sub_intf} up")
 
-        # Assign an IP address to the subinterface (optional, adjust as needed)
-        host.cmd(f"ip addr add 192.168.10.{host.IP().split('.')[-1]}/24 dev {sub_intf}")
 
-        setup_arp_proxy_on_subinterface(host, sub_intf)
 
     print("Network ARP Proxy configuration completed.")
