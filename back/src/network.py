@@ -126,11 +126,5 @@ def configure_network(net: Mininet):
         host.cmd("sysctl -w net.ipv4.conf.all.proxy_arp=1")
         host.cmd("sysctl -w net.ipv4.conf.default.proxy_arp=1")
 
-        # Create a VLAN subinterface
-        sub_intf = f"{host.name}-eth1.10"  # Example for VLAN 10
-        host.cmd(f"ip link add link {host.name}-eth1 name {sub_intf} type vlan id 10")
-        host.cmd(f"ip link set {sub_intf} up")
-
-
 
     print("Network ARP Proxy configuration completed.")
