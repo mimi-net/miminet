@@ -197,12 +197,10 @@ class AbstractDeviceConfigurator:
         self._nodes: list = self._json_network["nodes"]
 
         # find all matches with device in nodes
-        filt_nodes = list(
-            filter(lambda n: n["data"]["id"] == device_id, self._nodes))
+        filt_nodes = list(filter(lambda n: n["data"]["id"] == device_id, self._nodes))
 
         if not filt_nodes and self._device_type != "edge":
-            raise ConfigurationError(
-                f"Такого '{self._device_type}' не существует")
+            raise ConfigurationError(f"Такого '{self._device_type}' не существует")
 
         # current device's node
         if self._device_type != "edge":
@@ -220,8 +218,7 @@ class AbstractDeviceConfigurator:
     def __conf_sims_delete(self):
         """Delete saved simulations. Typically used at the end of the configuration"""
         # Remove all previous simulations (after configuration update)
-        sims = Simulate.query.filter(
-            Simulate.network_id == self._cur_network.id).all()
+        sims = Simulate.query.filter(Simulate.network_id == self._cur_network.id).all()
         for s in sims:
             db.session.delete(s)
 
@@ -266,15 +263,13 @@ class AbstractDeviceConfigurator:
         """Configurate device IP-addresses"""
 
         # all interfaces
-        iface_ids = request.form.getlist(
-            f"config_{self._device_type}_iface_ids[]")
+        iface_ids = request.form.getlist(f"config_{self._device_type}_iface_ids[]")
         for iface_id in iface_ids:
             if not self._device_node["interface"]:
                 return  # we have nothing to configure
 
             filtered_ifaces = list(
-                filter(lambda x: x["id"] == iface_id,
-                       self._device_node["interface"])
+                filter(lambda x: x["id"] == iface_id, self._device_node["interface"])
             )
 
             if not filtered_ifaces:
@@ -282,10 +277,8 @@ class AbstractDeviceConfigurator:
 
             interface = filtered_ifaces[0]
 
-            ip_value = get_data(
-                f"config_{self._device_type}_ip_{str(iface_id)}")
-            mask_value = get_data(
-                f"config_{self._device_type}_mask_{str(iface_id)}")
+            ip_value = get_data(f"config_{self._device_type}_ip_{str(iface_id)}")
+            mask_value = get_data(f"config_{self._device_type}_mask_{str(iface_id)}")
 
             if not ip_value:
                 continue
@@ -315,8 +308,7 @@ class AbstractDeviceConfigurator:
 
         if default_gw:
             if not self.__ip_check(default_gw):
-                raise ArgCheckError(
-                    "Неверно указан IP-адрес для шлюза по умолчанию")
+                raise ArgCheckError("Неверно указан IP-адрес для шлюза по умолчанию")
             self._device_node["config"]["default_gw"] = default_gw
         else:
             self._device_node["config"]["default_gw"] = ""

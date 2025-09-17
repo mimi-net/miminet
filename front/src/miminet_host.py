@@ -72,8 +72,7 @@ def name_check(arg: str) -> bool:
 def MAC_check(arg: str) -> bool:
     """Check MAC-address correctness"""
     return bool(
-        re.match(
-            "[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", arg.lower())
+        re.match("[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", arg.lower())
     )
 
 
@@ -99,8 +98,8 @@ def empty_ping_options_check(arg: str) -> bool:
 
 def ping_options_get(arg: str) -> str:
     """Get only whitelist options from ping options"""
-    flags_withoout_args = ['-b']
-    flags_with_args = ['-c', '-t', '-i', '-s']
+    flags_withoout_args = ["-b"]
+    flags_with_args = ["-c", "-t", "-i", "-s"]
     arg = re.sub(r"[^A-Za-z0-9._\-]+", " ", arg)
     parts = shlex.split(arg)
     res = ""
@@ -110,7 +109,11 @@ def ping_options_get(arg: str) -> str:
             continue
 
         if token in flags_with_args:
-            if idx+1 < len(parts) and parts[idx+1] not in flags_with_args and parts[idx+1] not in flags_withoout_args:
+            if (
+                idx + 1 < len(parts)
+                and parts[idx + 1] not in flags_with_args
+                and parts[idx + 1] not in flags_withoout_args
+            ):
                 res += f"{token} {parts[idx+1]} "
                 next(enumerate(parts), None)
                 continue
@@ -118,6 +121,7 @@ def ping_options_get(arg: str) -> str:
             res += f"{token} "
 
     return res
+
 
 # ------ Error messages ------
 
@@ -165,7 +169,11 @@ host_ping_job.add_param("config_host_ping_c_1_ip").add_check(IPv4_check).set_err
 host_ping_opt_job = host.create_job(2, "ping -c 1 [0] [1]")
 host_ping_opt_job.add_param(
     "config_host_ping_with_options_options_input_field"
-).add_check(emptiness_check).add_check(ascii_check).add_check(empty_ping_options_check).add_filter(ping_options_get).set_error_msg(
+).add_check(emptiness_check).add_check(ascii_check).add_check(
+    empty_ping_options_check
+).add_filter(
+    ping_options_get
+).set_error_msg(
     build_error(ErrorType.options, "ping (с опциями)")
 )
 host_ping_opt_job.add_param("config_host_ping_with_options_ip_input_field").add_check(
