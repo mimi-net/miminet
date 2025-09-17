@@ -134,4 +134,3 @@ def configure_network(net: Mininet):
         setup_arp_proxy_on_subinterface(host, sub_intf)
 
     print("Network ARP Proxy configuration completed.")
-
