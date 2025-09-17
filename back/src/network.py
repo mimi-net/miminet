@@ -98,7 +98,7 @@ def setup_arp_proxy_on_subinterface(node, sub_intf):
     node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
 
     # Enable IP Forwarding to allow packets to be forwarded between interfaces
-    node.cmd(f"sysctl -w net.ipv4.ip_forward=1")
+    node.cmd("sysctl -w net.ipv4.ip_forward=1")
 
     # Enable forwarding on the specific subinterface
     node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
@@ -114,6 +114,8 @@ def setup_arp_proxy_on_subinterface(node, sub_intf):
     node.cmd(f"sysctl -w net.ipv4.conf.{parent_iface}.proxy_arp=1")
     node.cmd(f"sysctl -w net.ipv4.conf.{parent_iface}.forwarding=1")
 
+    print("ARP Proxy configured on " + sub_intf + " and " + parent_iface)  # noqa
+
 
 def configure_network(net: Mininet):
     """Configure the Mininet network to use ARP Proxying on subinterfaces"""
@@ -127,7 +129,8 @@ def configure_network(net: Mininet):
         host.cmd(f"ip link set {sub_intf} up")
 
         # Assign an IP address to the subinterface (optional, adjust as needed)
-        host.cmd(f"ip addr add 192.168.10.{host.IP().split('.')[-1]}/24 dev {sub_intf}")
+        host_ip_last = host.IP().split('.')[-1]
+        host.cmd(f"ip addr add 192.168.10.{host_ip_last}/24 dev {sub_intf}")
 
         setup_arp_proxy_on_subinterface(host, sub_intf)
 
