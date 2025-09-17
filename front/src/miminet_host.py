@@ -1,6 +1,7 @@
 import json
 import re
 import ipaddress
+import shlex
 
 from flask import jsonify, make_response, request, Response
 from flask_login import current_user, login_required
@@ -71,7 +72,8 @@ def name_check(arg: str) -> bool:
 def MAC_check(arg: str) -> bool:
     """Check MAC-address correctness"""
     return bool(
-        re.match("[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", arg.lower())
+        re.match(
+            "[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", arg.lower())
     )
 
 
@@ -90,7 +92,36 @@ def regex_check(arg: str, regex: str) -> bool:
     return bool(re.match(regex, arg))
 
 
+def empty_ping_options_check(arg: str) -> bool:
+    """Check if option string after filter not empty"""
+    return ping_options_get(arg) != ""
+
+
+def ping_options_get(arg: str) -> str:
+    """Get only whitelist options from ping options"""
+    flags_withoout_args = ['-b']
+    flags_with_args = ['-c', '-t', '-i', '-s']
+    arg = re.sub(r"[^A-Za-z0-9._\-]+", " ", arg)
+    parts = shlex.split(arg)
+    res = ""
+
+    for idx, token in enumerate(parts):
+        if token in res:
+            continue
+
+        if token in flags_with_args:
+            if idx+1 < len(parts) and parts[idx+1] not in flags_with_args and parts[idx+1] not in flags_withoout_args:
+                res += f"{token} {parts[idx+1]} "
+                next(enumerate(parts), None)
+                continue
+        elif token in flags_withoout_args:
+            res += f"{token} "
+
+    return res
+
 # ------ Error messages ------
+
+
 class ErrorType:
     ip = "Неверно указан IP-адрес"
     port = "Неверно указан порт"
@@ -134,7 +165,7 @@ host_ping_job.add_param("config_host_ping_c_1_ip").add_check(IPv4_check).set_err
 host_ping_opt_job = host.create_job(2, "ping -c 1 [0] [1]")
 host_ping_opt_job.add_param(
     "config_host_ping_with_options_options_input_field"
-).add_check(emptiness_check).add_check(ascii_check).set_error_msg(
+).add_check(emptiness_check).add_check(ascii_check).add_check(empty_ping_options_check).add_filter(ping_options_get).set_error_msg(
     build_error(ErrorType.options, "ping (с опциями)")
 )
 host_ping_opt_job.add_param("config_host_ping_with_options_ip_input_field").add_check(
