@@ -114,8 +114,6 @@ def setup_arp_proxy_on_subinterface(node, sub_intf):
     node.cmd(f"sysctl -w net.ipv4.conf.{parent_iface}.proxy_arp=1")
     node.cmd(f"sysctl -w net.ipv4.conf.{parent_iface}.forwarding=1")
 
-    print("ARP Proxy configured on " + sub_intf + " and " + parent_iface)  # noqa: F541
-
 
 def configure_network(net: Mininet):
     """Configure the Mininet network to use ARP Proxying on subinterfaces"""
