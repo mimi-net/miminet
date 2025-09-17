@@ -129,7 +129,7 @@ def configure_network(net: Mininet):
         host.cmd(f"ip link set {sub_intf} up")
 
         # Assign an IP address to the subinterface (optional, adjust as needed)
-        host_ip_last = host.IP().split('.')[-1]
+        host_ip_last = host.IP().split(".")[-1]
         host.cmd(f"ip addr add 192.168.10.{host_ip_last}/24 dev {sub_intf}")
 
         setup_arp_proxy_on_subinterface(host, sub_intf)
