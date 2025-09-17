@@ -117,7 +117,6 @@ def setup_arp_proxy_on_subinterface(node, sub_intf):
     node.cmd(f"sysctl -w net.ipv4.conf.{parent_iface}.proxy_arp=1")
     node.cmd(f"sysctl -w net.ipv4.conf.{parent_iface}.forwarding=1")
 
-    print(f"ARP Proxy configured on {sub_intf} and {parent_iface}")
 
 
 
