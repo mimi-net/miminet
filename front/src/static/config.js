@@ -62,6 +62,8 @@ const ConfigHostForm = function(host_id){
     $(config_content_id).append(form);
     $(config_content_save_tag).append(button);
 
+    addIpFieldHandlers();
+
     // Set host_id
     $('#host_id').val(host_id);
     $('#net_guid').val(network_guid);
@@ -96,6 +98,8 @@ const ConfigRouterForm = function (router_id) {
     // Add new form
     $(config_content_id).append(form);
     $(config_content_save_tag).append(button);
+
+    addIpFieldHandlers();
 
     // Set host_id
     $('#router_id').val(router_id);
@@ -132,6 +136,8 @@ const ConfigServerForm = function (server_id) {
     $(config_content_id).append(form);
     $(config_content_save_tag).append(button);
 
+    addIpFieldHandlers();
+
     // Set host_id
     $('#server_id').val(server_id);
     $('#net_guid').val(network_guid);
@@ -167,6 +173,8 @@ const ConfigHubForm = function (hub_id) {
     $(config_content_id).append(form);
     $(config_content_save_tag).append(button);
 
+    addIpFieldHandlers();
+
     // Set host_id
     $('#hub_id').val(hub_id);
     $('#net_guid').val(network_guid);
@@ -201,6 +209,8 @@ const ConfigSwitchForm = function (switch_id) {
     // Add new form
     $(config_content_id).append(form);
     $(config_content_save_tag).append(button);
+
+    addIpFieldHandlers();
 
     // Add href for mimishark
     // var url = "/MimiShark?guid="+network_guid
@@ -427,6 +437,20 @@ const SharedConfigSwitchForm = function (switch_id) {
     $('#config_switch_main_form_submit_button').prop('disabled', true);
 }
 
+const SharedConfigEdgeForm = function (edge_id) {
+    var form = document.getElementById('config_edge_main_form_script').innerHTML;
+
+    // Clear all child
+    $(config_content_id).empty();
+    $(config_content_save_tag).empty();
+    document.getElementById(config_content_save_id).style.display='none';
+
+    // Add new form
+    $(config_content_id).append(form);
+    $('#config_edge_main_form_submit_button').prop('disabled', true);
+}
+
+
 const ConfigHostName = function (hostname) {
 
     var text = document.getElementById('config_host_name_script').innerHTML;
@@ -515,6 +539,20 @@ const ConfigHubIndent = function () {
 const ConfigSwitchIndent = function () {
     ConfigItemIndent("switch");
 }
+
+const addIpFieldHandlers = function () {
+    document.addEventListener('input', function (e) {
+        const input = e.target;
+ 
+        if (!input.matches('input[type="text"][id*="ip"], input[type="text"][name*="ip"]')) {
+            return;
+        }
+ 
+        const newValue = input.value.replace(/,/g, '.').replace(/ю/g, '.');
+ 
+        input.value = newValue;
+    });
+};
 
 const ConfigHostJobOnChange = function (evnt) {
 

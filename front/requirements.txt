@@ -1,18 +1,22 @@
-alembic==1.16.2
-beautifulsoup4==4.13.4
-certifi==2025.6.15
-charset-normalizer==3.4.2
+alembic==1.16.5
+beautifulsoup4==4.13.5
+certifi==2025.8.3
+charset-normalizer==3.4.3
 click==8.1.8
 colorama==0.4.6
 dpkt==1.9.8
+<<<<<<< HEAD
 Flask==3.1.0
+=======
+Flask==3.1.2
+>>>>>>> main
 Flask-Login==0.6.3
 Flask-Migrate==4.1.0
 Flask-SQLAlchemy==3.1.1
 google==3.0.0
 google-auth==2.40.3
 google-auth-oauthlib==1.2.2
-greenlet==3.2.3
+greenlet==3.2.4
 h11==0.16.0
 idna==3.10
 importlib-metadata==8.7.0
@@ -28,15 +32,15 @@ Pillow==11.3.0
 pyasn1==0.6.1
 pyasn1_modules==0.4.2
 PySocks==1.7.1
-pytest==8.4.1
+pytest==8.4.2
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.1
-requests==2.32.4
+requests==2.32.5
 requests-oauthlib==2.0.0
 rsa==4.9.1
 six==1.17.0
-soupsieve==2.7
-SQLAlchemy==2.0.41
+soupsieve==2.8
+SQLAlchemy==2.0.43
 urllib3==2.5.0
 uuid==1.30
 vine==5.1.0
@@ -48,6 +52,10 @@ zipp==3.23.0
 celery==5.5.3
 python-dotenv==1.1.1
 wtforms>=2.3.3, <3.1.0
+<<<<<<< HEAD
 jsonschema==4.24.0
+=======
+jsonschema==4.25.1
+>>>>>>> main
 Flask-Admin==1.6.1
 psycopg2-binary==2.9.10
