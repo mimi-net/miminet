@@ -2,6 +2,7 @@ import json
 import re
 import ipaddress
 import shlex
+from typing import List
 
 from flask import jsonify, make_response, request, Response
 from flask_login import current_user, login_required
@@ -93,13 +94,17 @@ def regex_check(arg: str, regex: str) -> bool:
 
 def empty_ping_options_check(arg: str) -> bool:
     """Check if option string after filter not empty"""
-    return ping_options_get(arg) != ""
+    return ping_options_filter(arg) != ""
 
 
-def ping_options_get(arg: str) -> str:
-    """Get only whitelist options from ping options"""
-    flags_withoout_args = ["-b"]
-    flags_with_args = ["-c", "-t", "-i", "-s"]
+def empty_traceout_options_check(arg: str) -> bool:
+    """Check if option string after filter not empty"""
+    return traceout_options_filter(arg) != ""
+
+
+def filter_arg_for_options(
+    arg: str, flags_withoout_args: List[str], flags_with_args: List[str]
+) -> str:
     arg = re.sub(r"[^A-Za-z0-9._\-]+", " ", arg)
     parts = shlex.split(arg)
     res = ""
@@ -119,8 +124,22 @@ def ping_options_get(arg: str) -> str:
                 continue
         elif token in flags_withoout_args:
             res += f"{token} "
-
     return res
+
+
+def ping_options_filter(arg: str) -> str:
+    """Get only whitelist options from ping options"""
+    flags_withoout_args = ["-b"]
+    flags_with_args = ["-c", "-t", "-i", "-s"]
+
+    return filter_arg_for_options(arg, flags_withoout_args, flags_with_args)
+
+
+def traceout_options_filter(arg: str) -> str:
+    """Get only whitelist options from traceout options"""
+    flags_withoout_args = ["-F", "-n"]
+    flags_with_args = ["-i", "-f", "-g", "-m", "-p"]
+    return filter_arg_for_options(arg, flags_withoout_args, flags_with_args)
 
 
 # ------ Error messages ------
@@ -172,7 +191,7 @@ host_ping_opt_job.add_param(
 ).add_check(emptiness_check).add_check(ascii_check).add_check(
     empty_ping_options_check
 ).add_filter(
-    ping_options_get
+    ping_options_filter
 ).set_error_msg(
     build_error(ErrorType.options, "ping (с опциями)")
 )
@@ -208,7 +227,11 @@ host_tcp_job.add_param("config_host_send_tcp_data_port_input_field").add_check(
 traceroute_job = host.create_job(5, "traceroute -n [0] [1]")
 traceroute_job.add_param(
     "config_host_traceroute_with_options_options_input_field"
-).add_check(emptiness_check).add_check(ascii_check).set_error_msg(
+).add_check(emptiness_check).add_check(ascii_check).add_filter(
+    traceout_options_filter
+).add_check(
+    empty_traceout_options_check
+).set_error_msg(
     build_error(ErrorType.options, "traceroute -n (с опциями)")
 )
 traceroute_job.add_param(
