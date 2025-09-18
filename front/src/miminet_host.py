@@ -2,7 +2,7 @@ import json
 import re
 import ipaddress
 import shlex
-from typing import List
+from typing import List, Dict
 
 from flask import jsonify, make_response, request, Response
 from flask_login import current_user, login_required
@@ -103,43 +103,50 @@ def empty_traceout_options_check(arg: str) -> bool:
 
 
 def filter_arg_for_options(
-    arg: str, flags_withoout_args: List[str], flags_with_args: List[str]
+    arg: str, flags_without_args: List[str], flags_with_args: Dict[str, str]
 ) -> str:
-    arg = re.sub(r"[^A-Za-z0-9._\-]+", " ", arg)
-    parts = shlex.split(arg)
+    parts = shlex.split(re.sub(r"[^A-Za-z0-9._\-]+", " ", arg))
+
     res = ""
+    # used = set()
 
     for idx, token in enumerate(parts):
         if token in res:
             continue
 
-        if token in flags_with_args:
-            if (
-                idx + 1 < len(parts)
-                and parts[idx + 1] not in flags_with_args
-                and parts[idx + 1] not in flags_withoout_args
-            ):
-                res += f"{token} {parts[idx+1]} "
-                next(enumerate(parts), None)
-                continue
-        elif token in flags_withoout_args:
+        if token in flags_with_args and idx + 1 < len(parts):
+            next_arg = parts[idx + 1]
+            if re.fullmatch(flags_with_args[token], next_arg):
+                res += f"{token} {next_arg} "
+                # used.add(token)
+
+        elif token in flags_without_args:
             res += f"{token} "
+            # used.add(token)
+
+    # return " ".join(res)
     return res
 
 
 def ping_options_filter(arg: str) -> str:
     """Get only whitelist options from ping options"""
-    flags_withoout_args = ["-b"]
-    flags_with_args = ["-c", "-t", "-i", "-s"]
+    flags_without_args = ["-b"]
+    flags_with_args = {"-c": r"([1-9]|10)", "-t": r"\d+", "-i": r"\d+", "-s": r"\d+"}
 
-    return filter_arg_for_options(arg, flags_withoout_args, flags_with_args)
+    return filter_arg_for_options(arg, flags_without_args, flags_with_args)
 
 
 def traceout_options_filter(arg: str) -> str:
     """Get only whitelist options from traceout options"""
-    flags_withoout_args = ["-F", "-n"]
-    flags_with_args = ["-i", "-f", "-g", "-m", "-p"]
-    return filter_arg_for_options(arg, flags_withoout_args, flags_with_args)
+    flags_without_args = ["-F", "-n"]
+    flags_with_args = {
+        "-i": r"\d+",
+        "-f": r"\d+",
+        "-g": r"\d+",
+        "-m": r"\d+",
+        "-p": r"\d+",
+    }
+    return filter_arg_for_options(arg, flags_without_args, flags_with_args)
 
 
 # ------ Error messages ------
