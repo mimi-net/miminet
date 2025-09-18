@@ -105,10 +105,10 @@ def empty_traceout_options_check(arg: str) -> bool:
 def filter_arg_for_options(
     arg: str, flags_without_args: List[str], flags_with_args: Dict[str, str]
 ) -> str:
+    """Get from str only whitelist options"""
     parts = shlex.split(re.sub(r"[^A-Za-z0-9._\-]+", " ", arg))
 
     res = ""
-    # used = set()
 
     for idx, token in enumerate(parts):
         if token in res:
@@ -118,13 +118,10 @@ def filter_arg_for_options(
             next_arg = parts[idx + 1]
             if re.fullmatch(flags_with_args[token], next_arg):
                 res += f"{token} {next_arg} "
-                # used.add(token)
 
         elif token in flags_without_args:
             res += f"{token} "
-            # used.add(token)
 
-    # return " ".join(res)
     return res
 
 
