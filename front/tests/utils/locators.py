@@ -162,6 +162,12 @@ class Location:
                     PING_OPTION_IP_FIELD = Locator(
                         "#config_host_ping_with_options_ip_input_field"
                     )
+                    TRACEROUTE_OPTION_FIELD = Locator(
+                        "#config_host_traceroute_with_options_options_input_field"
+                    )
+                    TRACEROUTE_OPTION_IP_FIELD = Locator(
+                        "#config_host_traceroute_with_options_ip_input_field"
+                    )
                     TCP_VOLUME_IN_BYTES_FIELD = Locator(
                         "#config_host_send_tcp_data_size_input_field"
                     )
