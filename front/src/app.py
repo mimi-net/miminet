@@ -32,6 +32,7 @@ from miminet_auth import (
     yandex_login,
     yandex_callback,
     tg_callback,
+    special_login,
 )
 from miminet_config import SECRET_KEY
 from miminet_host import (
@@ -138,6 +139,7 @@ app.add_url_rule("/auth/yandex_callback", methods=["GET"], view_func=yandex_call
 app.add_url_rule("/auth/tg_callback", methods=["GET"], view_func=tg_callback)
 app.add_url_rule("/user/profile.html", methods=["GET", "POST"], view_func=user_profile)
 app.add_url_rule("/auth/logout", methods=["GET"], view_func=logout)
+app.add_url_rule("/auth/special_login", methods=["GET"], view_func=special_login)
 
 # Network
 app.add_url_rule("/create_network", methods=["GET"], view_func=create_network)

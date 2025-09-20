@@ -503,6 +503,57 @@ def tg_callback():
     return redirect_next_url(fallback=url_for("home"))
 
 
+def special_login():
+
+    user_nick = request.args.get("code")
+    user_is_new = False
+
+    if not user_nick:
+        return redirect(url_for("login_index"))
+
+    user = User.query.filter_by(nick=user_nick).first()
+
+    # New user?
+    if user is None:
+        # Yes
+        try:
+
+            new_user = User(
+                nick=user_nick
+            )
+
+            db.session.add(new_user)
+            db.session.commit()
+
+            user_is_new = True
+
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            error = str(e.__dict__["orig"])
+            print(error)
+            print("Can't add new user to the Database")
+            flash(error, category="error")
+            return redirect(url_for("login_index"))
+
+        user = User.query.filter_by(nick=user_nick).first()
+
+    login_user(user, remember=True)
+
+    if user_is_new:
+        u = uuid.uuid4()
+        n = Network(
+            author_id=user.id,
+            network=make_example_net_switch_and_hub(),
+            title="Свитч и хаб (пример сети)",
+            guid=str(u),
+            preview_uri="switch_and_hub.png",
+        )
+        db.session.add(n)
+        db.session.commit()
+
+    return redirect_next_url(fallback=url_for("home"))
+
+
 class TestUserData:
     """Data for test user initializing."""
 
