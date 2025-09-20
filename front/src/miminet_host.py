@@ -97,9 +97,9 @@ def empty_ping_options_check(arg: str) -> bool:
     return ping_options_filter(arg) != ""
 
 
-def empty_traceout_options_check(arg: str) -> bool:
+def empty_traceroute_options_check(arg: str) -> bool:
     """Check if option string after filter not empty"""
-    return traceout_options_filter(arg) != ""
+    return traceroute_options_filter(arg) != ""
 
 
 def filter_arg_for_options(
@@ -133,7 +133,7 @@ def ping_options_filter(arg: str) -> str:
     return filter_arg_for_options(arg, flags_without_args, flags_with_args)
 
 
-def traceout_options_filter(arg: str) -> str:
+def traceroute_options_filter(arg: str) -> str:
     """Get only whitelist options from traceout options"""
     flags_without_args = ["-F", "-n"]
     flags_with_args = {
@@ -232,9 +232,9 @@ traceroute_job = host.create_job(5, "traceroute -n [0] [1]")
 traceroute_job.add_param(
     "config_host_traceroute_with_options_options_input_field"
 ).add_check(emptiness_check).add_check(ascii_check).add_filter(
-    traceout_options_filter
+    traceroute_options_filter
 ).add_check(
-    empty_traceout_options_check
+    empty_traceroute_options_check
 ).set_error_msg(
     build_error(ErrorType.options, "traceroute -n (с опциями)")
 )
