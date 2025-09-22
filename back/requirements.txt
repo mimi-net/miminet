@@ -2,5 +2,5 @@ celery==5.5.3
 dpkt==1.9.8
 python-dotenv==1.1.1
 marshmallow_dataclass==8.7.1
-psutil==7.0.0
+psutil==7.1.0
 ipmininet @ git+https://github.com/mimi-net/ipmininet.git@v1.1.1
