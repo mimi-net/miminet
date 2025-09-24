@@ -68,7 +68,8 @@ class JobArgConfigurator:
             res = arg
             for filter in self.__text_filters:
                 res = filter(res)
-            return res
+            if res:
+                return res
         return None
 
 

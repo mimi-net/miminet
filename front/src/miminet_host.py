@@ -92,16 +92,6 @@ def regex_check(arg: str, regex: str) -> bool:
     return bool(re.match(regex, arg))
 
 
-def empty_ping_options_check(arg: str) -> bool:
-    """Check if option string after filter not empty"""
-    return ping_options_filter(arg) != ""
-
-
-def empty_traceroute_options_check(arg: str) -> bool:
-    """Check if option string after filter not empty"""
-    return traceroute_options_filter(arg) != ""
-
-
 def filter_arg_for_options(
     arg: str, flags_without_args: List[str], flags_with_args: Dict[str, str]
 ) -> str:
@@ -192,11 +182,7 @@ host_ping_job.add_param("config_host_ping_c_1_ip").add_check(IPv4_check).set_err
 host_ping_opt_job = host.create_job(2, "ping -c 1 [0] [1]")
 host_ping_opt_job.add_param(
     "config_host_ping_with_options_options_input_field"
-).add_check(emptiness_check).add_check(ascii_check).add_check(
-    empty_ping_options_check
-).add_filter(
-    ping_options_filter
-).set_error_msg(
+).add_check(ascii_check).add_filter(ping_options_filter).set_error_msg(
     build_error(ErrorType.options, "ping (с опциями)")
 )
 host_ping_opt_job.add_param("config_host_ping_with_options_ip_input_field").add_check(
@@ -231,11 +217,7 @@ host_tcp_job.add_param("config_host_send_tcp_data_port_input_field").add_check(
 traceroute_job = host.create_job(5, "traceroute -n [0] [1]")
 traceroute_job.add_param(
     "config_host_traceroute_with_options_options_input_field"
-).add_check(emptiness_check).add_check(ascii_check).add_filter(
-    traceroute_options_filter
-).add_check(
-    empty_traceroute_options_check
-).set_error_msg(
+).add_check(ascii_check).add_filter(traceroute_options_filter).set_error_msg(
     build_error(ErrorType.options, "traceroute -n (с опциями)")
 )
 traceroute_job.add_param(
