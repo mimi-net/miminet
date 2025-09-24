@@ -145,7 +145,7 @@
         'matching': displayMatching,
         'sorting': displaySorting
     };
-    const answers = '{{ question.answers | replace("'", '"') | safe }}';
+    const answers = '{{ question.answers | tojson }}';
     const correctCount = '{{ question.correct_count }}';
     const textType = '{{ question.question_type }}';
     displayFunctions[textType](JSON.parse(answers));
