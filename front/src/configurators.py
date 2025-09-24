@@ -24,6 +24,7 @@ class JobArgConfigurator:
         """
         self.__control_id: str = control_id
         self.__validators: list[Callable[[str], bool]] = []
+        self.__text_filters: list[Callable[[str], str]] = []
         self.__error_msg: str = "Невозможно добавить команду: ошибка в аргументе"
 
     def set_error_msg(self, msg: str):
@@ -46,6 +47,15 @@ class JobArgConfigurator:
 
         return self
 
+    def add_filter(self, filter: Callable[[str], str]):
+        """Add new filter for argument (you can add several filters)
+        Args:
+            filter (Callable[[str], str]): function that takes a string and returns string after filter
+        """
+        self.__text_filters.append(filter)
+
+        return self
+
     def configure(self) -> Optional[str]:
         """Get an element from the request and performs validation
 
@@ -55,7 +65,11 @@ class JobArgConfigurator:
         arg = get_data(self.__control_id)
 
         if all([validate(arg) for validate in self.__validators]):
-            return arg
+            res = arg
+            for filter in self.__text_filters:
+                res = filter(res)
+            if res:
+                return res
         return None
 
 

@@ -1,6 +1,8 @@
 import json
 import re
 import ipaddress
+import shlex
+from typing import List, Dict
 
 from flask import jsonify, make_response, request, Response
 from flask_login import current_user, login_required
@@ -90,7 +92,53 @@ def regex_check(arg: str, regex: str) -> bool:
     return bool(re.match(regex, arg))
 
 
+def filter_arg_for_options(
+    arg: str, flags_without_args: List[str], flags_with_args: Dict[str, str]
+) -> str:
+    """Get from str only whitelist options"""
+    parts = shlex.split(re.sub(r"[^A-Za-z0-9._\-]+", " ", arg))
+
+    res = ""
+
+    for idx, token in enumerate(parts):
+        if token in res:
+            continue
+
+        if token in flags_with_args and idx + 1 < len(parts):
+            next_arg = parts[idx + 1]
+            if re.fullmatch(flags_with_args[token], next_arg):
+                res += f"{token} {next_arg} "
+
+        elif token in flags_without_args:
+            res += f"{token} "
+
+    return res
+
+
+def ping_options_filter(arg: str) -> str:
+    """Get only whitelist options from ping options"""
+    flags_without_args = ["-b"]
+    flags_with_args = {"-c": r"([1-9]|10)", "-t": r"\d+", "-i": r"\d+", "-s": r"\d+"}
+
+    return filter_arg_for_options(arg, flags_without_args, flags_with_args)
+
+
+def traceroute_options_filter(arg: str) -> str:
+    """Get only whitelist options from traceout options"""
+    flags_without_args = ["-F", "-n"]
+    flags_with_args = {
+        "-i": r"\d+",
+        "-f": r"\d+",
+        "-g": r"\d+",
+        "-m": r"\d+",
+        "-p": r"\d+",
+    }
+    return filter_arg_for_options(arg, flags_without_args, flags_with_args)
+
+
 # ------ Error messages ------
+
+
 class ErrorType:
     ip = "Неверно указан IP-адрес"
     port = "Неверно указан порт"
@@ -134,7 +182,7 @@ host_ping_job.add_param("config_host_ping_c_1_ip").add_check(IPv4_check).set_err
 host_ping_opt_job = host.create_job(2, "ping -c 1 [0] [1]")
 host_ping_opt_job.add_param(
     "config_host_ping_with_options_options_input_field"
-).add_check(emptiness_check).add_check(ascii_check).set_error_msg(
+).add_check(ascii_check).add_filter(ping_options_filter).set_error_msg(
     build_error(ErrorType.options, "ping (с опциями)")
 )
 host_ping_opt_job.add_param("config_host_ping_with_options_ip_input_field").add_check(
@@ -169,7 +217,7 @@ host_tcp_job.add_param("config_host_send_tcp_data_port_input_field").add_check(
 traceroute_job = host.create_job(5, "traceroute -n [0] [1]")
 traceroute_job.add_param(
     "config_host_traceroute_with_options_options_input_field"
-).add_check(emptiness_check).add_check(ascii_check).set_error_msg(
+).add_check(ascii_check).add_filter(traceroute_options_filter).set_error_msg(
     build_error(ErrorType.options, "traceroute -n (с опциями)")
 )
 traceroute_job.add_param(
