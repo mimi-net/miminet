@@ -10,58 +10,6 @@ from mininet.log import setLogLevel, error
 from network_topology import MiminetTopology
 from network import MiminetNetwork
 
-# test copy func from miminet_host
-import re
-from typing import List, Dict
-import shlex
-
-
-def filter_arg_for_options(
-    arg: str, flags_without_args: List[str], flags_with_args: Dict[str, str]
-) -> str:
-    """Get from str only whitelist options"""
-    parts = shlex.split(re.sub(r"[^A-Za-z0-9._\-]+", " ", arg))
-
-    res = ""
-
-    for idx, token in enumerate(parts):
-        if token in res:
-            continue
-
-        if token in flags_with_args and idx + 1 < len(parts):
-            next_arg = parts[idx + 1]
-            if re.fullmatch(flags_with_args[token], next_arg):
-                res += f"{token} {next_arg} "
-
-        elif token in flags_without_args:
-            res += f"{token} "
-
-    return res
-
-
-def ping_options_filter(arg: str) -> str:
-    """Get only whitelist options from ping options"""
-    flags_without_args = ["-b"]
-    flags_with_args = {"-c": r"([1-9]|10)", "-t": r"\d+", "-i": r"\d+", "-s": r"\d+"}
-
-    return filter_arg_for_options(arg, flags_without_args, flags_with_args)
-
-
-def traceroute_options_filter(arg: str) -> str:
-    """Get only whitelist options from traceout options"""
-    flags_without_args = ["-F", "-n"]
-    flags_with_args = {
-        "-i": r"\d+",
-        "-f": r"\d+",
-        "-g": r"\d+",
-        "-m": r"\d+",
-        "-p": r"\d+",
-    }
-    return filter_arg_for_options(arg, flags_without_args, flags_with_args)
-
-
-##############
-
 
 def emulate(
     network: Network,
@@ -90,17 +38,7 @@ def emulate(
         ordered_jobs = sorted(network.jobs, key=lambda job: job.job_id, reverse=True)
 
         for job in ordered_jobs:
-            match job.job_id:
-                case 2:
-                    job.arg_1 = ping_options_filter(job.arg_1)
-                    if job.arg_1:
-                        execute_job(job, net)
-                case 5:
-                    job.arg_1 = traceroute_options_filter(job.arg_1)
-                    if job.arg_1:
-                        execute_job(job, net)
-                case _:
-                    execute_job(job, net)
+            execute_job(job, net)
 
         net.stop()
 

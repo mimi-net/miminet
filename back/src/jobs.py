@@ -3,6 +3,53 @@ from typing import Any, Callable
 
 from network_schema import Job
 
+from typing import List, Dict
+import shlex
+
+
+def filter_arg_for_options(
+    arg: str, flags_without_args: List[str], flags_with_args: Dict[str, str]
+) -> str:
+    """Get from str only whitelist options"""
+    parts = shlex.split(re.sub(r"[^A-Za-z0-9._\-]+", " ", arg))
+
+    res = ""
+
+    for idx, token in enumerate(parts):
+        if token in res:
+            continue
+
+        if token in flags_with_args and idx + 1 < len(parts):
+            next_arg = parts[idx + 1]
+            if re.fullmatch(flags_with_args[token], next_arg):
+                res += f"{token} {next_arg} "
+
+        elif token in flags_without_args:
+            res += f"{token} "
+
+    return res
+
+
+def ping_options_filter(arg: str) -> str:
+    """Get only whitelist options from ping options"""
+    flags_without_args = ["-b"]
+    flags_with_args = {"-c": r"([1-9]|10)", "-t": r"\d+", "-i": r"\d+", "-s": r"\d+"}
+
+    return filter_arg_for_options(arg, flags_without_args, flags_with_args)
+
+
+def traceroute_options_filter(arg: str) -> str:
+    """Get only whitelist options from traceout options"""
+    flags_without_args = ["-F", "-n"]
+    flags_with_args = {
+        "-i": r"\d+",
+        "-f": r"\d+",
+        "-g": r"\d+",
+        "-m": r"\d+",
+        "-p": r"\d+",
+    }
+    return filter_arg_for_options(arg, flags_without_args, flags_with_args)
+
 
 def ping_handler(job: Job, job_host: Any) -> None:
     """Execute ping -c 1"""
@@ -17,7 +64,7 @@ def ping_with_options_handler(job: Job, job_host: Any) -> None:
     arg_ip = job.arg_2
 
     if len(arg_opt) > 0:
-        arg_opt = re.sub(r"[^\x00-\x7F]", "", str(arg_opt))
+        arg_opt = ping_options_filter(arg_opt)
     job_host.cmd(f"ping -c 1 {arg_opt} {arg_ip}")
 
 
@@ -58,7 +105,7 @@ def traceroute_handler(job: Job, job_host: Any) -> None:
     arg_ip = job.arg_2
 
     if len(arg_opt) > 0:
-        arg_opt = re.sub(r"[^\x00-\x7F]", "", str(arg_opt))
+        arg_opt = traceroute_options_filter(arg_opt)
 
     job_host.cmd(f"traceroute -n {arg_opt} {arg_ip}")
 
