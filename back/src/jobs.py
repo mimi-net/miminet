@@ -1,10 +1,10 @@
 import re
-from typing import Any, Callable
-
-from network_schema import Job
-
-from typing import List, Dict
 import shlex
+import ipaddress
+
+from netaddr import EUI, AddrFormatError
+from typing import Any, Callable, List, Dict
+from network_schema import Job
 
 
 def filter_arg_for_options(
@@ -51,9 +51,148 @@ def traceroute_options_filter(arg: str) -> str:
     return filter_arg_for_options(arg, flags_without_args, flags_with_args)
 
 
+def udp_tcp_args_checker(ip, size, port) -> bool:
+    """Check all args in tcp and udp data handler on correct"""
+    if not valid_ip(ip):
+        return False
+
+    try:
+        _ = int(size)
+        _ = int(port)
+    except (ValueError, TypeError):
+        return False
+
+    return True
+
+
+def net_dev_checker(dev) -> bool:
+    """Checker for net interface"""
+    if not re.match(r"^[a-z][a-z0-9:_\-\.]{,14}$", dev):
+        return False
+    return True
+
+
+def ip_addr_add_checker(ip, mask, dev) -> bool:
+    """Checker all args in ip addr add job"""
+
+    if not valid_ip(ip):
+        return False
+
+    try:
+        _ = int(mask)
+    except (ValueError, TypeError):
+        return False
+    if not net_dev_checker(dev):
+        return False
+    return True
+
+
+def ip_route_add_checker(ip, mask, router) -> bool:
+    """Checker all args in ip route add job"""
+
+    if not valid_ip(ip):
+        return False
+
+    try:
+        _ = int(mask)
+    except (ValueError, TypeError):
+        return False
+
+    if not valid_ip(router):
+        return False
+
+    return True
+
+
+def subinterface_vlan_checker(intf, ip, mask, vlan, intf_name) -> bool:
+    """Checker for subinterface_vlan args"""
+
+    if not net_dev_checker(intf):
+        return False
+
+    if not valid_ip(ip):
+        return False
+
+    try:
+        _ = int(mask)
+        _ = int(vlan)
+    except (ValueError, TypeError):
+        return False
+
+    if not intf_name:
+        return False
+
+    return True
+
+
+def ipip_interface_checker(ip_start, ip_end, ip_int, name_int) -> bool:
+    """Checker args for ipip_interface"""
+
+    if not valid_ip(ip_start) or not valid_ip(ip_end) or not valid_ip(ip_int):
+        return False
+
+    if not valid_iface(name_int):
+        return False
+
+    return True
+
+
+def add_gre_checker(ip_start, ip_end, ip_iface, name_iface) -> bool:
+    """Checker args for add_gre"""
+
+    if not valid_ip(ip_start) or not valid_ip(ip_iface) or not valid_ip(ip_end):
+        return False
+
+    if not valid_iface(name_iface):
+        return False
+
+    return True
+
+
+def valid_port(port) -> bool:
+    """Check if given arg is port or not"""
+    try:
+        _ = int(port)
+    except (ValueError, TypeError):
+        return False
+
+    return True
+
+
+def valid_ip(ip) -> bool:
+    """Check if given arg is ip or not"""
+
+    try:
+        ipaddress.ip_address(str(ip))
+        return True
+    except ValueError:
+        return False
+
+
+def valid_mac(mac) -> bool:
+    """Check if given arg is mac or not"""
+    try:
+        EUI(mac)
+    except AddrFormatError:
+        return False
+
+    return True
+
+
+def valid_iface(iface) -> bool:
+    """Check if arg have only valid symbols for iface"""
+    if not re.match(r"^[a-z][a-z0-9_-]{0,14}$", iface):
+        return False
+    return True
+
+
 def ping_handler(job: Job, job_host: Any) -> None:
     """Execute ping -c 1"""
     arg_ip = job.arg_1
+
+    if not valid_ip(arg_ip):
+        return
+
     job_host.cmd(f"ping -c 1 {arg_ip}")
 
 
@@ -63,8 +202,12 @@ def ping_with_options_handler(job: Job, job_host: Any) -> None:
     arg_opt = job.arg_1
     arg_ip = job.arg_2
 
+    if not valid_ip(arg_ip):
+        return
+
     if len(arg_opt) > 0:
         arg_opt = ping_options_filter(arg_opt)
+
     job_host.cmd(f"ping -c 1 {arg_opt} {arg_ip}")
 
 
@@ -83,6 +226,9 @@ def sending_udp_data_handler(job: Job, job_host: Any) -> None:
 
     arg_size, arg_ip, arg_port = get_sending_data_argument(job)
 
+    if not udp_tcp_args_checker(arg_ip, arg_size, arg_port):
+        return
+
     job_host.cmd(
         f"dd if=/dev/urandom bs={arg_size} count=1 | nc -uq1 {arg_ip} {arg_port}"
     )
@@ -92,6 +238,9 @@ def sending_tcp_data_handler(job: Job, job_host: Any) -> None:
     """Method for sending TCP data sending"""
 
     arg_size, arg_ip, arg_port = get_sending_data_argument(job)
+
+    if not udp_tcp_args_checker(arg_ip, arg_size, arg_port):
+        return
 
     job_host.cmd(
         f"dd if=/dev/urandom bs={arg_size} count=1 | nc -w 30 -q1 {arg_ip} {arg_port}"
@@ -103,6 +252,9 @@ def traceroute_handler(job: Job, job_host: Any) -> None:
 
     arg_opt = job.arg_1
     arg_ip = job.arg_2
+
+    if not valid_ip(arg_ip):
+        return
 
     if len(arg_opt) > 0:
         arg_opt = traceroute_options_filter(arg_opt)
@@ -117,7 +269,7 @@ def ip_addr_add_handler(job: Job, job_host: Any) -> None:
     arg_mask = job.arg_3
     arg_dev = job.arg_1
 
-    if arg_ip is None or arg_dev is None:
+    if not ip_addr_add_checker(arg_ip, arg_mask, arg_dev):
         return
 
     job_host.cmd(f"ip addr add {arg_ip}/{arg_mask} dev {arg_dev}")
@@ -128,7 +280,7 @@ def iptables_handler(job: Job, job_host: Any) -> None:
 
     arg_dev = job.arg_1
 
-    if not arg_dev:
+    if not net_dev_checker(arg_dev):
         return
 
     job_host.cmd(f"iptables -t nat -A POSTROUTING -o {arg_dev} -j MASQUERADE")
@@ -140,12 +292,18 @@ def ip_route_add_handler(job: Job, job_host: Any) -> None:
     arg_mask = job.arg_2
     arg_router = job.arg_3
 
+    if not ip_route_add_checker(arg_ip, arg_mask, arg_router):
+        return
+
     job_host.cmd(f"ip route add {arg_ip}/{arg_mask} via {arg_router}")
 
 
 def block_tcp_udp_port(job: Job, job_host: Any) -> None:
     """ "Method for executing Block TCP/UDP port"""
     arg_port = job.arg_1
+
+    if not valid_port(arg_port):
+        return
 
     job_host.cmd(f"iptables -A INPUT -p tcp --dport {arg_port} -j DROP")
     job_host.cmd(f"iptables -A INPUT -p udp --dport {arg_port} -j DROP")
@@ -155,6 +313,9 @@ def open_tcp_server_handler(job: Job, job_host: Any) -> None:
     """ "Method for open tcp server"""
     arg_ip = job.arg_1
     arg_port = job.arg_2
+
+    if not valid_port(arg_port) or not valid_ip(arg_ip):
+        return
 
     job_host.cmd(
         f"nohup nc -k -d {arg_ip} -l {arg_port} > /tmp/tcpserver 2>&1 < /dev/null &"
@@ -166,6 +327,9 @@ def open_udp_server_handler(job: Job, job_host: Any) -> None:
     arg_ip = job.arg_1
     arg_port = job.arg_2
 
+    if not valid_ip(arg_ip) or not valid_port(arg_port):
+        return
+
     job_host.cmd(
         f"nohup nc -d -u {arg_ip} -l {arg_port} > /tmp/udpserver 2>&1 < /dev/null &"
     )
@@ -175,6 +339,9 @@ def arp_handler(job: Job, job_host: Any) -> None:
     """ "Method for executing arp -s"""
     arg_ip = job.arg_1
     arg_mac = job.arg_2
+
+    if not valid_ip(arg_ip) or not valid_mac(arg_mac):
+        return
 
     job_host.cmd(f"arp -s {arg_ip} {arg_mac}")
 
@@ -186,6 +353,11 @@ def subinterface_with_vlan(job: Job, job_host: Any) -> None:
     arg_mask = job.arg_3
     arg_vlan = job.arg_4
     arg_intf_name = arg_intf[6:]
+
+    if not subinterface_vlan_checker(
+        arg_intf, arg_ip, arg_mask, arg_vlan, arg_intf_name
+    ):
+        return
 
     job_host.cmd(
         f"ip link add link {arg_intf} name {arg_intf_name}.{arg_vlan} type vlan id {arg_vlan}"
@@ -201,6 +373,9 @@ def add_ipip_interface(job: Job, job_host: Any) -> None:
     arg_ip_int = job.arg_3
     arg_name_int = job.arg_4
 
+    if not ipip_interface_checker(arg_ip_start, arg_ip_end, arg_ip_int, arg_name_int):
+        return
+
     job_host.cmd(
         f"ip tunnel add {arg_name_int} mode ipip remote {arg_ip_end} local {arg_ip_start}"
     )
@@ -213,6 +388,9 @@ def add_gre(job: Job, job_host: Any) -> None:
     arg_ip_iface = job.arg_3  # New virtual interface (IP)
     arg_name_iface = job.arg_4  # New virtual interface (Name) + TTL value
 
+    if not add_gre_checker(arg_ip_start, arg_ip_end, arg_ip_iface, arg_name_iface):
+        return
+
     job_host.cmd(
         f"ip tunnel add {arg_name_iface} mode gre remote {arg_ip_end} local {arg_ip_start} ttl 255"
     )
@@ -223,6 +401,9 @@ def add_gre(job: Job, job_host: Any) -> None:
 def arp_proxy_enable(job: Job, job_host: Any) -> None:
     """Enable ARP proxying on the interface"""
     arg_iface = job.arg_1
+
+    if not valid_iface(arg_iface):
+        return
 
     job_host.cmd(f"sysctl -w net.ipv4.conf.{arg_iface}.proxy_arp=1")
 
