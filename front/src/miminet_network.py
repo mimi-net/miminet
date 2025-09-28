@@ -24,10 +24,11 @@ def create_network():
     user = current_user
     u = uuid.uuid4()
 
-    n = Network(author_id=user.id, guid=str(u))
+    user.networks_number += 1
+    n = Network(author_id=user.id, title=f"Сеть {user.networks_number}", guid=str(u))
+
     db.session.add(n)
-    db.session.flush()
-    db.session.refresh(n)
+    db.session.add(user)
     db.session.commit()
 
     return redirect(url_for("web_network", guid=n.guid))

@@ -33,6 +33,8 @@ class User(db.Model, UserMixin):  # type:ignore[name-defined]
     nick = db.Column(Text, nullable=False)
     avatar_uri = db.Column(Text, default="empty.jpg", nullable=False)
 
+    networks_number = db.Column(BigInteger, default=0, nullable=False)
+
     vk_id = db.Column(Text, nullable=True)
     google_id = db.Column(Text, nullable=True)
     yandex_id = db.Column(Text, nullable=True)
@@ -44,7 +46,7 @@ class Network(db.Model):  # type:ignore[name-defined]
     author_id = db.Column(BigInteger, ForeignKey("user.id"), nullable=False)
 
     guid = db.Column(Text, nullable=False, unique=True)
-    title = db.Column(Text, default="Новая сеть", nullable=False)
+    title = db.Column(Text, nullable=False)
 
     description = db.Column(Text, default="", nullable=True)
 
