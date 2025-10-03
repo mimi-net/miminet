@@ -163,12 +163,11 @@
             new bootstrap.Modal(document.getElementById('imageModal')).show();
     }
 
-    // Логика для активации кнопки "Ответить" только при выборе варианта
+    // Enable answer button only when option is selected
     document.addEventListener('DOMContentLoaded', function () {
         let answerBtn = document.querySelector('button[name="answerQuestion"]');
         let examBtn = document.querySelector('button[name="answerExamQuestion"]');
 
-        // Для variable (radio/checkbox)
         const variantsContainer = document.getElementById('variants');
         if (variantsContainer) {
             variantsContainer.addEventListener('change', function (e) {
@@ -178,7 +177,6 @@
             });
         }
 
-        // Для matching/sorting - активировать при любом действии пользователя
         if (textType === 'matching' || textType === 'sorting') {
             if (answerBtn) answerBtn.disabled = false;
             if (examBtn) examBtn.disabled = false;
