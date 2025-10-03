@@ -24,8 +24,8 @@ def create_network():
     user = current_user
     u = uuid.uuid4()
 
-    user.networks_number += 1
-    n = Network(author_id=user.id, title=f"Сеть {user.networks_number}", guid=str(u))
+    user.network_counter += 1
+    n = Network(author_id=user.id, title=f"Сеть {user.network_counter}", guid=str(u))
 
     db.session.add(n)
     db.session.add(user)
