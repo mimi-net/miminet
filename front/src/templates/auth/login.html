@@ -4,100 +4,61 @@
 {% block content %}
 
 <section class="vh-100">
-    <div class="container py-3 h-100">
-        <div class="row d-flex align-items-center justify-content-center h-100">
-            <div class="col-md-7 col-lg-5 col-xl-5 offset-xl-1">
-            <h1 class="text-center">Добро пожаловать!</h1>
+	<div class="container py-3 h-100">
+		<div class="row d-flex align-items-center justify-content-center h-100">
+			<div class="col-md-7 col-lg-5 col-xl-5 offset-xl-1">
+				<h1 class="text-center">Добро пожаловать!</h1>
+				<hr class="my-4">
+				<h6 class="text-center mb-4">Вход с помощью</h6>
+				<div class="row row-cols-1 row-cols-sm-2">
+					<div class="col mb-3">
+					<!-- Google -->
+					<a href="{{ url_for('google_login') }}" class="btn btn-icon btn-secondary btn-google btn-lg w-100">
+						<i class="bx bxl-google"></i>
+					</a>
+					</div>
+					
+					<div class="col mb-3">
+					<!-- VKontakte -->
+					<a href="{{ url_for('vk_login') }}" class="btn btn-icon btn-secondary btn-vk btn-lg w-100">
+						<i class="bx bxl-vk"></i>
+					</a>
+					</div>
+					
+					<div class="col mb-3">
+					<!-- Yandex -->
+					<a href="{{ url_for('yandex_login') }}" class="btn btn-icon btn-secondary btn-yandex btn-lg w-100">
+						<img src="{{ url_for('static', filename='images/yandex_icon.png') }}"
+						style="width: 30px; height: 30px;" />
+					</a>
+					</div>
+					
+					<div class="col mb-3">
+					<!-- Telegram -->
+					<script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="Miminet_bot"
+						data-size="large" data-radius="5" data-onauth="onTelegramAuth(user)" data-request-access="write">
+					</script>
+					<script type="text/javascript">
+						function onTelegramAuth(user) {
+							var fullName = user.first_name;
 
-                <!--
-                <p class="text-center">Не зарегистрированы?<a href="!#">Создайте аккаунт.</a></p>
+							if (user.last_name) {
+								fullName += ' ' + user.last_name;
+							}
 
+							var message = 'Вы авторизовались в приложении как ' + fullName + ' (' + (user.username ? '@' + user.username : '') + ')';
+							alert(message);
+							window.location.href = "{{ url_for('tg_callback') }}?user=" + encodeURIComponent(JSON.stringify(user));
+						}
+					</script>
+					</div>
+				</div>
 
-                <form  class="needs-validation mb-2" novalidate="">
+				<p class="fs-sx text-muted text-center mb-md-0">Регистрируясь, я даю <a href="{{ url_for('cookie_consent') }}">согласие на обработку данных</a>.</p>
 
-          <div class="position-relative mb-4">
-                <label for="email" class="form-label fs-base">Электронная почта</label>
-                <input type="email" id="email" class="form-control form-control-lg" required="">
-                <div class="invalid-feedback position-absolute start-0 top-100">Please enter a valid email address!</div>
-          </div>
-
-
-          <div class="mb-4">
-                <label for="password" class="form-label fs-base">Пароль</label>
-                <div class="password-toggle">
-                  <input type="password" id="password" class="form-control form-control-lg" required="">
-                  <label class="password-toggle-btn" aria-label="Show/hide password">
-                    <input class="password-toggle-check" type="checkbox">
-                    <span class="password-toggle-indicator"></span>
-                  </label>
-                  <div class="invalid-feedback position-absolute start-0 top-100">Please enter your password!</div>
-                </div>
-          </div>
-
-
-          <div class="mb-4">
-                <div class="form-check">
-                  <input type="checkbox" id="remember" class="form-check-input">
-                  <label for="remember" class="form-check-label fs-base">Запомните меня</label>
-                </div>
-          </div>
-
-
-            <div class="butt container">
-             <div class="row">
-                <button type="submit" class="btn btn-primary shadow-primary btn-lg w-100">Вход</button>
-             </div>
-            </div>
-    </form>
-                <a href="#" class="btn btn-link btn-lg w-100">Забыли пароль?</a>
-                -->
-                <hr class="my-4">
-                 <h6 class="text-center mb-4">Вход с помощью</h6>
-            <div class="row row-cols-1 row-cols-sm-2">
-              <div class="col mb-3">
-                    <!-- Google -->
-                    <a href="{{ url_for('google_login') }}" class="btn btn-icon btn-secondary btn-google btn-lg w-100">
-                        <i class="bx bxl-google"></i>
-                    </a>
-                </div>
-                <div class="col mb-3">
-                    <!-- VKontakte -->
-                    <a href="{{ url_for('vk_login') }}" class="btn btn-icon btn-secondary btn-vk btn-lg w-100">
-                        <i class="bx bxl-vk"></i>
-                    </a>
-                </div>
-                <div class="col mb-3">
-                  <!-- Yandex -->
-                  <a href="{{ url_for('yandex_login') }}" class="btn btn-icon btn-secondary btn-yandex btn-lg w-100">
-                    <img src="{{ url_for('static', filename='images/yandex_icon.png') }}"
-                      style="width: 30px; height: 30px;" />
-                  </a>
-                </div>
-                <div class="col mb-3">
-                  <!-- Telegram -->
-                  <script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="Miminet_bot"
-                  data-size="large" data-radius="10" data-onauth="onTelegramAuth(user)" data-request-access="write">
-                  </script>
-                  <script type="text/javascript">
-                  function onTelegramAuth(user) {
-                    var fullName = user.first_name;
-
-                    if (user.last_name) {
-                      fullName += ' ' + user.last_name;
-                    }
-
-                    var message = 'Вы авторизовались в приложении как ' + fullName + ' (' + (user.username ? '@' + user.username : '') + ')';
-                    alert(message);
-                    window.location.href = "{{ url_for('tg_callback') }}?user=" + encodeURIComponent(JSON.stringify(user));
-                  }
-                  </script>
-                </div>
-             </div>
-          </div>
-    </div>
-  </div>
-</div>
-
+			</div>
+		</div>
+	</div>
 </section>
 
 {% endblock %}

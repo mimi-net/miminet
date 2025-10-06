@@ -315,6 +315,11 @@ def course():
     return render_template("course.html")
 
 
+@app.route("/information/consent")
+def cookie_consent():
+    return render_template("cookie_consent.html")
+
+
 @app.route("/examples")
 def examples():
     guids = [
@@ -367,6 +372,7 @@ def sitemap():
         "/post_network_nodes",
         "/network/upload_network_picture",
         "/home",
+        "/information/consent",
     ]
 
     # static pages
