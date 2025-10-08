@@ -33,8 +33,6 @@ class User(db.Model, UserMixin):  # type:ignore[name-defined]
     nick = db.Column(Text, nullable=False)
     avatar_uri = db.Column(Text, default="empty.jpg", nullable=False)
 
-    network_counter = db.Column(BigInteger, default=0, nullable=False)
-
     vk_id = db.Column(Text, nullable=True)
     google_id = db.Column(Text, nullable=True)
     yandex_id = db.Column(Text, nullable=True)

@@ -16,7 +16,7 @@ from flask_login import current_user, login_required
 from miminet_config import check_image_with_pil
 from miminet_model import Network, Simulate, db, SimulateLog
 import datetime
-from sqlalchemy import not_
+from sqlalchemy import not_, select, func
 
 
 @login_required
@@ -24,11 +24,14 @@ def create_network():
     user = current_user
     u = uuid.uuid4()
 
-    user.network_counter += 1
-    n = Network(author_id=user.id, title=f"Сеть {user.network_counter}", guid=str(u))
+    network_count = db.session.execute(
+        select(func.count()).select_from(Network).where(Network.author_id == user.id)
+    ).scalar_one()
+    print(network_count)
+
+    n = Network(author_id=user.id, title=f"Сеть {network_count+1}", guid=str(u))
 
     db.session.add(n)
-    db.session.add(user)
     db.session.commit()
 
     return redirect(url_for("web_network", guid=n.guid))
