@@ -9,6 +9,7 @@ var PacketPlayer = (function () {
     var player_pause = 0;
     var player_play = 0;
     var pkts_on_the_fly = 0;
+    var network_cy = null;
 
     var animation_traffic_step_callback = function(){};
 
