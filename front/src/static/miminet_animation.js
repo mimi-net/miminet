@@ -5,7 +5,7 @@ var PacketPlayer = (function () {
     var animation_guid = uid();
     var animation_packets = [];
     var traffic = [];
-    var network_cy = null;
+    var original_traffic = [];
     var player_pause = 0;
     var player_play = 0;
     var pkts_on_the_fly = 0;
@@ -14,9 +14,37 @@ var PacketPlayer = (function () {
 
     var instance;
 
+    const isArpPacket = function(packet) {
+        if (!packet || !packet.config || !packet.config.type) {
+            return false;
+        }
+        const packetType = packet.config.type.toLowerCase();
+        return packetType.includes('arp-request') || packetType.includes('arp-response');
+    };
+
+    const applyArpFilter = function() {
+        const arpFilterCheckbox = document.getElementById('arpFilterCheckbox');
+        if (!arpFilterCheckbox || !original_traffic) {
+            traffic = original_traffic ? JSON.parse(JSON.stringify(original_traffic)) : [];
+            return;
+        }
+
+        if (arpFilterCheckbox.checked) {
+            traffic = original_traffic.map(step => {
+                if (!Array.isArray(step)) return step;
+                return step.filter(packet => !isArpPacket(packet));
+            }).filter(step => step.length > 0);
+        } else {
+            traffic = JSON.parse(JSON.stringify(original_traffic));
+        }
+    };
+
     const InitPlayer = function(packet){
 
-        setTraffic(packet);
+        original_traffic = packet ? JSON.parse(JSON.stringify(packet)) : [];
+        
+        applyArpFilter();
+        
         setAnimationTrafficStep(0);
         clearAnimationPackets();
         setPlayerPause(0);
@@ -284,6 +312,10 @@ var PacketPlayer = (function () {
         return;
     }
 
+    const getFilteredTraffic = function () {
+        return traffic;
+    }
+
     const setCy = function (cy) {
         network_cy = cy;
         return;
@@ -337,6 +369,27 @@ var PacketPlayer = (function () {
         return animation_traffic_step_callback;
     }
 
+    // Function to update filter and refresh animation
+    const updateArpFilter = function() {
+        const wasPlaying = getPlayerPlay();
+        const currentStep = getAnimationTrafficStep();
+        
+        if (wasPlaying) {
+            StopPlayer();
+        }
+        
+        applyArpFilter();
+        
+        // Adjust current step if needed
+        const newStep = Math.min(currentStep, Math.max(0, traffic.length - 1));
+        setAnimationTrafficStep(newStep);
+        
+        // Restart if was playing
+        if (wasPlaying && traffic.length > 0) {
+            setTimeout(() => StartPlayer(network_cy), 50);
+        }
+    };
+
     const createInstance = function () {
 
         return {
@@ -349,7 +402,9 @@ var PacketPlayer = (function () {
             setAnimationTrafficStepCallback: setAnimationTrafficStepCallback,
             resetAnimationTrafficStepCallback: resetAnimationTrafficStepCallback,
             getAnimationTrafficStep: getAnimationTrafficStep,
-            setAnimationTrafficStep: setAnimationTrafficStep
+            setAnimationTrafficStep: setAnimationTrafficStep,
+            updateArpFilter: updateArpFilter,
+            getFilteredTraffic: getFilteredTraffic
         }
     }
 
@@ -359,3 +414,17 @@ var PacketPlayer = (function () {
         }
     }
 })();
+
+// Global function to update slider display with current traffic
+window.updateSliderDisplay = function(x) {
+    const currentTraffic = PacketPlayer.getInstance().getFilteredTraffic();
+    if (!currentTraffic || currentTraffic.length === 0){
+        $('#NetworkPlayerLabel').text('0 пакетов');
+        return;
+    }
+    const stepData = currentTraffic[x-1] || [];
+    const NumWord = window.NumWord || function(n, words) { 
+        return words[n % 10 === 1 && n % 100 !== 11 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2]; 
+    };
+    $('#NetworkPlayerLabel').text('Шаг: ' + x + '/' + currentTraffic.length + ' (' + stepData.length + ' ' + NumWord(stepData.length, ['пакет', 'пакета', 'пакетов']) + ')');
+};

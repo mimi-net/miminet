@@ -90,7 +90,7 @@
             </div>
       </div>
 
-      <div class="position-absolute start-0 bottom-0" style="margin: 17px; font-weight: 500;">
+        <div class="position-absolute start-0 bottom-0" style="margin: 17px; font-weight: 500;">
             <div class="d-flex justify-content-center ws-shadow" id="NetworkPlayer">
                 <button type="button" class="btn btn-primary w-100" id="NetworkRunButton" disabled>Проверка эмуляции</button>
             </div>
@@ -100,10 +100,18 @@
                     <input class="form-control range-slider-value-min" type="hidden">
                 </div>
             </div>
+            <div id="AnimationFilters" style="display:none;">
+                <div class="d-flex justify-content-center pt-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="arpFilterCheckbox">
+                        <label class="form-check-label text-muted" for="arpFilterCheckbox" style="font-size: 0.875rem !important;">
+                            Скрыть ARP пакеты
+                        </label>
+                    </div>
+                </div>
+            </div>
             <small id="NetworkPlayerLabel" class=" d-flex justify-content-center text-muted text-center">Ожидание 10-30 сек.</small>
-      </div>
-
-      <a href="https://t.me/MimiNetCommunity" target="_blank" class="position-absolute bottom-0 end-0 ws-ask-link">
+        </div>      <a href="https://t.me/MimiNetCommunity" target="_blank" class="position-absolute bottom-0 end-0 ws-ask-link">
         <div id="NetworkRunButtonHelpLabel" class="ws-ask-button">
             <img src="{{ url_for('static', filename='/images/tg_logo.png') }}" width="24" style="margin-right: 8px;"/>Задать вопрос
         </div>
