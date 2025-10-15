@@ -1,5 +1,6 @@
 from os import urandom
 import random
+import json
 from datetime import datetime
 
 from flask_login import UserMixin
@@ -14,39 +15,19 @@ import psycopg2
 
 def generate_cosmic_name():
     """Generates unique cosmic object name with timestamp"""
-    cosmic_objects = [
-        "Комета",
-        "Звезда",
-        "Галактика",
-        "Туманность",
-        "Спутник",
-        "Вселенная",
-        "Астероид",
-        "Планета",
-        "Метеорит",
-        "Квазар",
-        "Пульсар",
-        "Чёрная дыра",
-        "Суперновая",
-        "Созвездие",
-        "Космодром",
-        "Телескоп",
-        "Ракета",
-        "Орбита",
-        "Экзопланета",
-        "Космический корабль",
-        "Межзвёздный объект",
-        "Космическая станция",
-        "Темная материя",
-        "Космический зонд",
-    ]
-    prefixes = ["", "XB-", "NGC-", "HD-", "M-", "IC-", "PG-", "PSR-"]
+    try:
+        with open("static/cosmic_names.json", "r", encoding="utf-8") as f:
+            config = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError, KeyError):
+        config = {
+            "cosmic_objects": ["Звезда", "Галактика", "Планета"],
+            "prefixes": ["", "XB-", "NGC-"],
+        }
 
     timestamp = datetime.now().strftime("%d%m%y")
     random_num = random.randint(100, 999)
-
-    cosmic_type = random.choice(cosmic_objects)
-    prefix = random.choice(prefixes)
+    cosmic_type = random.choice(config["cosmic_objects"])
+    prefix = random.choice(config["prefixes"])
 
     return f"{cosmic_type} {prefix}{timestamp}{random_num}"
 
