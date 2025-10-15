@@ -6,9 +6,10 @@ from ipmininet.ipnet import IPNet
 from jobs import Jobs
 from network_schema import Job, Network
 from pkt_parser import create_pkt_animation
-from mininet.log import setLogLevel, error
+from mininet.log import setLogLevel, error, info
 from network_topology import MiminetTopology
 from network import MiminetNetwork
+from ipmininet.router.config.base import Daemon
 
 
 def emulate(
@@ -35,7 +36,7 @@ def emulate(
         net.start()
 
         # Jobs with high ID have priority over low ones
-        ordered_jobs = sorted(network.jobs, key=lambda job: job.job_id, reverse=True)
+        ordered_jobs = sorted(network.jobs, key=lambda job: job.job_id // 100, reverse=True)
 
         for job in ordered_jobs:
             execute_job(job, net)

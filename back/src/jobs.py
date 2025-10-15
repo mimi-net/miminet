@@ -1,7 +1,12 @@
 import re
+import shlex
 from typing import Any, Callable
 
 from network_schema import Job
+from mininet.log import info
+from ipmininet.router.config.utils import ConfigDict
+from ipmininet.router.config.base import Daemon
+from ipmininet.host.config.dnsmasq import Dnsmasq
 
 
 def ping_handler(job: Job, job_host: Any) -> None:
@@ -180,6 +185,44 @@ def arp_proxy_enable(job: Job, job_host: Any) -> None:
     job_host.cmd(f"sysctl -w net.ipv4.conf.{arg_iface}.proxy_arp=1")
 
 
+def dhcp_client(job: Job, job_host) :
+    out0 = job_host.cmd(f"ifconfig {job_host.intf().name} 0")
+    out1 = job_host.cmd(f"timeout -k 0 5 dhclient -v -4 {job_host.intf().name} && ip route show")
+    ip, netmask, gateway = None, None, None
+    ip_route = job_host.cmd("ip route show")
+    ip, netmask, gateway = parse_ip_route_show_output(ip_route)
+    job_host.setIP(f"{ip}/{netmask}")
+    job_host.cmd(f"route add default gw {gateway}")
+    oute = job_host.cmd("ip route show")
+
+
+def dhcp_server(job: Job, job_host):
+    ip_range_start = job.arg_1
+    ip_range_end = job.arg_2
+    mask = job.arg_3
+    gw = job.arg_4
+    daemon = Dnsmasq(
+        node = job_host, 
+        ip_range = f"{ip_range_start},{ip_range_end}",
+        mask=mask,
+        gw=gw
+    )
+    job_host.build_daemon(daemon)
+    job_host.start_daemon(daemon)
+
+
+def parse_ip_route_show_output(output):
+    ip_match = re.search(r'src (\d+\.\d+\.\d+\.\d+)', output)
+    netmask_match = re.search(r'(\d+\.\d+\.\d+\.\d+)/(\d+)', output)
+    gateway_match = re.search(r'default via (\d+\.\d+\.\d+\.\d+)', output)
+
+    ip = ip_match.group(1) if ip_match else None
+    netmask = netmask_match.group(2) if netmask_match else None
+    gateway = gateway_match.group(1) if gateway_match else None
+
+    return ip, netmask, gateway
+
+
 class Jobs:
     """Class for representing various commands for working with miminet network"""
 
@@ -205,9 +248,11 @@ class Jobs:
             105: add_ipip_interface,
             106: add_gre,
             107: arp_proxy_enable,
+            108: dhcp_client,
             200: open_udp_server_handler,
             201: open_tcp_server_handler,
             202: block_tcp_udp_port,
+            203: dhcp_server,
         }
         self._job: Job = job
         self._job_host = job_host

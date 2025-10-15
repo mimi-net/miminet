@@ -6,6 +6,7 @@ from ipmininet.iptopo import IPTopo
 from ipmininet.router.config import RouterConfig
 from network_schema import Network, Node, NodeConfig, NodeInterface
 from pkt_parser import is_ipv4_address
+from mininet.log import setLogLevel, error, info
 
 
 class MiminetTopology(IPTopo):
