@@ -18,6 +18,8 @@ RUN apt-get update \
     tcpdump \
     git\
     python3-pip \
+    dnsmasq \
+    isc-dhcp-client \
     python3-setuptools \
     gcc \
     make \
