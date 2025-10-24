@@ -48,7 +48,34 @@ const ServerWarningMsg = function (msg) {
     $(config_content_id).prepend(warning_msg);
 }
 
-const ConfigHostForm = function(host_id){
+const HostErrorMsg = function (msg) {
+
+    $(config_content_id).find('.alert-info, .alert-danger').remove();
+
+    let error_msg = '<div class="alert alert-info alert-dismissible fade show" role="alert">' +
+        msg + '<button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+
+    $(config_content_id).prepend(error_msg);
+
+    $("#config_main_form :input").prop("disabled", false);
+    $("#config_router_main_form :input").prop("disabled", false);
+    $("#config_server_main_form :input").prop("disabled", false);
+
+    $('#config_host_main_form_submit_button').text('Сохранить').removeClass('disabled');
+    $('#config_router_main_form_submit_button').text('Сохранить').removeClass('disabled');
+    $('#config_server_main_form_submit_button').text('Сохранить').removeClass('disabled');
+}
+
+const UpdateJobCounter = function (counterId, deviceId = null) {
+    const counter = document.getElementById(counterId);
+    if (!counter) {
+        return;
+    }
+
+    counter.style.display = 'none';
+}
+
+const ConfigHostForm = function (host_id) {
     var form = document.getElementById('config_host_main_form_script').innerHTML;
     var button = document.getElementById('config_host_save_script').innerHTML;
 
@@ -668,6 +695,9 @@ const ConfigHostJob = function (host_jobs, shared = 0) {
     // Set onchange
     document.getElementById('config_host_job_select_field').addEventListener('change', ConfigHostJobOnChange);
 
+    // Update job counter with device ID
+    UpdateJobCounter('config_host_job_counter', host_id.value);
+
     elem = document.getElementById('config_host_job_list_script').innerHTML;
     if (!elem) {
         return;
@@ -799,6 +829,9 @@ const ConfigRouterJob = function (router_jobs, shared = 0) {
     // Set onchange
     document.getElementById('config_router_job_select_field').addEventListener('change', ConfigRouterJobOnChange);
 
+    // Update job counter with device ID
+    UpdateJobCounter('config_router_job_counter', router_id.value);
+
     elem = document.getElementById('config_router_job_list_script').innerHTML;
     if (!elem) {
         return;
@@ -854,6 +887,9 @@ const ConfigServerJob = function (server_jobs, shared = 0) {
 
     // Set onchange
     document.getElementById('config_server_job_select_field').addEventListener('change', ConfigServerJobOnChange);
+
+    // Update job counter with device ID
+    UpdateJobCounter('config_server_job_counter', server_id.value);
 
     elem = document.getElementById('config_server_job_list_script').innerHTML;
     if (!elem) {
@@ -1076,6 +1112,7 @@ const FillRouterSelect = function(select_id, field_msg = 'Интерфейс н�
 
 const DisableVXLANInputs = function (n) {
     var modalId = 'VxlanConfigModal' + n.data.id;
+
 
     $(document).ready(function () {
         $('#config_button_vxlan').prop('disabled', false);
