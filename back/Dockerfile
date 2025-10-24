@@ -35,7 +35,7 @@ RUN git clone https://github.com/mimi-net/mimidump.git \
 
 WORKDIR /app
 ADD ./requirements.txt /app/requirements.txt
-RUN pip3 install -r requirements.txt
+RUN pip3 install --use-pep517 --no-build-isolation -r requirements.txt
 ADD ./ENTRYPOINT.sh /app/ENTRYPOINT.sh
 RUN chmod +x ENTRYPOINT.sh
 ADD ./src /app

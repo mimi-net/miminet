@@ -412,9 +412,10 @@ def arp_proxy_enable(job: Job, job_host: Any) -> None:
 
 def dhcp_client(job: Job, job_host):
     job_host.cmd(f"ifconfig {job_host.intf().name} 0")
+    job_host.cmd("rm /var/lib/dhcp/dhclient.leases")
     out = job_host.cmd(
-        "echo 'initial-interval 4;' > /tmp/dhclient.conf && "
-        + f"timeout -k 0 20 dhclient -v -4 -cf /tmp/dhclient.conf {job_host.intf().name} && "
+        "echo 'initial-interval 5;' > /tmp/dhclient.conf && "
+        + f"timeout -k 0 15 dhclient -v -4 -cf /tmp/dhclient.conf {job_host.intf().name} && "
         + "ip route show && rm -f /tmp/dhclient.conf"
     )
     info(out)
