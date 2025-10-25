@@ -28,19 +28,21 @@ class TestJobLimit:
         for i in range(30):
             config1.add_jobs(
                 1,
-                {Location.Network.ConfigPanel.Host.Job.PING_FIELD.selector: "192.168.1.2"},
+                {
+                    Location.Network.ConfigPanel.Host.Job.PING_FIELD.selector: "192.168.1.2"
+                },
             )
         config1.submit()
 
         assert len(network.jobs) == 30, f"Expected 30 jobs, but got {len(network.jobs)}"
-        
+
         # Try to add 31st job - should fail with informative error
         config1 = network.open_node_config(host1_id)
         config1.add_jobs(
             1,
             {Location.Network.ConfigPanel.Host.Job.PING_FIELD.selector: "192.168.1.2"},
         )
-        
+
         try:
             config1.submit()
             pytest.fail("Should have raised exception about limit")
@@ -49,8 +51,10 @@ class TestJobLimit:
             # Check error message quality
             assert "лимит" in error_message.lower(), "Error should mention limit"
             assert "30" in error_message, "Error should mention the limit number (30)"
-            assert "команд" in error_message.lower(), "Error should mention 'команд' (commands)"
-        
+            assert (
+                "команд" in error_message.lower()
+            ), "Error should mention 'команд' (commands)"
+
         network.delete()
 
     def test_limit_across_multiple_devices(self, selenium: MiminetTester):
@@ -60,7 +64,7 @@ class TestJobLimit:
         router_id = network.add_node(NodeType.Router)
         host1_id = network.add_node(NodeType.Host)
         host2_id = network.add_node(NodeType.Host)
-        
+
         network.add_edge(router_id, host1_id)
         network.add_edge(router_id, host2_id)
 
@@ -84,7 +88,9 @@ class TestJobLimit:
         for i in range(15):
             config_router.add_jobs(
                 1,
-                {Location.Network.ConfigPanel.Router.Job.PING_FIELD.selector: "10.0.1.2"},
+                {
+                    Location.Network.ConfigPanel.Router.Job.PING_FIELD.selector: "10.0.1.2"
+                },
             )
         config_router.submit()
 
@@ -96,7 +102,7 @@ class TestJobLimit:
                 {Location.Network.ConfigPanel.Host.Job.PING_FIELD.selector: "10.0.1.1"},
             )
         config_host1.submit()
-        
+
         # Add 5 jobs to host2 (total 30)
         config_host2 = network.open_node_config(host2_id)
         for i in range(5):
@@ -106,7 +112,9 @@ class TestJobLimit:
             )
         config_host2.submit()
 
-        assert len(network.jobs) == 30, f"Expected 30 jobs across all devices, but got {len(network.jobs)}"
+        assert (
+            len(network.jobs) == 30
+        ), f"Expected 30 jobs across all devices, but got {len(network.jobs)}"
 
         # Try to add 31st job to any device - should fail
         config_host2 = network.open_node_config(host2_id)
@@ -144,16 +152,21 @@ class TestJobLimit:
         for i in range(30):
             config1.add_jobs(
                 1,
-                {Location.Network.ConfigPanel.Host.Job.PING_FIELD.selector: "192.168.1.2"},
+                {
+                    Location.Network.ConfigPanel.Host.Job.PING_FIELD.selector: "192.168.1.2"
+                },
             )
         config1.submit()
 
-        assert len(network.jobs) == 30, f"Expected 30 jobs initially, but got {len(network.jobs)}"
+        assert (
+            len(network.jobs) == 30
+        ), f"Expected 30 jobs initially, but got {len(network.jobs)}"
 
         # Delete one job via API
-        job_id_to_delete = network.jobs[0]['id']
-        
-        delete_result = selenium.execute_script(f"""
+        job_id_to_delete = network.jobs[0]["id"]
+
+        delete_result = selenium.execute_script(
+            f"""
             return new Promise((resolve) => {{
                 $.ajax({{
                     type: 'POST',
@@ -176,10 +189,13 @@ class TestJobLimit:
                     }}
                 }});
             }});
-        """)
-        assert delete_result['success'], "Failed to delete job"
-        assert len(network.jobs) == 29, f"Expected 29 jobs after deletion, but got {len(network.jobs)}"
-        
+        """
+        )
+        assert delete_result["success"], "Failed to delete job"
+        assert (
+            len(network.jobs) == 29
+        ), f"Expected 29 jobs after deletion, but got {len(network.jobs)}"
+
         # Add a new job - should succeed
         config1 = network.open_node_config(host1_id)
         config1.add_jobs(
@@ -187,7 +203,9 @@ class TestJobLimit:
             {Location.Network.ConfigPanel.Host.Job.PING_FIELD.selector: "192.168.1.2"},
         )
         config1.submit()
-        
-        assert len(network.jobs) == 30, f"Expected 30 jobs after adding new one, but got {len(network.jobs)}"
-        
+
+        assert (
+            len(network.jobs) == 30
+        ), f"Expected 30 jobs after adding new one, but got {len(network.jobs)}"
+
         network.delete()
