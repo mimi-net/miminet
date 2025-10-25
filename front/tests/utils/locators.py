@@ -126,11 +126,11 @@ class Location:
                     STP_BUTTON = Locator("#stp")
                     OFF_STP_BUTTON = Locator("#none")
                     PRIORITY_FIELD = Locator("#config_stp_priority")
-                    SUBMIT_BUTTON = Locator("#rstpConfigrationSubmit")
+                    SUBMIT_BUTTON = Locator("#rstpConfigurationSubmit")
 
                 class VlanPanel:
                     SWITCH_BUTTON = Locator("#config_switch_vlan")
-                    SUBMIT_BUTTON = Locator("#vlanConfigrationSubmit")
+                    SUBMIT_BUTTON = Locator("#vlanConfigurationSubmit")
 
                     @staticmethod
                     def get_modal_dialog_selector(switch_name: str):
