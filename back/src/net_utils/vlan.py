@@ -92,3 +92,4 @@ def configure_access_with_arp(switch: IPSwitch, intf: str, vlan: int) -> None:
     sub_intf = f"{intf}.{vlan}"
     switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
     switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
+    

@@ -18,7 +18,6 @@ def setup_arp_proxy_on_subinterface(node, sub_intf):
 
     print(f"[ARP-PROXY] Enabled on {sub_intf} (parent: {parent_iface})")
 
-
 def configure_vlan_subinterface(node, vlan_id):
     """
     Create a VLAN subinterface and enable ARP proxying on it.

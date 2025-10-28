@@ -240,7 +240,6 @@ class Jobs:
 
 # VLAN helpers
 
-
 def enable_arp_proxy(job: Job, job_host: Any) -> None:
     """Enable ARP proxying on an interface (either a VLAN subinterface or a direct subinterface)."""
 
