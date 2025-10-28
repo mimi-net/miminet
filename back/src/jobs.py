@@ -254,20 +254,20 @@ def enable_arp_proxy(job: Job, job_host: Any) -> None:
         arg_ip = job.arg_3  # IP Address
         arg_mask = job.arg_4  # Subnet Mask
 
-        subinterface = f"{arg_iface}.{arg_vlan}"  # Example: eth0.10
+        subinterface = f"{arg_iface}.{arg_vlan}"  
 
         # Create VLAN subinterface
         job_host.cmd(
             f"ip link add link {arg_iface} name {subinterface} type vlan id {arg_vlan}"
         )
 
-        # Assign IP address to the VLAN subinterface
+        
         job_host.cmd(f"ip addr add {arg_ip}/{arg_mask} dev {subinterface}")
 
-        # Bring the subinterface up
+
         job_host.cmd(f"ip link set dev {subinterface} up")
 
-    # Enable ARP Proxying on the subinterface
+    
     job_host.cmd(f"sysctl -w net.ipv4.conf.{subinterface}.proxy_arp=1")
 
     # Enable ARP proxying on the parent interface (if not already a subinterface)
