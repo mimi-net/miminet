@@ -118,3 +118,4 @@ class MiminetNetwork(IPNet):
                 # finish other processes
                 info(f"Killed: {child.name()} {child.pid}\n")
                 child.kill()
+

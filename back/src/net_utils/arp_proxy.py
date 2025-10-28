@@ -4,7 +4,6 @@ def setup_arp_proxy_on_subinterface(node, sub_intf):
 
     node.cmd("sysctl -w net.ipv4.ip_forward=1")
 
-
     node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.arp_ignore=0")
     node.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.arp_announce=2")
 
