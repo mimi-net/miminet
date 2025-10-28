@@ -108,5 +108,3 @@ class MiminetNetwork(IPNet):
                 info(f"Killed: {child.name()} {child.pid}")
                 child.kill()
                 child.wait()
-                child.wait()
-
