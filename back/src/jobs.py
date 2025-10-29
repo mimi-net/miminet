@@ -314,5 +314,12 @@ def enable_arp_proxy(job: Job, job_host: Any) -> None:
         job_host.cmd(f"ip link add link {arg_iface} name {subinterface} type vlan id {arg_vlan}")
         job_host.cmd(f"ip link set dev {subinterface} up")
 
-   
+
+    
     job_host.cmd(f"sysctl -w net.ipv4.conf.{subinterface}.proxy_arp=1")
+
+    # Enable ARP proxying on the parent interface (if not already a subinterface)
+    if "." not in arg_iface:
+        job_host.cmd(f"sysctl -w net.ipv4.conf.{arg_iface}.proxy_arp=1")
+
+    print(f"ARP Proxy enabled on {subinterface}")
