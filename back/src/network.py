@@ -11,7 +11,11 @@ from network_schema import Network
 from net_utils.vlan import setup_vlans, clean_bridges
 from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
 
+
 from mininet.net import Mininet
+
+from net_utils.arp_proxy import configure_vlan_subinterface  
+
 
 from net_utils.arp_proxy import configure_vlan_subinterface  
 
@@ -31,6 +35,7 @@ class MiminetNetwork(IPNet):
         # Additional settings
         setup_vlans(self, self.__network_schema.nodes)
         setup_vtep_interfaces(self, self.__network_schema.nodes)
+
                 
         # Enable ARP Proxy for VLAN subinterfaces dynamically
         for host in self.hosts:
@@ -41,7 +46,10 @@ class MiminetNetwork(IPNet):
                 info(f"Configured VLAN {vlan_id} on host {host.name}\n")
 
 
+        
+
         # Enable ARP Proxy for VLAN subinterfaces dynamically
+    
         for host in self.hosts:
             node_info = self.__network_schema.nodes.get(host.name, {})
             vlan_id = node_info.get("vlan_id")
