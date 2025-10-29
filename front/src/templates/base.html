@@ -133,6 +133,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                             <label for="network_description" class="text-sm pt-2">Описание сети</label>
                             <textarea rows="3" class="form-control form-control-sm" id="network_description" name="network_description">{{ network.description }}</textarea>
                         </div>
+                        <hr class="my-3">
+                        <div>
+                            <h6>Настройки анимации</h6>
+                            <div>
+                                <input class="form-check-input" role="switch" type="checkbox" id="ARPFilterCheckbox" name="ARPFilterCheckbox">
+                                <label for="ARPFilterCheckbox"> Пропустить ARP пакеты </label>
+                            </div>
+                            <div>
+                                <input class="form-check-input" role="switch" type="checkbox" id="STPFilterCheckbox" name="STPFilterCheckbox">
+                                <label for="STPFilterCheckbox"> Пропустить STP/RSTP пакеты </label>
+                            </div>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -279,7 +291,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script>
     $(document).ready(function() {
-        $("#networkConfigrationCancel").click(function(){
+        $("#netConfigModal").on("hidden.bs.modal", function() {
+            RecoverFilterStates();
+        })
+
+        $("#networkConfigurationCancel").click(function(){
             $('#netConfigModal').modal('hide');
         });
 
@@ -291,6 +307,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             network_title = $("#network_title").val();
             network_description = $("#network_description").val();
             UpdateNetworkConfig();
+            SetPacketFilter();
             $('#netConfigModal').modal('hide');
             $('#network_title_head').text(network_title);
         });
@@ -301,6 +318,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 network_title = $("#network_title").val();
                 network_description = $("#network_description").val();
                 UpdateNetworkConfig();
+                SetPacketFilter();
                 $('#netConfigModal').modal('hide');
                 $('#network_title_head').text(network_title);
                 return false;
