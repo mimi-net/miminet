@@ -1,8 +1,7 @@
-import logging
 import re
 import shlex
 import ipaddress
-
+import datetime
 from netaddr import EUI, AddrFormatError
 from typing import Any, Callable, List, Dict
 from network_schema import Job
@@ -187,16 +186,42 @@ def valid_iface(iface) -> bool:
         return False
     return True
 
-
+def run_command(job, host, cmd):
+    return_code, stdout, stderr = host.cmd_result(cmd)
+    if return_code != 0:
+        logger.error(
+            "job_execution_failed",
+            extra={
+                "timestamp": datetime().utcnow().isoformat() + "Z",
+                "level": "ERROR",
+                "job_id": getattr(job, "job_id", None),
+                "host_id": getattr(job, "host_id", None),
+                "command": cmd,
+                "return_code": rc,
+                "strerr": stderr
+            }
+        )
+    else:
+        logger.debug(
+            "job_command_executed", 
+            extra={
+                "timestamp": datetime().utcnow().isoformat() + "Z",
+                "level": "DEBUG",
+                "job_id": getattr(job, "job_id", None),
+                "host_id": getattr(job, "host_id", None),
+                "command": cmd,
+                "return_code": rc
+            }
+        )
+    
 def ping_handler(job: Job, job_host: Any) -> None:
     """Execute ping -c 1"""
     arg_ip = job.arg_1
 
     if not valid_ip(arg_ip):
         return
-
-    job_host.cmd(f"ping -c 1 {arg_ip}")
-
+    cmd = f"ping -c 1 {arg_ip}"
+    run_command(job, job_host, cmd)
 
 def ping_with_options_handler(job: Job, job_host: Any) -> None:
     """Execute ping with options"""
@@ -209,8 +234,8 @@ def ping_with_options_handler(job: Job, job_host: Any) -> None:
 
     if len(arg_opt) > 0:
         arg_opt = ping_options_filter(arg_opt)
-
-    job_host.cmd(f"ping -c 1 {arg_opt} {arg_ip}")
+    cmd = f"ping -c 1 {arg_opt} {arg_ip}"
+    run_command(job, job_host, cmd)    
 
 
 def get_sending_data_argument(job: Job) -> tuple[str | int, str | int, str | int]:
@@ -231,10 +256,8 @@ def sending_udp_data_handler(job: Job, job_host: Any) -> None:
     if not udp_tcp_args_checker(arg_ip, arg_size, arg_port):
         return
 
-    job_host.cmd(
-        f"dd if=/dev/urandom bs={arg_size} count=1 | nc -uq1 {arg_ip} {arg_port}"
-    )
-
+    cmd = f"dd if=/dev/urandom bs={arg_size} count=1 | nc -uq1 {arg_ip} {arg_port}"
+    run_command(job, job_host, cmd)
 
 def sending_tcp_data_handler(job: Job, job_host: Any) -> None:
     """Method for sending TCP data sending"""
@@ -244,10 +267,9 @@ def sending_tcp_data_handler(job: Job, job_host: Any) -> None:
     if not udp_tcp_args_checker(arg_ip, arg_size, arg_port):
         return
 
-    job_host.cmd(
-        f"dd if=/dev/urandom bs={arg_size} count=1 | nc -w 30 -q1 {arg_ip} {arg_port}"
-    )
-
+    cmd = f"dd if=/dev/urandom bs={arg_size} count=1 | nc -w 30 -q1 {arg_ip} {arg_port}"
+    run_command(job, job_host, cmd)
+    
 
 def traceroute_handler(job: Job, job_host: Any) -> None:
     """Method for executing traceroute"""
@@ -261,7 +283,8 @@ def traceroute_handler(job: Job, job_host: Any) -> None:
     if len(arg_opt) > 0:
         arg_opt = traceroute_options_filter(arg_opt)
 
-    job_host.cmd(f"traceroute -n {arg_opt} {arg_ip}")
+    cmd = f"traceroute -n {arg_opt} {arg_ip}"
+    run_command(job, job_host, cmd)
 
 
 def ip_addr_add_handler(job: Job, job_host: Any) -> None:
@@ -274,8 +297,8 @@ def ip_addr_add_handler(job: Job, job_host: Any) -> None:
     if not ip_addr_add_checker(arg_ip, arg_mask, arg_dev):
         return
 
-    job_host.cmd(f"ip addr add {arg_ip}/{arg_mask} dev {arg_dev}")
-
+    cmd = f"ip addr add {arg_ip}/{arg_mask} dev {arg_dev}"
+    run_command(job, job_host, cmd)
 
 def iptables_handler(job: Job, job_host: Any) -> None:
     """Method for adding forwarding rule"""
@@ -285,7 +308,8 @@ def iptables_handler(job: Job, job_host: Any) -> None:
     if not net_dev_checker(arg_dev):
         return
 
-    job_host.cmd(f"iptables -t nat -A POSTROUTING -o {arg_dev} -j MASQUERADE")
+    cmd = f"iptables -t nat -A POSTROUTING -o {arg_dev} -j MASQUERADE"
+    run_command(job, job_host, cmd)
 
 
 def ip_route_add_handler(job: Job, job_host: Any) -> None:
@@ -297,7 +321,8 @@ def ip_route_add_handler(job: Job, job_host: Any) -> None:
     if not ip_route_add_checker(arg_ip, arg_mask, arg_router):
         return
 
-    job_host.cmd(f"ip route add {arg_ip}/{arg_mask} via {arg_router}")
+    cmd = f"ip route add {arg_ip}/{arg_mask} via {arg_router}"
+    run_command(job, job_host, cmd)
 
 
 def block_tcp_udp_port(job: Job, job_host: Any) -> None:
@@ -306,10 +331,10 @@ def block_tcp_udp_port(job: Job, job_host: Any) -> None:
 
     if not valid_port(arg_port):
         return
-
-    job_host.cmd(f"iptables -A INPUT -p tcp --dport {arg_port} -j DROP")
-    job_host.cmd(f"iptables -A INPUT -p udp --dport {arg_port} -j DROP")
-
+    cmd = f"iptables -A INPUT -p tcp --dport {arg_port} -j DROP"
+    run_command(job, job_host, cmd)
+    cmd = f"iptables -A INPUT -p udp --dport {arg_port} -j DROP"
+    run_command(job, job_host, cmd)
 
 def open_tcp_server_handler(job: Job, job_host: Any) -> None:
     """ "Method for open tcp server"""
@@ -319,10 +344,10 @@ def open_tcp_server_handler(job: Job, job_host: Any) -> None:
     if not valid_port(arg_port) or not valid_ip(arg_ip):
         return
 
-    job_host.cmd(
-        f"nohup nc -k -d {arg_ip} -l {arg_port} > /tmp/tcpserver 2>&1 < /dev/null &"
-    )
-
+    
+    cmd = f"nohup nc -k -d {arg_ip} -l {arg_port} > /tmp/tcpserver 2>&1 < /dev/null &"
+    run_command(job, job_host, cmd)
+    
 
 def open_udp_server_handler(job: Job, job_host: Any) -> None:
     """ "Method for open udp server"""
@@ -332,9 +357,8 @@ def open_udp_server_handler(job: Job, job_host: Any) -> None:
     if not valid_ip(arg_ip) or not valid_port(arg_port):
         return
 
-    job_host.cmd(
-        f"nohup nc -d -u {arg_ip} -l {arg_port} > /tmp/udpserver 2>&1 < /dev/null &"
-    )
+    cmd = f"nohup nc -d -u {arg_ip} -l {arg_port} > /tmp/udpserver 2>&1 < /dev/null &"
+    run_command(job, job_host, cmd)
 
 
 def arp_handler(job: Job, job_host: Any) -> None:
@@ -345,7 +369,8 @@ def arp_handler(job: Job, job_host: Any) -> None:
     if not valid_ip(arg_ip) or not valid_mac(arg_mac):
         return
 
-    job_host.cmd(f"arp -s {arg_ip} {arg_mac}")
+    cmd = f"arp -s {arg_ip} {arg_mac}"
+    run_command(job, job_host, cmd)
 
 
 def subinterface_with_vlan(job: Job, job_host: Any) -> None:
@@ -361,12 +386,13 @@ def subinterface_with_vlan(job: Job, job_host: Any) -> None:
     ):
         return
 
-    job_host.cmd(
-        f"ip link add link {arg_intf} name {arg_intf_name}.{arg_vlan} type vlan id {arg_vlan}"
-    )
+    cmd = f"ip link add link {arg_intf} name {arg_intf_name}.{arg_vlan} type vlan id {arg_vlan}"
+    run_command(job, job_host, cmd)
     job_host.cmd(f"ip addr add {arg_ip}/{arg_mask} dev {arg_intf_name}.{arg_vlan}")
-    job_host.cmd(f"ip link set dev {arg_intf_name}.{arg_vlan} up")
+    run_command(job, job_host, cmd)
 
+    cmd = f"ip link set dev {arg_intf_name}.{arg_vlan} up"
+    run_command(job, job_host, cmd)
 
 def add_ipip_interface(job: Job, job_host: Any) -> None:
     """Method for adding ipip-interface"""
@@ -378,11 +404,10 @@ def add_ipip_interface(job: Job, job_host: Any) -> None:
     if not ipip_interface_checker(arg_ip_start, arg_ip_end, arg_ip_int, arg_name_int):
         return
 
-    job_host.cmd(
-        f"ip tunnel add {arg_name_int} mode ipip remote {arg_ip_end} local {arg_ip_start}"
-    )
-    job_host.cmd(f"ifconfig {arg_name_int} {arg_ip_int}")
-
+    cmd = f"ip tunnel add {arg_name_int} mode ipip remote {arg_ip_end} local {arg_ip_start}"
+    run_command(job, job_host, cmd)
+    cmd = f"ifconfig {arg_name_int} {arg_ip_int}"
+    run_command(job, job_host, cmd)
 
 def add_gre(job: Job, job_host: Any) -> None:
     arg_ip_start = job.arg_1
@@ -393,12 +418,12 @@ def add_gre(job: Job, job_host: Any) -> None:
     if not add_gre_checker(arg_ip_start, arg_ip_end, arg_ip_iface, arg_name_iface):
         return
 
-    job_host.cmd(
-        f"ip tunnel add {arg_name_iface} mode gre remote {arg_ip_end} local {arg_ip_start} ttl 255"
-    )
-    job_host.cmd(f"ip addr add {arg_ip_iface}/24 dev {arg_name_iface}")
-    job_host.cmd(f"ip link set {arg_name_iface} up")
-
+    cmd = f"ip tunnel add {arg_name_iface} mode gre remote {arg_ip_end} local {arg_ip_start} ttl 255"
+    run_command(job, job_host, cmd)
+    cmd = f"ip addr add {arg_ip_iface}/24 dev {arg_name_iface}"
+    run_command(job, job_host, cmd)
+    cmd = f"ip link set {arg_name_iface} up"
+    run_command(job, job_host, cmd)
 
 def arp_proxy_enable(job: Job, job_host: Any) -> None:
     """Enable ARP proxying on the interface"""
@@ -407,7 +432,8 @@ def arp_proxy_enable(job: Job, job_host: Any) -> None:
     if not valid_iface(arg_iface):
         return
 
-    job_host.cmd(f"sysctl -w net.ipv4.conf.{arg_iface}.proxy_arp=1")
+    cmd = f"sysctl -w net.ipv4.conf.{arg_iface}.proxy_arp=1"
+    run_command(job, job_host, cmd)
 
 
 class Jobs:
@@ -464,4 +490,37 @@ class Jobs:
         self._strategy = self._dct[job_id]
 
     def handler(self) -> None:
-        self._strategy(self._job, self._job_host)
+        job_id = getattr(self._job, "job_id", None)
+        host_id = getattr(self._job, "host_id", None)
+        logger.debug(
+            "job_start", 
+            extra={
+                "timestamp": datetime().utcnow().isoformat() + "Z",
+                "level": "DEBUG",
+                "job_id": job_id, 
+                "host_id": host_id
+            }
+        )
+        try:
+            self._strategy(self._job, self._job_host)
+            logger.debug(
+                "job_done", 
+                extra={
+                    "timestamp": datetime().utcnow().isoformat() + "Z",
+                    "level": "DEBUG",
+                    "job_id": job_id, 
+                    "host_id": host_id
+                }
+            )
+        except Exception as e:
+            logger.error(
+                "job_failed",
+                extra={
+                    "timestamp": datetime().utcnow().isoformat() + "Z",
+                    "level": "DEBUG",
+                    "job_id": job_id,
+                    "host_id": host_id,
+                    "error": str(e)
+                }
+            )
+            raise

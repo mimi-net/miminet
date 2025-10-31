@@ -51,7 +51,9 @@ class MiminetNetwork(IPNet):
 
             if not os.path.exists(pcap_out_file1):
                 self.__clear_files()
-                logger.error("pcap_out_file_not_found", extra={
+                logger.error(
+                    "pcap_out_file_not_found", 
+                    extra={
                         "timestamp": datetime().utcnow().isoformat() + "Z",
                         "level": "ERROR",
                         "task_id": getattr(self, "task_id", None),
@@ -63,7 +65,9 @@ class MiminetNetwork(IPNet):
 
             if not os.path.exists(pcap_out_file2):
                 self.__clear_files()
-                logger.error("pcap_file_not_found", extra={
+                logger.error(
+                    "pcap_file_not_found",
+                    extra={
                         "timestamp": datetime().utcnow().isoformat() + "Z",
                         "level": "ERROR",
                         "task_id": getattr(self, "task_id", None),
@@ -111,10 +115,13 @@ class MiminetNetwork(IPNet):
                 child.wait()
                 killed_count += 1
         if zombie_count > 0 or killed_count > 0:
-            logger.warning("cleanup_incomplete", extra={
-                "timestamp": datetime().utcnow().isoformat() + "Z",
-                "level": "ERROR",    
-                "killed_processes": killed_count,
-                "zombies_left": zombie_count  
-            })        
+            logger.warning(
+                "cleanup_incomplete",
+                extra={
+                    "timestamp": datetime().utcnow().isoformat() + "Z",
+                    "level": "ERROR",    
+                    "killed_processes": killed_count,
+                    "zombies_left": zombie_count  
+                }
+            )        
 

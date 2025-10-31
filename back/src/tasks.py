@@ -43,13 +43,16 @@ def run_miminet(network_json: str):
         except Exception as e:
             # Sometimes mininet doesn't work correctly and simulation needs to be redone,
             # Example of mininet error: https://github.com/mininet/mininet/issues/737.
-            logger.warning("emulating_rerty", extra={
-                "timestamp": datetime().utcnow().isoformat() + "Z",
-                "level": "WARNING",
-                "task_id":  getattr(self, 'request', None) and getattr(self.request, 'id', None),
-                "attempt": attempt + 1,
-                "error": str(e)
-            })
+            logger.warning(
+                "emulating_rerty",
+                extra={
+                    "timestamp": datetime().utcnow().isoformat() + "Z",
+                    "level": "WARNING",
+                    "task_id":  getattr(self, 'request', None) and getattr(self.request, 'id', None),
+                    "attempt": attempt + 1,
+                    "error": str(e)
+                }
+            )
             continue
 
     return "", []
