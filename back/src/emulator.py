@@ -2,9 +2,8 @@ import os
 import os.path
 import subprocess
 import time
-
-import dpkt
-
+import dpkt 
+import datetime
 from ipmininet.ipnet import IPNet
 from jobs import Jobs
 from network_schema import Job, Network
@@ -12,7 +11,7 @@ from pkt_parser import create_pkt_animation
 from mininet.log import setLogLevel, info, error
 from network_topology import MiminetTopology
 from network import MiminetNetwork
-
+from logging import logger
 
 def emulate(
     network: Network,
@@ -26,6 +25,17 @@ def emulate(
         tuple: animation list and pcap files.
     """
 
+    start_ts = time.time()
+
+    logger.info(
+        "emulation_started",
+        extra={
+            "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+            "level": "INFO",
+            "jobs_count": len(network.jobs) if getattr(network, "jobs", None) else 0,
+        }
+    )
+    
     setLogLevel("info")
 
     # Validate job limit
@@ -42,7 +52,6 @@ def emulate(
         raise ValueError(
             f"Превышен лимит! В сети максимальное количество команд sleep {MAX_TIME_SLEEP})."
         )
-
     if len(network.jobs) == 0:
         return [], []
 
@@ -125,6 +134,16 @@ def emulate(
         net.stop()
 
     except Exception as e:
+
+        logger.error(
+            "miminet_configuration_failed",
+            extra={
+                "timestamp": datetime().utcnow().isoformat() + "Z",
+                "level": "ERROR",
+                "error": str(e)        
+            }
+        )
+        
         error(f"An error occurred during mininet configuration: {str(e)}")
         subprocess.call("mn -c", shell=True)
 
@@ -143,6 +162,17 @@ def emulate(
     animation = group_packets_by_time(animation)
     error("[emulator] Animation groups after time-grouping: %d\n" % len(animation))
 
+    duration_ms = int((time.time() - start_ts) * 1000)
+    logger.info(
+        "emulation_finished",
+        extra={
+            "timestamp": datetime().utcnow().isoformat() + "Z",
+            "level": "INFO",
+            "pcaps_count": len(pcaps),
+            "duration_ms": duration_ms,
+        }
+    )
+    
     return animation, pcaps
 
 
