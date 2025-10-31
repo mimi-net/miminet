@@ -1,3 +1,4 @@
+import logging
 import re
 import shlex
 import ipaddress
@@ -5,6 +6,7 @@ import ipaddress
 from netaddr import EUI, AddrFormatError
 from typing import Any, Callable, List, Dict
 from network_schema import Job
+from logging import logger
 
 
 def filter_arg_for_options(

@@ -1,7 +1,7 @@
 import json
 import os
 import signal
-
+import datetime
 import marshmallow_dataclass
 from celery_app import (
     app,
@@ -9,7 +9,7 @@ from celery_app import (
     SEND_NETWORK_RESPONSE_ROUTING_KEY,
 )
 from mininet.log import setLogLevel, error
-
+from logging import logger
 from network_schema import Network
 from emulator import emulate
 
@@ -35,7 +35,7 @@ def run_miminet(network_json: str):
     network_schema = marshmallow_dataclass.class_schema(Network)()
     network_json = network_schema.load(jnet, unknown="include")
 
-    for _ in range(4):
+    for attempt in range(4):
         try:
             animation, pcaps = emulate(network_json)
 
@@ -43,7 +43,13 @@ def run_miminet(network_json: str):
         except Exception as e:
             # Sometimes mininet doesn't work correctly and simulation needs to be redone,
             # Example of mininet error: https://github.com/mininet/mininet/issues/737.
-            error(e)
+            logger.warning("emulating_rerty", extra={
+                "timestamp": datetime().utcnow().isoformat() + "Z",
+                "level": "WARNING",
+                "task_id":  getattr(self, 'request', None) and getattr(self.request, 'id', None),
+                "attempt": attempt + 1,
+                "error": str(e)
+            })
             continue
 
     return "", []
