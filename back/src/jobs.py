@@ -7,8 +7,7 @@ from network_schema import Job
 
 from typing import Any, Callable
 from typing import Any, Callable, Optional, Tuple
-
-from net_utils.switches import IPSwitch, IPOVSSwitch
+from net_utils.vlan import IPSwitch, IPOVSSwitch
 
 
 

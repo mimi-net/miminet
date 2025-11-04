@@ -10,17 +10,6 @@ from network_schema import Network
 
 from net_utils.vlan import setup_vlans, clean_bridges
 from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
-
-
-from mininet.net import Mininet
-
-from net_utils.arp_proxy import configure_vlan_subinterface  
-
-
-from net_utils.arp_proxy import configure_vlan_subinterface  
-
-from mininet.node import Host
-from mininet.link import Link
 from net_utils.arp_proxy import configure_vlan_subinterface
 class MiminetNetwork(IPNet):
     def __init__(self, topo: MiminetTopology, network: Network):
@@ -43,18 +32,6 @@ class MiminetNetwork(IPNet):
             vlan_id = node_info.get("vlan_id")
             if vlan_id is not None:
                 self.create_vlan_subinterface(host, parent="eth0", vlan_id=vlan_id)
-                info(f"Configured VLAN {vlan_id} on host {host.name}\n")
-
-
-        
-
-        # Enable ARP Proxy for VLAN subinterfaces dynamically
-    
-        for host in self.hosts:
-            node_info = self.__network_schema.nodes.get(host.name, {})
-            vlan_id = node_info.get("vlan_id")
-            if vlan_id is not None:
-                configure_vlan_subinterface(host, vlan_id=vlan_id)
                 info(f"Configured VLAN {vlan_id} on host {host.name}\n")
 
         # Waiting for network setup
