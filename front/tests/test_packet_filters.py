@@ -27,6 +27,9 @@ class TestPacketFilters:
         ).click()
         selenium.wait_until_appear(By.CSS_SELECTOR, "#netConfigModal")
 
+    def _save_network_settings(self, selenium: MiminetTester):
+        selenium.execute_script("UpdateNetworkConfig(); SetPacketFilter();")
+
     def _close_settings_modal(self, selenium: MiminetTester):
         selenium.execute_script("$('#netConfigModal').modal('hide');")
         selenium.wait_for(
@@ -60,15 +63,13 @@ class TestPacketFilters:
         selenium.get(network.url)
         self._wait_filter_state_ready(selenium)
 
-        self._prepare_packets(
-            selenium, ["ARP Request: who-has 10.0.0.1", "ICMP Echo Reply"]
-        )
+        self._prepare_packets(selenium, ["ARP packet", "ICMP packet"])
 
         self._open_settings_modal(selenium)
         arp_checkbox = selenium.find_element(By.CSS_SELECTOR, "#ARPFilterCheckbox")
         if not arp_checkbox.is_selected():
             arp_checkbox.click()
-        selenium.execute_script("UpdateNetworkConfig(); SetPacketFilter();")
+        self._save_network_settings(selenium)
         self._close_settings_modal(selenium)
         selenium.wait_for(
             lambda driver: driver.execute_script(
@@ -81,12 +82,12 @@ class TestPacketFilters:
         )
 
         filtered_packets = selenium.execute_script("return packets;")
-        assert filtered_packets[0][0]["data"]["label"] == "ICMP Echo Reply"
+        assert filtered_packets[0][0]["data"]["label"] == "ICMP packet"
 
         self._open_settings_modal(selenium)
-        assert (
-            self._checkbox_state(selenium, "ARPFilterCheckbox") is True
-        ), "ARP checkbox should remain selected after saving"
+        assert self._checkbox_state(selenium, "ARPFilterCheckbox") is True, (
+            "ARP checkbox should remain selected after saving"
+        )
         self._close_settings_modal(selenium)
 
     def test_cancel_does_not_change_filter_state(
@@ -100,17 +101,17 @@ class TestPacketFilters:
         self._open_settings_modal(selenium)
         arp_checkbox = selenium.find_element(By.CSS_SELECTOR, "#ARPFilterCheckbox")
         arp_checkbox.click()  # toggle current state
-        self._close_settings_modal(selenium)
+        self._close_settings_modal(selenium)  # close without saving
 
         current_state = selenium.execute_script("return filterState.hideARP === true;")
-        assert (
-            current_state == initial_state
-        ), "Filter state must not change when closing without saving"
+        assert current_state == initial_state, (
+            "Filter state must not change when closing without saving"
+        )
 
         self._open_settings_modal(selenium)
-        assert (
-            self._checkbox_state(selenium, "ARPFilterCheckbox") == initial_state
-        ), "ARP checkbox should display the original value after cancel"
+        assert self._checkbox_state(selenium, "ARPFilterCheckbox") == initial_state, (
+            "ARP checkbox should display the original value after cancel"
+        )
         self._close_settings_modal(selenium)
 
     def test_enable_stp_filter_filters_packets(
@@ -122,9 +123,9 @@ class TestPacketFilters:
         self._prepare_packets(
             selenium,
             [
-                "STP Configuration BPDU",
-                "RSTP Topology Change",
-                "ICMP Echo Reply",
+                "STP packet",
+                "RSTP packet",
+                "ICMP packet",
             ],
         )
 
@@ -132,7 +133,7 @@ class TestPacketFilters:
         stp_checkbox = selenium.find_element(By.CSS_SELECTOR, "#STPFilterCheckbox")
         if not stp_checkbox.is_selected():
             stp_checkbox.click()
-        selenium.execute_script("UpdateNetworkConfig(); SetPacketFilter();")
+        self._save_network_settings(selenium)
         self._close_settings_modal(selenium)
 
         selenium.wait_for(
@@ -147,10 +148,64 @@ class TestPacketFilters:
         )
 
         filtered_packets = selenium.execute_script("return packets;")
-        assert filtered_packets[0][0]["data"]["label"] == "ICMP Echo Reply"
+        assert filtered_packets[0][0]["data"]["label"] == "ICMP packet"
 
         self._open_settings_modal(selenium)
-        assert (
-            self._checkbox_state(selenium, "STPFilterCheckbox") is True
-        ), "STP checkbox should remain selected after saving"
+        assert self._checkbox_state(selenium, "STPFilterCheckbox") is True, (
+            "STP checkbox should remain selected after saving"
+        )
         self._close_settings_modal(selenium)
+
+    def test_disabling_filters_restores_packets(
+        self, selenium: MiminetTester, network: MiminetTestNetwork
+    ):
+        selenium.get(network.url)
+        self._wait_filter_state_ready(selenium)
+
+        self._prepare_packets(
+            selenium,
+            [
+                "ARP packet",
+                "STP packet",
+            ],
+        )
+
+        # Enable both filters and apply
+        self._open_settings_modal(selenium)
+        arp_checkbox = selenium.find_element(By.CSS_SELECTOR, "#ARPFilterCheckbox")
+        stp_checkbox = selenium.find_element(By.CSS_SELECTOR, "#STPFilterCheckbox")
+        if not arp_checkbox.is_selected():
+            arp_checkbox.click()
+        if not stp_checkbox.is_selected():
+            stp_checkbox.click()
+        self._save_network_settings(selenium)
+        self._close_settings_modal(selenium)
+
+        selenium.wait_for(
+            lambda driver: driver.execute_script(
+                "return filterState.hideARP === true"
+                " && filterState.hideSTP === true"
+                " && Array.isArray(packets)"
+                " && packets.length === 0;"
+            )
+        )
+
+        # Disable filters and ensure packets come back
+        self._open_settings_modal(selenium)
+        arp_checkbox = selenium.find_element(By.CSS_SELECTOR, "#ARPFilterCheckbox")
+        stp_checkbox = selenium.find_element(By.CSS_SELECTOR, "#STPFilterCheckbox")
+        if arp_checkbox.is_selected():
+            arp_checkbox.click()
+        if stp_checkbox.is_selected():
+            stp_checkbox.click()
+        self._save_network_settings(selenium)
+        self._close_settings_modal(selenium)
+
+        selenium.wait_for(
+            lambda driver: driver.execute_script(
+                "return filterState.hideARP === false"
+                " && filterState.hideSTP === false"
+                " && Array.isArray(packets)"
+                " && packets.length === 2;"
+            )
+        )
