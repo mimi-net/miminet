@@ -1,7 +1,7 @@
 version: "3"
 services:
   chrome:
-    image: selenium/node-chrome:141.0:
+    image: selenium/node-chrome:141.0
     container_name: chrome
     shm_size: 2gb
     networks:
