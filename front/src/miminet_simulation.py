@@ -53,7 +53,7 @@ def run_simulation() -> Response:
 
         # Add new network
         task_guid = uuid.uuid4()
-        sim = Simulate(network_id=net.id, packets="", task_guid=str(task_guid))
+        sim = Simulate(network_id=net.id, packets=None, task_guid=str(task_guid))
         db.session.add(sim)
         db.session.add(simlog)
         db.session.commit()

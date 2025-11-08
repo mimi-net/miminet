@@ -1049,7 +1049,7 @@ const DrawGraph = function() {
 
             // Save the network state.
             SaveNetworkObject();
-
+                        
             DeleteNode(selecteed_node_id);
             DeleteJob(selecteed_node_id);
 
