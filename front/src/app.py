@@ -272,7 +272,6 @@ admin = Admin(
     app,
     index_view=MiminetAdminIndexView(),
     name="Miminet Admin",
-    template_mode="bootstrap4",
 )
 
 
