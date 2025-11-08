@@ -61,7 +61,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <a class="btn btn-outline-primary btn-icon me-4" data-target="#ModalCopy" id="copy-network" data-toggle="tooltip" data-bs-placement="bottom" title="Сохранить копию" onclick="CopyNetwork()">
                         <i class='bx bx-copy fs-4 mx-1'></i>
                     </a>
-                    <a {% if request.path != url_for('web_network_shared') %} class="btn btn-outline-primary btn-icon" {% else %} class="btn btn-outline-primary btn-icon disabled" {% endif %} href="#netConfigModal" id="net-settings" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети"><i class='bx bx-cog fs-4 mx-1'></i></a>
+                    <a class="btn btn-outline-primary btn-icon" href="#netConfigModal" id="net-settings" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети"><i class='bx bx-cog fs-4 mx-1'></i></a>
                 </div>
             {% else %}
                 <div class="mx-auto navbar-nav">
@@ -128,15 +128,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <form id="networkConfigrationForm" method="POST" action="">
                         <div class="form-group">
                             <label for="network_title" class="text-sm">Название сети</label>
-                            <input type="text" class="form-control form-control-sm" id="network_title" name="network_title" value='{{ network.title }}'>
+                            <input type="text" class="form-control form-control-sm" id="network_title" name="network_title" value='{{ network.title }}' {{ 'disabled' if request.path == url_for('web_network_shared') else '' }}>
 
                             <label for="network_description" class="text-sm pt-2">Описание сети</label>
-                            <textarea rows="3" class="form-control form-control-sm" id="network_description" name="network_description">{{ network.description }}</textarea>
+                            <textarea rows="3" class="form-control form-control-sm" id="network_description" name="network_description" {{ 'disabled' if request.path == url_for('web_network_shared') else '' }}>{{ network.description }}</textarea>
+                        </div>
+                            <hr class="my-3">
+                            <h6>Настройки анимации</h6>
+                        <div>
+                            <input class="form-check-input" role="switch" type="checkbox" id="ARPFilterCheckbox" name="ARPFilterCheckbox">
+                            <label for="ARPFilterCheckbox"> Пропустить ARP пакеты </label>
+                        </div>
+                        <div>
+                            <input class="form-check-input" role="switch" type="checkbox" id="STPFilterCheckbox" name="STPFilterCheckbox">
+                            <label for="STPFilterCheckbox"> Пропустить STP/RSTP пакеты </label>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button id="networkDeleteButton" type="button" data-toggle="modal" class="btn btn-danger" href="#deleteNetConfirmModal">Удалить сеть</button>
+                    <button id="networkDeleteButton" type="button" data-toggle="modal"
+                        class="btn btn-danger" {{'disabled' if request.path == url_for('web_network_shared') else ''}}
+                        href="#deleteNetConfirmModal">
+                        Удалить сеть
+                    </button>
                     <button id="networkConfigrationCancel" type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
                     <button id="networkConfigrationSubmit" type="button" class="btn btn-primary">Сохранить</button>
                 </div>
@@ -279,6 +293,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script>
     $(document).ready(function() {
+        $("#netConfigModal").on("hidden.bs.modal", function() {
+            RecoverFilterStates();
+        })
+
         $("#networkConfigrationCancel").click(function(){
             $('#netConfigModal').modal('hide');
         });
@@ -291,6 +309,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             network_title = $("#network_title").val();
             network_description = $("#network_description").val();
             UpdateNetworkConfig();
+            SetPacketFilter();
             $('#netConfigModal').modal('hide');
             $('#network_title_head').text(network_title);
         });
@@ -301,6 +320,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 network_title = $("#network_title").val();
                 network_description = $("#network_description").val();
                 UpdateNetworkConfig();
+                SetPacketFilter();
                 $('#netConfigModal').modal('hide');
                 $('#network_title_head').text(network_title);
                 return false;
