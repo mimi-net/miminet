@@ -25,18 +25,14 @@
                     <img src="{{ url_for('static', filename='/images/logo.png') }}" class="position-absolute start-0 top-0" width="170" style="margin: 17px;" alt="Miminet">
                 </a>
                 <div class="ws-name-case position-absolute top-0 start-50 translate-middle-x" style="margin-top: 17px;">
-                     {% if request.path != url_for('web_network_shared') %}
+                     {% if not is_shared %}
                         <a class="d-inline nav-link" href="{{ url_for('home') }}">Мои сети</a>
                         <a class="d-inline nav-link" href="#"> / </a>
                      {% endif %}
                         <a class="d-inline nav-link" id="network_title_head" href="{{ url_for('web_network', guid=network.guid) }}">{{ network.title }}</a>
                 </div>
                 <div class="d-flex position-absolute end-0 top-0" style="margin: 17px;">
-                     <a {% if request.path != url_for('web_network_shared') %}
-                            class="ws-settings-button"
-                        {% else %}
-                            class="ws-settings-button disabled"
-                        {% endif %}
+                     <a class="ws-settings-button"
                         href="#netConfigModal"
                         data-bs-toggle="modal"
                         data-target="#netConfigModal"
@@ -66,7 +62,7 @@
                     <a class="btn btn-outline-primary btn-icon me-4" data-target="#ModalCopy" id="copy-network" data-toggle="tooltip" data-bs-placement="bottom" title="Сохранить копию" onclick="CopyNetwork()">
                         <i class='bx bx-copy fs-4 mx-1'></i>
                     </a>
-                    <a {% if request.path != url_for('web_network_shared') %} class="btn btn-outline-primary btn-icon" {% else %} class="btn btn-outline-primary btn-icon disabled" {% endif %} href="#netConfigModal" id="net-settings" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети"><i class='bx bx-cog fs-4 mx-1'></i></a>
+                    <a class="btn btn-outline-primary btn-icon" href="#netConfigModal" id="net-settings" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети"><i class='bx bx-cog fs-4 mx-1'></i></a>
                 </div>
             {% else %}
                  <a href="/">
