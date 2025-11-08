@@ -1,4 +1,5 @@
 from os import urandom
+import os
 
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
@@ -6,8 +7,22 @@ from miminet_config import (
     make_empty_network,
 )
 from sqlalchemy import MetaData, BigInteger, Text, Boolean, TIMESTAMP, ForeignKey, not_
+from sqlalchemy.types import TypeDecorator
 from werkzeug.security import generate_password_hash
 import psycopg2
+
+
+class TZTimestamp(TypeDecorator):
+    """Кросс-БД тип для TIMESTAMP с поддержкой timezone."""
+    impl = TIMESTAMP
+    cache_ok = True
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == "postgresql":
+            return dialect.type_descriptor(TIMESTAMP(timezone=True))
+        else:
+            # SQLite не поддерживает timezone
+            return dialect.type_descriptor(TIMESTAMP(timezone=False))
 
 
 convention = {
@@ -76,8 +91,8 @@ class SimulateLog(db.Model):  # type:ignore[name-defined]
     network_guid = db.Column(Text, nullable=False)
     network = db.Column(Text, default=make_empty_network, nullable=False)
 
-    simulate_start = db.Column(TIMESTAMP(timezone=True), server_default=db.func.now())
-    simulate_end = db.Column(TIMESTAMP(timezone=True), onupdate=db.func.now())
+    simulate_start = db.Column(TZTimestamp, server_default=db.func.now())
+    simulate_end = db.Column(TZTimestamp, onupdate=db.func.now())
 
     ready = db.Column(Boolean, default=False, nullable=False)
 
@@ -110,7 +125,19 @@ def ensure_db_exists(host, user, password, target_db):
 
 def init_db(app):
     # Init DB
+    mode = os.getenv("MODE", "dev")
+
     with app.app_context():
+        # Для PostgreSQL (prod) - проверить/создать БД
+        if mode == "prod":
+            postgres_host = os.getenv("POSTGRES_HOST") or os.getenv("YANDEX_POSTGRES_HOST")
+            postgres_user = os.getenv("POSTGRES_DEFAULT_USER") or os.getenv("YANDEX_POSTGRES_USER")
+            postgres_password = os.getenv("POSTGRES_DEFAULT_PASSWORD") or os.getenv("YANDEX_POSTGRES_PASSWORD")
+            postgres_db = os.getenv("POSTGRES_DATABASE_NAME") or os.getenv("YANDEX_POSTGRES_DB")
+
+            if postgres_host and postgres_user and postgres_password and postgres_db:
+                ensure_db_exists(postgres_host, postgres_user, postgres_password, postgres_db)
+
         try:
             # Some networks can be marked as non-emulated in the database, we should fix them.
             print("[!] Fix nonemulated networks...")

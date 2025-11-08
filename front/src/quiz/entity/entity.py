@@ -6,7 +6,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import declared_attr
 from sqlalchemy.types import TypeDecorator
 
-from miminet_model import db
+from miminet_model import db, TZTimestamp
 
 
 class GUID(TypeDecorator):
@@ -74,9 +74,9 @@ class SoftDeleteMixin(object):
 class TimeMixin(object):
     __table_args__ = ({"extend_existing": True},)
 
-    created_on = db.Column(TIMESTAMP(timezone=True), default=func.now())
+    created_on = db.Column(TZTimestamp, default=func.now())
     updated_on = db.Column(
-        TIMESTAMP(timezone=True), default=func.now(), onupdate=func.now()
+        TZTimestamp, default=func.now(), onupdate=func.now()
     )
 
 
@@ -268,7 +268,7 @@ class PracticeQuestion(
     available_l1_hub = db.Column(BigInteger, default=0)
     available_l3_router = db.Column(BigInteger, default=0)
     available_server = db.Column(BigInteger, default=0)
-    requirements = db.Column(db.JSON, default={})
+    requirements = db.Column(Json, default={})
 
     question = db.relationship(
         "Question", uselist=False, back_populates="practice_question"
