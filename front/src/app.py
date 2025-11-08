@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 from dotenv import load_dotenv
 
-from flask import Flask, make_response, render_template, request, has_request_context
+from flask import Flask, make_response, render_template
 from flask_admin import Admin
 from flask_login import current_user, login_required
 from flask_migrate import Migrate
@@ -218,15 +218,6 @@ app.add_url_rule(
 app.add_url_rule(
     "/quiz/question/delete", methods=["DELETE"], view_func=delete_question_endpoint
 )
-
-
-@app.context_processor
-def inject_shared_flag():
-    if not has_request_context():
-        return {"is_shared": False}
-
-    return {"is_shared": request.endpoint == "web_network_shared"}
-
 
 app.add_url_rule(
     "/quiz/question/all", methods=["GET"], view_func=get_questions_by_section_endpoint

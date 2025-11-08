@@ -25,7 +25,7 @@
                     <img src="{{ url_for('static', filename='/images/logo.png') }}" class="position-absolute start-0 top-0" width="170" style="margin: 17px;" alt="Miminet">
                 </a>
                 <div class="ws-name-case position-absolute top-0 start-50 translate-middle-x" style="margin-top: 17px;">
-                     {% if not is_shared %}
+                     {% if request.path != url_for('web_network_shared') %}
                         <a class="d-inline nav-link" href="{{ url_for('home') }}">Мои сети</a>
                         <a class="d-inline nav-link" href="#"> / </a>
                      {% endif %}
