@@ -147,8 +147,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 </div>
                 <div class="modal-footer">
                     <button id="networkDeleteButton" type="button" data-toggle="modal"
-                        class="btn btn-danger{% if is_shared %} disabled{% endif %}"
-                        {% if is_shared %}disabled{% endif %}
+                        class="btn btn-danger" {{'disabled' if is_shared else ''}}
                         href="#deleteNetConfirmModal">
                         Удалить сеть
                     </button>
