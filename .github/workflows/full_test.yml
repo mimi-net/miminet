@@ -31,7 +31,7 @@ jobs:
    
       - name: Install dependencies
         run: |
-            sudo python -m pip install pip==22.0.2 pytest selenium --ignore-installed urllib3
+            sudo python -m pip install pip pytest selenium --ignore-installed urllib3
 
       - name: Check availability
         run: |

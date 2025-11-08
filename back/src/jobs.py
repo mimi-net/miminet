@@ -415,7 +415,7 @@ def dhcp_client(job: Job, job_host):
     job_host.cmd("rm /var/lib/dhcp/dhclient.leases")
     out = job_host.cmd(
         "echo 'initial-interval 5;' > /tmp/dhclient.conf && "
-        + f"timeout -k 0 15 dhclient -v -4 -cf /tmp/dhclient.conf {job_host.intf().name} && "
+        + f"timeout -k 0 6 dhclient -v -4 -cf /tmp/dhclient.conf {job_host.intf().name} && "
         + "ip route show && rm -f /tmp/dhclient.conf"
     )
     info(out)
