@@ -104,7 +104,7 @@ app = Flask(
 load_dotenv()
 
 # Получаем режим работы из переменных окружения
-mode = os.getenv("MODE", "dev")
+MODE = os.getenv("MODE", "dev")
 
 def get_database_uri(mode):
     """
@@ -124,7 +124,7 @@ def get_database_uri(mode):
         POSTGRES_DB_NAME = os.getenv("POSTGRES_DATABASE_NAME")
         POSTGRES_URL = f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB_NAME}"
 
-        print(f"[DB] Using local PostgreSQL: {POSTGRES_HOST}:{"default"}/{POSTGRES_DB_NAME}")
+        print(f"[DB] Using local PostgreSQL: {POSTGRES_HOST}/{POSTGRES_DB_NAME}")
         return POSTGRES_URL
     elif mode == "prod":
         # Yandex Cloud PostgreSQL для продакшена
@@ -143,7 +143,7 @@ def get_database_uri(mode):
         print(f"[DB] Using Yandex Cloud PostgreSQL: {POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB_NAME}")
         return POSTGRES_URL
     else:
-        raise ValueError(f"Unknown MODE: {MODE}. Expected 'dev' or 'prod'")
+        raise ValueError(f"Unknown MODE: {mode}. Expected 'dev' or 'prod'")
 
 
 app.config["SQLALCHEMY_DATABASE_URI"] = get_database_uri(MODE)
