@@ -46,7 +46,7 @@ def run_miminet(network_json: str):
             error(e)
             continue
 
-    return "", []
+    return "[]", []
 
 
 @app.task(bind=True)

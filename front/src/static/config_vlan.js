@@ -33,12 +33,12 @@ function setupEventHandlers(currentDevice, modalId, tableId) {
         }
     });
 
-    $('#' + modalId).find('#vlanConfigrationCancelIcon, #vlanConfigrationCancel').on('click', function () {
+    $('#' + modalId).find('#vlanConfigurationCancelIcon, #vlanConfigurationCancel').on('click', function () {
         restoreFormData(currentDevice, '#' + tableId);
         $('#' + modalId).modal('hide');
     });
 
-    $('#' + modalId).find('#vlanConfigrationSubmit').on('click', function () {
+    $('#' + modalId).find('#vlanConfigurationSubmit').on('click', function () {
         if ($('#' + modalId).find('#config_switch_vlan').is(':checked')) {
             saveCurrentFormData(currentDevice, '#' + tableId);
 

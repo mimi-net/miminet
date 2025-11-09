@@ -1049,7 +1049,7 @@ const DrawGraph = function() {
 
             // Save the network state.
             SaveNetworkObject();
-
+                        
             DeleteNode(selecteed_node_id);
             DeleteJob(selecteed_node_id);
 
@@ -1801,11 +1801,10 @@ const RunSimulation = function (network_guid)
 // 2 states:
 // Do we need emulation
 // We have a packets and ready to play packets
-const SetNetworkPlayerState = function(simultaion_id)
-{
+const SetNetworkPlayerState = function (simulation_id) {
 
     // Reset?
-    if (simultaion_id === -1){
+    if (simulation_id === -1) {
         packets = null;
         pcaps = [];
         SetNetworkPlayerState(0);
@@ -1916,13 +1915,12 @@ const SetNetworkPlayerState = function(simultaion_id)
 
     // No packets.
     // The network is simulating?
-    if (simultaion_id)
-    {
+    if (simulation_id) {
         $('#NetworkPlayer').empty();
         $('#PacketSliderInput').hide();
         $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" disabled>Эмулируется...</button>');
         InsertWaitingTime()
-        CheckSimulation(simultaion_id);
+        CheckSimulation(simulation_id);
         return;
     }
 
