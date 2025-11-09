@@ -128,15 +128,25 @@ def init_db(app):
     mode = os.getenv("MODE", "dev")
 
     with app.app_context():
-        # Для PostgreSQL (prod) - проверить/создать БД
-        if mode == "prod":
-            postgres_host = os.getenv("POSTGRES_HOST") or os.getenv("YANDEX_POSTGRES_HOST")
-            postgres_user = os.getenv("POSTGRES_DEFAULT_USER") or os.getenv("YANDEX_POSTGRES_USER")
-            postgres_password = os.getenv("POSTGRES_DEFAULT_PASSWORD") or os.getenv("YANDEX_POSTGRES_PASSWORD")
-            postgres_db = os.getenv("POSTGRES_DATABASE_NAME") or os.getenv("YANDEX_POSTGRES_DB")
+        # Получить параметры подключения в зависимости от режима
+        if mode == "dev":
+            # Локальный PostgreSQL
+            postgres_host = os.getenv("POSTGRES_HOST")
+            postgres_user = os.getenv("POSTGRES_DEFAULT_USER")
+            postgres_password = os.getenv("POSTGRES_DEFAULT_PASSWORD", "my_postgres")
+            postgres_db = os.getenv("POSTGRES_DATABASE_NAME")
+        elif mode == "prod":
+            # Yandex Cloud PostgreSQL
+            postgres_host = os.getenv("YANDEX_POSTGRES_HOST")
+            postgres_user = os.getenv("YANDEX_POSTGRES_USER")
+            postgres_password = os.getenv("YANDEX_POSTGRES_PASSWORD")
+            postgres_db = os.getenv("YANDEX_POSTGRES_DB", "miminet")
+        else:
+            raise ValueError(f"Unknown MODE: {mode}")
 
-            if postgres_host and postgres_user and postgres_password and postgres_db:
-                ensure_db_exists(postgres_host, postgres_user, postgres_password, postgres_db)
+        # Проверить/создать БД для обоих режимов
+        if postgres_host and postgres_user and postgres_password and postgres_db:
+            ensure_db_exists(postgres_host, postgres_user, postgres_password, postgres_db)
 
         try:
             # Some networks can be marked as non-emulated in the database, we should fix them.
