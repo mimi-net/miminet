@@ -129,13 +129,13 @@ def get_database_uri(mode):
     elif mode == "prod":
         # Yandex Cloud PostgreSQL для продакшена
         POSTGRES_HOST = os.getenv("YANDEX_POSTGRES_HOST")
-        POSTGRES_PORT = os.getenv("YANDEX_POSTGRES_PORT")
+        POSTGRES_PORT = os.getenv("YANDEX_POSTGRES_PORT", "6432")
         POSTGRES_USER = os.getenv("YANDEX_POSTGRES_USER")
         POSTGRES_PASSWORD = os.getenv("YANDEX_POSTGRES_PASSWORD")
         POSTGRES_DB_NAME = os.getenv("YANDEX_POSTGRES_DB")
         POSTGRES_SSLMODE = os.getenv("YANDEX_POSTGRES_SSLMODE", "require")
 
-        if not all([host, user, password]):
+        if not all([POSTGRES_HOST, POSTGRES_USER, POSTGRES_PASSWORD]):
             raise ValueError("Missing Yandex Cloud PostgreSQL credentials in environment variables")
 
         POSTGRES_URL = f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB_NAME}?sslmode={POSTGRES_SSLMODE}"
