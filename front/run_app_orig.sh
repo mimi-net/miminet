@@ -7,7 +7,7 @@ echo "[!] Running in $MODE mode"
 python3 app.py "$MODE"
 
 # Start the application
-exec uwsgi --ini /app/uwsgi.ini
+nohup uwsgi --ini /app/uwsgi.ini &
 
 # Start celery
 exec python3 -m celery -A celery_app worker --loglevel=info --concurrency=${celery_concurrency} -Q common-results-queue,task-checking-queue
