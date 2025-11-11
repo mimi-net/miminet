@@ -783,6 +783,22 @@ const prepareStylesheet = function() {
 
         });
 
+        if (n.config && n.config.type === 'l2_switch') {
+            const stpMode = n.config.stp || 0;
+            if (stpMode > 0) {
+                const proto = (stpMode === 2) ? 'rstp on' : 'stp on';
+                const pr = (n.config.priority !== undefined && n.config.priority !== null)
+                    ? ` prior ${n.config.priority}` : '';
+                label = label + '\n' + `(${proto}${pr})`;
+            }
+            if (Array.isArray(n.interface)) {
+                n.interface.forEach((iface) => {
+                    const vlanLine = buildVlanLine(n, iface);
+                    if (vlanLine) label = label + '\n' + vlanLine;
+                });
+            }
+        }
+
         return label;
     };
 
