@@ -778,7 +778,9 @@ const ConfigRouterJobOnChange = function(evnt) {
         case '107':
             UpdateRouterForm('config_router_add_arp_proxy_script');
             FillRouterSelect("#config_router_add_arp_proxy_iface_select_field", "Выберите линк", false);
-
+        case '108':
+            UpdateRouterForm('config_router_add_port_forwarding_script');
+            FillRouterSelect("#config_router_add_port_forwarding_iface_select_field", "Выберите линк", false);
             break;
         default:
             console.log("Unknown target.value");

@@ -285,6 +285,16 @@ def iptables_handler(job: Job, job_host: Any) -> None:
 
     job_host.cmd(f"iptables -t nat -A POSTROUTING -o {arg_dev} -j MASQUERADE")
 
+def port_forwarding_handler(job: Job, job_host: Any):
+    #arg_proto = job.arg_1
+    arg_iface = job.arg_1
+    arg_port = job.arg_2
+    arg_dest_addr = job.arg_3
+    arg_dest_port = job.arg_4
+
+    job_host.cmd(f"iptables -t nat -A PREROUTING -p tcp -i {arg_iface} --dport {arg_port} -j DNAT --to-destination {arg_dest_addr}:{arg_dest_port}")
+    job_host.cmd(f"iptables -t nat -A POSTROUTING -o {arg_iface} -j MASQUERADE")
+
 
 def ip_route_add_handler(job: Job, job_host: Any) -> None:
     """Method for executing ip route add"""
@@ -433,6 +443,7 @@ class Jobs:
             105: add_ipip_interface,
             106: add_gre,
             107: arp_proxy_enable,
+            108: port_forwarding_handler,
             200: open_udp_server_handler,
             201: open_tcp_server_handler,
             202: block_tcp_udp_port,
