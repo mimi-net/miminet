@@ -529,13 +529,10 @@ function add_icmp_header (pkt, header_number) {
 	}
 
     const tcp_hdr_len = (parseInt(pkt.slice(12, 13).join(''), 16) >> 4) * 4;
-    const payload_bytes = pkt.length - tcp_hdr_len;
+    const payload_bytes = pkt.length - tcp_hdr_len - 8;
     if (payload_bytes > 0) {
         const payload_p = document.createElement('p');
-        payload_p.innerHTML = 'Data:';
-        payload_p.dataset.startByte = tcp_hdr_len;
-        payload_p.dataset.byteCount = payload_bytes;
-        payload_p.classList.add('payload');
+        payload_p.innerHTML = `Data: ${payload_bytes} bytes`;
         decode_div.appendChild(payload_p);
     }
 
@@ -561,10 +558,7 @@ function add_tcp_header (pkt, header_number) {
     const payload_bytes = pkt.length - tcp_hdr_len;
     if (payload_bytes > 0) {
         const payload_p = document.createElement('p');
-        payload_p.innerHTML = 'Data:';
-        payload_p.dataset.startByte = tcp_hdr_len;
-        payload_p.dataset.byteCount = payload_bytes;
-        payload_p.classList.add('payload');
+        payload_p.innerHTML = `Data: ${payload_bytes} bytes`;
         decode_div.appendChild(payload_p);
     }
 
@@ -589,10 +583,7 @@ function add_udp_header (pkt, header_number) {
     const payload_bytes = pkt.length - 8;
     if (payload_bytes > 0) {
         const payload_p = document.createElement('p');
-        payload_p.innerHTML = 'Data:';
-        payload_p.dataset.startByte = 8;
-        payload_p.dataset.byteCount = payload_bytes;
-        payload_p.classList.add('payload');
+        payload_p.innerHTML = `Data: ${payload_bytes} bytes`;
         decode_div.appendChild(payload_p);
     }
 
@@ -625,10 +616,7 @@ function add_gre_header (pkt, header_number) {
     const payload_bytes = pkt.length - gre_hdr_len;
     if (payload_bytes > 0) {
         const payload_p = document.createElement('p');
-        payload_p.innerHTML = 'Data:';
-        payload_p.dataset.startByte = gre_hdr_len;
-        payload_p.dataset.byteCount = payload_bytes;
-        payload_p.classList.add('payload');
+        payload_p.innerHTML = `Data: ${payload_bytes} bytes`;
         decode_div.appendChild(payload_p);
     }
 
@@ -654,19 +642,11 @@ function decode_packet(pkt) {
 	decode_div.classList.add("collapse", "decode_body", "decode_width");
 	decode_div.id = "collapseDecode" + header_number;
 
-    const header_a = decode.querySelector(`a[href="#collapseDecode${header_number}"]`);
-    if (header_a) {
-        header_a.dataset.startByte = current_offset;
-        header_a.dataset.byteCount = 14;
-    }
-
 	pkt_decode = decode_ethernet_header(pkt.slice(0, pkt.length));
 
 	for (const [label, field] of Object.entries(pkt_decode)) {
         const decode_p = document.createElement('p');
         decode_p.innerHTML = `${label} ${field.value}`;
-        decode_p.dataset.startByte = current_offset + field.offset;
-        decode_p.dataset.byteCount = field.length;
         decode_div.appendChild(decode_p);
     }
 

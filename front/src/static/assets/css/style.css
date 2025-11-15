@@ -224,8 +224,8 @@ a.lastResult {
             user-select: none;
 }
 
-.decode {
-    line-height: 1;
+#decode {
+    line-height: 1.1;
 }
 
 .byte:hover,
