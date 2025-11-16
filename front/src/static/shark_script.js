@@ -5,7 +5,7 @@ let input = document.querySelector('#bytes');
 let rows = document.querySelector('#rows');
 let ascii = document.querySelector('#ascii');
 let decode = document.querySelector('#decode');
-{
+if (tds.length > 0){
 	tds[0].classList.toggle('selected');
 	tds[0].classList.add('no-hover');
 	decode_packet(pcap_data[0].bytes);
@@ -27,7 +27,6 @@ tds.forEach(function (item) {
         var i = this.id;
         this.classList.add('no-hover');
         this.classList.toggle('selected');
-        var string = pcap_data[i - 1]['bytes'];
 
         createByteDivs(pcap_data[i - 1].bytes, pcap_data[i - 1]);
 		decode_packet(pcap_data[i - 1].bytes);
