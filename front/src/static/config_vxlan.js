@@ -47,7 +47,7 @@ function setupVxlanEventHandlers(currentDevice, modalId, tableId) {
         }
     });
 
-    $('#' + modalId).find('#vxlanConfigrationCancelIcon').on('click', function () {
+    $('#' + modalId).find('#vxlanConfigurationCancelIcon').on('click', function () {
         $('#' + modalId).modal('hide');
     });
 
