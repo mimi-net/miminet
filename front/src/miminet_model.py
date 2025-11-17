@@ -38,6 +38,9 @@ class User(db.Model, UserMixin):  # type:ignore[name-defined]
     yandex_id = db.Column(Text, nullable=True)
     tg_id = db.Column(Text, nullable=True)
 
+    animation_hide_arp = db.Column(Boolean, default=False, nullable=False)
+    animation_hide_stp = db.Column(Boolean, default=False, nullable=False)
+
 
 class Network(db.Model):  # type:ignore[name-defined]
     id = db.Column(BigInteger, primary_key=True, autoincrement=True)

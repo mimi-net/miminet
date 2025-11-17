@@ -1827,11 +1827,60 @@ const FilterPackets = function () {
             .filter((step) => step.length > 0);
 };
 
-const ResetFilterStates = function () {
+const SetFilterCheckboxes= function () {
     $("#ARPFilterCheckbox").prop("checked", filterState.hideARP);
     $("#STPFilterCheckbox").prop("checked", filterState.hideSTP);
 };
 
+const UpdateFilterStates = function (settings) {
+    if (!settings) {
+        return;
+    }
+
+    filterState.hideARP = Boolean(settings.hideARP);
+    filterState.hideSTP = Boolean(settings.hideSTP);
+    SetFilterCheckboxes();
+};
+
+const SaveAnimationFilters = function () {
+    if (!window.MIMINET || window.MIMINET.isAuthenticated !== true) {
+        return;
+    }
+
+    const payload = {
+        hide_arp: $("#ARPFilterCheckbox").is(":checked"),
+        hide_stp: $("#STPFilterCheckbox").is(":checked"),
+    };
+
+    $.ajax({
+        type: "POST",
+        url: "/user/animation_filters",
+        data: JSON.stringify(payload),
+        contentType: "application/json; charset=utf-8",
+        success: function (data) {
+            if (!window.MIMINET) {
+                return;
+            }
+
+            const currentFilters = filterState || {};
+            currentFilters.hideARP = Boolean(
+                data && Object.prototype.hasOwnProperty.call(data, "hide_arp")
+                    ? data.hide_arp
+                    : payload.hide_arp
+            );
+            currentFilters.hideSTP = Boolean(
+                data && Object.prototype.hasOwnProperty.call(data, "hide_stp")
+                    ? data.hide_stp
+                    : payload.hide_stp
+            );
+            filterState = currentFilters;
+        },
+        error: function (xhr) {
+            console.log("Cannot save animation filters");
+            console.log(xhr);
+        },
+    });
+};
 
 const SetPacketFilter = function () {
     console.log("Packet filter call");

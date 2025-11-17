@@ -9,7 +9,7 @@ import hashlib
 
 import google.auth.transport.requests
 import requests
-from flask import flash, redirect, render_template, request, session, url_for
+from flask import flash, redirect, render_template, request, session, url_for, jsonify
 from flask_login import (
     LoginManager,
     current_user,
@@ -153,6 +153,32 @@ def user_profile():
             db.session.commit()
 
     return render_template("auth/profile.html", user=user)
+
+
+@login_required
+def animation_filters():
+    user = User.query.filter_by(id=current_user.id).first()
+
+    if request.method == "POST":
+        payload = request.get_json(silent=True) or {}
+
+        if "hide_arp" in payload:
+            user.animation_hide_arp = bool(payload.get("hide_arp"))
+
+        if "hide_stp" in payload:
+            user.animation_hide_stp = bool(payload.get("hide_stp"))
+
+        db.session.commit()
+
+    return (
+        jsonify(
+            {
+                "hide_arp": bool(user.animation_hide_arp),
+                "hide_stp": bool(user.animation_hide_stp),
+            }
+        ),
+        200,
+    )
 
 
 def password_recovery():

@@ -120,28 +120,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="netConfigModalLabel">Настройки сети</h5>
+                    <h5 class="modal-title" id="netConfigModalLabel">Настройки</h5>
                     <button id="networkConfigurationCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть">
                     </button>
                 </div>
                 <div class="modal-body">
                     <form id="networkConfigurationForm" method="POST" action="">
                         <div class="form-group">
+                            <h6>Сеть</h6>
                             <label for="network_title" class="text-sm">Название сети</label>
                             <input type="text" class="form-control form-control-sm" id="network_title" name="network_title" value='{{ network.title }}' {{ 'disabled' if request.path == url_for('web_network_shared') else '' }}>
 
                             <label for="network_description" class="text-sm pt-2">Описание сети</label>
                             <textarea rows="3" class="form-control form-control-sm" id="network_description" name="network_description" {{ 'disabled' if request.path == url_for('web_network_shared') else '' }}>{{ network.description }}</textarea>
                         </div>
+                        <div>
                             <hr class="my-3">
-                            <h6>Настройки анимации</h6>
-                        <div>
-                            <input class="form-check-input" role="switch" type="checkbox" id="ARPFilterCheckbox" name="ARPFilterCheckbox">
-                            <label for="ARPFilterCheckbox"> Пропустить ARP пакеты </label>
+                            <h6>Анимация</h6>
+                            <label for="animation_settings">Эти настройки применяются для всех сетей.</label>
                         </div>
-                        <div>
-                            <input class="form-check-input" role="switch" type="checkbox" id="STPFilterCheckbox" name="STPFilterCheckbox">
-                            <label for="STPFilterCheckbox"> Пропустить STP/RSTP пакеты </label>
+                        <div name="animation_settings">
+                            <div>
+                                <input class="form-check-input" role="switch" type="checkbox" id="ARPFilterCheckbox" name="ARPFilterCheckbox">
+                                <label for="ARPFilterCheckbox">Не анимировать ARP пакеты </label>
+                            </div>
+                            <div>
+                                <input class="form-check-input" role="switch" type="checkbox" id="STPFilterCheckbox" name="STPFilterCheckbox">
+                                <label for="STPFilterCheckbox">Не анимировать STP/RSTP пакеты </label>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -151,7 +157,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         href="#deleteNetConfirmModal">
                         Удалить сеть
                     </button>
-                    <button id="networkDeleteButton" type="button" data-toggle="modal" class="btn btn-danger" href="#deleteNetConfirmModal">Удалить сеть</button>
                     <button id="networkConfigurationCancel" type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
                     <button id="networkConfigurationSubmit" type="button" class="btn btn-primary">Сохранить</button>
                 </div>
@@ -293,23 +298,39 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="{{ url_for('static', filename='/miminet_animation.js') }}"></script>
 
 <script>
-    $(document).ready(function() {
-<<<<<<< HEAD
-        $("#netConfigModal").on("hidden.bs.modal", function() {
-            RecoverFilterStates();
-        })
+    window.MIMINET = window.MIMINET || {};
+    window.MIMINET.isAuthenticated = {{ current_user.is_authenticated|tojson }};
 
-        $("#networkConfigrationCancel").click(function(){
-||||||| 15bb04e
-        $("#networkConfigrationCancel").click(function(){
-=======
+    $(document).ready(function() {
+        const serverAnimationFilters = filterState = {{ {
+            "hideARP": current_user.is_authenticated and current_user.animation_hide_arp,
+            "hideSTP": current_user.is_authenticated and current_user.animation_hide_stp,
+        } | tojson }};
+
+        if (typeof UpdateFilterStates === "function") {
+            UpdateFilterStates(serverAnimationFilters);
+            if (packets) {
+                SetPacketFilter();
+            }
+        }
+
+        const resetAnimationFilters = function () {
+            if (typeof UpdateFilterStates !== "function") {
+                return;
+            }
+
+            const storedFilters = filterState || serverAnimationFilters;
+            UpdateFilterStates(storedFilters);
+        };
+
         $("#networkConfigurationCancel").click(function(){
->>>>>>> main
             $('#netConfigModal').modal('hide');
+            resetAnimationFilters();
         });
 
         $("#networkConfigurationCancelIcon").click(function(){
             $('#netConfigModal').modal('hide');
+            resetAnimationFilters();
         });
 
         $("#networkConfigurationSubmit").click(function(){
@@ -317,6 +338,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             network_description = $("#network_description").val();
             UpdateNetworkConfig();
             SetPacketFilter();
+            if (window.MIMINET.isAuthenticated && typeof SaveAnimationFilters === "function") {
+                SaveAnimationFilters();
+            }
             $('#netConfigModal').modal('hide');
             $('#network_title_head').text(network_title);
         });
@@ -328,6 +352,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 network_description = $("#network_description").val();
                 UpdateNetworkConfig();
                 SetPacketFilter();
+                if (window.MIMINET.isAuthenticated && typeof SaveAnimationFilters === "function") {
+                    SaveAnimationFilters();
+                }
                 $('#netConfigModal').modal('hide');
                 $('#network_title_head').text(network_title);
                 return false;

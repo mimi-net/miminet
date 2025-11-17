@@ -19,6 +19,7 @@ from miminet_admin import (
     CreateCheckTaskView,
 )
 from miminet_auth import (
+    animation_filters,
     google_callback,
     google_login,
     insert_test_user,
@@ -158,7 +159,9 @@ app.add_url_rule(
     view_func=upload_network_picture,
 )
 app.add_url_rule("/network/copy_network", methods=["POST"], view_func=copy_network)
-
+app.add_url_rule(
+    "/user/animation_filters", methods=["GET", "POST"], view_func=animation_filters
+)
 # Simulation
 app.add_url_rule("/run_simulation", methods=["POST"], view_func=run_simulation)
 app.add_url_rule("/check_simulation", methods=["GET"], view_func=check_simulation)
