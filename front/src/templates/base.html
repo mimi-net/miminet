@@ -302,14 +302,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     window.MIMINET.isAuthenticated = {{ current_user.is_authenticated|tojson }};
 
     $(document).ready(function() {
-        const serverAnimationFilters = filterState = {{ {
+        const serverAnimationFilters = window.MIMINET.animationFilters = {{ {
             "hideARP": current_user.is_authenticated and current_user.animation_hide_arp,
             "hideSTP": current_user.is_authenticated and current_user.animation_hide_stp,
         } | tojson }};
 
         if (typeof UpdateFilterStates === "function") {
             UpdateFilterStates(serverAnimationFilters);
-            if (packets) {
+            if (typeof packets !== "undefined" && packets) {
                 SetPacketFilter();
             }
         }
@@ -319,7 +319,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 return;
             }
 
-            const storedFilters = filterState || serverAnimationFilters;
+            const storedFilters =
+                window.MIMINET.animationFilters || serverAnimationFilters;
             UpdateFilterStates(storedFilters);
         };
 
@@ -359,6 +360,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 $('#network_title_head').text(network_title);
                 return false;
             }
+        });
+
+        $('#netConfigModal').on('hidden.bs.modal', function () {
+            resetAnimationFilters();
         });
 
         $("#networkDeleteButton").click(function(){

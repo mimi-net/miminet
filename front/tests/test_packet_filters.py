@@ -85,9 +85,9 @@ class TestPacketFilters:
         assert filtered_packets[0][0]["data"]["label"] == "ICMP packet"
 
         self._open_settings_modal(selenium)
-        assert (
-            self._checkbox_state(selenium, "ARPFilterCheckbox") is True
-        ), "ARP checkbox should remain selected after saving"
+        assert self._checkbox_state(selenium, "ARPFilterCheckbox") is True, (
+            "ARP checkbox should remain selected after saving"
+        )
         self._close_settings_modal(selenium)
 
     def test_cancel_does_not_change_filter_state(
@@ -104,14 +104,14 @@ class TestPacketFilters:
         self._close_settings_modal(selenium)  # close without saving
 
         current_state = selenium.execute_script("return filterState.hideARP === true;")
-        assert (
-            current_state == initial_state
-        ), "Filter state must not change when closing without saving"
+        assert current_state == initial_state, (
+            "Filter state must not change when closing without saving"
+        )
 
         self._open_settings_modal(selenium)
-        assert (
-            self._checkbox_state(selenium, "ARPFilterCheckbox") == initial_state
-        ), "ARP checkbox should display the original value after cancel"
+        assert self._checkbox_state(selenium, "ARPFilterCheckbox") == initial_state, (
+            "ARP checkbox should display the original value after cancel"
+        )
         self._close_settings_modal(selenium)
 
     def test_enable_stp_filter_filters_packets(
@@ -151,9 +151,9 @@ class TestPacketFilters:
         assert filtered_packets[0][0]["data"]["label"] == "ICMP packet"
 
         self._open_settings_modal(selenium)
-        assert (
-            self._checkbox_state(selenium, "STPFilterCheckbox") is True
-        ), "STP checkbox should remain selected after saving"
+        assert self._checkbox_state(selenium, "STPFilterCheckbox") is True, (
+            "STP checkbox should remain selected after saving"
+        )
         self._close_settings_modal(selenium)
 
     def test_disabling_filters_restores_packets(
@@ -209,3 +209,9 @@ class TestPacketFilters:
                 " && packets.length === 2;"
             )
         )
+
+    # TODO: shared network test
+    def test_filtering_shared_network(
+        self, selenium: MiminetTester, network: MiminetTestNetwork
+    ):
+        raise "TODO"
