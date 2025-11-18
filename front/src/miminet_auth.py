@@ -162,19 +162,19 @@ def animation_filters():
     if request.method == "POST":
         payload = request.get_json(silent=True) or {}
 
-        if "hide_arp" in payload:
-            user.animation_hide_arp = bool(payload.get("hide_arp"))
+        if "hideARP" in payload:
+            user.animation_hide_arp = bool(payload.get("hideARP"))
 
-        if "hide_stp" in payload:
-            user.animation_hide_stp = bool(payload.get("hide_stp"))
+        if "hideSTP" in payload:
+            user.animation_hide_stp = bool(payload.get("hideSTP"))
 
         db.session.commit()
 
     return (
         jsonify(
             {
-                "hide_arp": bool(user.animation_hide_arp),
-                "hide_stp": bool(user.animation_hide_stp),
+                "hideARP": bool(user.animation_hide_arp),
+                "hideSTP": bool(user.animation_hide_stp),
             }
         ),
         200,

@@ -1827,11 +1827,6 @@ const FilterPackets = function () {
             .filter((step) => step.length > 0);
 };
 
-const SetFilterCheckboxes= function () {
-    $("#ARPFilterCheckbox").prop("checked", filterState.hideARP);
-    $("#STPFilterCheckbox").prop("checked", filterState.hideSTP);
-};
-
 const UpdateFilterStates = function (settings) {
     if (!settings) {
         return;
@@ -1839,7 +1834,8 @@ const UpdateFilterStates = function (settings) {
 
     filterState.hideARP = Boolean(settings.hideARP);
     filterState.hideSTP = Boolean(settings.hideSTP);
-    SetFilterCheckboxes();
+    $("#ARPFilterCheckbox").prop("checked", filterState.hideARP);
+    $("#STPFilterCheckbox").prop("checked", filterState.hideSTP);
 };
 
 const SaveAnimationFilters = function () {
@@ -1847,33 +1843,27 @@ const SaveAnimationFilters = function () {
         return;
     }
 
-    const payload = {
-        hide_arp: $("#ARPFilterCheckbox").is(":checked"),
-        hide_stp: $("#STPFilterCheckbox").is(":checked"),
-    };
-
     $.ajax({
         type: "POST",
         url: "/user/animation_filters",
-        data: JSON.stringify(payload),
+        data: JSON.stringify(filterState),
         contentType: "application/json; charset=utf-8",
         success: function (data) {
             if (!window.MIMINET) {
                 return;
             }
 
-            const currentFilters = filterState || {};
-            currentFilters.hideARP = Boolean(
-                data && Object.prototype.hasOwnProperty.call(data, "hide_arp")
-                    ? data.hide_arp
-                    : payload.hide_arp
+            filterState.hideARP = Boolean(
+                data && Object.prototype.hasOwnProperty.call(data, "hideARP")
+                    ? data.hideARP
+                    : filterState.hideARP
             );
-            currentFilters.hideSTP = Boolean(
-                data && Object.prototype.hasOwnProperty.call(data, "hide_stp")
-                    ? data.hide_stp
-                    : payload.hide_stp
+            filterState.hideSTP = Boolean(
+                data && Object.prototype.hasOwnProperty.call(data, "hideSTP")
+                    ? data.hideSTP
+                    : filterState.hideSTP
             );
-            filterState = currentFilters;
+            UpdateFilterStates(filterState);
         },
         error: function (xhr) {
             console.log("Cannot save animation filters");
