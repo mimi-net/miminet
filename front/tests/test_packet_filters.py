@@ -111,14 +111,18 @@ class TestPacketFilters:
         selenium.get(network.url)
         self._wait_filter_state_ready(selenium)
 
-        initial_state = selenium.execute_script("return packetFilterState.hideARP === true;")
+        initial_state = selenium.execute_script(
+            "return packetFilterState.hideARP === true;"
+        )
 
         self._open_settings_modal(selenium)
         arp_checkbox = selenium.find_element(By.CSS_SELECTOR, "#ARPFilterCheckbox")
         arp_checkbox.click()  # toggle current state
         self._close_settings_modal(selenium)  # close without saving
 
-        current_state = selenium.execute_script("return packetFilterState.hideARP === true;")
+        current_state = selenium.execute_script(
+            "return packetFilterState.hideARP === true;"
+        )
         assert (
             current_state == initial_state
         ), "Filter state must not change when closing without saving"
