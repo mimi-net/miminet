@@ -2,6 +2,7 @@ import datetime
 from functools import wraps
 import os
 import pathlib
+import uuid
 
 from flask_login import login_user, logout_user
 
@@ -59,17 +60,17 @@ def launch():
 
     platformUser = User.query.filter(
         User.platformUserId == message_launch_data.get("sub"),
-        User.platformName == message_launch_data.get("iss")
+        User.platform == message_launch_data.get("iss")
     ).first()
     
     if platformUser is None:
-        platformUser = User(nick=message_launch_data.get("name"), platformName=message_launch_data.get("iss"), platformUserId=message_launch_data.get("sub"))
+        platformUser = User(nick=message_launch_data.get("name", f"platformUser_{uuid.uuid4().hex[:8]}"), platform=message_launch_data.get("iss"), platformUserId=message_launch_data.get("sub"))
         db.session.add(platformUser)
         db.session.commit()
 
     login_user(platformUser)
 
-    launchSectionId = message_launch_data.get("https://purl.imsglobal.org/spec/lti/claim/custom").get('section_id')
+    launchSectionId = message_launch_data.get("https://purl.imsglobal.org/spec/lti/claim/custom").get('task')
 
     return redirect(url_for('get_section_endpoint', section=launchSectionId))
 
@@ -108,11 +109,3 @@ def get_lti_config_path():
 
 def get_launch_data_storage():
     return FlaskCacheDataStorage(cache)
-
-def get_jwk_from_public_key(key_name):
-    key_path = os.path.join(pathlib.Path(__file__).parent, "config", "keys", key_name)
-    f = open(key_path, 'r')
-    key_content = f.read()
-    jwk = Registration.get_jwk(key_content)
-    f.close()
-    return jwk

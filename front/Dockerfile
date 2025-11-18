@@ -11,6 +11,4 @@ ADD ./src /app
 ADD run_app.sh /app/run_app.sh
 RUN chmod +x /app/run_app.sh 
 
-# CMD ["/app/run_app.sh"]
-
-ENTRYPOINT ["/bin/sh", "/app/run_app.sh"]
+CMD ["/app/run_app.sh"]
