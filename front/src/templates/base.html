@@ -302,7 +302,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     window.MIMINET.isAuthenticated = {{ current_user.is_authenticated|tojson }};
 
     $(document).ready(function() {
-        const serverAnimationFilters = filterState = {{ {
+        const serverAnimationFilters = packetFilterState = {{ {
             "hideARP": current_user.is_authenticated and current_user.animation_hide_arp,
             "hideSTP": current_user.is_authenticated and current_user.animation_hide_stp,
         } | tojson }};
@@ -321,7 +321,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             }
 
             const storedFilters =
-                filterState || serverAnimationFilters;
+                packetFilterState || serverAnimationFilters;
             UpdateFilterStates(storedFilters);
 
             if (packets) {

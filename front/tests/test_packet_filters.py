@@ -16,7 +16,7 @@ class TestPacketFilters:
     def _wait_filter_state_ready(self, selenium: MiminetTester):
         selenium.wait_for(
             lambda driver: driver.execute_script(
-                "return typeof filterState !== 'undefined' && "
+                "return typeof packetFilterState !== 'undefined' && "
                 "typeof SetPacketFilter === 'function';"
             )
         )
@@ -63,8 +63,8 @@ class TestPacketFilters:
     def _prepare_packets(self, selenium: MiminetTester, labels: list[str]):
         selenium.execute_script(
             """
-            filterState.hideARP = false;
-            filterState.hideSTP = false;
+            packetFilterState.hideARP = false;
+            packetFilterState.hideSTP = false;
             packets_not_filtered = null;
             packets = arguments[0].map(function(label){ return [{ data: { label: label } }]; });
             pcaps = [];
@@ -88,7 +88,7 @@ class TestPacketFilters:
         self._close_settings_modal(selenium)
         selenium.wait_for(
             lambda driver: driver.execute_script(
-                "return filterState.hideARP === true"
+                "return packetFilterState.hideARP === true"
                 " && Array.isArray(packets)"
                 " && packets.length === 1"
                 " && packets[0].length === 1"
@@ -111,14 +111,14 @@ class TestPacketFilters:
         selenium.get(network.url)
         self._wait_filter_state_ready(selenium)
 
-        initial_state = selenium.execute_script("return filterState.hideARP === true;")
+        initial_state = selenium.execute_script("return packetFilterState.hideARP === true;")
 
         self._open_settings_modal(selenium)
         arp_checkbox = selenium.find_element(By.CSS_SELECTOR, "#ARPFilterCheckbox")
         arp_checkbox.click()  # toggle current state
         self._close_settings_modal(selenium)  # close without saving
 
-        current_state = selenium.execute_script("return filterState.hideARP === true;")
+        current_state = selenium.execute_script("return packetFilterState.hideARP === true;")
         assert (
             current_state == initial_state
         ), "Filter state must not change when closing without saving"
@@ -153,7 +153,7 @@ class TestPacketFilters:
 
         selenium.wait_for(
             lambda driver: driver.execute_script(
-                "return filterState.hideSTP === true"
+                "return packetFilterState.hideSTP === true"
                 " && Array.isArray(packets)"
                 " && packets.length === 1"
                 " && packets[0].length === 1"
@@ -198,8 +198,8 @@ class TestPacketFilters:
 
         selenium.wait_for(
             lambda driver: driver.execute_script(
-                "return filterState.hideARP === true"
-                " && filterState.hideSTP === true"
+                "return packetFilterState.hideARP === true"
+                " && packetFilterState.hideSTP === true"
                 " && Array.isArray(packets)"
                 " && packets.length === 0;"
             )
@@ -218,8 +218,8 @@ class TestPacketFilters:
 
         selenium.wait_for(
             lambda driver: driver.execute_script(
-                "return filterState.hideARP === false"
-                " && filterState.hideSTP === false"
+                "return packetFilterState.hideARP === false"
+                " && packetFilterState.hideSTP === false"
                 " && Array.isArray(packets)"
                 " && packets.length === 2;"
             )

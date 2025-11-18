@@ -5,7 +5,7 @@ var NetworkUpdateTimeoutId = -1;
 let NetworkCache = [];
 
 let packets_not_filtered = null;
-let filterState = {
+let packetFilterState = {
     hideARP: false,
     hideSTP: false,
 };
@@ -1816,9 +1816,9 @@ const FilterPackets = function () {
                 step.filter(
                     (pkt) =>
                         !(
-                            (filterState.hideARP &&
+                            (packetFilterState.hideARP &&
                             pkt.data.label.startsWith("ARP")) ||
-                            filterState.hideSTP &&
+                            packetFilterState.hideSTP &&
                             (pkt.data.label.startsWith("STP") ||
                             pkt.data.label.startsWith("RSTP"))
                         )
@@ -1832,10 +1832,10 @@ const UpdateFilterStates = function (settings) {
         return;
     }
 
-    filterState.hideARP = Boolean(settings.hideARP);
-    filterState.hideSTP = Boolean(settings.hideSTP);
-    $("#ARPFilterCheckbox").prop("checked", filterState.hideARP);
-    $("#STPFilterCheckbox").prop("checked", filterState.hideSTP);
+    packetFilterState.hideARP = Boolean(settings.hideARP);
+    packetFilterState.hideSTP = Boolean(settings.hideSTP);
+    $("#ARPFilterCheckbox").prop("checked", packetFilterState.hideARP);
+    $("#STPFilterCheckbox").prop("checked", packetFilterState.hideSTP);
 };
 
 const SaveAnimationFilters = function () {
@@ -1846,24 +1846,24 @@ const SaveAnimationFilters = function () {
     $.ajax({
         type: "POST",
         url: "/user/animation_filters",
-        data: JSON.stringify(filterState),
+        data: JSON.stringify(packetFilterState),
         contentType: "application/json; charset=utf-8",
         success: function (data) {
             if (!window.MIMINET) {
                 return;
             }
 
-            filterState.hideARP = Boolean(
+            packetFilterState.hideARP = Boolean(
                 data && Object.prototype.hasOwnProperty.call(data, "hideARP")
                     ? data.hideARP
-                    : filterState.hideARP
+                    : packetFilterState.hideARP
             );
-            filterState.hideSTP = Boolean(
+            packetFilterState.hideSTP = Boolean(
                 data && Object.prototype.hasOwnProperty.call(data, "hideSTP")
                     ? data.hideSTP
-                    : filterState.hideSTP
+                    : packetFilterState.hideSTP
             );
-            UpdateFilterStates(filterState);
+            UpdateFilterStates(packetFilterState);
         },
         error: function (xhr) {
             console.log("Cannot save animation filters");
@@ -1883,8 +1883,8 @@ const SetPacketFilter = function () {
         packets = JSON.parse(JSON.stringify(packets_not_filtered));
     }
 
-    filterState.hideARP = $("#ARPFilterCheckbox").is(":checked");
-    filterState.hideSTP = $("#STPFilterCheckbox").is(":checked");
+    packetFilterState.hideARP = $("#ARPFilterCheckbox").is(":checked");
+    packetFilterState.hideSTP = $("#STPFilterCheckbox").is(":checked");
 
     if (packets) {
         FilterPackets();
