@@ -223,7 +223,7 @@ class AbstractDeviceConfigurator:
     def __conf_sims_delete(self):
         """Delete saved simulations. Typically used at the end of the configuration"""
         # Remove all previous simulations (after configuration update)
-        sims = Simulate.query.filter(Simulate.network_id == self._cur_network.id).all()    
+        sims = Simulate.query.filter(Simulate.network_id == self._cur_network.id).all()
         for s in sims:
             app.control.revoke(s.task_guid, terminate=False)
             db.session.delete(s)
