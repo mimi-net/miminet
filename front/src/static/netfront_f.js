@@ -1836,7 +1836,7 @@ const UpdateFilterStates = function (settings) {
 };
 
 const SaveAnimationFilters = function () {
-    if (!window.MIMINET || window.MIMINET.isAuthenticated !== true) {
+    if (!window.isAuthenticated) {
         return;
     }
 
@@ -1845,22 +1845,8 @@ const SaveAnimationFilters = function () {
         url: "/user/animation_filters",
         data: JSON.stringify(packetFilterState),
         contentType: "application/json; charset=utf-8",
-        success: function (data) {
-            if (!window.MIMINET) {
-                return;
-            }
-
-            packetFilterState.hideARP = Boolean(
-                data && Object.prototype.hasOwnProperty.call(data, "hideARP")
-                    ? data.hideARP
-                    : packetFilterState.hideARP
-            );
-            packetFilterState.hideSTP = Boolean(
-                data && Object.prototype.hasOwnProperty.call(data, "hideSTP")
-                    ? data.hideSTP
-                    : packetFilterState.hideSTP
-            );
-            UpdateFilterStates(packetFilterState);
+        success: function (data) { 
+            return;
         },
         error: function (xhr) {
             console.log("Cannot save animation filters");

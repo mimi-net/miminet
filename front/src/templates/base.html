@@ -298,8 +298,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="{{ url_for('static', filename='/miminet_animation.js') }}"></script>
 
 <script>
-    window.MIMINET = window.MIMINET || {};
-    window.MIMINET.isAuthenticated = {{ current_user.is_authenticated|tojson }};
+    window.isAuthenticated = {{ current_user.is_authenticated|tojson }};
 
     $(document).ready(function() {
         const serverAnimationFilters = packetFilterState = {{ {
@@ -344,7 +343,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             network_description = $("#network_description").val();
             UpdateNetworkConfig();
             SetPacketFilter();
-            if (window.MIMINET.isAuthenticated && typeof SaveAnimationFilters === "function") {
+            if (window.isAuthenticated && typeof SaveAnimationFilters === "function") {
                 SaveAnimationFilters();
             }
             $('#netConfigModal').modal('hide');
@@ -358,7 +357,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 network_description = $("#network_description").val();
                 UpdateNetworkConfig();
                 SetPacketFilter();
-                if (window.MIMINET.isAuthenticated && typeof SaveAnimationFilters === "function") {
+                if (window.isAuthenticated && typeof SaveAnimationFilters === "function") {
                     SaveAnimationFilters();
                 }
                 $('#netConfigModal').modal('hide');
