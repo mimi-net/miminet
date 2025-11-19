@@ -1,10 +1,6 @@
 from abc import abstractmethod
 import json
-from celery_app import (
-    SEND_NETWORK_EXCHANGE,
-    EXCHANGE_TYPE,
-    app,
-)
+from celery_app import app
 from flask import jsonify, make_response, request, Response
 from flask_login import current_user
 from miminet_model import Network, Simulate, db
