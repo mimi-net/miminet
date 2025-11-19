@@ -1287,9 +1287,6 @@ const CheckSimulation = function (simulation_id)
                 packetsNotFiltered = null;
                 SetPacketFilter();
 
-                // TODO: подумать над этим
-                // SetNetworkPlayerState(0);
-
                 const answerButton = document.querySelector('button[name="answerQuestion"]');
                 if (answerButton) {
                     answerButton.disabled = false;
