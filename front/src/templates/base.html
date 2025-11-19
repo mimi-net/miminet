@@ -328,6 +328,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             }
         };
 
+        const escHandler = (evt) => {
+            if (evt.key === 'Escape' || evt.keyCode === 27) {
+                resetAnimationFilters();
+            }
+        };
+
+        $('#netConfigModal').on('shown.bs.modal', () => {
+            document.addEventListener('keydown', escHandler);
+        });
+
         $("#networkConfigurationCancel").click(function(){
             resetAnimationFilters();
             $('#netConfigModal').modal('hide');
