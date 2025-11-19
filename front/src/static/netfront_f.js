@@ -3,6 +3,7 @@ let global_cy = undefined;
 let global_eh = undefined;
 var NetworkUpdateTimeoutId = -1;
 let NetworkCache = [];
+let lastSimulationId = 0
 
 const uid = function(){
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -1299,7 +1300,7 @@ const CheckSimulation = function (simulation_id)
         url: '/check_simulation?simulation_id=' + simulation_id + '&network_guid=' + network_guid,
         data: '',
         success: function(data, textStatus, xhr) {
-
+            lastSimulationId = data.simulation_id
             // If we got 210 (processing) wait 2 sec and call themself again
             if (xhr.status === 210)
             {
@@ -1321,7 +1322,9 @@ const CheckSimulation = function (simulation_id)
         },
         error: function(xhr) {
             console.log('Cannot check simulation id = ' + simulation_id);
-            SetNetworkPlayerState(-1);
+            if (lastSimulationId == simulation_id){
+                SetNetworkPlayerState(-1);
+            }
         },
         contentType: "application/json",
         dataType: 'json'
@@ -1377,8 +1380,8 @@ const InsertWaitingTimeHelper = function(time_filter) {
         data: '',
         success: function(data) {
             const queue_size = parseInt(data.size);
-
-            if ($('#NetworkPlayerLabel').text().startsWith("Шаг:")) {
+            if (!$('#NetworkPlayer button:first').prop('disabled')) {
+                console.log($('#NetworkPlayer button:first').prop('disabled'))
                 return;
             } else if (queue_size <= 1) {
                 $('#NetworkPlayerLabel').text("Ожидание 10-15 сек.");
