@@ -65,7 +65,7 @@ class TestPacketFilters:
             """
             packetFilterState.hideARP = false;
             packetFilterState.hideSTP = false;
-            packets_not_filtered = null;
+            packetsNotFiltered = null;
             packets = arguments[0].map(function(label){ return [{ data: { label: label } }]; });
             pcaps = [];
             """,

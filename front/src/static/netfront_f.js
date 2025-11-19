@@ -4,7 +4,7 @@ let global_eh = undefined;
 var NetworkUpdateTimeoutId = -1;
 let NetworkCache = [];
 
-let packets_not_filtered = null;
+let packetsNotFiltered = null;
 let packetFilterState = {
     hideARP: false,
     hideSTP: false,
@@ -1284,7 +1284,7 @@ const CheckSimulation = function (simulation_id)
                 pcaps = data.pcaps;
 
                 // Set filters
-                packets_not_filtered = null;
+                packetsNotFiltered = null;
                 SetPacketFilter();
 
                 // TODO: подумать над этим
@@ -1875,12 +1875,12 @@ const SaveAnimationFilters = function () {
 const SetPacketFilter = function () {
     console.log("Packet filter call");
     // SetPacketFilter first call on emulated network
-    if (packets && !packets_not_filtered) {
-        packets_not_filtered = JSON.parse(JSON.stringify(packets)); // Array deep copy
+    if (packets && !packetsNotFiltered) {
+        packetsNotFiltered = JSON.parse(JSON.stringify(packets)); // Array deep copy
     }
     // Numerous filter call, we grab our packets copy to filter it
-    else if (packets_not_filtered) {
-        packets = JSON.parse(JSON.stringify(packets_not_filtered));
+    else if (packetsNotFiltered) {
+        packets = JSON.parse(JSON.stringify(packetsNotFiltered));
     }
 
     packetFilterState.hideARP = $("#ARPFilterCheckbox").is(":checked");
@@ -1899,7 +1899,7 @@ const SetNetworkPlayerState = function (simulation_id) {
 
     // Reset?
     if (simulation_id === -1) {
-        packets_not_filtered = null;
+        packetsNotFiltered = null;
         packets = null;
         pcaps = [];
         SetNetworkPlayerState(0);
