@@ -734,6 +734,25 @@ const prepareStylesheet = function() {
       return ele.data('direction') || 'autorotate';
     };
 
+     const getPeerLabelByEdge = function(edgeId, selfId) {
+        const e = edges.find(ed => ed.data && ed.data.id === edgeId);
+        if (!e) return null;
+        const otherId = (e.data.source === selfId) ? e.data.target : e.data.source;
+        const n = nodes.find(nn => nn.data && nn.data.id === otherId);
+        return (n && n.data && n.data.label) ? n.data.label : otherId;
+    };
+
+    const buildVlanLine = function(swNode, iface) {
+        if (iface == null) return '';
+        const vlan = iface.vlan;
+        if (vlan === null || vlan === undefined) return '';
+        const peer = getPeerLabelByEdge(iface.connect, swNode.data.id) || '';
+        let mode = 'Access';
+        if (iface.type_connection === 1) mode = 'Trunk';
+        const vlanStr = Array.isArray(vlan) ? vlan.join(',') : vlan;
+        return `(${peer} VLAN ${vlanStr} ${mode})`;
+    };
+
     const getNodeLabel = function(ele) {
 
         let label = ele.data('label') || '';
@@ -769,6 +788,22 @@ const prepareStylesheet = function() {
             }
 
         });
+
+        if (n.config && n.config.type === 'l2_switch') {
+            const stpMode = n.config.stp || 0;
+            if (stpMode > 0) {
+                const proto = (stpMode === 2) ? 'rstp on' : 'stp on';
+                const pr = (n.config.priority !== undefined && n.config.priority !== null)
+                    ? ` prior ${n.config.priority}` : '';
+                label = label + '\n' + `(${proto}${pr})`;
+            }
+            if (Array.isArray(n.interface)) {
+                n.interface.forEach((iface) => {
+                    const vlanLine = buildVlanLine(n, iface);
+                    if (vlanLine) label = label + '\n' + vlanLine;
+                });
+            }
+        }
 
         return label;
     };
