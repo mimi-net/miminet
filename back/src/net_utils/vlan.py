@@ -4,7 +4,7 @@ from ipmininet.ipovs_switch import IPOVSSwitch
 
 from network_schema import Node, NodeInterface
 
-
+from src.network import IPSwitch
 def setup_vlans(net: IPNet, nodes: list[Node]) -> None:
     """Function to configure VLANs on the presented network
 
@@ -94,7 +94,5 @@ def configure_access_with_arp(switch: IPSwitch, intf: str, vlan: int) -> None:
     sub_intf = f"{intf}.{vlan}"
     switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
     switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
-
-
     
 

@@ -8,8 +8,7 @@ from network_schema import Job
 from typing import Any, Callable
 from typing import Any, Callable, Optional, Tuple
 from net_utils.vlan import IPSwitch, IPOVSSwitch
-
-
+from net_utils.switches import IPSwitch 
 
 def ping_handler(job: Job, job_host: Any) -> None:
     """Execute ping -c 1"""
@@ -291,7 +290,6 @@ class Jobs:
         self._strategy(self._job, self._job_host)
 
 
-    
 # VLAN helpers
 def enable_arp_proxy(job: Job, job_host: Any) -> None:
     """Enable ARP proxying on an interface (VLAN subinterface or direct)."""
