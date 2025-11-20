@@ -18,6 +18,51 @@ def is_ipv4_address(dotquad: str) -> bool:
     octets = dotquad.split(".")
     return len(octets) == 4 and all(o.isdigit() and 0 <= int(o) < 256 for o in octets)
 
+def int_to_ip(ip_int: int | None) -> str:
+    if ip_int is not None:
+        octet1 = (ip_int >> 24) & 0xFF
+        octet2 = (ip_int >> 16) & 0xFF
+        octet3 = (ip_int >> 8) & 0xFF
+        octet4 = (ip_int >> 0) & 0xFF
+
+        return f"{octet1}.{octet2}.{octet3}.{octet4}"
+    else:
+        return ""
+
+
+def is_dhcp(udp) -> bool:
+    try:
+        dh = dpkt.dhcp.DHCP(udp.data)
+        return dict(dh.opts).get(dpkt.dhcp.DHCP_OPT_MSGTYPE) is not None
+    except (dpkt.dpkt.NeedData, dpkt.dpkt.UnpackError):
+        return False
+
+def udp_packet_type(pkt) -> str | None:
+    if is_dhcp(pkt):
+        dh = dpkt.dhcp.DHCP(pkt.data)
+        opts = dict(dh.opts)
+        msg_type = int.from_bytes(opts.get(dpkt.dhcp.DHCP_OPT_MSGTYPE), byteorder='big')
+        match msg_type:
+            case dpkt.dhcp.DHCPDISCOVER:
+                return "DHCP Discover"
+            case dpkt.dhcp.DHCPOFFER:
+                ip = dh.yiaddr
+                mask = bin(int.from_bytes(opts.get(dpkt.dhcp.DHCP_OPT_NETMASK), byteorder='big')).count('1')
+                return f"DHCP Offer {int_to_ip(ip)}/{mask}"
+            case dpkt.dhcp.DHCPREQUEST:
+                ip = int.from_bytes(opts.get(dpkt.dhcp.DHCP_OPT_REQ_IP), byteorder='big')
+                return f"DHCP Request {int_to_ip(ip)}"
+            case dpkt.dhcp.DHCPDECLINE:
+                return "DHCP Decline"
+            case dpkt.dhcp.DHCPACK:
+                return f"DHCP ACK"
+            case dpkt.dhcp.DHCPNAK:
+                return "DHCP NAK"
+            case dpkt.dhcp.DHCPRELEASE:
+                return "DHCP Release"
+            case dpkt.dhcp.DHCPINFORM:
+                return "DHCP Inform"
+    return None
 
 def ip_packet_type(pkt) -> str:
     if isinstance(pkt.data, dpkt.icmp.ICMP):
@@ -208,6 +253,7 @@ def packet_parser(
         # IP?
         if isinstance(eth.data, dpkt.ip.IP):
             ip = eth.data
+            pkt_type = None
 
             # Skip IGMP
             if isinstance(ip.data, dpkt.igmp.IGMP):
@@ -226,14 +272,16 @@ def packet_parser(
                         inner_ip = inner_eth.data
                         if isinstance(inner_ip.data, dpkt.igmp.IGMP):
                             continue
+                pkt_type = udp_packet_type(udp)
 
             ts = str(timestamp)
             ts = ts.replace(".", "").ljust(16, "0")
 
-            pkt_type = ip_packet_type(ip)
-            pkt_type = (
-                pkt_type + "\n" + inet_to_str(ip.src) + " > " + inet_to_str(ip.dst)
-            )
+            if pkt_type is None:
+                pkt_type = ip_packet_type(ip)
+                pkt_type = (
+                    pkt_type + "\n" + inet_to_str(ip.src) + " > " + inet_to_str(ip.dst)
+                )
 
             pkts.append(
                 {
