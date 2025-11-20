@@ -147,7 +147,7 @@ class AbstractDeviceConfigurator:
         self._device_type: str = device_type
         self._device_node = None  # current device node in miminet network
 
-    __MAX_JOBS_COUNT: int = 20
+    __MAX_JOBS_COUNT: int = 30
 
     def create_job(self, job_id: int, job_sign: str) -> JobConfigurator:
         """
@@ -243,8 +243,11 @@ class AbstractDeviceConfigurator:
             self._json_network["jobs"]
         )  # level in the device configuration list
 
-        if job_level > self.__MAX_JOBS_COUNT:
-            raise ConfigurationError("Превышен лимит на количество задач")
+        if job_level >= self.__MAX_JOBS_COUNT:
+            raise ConfigurationError(
+                f"Достигнут лимит! В сети максимальное количество команд ({self.__MAX_JOBS_COUNT}). "
+                "Для добавления новой команды удалите существующую."
+            )
 
         job = self.__jobs[job_id]
         job_conf_res = job.configure()
