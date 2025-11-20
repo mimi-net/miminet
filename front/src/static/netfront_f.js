@@ -3,6 +3,7 @@ let global_cy = undefined;
 let global_eh = undefined;
 var NetworkUpdateTimeoutId = -1;
 let NetworkCache = [];
+let lastSimulationId = 0
 
 const uid = function(){
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -728,6 +729,25 @@ const prepareStylesheet = function() {
       return ele.data('direction') || 'autorotate';
     };
 
+     const getPeerLabelByEdge = function(edgeId, selfId) {
+        const e = edges.find(ed => ed.data && ed.data.id === edgeId);
+        if (!e) return null;
+        const otherId = (e.data.source === selfId) ? e.data.target : e.data.source;
+        const n = nodes.find(nn => nn.data && nn.data.id === otherId);
+        return (n && n.data && n.data.label) ? n.data.label : otherId;
+    };
+
+    const buildVlanLine = function(swNode, iface) {
+        if (iface == null) return '';
+        const vlan = iface.vlan;
+        if (vlan === null || vlan === undefined) return '';
+        const peer = getPeerLabelByEdge(iface.connect, swNode.data.id) || '';
+        let mode = 'Access';
+        if (iface.type_connection === 1) mode = 'Trunk';
+        const vlanStr = Array.isArray(vlan) ? vlan.join(',') : vlan;
+        return `(${peer} VLAN ${vlanStr} ${mode})`;
+    };
+
     const getNodeLabel = function(ele) {
 
         let label = ele.data('label') || '';
@@ -763,6 +783,22 @@ const prepareStylesheet = function() {
             }
 
         });
+
+        if (n.config && n.config.type === 'l2_switch') {
+            const stpMode = n.config.stp || 0;
+            if (stpMode > 0) {
+                const proto = (stpMode === 2) ? 'rstp on' : 'stp on';
+                const pr = (n.config.priority !== undefined && n.config.priority !== null)
+                    ? ` prior ${n.config.priority}` : '';
+                label = label + '\n' + `(${proto}${pr})`;
+            }
+            if (Array.isArray(n.interface)) {
+                n.interface.forEach((iface) => {
+                    const vlanLine = buildVlanLine(n, iface);
+                    if (vlanLine) label = label + '\n' + vlanLine;
+                });
+            }
+        }
 
         return label;
     };
@@ -1049,7 +1085,7 @@ const DrawGraph = function() {
 
             // Save the network state.
             SaveNetworkObject();
-
+                        
             DeleteNode(selecteed_node_id);
             DeleteJob(selecteed_node_id);
 
@@ -1264,7 +1300,7 @@ const CheckSimulation = function (simulation_id)
         url: '/check_simulation?simulation_id=' + simulation_id + '&network_guid=' + network_guid,
         data: '',
         success: function(data, textStatus, xhr) {
-
+            lastSimulationId = data.simulation_id
             // If we got 210 (processing) wait 2 sec and call themself again
             if (xhr.status === 210)
             {
@@ -1286,7 +1322,9 @@ const CheckSimulation = function (simulation_id)
         },
         error: function(xhr) {
             console.log('Cannot check simulation id = ' + simulation_id);
-            SetNetworkPlayerState(-1);
+            if (lastSimulationId == simulation_id){
+                SetNetworkPlayerState(-1);
+            }
         },
         contentType: "application/json",
         dataType: 'json'
@@ -1342,8 +1380,8 @@ const InsertWaitingTimeHelper = function(time_filter) {
         data: '',
         success: function(data) {
             const queue_size = parseInt(data.size);
-
-            if ($('#NetworkPlayerLabel').text().startsWith("Шаг:")) {
+            if (!$('#NetworkPlayer button:first').prop('disabled')) {
+                console.log($('#NetworkPlayer button:first').prop('disabled'))
                 return;
             } else if (queue_size <= 1) {
                 $('#NetworkPlayerLabel').text("Ожидание 10-15 сек.");
@@ -1840,11 +1878,10 @@ const RunSimulation = function (network_guid)
 // 2 states:
 // Do we need emulation
 // We have a packets and ready to play packets
-const SetNetworkPlayerState = function(simultaion_id)
-{
+const SetNetworkPlayerState = function (simulation_id) {
 
     // Reset?
-    if (simultaion_id === -1){
+    if (simulation_id === -1) {
         packets = null;
         pcaps = [];
         SetNetworkPlayerState(0);
@@ -1955,13 +1992,12 @@ const SetNetworkPlayerState = function(simultaion_id)
 
     // No packets.
     // The network is simulating?
-    if (simultaion_id)
-    {
+    if (simulation_id) {
         $('#NetworkPlayer').empty();
         $('#PacketSliderInput').hide();
         $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" disabled>Эмулируется...</button>');
         InsertWaitingTime()
-        CheckSimulation(simultaion_id);
+        CheckSimulation(simulation_id);
         return;
     }
 

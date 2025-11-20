@@ -75,7 +75,20 @@ const UpdateJobCounter = function (counterId, deviceId = null) {
     counter.style.display = 'none';
 }
 
-const ConfigHostForm = function (host_id) {
+const UpdateHostConfigurationForm = function(host_id) {
+    let data = $('#config_main_form').serialize();
+
+    // Disable all input fields
+    $("#config_main_form :input").prop("disabled", true);
+
+    // Set loading spinner
+    $('#config_host_main_form_submit_button').text('');
+    $('#config_host_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
+
+    UpdateHostConfiguration(data, host_id);
+};
+
+const ConfigHostForm = function(host_id){
     var form = document.getElementById('config_host_main_form_script').innerHTML;
     var button = document.getElementById('config_host_save_script').innerHTML;
 
@@ -97,16 +110,7 @@ const ConfigHostForm = function (host_id) {
 
     function handleHostClick(event) {
         event.preventDefault();
-        let data = $('#config_main_form').serialize();
-
-        // Disable all input fields
-        $("#config_main_form :input").prop("disabled", true);
-
-        // Set loading spinner
-        $('#config_host_main_form_submit_button').text('');
-        $('#config_host_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
-
-        UpdateHostConfiguration(data, host_id);
+        UpdateHostConfigurationForm(host_id);
     }
 
     $('#config_host_main_form_submit_button, #config_host_end_form').on('click', handleHostClick);
@@ -581,6 +585,18 @@ const addIpFieldHandlers = function () {
     });
 };
 
+const UpdateHostForm = function(name) {
+    elem = document.getElementById(name).innerHTML;
+    host_job_list = document.getElementById('config_host_job_list');
+
+    if (!elem || !host_job_list) {
+        return;
+    }
+
+    $('div[name="config_host_select_input"]').remove();
+    $(elem).insertBefore(host_job_list);
+};
+
 const ConfigHostJobOnChange = function (evnt) {
 
     let elem = null;
@@ -588,87 +604,41 @@ const ConfigHostJobOnChange = function (evnt) {
 
     switch (evnt.target.value) {
         case '1':
-            elem = document.getElementById('config_host_ping_c_1_script').innerHTML;
-            host_job_list = document.getElementById('config_host_job_list');
-
-            if (!elem || !host_job_list) {
-                return;
-            }
-
-            $('div[name="config_host_select_input"]').remove();
-            $(elem).insertBefore(host_job_list);
+            UpdateHostForm('config_host_ping_c_1_script');
             break;
 
         case '2':
-            elem = document.getElementById('config_host_ping_with_options_script').innerHTML;
-            host_job_list = document.getElementById('config_host_job_list');
-
-            if (!elem || !host_job_list) {
-                return;
-            }
-
-            $('div[name="config_host_select_input"]').remove();
-            $(elem).insertBefore(host_job_list);
+            UpdateHostForm('config_host_ping_with_options_script');
             break;
 
         case '3':
-            elem = document.getElementById('config_host_send_udp_data_script').innerHTML;
-            host_job_list = document.getElementById('config_host_job_list');
-
-            if (!elem || !host_job_list) {
-                return;
-            }
-
-            $('div[name="config_host_select_input"]').remove();
-            $(elem).insertBefore(host_job_list);
+            UpdateHostForm('config_host_send_udp_data_script');
             break;
 
         case '4':
-            elem = document.getElementById('config_host_send_tcp_data_script').innerHTML;
-            host_job_list = document.getElementById('config_host_job_list');
-
-            if (!elem || !host_job_list) {
-                return;
-            }
-
-            $('div[name="config_host_select_input"]').remove();
-            $(elem).insertBefore(host_job_list);
+            UpdateHostForm('config_host_send_tcp_data_script');
             break;
 
         case '5':
-            elem = document.getElementById('config_host_traceroute_with_options_script').innerHTML;
-            host_job_list = document.getElementById('config_host_job_list');
-
-            if (!elem || !host_job_list) {
-                return;
-            }
-
-            $('div[name="config_host_select_input"]').remove();
-            $(elem).insertBefore(host_job_list);
+            UpdateHostForm('config_host_traceroute_with_options_script');
             break;
 
         case '102':
-            elem = document.getElementById('config_host_add_route_script').innerHTML;
-            host_job_list = document.getElementById('config_host_job_list');
-
-            if (!elem || !host_job_list) {
-                return;
-            }
-
-            $('div[name="config_host_select_input"]').remove();
-            $(elem).insertBefore(host_job_list);
+            UpdateHostForm('config_host_add_route_script');
             break;
 
         case '103':
-            elem = document.getElementById('config_host_add_arp_cache_script').innerHTML;
-            host_job_list = document.getElementById('config_host_job_list');
+            UpdateHostForm('config_host_add_arp_cache_script');
+            break;
+        
+        case '108':
+            UpdateHostForm('config_host_add_dhclient');
 
-            if (!elem || !host_job_list) {
-                return;
-            }
+            let host_id = $('#host_id')[0].value;
+            // let network_guid = $('#net_guid')[0].value;
+            UpdateHostConfigurationForm(host_id);
 
             $('div[name="config_host_select_input"]').remove();
-            $(elem).insertBefore(host_job_list);
             break;
 
         case '0':
@@ -935,6 +905,18 @@ const ConfigServerJob = function (server_jobs, shared = 0) {
     });
 }
 
+const UpdateServerForm = function(name) {
+    elem = document.getElementById(name).innerHTML;
+    server_job_list = document.getElementById('config_server_job_list');
+
+    if (!elem || !server_job_list) {
+        return;
+    }
+
+    $('div[name="config_server_select_input"]').remove();
+    $(elem).insertBefore(server_job_list);
+}
+
 const ConfigServerJobOnChange = function (evnt) {
 
     let elem = null;
@@ -948,51 +930,23 @@ const ConfigServerJobOnChange = function (evnt) {
             break;
 
         case '1':
-            elem = document.getElementById('config_server_ping_c_1_script').innerHTML;
-            server_job_list = document.getElementById('config_server_job_list');
-
-            if (!elem || !server_job_list) {
-                return;
-            }
-
-            $('div[name="config_server_select_input"]').remove();
-            $(elem).insertBefore(server_job_list);
+            UpdateServerForm('config_server_ping_c_1_script');
             break;
 
         case '200':
-            elem = document.getElementById('config_server_start_udp_server_script').innerHTML;
-            server_job_list = document.getElementById('config_server_job_list');
-
-            if (!elem || !server_job_list) {
-                return;
-            }
-
-            $('div[name="config_server_select_input"]').remove();
-            $(elem).insertBefore(server_job_list);
+            UpdateServerForm('config_server_start_udp_server_script');
             break;
 
         case '201':
-            elem = document.getElementById('config_server_start_tcp_server_script').innerHTML;
-            server_job_list = document.getElementById('config_server_job_list');
-
-            if (!elem || !server_job_list) {
-                return;
-            }
-
-            $('div[name="config_server_select_input"]').remove();
-            $(elem).insertBefore(server_job_list);
+            UpdateServerForm('config_server_start_tcp_server_script');
             break;
 
         case '202':
-            elem = document.getElementById('config_server_block_tcp_udp_port_script').innerHTML;
-            server_job_list = document.getElementById('config_server_job_list');
-
-            if (!elem || !server_job_list) {
-                return;
-            }
-
-            $('div[name="config_server_select_input"]').remove();
-            $(elem).insertBefore(server_job_list);
+            UpdateServerForm('config_server_block_tcp_udp_port_script');
+            break;
+        
+        case '203':
+            UpdateServerForm('config_server_add_dhcp_server_script');
             break;
 
         default:

@@ -126,11 +126,11 @@ class Location:
                     STP_BUTTON = Locator("#stp")
                     OFF_STP_BUTTON = Locator("#none")
                     PRIORITY_FIELD = Locator("#config_stp_priority")
-                    SUBMIT_BUTTON = Locator("#rstpConfigrationSubmit")
+                    SUBMIT_BUTTON = Locator("#rstpConfigurationSubmit")
 
                 class VlanPanel:
                     SWITCH_BUTTON = Locator("#config_switch_vlan")
-                    SUBMIT_BUTTON = Locator("#vlanConfigrationSubmit")
+                    SUBMIT_BUTTON = Locator("#vlanConfigurationSubmit")
 
                     @staticmethod
                     def get_modal_dialog_selector(switch_name: str):
@@ -261,6 +261,18 @@ class Location:
                     )
                     UDP_PORT_FIELD = Locator(
                         "#config_server_start_udp_server_port_input_field"
+                    )
+                    DCHP_IP_RANGE_START_FIELD = Locator(
+                        "#config_server_add_dhcp_ip_range_1_input_field"
+                    )
+                    DCHP_IP_RANGE_END_FIELD = Locator(
+                        "#config_server_add_dhcp_ip_range_2_input_field"
+                    )
+                    DCHP_MASK_FIELD = Locator(
+                        "#config_server_add_dhcp_mask_input_field"
+                    )
+                    DCHP_IP_GW_FIELD = Locator(
+                        "#config_server_add_dhcp_gateway_input_field"
                     )
 
             # The only stable way for finding ip/subnet mask on page is using XPATHs

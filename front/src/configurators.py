@@ -1,6 +1,6 @@
 from abc import abstractmethod
 import json
-
+from celery_app import app
 from flask import jsonify, make_response, request, Response
 from flask_login import current_user
 from miminet_model import Network, Simulate, db
@@ -221,6 +221,7 @@ class AbstractDeviceConfigurator:
         # Remove all previous simulations (after configuration update)
         sims = Simulate.query.filter(Simulate.network_id == self._cur_network.id).all()
         for s in sims:
+            app.control.revoke(s.task_guid, terminate=False)
             db.session.delete(s)
 
         self._cur_network.network = json.dumps(self._json_network)

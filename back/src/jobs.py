@@ -5,6 +5,8 @@ import ipaddress
 from netaddr import EUI, AddrFormatError
 from typing import Any, Callable, List, Dict
 from network_schema import Job
+from mininet.log import info
+from ipmininet.host.config.dnsmasq import Dnsmasq
 
 
 def filter_arg_for_options(
@@ -408,6 +410,29 @@ def arp_proxy_enable(job: Job, job_host: Any) -> None:
     job_host.cmd(f"sysctl -w net.ipv4.conf.{arg_iface}.proxy_arp=1")
 
 
+def dhcp_client(job: Job, job_host):
+    job_host.cmd(f"ifconfig {job_host.intf().name} 0")
+    job_host.cmd("rm /var/lib/dhcp/dhclient.leases")
+    out = job_host.cmd(
+        "echo 'initial-interval 5;' > /tmp/dhclient.conf && "
+        + f"timeout -k 0 6 dhclient -v -4 -cf /tmp/dhclient.conf {job_host.intf().name} && "
+        + "ip route show && rm -f /tmp/dhclient.conf"
+    )
+    info(out)
+
+
+def dhcp_server(job: Job, job_host):
+    ip_range_start = job.arg_1
+    ip_range_end = job.arg_2
+    mask = job.arg_3
+    gw = job.arg_4
+    daemon = Dnsmasq(
+        node=job_host, ip_range=f"{ip_range_start},{ip_range_end}", mask=mask, gw=gw
+    )
+    job_host.build_daemon(daemon)
+    job_host.start_daemon(daemon)
+
+
 class Jobs:
     """Class for representing various commands for working with miminet network"""
 
@@ -433,9 +458,11 @@ class Jobs:
             105: add_ipip_interface,
             106: add_gre,
             107: arp_proxy_enable,
+            108: dhcp_client,
             200: open_udp_server_handler,
             201: open_tcp_server_handler,
             202: block_tcp_udp_port,
+            203: dhcp_server,
         }
         self._job: Job = job
         self._job_host = job_host
