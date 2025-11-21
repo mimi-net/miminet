@@ -4,7 +4,7 @@ from ipmininet.ipovs_switch import IPOVSSwitch
 
 from network_schema import Node, NodeInterface
 
-
+from ipmininet.ipswitch import IPSwitch
 def setup_vlans(net: IPNet, nodes: list[Node]) -> None:
     """Function to configure VLANs on the presented network
 
