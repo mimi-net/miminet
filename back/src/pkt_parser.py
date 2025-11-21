@@ -18,6 +18,7 @@ def is_ipv4_address(dotquad: str) -> bool:
     octets = dotquad.split(".")
     return len(octets) == 4 and all(o.isdigit() and 0 <= int(o) < 256 for o in octets)
 
+
 def int_to_ip(ip_int: int | None) -> str:
     if ip_int is not None:
         octet1 = (ip_int >> 24) & 0xFF
@@ -37,32 +38,42 @@ def is_dhcp(udp) -> bool:
     except (dpkt.dpkt.NeedData, dpkt.dpkt.UnpackError):
         return False
 
-def udp_packet_type(pkt) -> str | None:
+
+def udp_packet_type(pkt) -> str:
     if is_dhcp(pkt):
         dh = dpkt.dhcp.DHCP(pkt.data)
         opts = dict(dh.opts)
-        msg_type = int.from_bytes(opts.get(dpkt.dhcp.DHCP_OPT_MSGTYPE), byteorder='big')
+        msg_type = int.from_bytes(
+            opts.get(dpkt.dhcp.DHCP_OPT_MSGTYPE, b""), byteorder="big"
+        )
         match msg_type:
             case dpkt.dhcp.DHCPDISCOVER:
                 return "DHCP Discover"
             case dpkt.dhcp.DHCPOFFER:
                 ip = dh.yiaddr
-                mask = bin(int.from_bytes(opts.get(dpkt.dhcp.DHCP_OPT_NETMASK), byteorder='big')).count('1')
+                mask = bin(
+                    int.from_bytes(
+                        opts.get(dpkt.dhcp.DHCP_OPT_NETMASK, b""), byteorder="big"
+                    )
+                ).count("1")
                 return f"DHCP Offer {int_to_ip(ip)}/{mask}"
             case dpkt.dhcp.DHCPREQUEST:
-                ip = int.from_bytes(opts.get(dpkt.dhcp.DHCP_OPT_REQ_IP), byteorder='big')
+                ip = int.from_bytes(
+                    opts.get(dpkt.dhcp.DHCP_OPT_REQ_IP, b""), byteorder="big"
+                )
                 return f"DHCP Request {int_to_ip(ip)}"
             case dpkt.dhcp.DHCPDECLINE:
                 return "DHCP Decline"
             case dpkt.dhcp.DHCPACK:
-                return f"DHCP ACK"
+                return "DHCP ACK"
             case dpkt.dhcp.DHCPNAK:
                 return "DHCP NAK"
             case dpkt.dhcp.DHCPRELEASE:
                 return "DHCP Release"
             case dpkt.dhcp.DHCPINFORM:
                 return "DHCP Inform"
-    return None
+    return "UDP " + str(pkt.sport) + " > " + str(pkt.dport)
+
 
 def ip_packet_type(pkt) -> str:
     if isinstance(pkt.data, dpkt.icmp.ICMP):
@@ -88,8 +99,7 @@ def ip_packet_type(pkt) -> str:
                 return "ICMP message"
 
     if isinstance(pkt.data, dpkt.udp.UDP):
-        udp = pkt.data
-        return "UDP " + str(udp.sport) + " > " + str(udp.dport)
+        return udp_packet_type(pkt.data)
 
     if isinstance(pkt.data, dpkt.tcp.TCP):
         tcp = pkt.data
@@ -253,7 +263,6 @@ def packet_parser(
         # IP?
         if isinstance(eth.data, dpkt.ip.IP):
             ip = eth.data
-            pkt_type = None
 
             # Skip IGMP
             if isinstance(ip.data, dpkt.igmp.IGMP):
@@ -272,16 +281,14 @@ def packet_parser(
                         inner_ip = inner_eth.data
                         if isinstance(inner_ip.data, dpkt.igmp.IGMP):
                             continue
-                pkt_type = udp_packet_type(udp)
 
             ts = str(timestamp)
             ts = ts.replace(".", "").ljust(16, "0")
 
-            if pkt_type is None:
-                pkt_type = ip_packet_type(ip)
-                pkt_type = (
-                    pkt_type + "\n" + inet_to_str(ip.src) + " > " + inet_to_str(ip.dst)
-                )
+            pkt_type = ip_packet_type(ip)
+            pkt_type = (
+                pkt_type + "\n" + inet_to_str(ip.src) + " > " + inet_to_str(ip.dst)
+            )
 
             pkts.append(
                 {
