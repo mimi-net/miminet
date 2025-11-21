@@ -85,7 +85,7 @@ class SimulateLog(db.Model):  # type:ignore[name-defined]
 
 
 def ensure_db_exists(
-    host, user, password, target_db, port=5432, sslmode=None, mode="dev"
+    host, user, password, target_db, port=5432, sslmode=None, sslrootcert=None, mode="dev"
 ):
     """Check if the target database exists.
 
@@ -96,6 +96,7 @@ def ensure_db_exists(
         target_db: Target database name
         port: Database port (default: 5432)
         sslmode: SSL mode for connection (default: None, use 'require' for Yandex Cloud)
+        sslrootcert: Path to SSL root certificate
         mode: Operation mode ('dev' or 'prod')
     """
     # 1. Try to connect to target_db directly
@@ -108,6 +109,8 @@ def ensure_db_exists(
     }
     if sslmode:
         conn_params["sslmode"] = sslmode
+    if sslrootcert:
+        conn_params["sslrootcert"] = sslrootcert
 
     try:
         with psycopg2.connect(**conn_params) as conn:
@@ -166,6 +169,7 @@ def init_db(app):
             postgres_db = os.getenv("POSTGRES_DATABASE_NAME")
             postgres_port = 5432
             postgres_sslmode = None
+            postgres_sslrootcert = None
         elif mode == "prod":
             # Yandex Cloud PostgreSQL
             postgres_host = os.getenv("YANDEX_POSTGRES_HOST")
@@ -173,7 +177,8 @@ def init_db(app):
             postgres_password = os.getenv("YANDEX_POSTGRES_PASSWORD")
             postgres_db = os.getenv("YANDEX_POSTGRES_DB", "miminet")
             postgres_port = int(os.getenv("YANDEX_POSTGRES_PORT", "6432"))
-            postgres_sslmode = os.getenv("YANDEX_POSTGRES_SSLMODE", "require")
+            postgres_sslmode = os.getenv("YANDEX_POSTGRES_SSLMODE", "verify-full")
+            postgres_sslrootcert = os.getenv("YANDEX_POSTGRES_SSLROOTCERT", "/app/.postgresql/root.crt")
         else:
             raise ValueError(f"Unknown MODE: {mode}")
 
@@ -186,6 +191,7 @@ def init_db(app):
                 postgres_db,
                 port=postgres_port,
                 sslmode=postgres_sslmode,
+                sslrootcert=postgres_sslrootcert,
                 mode=mode,
             )
 

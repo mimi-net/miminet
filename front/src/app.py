@@ -134,14 +134,15 @@ def get_database_uri(mode):
         POSTGRES_USER = os.getenv("YANDEX_POSTGRES_USER")
         POSTGRES_PASSWORD = os.getenv("YANDEX_POSTGRES_PASSWORD")
         POSTGRES_DB_NAME = os.getenv("YANDEX_POSTGRES_DB")
-        POSTGRES_SSLMODE = os.getenv("YANDEX_POSTGRES_SSLMODE", "require")
+        POSTGRES_SSLMODE = os.getenv("YANDEX_POSTGRES_SSLMODE", "verify-full")
+        POSTGRES_SSLROOTCERT = os.getenv("YANDEX_POSTGRES_SSLROOTCERT", "/app/.postgresql/root.crt")
 
         if not all([POSTGRES_HOST, POSTGRES_USER, POSTGRES_PASSWORD]):
             raise ValueError(
                 "Missing Yandex Cloud PostgreSQL credentials in environment variables"
             )
 
-        POSTGRES_URL = f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB_NAME}?sslmode={POSTGRES_SSLMODE}"
+        POSTGRES_URL = f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB_NAME}?sslmode={POSTGRES_SSLMODE}&sslrootcert={POSTGRES_SSLROOTCERT}"
 
         print(
             f"[DB] Using Yandex Cloud PostgreSQL: {POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB_NAME}"
