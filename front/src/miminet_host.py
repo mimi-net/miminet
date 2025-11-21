@@ -249,6 +249,9 @@ arp_job.add_param("config_host_add_arp_cache_mac_input_field").add_check(
 
 host_dhclient_job = host.create_job(108, "dhcp client")
 host_dhclient_job.add_param("config_host_add_dhclient_field")
+host_dhclient_job.add_param("config_host_add_dhclient_interface_select_iface_field").add_check(
+    emptiness_check
+).set_error_msg('Не указан интерфейс для команды "Запросить IP адрес автоматически"')
 
 # ~ ~ ~ ROUTER JOBS ~ ~ ~
 
@@ -402,6 +405,9 @@ start_dhcp_server.add_param("config_server_add_dhcp_mask_input_field").add_check
 start_dhcp_server.add_param("config_server_add_dhcp_gateway_input_field").add_check(
     IPv4_check
 ).set_error_msg('Неверно указан IP адрес шлюза для команды "Запустить DHCP сервер"')
+start_dhcp_server.add_param("config_server_add_dhcp_interface_select_iface_field").add_check(
+    emptiness_check
+).set_error_msg('Не указан интерфейс для команды "Запустить DHCP сервер"')
 
 
 # ------ request handlers ------
