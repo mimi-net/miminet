@@ -1,8 +1,11 @@
 import pytest
 import requests
+import os
+import sys
 from typing import Generator
 from requests import Session
 from contextlib import contextmanager
+from unittest.mock import MagicMock
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support.ui import Select
@@ -262,12 +265,9 @@ def selenium(chrome_driver: MiminetTester, requester: Session):
 
 
 # --- Unit Test Fixtures ---
-import os
-import sys
-from unittest.mock import MagicMock
 
 # Add src to path so tests can import app and miminet_model
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 
 @pytest.fixture

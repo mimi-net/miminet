@@ -1,5 +1,4 @@
 import pytest
-import os
 from unittest.mock import MagicMock
 from psycopg2 import OperationalError
 
@@ -29,7 +28,9 @@ class TestConfigDB:
     def test_get_database_uri_prod_missing_creds(self, mock_env_prod, monkeypatch):
         """Verify Fail Fast behavior when credentials are missing in Prod."""
         monkeypatch.delenv("YANDEX_POSTGRES_PASSWORD")
-        with pytest.raises(ValueError, match="Missing Yandex Cloud PostgreSQL credentials"):
+        with pytest.raises(
+            ValueError, match="Missing Yandex Cloud PostgreSQL credentials"
+        ):
             get_database_uri("prod")
 
     def test_ensure_db_exists_prod_success(self, mock_env_prod, mock_psycopg2):
@@ -40,7 +41,7 @@ class TestConfigDB:
 
         assert res is True
         mock_connect.assert_called_once()
-        assert mock_connect.call_args[1]['dbname'] == 'db'
+        assert mock_connect.call_args[1]["dbname"] == "db"
 
     def test_ensure_db_exists_prod_failure(self, mock_env_prod, mock_psycopg2):
         """Verify Prod connection failure raises exception immediately."""
@@ -71,7 +72,7 @@ class TestConfigDB:
 
         assert mock_connect.call_count == 2
         # Verify second connection was to system db
-        assert mock_connect.call_args[1]['dbname'] == 'postgres'
+        assert mock_connect.call_args[1]["dbname"] == "postgres"
         # Verify creation SQL
         mock_cursor.execute.assert_any_call("CREATE DATABASE new_db")
 

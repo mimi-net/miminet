@@ -6,7 +6,16 @@ from flask_sqlalchemy import SQLAlchemy
 from miminet_config import (
     make_empty_network,
 )
-from sqlalchemy import MetaData, BigInteger, Text, Boolean, TIMESTAMP, ForeignKey, not_, inspect
+from sqlalchemy import (
+    MetaData,
+    BigInteger,
+    Text,
+    Boolean,
+    TIMESTAMP,
+    ForeignKey,
+    not_,
+    inspect,
+)
 from werkzeug.security import generate_password_hash
 import psycopg2
 from psycopg2 import OperationalError
@@ -85,7 +94,14 @@ class SimulateLog(db.Model):  # type:ignore[name-defined]
 
 
 def ensure_db_exists(
-    host, user, password, target_db, port=5432, sslmode=None, sslrootcert=None, mode="dev"
+    host,
+    user,
+    password,
+    target_db,
+    port=5432,
+    sslmode=None,
+    sslrootcert=None,
+    mode="dev",
 ):
     """Check if the target database exists.
 
@@ -178,7 +194,9 @@ def init_db(app):
             postgres_db = os.getenv("YANDEX_POSTGRES_DB", "miminet")
             postgres_port = int(os.getenv("YANDEX_POSTGRES_PORT", "6432"))
             postgres_sslmode = os.getenv("YANDEX_POSTGRES_SSLMODE", "verify-full")
-            postgres_sslrootcert = os.getenv("YANDEX_POSTGRES_SSLROOTCERT", "/app/.postgresql/root.crt")
+            postgres_sslrootcert = os.getenv(
+                "YANDEX_POSTGRES_SSLROOTCERT", "/app/.postgresql/root.crt"
+            )
         else:
             raise ValueError(f"Unknown MODE: {mode}")
 

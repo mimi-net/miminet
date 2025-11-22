@@ -135,7 +135,9 @@ def get_database_uri(mode):
         POSTGRES_PASSWORD = os.getenv("YANDEX_POSTGRES_PASSWORD")
         POSTGRES_DB_NAME = os.getenv("YANDEX_POSTGRES_DB")
         POSTGRES_SSLMODE = os.getenv("YANDEX_POSTGRES_SSLMODE", "verify-full")
-        POSTGRES_SSLROOTCERT = os.getenv("YANDEX_POSTGRES_SSLROOTCERT", "/app/.postgresql/root.crt")
+        POSTGRES_SSLROOTCERT = os.getenv(
+            "YANDEX_POSTGRES_SSLROOTCERT", "/app/.postgresql/root.crt"
+        )
 
         if not all([POSTGRES_HOST, POSTGRES_USER, POSTGRES_PASSWORD]):
             raise ValueError(
