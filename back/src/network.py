@@ -135,8 +135,9 @@ class MiminetNetwork(IPNet):
 
                 stable_duration = time.time() - stable_since
                 if stable_duration >= min_stable_time:
+                    convergence_time = time.time() - start_time
                     time.sleep(final_delay)
-                    return time.time() - start_time
+                    return convergence_time + final_delay
             else:
                 if stable_since is not None:
                     stable_since = None
