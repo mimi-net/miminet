@@ -185,9 +185,9 @@ class MiminetNetwork(IPNet):
             if node.config.type == "l2_switch":
                 graph[node.data.id] = []
 
-        for link in self.__network_schema.links:
-            node1 = link.node1_id
-            node2 = link.node2_id
+        for edge in self.__network_schema.edges:
+            node1 = edge.data.source
+            node2 = edge.data.target
 
             if node1 in graph and node2 in graph:
                 graph[node1].append(node2)
