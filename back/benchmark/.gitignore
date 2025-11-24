@@ -1,0 +1,5 @@
+benchmark_output_*/
+*.txt
+*.txt.json
+*.tmp
+*.log

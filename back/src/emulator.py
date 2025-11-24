@@ -9,15 +9,18 @@ from pkt_parser import create_pkt_animation
 from mininet.log import setLogLevel, error
 from network_topology import MiminetTopology
 from network import MiminetNetwork
+from benchmarking import StageTimer
 
 
 def emulate(
     network: Network,
+    timer: StageTimer = None,
 ) -> tuple[list[list], list[tuple[bytes, str]]]:
     """Run mininet emulation.
 
     Args:
         network (str): Network schema for emulation.
+        timer: Optional StageTimer for benchmarking.
 
     Returns:
         tuple: animation list and pcap files.
@@ -29,20 +32,42 @@ def emulate(
         return [], []
 
     try:
-        topo = MiminetTopology(network)
-        net = MiminetNetwork(topo, network)
+        if timer:
+            with timer.stage("topology_creation"):
+                topo = MiminetTopology(network)
+        else:
+            topo = MiminetTopology(network)
 
-        net.start()
+        if timer:
+            with timer.stage("network_init"):
+                net = MiminetNetwork(topo, network)
+        else:
+            net = MiminetNetwork(topo, network)
+
+        if timer:
+            with timer.stage("network_start"):
+                net.start()
+        else:
+            net.start()
 
         # Jobs with high ID have priority over low ones
         ordered_jobs = sorted(
             network.jobs, key=lambda job: job.job_id // 100, reverse=True
         )
 
-        for job in ordered_jobs:
-            execute_job(job, net)
+        if timer:
+            with timer.stage("job_execution"):
+                for job in ordered_jobs:
+                    execute_job(job, net)
+        else:
+            for job in ordered_jobs:
+                execute_job(job, net)
 
-        net.stop()
+        if timer:
+            with timer.stage("network_stop"):
+                net.stop()
+        else:
+            net.stop()
 
     except Exception as e:
         error(f"An error occurred during mininet configuration: {str(e)}")
@@ -50,8 +75,17 @@ def emulate(
 
         raise e
 
-    animation, pcaps = create_animation(topo.interfaces)
-    animation = group_packets_by_time(animation)
+    if timer:
+        with timer.stage("animation_creation"):
+            animation, pcaps = create_animation(topo.interfaces)
+    else:
+        animation, pcaps = create_animation(topo.interfaces)
+
+    if timer:
+        with timer.stage("packet_grouping"):
+            animation = group_packets_by_time(animation)
+    else:
+        animation = group_packets_by_time(animation)
 
     return animation, pcaps
 
