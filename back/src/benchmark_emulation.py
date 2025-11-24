@@ -223,7 +223,7 @@ def main():
 Examples:
   # Single network, 5 iterations (default)
   sudo python3 benchmark_emulation.py --networks back/tests/test_json/router_network.json
-  
+
   # Multiple networks, 10 iterations
   sudo python3 benchmark_emulation.py \\
     --networks back/tests/test_json/router_network.json \\
