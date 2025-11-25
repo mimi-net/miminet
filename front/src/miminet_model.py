@@ -1,4 +1,7 @@
 from os import urandom
+import random
+import json
+from datetime import datetime
 
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
@@ -8,6 +11,25 @@ from miminet_config import (
 from sqlalchemy import MetaData, BigInteger, Text, Boolean, TIMESTAMP, ForeignKey, not_
 from werkzeug.security import generate_password_hash
 import psycopg2
+
+
+def generate_cosmic_name():
+    """Generates unique cosmic object name with timestamp"""
+    try:
+        with open("static/cosmic_names.json", "r", encoding="utf-8") as f:
+            config = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError, KeyError):
+        config = {
+            "cosmic_objects": ["Звезда", "Галактика", "Планета"],
+            "prefixes": ["", "XB-", "NGC-"],
+        }
+
+    timestamp = datetime.now().strftime("%d%m%y")
+    random_num = random.randint(100, 999)
+    cosmic_type = random.choice(config["cosmic_objects"])
+    prefix = random.choice(config["prefixes"])
+
+    return f"{cosmic_type} {prefix}{timestamp}{random_num}"
 
 
 convention = {
@@ -44,7 +66,7 @@ class Network(db.Model):  # type:ignore[name-defined]
     author_id = db.Column(BigInteger, ForeignKey("user.id"), nullable=False)
 
     guid = db.Column(Text, nullable=False, unique=True)
-    title = db.Column(Text, default="Новая сеть", nullable=False)
+    title = db.Column(Text, default=lambda: generate_cosmic_name(), nullable=False)
 
     description = db.Column(Text, default="", nullable=True)
 
