@@ -31,13 +31,13 @@
 cd back/benchmark
 
 # Быстрый тест (~1 минута)
-./run_quick_benchmark.sh quick --output-file test.txt
+./run_quick_benchmark.sh quick --output-file test
 
 # Средний тест (~5 минут)
-./run_quick_benchmark.sh medium --output-file test.txt
+./run_quick_benchmark.sh medium --output-file test
 
 # Полный тест (~30 минут)
-./run_quick_benchmark.sh full --output-file test.txt
+./run_quick_benchmark.sh full --output-file test
 ```
 
 ### Полная версия:
@@ -47,22 +47,22 @@ cd back/benchmark
   tests/test_json/router_network.json \
   tests/test_json/vlan_with_stp_network.json \
   --iterations 20 \
-  --output-file my_benchmark.txt
+  --output-file my_benchmark
 
 # Все сети
 ./run_benchmark_in_docker.sh \
   tests/test_json/*_network.json \
   --iterations 20 \
-  --output-file full.txt \
+  --output-file full \
   --continue-on-error
 ```
 
 ### Параметры:
 - `--iterations N` - количество повторений (по умолчанию: 5)
-- `--output-file FILE` - имя файла результатов
+- `--output-file FILE` - базовое имя файла результатов (без расширения)
 - `--continue-on-error` - продолжать при ошибках
 
-> **📁 Примечание**: Результаты сети сохраняются в `benchmark_output_*/` . Результаты бенчмерка сохраняются в `benchmark`.
+> **📁 Примечание**: Результаты сети сохраняются в `benchmark_output_*/`. Результаты бенчмарка сохраняются в `benchmark` в формате `.bench` (текст) и `.bench.json` (JSON).
 
 ---
 
@@ -92,8 +92,8 @@ topology_creation       0.000     0.000       0.00
 ```
 
 После завершения создаются два файла:
-- `<name>.txt` - человекочитаемый отчет
-- `<name>.txt.json` - JSON для анализа
+- `<name>.bench` - человекочитаемый отчет
+- `<name>.bench.json` - JSON для анализа
 
 ---
 

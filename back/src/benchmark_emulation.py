@@ -229,7 +229,7 @@ Examples:
     --networks back/tests/test_json/router_network.json \\
               back/tests/test_json/switch_and_hub_network.json \\
     --iterations 10 \\
-    --output-file benchmark_results.txt
+    --output-file benchmark_results
         """,
     )
     parser.add_argument(
@@ -249,7 +249,7 @@ Examples:
         "--output-file",
         type=str,
         default="",
-        help="Output file for text report (JSON will be saved as <name>.json)",
+        help="Output file basename (without extension). Results will be saved as <name>.bench and <name>.bench.json",
     )
     parser.add_argument(
         "--continue-on-error",
@@ -325,17 +325,19 @@ Examples:
     print(text_report)
 
     if args.output_file:
-        txt_path = args.output_file
-        json_path = (
-            txt_path + ".json"
-            if not txt_path.endswith(".json")
-            else txt_path.replace(".txt", ".json")
-        )
+        # Remove any extension if provided
+        base_name = args.output_file
+        for ext in [".bench", ".txt", ".json"]:
+            if base_name.endswith(ext):
+                base_name = base_name[: -len(ext)]
+        
+        bench_path = base_name + ".bench"
+        json_path = base_name + ".bench.json"
 
         try:
-            with open(txt_path, "w", encoding="utf-8") as f:
+            with open(bench_path, "w", encoding="utf-8") as f:
                 f.write(text_report + "\n")
-            print(f"Text report saved: {txt_path}")
+            print(f"Text report saved: {bench_path}")
 
             with open(json_path, "w", encoding="utf-8") as f:
                 json.dump(json_data, f, indent=2, ensure_ascii=False)

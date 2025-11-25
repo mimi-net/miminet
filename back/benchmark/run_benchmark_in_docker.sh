@@ -41,13 +41,13 @@ while [[ $# -gt 0 ]]; do
             echo ""
             echo "Options:"
             echo "  --iterations N           Number of iterations per network (default: 5)"
-            echo "  --output-file FILE       Output file for results (default: print to console)"
+            echo "  --output-file FILE       Output file basename (without extension, default: print to console)"
             echo "  --continue-on-error      Continue benchmark even if some iterations fail"
             echo "  --help, -h               Show this help message"
             echo ""
             echo "Examples:"
             echo "  $0 tests/test_json/router_network.json"
-            echo "  $0 tests/test_json/*.json --iterations 10 --output-file results.txt"
+            echo "  $0 tests/test_json/*.json --iterations 10 --output-file results"
             exit 0
             ;;
         *)
@@ -121,12 +121,20 @@ docker run --rm \
 DOCKER_EXIT_CODE=$?
 
 if [ -n "$OUTPUT_FILE" ]; then
-    if [ -f "$TMP_OUTPUT_DIR/$(basename "$OUTPUT_FILE")" ]; then
-        cp "$TMP_OUTPUT_DIR/$(basename "$OUTPUT_FILE")" "$BENCHMARK_DIR/$OUTPUT_FILE"
-        echo -e "${GREEN}✓ Results saved to: benchmark/$OUTPUT_FILE${NC}"
+    # Remove any extension if provided by user
+    BASE_NAME="$OUTPUT_FILE"
+    BASE_NAME="${BASE_NAME%.bench}"
+    BASE_NAME="${BASE_NAME%.txt}"
+    BASE_NAME="${BASE_NAME%.json}"
+    
+    BENCH_FILE="${BASE_NAME}.bench"
+    JSON_FILE="${BASE_NAME}.bench.json"
+    
+    if [ -f "$TMP_OUTPUT_DIR/$(basename "$BENCH_FILE")" ]; then
+        cp "$TMP_OUTPUT_DIR/$(basename "$BENCH_FILE")" "$BENCHMARK_DIR/$BENCH_FILE"
+        echo -e "${GREEN}✓ Results saved to: benchmark/$BENCH_FILE${NC}"
     fi
     
-    JSON_FILE="${OUTPUT_FILE}.json"
     if [ -f "$TMP_OUTPUT_DIR/$(basename "$JSON_FILE")" ]; then
         cp "$TMP_OUTPUT_DIR/$(basename "$JSON_FILE")" "$BENCHMARK_DIR/$JSON_FILE"
         echo -e "${GREEN}✓ JSON results saved to: benchmark/$JSON_FILE${NC}"

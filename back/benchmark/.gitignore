@@ -1,5 +1,5 @@
 benchmark_output_*/
-*.txt
-*.txt.json
+*.bench
+*.bench.json
 *.tmp
 *.log
