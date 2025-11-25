@@ -330,7 +330,7 @@ Examples:
         for ext in [".bench", ".txt", ".json"]:
             if base_name.endswith(ext):
                 base_name = base_name[: -len(ext)]
-        
+
         bench_path = base_name + ".bench"
         json_path = base_name + ".bench.json"
 
