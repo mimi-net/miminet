@@ -77,7 +77,7 @@ echo ""
 
 echo -e "${YELLOW}Building Docker image...${NC}"
 cd "$BACK_DIR"
-docker build -f benchmark/Dockerfile.benchmark -t "$DOCKER_IMAGE" . > /dev/null 2>&1
+docker build -f benchmark/Dockerfile -t "$DOCKER_IMAGE" . > /dev/null 2>&1
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✓ Docker image built successfully${NC}"
 else

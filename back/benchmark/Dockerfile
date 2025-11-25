@@ -35,9 +35,12 @@ RUN git clone https://github.com/mimi-net/mimidump.git \
     && cd mimidump && git checkout 32e6e5e && make prefix=/usr install && cd .. && rm -rf mimidump
 
 WORKDIR /app
-ADD ./requirements.txt /app/requirements.txt
+COPY requirements.txt /app/requirements.txt
 RUN pip3 install -r requirements.txt
-ADD ./src /app
+COPY src /app
+
+ENV celery_concurrency=1
+ENV queue_names=benchmark-queue
 
 # Create startup script for benchmarking
 RUN echo '#!/bin/bash\n\
