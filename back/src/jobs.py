@@ -417,11 +417,11 @@ def arp_proxy_enable(job: Job, job_host: Any) -> None:
 
 
 def dhcp_client(job: Job, job_host):
-    job_host.cmd(f"ifconfig {job_host.intf().name} 0")
+    job_host.cmd(f"ifconfig {job.arg_1} 0")
     job_host.cmd("rm /var/lib/dhcp/dhclient.leases")
+    job_host.cmd("echo 'initial-interval 6;' > /tmp/dhclient.conf")
     out = job_host.cmd(
-        "echo 'initial-interval 5;' > /tmp/dhclient.conf && "
-        + f"timeout -k 0 6 dhclient -v -4 -cf /tmp/dhclient.conf {job_host.intf().name} && "
+        f"timeout -k 1 5 dhclient -d -v -4 -cf /tmp/dhclient.conf {job.arg_1} && "
         + "ip route show && rm -f /tmp/dhclient.conf"
     )
     info(out)
@@ -432,8 +432,13 @@ def dhcp_server(job: Job, job_host):
     ip_range_end = job.arg_2
     mask = job.arg_3
     gw = job.arg_4
+    intfs = [job.arg_5]
     daemon = Dnsmasq(
-        node=job_host, ip_range=f"{ip_range_start},{ip_range_end}", mask=mask, gw=gw
+        node=job_host,
+        ip_range=f"{ip_range_start},{ip_range_end}",
+        mask=mask,
+        gw=gw,
+        intfs=intfs,
     )
     job_host.build_daemon(daemon)
     job_host.start_daemon(daemon)
