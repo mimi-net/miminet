@@ -3,6 +3,7 @@ let global_cy = undefined;
 let global_eh = undefined;
 var NetworkUpdateTimeoutId = -1;
 let NetworkCache = [];
+let lastSimulationId = 0
 
 const uid = function(){
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -728,6 +729,25 @@ const prepareStylesheet = function() {
       return ele.data('direction') || 'autorotate';
     };
 
+     const getPeerLabelByEdge = function(edgeId, selfId) {
+        const e = edges.find(ed => ed.data && ed.data.id === edgeId);
+        if (!e) return null;
+        const otherId = (e.data.source === selfId) ? e.data.target : e.data.source;
+        const n = nodes.find(nn => nn.data && nn.data.id === otherId);
+        return (n && n.data && n.data.label) ? n.data.label : otherId;
+    };
+
+    const buildVlanLine = function(swNode, iface) {
+        if (iface == null) return '';
+        const vlan = iface.vlan;
+        if (vlan === null || vlan === undefined) return '';
+        const peer = getPeerLabelByEdge(iface.connect, swNode.data.id) || '';
+        let mode = 'Access';
+        if (iface.type_connection === 1) mode = 'Trunk';
+        const vlanStr = Array.isArray(vlan) ? vlan.join(',') : vlan;
+        return `(${peer} VLAN ${vlanStr} ${mode})`;
+    };
+
     const getNodeLabel = function(ele) {
 
         let label = ele.data('label') || '';
@@ -763,6 +783,22 @@ const prepareStylesheet = function() {
             }
 
         });
+
+        if (n.config && n.config.type === 'l2_switch') {
+            const stpMode = n.config.stp || 0;
+            if (stpMode > 0) {
+                const proto = (stpMode === 2) ? 'rstp on' : 'stp on';
+                const pr = (n.config.priority !== undefined && n.config.priority !== null)
+                    ? ` prior ${n.config.priority}` : '';
+                label = label + '\n' + `(${proto}${pr})`;
+            }
+            if (Array.isArray(n.interface)) {
+                n.interface.forEach((iface) => {
+                    const vlanLine = buildVlanLine(n, iface);
+                    if (vlanLine) label = label + '\n' + vlanLine;
+                });
+            }
+        }
 
         return label;
     };
@@ -1264,7 +1300,7 @@ const CheckSimulation = function (simulation_id)
         url: '/check_simulation?simulation_id=' + simulation_id + '&network_guid=' + network_guid,
         data: '',
         success: function(data, textStatus, xhr) {
-
+            lastSimulationId = data.simulation_id
             // If we got 210 (processing) wait 2 sec and call themself again
             if (xhr.status === 210)
             {
@@ -1286,7 +1322,9 @@ const CheckSimulation = function (simulation_id)
         },
         error: function(xhr) {
             console.log('Cannot check simulation id = ' + simulation_id);
-            SetNetworkPlayerState(-1);
+            if (lastSimulationId == simulation_id){
+                SetNetworkPlayerState(-1);
+            }
         },
         contentType: "application/json",
         dataType: 'json'
@@ -1342,8 +1380,8 @@ const InsertWaitingTimeHelper = function(time_filter) {
         data: '',
         success: function(data) {
             const queue_size = parseInt(data.size);
-
-            if ($('#NetworkPlayerLabel').text().startsWith("Шаг:")) {
+            if (!$('#NetworkPlayer button:first').prop('disabled')) {
+                console.log($('#NetworkPlayer button:first').prop('disabled'))
                 return;
             } else if (queue_size <= 1) {
                 $('#NetworkPlayerLabel').text("Ожидание 10-15 сек.");
@@ -1407,11 +1445,21 @@ const UpdateHostConfiguration = function (data, host_id)
                 if (data.warning){
                     HostWarningMsg(data.warning);
                 }
+
+                // Update job counter after successful configuration
+                UpdateJobCounter('config_host_job_counter', host_id);
             }
         },
         error: function(xhr) {
             console.log('Не удалось обновить конфигурацию хоста');
             console.log(xhr);
+
+            // Show error message to user
+            let errorMsg = 'Ошибка при сохранении конфигурации';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMsg = xhr.responseJSON.message;
+            }
+            HostErrorMsg(errorMsg);
         },
         dataType: 'json'
     });
@@ -1456,6 +1504,9 @@ const DeleteJobFromHost = function (host_id, job_id, network_guid)
                 } else {
                     ClearConfigForm('Узел есть, но это не хост');
                 }
+
+                // Update job counter after deletion
+                UpdateJobCounter('config_host_job_counter', host_id);
 
             }
         },
@@ -1506,6 +1557,9 @@ const DeleteJobFromRouter = function (router_id, job_id, network_guid)
                 } else {
                     ClearConfigForm('Узел есть, но это не раутер');
                 }
+
+                // Update job counter after deletion
+                UpdateJobCounter('config_router_job_counter', router_id);
             }
         },
         error: function(xhr) {
@@ -1555,6 +1609,9 @@ const DeleteJobFromServer = function (server_id, job_id, network_guid)
                 } else {
                     ClearConfigForm('Узел есть, но это не сервер');
                 }
+
+                // Update job counter after deletion
+                UpdateJobCounter('config_server_job_counter', server_id);
             }
         },
         error: function(xhr) {
@@ -1613,12 +1670,22 @@ const UpdateRouterConfiguration = function (data, router_id)
                 {
                     HostWarningMsg(data.warning);
                 }
+
+                // Update job counter after successful configuration
+                UpdateJobCounter('config_router_job_counter', router_id);
             }
 
         },
         error: function(xhr) {
             console.log('Не удалось обновить конфигурацию хоста');
             console.log(xhr);
+
+            // Show error message to user
+            let errorMsg = 'Ошибка при сохранении конфигурации роутера';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMsg = xhr.responseJSON.message;
+            }
+            HostErrorMsg(errorMsg);
         },
         dataType: 'json'
     });
@@ -1672,12 +1739,22 @@ const UpdateServerConfiguration = function (data, router_id)
                 {
                     ServerWarningMsg(data.warning);
                 }
+
+                // Update job counter after successful configuration
+                UpdateJobCounter('config_server_job_counter', router_id);
             }
 
         },
         error: function(xhr) {
             console.log('Не удалось обновить конфигурацию сервера');
             console.log(xhr);
+
+            // Show error message to user
+            let errorMsg = 'Ошибка при сохранении конфигурации сервера';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMsg = xhr.responseJSON.message;
+            }
+            HostErrorMsg(errorMsg);
         },
         dataType: 'json'
     });

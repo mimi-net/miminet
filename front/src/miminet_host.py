@@ -83,8 +83,8 @@ def ascii_check(arg: str) -> bool:
 
 
 def emptiness_check(arg: str) -> bool:
-    """Check if the Python String is empty or not"""
-    return arg != ""
+    """Check if the Python String is empty or equals 0"""
+    return bool(arg and str(arg).strip()) and str(arg) != "0"
 
 
 def regex_check(arg: str, regex: str) -> bool:
