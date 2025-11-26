@@ -182,6 +182,9 @@ class Location:
                     UDP_PORT_FIELD = Locator(
                         "#config_host_send_udp_data_port_input_field"
                     )
+                    DHCLIENT_INTF = Locator(
+                        "#config_host_add_dhclient_interface_select_iface_field"
+                    )
 
             class Hub(CommonDevice):
                 MAIN_FORM = Locator("#config_hub_main_form")
@@ -262,17 +265,20 @@ class Location:
                     UDP_PORT_FIELD = Locator(
                         "#config_server_start_udp_server_port_input_field"
                     )
-                    DCHP_IP_RANGE_START_FIELD = Locator(
+                    DHCP_IP_RANGE_START_FIELD = Locator(
                         "#config_server_add_dhcp_ip_range_1_input_field"
                     )
-                    DCHP_IP_RANGE_END_FIELD = Locator(
+                    DHCP_IP_RANGE_END_FIELD = Locator(
                         "#config_server_add_dhcp_ip_range_2_input_field"
                     )
-                    DCHP_MASK_FIELD = Locator(
+                    DHCP_MASK_FIELD = Locator(
                         "#config_server_add_dhcp_mask_input_field"
                     )
-                    DCHP_IP_GW_FIELD = Locator(
+                    DHCP_IP_GW_FIELD = Locator(
                         "#config_server_add_dhcp_gateway_input_field"
+                    )
+                    DHCP_INTF = Locator(
+                        "#config_server_add_dhcp_interface_select_iface_field"
                     )
 
             # The only stable way for finding ip/subnet mask on page is using XPATHs
