@@ -78,6 +78,7 @@ def create_animation(
         edge_source,
         edge_target,
         loss_percentage,
+        duplicate_percentage
     ) in interfaces_info:
         pcap_out_file1 = "/tmp/capture_" + link1 + "_out.pcapng"
         pcap_out_file2 = "/tmp/capture_" + link2 + "_out.pcapng"
@@ -102,6 +103,7 @@ def create_animation(
             edge_source,
             edge_target,
             loss_percentage,
+            duplicate_percentage
         )
 
         animation += packets

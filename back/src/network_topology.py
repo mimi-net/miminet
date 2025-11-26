@@ -141,6 +141,11 @@ class MiminetTopology(IPTopo):
                 if edge.data.loss_percentage is not None
                 else 0
             )
+            duplicate_percentage = (
+                edge.data.duplicate_percentage
+                if edge.data.duplicate_percentage is not None
+                else 0
+            )
 
             if source_id not in self.__nodes:
                 raise ValueError(
@@ -170,6 +175,7 @@ class MiminetTopology(IPTopo):
                     source_id,
                     target_id,
                     loss_percentage,
+                    duplicate_percentage,
                 )
             )
 
@@ -181,6 +187,7 @@ class MiminetTopology(IPTopo):
                 interface_name_2=trg_iface.name,
                 delay="15ms",
                 loss_percentage=loss_percentage,
+                duplicate_percentage=duplicate_percentage,
             )
 
             self.__configure_link(link1[src_host], src_iface)
@@ -211,6 +218,7 @@ class MiminetTopology(IPTopo):
         delay="2ms",
         max_queue_size=None,
         loss_percentage=0,
+        duplicate_percentage=0,
     ):
         """Connects two hosts through a virtual switch."""
         # Create unique switch name
@@ -225,6 +233,7 @@ class MiminetTopology(IPTopo):
                 "delay": delay,
                 "max_queue_size": max_queue_size,
                 "loss": loss_percentage,
+                "duplicate": duplicate_percentage
             }
         }
 
@@ -233,6 +242,7 @@ class MiminetTopology(IPTopo):
                 "delay": delay,
                 "max_queue_size": max_queue_size,
                 "loss": loss_percentage,
+                "duplicate": duplicate_percentage
             }
         }
 

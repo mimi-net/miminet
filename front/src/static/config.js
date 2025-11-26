@@ -273,11 +273,13 @@ const ConfigEdgeForm = function (edge_id) {
         const edge = edges.find(e => e.data.id === edge_id);
         console.log(edge);
         const lossValue = $("#edge_loss").val();
+        const duplicateValue = $("#edge_duplicate").val();
 
-        if (edge)
+        if (edge) {
             edge.data.loss_percentage = lossValue;
-
-        const inputsToDisable = $('#edge_loss, #config_edge_main_form_submit_button');
+            edge.data.duplicate_percentage = duplicateValue;
+        }
+        const inputsToDisable = $('#edge_loss, #edge_duplicate, #config_edge_main_form_submit_button');
         inputsToDisable.prop("disabled", true);
 
         $('#config_edge_main_form_submit_button').html(
@@ -299,13 +301,12 @@ const ConfigHubName = function (hostname) {
     $('#config_hub_name').val(hostname);
 }
 
-const ConfigEdgePercentage = function (edge_loss) {
-
-    var text = document.getElementById('config_edge_save_loss_script').innerHTML;
-
+const ConfigEdgeNetworkIssues = function (edge_loss = 0, edge_duplicate = 0) {
+    var text = document.getElementById('config_edge_set_network_issues_script').innerHTML;
     $(config_edge_main_form_id).prepend(text);
     $('#edge_loss').val(edge_loss);
-}
+    $('#edge_duplicate').val(edge_duplicate);
+};
 
 const ConfigEdgeEndpoints = function (edge_source, edge_target) {
 

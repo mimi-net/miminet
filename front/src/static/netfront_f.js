@@ -5,6 +5,28 @@ var NetworkUpdateTimeoutId = -1;
 let NetworkCache = [];
 let lastSimulationId = 0
 
+// Backward compatibility: convert legacy loss_percentage -> loss and remove legacy field after a delay
+const NormalizeEdgeLoss = function(edgesList, delayMs = 5000) {
+    if (!Array.isArray(edgesList)) return;
+    edgesList.forEach(function(ed) {
+        if (!ed || !ed.data) return;
+        if (ed.data.loss === undefined && ed.data.loss_percentage !== undefined) {
+            // Copy legacy value to new field
+            ed.data.loss = ed.data.loss_percentage;
+            // Schedule removal of legacy field after delay
+            setTimeout(function() {
+                try {
+                    if (ed && ed.data && ed.data.loss_percentage !== undefined) {
+                        delete ed.data.loss_percentage;
+                    }
+                } catch (e) {
+                    console.log('Failed to delete legacy loss_percentage', e);
+                }
+            }, delayMs);
+        }
+    });
+};
+
 const uid = function(){
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
@@ -335,7 +357,8 @@ const ShowEdgeConfig = function(edge_id, shared = 0){
 
     let edge_source = ed.data.source;
     let edge_target = ed.data.target;
-    let edge_loss = ed.data.loss_percentage || 0
+    let edge_loss = ed.data.loss_percentage || 0;
+    let edge_duplicate = ed.data.duplicate_percentage || 0;
 
     // Create form
     if (shared){
@@ -344,9 +367,7 @@ const ShowEdgeConfig = function(edge_id, shared = 0){
         ConfigEdgeForm(edge_id);
     }
 
-
-    // Add loss percentage info
-    ConfigEdgePercentage(edge_loss)
+    ConfigEdgeNetworkIssues(edge_loss, edge_duplicate);
 
     // Add source and target info
     ConfigEdgeEndpoints(edge_source, edge_target);
@@ -710,9 +731,15 @@ const MoveNodes = function(){
 const prepareStylesheet = function() {
     const getColor = function(ele) {
         if (ele.group() === "edges") {
-            const loss = ele.data('loss_percentage') || 0;
-            if (loss > 0)
+            const loss = ele.data('loss_percentage');
+            const dup = ele.data('duplicate_percentage');
+            if (loss > 0 && dup > 0) {
+                return '#000000';
+            } else if (loss > 0) {
                 return '#FF8C00';
+            } else if (dup > 0) {
+                return '#26AE31';
+            }
         }
         return ele.data('color') || '#9FBFE5';
     };
@@ -934,11 +961,13 @@ const DrawGraph = function() {
         var collection = cy.elements();
         cy.remove(collection);
         cy.autounselectify(true);
-        cy.add(nodes);
-        cy.add(edges);
-        cy.nodes().grabify();
-        global_eh.enable();
-        return;
+    // Normalize legacy loss field for backward compatibility
+    NormalizeEdgeLoss(edges);
+    cy.add(nodes);
+    cy.add(edges);
+    cy.nodes().grabify();
+    global_eh.enable();
+    return;
     }
 
     cy = cytoscape({
@@ -983,6 +1012,8 @@ const DrawGraph = function() {
     cy.minZoom(0.5);
     cy.maxZoom(2);
 
+    // Normalize legacy loss field for backward compatibility
+    NormalizeEdgeLoss(edges);
     cy.add(nodes);
     cy.add(edges);
 
@@ -1220,6 +1251,8 @@ const DrawSharedGraph = function(nodes, edges) {
     cy.minZoom(0.5);
     cy.maxZoom(2);
 
+    // Normalize legacy loss field for backward compatibility
+    NormalizeEdgeLoss(edges);
     cy.add(nodes);
     cy.add(edges);
 
@@ -1284,6 +1317,8 @@ const DrawIndexGraphStatic = function(nodes, edges, container_id, graph_network_
 
     index_cy.autounselectify(false);
 
+    // Normalize legacy loss field for backward compatibility
+    NormalizeEdgeLoss(edges);
     index_cy.add(nodes);
     index_cy.add(edges);
     index_cy.panningEnabled(false);
