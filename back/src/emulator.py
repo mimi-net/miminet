@@ -25,6 +25,14 @@ def emulate(
 
     setLogLevel("info")
 
+    # Validate job limit
+    MAX_JOBS_COUNT = 30
+    if len(network.jobs) > MAX_JOBS_COUNT:
+        raise ValueError(
+            f"Превышен лимит! В сети максимальное количество команд ({MAX_JOBS_COUNT}). "
+            f"Текущее количество: {len(network.jobs)}"
+        )
+
     if len(network.jobs) == 0:
         return [], []
 

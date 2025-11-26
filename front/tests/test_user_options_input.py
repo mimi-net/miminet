@@ -28,10 +28,11 @@ class TestOptionsFilter:
         [
             ("-c 5 -t 10 ; rm -rf /", "-c 5 -t 10"),
             ("-s 1200 -b --badflag", "-s 1200 -b"),
-            ("echo test && -i 3", "-i 3"),
+            ("echo test && -i 3 -l -l -l hello", "-i 3"),
             ("-c 10 -c 56 -c 12 -b -b -b -i 3 -i 10", "-c 10 -b -i 3"),
             ("-c -c -c -c 5 -i -b", "-c 5 -b"),
             ("-c -x -c 11 -c 5", "-c 5"),
+            ("-l -l -l 1 -l 120001 -l 12", "-l 1"),
         ],
     )
     def test_ping_options_whitelist(
@@ -66,6 +67,7 @@ class TestOptionsFilter:
             ("-c 57 -c 90"),
             ("; curl test.com"),
             ("|| apt-update"),
+            ("-l hi -l blacklist -l 5.0"),
         ],
     )
     def test_ping_options_blacklist(self, network: MiminetTestNetwork, options_input):
