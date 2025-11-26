@@ -47,18 +47,21 @@ cd back/benchmark
   tests/test_json/router_network.json \
   tests/test_json/vlan_with_stp_network.json \
   --iterations 20 \
+  --warmup 10 \
   --output-file my_benchmark
 
 # Все сети
 ./run_benchmark_in_docker.sh \
   tests/test_json/*_network.json \
   --iterations 20 \
+  --warmup 10 \
   --output-file full \
   --continue-on-error
 ```
 
 ### Параметры:
 - `--iterations N` - количество повторений (по умолчанию: 5)
+- `--warmup N` - количество прогревочных итераций (по умолчанию: 10)
 - `--output-file FILE` - базовое имя файла результатов (без расширения)
 - `--continue-on-error` - продолжать при ошибках
 
@@ -72,6 +75,7 @@ cd back/benchmark
 ================================================================================
 MIMINET EMULATION BENCHMARK REPORT
 ================================================================================
+Warmup iterations: 10
 Iterations per network: 20
 Networks tested: 18
 
@@ -79,16 +83,18 @@ Networks tested: 18
 Network: vlan_with_stp_network
 --------------------------------------------------------------------------------
 Total time (mean): 14.265s ± 0.050s
+Total time (p95):  14.342s
+Total time (p99):  14.378s
 
-Stage                 Mean(s)    Std(s)   Share(%)
---------------------------------------------------
-animation_creation      0.001     0.000       0.01
-job_execution           3.078     0.015      21.58
-network_init            0.409     0.024       2.87
-network_start           8.311     0.028      58.26 
-network_stop            2.465     0.036      17.28
-packet_grouping         0.000     0.000       0.00
-topology_creation       0.000     0.000       0.00
+Stage                 Mean(s)    Std(s)   p95(s)   p99(s)   Share(%)
+-----------------------------------------------------------------------
+animation_creation      0.001     0.000    0.001    0.001       0.01
+job_execution           3.078     0.015    3.102    3.115      21.58
+network_init            0.409     0.024    0.445    0.458       2.87
+network_start           8.311     0.028    8.358    8.378      58.26 
+network_stop            2.465     0.036    2.523    2.545      17.28
+packet_grouping         0.000     0.000    0.000    0.000       0.00
+topology_creation       0.000     0.000    0.000    0.000       0.00
 ```
 
 После завершения создаются два файла:
@@ -147,4 +153,9 @@ job_execution    3.078s    21.58%  # 22% на выполнение jobs
 - **< 0.05s** - отлично
 - **0.05-0.1s** - хорошо
 - **> 0.1s** - возможны флуктуации
+
+### p95 и p99 (Перцентили)
+Показывают "хвосты" распределения - худшие случаи производительности:
+- **p95** - 95% измерений были быстрее этого значения (5% медленнее)
+- **p99** - 99% измерений были быстрее этого значения (1% медленнее)
 

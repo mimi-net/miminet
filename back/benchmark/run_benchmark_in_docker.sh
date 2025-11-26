@@ -18,6 +18,7 @@ SCRIPT_DIR="$BACK_DIR"
 
 
 ITERATIONS=5
+WARMUP=10
 OUTPUT_FILE=""
 CONTINUE_ON_ERROR=""
 NETWORK_FILES=()
@@ -26,6 +27,10 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         --iterations)
             ITERATIONS="$2"
+            shift 2
+            ;;
+        --warmup)
+            WARMUP="$2"
             shift 2
             ;;
         --output-file)
@@ -37,17 +42,18 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --help|-h)
-            echo "Usage: $0 <network_json_file> [network_json_file2...] [--iterations N] [--output-file FILE] [--continue-on-error]"
+            echo "Usage: $0 <network_json_file> [network_json_file2...] [--iterations N] [--warmup N] [--output-file FILE] [--continue-on-error]"
             echo ""
             echo "Options:"
             echo "  --iterations N           Number of iterations per network (default: 5)"
+            echo "  --warmup N               Number of warmup iterations (default: 10)"
             echo "  --output-file FILE       Output file basename (without extension, default: print to console)"
             echo "  --continue-on-error      Continue benchmark even if some iterations fail"
             echo "  --help, -h               Show this help message"
             echo ""
             echo "Examples:"
             echo "  $0 tests/test_json/router_network.json"
-            echo "  $0 tests/test_json/*.json --iterations 10 --output-file results"
+            echo "  $0 tests/test_json/*.json --iterations 10 --warmup 5 --output-file results"
             exit 0
             ;;
         *)
@@ -72,7 +78,8 @@ done
 
 echo -e "${BLUE}=== Miminet Emulation Benchmark ===${NC}"
 echo -e "${BLUE}Network files: ${#NETWORK_FILES[@]}${NC}"
-echo -e "${BLUE}Iterations: $ITERATIONS${NC}"
+echo -e "${BLUE}Warmup iterations: $WARMUP${NC}"
+echo -e "${BLUE}Benchmark iterations: $ITERATIONS${NC}"
 echo ""
 
 echo -e "${YELLOW}Building Docker image...${NC}"
@@ -114,6 +121,7 @@ docker run --rm \
     python3 benchmark_emulation.py \
         --networks $CONTAINER_ARGS \
         --iterations "$ITERATIONS" \
+        --warmup "$WARMUP" \
         $OUTPUT_ARG \
         $CONTINUE_ON_ERROR \
     2>&1

@@ -1,5 +1,27 @@
 from __future__ import annotations
 
+"""Miminet Emulation Benchmark Tool.
+
+This module provides benchmarking capabilities for Miminet network emulation.
+It measures performance across multiple stages and calculates key statistics:
+
+Statistics calculated:
+- Mean: Average execution time
+- Std: Standard deviation (stability indicator)
+- p95: 95th percentile (5% of runs were slower)
+- p99: 99th percentile (1% of runs were slower - worst case)
+
+The benchmark includes warmup iterations (default: 10) that are not included
+in the final statistics, allowing the system to stabilize before measurements.
+
+Example usage:
+    sudo python3 benchmark_emulation.py \\
+        --networks tests/test_json/router_network.json \\
+        --iterations 20 \\
+        --warmup 10 \\
+        --output-file results
+"""
+
 import argparse
 import json
 import os
@@ -101,13 +123,14 @@ def run_once(network, network_name: str) -> Dict[str, float]:
 
 
 def format_report(
-    results: Dict[str, List[Dict[str, float]]], iterations: int
+    results: Dict[str, List[Dict[str, float]]], iterations: int, warmup: int = 0
 ) -> tuple[str, dict]:
     """Format benchmark results as text report and JSON.
 
     Args:
         results: Dictionary mapping network names to lists of timing dictionaries
         iterations: Number of iterations per network
+        warmup: Number of warmup iterations (not included in results)
 
     Returns:
         Tuple of (text_report, json_data)
@@ -116,11 +139,16 @@ def format_report(
     report_lines.append("=" * 80)
     report_lines.append("MIMINET EMULATION BENCHMARK REPORT")
     report_lines.append("=" * 80)
+    report_lines.append(f"Warmup iterations: {warmup}")
     report_lines.append(f"Iterations per network: {iterations}")
     report_lines.append(f"Networks tested: {len(results)}")
     report_lines.append("")
 
-    json_data: Dict[str, Any] = {"iterations_per_network": iterations, "networks": []}
+    json_data: Dict[str, Any] = {
+        "warmup_iterations": warmup,
+        "iterations_per_network": iterations,
+        "networks": [],
+    }
 
     for network_name, runs in results.items():
         report_lines.append("-" * 80)
@@ -140,15 +168,17 @@ def format_report(
         totals = [sum(r.values()) for r in runs]
         tot_mean = stats.mean(totals) if totals else 0.0
         tot_std = stats.stdev(totals) if len(totals) > 1 else 0.0
+        tot_p95 = stats.quantiles(totals, n=20)[18] if len(totals) >= 2 else tot_mean
+        tot_p99 = stats.quantiles(totals, n=100)[98] if len(totals) >= 2 else tot_mean
 
         report_lines.append(f"Total time (mean): {tot_mean:.3f}s ± {tot_std:.3f}s")
+        report_lines.append(f"Total time (p95):  {tot_p95:.3f}s")
+        report_lines.append(f"Total time (p99):  {tot_p99:.3f}s")
         report_lines.append("")
 
         # Stage details
         width = max((len(k) for k in keys), default=20)
-        header = (
-            f"{'Stage'.ljust(width)}  {'Mean(s)':>9}  {'Std(s)':>8}  {'Share(%)':>9}"
-        )
+        header = f"{'Stage'.ljust(width)}  {'Mean(s)':>9}  {'Std(s)':>8}  {'p95(s)':>8}  {'p99(s)':>8}  {'Share(%)':>9}"
         report_lines.append(header)
         report_lines.append("-" * len(header))
 
@@ -156,6 +186,8 @@ def format_report(
             "name": network_name,
             "total_mean_sec": tot_mean,
             "total_std_sec": tot_std,
+            "total_p95_sec": tot_p95,
+            "total_p99_sec": tot_p99,
             "stages": [],
         }
 
@@ -163,15 +195,19 @@ def format_report(
             vals = agg[k]
             mean = stats.mean(vals) if vals else 0.0
             std = stats.stdev(vals) if len(vals) > 1 else 0.0
+            p95 = stats.quantiles(vals, n=20)[18] if len(vals) >= 2 else mean
+            p99 = stats.quantiles(vals, n=100)[98] if len(vals) >= 2 else mean
             share = (mean / tot_mean * 100.0) if tot_mean > 0 else 0.0
 
-            line = f"{k.ljust(width)}  {mean:9.3f}  {std:8.3f}  {share:9.2f}"
+            line = f"{k.ljust(width)}  {mean:9.3f}  {std:8.3f}  {p95:8.3f}  {p99:8.3f}  {share:9.2f}"
             report_lines.append(line)
 
             stage_info: Dict[str, Any] = {
                 "name": k,
                 "mean_sec": mean,
                 "std_sec": std,
+                "p95_sec": p95,
+                "p99_sec": p99,
                 "share_percent": share,
             }
             network_json["stages"].append(stage_info)
@@ -221,15 +257,21 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Single network, 5 iterations (default)
+  # Single network, 5 iterations (default), 10 warmup iterations (default)
   sudo python3 benchmark_emulation.py --networks back/tests/test_json/router_network.json
 
-  # Multiple networks, 10 iterations
+  # Multiple networks, 10 iterations, 5 warmup iterations
   sudo python3 benchmark_emulation.py \\
     --networks back/tests/test_json/router_network.json \\
               back/tests/test_json/switch_and_hub_network.json \\
     --iterations 10 \\
+    --warmup 5 \\
     --output-file benchmark_results
+
+  # No warmup iterations
+  sudo python3 benchmark_emulation.py \\
+    --networks back/tests/test_json/router_network.json \\
+    --warmup 0
         """,
     )
     parser.add_argument(
@@ -244,6 +286,12 @@ Examples:
         type=int,
         default=5,
         help="Number of iterations per network (default: 5)",
+    )
+    parser.add_argument(
+        "--warmup",
+        type=int,
+        default=10,
+        help="Number of warmup iterations before benchmark (default: 10)",
     )
     parser.add_argument(
         "--output-file",
@@ -262,6 +310,10 @@ Examples:
         print(f"[ERROR] Iterations must be >= 1, got {args.iterations}")
         return 1
 
+    if args.warmup < 0:
+        print(f"[ERROR] Warmup iterations must be >= 0, got {args.warmup}")
+        return 1
+
     if not check_requirements():
         return 1
 
@@ -271,7 +323,7 @@ Examples:
             return 1
 
     print(
-        f"Starting benchmark with {len(args.networks)} network(s), {args.iterations} iteration(s) each"
+        f"Starting benchmark with {len(args.networks)} network(s), {args.warmup} warmup + {args.iterations} iteration(s) each"
     )
     print()
 
@@ -287,6 +339,33 @@ Examples:
             print(f"[ERROR] Failed to load network '{network_path}': {e}")
             return 1
 
+        # Run warmup iterations
+        if args.warmup > 0:
+            print(f"  Running {args.warmup} warmup iteration(s)...")
+            warmup_failed = 0
+            for i in range(args.warmup):
+                print(f"    Warmup {i+1}/{args.warmup}")
+                try:
+                    run_once(network, network_name)
+                except Exception as e:
+                    warmup_failed += 1
+                    print(f"[WARNING] Warmup iteration {i+1} failed: {e}")
+                    if args.continue_on_error:
+                        print("[INFO] Continuing with remaining warmup iterations...")
+                        continue
+                    else:
+                        print(
+                            "[ERROR] Stopping benchmark (use --continue-on-error to continue)"
+                        )
+                        return 1
+
+            if warmup_failed > 0:
+                print(
+                    f"[WARNING] {warmup_failed}/{args.warmup} warmup iterations failed"
+                )
+            print("  Warmup completed")
+
+        # Run benchmark iterations
         runs: List[Dict[str, float]] = []
         failed_iterations = 0
 
@@ -320,7 +399,7 @@ Examples:
         print(f"  Completed {network_name}")
         print()
 
-    text_report, json_data = format_report(all_results, args.iterations)
+    text_report, json_data = format_report(all_results, args.iterations, args.warmup)
 
     print(text_report)
 
