@@ -1867,8 +1867,7 @@ const UpdateFilterStates = function (settings) {
         return;
     }
 
-    packetFilterState.hideARP = Boolean(settings.hideARP);
-    packetFilterState.hideSTP = Boolean(settings.hideSTP);
+    Object.assign(packetFilterState, settings);
     $("#ARPFilterCheckbox").prop("checked", packetFilterState.hideARP);
     $("#STPFilterCheckbox").prop("checked", packetFilterState.hideSTP);
 };
@@ -1878,13 +1877,28 @@ const SaveAnimationFilters = function () {
         return;
     }
 
+    const payload = {
+        hideARP: Boolean(packetFilterState.hideARP),
+        hideSTP: Boolean(packetFilterState.hideSTP),
+    };
+
     $.ajax({
         type: "POST",
         url: "/user/animation_filters",
-        data: JSON.stringify(packetFilterState),
+        data: JSON.stringify(payload),
         contentType: "application/json; charset=utf-8",
-        success: function (data) { 
-            return;
+        dataType: "json",
+        success: function (data) {
+            if (!data) {
+                return;
+            }
+
+            const saved = {
+                hideARP: Boolean(data.hideARP),
+                hideSTP: Boolean(data.hideSTP),
+            };
+
+            UpdateFilterStates(saved);
         },
         error: function (xhr) {
             console.log("Cannot save animation filters");
@@ -1894,6 +1908,11 @@ const SaveAnimationFilters = function () {
 };
 
 const SetPacketFilter = function () {
+    // If network player UI is absent (e.g., not on network page), skip.
+    if (!document.getElementById("NetworkPlayer") || !document.getElementById("PacketSliderInput")) {
+        return;
+    }
+
     console.log("Packet filter call");
     // SetPacketFilter first call on emulated network
     if (packets && !packetsNotFiltered) {
@@ -1938,6 +1957,10 @@ const SetNetworkPlayerState = function (simulation_id) {
         PacketPlayer.getInstance().InitPlayer(packets);
 
         // Configure the slider
+        if (!$('#PacketSliderInput')[0] || !$('#PacketSliderInput')[0].noUiSlider) {
+            return;
+        }
+
         $('#PacketSliderInput')[0].noUiSlider.updateOptions({
             start: [1],
             range: {

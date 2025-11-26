@@ -301,10 +301,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     window.isAuthenticated = {{ current_user.is_authenticated|tojson }};
 
     $(document).ready(function() {
-        const serverAnimationFilters = packetFilterState = {{ {
-            "hideARP": current_user.is_authenticated and current_user.animation_hide_arp,
-            "hideSTP": current_user.is_authenticated and current_user.animation_hide_stp,
-        } | tojson }};
+        const rawUserConfig = {{ (current_user.config or "null") | tojson }};
+        const parsedUserConfig = (() => {
+            try {
+                if (!rawUserConfig) {
+                    return {};
+                }
+
+                if (typeof rawUserConfig === "string") {
+                    const parsed = JSON.parse(rawUserConfig);
+                    return parsed && typeof parsed === "object" ? parsed : {};
+                }
+
+                return typeof rawUserConfig === "object" ? rawUserConfig : {};
+            } catch (err) {
+                console.warn("Cannot parse user config", err);
+                return {};
+            }
+        })();
+
+        const serverAnimationFilters = {
+            hideARP: Boolean(window.isAuthenticated && parsedUserConfig.hideARP),
+            hideSTP: Boolean(window.isAuthenticated && parsedUserConfig.hideSTP),
+        };
 
         if (typeof UpdateFilterStates === "function") {
             UpdateFilterStates(serverAnimationFilters);

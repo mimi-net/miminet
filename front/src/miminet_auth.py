@@ -27,6 +27,11 @@ from pip._vendor import cachecontrol
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import check_password_hash, generate_password_hash
 
+DEFAULT_USER_CONFIG = {
+    "hideARP": False,
+    "hideSTP": False,
+}
+
 # Global variables
 UPLOAD_FOLDER = "static/avatar/"
 UPLOAD_TMP_FOLDER = "static/tmp/avatar/"
@@ -155,30 +160,41 @@ def user_profile():
     return render_template("auth/profile.html", user=user)
 
 
+def _load_user_config(user: User) -> dict:
+    try:
+        parsed = json.loads(user.config) if user.config else {}
+    except (TypeError, ValueError):
+        parsed = {}
+
+    return parsed if isinstance(parsed, dict) else {}
+
+
 @login_required
 def animation_filters():
-    user = User.query.filter_by(id=current_user.id).first()
+    user = current_user
+    user_config = _load_user_config(user)
+
+    # Ensure defaults are present
+    merged_config = {**DEFAULT_USER_CONFIG, **user_config}
+    merged_config["hideARP"] = bool(merged_config.get("hideARP", False))
+    merged_config["hideSTP"] = bool(merged_config.get("hideSTP", False))
 
     if request.method == "POST":
         payload = request.get_json(silent=True) or {}
 
-        if "hideARP" in payload:
-            user.animation_hide_arp = bool(payload.get("hideARP"))
+        if not isinstance(payload, dict):
+            return jsonify({"error": "Invalid payload"}), 400
 
-        if "hideSTP" in payload:
-            user.animation_hide_stp = bool(payload.get("hideSTP"))
+        for key in ("hideARP", "hideSTP"):
+            if key in payload:
+                merged_config[key] = bool(payload.get(key, False))
 
+        user.config = json.dumps(merged_config)
         db.session.commit()
 
-    return (
-        jsonify(
-            {
-                "hideARP": bool(user.animation_hide_arp),
-                "hideSTP": bool(user.animation_hide_stp),
-            }
-        ),
-        200,
-    )
+        return jsonify(merged_config), 200
+
+    return jsonify({"error": "Invalid request"}), 405
 
 
 def password_recovery():
