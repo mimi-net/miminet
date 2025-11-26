@@ -1,6 +1,6 @@
 import json
-from flask import request, make_response, jsonify, abort, render_template
-from flask_login import login_required, current_user
+from flask import request, make_response, jsonify, abort, render_template, session
+from flask_login import login_required, current_user, logout_user
 
 from quiz.facade.quiz_session_facade import (
     start_session,
@@ -17,7 +17,6 @@ from quiz.service.session_question_service import (
 )
 
 from quiz.service.network_upload_service import create_check_task
-
 
 @login_required
 def answer_on_session_question_endpoint():
@@ -87,6 +86,7 @@ def get_question_by_session_question_id_endpoint():
             available_from=available_from,
             session_question_id=session_question_id,
             available_answer=available_answer,
+            returnToLtiPlatformUrl=session.get("returnToLtiPlatformUrl")
         ),
         status_code,
     )
@@ -108,6 +108,10 @@ def start_session_endpoint():
 @login_required
 def finish_session_endpoint():
     code = finish_session(request.args["id"], current_user)
+
+    if "launch_id" in session:
+        logout_user()
+        session.pop("launch_id")
 
     if code == 404 or code == 403:
         abort(code)
