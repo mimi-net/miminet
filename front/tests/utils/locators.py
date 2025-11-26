@@ -204,6 +204,7 @@ class Location:
                 JOB_SELECT = Locator("#config_router_job_select_field")
 
                 class Job:
+                    PING_FIELD = Locator("#config_router_ping_c_1_ip")
                     NAT_LINK_SELECT = Locator(
                         "#config_router_add_nat_masquerade_iface_select_field"
                     )

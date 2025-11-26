@@ -35,7 +35,13 @@ def filter_arg_for_options(
 def ping_options_filter(arg: str) -> str:
     """Get only whitelist options from ping options"""
     flags_without_args = ["-b"]
-    flags_with_args = {"-c": r"([1-9]|10)", "-t": r"\d+", "-i": r"\d+", "-s": r"\d+"}
+    flags_with_args = {
+        "-c": r"([1-9]|10)",
+        "-t": r"\d+",
+        "-i": r"\d+",
+        "-s": r"\d+",
+        "-l": r"\d+",
+    }
 
     return filter_arg_for_options(arg, flags_without_args, flags_with_args)
 
