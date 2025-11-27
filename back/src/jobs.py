@@ -148,6 +148,18 @@ def add_gre_checker(ip_start, ip_end, ip_iface, name_iface) -> bool:
 
     return True
 
+def port_forwarding_checker(iface, port, dest_addr, dest_port) -> bool:
+    if not valid_ip(dest_addr):
+        return False
+
+    if not valid_port(port) or not valid_port(dest_port):
+        return False
+
+    if not valid_iface(iface):
+        return False
+
+    return True
+
 
 def valid_port(port) -> bool:
     """Check if given arg is port or not"""
@@ -285,15 +297,29 @@ def iptables_handler(job: Job, job_host: Any) -> None:
 
     job_host.cmd(f"iptables -t nat -A POSTROUTING -o {arg_dev} -j MASQUERADE")
 
-def port_forwarding_handler(job: Job, job_host: Any):
-    #arg_proto = job.arg_1
+
+def port_forwarding_tcp_handler(job: Job, job_host: Any) -> None:
     arg_iface = job.arg_1
     arg_port = job.arg_2
     arg_dest_addr = job.arg_3
     arg_dest_port = job.arg_4
 
+    if not port_forwarding_checker(arg_iface, arg_port, arg_dest_addr, arg_dest_port):
+        return
+
     job_host.cmd(f"iptables -t nat -A PREROUTING -p tcp -i {arg_iface} --dport {arg_port} -j DNAT --to-destination {arg_dest_addr}:{arg_dest_port}")
-    job_host.cmd(f"iptables -t nat -A POSTROUTING -o {arg_iface} -j MASQUERADE")
+
+
+def port_forwarding_udp_handler(job: Job, job_host: Any) -> None:
+    arg_iface = job.arg_1
+    arg_port = job.arg_2
+    arg_dest_addr = job.arg_3
+    arg_dest_port = job.arg_4
+
+    if not port_forwarding_checker(arg_iface, arg_port, arg_dest_addr, arg_dest_port):
+        return
+
+    job_host.cmd(f"iptables -t nat -A PREROUTING -p udp -i {arg_iface} --dport {arg_port} -j DNAT --to-destination {arg_dest_addr}:{arg_dest_port}")
 
 
 def ip_route_add_handler(job: Job, job_host: Any) -> None:
@@ -443,7 +469,8 @@ class Jobs:
             105: add_ipip_interface,
             106: add_gre,
             107: arp_proxy_enable,
-            108: port_forwarding_handler,
+            109: port_forwarding_tcp_handler,
+            110: port_forwarding_udp_handler,
             200: open_udp_server_handler,
             201: open_tcp_server_handler,
             202: block_tcp_udp_port,
