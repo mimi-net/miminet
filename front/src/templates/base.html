@@ -148,6 +148,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                 <input class="form-check-input" role="switch" type="checkbox" id="STPFilterCheckbox" name="STPFilterCheckbox">
                                 <label for="STPFilterCheckbox">Не анимировать STP/RSTP пакеты </label>
                             </div>
+                            <div>
+                                <input class="form-check-input" role="switch" type="checkbox" id="SYNFilterCheckbox" name="SYNFilterCheckbox">
+                                <label for="SYNFilterCheckbox">Не анимировать SYN/SYN+ACK (TCP)</label>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -323,6 +327,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         const serverAnimationFilters = {
             hideARP: Boolean(window.isAuthenticated && parsedUserConfig.hideARP),
             hideSTP: Boolean(window.isAuthenticated && parsedUserConfig.hideSTP),
+            hideSYN: Boolean(window.isAuthenticated && parsedUserConfig.hideSYN),
         };
 
         if (typeof UpdateFilterStates === "function") {

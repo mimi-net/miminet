@@ -9,6 +9,7 @@ let packetsNotFiltered = null;
 let packetFilterState = {
     hideARP: false,
     hideSTP: false,
+    hideSYN: false,
 };
 
 const uid = function(){
@@ -1894,7 +1895,10 @@ const FilterPackets = function () {
                             pkt.data.label.startsWith("ARP")) ||
                             packetFilterState.hideSTP &&
                             (pkt.data.label.startsWith("STP") ||
-                            pkt.data.label.startsWith("RSTP"))
+                            pkt.data.label.startsWith("RSTP") ||
+                            packetFilterState.hideSYN &&
+                            pkt.data.label.startsWith("TCP (SYN"))
+
                         )
                 )
             )
@@ -1909,6 +1913,7 @@ const UpdateFilterStates = function (settings) {
     Object.assign(packetFilterState, settings);
     $("#ARPFilterCheckbox").prop("checked", packetFilterState.hideARP);
     $("#STPFilterCheckbox").prop("checked", packetFilterState.hideSTP);
+    $("#SYNFilterCheckbox").prop("checked", packetFilterState.hideSYN);
 };
 
 const SaveAnimationFilters = function () {
@@ -1919,6 +1924,7 @@ const SaveAnimationFilters = function () {
     const payload = {
         hideARP: Boolean(packetFilterState.hideARP),
         hideSTP: Boolean(packetFilterState.hideSTP),
+        hideSYN: Boolean(packetFilterState.hideSYN),
     };
 
     $.ajax({
@@ -1935,6 +1941,7 @@ const SaveAnimationFilters = function () {
             const saved = {
                 hideARP: Boolean(data.hideARP),
                 hideSTP: Boolean(data.hideSTP),
+                hideSYN: Boolean(data.hideSYN),
             };
 
             UpdateFilterStates(saved);
@@ -1964,6 +1971,7 @@ const SetPacketFilter = function () {
 
     packetFilterState.hideARP = $("#ARPFilterCheckbox").is(":checked");
     packetFilterState.hideSTP = $("#STPFilterCheckbox").is(":checked");
+    packetFilterState.hideSYN = $("#SYNFilterCheckbox").is(":checked");
 
     if (packets) {
         FilterPackets();

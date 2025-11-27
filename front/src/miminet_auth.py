@@ -30,6 +30,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 DEFAULT_USER_CONFIG = {
     "hideARP": False,
     "hideSTP": False,
+    "hideSYN": False,
 }
 
 # Global variables
@@ -178,6 +179,7 @@ def animation_filters():
     merged_config = {**DEFAULT_USER_CONFIG, **user_config}
     merged_config["hideARP"] = bool(merged_config.get("hideARP", False))
     merged_config["hideSTP"] = bool(merged_config.get("hideSTP", False))
+    merged_config["hideSYN"] = bool(merged_config.get("hideSYN", False))
 
     if request.method == "POST":
         payload = request.get_json(silent=True) or {}
@@ -185,7 +187,7 @@ def animation_filters():
         if not isinstance(payload, dict):
             return jsonify({"error": "Invalid payload"}), 400
 
-        for key in ("hideARP", "hideSTP"):
+        for key in ("hideARP", "hideSTP", "hideSYN"):
             if key in payload:
                 merged_config[key] = bool(payload.get(key, False))
 
