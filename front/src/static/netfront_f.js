@@ -1886,23 +1886,23 @@ const RunSimulation = function (network_guid)
 }
 
 const FilterPackets = function () {
-        packets = packets
-            .map((step) =>
-                step.filter(
-                    (pkt) =>
-                        !(
-                            (packetFilterState.hideARP &&
+    const tcpRegex = /TCP \((ACK|SYN|FIN)/;
+    packets = packets
+        .map((step) =>
+            step.filter(
+                (pkt) =>
+                    !(
+                        (packetFilterState.hideARP &&
                             pkt.data.label.startsWith("ARP")) ||
-                            packetFilterState.hideSTP &&
+                        (packetFilterState.hideSTP &&
                             (pkt.data.label.startsWith("STP") ||
-                            pkt.data.label.startsWith("RSTP") ||
-                            packetFilterState.hideSYN &&
-                            pkt.data.label.startsWith("TCP (SYN"))
-
-                        )
-                )
+                            pkt.data.label.startsWith("RSTP"))) ||
+                        (packetFilterState.hideSYN &&
+                            tcpRegex.test(pkt.data.label))
+                    )
             )
-            .filter((step) => step.length > 0);
+        )
+        .filter((step) => step.length > 0);
 };
 
 const UpdateFilterStates = function (settings) {
