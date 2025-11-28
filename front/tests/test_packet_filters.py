@@ -97,9 +97,9 @@ class TestPacketFilters:
             )
         )
 
-    def _checkbox_state(self, selenium: MiminetTester, checkbox_id: str):
+    def _checkbox_state(self, selenium: MiminetTester, checkbox_id_or_selector: str):
         return selenium.execute_script(
-            f"var el = document.getElementById('{checkbox_id}');"
+            f"var el = document.getElementById('{checkbox_id_or_selector}');"
             "return el ? el.checked : null;"
         )
 
@@ -263,8 +263,7 @@ class TestPacketFilters:
 
         self._open_settings_modal(selenium)
         assert (
-            self._checkbox_state(selenium, Location.Network.Options.SYN_FILTER.selector)
-            is True
+            self._checkbox_state(selenium, "SYNFilterCheckbox") is True
         ), "SYN checkbox should remain selected after saving"
         self._close_options_modal(selenium)
 
