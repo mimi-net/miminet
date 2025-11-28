@@ -10,9 +10,9 @@ from enum import Enum
 
 class TestPacketFilters:
     class Filter(Enum):
-        ARP = "ARP"
-        STP = "STP"
-        SYN = "SYN"
+        ARP = Location.Network.Options.ARP_FILTER
+        STP = Location.Network.Options.STP_FILTER
+        SYN = Location.Network.Options.SYN_FILTER
 
     @pytest.fixture(scope="class")
     def network(self, selenium: MiminetTester):
@@ -58,6 +58,15 @@ class TestPacketFilters:
             By.CSS_SELECTOR, Location.Network.TopButton.OPTIONS.selector
         ).click()
         selenium.wait_until_appear(By.CSS_SELECTOR, "#netConfigModal")
+        self._wait_filters_ready(selenium)
+
+    def _wait_filters_ready(self, selenium: MiminetTester):
+        for locator in (
+            Location.Network.Options.ARP_FILTER,
+            Location.Network.Options.STP_FILTER,
+            Location.Network.Options.SYN_FILTER,
+        ):
+            selenium.wait_until_appear(By.CSS_SELECTOR, locator.selector)
 
     def _save_network_options(self, selenium: MiminetTester):
         submit_button = selenium.find_element(
@@ -107,10 +116,9 @@ class TestPacketFilters:
             labels,
         )
 
-    def _find_filter(self, selenium, filter_name: Filter):
-        return selenium.find_element(
-            By.CSS_SELECTOR, f"#{filter_name.value}FilterCheckbox"
-        )
+    def _find_filter(self, selenium, filter: Filter):
+        selenium.wait_until_appear(By.CSS_SELECTOR, filter.value.selector)
+        return selenium.find_element(By.CSS_SELECTOR, filter.value.selector)
 
     def test_enable_arp_filter_filters_packets(
         self, selenium: MiminetTester, network: MiminetTestNetwork
@@ -140,9 +148,9 @@ class TestPacketFilters:
         assert filtered_packets[0][0]["data"]["label"] == "ICMP packet"
 
         self._open_settings_modal(selenium)
-        assert self._checkbox_state(selenium, "ARPFilterCheckbox") is True, (
-            "ARP checkbox should remain selected after saving"
-        )
+        assert (
+            self._checkbox_state(selenium, "ARPFilterCheckbox") is True
+        ), "ARP checkbox should remain selected after saving"
         self._close_options_modal(selenium)
 
     def test_cancel_does_not_change_filter_state(
@@ -163,14 +171,14 @@ class TestPacketFilters:
         current_state = selenium.execute_script(
             "return packetFilterState.hideARP === true;"
         )
-        assert current_state == initial_state, (
-            "Filter state must not change when closing without saving"
-        )
+        assert (
+            current_state == initial_state
+        ), "Filter state must not change when closing without saving"
 
         self._open_settings_modal(selenium)
-        assert self._checkbox_state(selenium, "ARPFilterCheckbox") == initial_state, (
-            "ARP checkbox should display the original value after cancel"
-        )
+        assert (
+            self._checkbox_state(selenium, "ARPFilterCheckbox") == initial_state
+        ), "ARP checkbox should display the original value after cancel"
         self._close_options_modal(selenium)
 
     def test_enable_stp_filter_filters_packets(
@@ -210,9 +218,9 @@ class TestPacketFilters:
         assert filtered_packets[0][0]["data"]["label"] == "ICMP packet"
 
         self._open_settings_modal(selenium)
-        assert self._checkbox_state(selenium, "STPFilterCheckbox") is True, (
-            "STP checkbox should remain selected after saving"
-        )
+        assert (
+            self._checkbox_state(selenium, "STPFilterCheckbox") is True
+        ), "STP checkbox should remain selected after saving"
         self._close_options_modal(selenium)
 
     def test_enable_syn_filter_filters_packets(
