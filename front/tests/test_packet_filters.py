@@ -1,5 +1,6 @@
 import pytest
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import ElementClickInterceptedException
 
 from conftest import MiminetTester
 from utils.locators import Location
@@ -17,7 +18,30 @@ class TestPacketFilters:
     def network(self, selenium: MiminetTester):
         test_network = MiminetTestNetwork(selenium)
         yield test_network
-        test_network.delete()
+        try:
+            selenium.execute_script("$('.modal.show').modal('hide');")
+        except Exception:
+            pass
+
+        try:
+            test_network.delete()
+        except ElementClickInterceptedException:
+            # Fallback: close overlays and click via JS to ensure deletion
+            try:
+                selenium.execute_script("$('.modal.show').modal('hide');")
+                selenium.find_element(
+                    By.CSS_SELECTOR, Location.Network.TopButton.OPTIONS.selector
+                ).click()
+                delete_btn = selenium.find_element(
+                    By.CSS_SELECTOR, Location.Network.ModalButton.DELETE_MODAL_BUTTON.selector
+                )
+                selenium.execute_script("arguments[0].click();", delete_btn)
+                submit_btn = selenium.find_element(
+                    By.CSS_SELECTOR, Location.Network.ModalButton.DELETE_SUBMIT_BUTTON.selector
+                )
+                selenium.execute_script("arguments[0].click();", submit_btn)
+            except Exception:
+                pass
 
     def _wait_filter_state_ready(self, selenium: MiminetTester):
         selenium.wait_for(
