@@ -273,13 +273,19 @@ nat_job.add_param("config_router_add_nat_masquerade_iface_select_field").add_che
     emptiness_check
 ).set_error_msg('Не указан интерфейс для команды "Включить NAT masquerade"')
 
-# add Port forwarding
-port_forwarding_job = router.create_job(108, "port forwarding -p [0] from [1] to [2]:[3]")
-#port_forwarding_job.add_param("config_router_add_port_forwarding_protocol_select_field").add_check(emptiness_check).set_error_msg("Добавить Port forwarding")
-port_forwarding_job.add_param("config_router_add_port_forwarding_iface_select_field").add_check(emptiness_check).set_error_msg("Добавить Port forwarding")
-port_forwarding_job.add_param("config_router_add_port_forwarding_port_input_field").add_check(port_check).set_error_msg(build_error(ErrorType.port, "Добавить Port forwarding"))
-port_forwarding_job.add_param("config_router_add_port_forwarding_dest_ip_input_field").add_check(IPv4_check).set_error_msg(build_error(ErrorType.ip,"Добавить Port forwarding"))
-port_forwarding_job.add_param("config_router_add_port_forwarding_dest_port_input_field").add_check(port_check).set_error_msg(build_error(ErrorType.port,"Добавить Port forwarding"))
+# add Port forwarding TCP
+port_forwarding_tcp_job = router.create_job(109, "port forwarding -p tcp -i [0] from [1] to [2]:[3]")
+port_forwarding_tcp_job.add_param("config_router_add_port_forwarding_tcp_iface_select_field").add_check(emptiness_check).set_error_msg("Добавить Port forwarding для TCP")
+port_forwarding_tcp_job.add_param("config_router_add_port_forwarding_tcp_port_input_field").add_check(port_check).set_error_msg(build_error(ErrorType.port, "Добавить Port forwarding для TCP"))
+port_forwarding_tcp_job.add_param("config_router_add_port_forwarding_tcp_dest_ip_input_field").add_check(IPv4_check).set_error_msg(build_error(ErrorType.ip,"Добавить Port forwarding для TCP"))
+port_forwarding_tcp_job.add_param("config_router_add_port_forwarding_tcp_dest_port_input_field").add_check(port_check).set_error_msg(build_error(ErrorType.port,"Добавить Port forwarding для TCP"))
+
+# add Port forwarding UDP
+port_forwarding_udp_job = router.create_job(110, "port forwarding -p udp -i [0] from [1] to [2]:[3]")
+port_forwarding_udp_job.add_param("config_router_add_port_forwarding_udp_iface_select_field").add_check(emptiness_check).set_error_msg("Добавить Port forwarding для UDP")
+port_forwarding_udp_job.add_param("config_router_add_port_forwarding_udp_port_input_field").add_check(port_check).set_error_msg(build_error(ErrorType.port, "Добавить Port forwarding для UDP"))
+port_forwarding_udp_job.add_param("config_router_add_port_forwarding_udp_dest_ip_input_field").add_check(IPv4_check).set_error_msg(build_error(ErrorType.ip,"Добавить Port forwarding для UDP"))
+port_forwarding_udp_job.add_param("config_router_add_port_forwarding_udp_dest_port_input_field").add_check(port_check).set_error_msg(build_error(ErrorType.port,"Добавить Port forwarding для UDP"))
 
 # Add route
 router_add_route_job = router.create_job(102, "ip route add [0]/[1] via [2]")

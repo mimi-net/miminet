@@ -49,7 +49,8 @@
             <option value="105">Добавить IPIP-интерфейс</option>
             <option value="106">Добавить GRE-интерфейс</option>
             <option value="107">Включить ARP Proxy на интерфейсе</option>
-            <option value="108">Добавить Port forwarding</option>
+            <option value="109">Добавить Port forwarding для TCP</option>
+            <option value="110">Добавить Port forwarding для UDP</option>
         </select>
     </div>
 </script>
@@ -79,24 +80,36 @@
     </div>
 </script>
 
-<script id="config_router_add_port_forwarding_script" type="text/plain">
+<script id="config_router_add_port_forwarding_tcp_script" type="text/plain">
     <div class="form-group pt-1" name="config_router_select_input">
 
-        <select id="config_router_add_port_forwarding_iface_select_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_router_add_port_forwarding_iface_select_field">
+        <select id="config_router_add_port_forwarding_tcp_iface_select_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_router_add_port_forwarding_tcp_iface_select_field">
         </select>
 
-        <label for="config_router_add_port_forwarding_protocol" class="text-sm">Выбрать протокол</label>
-        <select id="config_router_add_port_forwarding_protocol_select_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_router_add_port_forwarding_protocol_select_field">
-            <option>TCP</option>
-            <option>UDP</option>
-        </select>
-        <label for="config_router_add_port_forwarding`_port_input_field" class="text-sm">Порт</label>
-        <input type="text" class="form-control form-control-sm" id="config_router_add_port_forwarding_port_input_field" name="config_router_add_port_forwarding_port_input_field" value=''>
+        <label for="config_router_add_port_forwarding_tcp_port_input_field" class="text-sm">Порт</label>
+        <input type="text" class="form-control form-control-sm" id="config_router_add_port_forwarding_tcp_port_input_field" name="config_router_add_port_forwarding_tcp_port_input_field" value=''>
 
-        <label id="config_router_add_port_forwarding_dest_label" for="config_router_add_port_forwarding_dest_label" class="text-sm">IP-адрес / Порт назначения</label>
+        <label id="config_router_add_port_forwarding_tcp_dest_label" for="config_router_add_port_forwarding_tcp_dest_label" class="text-sm">IP-адрес / Порт назначения</label>
         <div class="input-group flex-nowrap">
-            <input type="text" class="form-control form-control-sm" style="width:65% !important" id="config_router_add_port_forwarding_dest_ip_input_field" name="config_router_add_port_forwarding_dest_ip_input_field" autocomplete="none" value=''>
-            <input type="number" class="px-2 form-control form-control-sm" style="width:35% !important" id="config_router_add_port_forwarding_dest_port_input_field" name="config_router_add_port_forwarding_dest_port_input_field" min="0" max="65535" value="0">
+            <input type="text" class="form-control form-control-sm" style="width:65% !important" id="config_router_add_port_forwarding_tcp_dest_ip_input_field" name="config_router_add_port_forwarding_tcp_dest_ip_input_field" autocomplete="none" value=''>
+            <input type="number" class="px-2 form-control form-control-sm" style="width:35% !important" id="config_router_add_port_forwarding_tcp_dest_port_input_field" name="config_router_add_port_forwarding_tcp_dest_port_input_field" min="0" max="65535" value="0">
+        </div>
+    </div>
+</script>
+
+<script id="config_router_add_port_forwarding_udp_script" type="text/plain">
+    <div class="form-group pt-1" name="config_router_select_input">
+
+        <select id="config_router_add_port_forwarding_udp_iface_select_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_router_add_port_forwarding_udp_iface_select_field">
+        </select>
+
+        <label for="config_router_add_port_forwarding_udp_port_input_field" class="text-sm">Порт</label>
+        <input type="text" class="form-control form-control-sm" id="config_router_add_port_forwarding_udp_port_input_field" name="config_router_add_port_forwarding_udp_port_input_field" value=''>
+
+        <label id="config_router_add_port_forwarding_udp_dest_label" for="config_router_add_port_forwarding_udp_dest_label" class="text-sm">IP-адрес / Порт назначения</label>
+        <div class="input-group flex-nowrap">
+            <input type="text" class="form-control form-control-sm" style="width:65% !important" id="config_router_add_port_forwarding_udp_dest_ip_input_field" name="config_router_add_port_forwarding_udp_dest_ip_input_field" autocomplete="none" value=''>
+            <input type="number" class="px-2 form-control form-control-sm" style="width:35% !important" id="config_router_add_port_forwarding_udp_dest_port_input_field" name="config_router_add_port_forwarding_udp_dest_port_input_field" min="0" max="65535" value="0">
         </div>
     </div>
 </script>
