@@ -1,0 +1,330 @@
+[
+    [
+        {
+            "data": {
+                "id": "pkt_CGFABPJG",
+                "label": "ARP-request\nWho has 20.0.0.2? Tell 20.0.0.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\nWho has 20.0.0.2? Tell 20.0.0.1",
+                "path": "edge_miiujup6w4rb8s84kr",
+                "source": "host_1",
+                "target": "router_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764334172898271"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_7YC94WC9",
+                "label": "ARP-response\n20.0.0.2 at 32:09:fe:50:44:95",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-response\n20.0.0.2 at 32:09:fe:50:44:95",
+                "path": "edge_miiujup6w4rb8s84kr",
+                "source": "router_1",
+                "target": "host_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764334172913327"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_A6WNE7LY",
+                "label": "TCP (SYN) 47372 > 8080\n20.0.0.1 > 20.0.0.2",
+                "type": "packet"
+            },
+            "config": {
+                "type": "TCP (SYN) 47372 > 8080\n20.0.0.1 > 20.0.0.2",
+                "path": "edge_miiujup6w4rb8s84kr",
+                "source": "host_1",
+                "target": "router_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764334172928454"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_3L8AZY11",
+                "label": "ARP-request\nWho has 10.0.0.1? Tell 10.0.0.2",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\nWho has 10.0.0.1? Tell 10.0.0.2",
+                "path": "edge_miiujtc6sj4wul749va",
+                "source": "router_1",
+                "target": "server_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764334172943544"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_3HVCOULG",
+                "label": "ARP-response\n10.0.0.1 at 00:00:00:00:00:02",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-response\n10.0.0.1 at 00:00:00:00:00:02",
+                "path": "edge_miiujtc6sj4wul749va",
+                "source": "server_1",
+                "target": "router_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764334172958606"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_NXHC7ZKU",
+                "label": "TCP (SYN) 47372 > 8000\n20.0.0.1 > 10.0.0.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "TCP (SYN) 47372 > 8000\n20.0.0.1 > 10.0.0.1",
+                "path": "edge_miiujtc6sj4wul749va",
+                "source": "router_1",
+                "target": "server_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764334172973634"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_ILAA5618",
+                "label": "TCP (SYN + ACK) 8000 > 47372\n10.0.0.1 > 20.0.0.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "TCP (SYN + ACK) 8000 > 47372\n10.0.0.1 > 20.0.0.1",
+                "path": "edge_miiujtc6sj4wul749va",
+                "source": "server_1",
+                "target": "router_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764334172988679"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_VMT88Q5T",
+                "label": "TCP (SYN + ACK) 8080 > 47372\n20.0.0.2 > 20.0.0.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "TCP (SYN + ACK) 8080 > 47372\n20.0.0.2 > 20.0.0.1",
+                "path": "edge_miiujup6w4rb8s84kr",
+                "source": "router_1",
+                "target": "host_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764334173003716"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_D98KIYU5",
+                "label": "TCP (ACK) 47372 > 8080\n20.0.0.1 > 20.0.0.2",
+                "type": "packet"
+            },
+            "config": {
+                "type": "TCP (ACK) 47372 > 8080\n20.0.0.1 > 20.0.0.2",
+                "path": "edge_miiujup6w4rb8s84kr",
+                "source": "host_1",
+                "target": "router_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764334173018813"
+        },
+        {
+            "data": {
+                "id": "pkt_UTAJ6LEA",
+                "label": "TCP (PUSH + ACK) 47372 > 8080\n20.0.0.1 > 20.0.0.2",
+                "type": "packet"
+            },
+            "config": {
+                "type": "TCP (PUSH + ACK) 47372 > 8080\n20.0.0.1 > 20.0.0.2",
+                "path": "edge_miiujup6w4rb8s84kr",
+                "source": "host_1",
+                "target": "router_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764334173018866"
+        },
+        {
+            "data": {
+                "id": "pkt_OIJRM1BZ",
+                "label": "TCP (FIN + ACK) 47372 > 8080\n20.0.0.1 > 20.0.0.2",
+                "type": "packet"
+            },
+            "config": {
+                "type": "TCP (FIN + ACK) 47372 > 8080\n20.0.0.1 > 20.0.0.2",
+                "path": "edge_miiujup6w4rb8s84kr",
+                "source": "host_1",
+                "target": "router_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764334173018870"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_D8YUF82G",
+                "label": "TCP (ACK) 47372 > 8000\n20.0.0.1 > 10.0.0.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "TCP (ACK) 47372 > 8000\n20.0.0.1 > 10.0.0.1",
+                "path": "edge_miiujtc6sj4wul749va",
+                "source": "router_1",
+                "target": "server_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764334173033850"
+        },
+        {
+            "data": {
+                "id": "pkt_QKI3E8GG",
+                "label": "TCP (PUSH + ACK) 47372 > 8000\n20.0.0.1 > 10.0.0.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "TCP (PUSH + ACK) 47372 > 8000\n20.0.0.1 > 10.0.0.1",
+                "path": "edge_miiujtc6sj4wul749va",
+                "source": "router_1",
+                "target": "server_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764334173033874"
+        },
+        {
+            "data": {
+                "id": "pkt_3USRHCOS",
+                "label": "TCP (FIN + ACK) 47372 > 8000\n20.0.0.1 > 10.0.0.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "TCP (FIN + ACK) 47372 > 8000\n20.0.0.1 > 10.0.0.1",
+                "path": "edge_miiujtc6sj4wul749va",
+                "source": "router_1",
+                "target": "server_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764334173033877"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_5O93GD3J",
+                "label": "TCP (ACK) 8000 > 47372\n10.0.0.1 > 20.0.0.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "TCP (ACK) 8000 > 47372\n10.0.0.1 > 20.0.0.1",
+                "path": "edge_miiujtc6sj4wul749va",
+                "source": "server_1",
+                "target": "router_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764334173048958"
+        },
+        {
+            "data": {
+                "id": "pkt_AAWH6ZJB",
+                "label": "TCP (FIN + ACK) 8000 > 47372\n10.0.0.1 > 20.0.0.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "TCP (FIN + ACK) 8000 > 47372\n10.0.0.1 > 20.0.0.1",
+                "path": "edge_miiujtc6sj4wul749va",
+                "source": "server_1",
+                "target": "router_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764334173049080"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_DIHZW9ZA",
+                "label": "TCP (ACK) 8080 > 47372\n20.0.0.2 > 20.0.0.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "TCP (ACK) 8080 > 47372\n20.0.0.2 > 20.0.0.1",
+                "path": "edge_miiujup6w4rb8s84kr",
+                "source": "router_1",
+                "target": "host_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764334173064016"
+        },
+        {
+            "data": {
+                "id": "pkt_8S3Z7BNA",
+                "label": "TCP (FIN + ACK) 8080 > 47372\n20.0.0.2 > 20.0.0.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "TCP (FIN + ACK) 8080 > 47372\n20.0.0.2 > 20.0.0.1",
+                "path": "edge_miiujup6w4rb8s84kr",
+                "source": "router_1",
+                "target": "host_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764334173064097"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_87844XDB",
+                "label": "TCP (ACK) 47372 > 8080\n20.0.0.1 > 20.0.0.2",
+                "type": "packet"
+            },
+            "config": {
+                "type": "TCP (ACK) 47372 > 8080\n20.0.0.1 > 20.0.0.2",
+                "path": "edge_miiujup6w4rb8s84kr",
+                "source": "host_1",
+                "target": "router_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764334173079282"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_5KJQX3HW",
+                "label": "TCP (ACK) 47372 > 8000\n20.0.0.1 > 10.0.0.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "TCP (ACK) 47372 > 8000\n20.0.0.1 > 10.0.0.1",
+                "path": "edge_miiujtc6sj4wul749va",
+                "source": "router_1",
+                "target": "server_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764334173094435"
+        }
+    ]
+]
