@@ -1,0 +1,148 @@
+{
+    "nodes": [
+        {
+            "classes": [
+                "l3_router"
+            ],
+            "config": {
+                "default_gw": "",
+                "label": "router_1",
+                "type": "router"
+            },
+            "data": {
+                "id": "router_1",
+                "label": "router_1"
+            },
+            "interface": [
+                {
+                    "connect": "edge_milrbuuq9kwwq000dvd",
+                    "id": "iface_07861350",
+                    "ip": "20.0.0.2",
+                    "name": "iface_07861350",
+                    "netmask": 30
+                },
+                {
+                    "connect": "edge_milrbw17ye2gzkkqxk9",
+                    "id": "iface_12841027",
+                    "ip": "10.0.0.2",
+                    "name": "iface_12841027",
+                    "netmask": 30
+                }
+            ],
+            "position": {
+                "x": 408.75,
+                "y": 148.1999969482422
+            }
+        },
+        {
+            "classes": [
+                "server"
+            ],
+            "config": {
+                "default_gw": "",
+                "label": "server_1",
+                "type": "server"
+            },
+            "data": {
+                "id": "server_1",
+                "label": "server_1"
+            },
+            "interface": [
+                {
+                    "connect": "edge_milrbw17ye2gzkkqxk9",
+                    "id": "iface_38603481",
+                    "ip": "10.0.0.1",
+                    "name": "iface_38603481",
+                    "netmask": 30
+                }
+            ],
+            "position": {
+                "x": 350.75,
+                "y": 213.5
+            }
+        },
+        {
+            "classes": [
+                "host"
+            ],
+            "config": {
+                "default_gw": "",
+                "label": "host_1",
+                "type": "host"
+            },
+            "data": {
+                "id": "host_1",
+                "label": "host_1"
+            },
+            "interface": [
+                {
+                    "connect": "edge_milrbuuq9kwwq000dvd",
+                    "id": "iface_08633567",
+                    "ip": "20.0.0.1",
+                    "name": "iface_08633567",
+                    "netmask": 30
+                }
+            ],
+            "position": {
+                "x": 469.25,
+                "y": 216.5999984741211
+            }
+        }
+    ],
+    "edges": [
+        {
+            "data": {
+                "id": "edge_milrbuuq9kwwq000dvd",
+                "source": "host_1",
+                "target": "router_1",
+                "loss_percentage": 0
+            }
+        },
+        {
+            "data": {
+                "id": "edge_milrbw17ye2gzkkqxk9",
+                "source": "server_1",
+                "target": "router_1",
+                "loss_percentage": 0
+            }
+        }
+    ],
+    "jobs": [
+        {
+            "id": "724709dde8794306a87b9c7b50aa4329",
+            "job_id": 200,
+            "print_cmd": "nc -u 10.0.0.1 -l 8000",
+            "arg_1": "10.0.0.1",
+            "arg_2": "8000",
+            "level": 0,
+            "host_id": "server_1"
+        },
+        {
+            "id": "e9149f9b8ad940bebf46583c375a3e1d",
+            "job_id": 110,
+            "print_cmd": "port forwarding -p udp -i iface_07861350 from 8080 to 10.0.0.1:8000",
+            "arg_1": "iface_07861350",
+            "arg_2": "8080",
+            "arg_3": "10.0.0.1",
+            "arg_4": "8000",
+            "level": 1,
+            "host_id": "router_1"
+        },
+        {
+            "id": "e62ce6982d004967a253100f7b67b2ca",
+            "job_id": 3,
+            "print_cmd": "send -s 20 -p udp 20.0.0.2:8080",
+            "arg_1": "20",
+            "arg_2": "20.0.0.2",
+            "arg_3": "8080",
+            "level": 2,
+            "host_id": "host_1"
+        }
+    ],
+    "config": {
+        "zoom": 2.0,
+        "pan_x": 0,
+        "pan_y": 0
+    },
+    "pcap": []
+}
