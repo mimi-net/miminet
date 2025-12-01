@@ -36,6 +36,9 @@ db = SQLAlchemy(metadata=metadata)
 class User(db.Model, UserMixin):  # type:ignore[name-defined]
     id = db.Column(BigInteger, primary_key=True, unique=True, autoincrement=True)
 
+    platform = db.Column(Text, nullable=True)
+    platformUserId = db.Column(Text, nullable=True)
+
     role = db.Column(BigInteger, default=0, nullable=True)
 
     email = db.Column(Text, unique=True, nullable=True)

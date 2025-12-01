@@ -26,6 +26,7 @@
 
         const questionType = '{{ question.question_type }}'
         const sessionQuestionId = '{{ session_question_id }}'
+        sessionStorage.setItem('returnToLtiPlatformUrl', '{{ returnToLtiPlatformUrl }}');
     </script>
     <script src="/quiz/session_scripts.js"></script>
 {% endblock %}
