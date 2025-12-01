@@ -198,7 +198,7 @@ def packet_parser(
                         "source": e_source,
                         "target": e_target,
                         "loss_percentage": loss_percentage,
-                        "duplicat_percentage": duplicate_percentage,
+                        "duplicate_percentage": duplicate_percentage,
                     },
                     "timestamp": ts,
                 }
