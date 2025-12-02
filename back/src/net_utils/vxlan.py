@@ -134,13 +134,3 @@ def teardown_vtep_bridges(net: "IPNet", nodes: list["Node"]) -> None:
                         router.cmd(f"ip link set {vxlan_name} down")
                         router.cmd(f"ip link del {vxlan_name}")
 
-def configure_access_with_arp(switch: IPSwitch, intf: str, vlan: int) -> None:
-    """Configure access VLAN and enable ARP proxying."""
-    switch.cmd(f'ip link set {intf} master {f"br-{switch.name}"}')
-    switch.cmd(f"bridge vlan del dev {intf} vid 1")
-    switch.cmd(f"bridge vlan add dev {intf} vid {vlan} pvid untagged")
-
-    # Enable ARP Proxy for VLAN sub-interface (if created)
-    sub_intf = f"{intf}.{vlan}"
-    switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.proxy_arp=1")
-    switch.cmd(f"sysctl -w net.ipv4.conf.{sub_intf}.forwarding=1")
