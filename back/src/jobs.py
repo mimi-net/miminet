@@ -501,3 +501,38 @@ class Jobs:
 
     def handler(self) -> None:
         self._strategy(self._job, self._job_host)
+
+# VLAN helpers
+def enable_arp_proxy(job: Job, job_host: Any) -> None:
+    """
+    Enable ARP proxying on a VLAN subinterface.
+    If the interface contains '.', it is already a subinterface.
+    Otherwise it creates one (iface.vlan) and assigns IP/mask.
+    """
+
+    arg_iface = str(job.arg_1)  
+
+    if "." in arg_iface:
+        # Already a subinterface
+        subiface = arg_iface
+    else:
+        vlan = str(job.arg_2)
+        ip = str(job.arg_3)
+        mask = str(job.arg_4)
+
+        subiface = f"{arg_iface}.{vlan}"
+
+        job_host.cmd(
+            f"ip link add link {arg_iface} name {subiface} type vlan id {vlan}"
+        )
+        job_host.cmd(f"ip link set dev {subiface} up")
+        job_host.cmd(f"ip addr add {ip}/{mask} dev {subiface}")
+
+    # Enable ARP proxy on the subinterface
+    job_host.cmd(f"sysctl -w net.ipv4.conf.{subiface}.proxy_arp=1")
+
+    # Also enable on parent interface
+    parent_iface = arg_iface.split(".")[0]
+    job_host.cmd(f"sysctl -w net.ipv4.conf.{parent_iface}.proxy_arp=1")
+
+    print(f"[OK] ARP Proxy enabled on {subiface} and {parent_iface}")
