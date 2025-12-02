@@ -258,10 +258,14 @@ class AbstractDeviceConfigurator:
 
         if editing_job_id:
             # Find the index of the job being edited to preserve order
-            old_job_index = next((i for i, j in enumerate(jobs_list) if j["id"] == editing_job_id), None)
+            old_job_index = next(
+                (i for i, j in enumerate(jobs_list) if j["id"] == editing_job_id), None
+            )
 
             # Remove the old job
-            self._json_network["jobs"] = [j for j in jobs_list if j["id"] != editing_job_id]
+            self._json_network["jobs"] = [
+                j for j in jobs_list if j["id"] != editing_job_id
+            ]
             # Recalculate level after removal
             job_level = len(self._json_network["jobs"])
 
