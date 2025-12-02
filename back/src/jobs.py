@@ -502,37 +502,37 @@ class Jobs:
     def handler(self) -> None:
         self._strategy(self._job, self._job_host)
 
-# VLAN helpers
+##subinterface 
 def enable_arp_proxy(job: Job, job_host: Any) -> None:
     """
-    Enable ARP proxying on a VLAN subinterface.
-    If the interface contains '.', it is already a subinterface.
-    Otherwise it creates one (iface.vlan) and assigns IP/mask.
+    Enable ARP proxy on an interface (VLAN subinterface or direct).
+    If the interface does not exist, it creates a VLAN subinterface and assigns IP.
     """
 
-    arg_iface = str(job.arg_1)  
+    arg_iface = str(job.arg_1) 
 
     if "." in arg_iface:
-        # Already a subinterface
-        subiface = arg_iface
+        subinterface = arg_iface
     else:
-        vlan = str(job.arg_2)
-        ip = str(job.arg_3)
-        mask = str(job.arg_4)
+        arg_vlan = str(job.arg_2)  # VLAN ID
+        arg_ip = str(job.arg_3)    # IP address
+        arg_mask = str(job.arg_4)  # Subnet mask
+        subinterface = f"{arg_iface}.{arg_vlan}"
 
-        subiface = f"{arg_iface}.{vlan}"
+        # Check if parent interface exists
+        existing_ifaces = job_host.cmd("ip link show").splitlines()
+        if not any(arg_iface in line for line in existing_ifaces):
+            print(f"[ERROR] Parent interface {arg_iface} does not exist!")
+            return
 
-        job_host.cmd(
-            f"ip link add link {arg_iface} name {subiface} type vlan id {vlan}"
-        )
-        job_host.cmd(f"ip link set dev {subiface} up")
-        job_host.cmd(f"ip addr add {ip}/{mask} dev {subiface}")
+        job_host.cmd(f"ip link add link {arg_iface} name {subinterface} type vlan id {arg_vlan}")
+        job_host.cmd(f"ip addr add {arg_ip}/{arg_mask} dev {subinterface}")
+        job_host.cmd(f"ip link set dev {subinterface} up")
 
-    # Enable ARP proxy on the subinterface
-    job_host.cmd(f"sysctl -w net.ipv4.conf.{subiface}.proxy_arp=1")
+    job_host.cmd(f"sysctl -w net.ipv4.conf.{subinterface}.proxy_arp=1")
 
-    # Also enable on parent interface
-    parent_iface = arg_iface.split(".")[0]
-    job_host.cmd(f"sysctl -w net.ipv4.conf.{parent_iface}.proxy_arp=1")
+    # Enable proxy ARP on the parent interface if applicable
+    if "." not in arg_iface:
+        job_host.cmd(f"sysctl -w net.ipv4.conf.{arg_iface}.proxy_arp=1")
 
-    print(f"[OK] ARP Proxy enabled on {subiface} and {parent_iface}")
+    print(f"[OK] ARP Proxy enabled on {subinterface}")
