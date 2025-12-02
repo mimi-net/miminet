@@ -123,17 +123,20 @@ class JobConfigurator:
         for i in range(len(raw_values) - 1):
             val = raw_values[i]
 
-            if val and '/' in val:
+            if val and "/" in val:
                 try:
-                    parts = val.split('/')
+                    parts = val.split("/")
                     if len(parts) == 2 and parts[0] and parts[1]:
                         raw_values[i] = parts[0]
-                        raw_values[i+1] = parts[1]
+                        raw_values[i + 1] = parts[1]
                 except Exception:
                     pass
 
         # configure args using processed raw_values
-        configured_args = [self.__args[i].configure(value=raw_values[i]) for i in range(len(self.__args))]
+        configured_args = [
+            self.__args[i].configure(value=raw_values[i])
+            for i in range(len(self.__args))
+        ]
 
         # insert arguments into label string
         command_label: str = self.__print_cmd
