@@ -1,4 +1,3 @@
-import pytest
 import time
 from conftest import MiminetTester
 from utils.networks import NodeType, MiminetTestNetwork
