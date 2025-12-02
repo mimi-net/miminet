@@ -126,11 +126,11 @@ class Location:
                     STP_BUTTON = Locator("#stp")
                     OFF_STP_BUTTON = Locator("#none")
                     PRIORITY_FIELD = Locator("#config_stp_priority")
-                    SUBMIT_BUTTON = Locator("#rstpConfigrationSubmit")
+                    SUBMIT_BUTTON = Locator("#rstpConfigurationSubmit")
 
                 class VlanPanel:
                     SWITCH_BUTTON = Locator("#config_switch_vlan")
-                    SUBMIT_BUTTON = Locator("#vlanConfigrationSubmit")
+                    SUBMIT_BUTTON = Locator("#vlanConfigurationSubmit")
 
                     @staticmethod
                     def get_modal_dialog_selector(switch_name: str):
@@ -182,6 +182,9 @@ class Location:
                     UDP_PORT_FIELD = Locator(
                         "#config_host_send_udp_data_port_input_field"
                     )
+                    DHCLIENT_INTF = Locator(
+                        "#config_host_add_dhclient_interface_select_iface_field"
+                    )
 
             class Hub(CommonDevice):
                 MAIN_FORM = Locator("#config_hub_main_form")
@@ -201,6 +204,7 @@ class Location:
                 JOB_SELECT = Locator("#config_router_job_select_field")
 
                 class Job:
+                    PING_FIELD = Locator("#config_router_ping_c_1_ip")
                     NAT_LINK_SELECT = Locator(
                         "#config_router_add_nat_masquerade_iface_select_field"
                     )
@@ -260,6 +264,21 @@ class Location:
                     )
                     UDP_PORT_FIELD = Locator(
                         "#config_server_start_udp_server_port_input_field"
+                    )
+                    DHCP_IP_RANGE_START_FIELD = Locator(
+                        "#config_server_add_dhcp_ip_range_1_input_field"
+                    )
+                    DHCP_IP_RANGE_END_FIELD = Locator(
+                        "#config_server_add_dhcp_ip_range_2_input_field"
+                    )
+                    DHCP_MASK_FIELD = Locator(
+                        "#config_server_add_dhcp_mask_input_field"
+                    )
+                    DHCP_IP_GW_FIELD = Locator(
+                        "#config_server_add_dhcp_gateway_input_field"
+                    )
+                    DHCP_INTF = Locator(
+                        "#config_server_add_dhcp_interface_select_iface_field"
                     )
 
             # The only stable way for finding ip/subnet mask on page is using XPATHs

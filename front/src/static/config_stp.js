@@ -18,14 +18,14 @@ const ConfigRSTP = function (currentDevice) {
 };
 
 function eventHandlers(currentDevice, modalId) {
-    $('#' + modalId).find('#rstpConfigrationCancelIcon, #rstpConfigrationCancel').on('click', function () {
+    $('#' + modalId).find('#rstpConfigurationCancelIcon, #rstpConfigurationCancel').on('click', function () {
         $('#' + modalId).modal('hide');
     });
     var modalRadios = '#' + modalId + " input[type='radio'][name='config_rstp_stp']";
     $(modalRadios + "[value=\""+currentDevice.config.stp+"\"]").attr('checked','checked')
     $('#' + modalId).find('#config_stp_priority').val(currentDevice.config.priority)
 
-    $('#' + modalId).find('#rstpConfigrationSubmit').on('click', function () {
+    $('#' + modalId).find('#rstpConfigurationSubmit').on('click', function () {
         var rstp_stp_config = $(modalRadios + ":checked").val();
         $('#' + modalId).modal('hide');
         updateRstpButtonStyle(currentDevice, rstp_stp_config);

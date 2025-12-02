@@ -30,6 +30,7 @@
                 <option value="4">Отправить данные (TCP)</option>
                 <option value="102">Добавить маршрут</option>
                 <option value="103">Добавить запись в ARP-cache</option>
+                <option value="108">Запросить IP адрес автоматически</option>
             </select>
     </div>
 </script>
@@ -91,6 +92,13 @@
             <input type="number" class="px-2 form-control form-control-sm w-25" id="config_host_add_route_mask_input_field" name="config_host_add_route_mask_input_field" min="0" max="32" value="0">
         </div>
         <input type="text" class="form-control form-control-sm" id="config_host_add_route_gw_input_field" name="config_host_add_route_gw_input_field" value='' autocomplete="none" placeholder='IP адрес шлюза'>
+    </div>
+</script>
+
+<script id="config_host_add_dhclient" type="text/plain">
+    <div class="form-group pt-1" name="config_host_select_input">
+        <select id="config_host_add_dhclient_interface_select_iface_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_host_add_dhclient_interface_select_iface_field">
+        </select>
     </div>
 </script>
 

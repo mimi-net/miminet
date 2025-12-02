@@ -26,6 +26,7 @@
             <option value="200">Запустить UDP сервер</option>
             <option value="201">Запустить TCP сервер</option>
             <option value="202">Блокировать TCP/UDP порт</option>
+            <option value="203">Запустить DHCP сервер</option>
         </select>
     </div>
 </script>
@@ -73,6 +74,22 @@
         <div class="input-group flex-nowrap">
             <input type="number" class="form-control form-control-sm" id="config_server_block_tcp_udp_port_input_field" name="config_server_block_tcp_udp_port_input_field" min="0" max="65535" value="0">
         </div>
+    </div>
+</script>
+
+<script id="config_server_add_dhcp_server_script" type="text/plain">
+    <div class="form-group pt-1" name="config_server_select_input">
+        <label id="config_server_add_dhcp_label" for="config_server_add_dhcp_label" class="text-sm">Диапазон IP адресов</label>
+        <div class="input-group flex-nowrap">
+            <input type="text" class="form-control form-control-sm w-50" id="config_server_add_dhcp_ip_range_1_input_field" name="config_server_add_dhcp_ip_range_1_input_field" value=''>
+            <input type="text" class="px-2 form-control form-control-sm w-50" id="config_server_add_dhcp_ip_range_2_input_field" name="config_server_add_dhcp_ip_range_2_input_field" value="">
+        </div>
+        <div class="pt-1">
+            <input type="number" class="form-control form-control-sm" id="config_server_add_dhcp_mask_input_field" name="config_server_add_dhcp_mask_input_field" min="0" max="32" value="" placeholder='Маска IP адреса'>
+            <input type="text" class="form-control form-control-sm" id="config_server_add_dhcp_gateway_input_field" name="config_server_add_dhcp_gateway_input_field" value='' placeholder='IP адрес шлюза'>
+        </div>
+        <select id="config_server_add_dhcp_interface_select_iface_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_server_add_dhcp_interface_select_iface_field">
+        </select>
     </div>
 </script>
 
