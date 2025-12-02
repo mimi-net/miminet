@@ -115,8 +115,8 @@ class JobConfigurator:
 
         # fetch all raw values
         raw_values = []
-        for arg in self.__args:
-            val = get_data(arg.control_id)
+        for job_arg in self.__args:
+            val = get_data(job_arg.control_id)
             raw_values.append(val if val is not None else "")
 
         # check if we have 1.2.3.4/5
@@ -138,10 +138,10 @@ class JobConfigurator:
         # insert arguments into label string
         command_label: str = self.__print_cmd
 
-        for i, arg in enumerate(configured_args):
-            if arg is None:  # check whether the arguments passed the checks
+        for i, conf_arg in enumerate(configured_args):
+            if conf_arg is None:  # check whether the arguments passed the checks
                 raise ArgCheckError(self.__args[i].error_msg)
-            command_label = command_label.replace(f"[{i}]", arg)
+            command_label = command_label.replace(f"[{i}]", conf_arg)
 
         response = {
             "id": random_id,
@@ -150,8 +150,8 @@ class JobConfigurator:
         }
 
         # add args to response
-        for i, arg in enumerate(configured_args):
-            response[f"arg_{i+1}"] = arg
+        for i, conf_arg in enumerate(configured_args):
+            response[f"arg_{i+1}"] = conf_arg
 
         return response
 
