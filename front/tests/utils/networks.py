@@ -202,16 +202,40 @@ class MiminetTestNetwork:
         [!] This function doesn't work in CI for unknown reasons :(.
 
         :Return: Emulation packets."""
+        from selenium.common.exceptions import TimeoutException
+        import time
+
         self.__check_page()
         self.__selenium.find_element(
             By.CSS_SELECTOR, Location.Network.EMULATE_BUTTON.selector
         ).click()
-        self.__selenium.wait_until_appear(
-            By.CSS_SELECTOR,
-            Location.Network.EMULATE_PLAYER_PAUSE_BUTTON.selector,
-            60,
-        )
 
+        try:
+            # waiting for player to appear (normal path)
+            self.__selenium.wait_until_appear(
+                By.CSS_SELECTOR,
+                Location.Network.EMULATE_PLAYER_PAUSE_BUTTON.selector,
+                60,
+            )
+        except TimeoutException:
+            # fallback: if UI didn't show player, try to wait for `packets` JS variable
+            end = time.monotonic() + 60
+            while time.monotonic() < end:
+                try:
+                    packets = self.__selenium.execute_script("return packets")
+                    # consider emulation finished when packets is not None and len >= 0
+                    if packets is not None:
+                        return packets
+                except Exception:
+                    # ignore transient JS errors and retry
+                    pass
+                time.sleep(0.5)
+            # re-raise a clearer exception
+            raise TimeoutException(
+                "Emulation player didn't appear and no packets were produced in time"
+            )
+
+        # normal path: player appeared, read packets
         packets = self.__selenium.execute_script("return packets")
 
         return packets

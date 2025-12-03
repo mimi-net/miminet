@@ -182,6 +182,9 @@ class Location:
                     UDP_PORT_FIELD = Locator(
                         "#config_host_send_udp_data_port_input_field"
                     )
+                    # DHCLIENT_INTF = Locator(
+                    #     "#config_host_add_dhclient_interface_select_iface_field"
+                    # )
 
             class Hub(CommonDevice):
                 MAIN_FORM = Locator("#config_hub_main_form")
@@ -201,6 +204,7 @@ class Location:
                 JOB_SELECT = Locator("#config_router_job_select_field")
 
                 class Job:
+                    # PING_FIELD = Locator("#config_router_ping_c_1_ip")
                     NAT_LINK_SELECT = Locator(
                         "#config_router_add_nat_masquerade_iface_select_field"
                     )
@@ -273,24 +277,51 @@ class Location:
                     DCHP_IP_GW_FIELD = Locator(
                         "#config_server_add_dhcp_gateway_input_field"
                     )
+                    # DHCP_IP_RANGE_START_FIELD = Locator(
+                    #     "#config_server_add_dhcp_ip_range_1_input_field"
+                    # )
+                    # DHCP_IP_RANGE_END_FIELD = Locator(
+                    #     "#config_server_add_dhcp_ip_range_2_input_field"
+                    # )
+                    # DHCP_MASK_FIELD = Locator(
+                    #     "#config_server_add_dhcp_mask_input_field"
+                    # )
+                    # DHCP_IP_GW_FIELD = Locator(
+                    #     "#config_server_add_dhcp_gateway_input_field"
+                    # )
+                    # DHCP_INTF = Locator(
+                    #     "#config_server_add_dhcp_interface_select_iface_field"
+                    # )
+
+
+            class Edge(CommonDevice):
+                # New edge config structure: separate form and fields in config_edge.html
+                MAIN_FORM = Locator("#config_edge_main_form")
+                SUBMIT_BUTTON = Locator("#config_edge_main_form_submit_button")
+                END_FORM_BUTTON = Locator("#config_edge_end_form")
+                LOSS_FIELD = Locator("#edge_loss")
+                DUPLICATE_FIELD = Locator("#edge_duplicate")
+                SOURCE_FIELD = Locator("#edge_source")
+                TARGET_FIELD = Locator("#edge_target")
 
             # The only stable way for finding ip/subnet mask on page is using XPATHs
 
             @staticmethod
             def get_ip_field_xpath(id: int = 0):
-                """XPATH for specific ip address from config panel.
+                """XPATH for specific ip address from config panel anchored to form id.
                 Args:
                     id (int): Position of link in links list. Starts from 0."""
                 assert id >= 0, "IP field can't have index less than 0."
-                return f"/html/body/main/section/div[2]/div[2]/div[2]/form/div[{4 + id * 2}]/input[1]"
+                # form contains hidden inputs then groups; preserve previous indexing logic but anchor to form[@id='config_main_form']
+                return f"/html/body//form[@id='config_main_form']/div[{4 + id * 2}]/input[1]"
 
             @staticmethod
             def get_mask_field_xpath(id: int = 0):
-                """XPATH for specific subnet mask from config panel.
+                """XPATH for specific subnet mask from config panel anchored to form id.
                 Args:
                     id (int): Position of link in links list. Starts from 0."""
                 assert id >= 0, "Subnet mask field can't have index less than 0."
-                return f"/html/body/main/section/div[2]/div[2]/div[2]/form/div[{4 + id * 2}]/input[2]"
+                return f"/html/body//form[@id='config_main_form']/div[{4 + id * 2}]/input[2]"
 
             MODAL_ERROR_DIALOG = Locator("#config_content > div")
 
