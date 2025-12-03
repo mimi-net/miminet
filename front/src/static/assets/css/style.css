@@ -224,3 +224,25 @@ a.lastResult {
             user-select: none;
 }
 
+#decode {
+    line-height: 1.1;
+}
+
+.byte:hover,
+.ascii-char:hover {
+    outline: 1px solid #99f;
+    outline-offset: -1px;
+    cursor: pointer;
+}
+
+.highlight {
+    background: #a2c9e8 !important;
+    color: #fff !important;
+    transition: background 0.15s ease;
+    box-shadow: 0 0 0 1px #a2c9e8;
+}
+
+.decode_body p:hover {
+    color: var(--si-link-color);
+    cursor: pointer;
+}
