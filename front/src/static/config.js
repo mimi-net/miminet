@@ -288,6 +288,16 @@ const ConfigEdgeForm = function (edge_id) {
 
         edgeSaveXHR = UpdateEdgeConfiguration(data);
         inputsToDisable.prop("disabled", false);
+
+//        edgeSaveXHR = UpdateEdgeConfiguration(data)
+//            .done(function() {
+//                inputsToDisable.prop("disabled", false);
+//                $('#config_edge_main_form_submit_button').html('Сохранить');
+//            })
+//            .fail(function() {
+//                inputsToDisable.prop("disabled", false);
+//                $('#config_edge_main_form_submit_button').html('Ошибка');
+//            });
     }
 
     $('#config_edge_main_form_submit_button, #config_edge_end_form').off('click').on('click', handleEdgeClick);
@@ -301,7 +311,7 @@ const ConfigHubName = function (hostname) {
     $('#config_hub_name').val(hostname);
 }
 
-const ConfigEdgeNetworkIssues = function (edge_loss = 0, edge_duplicate = 0) {
+const ConfigEdgeNetworkIssues = function (edge_loss, edge_duplicate) {
     var text = document.getElementById('config_edge_set_network_issues_script').innerHTML;
     $(config_edge_main_form_id).prepend(text);
     $('#edge_loss').val(edge_loss);
@@ -448,7 +458,7 @@ const SharedConfigEdgeForm = function (edge_id) {
     // Clear all child
     $(config_content_id).empty();
     $(config_content_save_tag).empty();
-    document.getElementById(config_content_save_id).style.display='none';
+    document.getElementById(config_content_save_id).style.display='block';
 
     // Add new form
     $(config_content_id).append(form);
@@ -548,13 +558,13 @@ const ConfigSwitchIndent = function () {
 const addIpFieldHandlers = function () {
     document.addEventListener('input', function (e) {
         const input = e.target;
- 
+
         if (!input.matches('input[type="text"][id*="ip"], input[type="text"][name*="ip"]')) {
             return;
         }
- 
+
         const newValue = input.value.replace(/,/g, '.').replace(/ю/g, '.');
- 
+
         input.value = newValue;
     });
 };
@@ -715,7 +725,7 @@ const ConfigRouterJobOnChange = function(evnt) {
             break;
         case '1':
             UpdateRouterForm('config_router_ping_c_1_script');
-        
+
             break;
         case '100':
             UpdateRouterForm('config_router_add_ip_mask_script');

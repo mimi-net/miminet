@@ -293,7 +293,6 @@ class Location:
                     #     "#config_server_add_dhcp_interface_select_iface_field"
                     # )
 
-
             class Edge(CommonDevice):
                 # New edge config structure: separate form and fields in config_edge.html
                 MAIN_FORM = Locator("#config_edge_main_form")
