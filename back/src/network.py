@@ -34,14 +34,6 @@ class MiminetNetwork(IPNet):
                 info(f"Configured VLAN {vlan_id} on host {host.name}\n")
 
                 
-        # Enable ARP Proxy for VLAN subinterfaces dynamically
-        for host in self.hosts:
-            node_info = self.__network_schema.nodes.get(host.name, {})
-            vlan_id = node_info.get("vlan_id")
-            if vlan_id is not None:
-                self.create_vlan_subinterface(host, parent="eth0", vlan_id=vlan_id)
-                info(f"Configured VLAN {vlan_id} on host {host.name}\n")
-
         # Waiting for network setup
         time.sleep(self.__network_topology.network_configuration_time)
 
