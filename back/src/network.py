@@ -24,7 +24,7 @@ class MiminetNetwork(IPNet):
         # Additional settings
         setup_vlans(self, self.__network_schema.nodes)
         setup_vtep_interfaces(self, self.__network_schema.nodes)
-        
+
         # Enable ARP Proxy for VLAN subinterfaces dynamically
         for host in self.hosts:
             node_info = self.__network_schema.nodes.get(host.name, {})

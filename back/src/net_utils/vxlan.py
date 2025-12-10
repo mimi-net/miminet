@@ -133,4 +133,3 @@ def teardown_vtep_bridges(net: "IPNet", nodes: list["Node"]) -> None:
                         router.cmd(f"brctl delbr {bridge_name}")
                         router.cmd(f"ip link set {vxlan_name} down")
                         router.cmd(f"ip link del {vxlan_name}")
-
