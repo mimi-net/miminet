@@ -115,6 +115,7 @@ class EdgeData:
     source: str
     target: str
     loss_percentage: int = 0
+    duplicate_percentage: int = 0
 
 
 @dataclass

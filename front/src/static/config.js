@@ -309,11 +309,13 @@ const ConfigEdgeForm = function (edge_id) {
         const edge = edges.find(e => e.data.id === edge_id);
         console.log(edge);
         const lossValue = $("#edge_loss").val();
+        const duplicateValue = $("#edge_duplicate").val();
 
-        if (edge)
+        if (edge) {
             edge.data.loss_percentage = lossValue;
-
-        const inputsToDisable = $('#edge_loss, #config_edge_main_form_submit_button');
+            edge.data.duplicate_percentage = duplicateValue;
+        }
+        const inputsToDisable = $('#edge_loss, #edge_duplicate, #config_edge_main_form_submit_button');
         inputsToDisable.prop("disabled", true);
 
         $('#config_edge_main_form_submit_button').html(
@@ -335,13 +337,12 @@ const ConfigHubName = function (hostname) {
     $('#config_hub_name').val(hostname);
 }
 
-const ConfigEdgePercentage = function (edge_loss) {
-
-    var text = document.getElementById('config_edge_save_loss_script').innerHTML;
-
+const ConfigEdgeNetworkIssues = function (edge_loss, edge_duplicate) {
+    var text = document.getElementById('config_edge_set_network_issues_script').innerHTML;
     $(config_edge_main_form_id).prepend(text);
     $('#edge_loss').val(edge_loss);
-}
+    $('#edge_duplicate').val(edge_duplicate);
+};
 
 const ConfigEdgeEndpoints = function (edge_source, edge_target) {
 
@@ -483,7 +484,7 @@ const SharedConfigEdgeForm = function (edge_id) {
     // Clear all child
     $(config_content_id).empty();
     $(config_content_save_tag).empty();
-    document.getElementById(config_content_save_id).style.display='none';
+    document.getElementById(config_content_save_id).style.display='block';
 
     // Add new form
     $(config_content_id).append(form);
@@ -583,13 +584,13 @@ const ConfigSwitchIndent = function () {
 const addIpFieldHandlers = function () {
     document.addEventListener('input', function (e) {
         const input = e.target;
- 
+
         if (!input.matches('input[type="text"][id*="ip"], input[type="text"][name*="ip"], input[type="text"][id*="gw"], input[type="text"][name*="gw"]')) {
             return;
         }
- 
+
         const newValue = input.value.replace(/,/g, '.').replace(/ю/g, '.');
- 
+
         input.value = newValue;
     });
 };
@@ -755,7 +756,7 @@ const ConfigRouterJobOnChange = function(evnt) {
             break;
         case '1':
             UpdateRouterForm('config_router_ping_c_1_script');
-        
+
             break;
         case '100':
             UpdateRouterForm('config_router_add_ip_mask_script');

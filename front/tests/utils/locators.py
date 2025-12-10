@@ -295,6 +295,13 @@ class Location:
                         "#config_server_add_dhcp_interface_select_iface_field"
                     )
 
+            class Edge(CommonDevice):
+                # New edge config structure: separate form and fields in config_edge.html
+                MAIN_FORM = Locator("#config_edge_main_form")
+                SUBMIT_BUTTON = Locator("#config_edge_main_form_submit_button")
+                END_FORM_BUTTON = Locator("#config_edge_end_form")
+                DUPLICATE_FIELD = Locator("#edge_duplicate")
+
             # The only stable way for finding ip/subnet mask on page is using XPATHs
 
             @staticmethod
@@ -303,7 +310,7 @@ class Location:
                 Args:
                     id (int): Position of link in links list. Starts from 0."""
                 assert id >= 0, "IP field can't have index less than 0."
-                return f"/html/body/main/section/div[2]/div[2]/div[2]/form/div[{4 + id * 2}]/input[1]"
+                return f"/html/body//form[@id='config_main_form']/div[{4 + id * 2}]/input[1]"
 
             @staticmethod
             def get_mask_field_xpath(id: int = 0):
@@ -311,7 +318,7 @@ class Location:
                 Args:
                     id (int): Position of link in links list. Starts from 0."""
                 assert id >= 0, "Subnet mask field can't have index less than 0."
-                return f"/html/body/main/section/div[2]/div[2]/div[2]/form/div[{4 + id * 2}]/input[2]"
+                return f"/html/body//form[@id='config_main_form']/div[{4 + id * 2}]/input[2]"
 
             MODAL_ERROR_DIALOG = Locator(
                 "#config_content > .alert-danger, #config_content > .alert-info:not(.edit-banner)"

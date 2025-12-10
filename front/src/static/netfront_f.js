@@ -357,7 +357,8 @@ const ShowEdgeConfig = function(edge_id, shared = 0){
 
     let edge_source = ed.data.source;
     let edge_target = ed.data.target;
-    let edge_loss = ed.data.loss_percentage || 0
+    let edge_loss = ed.data.loss_percentage || 0;
+    let edge_duplicate = ed.data.duplicate_percentage || 0;
 
     // Create form
     if (shared){
@@ -366,9 +367,7 @@ const ShowEdgeConfig = function(edge_id, shared = 0){
         ConfigEdgeForm(edge_id);
     }
 
-
-    // Add loss percentage info
-    ConfigEdgePercentage(edge_loss)
+    ConfigEdgeNetworkIssues(edge_loss, edge_duplicate);
 
     // Add source and target info
     ConfigEdgeEndpoints(edge_source, edge_target);
@@ -732,9 +731,15 @@ const MoveNodes = function(){
 const prepareStylesheet = function() {
     const getColor = function(ele) {
         if (ele.group() === "edges") {
-            const loss = ele.data('loss_percentage') || 0;
-            if (loss > 0)
+            const loss = ele.data('loss_percentage');
+            const dup = ele.data('duplicate_percentage');
+            if (loss > 0 && dup > 0) {
+                return '#000000';
+            } else if (loss > 0) {
                 return '#FF8C00';
+            } else if (dup > 0) {
+                return '#26AE31';
+            }
         }
         return ele.data('color') || '#9FBFE5';
     };
@@ -1107,7 +1112,7 @@ const DrawGraph = function() {
 
             // Save the network state.
             SaveNetworkObject();
-                        
+
             DeleteNode(selecteed_node_id);
             DeleteJob(selecteed_node_id);
 
