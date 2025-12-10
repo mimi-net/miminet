@@ -141,7 +141,7 @@ class MiminetTopology(IPTopo):
                 try:
                     if val is None:
                         return 0.0
-                    s = str(val).strip().rstrip('%')
+                    s = str(val).strip().rstrip("%")
                     return float(s) if s else 0.0
                 except (ValueError, TypeError):
                     return 0.0
