@@ -313,7 +313,9 @@ class Location:
                 assert id >= 0, "Subnet mask field can't have index less than 0."
                 return f"/html/body/main/section/div[2]/div[2]/div[2]/form/div[{4 + id * 2}]/input[2]"
 
-            MODAL_ERROR_DIALOG = Locator("#config_content > div")
+            MODAL_ERROR_DIALOG = Locator(
+                "#config_content > .alert-danger, #config_content > .alert-info:not(.edit-banner)"
+            )
 
 
 DEVICE_BUTTON_SELECTORS = [
