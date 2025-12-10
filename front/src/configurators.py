@@ -20,12 +20,16 @@ class JobArgConfigurator:
     def __init__(self, control_id: str):
         """
         Args:
-            cotrol_id (str): ID of the element with argument data
+            control_id (str): ID of the element with argument data
         """
-        self.control_id: str = control_id
+        self.__control_id: str = control_id
         self.__validators: list[Callable[[str], bool]] = []
         self.__text_filters: list[Callable[[str], str]] = []
         self.__error_msg: str = "Невозможно добавить команду: ошибка в аргументе"
+
+    @property
+    def control_id(self) -> str:
+        return self.__control_id
 
     def set_error_msg(self, msg: str):
         if not msg:
