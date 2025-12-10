@@ -239,9 +239,13 @@ class AbstractDeviceConfigurator:
         if job_id not in self.__jobs.keys():
             return  # if user didn't select job
 
-        job_level = len(
-            self._json_network["jobs"]
-        )  # level in the device configuration list
+        editing_job_id = get_data("editing_job_id")
+
+        jobs_list = self._json_network["jobs"]
+        if editing_job_id:
+            job_level = len([j for j in jobs_list if j["id"] != editing_job_id])
+        else:
+            job_level = len(jobs_list)
 
         if job_level >= self.__MAX_JOBS_COUNT:
             raise ConfigurationError(
@@ -252,10 +256,28 @@ class AbstractDeviceConfigurator:
         job = self.__jobs[job_id]
         job_conf_res = job.configure()
 
+        if editing_job_id:
+            # Find the index of the job being edited to preserve order
+            old_job_index = next(
+                (i for i, j in enumerate(jobs_list) if j["id"] == editing_job_id), None
+            )
+
+            # Remove the old job
+            self._json_network["jobs"] = [
+                j for j in jobs_list if j["id"] != editing_job_id
+            ]
+            # Recalculate level after removal
+            job_level = len(self._json_network["jobs"])
+
         job_conf_res["level"] = job_level
         job_conf_res["host_id"] = self._device_node["data"]["id"]
 
-        self._json_network["jobs"].append(job_conf_res)
+        if editing_job_id and old_job_index is not None:
+            # Insert at the same position where the old job was
+            self._json_network["jobs"].insert(old_job_index, job_conf_res)
+        else:
+            # New job - append to the end
+            self._json_network["jobs"].append(job_conf_res)
 
     def __ip_check(self, ip: str) -> bool:
         try:
