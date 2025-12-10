@@ -64,6 +64,14 @@ def port_check(arg: str) -> bool:
         return False
 
 
+def data_size_check(arg: str) -> bool:
+    """Check data size correctness"""
+    try:
+        return int(arg) in range(0, 65536)
+    except (ValueError, TypeError):
+        return False
+
+
 def name_check(arg: str) -> bool:
     """Check that the name is in the allowed length from 2 to 15,
     from allowed characters: a-z, A-Z, 0-9, -, _."""
@@ -150,6 +158,7 @@ class ErrorType:
     port = "Неверно указан порт"
     mask = "Неверно указана маска подсети"
     options = "Неверно указаны опции"
+    data_size = "Неверно указан размер данных"
 
 
 def build_error(error_type: str, cmd: str) -> str:
@@ -198,8 +207,8 @@ host_ping_opt_job.add_param("config_host_ping_with_options_ip_input_field").add_
 # send UDP data
 host_udp_job = host.create_job(3, "send -s [0] -p udp [1]:[2]")
 host_udp_job.add_param("config_host_send_udp_data_size_input_field").add_check(
-    port_check
-).set_error_msg(build_error(ErrorType.port, "Отправить данные (UDP)"))
+    data_size_check
+).set_error_msg(build_error(ErrorType.data_size, "Отправить данные (UDP)"))
 host_udp_job.add_param("config_host_send_udp_data_ip_input_field").add_check(
     IPv4_check
 ).set_error_msg(build_error(ErrorType.ip, "Отправить данные (UDP)"))
@@ -210,8 +219,8 @@ host_udp_job.add_param("config_host_send_udp_data_port_input_field").add_check(
 # send TCP data
 host_tcp_job = host.create_job(4, "send -s [0] -p tcp [1]:[2]")
 host_tcp_job.add_param("config_host_send_tcp_data_size_input_field").add_check(
-    port_check
-).set_error_msg(build_error(ErrorType.port, "Отправить данные (TCP)"))
+    data_size_check
+).set_error_msg(build_error(ErrorType.data_size, "Отправить данные (TCP)"))
 host_tcp_job.add_param("config_host_send_tcp_data_ip_input_field").add_check(
     IPv4_check
 ).set_error_msg(build_error(ErrorType.ip, "Отправить данные (TCP)"))
