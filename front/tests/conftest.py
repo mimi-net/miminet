@@ -1,8 +1,11 @@
 import pytest
 import requests
+import os
+import sys
 from typing import Generator
 from requests import Session
 from contextlib import contextmanager
+from unittest.mock import MagicMock
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support.ui import Select
@@ -259,3 +262,61 @@ def selenium(chrome_driver: MiminetTester, requester: Session):
 
     # return configured chrome driver
     return chrome_driver
+
+
+# --- Unit Test Fixtures ---
+
+# Add src to path so tests can import app and miminet_model
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+
+
+@pytest.fixture
+def mock_env_dev(monkeypatch):
+    """Sets environment variables for DEV mode."""
+    monkeypatch.setenv("MODE", "dev")
+    monkeypatch.setenv("POSTGRES_HOST", "localhost")
+    monkeypatch.setenv("POSTGRES_DEFAULT_USER", "user")
+    monkeypatch.setenv("POSTGRES_DEFAULT_PASSWORD", "pass")
+    monkeypatch.setenv("POSTGRES_DATABASE_NAME", "miminet_dev")
+    monkeypatch.delenv("YANDEX_POSTGRES_HOST", raising=False)
+
+
+@pytest.fixture
+def mock_env_prod(monkeypatch):
+    """Sets environment variables for PROD mode."""
+    monkeypatch.setenv("MODE", "prod")
+    monkeypatch.setenv("YANDEX_POSTGRES_HOST", "rc1a-test.mdb.yandexcloud.net")
+    monkeypatch.setenv("YANDEX_POSTGRES_PORT", "6432")
+    monkeypatch.setenv("YANDEX_POSTGRES_USER", "prod_user")
+    monkeypatch.setenv("YANDEX_POSTGRES_PASSWORD", "prod_pass")
+    monkeypatch.setenv("YANDEX_POSTGRES_DB", "miminet_prod")
+    monkeypatch.setenv("YANDEX_POSTGRES_SSLMODE", "verify-full")
+    monkeypatch.setenv("YANDEX_POSTGRES_SSLROOTCERT", "/tmp/root.crt")
+
+
+@pytest.fixture
+def mock_psycopg2(mocker):
+    """Mocks psycopg2 to capture connection attempts."""
+    mock_connect = mocker.patch("miminet_model.psycopg2.connect")
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
+
+    mock_connect.return_value.__enter__.return_value = mock_conn
+    mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
+
+    return mock_connect, mock_cursor
+
+
+@pytest.fixture
+def mock_sqlalchemy_inspect(mocker):
+    """Mocks sqlalchemy.inspect."""
+    mock_inspect = mocker.patch("miminet_model.inspect")
+    mock_inspector = MagicMock()
+    mock_inspect.return_value = mock_inspector
+    return mock_inspector
+
+
+@pytest.fixture
+def mock_db(mocker):
+    """Mocks the entire db object to prevent context errors with db.engine."""
+    return mocker.patch("miminet_model.db")

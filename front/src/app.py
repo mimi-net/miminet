@@ -19,6 +19,7 @@ from miminet_admin import (
     CreateCheckTaskView,
 )
 from miminet_auth import (
+    animation_filters,
     google_callback,
     google_login,
     insert_test_user,
@@ -103,13 +104,58 @@ app = Flask(
 # SQLAlchimy config
 load_dotenv()
 
-POSTGRES_HOST = os.getenv("POSTGRES_HOST")
-POSTGRES_USER = os.getenv("POSTGRES_DEFAULT_USER")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_DEFAULT_PASSWORD")
-POSTGRES_DB_NAME = os.getenv("POSTGRES_DATABASE_NAME")
-POSTGRES_URL = f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB_NAME}"
+# Получаем режим работы из переменных окружения
+MODE = os.getenv("MODE", "dev")
 
-app.config["SQLALCHEMY_DATABASE_URI"] = POSTGRES_URL
+
+def get_database_uri(mode):
+    """
+    Выбирает URI базы данных в зависимости от режима работы.
+
+    Args:
+        mode: Режим работы ('dev' или 'prod')
+
+    Returns:
+        str: URI для подключения к БД
+    """
+    if mode == "dev":
+        # Локальный PostgreSQL контейнер для разработки
+        POSTGRES_HOST = os.getenv("POSTGRES_HOST")
+        POSTGRES_USER = os.getenv("POSTGRES_DEFAULT_USER")
+        POSTGRES_PASSWORD = os.getenv("POSTGRES_DEFAULT_PASSWORD")
+        POSTGRES_DB_NAME = os.getenv("POSTGRES_DATABASE_NAME")
+        POSTGRES_URL = f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB_NAME}"
+
+        print(f"[DB] Using local PostgreSQL: {POSTGRES_HOST}/{POSTGRES_DB_NAME}")
+        return POSTGRES_URL
+    elif mode == "prod":
+        # Yandex Cloud PostgreSQL для продакшена
+        POSTGRES_HOST = os.getenv("YANDEX_POSTGRES_HOST")
+        POSTGRES_PORT = os.getenv("YANDEX_POSTGRES_PORT", "6432")
+        POSTGRES_USER = os.getenv("YANDEX_POSTGRES_USER")
+        POSTGRES_PASSWORD = os.getenv("YANDEX_POSTGRES_PASSWORD")
+        POSTGRES_DB_NAME = os.getenv("YANDEX_POSTGRES_DB")
+        POSTGRES_SSLMODE = os.getenv("YANDEX_POSTGRES_SSLMODE", "verify-full")
+        POSTGRES_SSLROOTCERT = os.getenv(
+            "YANDEX_POSTGRES_SSLROOTCERT", "/app/.postgresql/root.crt"
+        )
+
+        if not all([POSTGRES_HOST, POSTGRES_USER, POSTGRES_PASSWORD]):
+            raise ValueError(
+                "Missing Yandex Cloud PostgreSQL credentials in environment variables"
+            )
+
+        POSTGRES_URL = f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB_NAME}?sslmode={POSTGRES_SSLMODE}&sslrootcert={POSTGRES_SSLROOTCERT}"
+
+        print(
+            f"[DB] Using Yandex Cloud PostgreSQL: {POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB_NAME}"
+        )
+        return POSTGRES_URL
+    else:
+        raise ValueError(f"Unknown MODE: {mode}. Expected 'dev' or 'prod'")
+
+
+app.config["SQLALCHEMY_DATABASE_URI"] = get_database_uri(MODE)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 app.config["SECRET_KEY"] = SECRET_KEY
 app.config["SESSION_COOKIE_NAME"] = "mimi_session"
@@ -158,7 +204,9 @@ app.add_url_rule(
     view_func=upload_network_picture,
 )
 app.add_url_rule("/network/copy_network", methods=["POST"], view_func=copy_network)
-
+app.add_url_rule(
+    "/user/animation_filters", methods=["POST"], view_func=animation_filters
+)
 # Simulation
 app.add_url_rule("/run_simulation", methods=["POST"], view_func=run_simulation)
 app.add_url_rule("/check_simulation", methods=["GET"], view_func=check_simulation)

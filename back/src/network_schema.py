@@ -144,6 +144,7 @@ class Job:
         arg_2 (str): parameter for job executing
         arg_3 (str): parameter for job executing
         arg_4 (str): parameter for job executing
+        arg_5 (str): parameter for job executing
     """
 
     id: str
@@ -155,6 +156,7 @@ class Job:
     arg_2: str | int = ""
     arg_3: str | int = ""
     arg_4: str | int = ""
+    arg_5: str | int = ""
 
 
 @dataclass
