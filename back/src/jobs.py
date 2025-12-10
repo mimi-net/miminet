@@ -501,8 +501,6 @@ class Jobs:
 
     def handler(self) -> None:
         self._strategy(self._job, self._job_host)
-        
-##subinterface
 def vlan_subinterface_with_arp_proxy(job: Job, job_host: Any) -> None:
     """
     Create a VLAN subinterface, assign IP/mask, bring it up,
