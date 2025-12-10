@@ -501,39 +501,38 @@ class Jobs:
 
     def handler(self) -> None:
         self._strategy(self._job, self._job_host)
+        
 def vlan_subinterface_with_arp_proxy(job: Job, job_host: Any) -> None:
-    """
-    Create a VLAN subinterface, assign IP/mask, bring it up,
-    and enable ARP proxy on both parent and subinterface.
-    """
     parent_iface = str(job.arg_1)
     vlan_id = str(job.arg_2)
     ip = str(job.arg_3)
     mask = str(job.arg_4)
 
-    # Validate inputs
     if not valid_iface(parent_iface) or not valid_ip(ip):
-        print(f"[ERROR] Invalid interface or IP: {parent_iface}, {ip}")
         return
 
     try:
         vlan_id_int = int(vlan_id)
         mask_int = int(mask)
     except ValueError:
-        print(f"[ERROR] VLAN ID or mask must be integers: {vlan_id}, {mask}")
         return
 
-    subiface = f"{parent_iface}.{vlan_id}"
+    subiface = f"{parent_iface}.{vlan_id_int}"
 
-    job_host.cmd(
-        f"ip link add link {parent_iface} name {subiface} type vlan id {vlan_id}"
-    )
+    job_host.cmd(f"ip link add link {parent_iface} name {subiface} type vlan id {vlan_id_int}")
     job_host.cmd(f"ip addr add {ip}/{mask_int} dev {subiface}")
     job_host.cmd(f"ip link set dev {subiface} up")
 
     job_host.cmd(f"sysctl -w net.ipv4.conf.{subiface}.proxy_arp=1")
     job_host.cmd(f"sysctl -w net.ipv4.conf.{parent_iface}.proxy_arp=1")
+    job_host.cmd("sysctl -w net.ipv4.conf.all.proxy_arp_pvlan=1")
 
-    print(
-        f"[OK] VLAN {subiface} created with IP {ip}/{mask_int}, ARP proxy enabled on {parent_iface} and {subiface}"
-    )
+    # Disable reverse path filtering (strict RPF breaks ARP proxy)
+    job_host.cmd("sysctl -w net.ipv4.conf.all.rp_filter=0")
+    job_host.cmd("sysctl -w net.ipv4.conf.default.rp_filter=0")
+    job_host.cmd(f"sysctl -w net.ipv4.conf.{parent_iface}.rp_filter=0")
+    job_host.cmd(f"sysctl -w net.ipv4.conf.{subiface}.rp_filter=0")
+
+    job_host.cmd("sysctl -w net.ipv4.conf.all.arp_filter=1")
+
+    print(f"[OK] VLAN {subiface} created, IP {ip}/{mask}, ARP proxy enabled and kernel settings fixed")
