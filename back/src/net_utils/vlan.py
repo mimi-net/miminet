@@ -79,4 +79,3 @@ def add_bridge(switch: IPSwitch, interface: list[NodeInterface]) -> None:
     else:
         switch.cmd(f'ip link add name {f"br-{switch.name}"} type bridge')
     switch.cmd(f'ip link set dev {f"br-{switch.name}"} up')
-    switch.cmd(f'ip link set dev {f"br-{switch.name}"} type bridge vlan_filtering 1')
