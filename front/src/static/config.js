@@ -288,16 +288,6 @@ const ConfigEdgeForm = function (edge_id) {
 
         edgeSaveXHR = UpdateEdgeConfiguration(data);
         inputsToDisable.prop("disabled", false);
-
-//        edgeSaveXHR = UpdateEdgeConfiguration(data)
-//            .done(function() {
-//                inputsToDisable.prop("disabled", false);
-//                $('#config_edge_main_form_submit_button').html('Сохранить');
-//            })
-//            .fail(function() {
-//                inputsToDisable.prop("disabled", false);
-//                $('#config_edge_main_form_submit_button').html('Ошибка');
-//            });
     }
 
     $('#config_edge_main_form_submit_button, #config_edge_end_form').off('click').on('click', handleEdgeClick);

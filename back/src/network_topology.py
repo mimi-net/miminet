@@ -138,31 +138,17 @@ class MiminetTopology(IPTopo):
             target_id = edge.data.target
 
             def _to_percent(val):
-                if val is None:
-                    return 0.0
-                if isinstance(val, (int, float)):
-                    return float(val)
-                s = str(val).strip()
-                if s.endswith("%"):
-                    s = s[:-1]
                 try:
-                    return float(s)
-                except ValueError:
+                    if val is None:
+                        return 0.0
+                    s = str(val).strip().rstrip('%')
+                    return float(s) if s else 0.0
+                except (ValueError, TypeError):
                     return 0.0
 
             loss_percentage = _to_percent(edge.data.loss_percentage)
             duplicate_percentage = _to_percent(edge.data.duplicate_percentage)
 
-            # loss_percentage = (
-            #     edge.data.loss_percentage
-            #     if edge.data.loss_percentage is not None
-            #     else 0
-            # )
-            # duplicate_percentage = (
-            #     edge.data.duplicate_percentage
-            #     if edge.data.duplicate_percentage is not None
-            #     else 0
-            # )
             if source_id not in self.__nodes:
                 raise ValueError(
                     f"Edge '{edge_id}' references unknown source node '{source_id}'."
