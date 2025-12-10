@@ -584,7 +584,7 @@ const addIpFieldHandlers = function () {
     document.addEventListener('input', function (e) {
         const input = e.target;
  
-        if (!input.matches('input[type="text"][id*="ip"], input[type="text"][name*="ip"]')) {
+        if (!input.matches('input[type="text"][id*="ip"], input[type="text"][name*="ip"], input[type="text"][id*="gw"], input[type="text"][name*="gw"]')) {
             return;
         }
  

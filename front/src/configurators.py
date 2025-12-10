@@ -20,12 +20,16 @@ class JobArgConfigurator:
     def __init__(self, control_id: str):
         """
         Args:
-            cotrol_id (str): ID of the element with argument data
+            control_id (str): ID of the element with argument data
         """
         self.__control_id: str = control_id
         self.__validators: list[Callable[[str], bool]] = []
         self.__text_filters: list[Callable[[str], str]] = []
         self.__error_msg: str = "Невозможно добавить команду: ошибка в аргументе"
+
+    @property
+    def control_id(self) -> str:
+        return self.__control_id
 
     def set_error_msg(self, msg: str):
         if not msg:
@@ -56,13 +60,22 @@ class JobArgConfigurator:
 
         return self
 
-    def configure(self) -> Optional[str]:
+    def configure(self, value: Optional[str] = None) -> Optional[str]:
         """Get an element from the request and performs validation
+
+        Args:
+            value (Optional[str]): If provided, use this value instead of getting from request
 
         Returns:
             Optional[str]: None if argument didn't pass checks
         """
-        arg = get_data(self.__control_id)
+        if value is not None:
+            arg = value
+        else:
+            arg = get_data(self.control_id)
+
+        if arg is None:
+            return None
 
         if all([validate(arg) for validate in self.__validators]):
             res = arg
@@ -103,15 +116,39 @@ class JobConfigurator:
     def configure(self) -> dict[str, object]:
         """Validate every argument and return dict with job's data"""
         random_id: str = uuid.uuid4().hex  # random id for every added job
-        configured_args = [arg.configure() for arg in self.__args]
+
+        # fetch all raw values
+        raw_values = []
+        for job_arg in self.__args:
+            val = get_data(job_arg.control_id)
+            raw_values.append(val if val is not None else "")
+
+        # check if we have 1.2.3.4/5
+        for i in range(len(raw_values) - 1):
+            val = raw_values[i]
+
+            if val and "/" in val:
+                try:
+                    parts = val.split("/")
+                    if len(parts) == 2 and parts[0] and parts[1]:
+                        raw_values[i] = parts[0]
+                        raw_values[i + 1] = parts[1]
+                except Exception:
+                    pass
+
+        # configure args using processed raw_values
+        configured_args = [
+            self.__args[i].configure(value=raw_values[i])
+            for i in range(len(self.__args))
+        ]
 
         # insert arguments into label string
         command_label: str = self.__print_cmd
 
-        for i, arg in enumerate(configured_args):
-            if arg is None:  # check whether the arguments passed the checks
+        for i, conf_arg in enumerate(configured_args):
+            if conf_arg is None:  # check whether the arguments passed the checks
                 raise ArgCheckError(self.__args[i].error_msg)
-            command_label = command_label.replace(f"[{i}]", arg)
+            command_label = command_label.replace(f"[{i}]", conf_arg)
 
         response = {
             "id": random_id,
@@ -120,8 +157,8 @@ class JobConfigurator:
         }
 
         # add args to response
-        for i, arg in enumerate(configured_args):
-            response[f"arg_{i+1}"] = arg
+        for i, conf_arg in enumerate(configured_args):
+            response[f"arg_{i+1}"] = conf_arg
 
         return response
 
@@ -191,7 +228,7 @@ class AbstractDeviceConfigurator:
         device_id = get_data(element_form_id)
 
         if not device_id:
-            raise ConfigurationError("Не указан параметр {element_form_id}")
+            raise ConfigurationError(f"Не указан параметр {element_form_id}")
 
         # json representation
         self._json_network: dict = json.loads(self._cur_network.network)
@@ -310,14 +347,19 @@ class AbstractDeviceConfigurator:
             if not ip_value:
                 continue
 
-            if not mask_value.isdigit():
-                # Check if we have 1.2.3.4/5 ?
-                ip_mask = ip_value.split("/")
-                if len(ip_mask) == 2:
-                    ip_value = ip_mask[0]
-                    mask_value = ip_mask[1]
-                else:
-                    raise ArgCheckError("Не указана маска IP-адреса для линка")
+            # check if split is needed.
+            if "/" in ip_value:
+                try:
+                    parts = ip_value.split("/")
+                    if len(parts) == 2:
+                        ip_value = parts[0]
+                        mask_value = parts[1]
+                except Exception:
+                    pass
+
+            # then check mask validity
+            if not mask_value or not str(mask_value).isdigit():
+                raise ArgCheckError("Не указана маска IP-адреса для линка")
 
             mask_value = int(mask_value)
 
