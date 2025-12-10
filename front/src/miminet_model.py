@@ -49,6 +49,8 @@ class User(db.Model, UserMixin):  # type:ignore[name-defined]
     yandex_id = db.Column(Text, nullable=True)
     tg_id = db.Column(Text, nullable=True)
 
+    config = db.Column(Text, nullable=True)
+
 
 class Network(db.Model):  # type:ignore[name-defined]
     id = db.Column(BigInteger, primary_key=True, autoincrement=True)
