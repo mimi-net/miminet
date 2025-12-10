@@ -11,7 +11,6 @@ from network_schema import Network
 from net_utils.vlan import setup_vlans, clean_bridges
 from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
 
-
 class MiminetNetwork(IPNet):
     def __init__(self, topo: MiminetTopology, network: Network):
         super().__init__(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
