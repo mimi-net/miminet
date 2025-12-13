@@ -44,6 +44,12 @@
     </div>
 </script>
 
+<script id="config_switch_warning_mstp_script" type="text/plain">
+    <div id="config_warning_mstp" class="form-group pb-2">
+        <label class="text-sm" style="font-size:0.85em">Включение протокола MSTP увеличивает эмуляцию на <b>10 секунд</b>.</label>
+    </div>
+</script>
+
 <script id="config_button_rstp_script" type="text/plain">
 <button id="config_button_rstp" name="config_button_rstp" class="btn btn-outline-secondary btn-sm mt-2" type="button" data-bs-toggle="modal" data-bs-target="#RstpModal" data-toggle="tooltip" data-bs-placement="bottom">
     <i class='bx bx-network-chart fs-lg me-1'></i>
@@ -56,7 +62,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="netConfigModalLabel">Выбор STP/RSTP</h5>
+                    <h5 class="modal-title" id="netConfigModalLabel">Выбор STP/RSTP/MSTP</h5>
                     <button id="rstpConfigurationCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть">
                     </button>
                 </div>
@@ -70,7 +76,9 @@
                             <input class="form-check-input" type="radio" id="stp" name="config_rstp_stp" value=1>
                             <label class="form-check-label" for="customSwitch1">STP</label><br>
                             <input class="form-check-input" type="radio" id="rstp" name="config_rstp_stp" value=2>
-                            <label class="form-check-label" for="customSwitch1">RSTP</label>
+                            <label class="form-check-label" for="customSwitch1">RSTP</label><br>
+                            <input class="form-check-input" type="radio" id="mstp" name="config_rstp_stp" value=3>
+                            <label class="form-check-label" for="customSwitch1">MSTP</label>
                         </div>
                         <div class="form-group pb-2 flex-nowrap" id="input_priority_form" style="display: none;">
                             <div class="row">
