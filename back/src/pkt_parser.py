@@ -229,10 +229,10 @@ def packet_parser(
                 data = bytes(llc.data)
                 version = data[2]
                 bpdu_type = data[3] if len(data) > 3 else 0
-                
+
                 if version == 0x03:  # MSTP version
                     llc_label = "MSTP"
-                    
+
                     match bpdu_type:
                         case 0x02:
                             llc_label = "MSTP (MST BPDU)"

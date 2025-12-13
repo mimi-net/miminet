@@ -62,8 +62,10 @@ def configure_mstp_bridge(switch, node: Node) -> None:
         switch.cmd(f"ip link set {bridge_name} type bridge stp_state 1")
         if config.priority is not None:
             # Set bridge priority (0-65535, default 32768)
-            priority_hex = format(config.priority, '04x')
-            switch.cmd(f"ip link set {bridge_name} type bridge priority {config.priority}")
+            priority_hex = format(config.priority, "04x")
+            switch.cmd(
+                f"ip link set {bridge_name} type bridge priority {config.priority}"
+            )
         return
 
     # Enable MSTP using mstpctl

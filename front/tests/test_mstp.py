@@ -5,7 +5,6 @@ from tests.utils.comparator import TestNetworkComparator
 
 
 class TestMSTP:
-
     @pytest.fixture(scope="class")
     def network(self, selenium: MiminetTester):
         network = MiminetTestNetwork(selenium)

@@ -243,9 +243,9 @@ class NodeConfig:
     def __init__(self, selenium: MiminetTester, node: dict):
         self.__selenium = selenium
         # Locator with config elements
-        self.__config_locator: Type[Location.Network.ConfigPanel.CommonDevice] = (
-            Location.Network.ConfigPanel.Host
-        )
+        self.__config_locator: Type[
+            Location.Network.ConfigPanel.CommonDevice
+        ] = Location.Network.ConfigPanel.Host
         self.__node = node
         self.__open_config(node)
 
