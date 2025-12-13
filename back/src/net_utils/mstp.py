@@ -144,15 +144,22 @@ def configure_mstp_interface_vlan(switch, bridge_name: str, iface) -> None:
         iface: The interface configuration.
     """
     if iface.vlan is None:
+        # For inter-switch links without VLAN config, allow all VLANs (trunk mode)
+        # Keep default VLAN 1 for basic connectivity
         return
 
-    # Remove default VLAN 1
-    switch.cmd(f"bridge vlan del dev {iface.name} vid 1")
+    # Remove default VLAN 1 only if specific VLANs are configured
+    switch.cmd(f"bridge vlan del dev {iface.name} vid 1 2>/dev/null || true")
 
     if iface.type_connection == 0:  # Access port
         vlan = iface.vlan
         switch.cmd(f"bridge vlan add dev {iface.name} vid {vlan} pvid untagged")
     elif iface.type_connection == 1:  # Trunk port
+        vlans = iface.vlan if isinstance(iface.vlan, list) else [iface.vlan]
+        for vlan in vlans:
+            switch.cmd(f"bridge vlan add dev {iface.name} vid {vlan}")
+    else:
+        # Default: allow configured VLANs as tagged
         vlans = iface.vlan if isinstance(iface.vlan, list) else [iface.vlan]
         for vlan in vlans:
             switch.cmd(f"bridge vlan add dev {iface.name} vid {vlan}")
