@@ -58,13 +58,13 @@ def configure_mstp_bridge(switch, node: Node) -> None:
 
     if "not found" in result:
         # mstpd not installed - use STP as fallback
-        print(f"Warning: mstpctl not found, using STP fallback for "
-              f"{switch.name}")
+        print(f"Warning: mstpctl not found, using STP fallback for " f"{switch.name}")
         switch.cmd(f"ip link set {bridge_name} type bridge stp_state 1")
         if config.priority is not None:
             # Set bridge priority (0-65535, default 32768)
-            switch.cmd(f"ip link set {bridge_name} type bridge priority "
-                       f"{config.priority}")
+            switch.cmd(
+                f"ip link set {bridge_name} type bridge priority " f"{config.priority}"
+            )
         return
 
     # Enable MSTP using mstpctl
@@ -75,12 +75,10 @@ def configure_mstp_bridge(switch, node: Node) -> None:
     # setmstconfid <bridge> 0 <region_name> - sets region name
     # setmstconfid <bridge> 1 <revision> - sets revision number
     if config.mst_region:
-        switch.cmd(f"mstpctl setmstconfid {bridge_name} 0 "
-                   f"{config.mst_region}")
+        switch.cmd(f"mstpctl setmstconfid {bridge_name} 0 " f"{config.mst_region}")
 
     if config.mst_revision is not None:
-        switch.cmd(f"mstpctl setmstconfid {bridge_name} 1 "
-                   f"{config.mst_revision}")
+        switch.cmd(f"mstpctl setmstconfid {bridge_name} 1 " f"{config.mst_revision}")
 
     # Set bridge priority for CIST (instance 0)
     # Priority uses 0-15 scale (0 = highest priority, becomes root)
@@ -99,8 +97,7 @@ def configure_mstp_bridge(switch, node: Node) -> None:
         configure_mstp_interface_vlan(switch, bridge_name, iface)
 
 
-def configure_mst_instance(switch, bridge_name: str,
-                           mst_instance: MstInstance) -> None:
+def configure_mst_instance(switch, bridge_name: str, mst_instance: MstInstance) -> None:
     """Configure a single MST instance with VLAN mappings.
 
     MSTP VLAN mapping uses two-step process:
@@ -125,8 +122,7 @@ def configure_mst_instance(switch, bridge_name: str,
     if priority is not None:
         # Ensure priority is in valid range 0-15
         prio = min(15, max(0, priority))
-        switch.cmd(f"mstpctl settreeprio {bridge_name} {instance_id} "
-                   f"{prio}")
+        switch.cmd(f"mstpctl settreeprio {bridge_name} {instance_id} " f"{prio}")
 
     # Map VLANs to this MST instance using FID (Filtering ID)
     # Use a single FID per MST instance for simplicity
@@ -137,8 +133,7 @@ def configure_mst_instance(switch, bridge_name: str,
         switch.cmd(f"mstpctl setvid2fid {bridge_name} {vlan}:{fid}")
 
     # Map FID to MST instance (one mapping per FID)
-    switch.cmd(f"mstpctl setfid2mstid {bridge_name} "
-               f"{fid}:{instance_id}")
+    switch.cmd(f"mstpctl setfid2mstid {bridge_name} " f"{fid}:{instance_id}")
 
 
 def configure_mstp_interface_vlan(switch, bridge_name: str, iface) -> None:
@@ -156,13 +151,11 @@ def configure_mstp_interface_vlan(switch, bridge_name: str, iface) -> None:
         return
 
     # Remove default VLAN 1 only if specific VLANs are configured
-    switch.cmd(f"bridge vlan del dev {iface.name} vid 1 2>/dev/null || "
-               f"true")
+    switch.cmd(f"bridge vlan del dev {iface.name} vid 1 2>/dev/null || " f"true")
 
     if iface.type_connection == 0:  # Access port
         vlan = iface.vlan
-        switch.cmd(f"bridge vlan add dev {iface.name} vid {vlan} pvid "
-                   f"untagged")
+        switch.cmd(f"bridge vlan add dev {iface.name} vid {vlan} pvid " f"untagged")
     elif iface.type_connection == 1:  # Trunk port
         vlans = iface.vlan if isinstance(iface.vlan, list) else [iface.vlan]
         for vlan in vlans:
