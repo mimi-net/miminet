@@ -1,4 +1,5 @@
 import pytest
+from tests.utils.miminet_tester import MiminetTester
 from tests.utils.networks import MiminetTestNetwork
 from tests.utils.comparator import TestNetworkComparator
 
