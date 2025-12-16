@@ -3,7 +3,6 @@ from conftest import MiminetTester
 from utils.networks import MiminetTestNetwork
 from utils.checkers import TestNetworkComparator
 
-
 class TestMSTP:
     @pytest.fixture(scope="class")
     def network(self, selenium: MiminetTester):
