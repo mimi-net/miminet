@@ -8,26 +8,6 @@ class TestMSTP:
     def network(self, selenium: MiminetTester):
         network = MiminetTestNetwork(selenium)
 
-        # Add hosts
-        network.add_host(1, 1, "host1")
-        network.add_host(1, 3, "host2")
-        network.add_host(3, 3, "host3")
-
-        # Add switches
-        network.add_l2_switch(2, 1, "l2sw1")
-        network.add_l2_switch(2, 2, "l2sw2")
-        network.add_l2_switch(2, 3, "l2sw3")
-
-        # Add links
-        network.add_link("host1", "l2sw1")
-        network.add_link("l2sw1", "l2sw2")
-        network.add_link("l2sw2", "l2sw3")
-        network.add_link("l2sw3", "host3")
-        network.add_link("host2", "l2sw2")
-        network.add_link("l2sw1", "l2sw3")  # Create loop for STP
-
-        network.submit()
-
         # config switches
         switch1_config = network.open_node_config(2)
         switch1_config.enable_mstp()  # ON mstp
