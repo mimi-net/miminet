@@ -56,21 +56,27 @@ class MiminetTopology(IPTopo):
             self.__handle_router(node_id, config)
 
     def __handle_l2_switch(self, node_id: str, config: NodeConfig):
-        assert config.stp in (0, 1, 2), "Incorrect STP mode"
+        assert config.stp in (0, 1, 2, 3), "Incorrect STP mode"
         is_stp_enabled = config.stp == 1  # Check switch mode
         is_rstp_enabled = config.stp == 2
+        is_mstp_enabled = config.stp == 3
 
+        # MSTP in OVS uses RSTP as base protocol
+        # OVS doesn't have native MSTP support, so we use RSTP mode
+        # which provides similar fast convergence behavior
         self.__nodes[node_id] = self.addSwitch(
             node_id,
             cls=IPOVSSwitch,
             stp=is_stp_enabled,
-            rstp=is_rstp_enabled,
+            rstp=is_rstp_enabled or is_mstp_enabled,  # MSTP uses RSTP mode in OVS
             cwd="/tmp",
             priority=config.priority,
         )
 
         # Set emulation delay based on STP mode
-        if is_rstp_enabled:
+        if is_mstp_enabled:
+            self.__set_network_configuration_time(10)  # MSTP converges similar to RSTP
+        elif is_rstp_enabled:
             self.__set_network_configuration_time(7)
         elif is_stp_enabled:
             self.__set_network_configuration_time(33)

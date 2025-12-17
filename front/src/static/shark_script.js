@@ -146,6 +146,7 @@ function decode_llc_header (llc_hdr) {
 function decode_stp_header (stp_hdr) {
 
 	let protocol_id = stp_hdr.slice(0,2).join("");
+	let version = parseInt(stp_hdr.slice(2,3).join(""), 16);
 	let bpdu_type = stp_hdr.slice(3,4).join("");
 	let bpdu_flags = stp_hdr.slice(4,5).join("");
 	let protocol_id_string = "";
@@ -158,8 +159,26 @@ function decode_stp_header (stp_hdr) {
 		protocol_id_string = "Spanning Tree Protocol (0x000)";
 	}
 
+	// Handle different protocol versions
+	let version_string = "";
+	if (version === 0) {
+		version_string = "Spanning Tree (0)";
+	} else if (version === 2) {
+		version_string = "Rapid Spanning Tree (2)";
+	} else if (version === 3) {
+		version_string = "Multiple Spanning Tree (3)";
+	} else {
+		version_string = "Spanning Tree (" + version.toString() + ")";
+	}
+
 	if (bpdu_type === "00") {
 		bpdu_type_string = "Configuration (0x00)";
+	} else if (bpdu_type === "02") {
+		if (version === 3) {
+			bpdu_type_string = "MST BPDU (0x02)";
+		} else {
+			bpdu_type_string = "RST BPDU (0x02)";
+		}
 	}
 
 	if (bpdu_flags === "00") {
@@ -176,9 +195,9 @@ function decode_stp_header (stp_hdr) {
 	bridge_identifier_string = bridge_identifier_string + " / " + parseInt(stp_hdr.slice(18,19).join(""), 16).toString();
 	bridge_identifier_string = bridge_identifier_string + " / " + stp_hdr.slice(19,25).join(":");
 
-	return {
+	let result = {
 		"Protocol Identifier:" : protocol_id_string,
-		"Protocol Version Identifier:" : "Spanning Tree (" + parseInt(stp_hdr.slice(2,3).join(""), 16).toString() + ")",
+		"Protocol Version Identifier:" : version_string,
 		"BPDU Type:" : bpdu_type_string,
 		"BPDU flags:" : bpdu_flags_string,
 		"Root Identifier:" : root_identifier_string,
@@ -190,6 +209,16 @@ function decode_stp_header (stp_hdr) {
 		"Hello Time:" : (parseInt(stp_hdr.slice(31,33).join(""), 16)/256).toString(),
 		"Forward Delay:" : (parseInt(stp_hdr.slice(33,35).join(""), 16)/256).toString(),
 	};
+
+	// Add MSTP-specific fields if version is 3
+	if (version === 3 && stp_hdr.length > 35) {
+		result["Version 1 Length:"] = parseInt(stp_hdr.slice(35,36).join(""), 16).toString();
+		if (stp_hdr.length > 36) {
+			result["Version 3 Length:"] = parseInt(stp_hdr.slice(36,38).join(""), 16).toString();
+		}
+	}
+
+	return result;
 }
 
 function decode_arp_header (arp_hdr) {
@@ -507,8 +536,17 @@ function add_llc_header (pkt, header_number) {
 }
 
 function add_stp_header (pkt, header_number) {
+	// Determine protocol type based on version
+	let version = parseInt(pkt.slice(2,3).join(""), 16);
+	let protocol_name = "Spanning Tree Protocol";
+	
+	if (version === 2) {
+		protocol_name = "Rapid Spanning Tree Protocol";
+	} else if (version === 3) {
+		protocol_name = "Multiple Spanning Tree Protocol";
+	}
 
-	make_pa("Spanning Tree Protocol", header_number);
+	make_pa(protocol_name, header_number);
 	decode_div = document.createElement("div");
 	decode_div.classList.add("collapse", "decode_body", "decode_width");
 	decode_div.id = "collapseDecode" + header_number;

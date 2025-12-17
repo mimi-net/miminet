@@ -228,7 +228,17 @@ def packet_parser(
             if llc.dsap == 0x42:
                 data = bytes(llc.data)
                 version = data[2]
-                if version == 0x02:
+                bpdu_type = data[3] if len(data) > 3 else 0
+
+                if version == 0x03:  # MSTP version
+                    llc_label = "MSTP"
+
+                    match bpdu_type:
+                        case 0x02:
+                            llc_label = "MSTP (MST BPDU)"
+                        case _:
+                            llc_label = "MSTP"
+                elif version == 0x02:
                     llc_label = "RSTP"
 
                     match llc.data.flags & 0x03:

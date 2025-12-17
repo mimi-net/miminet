@@ -332,6 +332,9 @@ const ShowSwitchConfig = function(n, shared = 0){
     // Add VLAN
     ConfigVLAN(n);
 
+    // Add MSTP configuration (only visible when stp=3)
+    ConfigMSTP(n);
+
     // Add interfaces
     $.each(n.interface, function (i) {
         ActionWithInterface(n, i, ConfigSwitchInterface)
@@ -1947,7 +1950,8 @@ const FilterPackets = function () {
                             pkt.data.label.startsWith("ARP")) ||
                         (packetFilterState.hideSTP &&
                             (pkt.data.label.startsWith("STP") ||
-                            pkt.data.label.startsWith("RSTP"))) ||
+                            pkt.data.label.startsWith("RSTP") ||
+                            pkt.data.label.startsWith("MSTP"))) ||
                         (packetFilterState.hideSYN &&
                             tcpRegex.test(pkt.data.label))
                     )

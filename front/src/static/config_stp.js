@@ -30,6 +30,12 @@ function eventHandlers(currentDevice, modalId) {
         $('#' + modalId).modal('hide');
         updateRstpButtonStyle(currentDevice, rstp_stp_config);
 
+        // Update MSTP button visibility when STP mode changes
+        currentDevice.config.stp = parseInt(rstp_stp_config);
+        if (typeof updateMstpButtonVisibility === 'function') {
+            updateMstpButtonVisibility(currentDevice);
+        }
+
         var switch_id = currentDevice.data.id;
         $('#' + modalId + ' #modal_switch_id').val(switch_id);
         $('#' + modalId + ' #modal_net_guid').val(network_guid);
@@ -66,6 +72,9 @@ function updateRstpButtonStyle(currentDevice, rstp_stp_config) {
         }
         if (rstp_stp_config == 2) {
             $('#config_button_rstp_text').text("RSTP")
+        }
+        if (rstp_stp_config == 3) {
+            $('#config_button_rstp_text').text("MSTP")
         }
         $('#config_button_rstp').addClass('btn-outline-primary').removeClass('btn-outline-secondary');
     } else {

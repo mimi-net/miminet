@@ -19,6 +19,22 @@ class NodeData:
 
 
 @dataclass
+class MstInstance:
+    """
+    Represents an MST (Multiple Spanning Tree) instance configuration.
+
+    Attributes:
+        instance_id (int): MST instance ID (0-64).
+        vlans (list[int]): List of VLAN IDs mapped to this instance.
+        priority (Optional[int]): Bridge priority for this MST instance.
+    """
+
+    instance_id: int
+    vlans: list[int]
+    priority: Optional[int] = None
+
+
+@dataclass
 class NodeConfig:
     """
     Configuration settings for a network node.
@@ -26,8 +42,11 @@ class NodeConfig:
     Attributes:
         label (str): Label for the node (e.g., "l2sw1").
         type (str): Node type (e.g., "l2_switch").
-        stp (int): 1 if spanning tree protocol (STP) is enabled; 2 if rapid spanning tree protocol (RSTP) is enabled; 0 otherwise.
-        priority (Optional[int]): stp or rstp priority
+        stp (int): 1 if spanning tree protocol (STP) is enabled; 2 if rapid spanning tree protocol (RSTP) is enabled; 3 if multiple spanning tree protocol (MSTP) is enabled; 0 otherwise.
+        priority (Optional[int]): stp, rstp or mstp priority (for CIST in MSTP).
+        mst_region (Optional[str]): MST region name (required for MSTP).
+        mst_revision (Optional[int]): MST region revision number.
+        mst_instances (Optional[list[MstInstance]]): List of MST instances with VLAN mappings.
         default_gw (str): Default gateway for the node.
     """
 
@@ -35,6 +54,9 @@ class NodeConfig:
     type: str = ""
     stp: int = 0
     priority: Optional[int] = None
+    mst_region: Optional[str] = None
+    mst_revision: Optional[int] = None
+    mst_instances: Optional[list[MstInstance]] = None
     default_gw: str = ""
 
 

@@ -146,7 +146,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                             </div>
                             <div>
                                 <input class="form-check-input" role="switch" type="checkbox" id="STPFilterCheckbox" name="STPFilterCheckbox">
-                                <label for="STPFilterCheckbox">Не анимировать STP/RSTP пакеты </label>
+                                <label for="STPFilterCheckbox">Не анимировать STP/RSTP/MSTP пакеты </label>
                             </div>
                             <div>
                                 <input class="form-check-input" role="switch" type="checkbox" id="SYNFilterCheckbox" name="SYNFilterCheckbox">
@@ -475,5 +475,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="{{ url_for('static', filename='config_vlan.js') }}"></script>
 <script src="{{ url_for('static', filename='config_vxlan.js') }}"></script>
 <script src="{{ url_for('static', filename='config_stp.js') }}"></script>
+<script src="{{ url_for('static', filename='config_mstp.js') }}"></script>
 
 </html>
