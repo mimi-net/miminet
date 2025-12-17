@@ -98,6 +98,22 @@ $('#network_scheme').droppable({
                 interface: [],
             });
         }
+        else if (type === 'textbox'){
+            let node_id = TextboxUid();
+            nodes.push(
+                {
+                    data: {id: node_id, label: node_id},
+                    position: {x: CalculateDropOffset(ui.position.left, ui.position.top).x, y: CalculateDropOffset(ui.position.left, ui.position.top).y},
+                    classes: ['textbox'],
+                    config: {
+                        type: 'textbox',
+                        label: node_id,
+                        text: 'Введите текст здесь'
+                    },
+                    interface: [],
+                });
+
+        }
         else {
             return;
         }
