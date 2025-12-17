@@ -19,6 +19,62 @@ def is_ipv4_address(dotquad: str) -> bool:
     return len(octets) == 4 and all(o.isdigit() and 0 <= int(o) < 256 for o in octets)
 
 
+def int_to_ip(ip_int: int | None) -> str:
+    if ip_int is not None:
+        octet1 = (ip_int >> 24) & 0xFF
+        octet2 = (ip_int >> 16) & 0xFF
+        octet3 = (ip_int >> 8) & 0xFF
+        octet4 = (ip_int >> 0) & 0xFF
+
+        return f"{octet1}.{octet2}.{octet3}.{octet4}"
+    else:
+        return ""
+
+
+def is_dhcp(udp) -> bool:
+    try:
+        dh = dpkt.dhcp.DHCP(udp.data)
+        return dict(dh.opts).get(dpkt.dhcp.DHCP_OPT_MSGTYPE) is not None
+    except (dpkt.dpkt.NeedData, dpkt.dpkt.UnpackError):
+        return False
+
+
+def udp_packet_type(pkt) -> str:
+    if is_dhcp(pkt):
+        dh = dpkt.dhcp.DHCP(pkt.data)
+        opts = dict(dh.opts)
+        msg_type = int.from_bytes(
+            opts.get(dpkt.dhcp.DHCP_OPT_MSGTYPE, b""), byteorder="big"
+        )
+        match msg_type:
+            case dpkt.dhcp.DHCPDISCOVER:
+                return "DHCP Discover"
+            case dpkt.dhcp.DHCPOFFER:
+                ip = dh.yiaddr
+                mask = bin(
+                    int.from_bytes(
+                        opts.get(dpkt.dhcp.DHCP_OPT_NETMASK, b""), byteorder="big"
+                    )
+                ).count("1")
+                return f"DHCP Offer {int_to_ip(ip)}/{mask}"
+            case dpkt.dhcp.DHCPREQUEST:
+                ip = int.from_bytes(
+                    opts.get(dpkt.dhcp.DHCP_OPT_REQ_IP, b""), byteorder="big"
+                )
+                return f"DHCP Request {int_to_ip(ip)}"
+            case dpkt.dhcp.DHCPDECLINE:
+                return "DHCP Decline"
+            case dpkt.dhcp.DHCPACK:
+                return "DHCP ACK"
+            case dpkt.dhcp.DHCPNAK:
+                return "DHCP NAK"
+            case dpkt.dhcp.DHCPRELEASE:
+                return "DHCP Release"
+            case dpkt.dhcp.DHCPINFORM:
+                return "DHCP Inform"
+    return "UDP " + str(pkt.sport) + " > " + str(pkt.dport)
+
+
 def ip_packet_type(pkt) -> str:
     if isinstance(pkt.data, dpkt.icmp.ICMP):
         icmp = pkt.data
@@ -43,8 +99,7 @@ def ip_packet_type(pkt) -> str:
                 return "ICMP message"
 
     if isinstance(pkt.data, dpkt.udp.UDP):
-        udp = pkt.data
-        return "UDP " + str(udp.sport) + " > " + str(udp.dport)
+        return udp_packet_type(pkt.data)
 
     if isinstance(pkt.data, dpkt.tcp.TCP):
         tcp = pkt.data
@@ -103,6 +158,7 @@ def create_pkt_animation(
     e_source: str,
     e_target: str,
     loss_percentage: int = 0,
+    duplicate_percentage: int = 0,
 ):
     if not os.path.exists(file1) or not os.path.exists(file2):
         return None
@@ -110,14 +166,23 @@ def create_pkt_animation(
     with open(file1, "rb") as f1, open(file2, "rb") as f2:
         pcap1 = dpkt.pcap.Reader(f1)
         pcap2 = dpkt.pcap.Reader(f2)
-        pkts = packet_parser(pcap1, edge_id, e_source, e_target, loss_percentage)
-        pkts2 = packet_parser(pcap2, edge_id, e_target, e_source, loss_percentage)
+        pkts = packet_parser(
+            pcap1, edge_id, e_source, e_target, loss_percentage, duplicate_percentage
+        )
+        pkts2 = packet_parser(
+            pcap2, edge_id, e_target, e_source, loss_percentage, duplicate_percentage
+        )
 
     return pkts + pkts2
 
 
 def packet_parser(
-    pcap1: Reader, edge_id: str, e_source: str, e_target: str, loss_percentage: int
+    pcap1: Reader,
+    edge_id: str,
+    e_source: str,
+    e_target: str,
+    loss_percentage: int,
+    duplicate_percentage: int,
 ):
     pkts = []
 
@@ -144,6 +209,7 @@ def packet_parser(
                         "source": e_source,
                         "target": e_target,
                         "loss_percentage": loss_percentage,
+                        "duplicate_percentage": duplicate_percentage,
                     },
                     "timestamp": ts,
                 }
@@ -196,6 +262,7 @@ def packet_parser(
                         "source": e_source,
                         "target": e_target,
                         "loss_percentage": loss_percentage,
+                        "duplicate_percentage": duplicate_percentage,
                     },
                     "timestamp": ts,
                 }
@@ -244,6 +311,7 @@ def packet_parser(
                         "source": e_source,
                         "target": e_target,
                         "loss_percentage": loss_percentage,
+                        "duplicate_percentage": duplicate_percentage,
                     },
                     "timestamp": ts,
                 }

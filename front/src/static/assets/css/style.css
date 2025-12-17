@@ -272,4 +272,38 @@ a.lastResult {
 .col-6.text-center.border > div {
     max-height: 282px;
     overflow-y: auto;
+
+/* Edit mode styles */
+.editing-command {
+    background-color: #f0f9ff !important;
+    border-left: 4px solid #38bdf8 !important;
+    box-shadow: 0 2px 4px rgba(56, 189, 248, 0.15) !important;
+    transition: all 0.3s ease;
+}
+
+/* Highlight editing form area */
+.editing-form-area {
+    background-color: #f0f9ff !important;
+    border-left: 4px solid #38bdf8 !important;
+    box-shadow: 0 2px 4px rgba(56, 189, 248, 0.15) !important;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    transition: all 0.3s ease;
+}
+
+.edit-banner {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

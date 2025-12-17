@@ -136,11 +136,18 @@ class MiminetTopology(IPTopo):
             edge_id = edge.data.id
             source_id = edge.data.source
             target_id = edge.data.target
-            loss_percentage = (
-                edge.data.loss_percentage
-                if edge.data.loss_percentage is not None
-                else 0
-            )
+
+            def _to_percent(val):
+                try:
+                    if val is None:
+                        return 0.0
+                    s = str(val).strip().rstrip("%")
+                    return float(s) if s else 0.0
+                except (ValueError, TypeError):
+                    return 0.0
+
+            loss_percentage = _to_percent(edge.data.loss_percentage)
+            duplicate_percentage = _to_percent(edge.data.duplicate_percentage)
 
             if source_id not in self.__nodes:
                 raise ValueError(
@@ -170,6 +177,7 @@ class MiminetTopology(IPTopo):
                     source_id,
                     target_id,
                     loss_percentage,
+                    duplicate_percentage,
                 )
             )
 
@@ -181,6 +189,7 @@ class MiminetTopology(IPTopo):
                 interface_name_2=trg_iface.name,
                 delay="15ms",
                 loss_percentage=loss_percentage,
+                duplicate_percentage=duplicate_percentage,
             )
 
             self.__configure_link(link1[src_host], src_iface)
@@ -211,6 +220,7 @@ class MiminetTopology(IPTopo):
         delay="2ms",
         max_queue_size=None,
         loss_percentage=0,
+        duplicate_percentage=0,
     ):
         """Connects two hosts through a virtual switch."""
         # Create unique switch name
@@ -225,6 +235,7 @@ class MiminetTopology(IPTopo):
                 "delay": delay,
                 "max_queue_size": max_queue_size,
                 "loss": loss_percentage,
+                "duplicate": duplicate_percentage,
             }
         }
 
@@ -233,6 +244,7 @@ class MiminetTopology(IPTopo):
                 "delay": delay,
                 "max_queue_size": max_queue_size,
                 "loss": loss_percentage,
+                "duplicate": duplicate_percentage,
             }
         }
 
