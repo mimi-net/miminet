@@ -8,7 +8,6 @@ let decode = document.querySelector('#decode');
 if (tds.length > 0){
 	tds[0].classList.toggle('selected');
 	tds[0].classList.add('no-hover');
-	decode_packet(pcap_data[0].bytes);
 
     // Creating div elements for byte assignments
 	createByteDivs(pcap_data[0].bytes, pcap_data[0]);
@@ -24,12 +23,10 @@ tds.forEach(function (item) {
             ascii.replaceChildren();
             decode.replaceChildren();
         });
-        var i = this.id;
         this.classList.add('no-hover');
         this.classList.toggle('selected');
 
-        createByteDivs(pcap_data[i - 1].bytes, pcap_data[i - 1]);
-		decode_packet(pcap_data[i - 1].bytes);
+        createByteDivs(pcap_data[this.id - 1].bytes, pcap_data[this.id - 1]);
         AddHoverInfoAttribute();
     };
 });
@@ -42,6 +39,7 @@ function make_pa(text, count) {
     decode_a.setAttribute('data-bs-toggle', 'collapse');
     decode_a.setAttribute('aria-expanded', 'false');
     decode_a.setAttribute('aria-controls', 'collapseDecode' + count);
+    decode_a.setAttribute('data-header-number', count);
     decode_a.innerHTML = text;
     decode_p.appendChild(decode_a);
     decode.appendChild(decode_p);
@@ -62,29 +60,67 @@ function hex_to_ip(ip_hex) {
     return ip_str.join('.');
 }
 
+function decode_vlan_header(vlan_bytes) {
+    const type_hex = vlan_bytes.slice(2, 4).join('');
+    const type_str = decode_ethertype(type_hex);
+    const tci  = vlan_bytes.slice(0, 2).join('');
+    const tci_num = parseInt(tci, 16);
+
+    const pcp = (tci_num >> 13) & 0x7;
+    const dei = (tci_num >> 12) & 0x1;
+    const vid = tci_num & 0xfff;
+
+    // Priority names
+    const pcp_names = [
+        'Best Effort (default) (0)',
+        'Background (1)',
+        'Excellent Effort (2)',
+        'Critical Applications (3)',
+        'Video, < 100 ms latency (4)',
+        'Voice, < 10 ms latency (5)',
+        'Internetwork Control (6)',
+        'Network Control (7)'
+    ];
+
+    return {
+        'Priority Code Point (PCP):': { 
+            value: `${pcp_names[pcp]}`, 
+            offset: 0, 
+            length: 2 
+        },
+        'Drop Eligible Indicator (DEI):': { 
+            value: dei === 0 ? 'Ineligible' : 'Eligible', 
+            offset: 0, 
+            length: 2,
+        },
+        // VID=0 → Priority Tag (no VLAN, PCP/DEI only)
+        // The user is not expected to enter VLAN ID = 0.
+        'VLAN Identifier (VID):': { 
+            value: vid === 0 ? '0 (Priority tag)' : vid.toString(), 
+            offset: 0, 
+            length: 2 
+        },
+        'Type:': { 
+            value: type_str, 
+            offset: 2, 
+            length: 2 
+        },
+    };
+}
 
 function decode_ethernet_header (eth_hdr) {
-
 	let eth_type = eth_hdr.slice(12,14).join("");
-	let eth_type_length_string = "";
-
+	let eth_type_length_string;
 	if (eth_hdr.length < 14) {
 		console.log("Mimishark: Ethernet header is too short");
 		return {};
 	}
-
 	// Do we have LLC packet
 	if (parseInt(eth_type, 16) < 1500) {
 		eth_type_length_string = parseInt(eth_type, 16).toString() + " bytes";
-
-	// Do we have ARP
-	} else if (eth_type === "0806") {
-		eth_type_length_string = "ARP (0x0806)";
-
-	// Do we have IP
-	} else if (eth_type === "0800") {
-		eth_type_length_string = "IPv4 (0x0800)"
-	}
+    } else {
+        eth_type_length_string = decode_ethertype(eth_type);
+    }
 
     return {
         'Destination:': { value: eth_hdr.slice(0, 6).join(':'), offset: 0, length: 6 },
@@ -354,27 +390,48 @@ function decode_udp_header (udp_hdr) {
     };
 }
 
-function decode_tcp_header (tcp_hdr) {
+function decode_tcp_header(tcp_hdr) {
+    if (tcp_hdr.length < 20) {
+        console.log("Mimishark: TCP header is too small");
+        return {};
+    }
 
-	let tcp_hdr_len = parseInt(tcp_hdr.slice(12, 13).join(""), 16) >> 4;
+    const dataOffsetByte = parseInt(tcp_hdr[12], 16);
+    const dataOffset = (dataOffsetByte >> 4) & 0x0F;
+    const tcp_hdr_len = dataOffset * 4;
+    const options_len = Math.max(tcp_hdr_len - 20, 0);
 
-	if (tcp_hdr.length < 20) {
-		console.log("Mimishark: TCP header is too small");
-		return {};
-	}
-
-
-	return {
+    const result = {
         'Source Port:': { value: parseInt(tcp_hdr.slice(0, 2).join(''), 16).toString(), offset: 0, length: 2 },
         'Destination Port:': { value: parseInt(tcp_hdr.slice(2, 4).join(''), 16).toString(), offset: 2, length: 2 },
-        'Sequence Number:': { value: parseInt(tcp_hdr.slice(4, 8).join(''), 16).toString(), offset: 4, length: 4 },
-        'Acknowledge Number:': { value: parseInt(tcp_hdr.slice(8, 12).join(''), 16).toString(), offset: 8, length: 4 },
-        'xxxx .... = Header Length: ': { value: `${tcp_hdr_len * 4} bytes (${tcp_hdr_len})`, offset: 12, length: 1 },
+        'Sequence Number:': { value: `0x${tcp_hdr.slice(4, 8).join('')}`, offset: 4, length: 4 },
+        'Acknowledge Number:': { value: `0x${tcp_hdr.slice(8, 12).join('')}`, offset: 8, length: 4 },
+        'Data Offset:': { value: `${tcp_hdr_len} bytes (${dataOffset})`, offset: 12, length: 1 },
         'Flags:': { value: `0x${tcp_hdr.slice(13, 14).join('')}`, offset: 13, length: 1 },
         'Window:': { value: parseInt(tcp_hdr.slice(14, 16).join(''), 16).toString(), offset: 14, length: 2 },
         'Checksum:': { value: `0x${tcp_hdr.slice(16, 18).join('')}`, offset: 16, length: 2 },
         'Urgent Pointer:': { value: `0x${tcp_hdr.slice(18, 20).join('')}`, offset: 18, length: 2 },
     };
+
+    if (options_len > 0) {
+        result['TCP Options:'] = { 
+            value: `${options_len} bytes`, 
+            offset: 20, 
+            length: options_len 
+        };
+    }
+
+    const data_len = Math.max(tcp_hdr.length - tcp_hdr_len, 0);
+    
+    if (data_len > 0) {
+        result['TCP Segment Data:'] = { 
+            value: `${data_len} bytes`, 
+            offset: tcp_hdr_len, 
+            length: data_len 
+        };
+    }
+
+    return result;
 }
 
 function decode_gre_header (gre_hdr) {
@@ -441,187 +498,397 @@ function decode_gre_header (gre_hdr) {
     return ret_val;
 }
 
-function add_llc_header (pkt, header_number) {
+function add_ethernet_header (pkt, header_number, offset=0) {
+
+    make_pa("Ethernet Frame", header_number);
+    const decode_div = make_div(header_number);
+    pkt_decode = decode_ethernet_header(pkt);
+    const fields = [];
+
+    for (var k in pkt_decode) {
+        const field = pkt_decode[k];
+        
+		const decode_p = document.createElement("p");
+        decode_p.innerHTML = `${k} ${field.value}`;
+        decode_div.appendChild(decode_p);
+
+        fields.push({
+            label: k,
+            value: field.value,
+            offset: field.offset,
+            len: field.length,
+            className: toHoverKey(k),
+            startByte: field.offset
+        });
+	}
+
+	decode.appendChild(decode_div);
+
+    return {
+        className: "Ethernet Frame",
+        startByte: offset,
+        byteCount: 14,
+        fields,
+        header_number,
+    };
+}
+
+function add_vlan_header(pkt, header_number, offset) {
+
+    make_pa("802.1Q Virtual LAN", header_number);
+    const decode_div = make_div(header_number);
+
+    const vlan_bytes = pkt.slice(offset, offset + 4);
+    const pkt_decode = decode_vlan_header(vlan_bytes);
+
+    const fields = [];
+
+    for (const k in pkt_decode) {
+        const field = pkt_decode[k];
+
+        const p = document.createElement('p');
+        p.innerHTML = `${k} ${field.value}`;
+        decode_div.appendChild(p);
+
+        fields.push({
+            label: k,
+            value: field.value,
+            offset: field.offset,
+            len: field.length,
+            className: toHoverKey(k),
+            startByte: field.offset
+        });
+    }
+
+    decode.appendChild(decode_div);
+
+    return {
+        className: "802.1Q Virtual LAN",
+        startByte: offset,
+        byteCount: 4,
+        fields, 
+        header_number,
+    };
+}
+
+function add_llc_header (pkt, header_number, offset = 0) {
 
 	make_pa("Logical-Link Control", header_number);
-	decode_div = document.createElement("div");
-	decode_div.classList.add("collapse", "decode_body", "decode_width");
-	decode_div.id = "collapseDecode" + header_number;
+    const decode_div = make_div(header_number);
 
 	pkt_decode = decode_llc_header(pkt);
+    const fields = [];
 
-	for (var k in pkt_decode) {
-		let decode_p = document.createElement("p");
-		decode_p.innerHTML = `${k} ${pkt_decode[k].value}`;
-		decode_div.appendChild(decode_p);
-	}
+	for (const k in pkt_decode) {
+        const field = pkt_decode[k];
 
-	decode.appendChild(decode_div);
-}
+        const decode_p = document.createElement("p");
+        decode_p.innerHTML = `${k} ${field.value}`;
+        decode_div.appendChild(decode_p);
 
-function add_stp_header (pkt, header_number) {
-
-	make_pa("Spanning Tree Protocol", header_number);
-	decode_div = document.createElement("div");
-	decode_div.classList.add("collapse", "decode_body", "decode_width");
-	decode_div.id = "collapseDecode" + header_number;
-
-	pkt_decode = decode_stp_header(pkt);
-
-	for (var k in pkt_decode) {
-		let decode_p = document.createElement("p");
-		decode_p.innerHTML = `${k} ${pkt_decode[k].value}`;
-		decode_div.appendChild(decode_p);
-	}
-
-	decode.appendChild(decode_div);
-}
-
-function add_arp_header(pkt, header_number) {
-
-	make_pa("Address Resolution Protocol", header_number);
-	decode_div = document.createElement("div");
-	decode_div.classList.add("collapse", "decode_body", "decode_width");
-	decode_div.id = "collapseDecode" + header_number;
-
-	pkt_decode = decode_arp_header(pkt);
-
-	for (var k in pkt_decode) {
-		let decode_p = document.createElement("p");
-		decode_p.innerHTML = `${k} ${pkt_decode[k].value}`;
-		decode_div.appendChild(decode_p);
-	}
-	
-	decode.appendChild(decode_div);
-}
-
-function add_ipv4_header (pkt, header_number) {
-
-	make_pa("Internet Protocol Version 4", header_number);
-	decode_div = document.createElement("div");
-	decode_div.classList.add("collapse", "decode_body", "decode_width");
-	decode_div.id = "collapseDecode" + header_number;
-	pkt_decode = decode_ip_header(pkt);
-
-	for (var k in pkt_decode) {
-		let decode_p = document.createElement("p");
-		decode_p.innerHTML = `${k} ${pkt_decode[k].value}`;
-		decode_div.appendChild(decode_p);
-	}
-
-	decode.appendChild(decode_div);
-}
-
-function add_icmp_header (pkt, header_number) {
-
-	make_pa("Internet Control Message Protocol", header_number);
-	decode_div = document.createElement("div");
-	decode_div.classList.add("collapse", "decode_body", "decode_width");
-	decode_div.id = "collapseDecode" + header_number;
-
-	pkt_decode = decode_icmp_header(pkt);
-
-	for (var k in pkt_decode) {
-		let decode_p = document.createElement("p");
-		decode_p.innerHTML = `${k} ${pkt_decode[k].value}`;
-		decode_div.appendChild(decode_p);
-	}
-
-    const tcp_hdr_len = (parseInt(pkt.slice(12, 13).join(''), 16) >> 4) * 4;
-    const payload_bytes = pkt.length - tcp_hdr_len - 8;
-    if (payload_bytes > 0) {
-        const payload_p = document.createElement('p');
-        payload_p.innerHTML = `Data: ${payload_bytes} bytes`;
-        decode_div.appendChild(payload_p);
-    }
-
-	decode.appendChild(decode_div);
-}
-
-function add_tcp_header (pkt, header_number) {
-
-	make_pa("Transmission Control Protocol", header_number);
-	decode_div = document.createElement("div");
-	decode_div.classList.add("collapse", "decode_body", "decode_width");
-	decode_div.id = "collapseDecode" + header_number;
-
-	pkt_decode = decode_tcp_header(pkt);
-
-	for (var k in pkt_decode) {
-		let decode_p = document.createElement("p");
-		decode_p.innerHTML = `${k} ${pkt_decode[k].value}`;
-		decode_div.appendChild(decode_p);
-	}
-
-    const tcp_hdr_len = (parseInt(pkt.slice(12, 13).join(''), 16) >> 4) * 4;
-    const payload_bytes = pkt.length - tcp_hdr_len;
-    if (payload_bytes > 0) {
-        const payload_p = document.createElement('p');
-        payload_p.innerHTML = `Data: ${payload_bytes} bytes`;
-        decode_div.appendChild(payload_p);
-    }
-
-	decode.appendChild(decode_div);
-}
-
-function add_udp_header (pkt, header_number) {
-
-	make_pa("User Datagram Protocol", header_number);
-	decode_div = document.createElement("div");
-	decode_div.classList.add("collapse", "decode_body", "decode_width");
-	decode_div.id = "collapseDecode" + header_number;
-
-	pkt_decode = decode_udp_header(pkt);
-
-	for (var k in pkt_decode) {
-		let decode_p = document.createElement("p");
-		decode_p.innerHTML = `${k} ${pkt_decode[k].value}`;
-		decode_div.appendChild(decode_p);
-	}
-
-    const payload_bytes = pkt.length - 8;
-    if (payload_bytes > 0) {
-        const payload_p = document.createElement('p');
-        payload_p.innerHTML = `Data: ${payload_bytes} bytes`;
-        decode_div.appendChild(payload_p);
-    }
-
-	decode.appendChild(decode_div);
-}
-
-function add_gre_header (pkt, header_number) {
-
-	make_pa("Generic routing encapsulation (GRE)", header_number);
-	decode_div = document.createElement("div");
-	decode_div.classList.add("collapse", "decode_body", "decode_width");
-	decode_div.id = "collapseDecode" + header_number;
-
-	pkt_decode = decode_gre_header(pkt);
-
-	let gre_hdr_len = 8;
-
-	for (var k in pkt_decode) {
-
-		if (k === "GRE_header_length") {
-			gre_hdr_len = pkt_decode[k];
-			continue;
-		}
-
-		let decode_p = document.createElement("p");
-		decode_p.innerHTML = k + " " + pkt_decode[k];
-		decode_div.appendChild(decode_p);
-	}
-
-    const payload_bytes = pkt.length - gre_hdr_len;
-    if (payload_bytes > 0) {
-        const payload_p = document.createElement('p');
-        payload_p.innerHTML = `Data: ${payload_bytes} bytes`;
-        decode_div.appendChild(payload_p);
+        fields.push({
+            label: k,
+            value: field.value,
+            offset: field.offset,
+            len: field.length,
+            className: toHoverKey(k),
+            startByte: field.offset
+        });
     }
 
 	decode.appendChild(decode_div);
 
-	return gre_hdr_len;
+    return {
+        className: "Logical-Link Control",
+        startByte: offset,
+        byteCount: 3,
+        fields, 
+        header_number,
+    };
+}
+
+function add_stp_header(pkt, header_number, offset = 0) {
+
+    make_pa("Spanning Tree Protocol", header_number);
+    const decode_div = make_div(header_number);
+
+    pkt_decode = decode_stp_header(pkt);
+    const fields = [];
+
+    for (const k in pkt_decode) {
+        const field = pkt_decode[k];
+
+        const decode_p = document.createElement("p");
+        decode_p.innerHTML = `${k} ${field.value}`;
+        decode_div.appendChild(decode_p);
+
+        fields.push({
+            label: k,
+            value: field.value,
+            offset: field.offset,
+            len: field.length,
+            className: toHoverKey(k),
+            startByte: field.offset
+        });
+    }
+
+    decode.appendChild(decode_div);
+
+    return {
+        className: "Spanning Tree Protocol",
+        startByte: offset,
+        byteCount: pkt.length,
+        fields, 
+        header_number,
+    };
+}
+
+function add_arp_header(pkt, header_number, offset = 0) {
+
+    make_pa("Address Resolution Protocol", header_number);
+    const decode_div = make_div(header_number);
+
+    const pkt_decode = decode_arp_header(pkt);
+    const fields = [];
+
+    for (const k in pkt_decode) {
+        const field = pkt_decode[k];
+
+        const decode_p = document.createElement("p");
+        decode_p.innerHTML = `${k} ${field.value}`;
+        decode_div.appendChild(decode_p);
+
+        fields.push({
+            label: k,
+            value: field.value,
+            offset: field.offset,
+            len: field.length,
+            className: toHoverKey(k),
+            startByte: field.offset
+        });
+    }
+
+    decode.appendChild(decode_div);
+
+    return {
+        className: "Address Resolution Protocol",
+        startByte: offset,
+        byteCount: pkt.length,
+        fields, 
+        header_number,
+    };
+}
+
+function add_ipv4_header(pkt, header_number, offset = 0) {
+
+    make_pa("Internet Protocol Version 4", header_number);
+    const decode_div = make_div(header_number);
+
+    const pkt_decode = decode_ip_header(pkt);
+    const fields = [];
+
+    for (const k in pkt_decode) {
+        const field = pkt_decode[k];
+
+        const decode_p = document.createElement("p");
+        decode_p.innerHTML = `${k} ${field.value}`;
+        decode_div.appendChild(decode_p);
+
+        fields.push({
+            label: k,
+            value: field.value,
+            offset: field.offset,
+            len: field.length,
+            className: toHoverKey(k),
+            startByte: field.offset
+        });
+    }
+
+    decode.appendChild(decode_div);
+
+    return {
+        className: "Internet Protocol Version 4",
+        startByte: offset,
+        byteCount: 20,
+        fields, 
+        header_number,
+    };
+}
+
+function add_icmp_header(pkt, header_number, offset = 0) {
+
+    make_pa("Internet Control Message Protocol", header_number);
+    const decode_div = make_div(header_number);
+
+    const pkt_decode = decode_icmp_header(pkt);
+    const fields = [];
+
+    for (const k in pkt_decode) {
+        const field = pkt_decode[k];
+
+        const decode_p = document.createElement("p");
+        decode_p.innerHTML = `${k} ${field.value}`;
+        decode_div.appendChild(decode_p);
+
+        fields.push({
+            label: k,
+            value: field.value,
+            offset: field.offset,
+            len: field.length,
+            className: toHoverKey(k),
+            startByte: field.offset
+        });
+    }
+
+    const icmp_hdr_len = 8;
+    add_payload_info(pkt, icmp_hdr_len, decode_div, fields, offset);
+
+    decode.appendChild(decode_div);
+
+    return {
+        className: "Internet Control Message Protocol",
+        startByte: offset,
+        byteCount: pkt.length,
+        fields, 
+        header_number,
+    };
+}
+
+function add_tcp_header(pkt, header_number, offset = 0) {
+
+    make_pa("Transmission Control Protocol", header_number);
+    const decode_div = make_div(header_number);
+
+    const pkt_decode = decode_tcp_header(pkt);
+    const fields = [];
+
+    for (const k in pkt_decode) {
+        const field = pkt_decode[k];
+
+        const decode_p = document.createElement("p");
+        decode_p.innerHTML = `${k} ${field.value}`;
+        decode_div.appendChild(decode_p);
+
+        fields.push({
+            label: k,
+            value: field.value,
+            offset: field.offset,
+            len: field.length,
+            className: toHoverKey(k),
+            startByte: field.offset
+        });
+    }
+
+    decode.appendChild(decode_div);
+
+    return {
+        className: "Transmission Control Protocol",
+        startByte: offset,
+        byteCount: pkt.length,
+        fields, 
+        header_number,
+    };
+}
+
+function add_udp_header(pkt, header_number, offset = 0) {
+
+    make_pa("User Datagram Protocol", header_number);
+    const decode_div = make_div(header_number);
+
+    const pkt_decode = decode_udp_header(pkt);
+    const fields = [];
+
+    for (const k in pkt_decode) {
+        const field = pkt_decode[k];
+
+        const decode_p = document.createElement("p");
+        decode_p.innerHTML = `${k} ${field.value}`;
+        decode_div.appendChild(decode_p);
+
+        fields.push({
+            label: k,
+            value: field.value,
+            offset: field.offset,
+            len: field.length,
+            className: toHoverKey(k),
+            startByte: field.offset
+        });
+    }
+
+    add_payload_info(pkt, 8, decode_div, fields, offset);
+
+    decode.appendChild(decode_div);
+
+    return {
+        className: "User Datagram Protocol",
+        startByte: offset,
+        byteCount: pkt.length,
+        fields, 
+        header_number,
+    };
+}
+
+function add_gre_header(pkt, header_number, offset = 0) {
+
+    make_pa("Generic routing encapsulation (GRE)", header_number);
+    const decode_div = make_div(header_number);
+
+    const pkt_decode = decode_gre_header(pkt);
+    const fields = [];
+
+    let gre_hdr_len = 8;
+
+    for (const k in pkt_decode) {
+
+        if (k === "GRE_header_length") {
+            gre_hdr_len = pkt_decode[k];
+            continue;
+        }
+
+        const decode_p = document.createElement("p");
+        decode_p.innerHTML = `${k} ${pkt_decode[k]}`;
+        decode_div.appendChild(decode_p);
+
+        fields.push({
+            label: k,
+            value: pkt_decode[k],
+            offset: 0,
+            len: 0,
+            className: toHoverKey(k),
+            startByte: offset
+        });
+    }
+
+    add_payload_info(pkt, gre_hdr_len, decode_div, fields, offset);
+
+    decode.appendChild(decode_div);
+
+    return {
+        className: "Generic routing encapsulation (GRE)",
+        startByte: offset,
+        byteCount: gre_hdr_len,
+        fields, 
+        header_number,
+    };
+}
+
+function add_payload_info(pkt, header_len, decode_div, fields, offset = 0) {
+    const payload_bytes = pkt.length - header_len;
+    
+    if (payload_bytes > 0) {
+        const payload_p = document.createElement('p');
+        payload_p.innerHTML = `Data: ${payload_bytes} bytes`;
+        decode_div.appendChild(payload_p);
+        
+        fields.push({
+            label: "Data:",
+            value: `${payload_bytes} bytes`,
+            offset: header_len,
+            len: payload_bytes,
+            className: "Data",
+            startByte: offset + header_len
+        });
+    }
 }
 
 function decode_packet(pkt) {
@@ -629,6 +896,7 @@ function decode_packet(pkt) {
 	pkt = pkt.split(/ /);
 	let header_number = 5;
 	let current_offset = 0;
+    const headers = [];
 
 	// Check if packet is long enought
 	if (pkt.length < 14){
@@ -636,63 +904,65 @@ function decode_packet(pkt) {
 		return 1;
 	}
 
-	make_pa("Ethernet Frame", header_number);
-	decode_div = document.createElement("div");
-	decode_div.classList.add("collapse", "decode_body", "decode_width");
-	decode_div.id = "collapseDecode" + header_number;
+	const eth = add_ethernet_header(pkt, header_number, current_offset);
+    headers.push(eth);
+    header_number = header_number + 1;
+    current_offset += 14;
+	let eth_type = pkt.slice(12,14).join("");
 
-	pkt_decode = decode_ethernet_header(pkt.slice(0, pkt.length));
+    // VLAN
+    if (eth_type === "8100" && pkt.length >= 18) {
+        const vlan = add_vlan_header(pkt, header_number, current_offset);
+        headers.push(vlan);
 
-	for (const [label, field] of Object.entries(pkt_decode)) {
-        const decode_p = document.createElement('p');
-        decode_p.innerHTML = `${label} ${field.value}`;
-        decode_div.appendChild(decode_p);
+        header_number = header_number + 1;
+        current_offset += 4;
+        eth_type = pkt.slice(16, 18).join("");
     }
 
-	decode.appendChild(decode_div);
-	header_number = header_number + 1;
-    current_offset += 14;
-
-	let eth_type = pkt.slice(12,14).join("");
-	let next_header = eth_type;
-
-	// Drop Ethernet header.
-	pkt = pkt.slice(14);
+	pkt = pkt.slice(current_offset);
 
 	// LLC
-	if (parseInt(next_header, 16) < 1500) {
-		add_llc_header(pkt, header_number);
-		header_number = header_number + 1;
+	if (parseInt(eth_type, 16) < 1500) {
+		const llc = add_llc_header(pkt, header_number, current_offset);
+        headers.push(llc);
+		header_number = header_number + 1
 
 		let dsap = pkt.slice(0,1).join("");
 
 		// STP
 		if (dsap === "42"){
-			add_stp_header(pkt.slice(3), header_number);
+			const stp = add_stp_header(pkt.slice(3), header_number, current_offset + 3);
+            headers.push(stp);
 		}
 
-		return 0;
+		return headers;
 
 	// ARP
-	} else if (next_header === "0806") {
-		add_arp_header(pkt, header_number);
-		return 0;
+	} else if (eth_type === "0806") {
+	    const arp = add_arp_header(pkt, header_number, current_offset);
+        headers.push(arp);
+        return headers;
 	} 
 
 	while (true) {
 
 		// IPv4 or IP tunnel
-		if (next_header === "0800" || next_header === "04") {
-			add_ipv4_header(pkt, header_number);
-			header_number = header_number + 1;
-			
+		if (eth_type === "0800" || eth_type === "04") {
+			const ip = add_ipv4_header(pkt, header_number, current_offset);
+
+            headers.push(ip);
+
+			header_number++;
+            current_offset += ip.byteCount;
+
 			let ip_protocol = pkt.slice(9,10).join("");
 			let ip_hdr_len = parseInt(pkt.slice(0,1).toString().split("")[1], 16) * 4;
 			let ip_offset = parseInt(pkt.slice(6, 8).join(""), 16) & 8191;
 
-			// Don't parse if IP offset not 0.
-			if (ip_offset) {
-				return 0;
+			// Don't parse if IP offset not 0.  
+			if (false) {
+				return headers;
 			}
 
 			// Drop IP header
@@ -700,34 +970,40 @@ function decode_packet(pkt) {
 
 			// ICMP
 			if (ip_protocol === "01") {
-				add_icmp_header(pkt, header_number);
+				const icmp = add_icmp_header(pkt, header_number, current_offset);
+                headers.push(icmp);
 				header_number = header_number + 1;
 				break;
 			
 			// TCP
 			} else if (ip_protocol === "06") {
-				add_tcp_header(pkt, header_number);
+				const tcp = add_tcp_header(pkt, header_number, current_offset);
+                headers.push(tcp);
 				header_number = header_number + 1;
 				break;
 			
 			// UDP
 			} else if (ip_protocol === "11") {
-				add_udp_header(pkt, header_number);
+				const udp = add_udp_header(pkt, header_number, current_offset);
+                headers.push(udp);
 				header_number = header_number + 1;
 				break;
 			
 			// IP
 			} else if (ip_protocol === "04") {
-				next_header = ip_protocol;
+				eth_type = ip_protocol;
 				continue;
 
 			// GRE
 			} else if (ip_protocol === "2f") {
-				let h_len = add_gre_header(pkt, header_number);
+				const gre = add_gre_header(pkt, header_number, current_offset);
+                headers.push(gre);
+
 				header_number = header_number + 1;
+                current_offset += gre.byteCount;
 
 				// Who is next?
-				next_header = pkt.slice(2,4).join("");
+				eth_type = pkt.slice(2,4).join("");
 				pkt = pkt.slice(h_len);
 				continue;
 
@@ -739,296 +1015,80 @@ function decode_packet(pkt) {
 			break;
 		}
 	}
-	
-	return 0;
+	return headers;
 }
 
-function parse_packet_structure(pkt) {
-    const bytes = pkt.split(/ /);
-    const headers = [];
-    let offset = 0;
+function renderByteRange({
+    decoded,
+    startByte,
+    endByte,
+    spanClass,
+    dataArray
+}) {
+    const container = document.createElement('div');
+    let globalOffset = startByte;
+    const headerMap = new Map();
+    
+    while (globalOffset < endByte) {
+        const infoByte = getByteOwnership(globalOffset, dataArray, decoded);
 
-    if (bytes.length < 14) {
-        console.log('Mimishark: packet is too short');
-        return headers;
-    }
+        const headerKey = infoByte.headerNumber ? 
+            `${infoByte.className}_${infoByte.headerNumber}` : 
+            infoByte.className;
 
-    // Ethernet
-    const eth_hdr = bytes.slice(0, 14);
-    const eth_decode = decode_ethernet_header(eth_hdr);
-    headers.push({
-        className: 'Ethernet Frame',
-        startByte: offset,
-        byteCount: 14,
-        fields: Object.entries(eth_decode).map(([label, field]) => ({
-            label,
-            value: field.value,
-            offset: field.offset,
-            len: field.length,
-            className: toHoverKey(label),
-            startByte: offset + field.offset
-        }))
-    });
-    offset += 14;
-
-    const eth_type = bytes.slice(12, 14).join('');
-    let remaining = bytes.slice(14);
-
-    // LLC + STP
-    if (parseInt(eth_type, 16) < 1500) {
-        const llc_hdr = remaining.slice(0, 3);
-        const llc_decode = decode_llc_header(llc_hdr);
-        headers.push({
-            className: 'Logical-Link Control',
-            startByte: offset,
-            byteCount: 3,
-            fields: Object.entries(llc_decode).map(([label, field]) => ({
-                label,
-                value: field.value,
-                offset: field.offset,
-                len: field.length,
-                className: toHoverKey(label),
-                startByte: offset + field.offset
-            }))
-        });
-        offset += 3;
-
-        if (llc_hdr[0] === '42') {
-            const stp_hdr = remaining.slice(3);
-            const stp_decode = decode_stp_header(stp_hdr);
-            headers.push({
-                className: 'Spanning Tree Protocol',
-                startByte: offset,
-                byteCount: stp_hdr.length,
-                fields: Object.entries(stp_decode).map(([label, field]) => ({
-                    label,
-                    value: field.value,
-                    offset: field.offset,
-                    len: field.length,
-                    className: toHoverKey(label),
-                    startByte: offset + field.offset
-                }))
+        if (!headerMap.has(headerKey)) {
+            const headerDiv = document.createElement('div');
+            headerDiv.className = toHoverKey(infoByte.className, "", infoByte.headerNumber);
+            headerDiv.style.display = 'inline';
+            headerMap.set(headerKey, {
+                div: headerDiv,
+                fieldMap: new Map()
             });
         }
-        return headers;
-    }
+        
+        const headerData = headerMap.get(headerKey);
+        const headerDiv = headerData.div;
+        
+        if (infoByte.labels && infoByte.labels.length > 0) {
+            const firstLabel = infoByte.labels[0];
+            
+            const fieldKey = infoByte.headerNumber ? 
+                `${firstLabel}_${infoByte.headerNumber}` : 
+                firstLabel;
 
-    // ARP
-    if (eth_type === '0806') {
-        const arp_hdr = remaining.slice(0, 28);
-        const arp_decode = decode_arp_header(arp_hdr);
-        headers.push({
-            className: 'Address Resolution Protocol',
-            startByte: offset,
-            byteCount: 28,
-            fields: Object.entries(arp_decode).map(([label, field]) => ({
-                label,
-                value: field.value,
-                offset: field.offset,
-                len: field.length,
-                className: toHoverKey(label),
-                startByte: offset + field.offset
-            }))
-        });
-        return headers;
-    }
-
-    // IPv4
-    if (eth_type === '0800') {
-        if (remaining.length < 20) {
-            console.log('Mimishark: IPv4 header is too short');
-            return headers;
-        }
-
-        const ihl = parseInt(remaining[0][1], 16);
-        const ip_hdr_len = ihl * 4;
-        const ip_hdr = remaining.slice(0, ip_hdr_len);
-        const ip_decode = decode_ip_header(ip_hdr);
-        headers.push({
-            className: 'Internet Protocol Version 4',
-            startByte: offset,
-            byteCount: ip_hdr_len,
-            fields: Object.entries(ip_decode).map(([label, field]) => ({
-                label,
-                value: field.value,
-                offset: field.offset,
-                len: field.length,
-                className: toHoverKey(label),
-                startByte: offset + field.offset
-            }))
-        });
-        offset += ip_hdr_len;
-        remaining = remaining.slice(ip_hdr_len);
-
-        const protocol = ip_hdr[9];
-
-        // TCP
-        if (protocol === '06') {
-            if (remaining.length < 20) return headers;
-
-            const data_offset = parseInt(remaining[12], 16) >> 4;
-            const tcp_hdr_len = data_offset * 4;
-            const full_tcp = remaining.slice(0, tcp_hdr_len + (remaining.length > tcp_hdr_len ? remaining.length - tcp_hdr_len : 0));
-            const tcp_hdr = remaining.slice(0, tcp_hdr_len);
-            const tcp_decode = decode_tcp_header(tcp_hdr);
-
-            const tcpHeader = {
-                className: 'Transmission Control Protocol',
-                startByte: offset,
-                byteCount: full_tcp.length,
-                fields: Object.entries(tcp_decode).map(([label, field]) => ({
-                    label,
-                    value: field.value,
-                    offset: field.offset,
-                    len: field.length,
-                    className: toHoverKey(label),
-                    startByte: offset + field.offset
-                }))
-            };
-
-            if (remaining.length > tcp_hdr_len) {
-                tcpHeader.fields.push({
-                    label: 'Data',
-                    value: '',
-                    offset: tcp_hdr_len,
-                    len: remaining.length - tcp_hdr_len,
-                    className: toHoverKey('Data'),
-                    startByte: offset + tcp_hdr_len
+            if (!headerData.fieldMap.has(fieldKey)) {
+                const fieldDiv = document.createElement('div');
+                fieldDiv.style.display = 'inline';
+                
+                infoByte.labels.forEach(label => {
+                    fieldDiv.classList.add(toHoverKey(label, infoByte.className, infoByte.headerNumber));
                 });
+                
+                headerDiv.appendChild(fieldDiv);
+                headerData.fieldMap.set(fieldKey, fieldDiv);
             }
-
-            headers.push(tcpHeader);
-            return headers;
+            
+            const fieldDiv = headerData.fieldMap.get(fieldKey);
+            const byteSpan = document.createElement('span');
+            byteSpan.textContent = infoByte.byteValue;
+            byteSpan.className = spanClass;
+            
+            infoByte.labels.forEach(label => {
+                byteSpan.classList.add(toHoverKey(label, "", infoByte.headerNumber));
+            });
+            byteSpan.classList.add(toHoverKey(infoByte.className, "", infoByte.headerNumber));
+            
+            fieldDiv.appendChild(byteSpan);
         }
-
-        // ICMP
-        if (protocol === '01') {
-            if (remaining.length < 8) {
-                console.log('Mimishark: ICMP header is too short');
-                return headers;
-            }
-
-            const full_icmp = remaining;
-            const icmp_hdr = remaining.slice(0, 8);
-            const icmp_decode = decode_icmp_header(icmp_hdr);
-
-            const icmpHeader = {
-                className: 'Internet Control Message Protocol',
-                startByte: offset,
-                byteCount: full_icmp.length,
-                fields: Object.entries(icmp_decode).map(([label, field]) => ({
-                    label,
-                    value: field.value,
-                    offset: field.offset,
-                    len: field.length,
-                    className: toHoverKey(label),
-                    startByte: offset + field.offset
-                }))
-            };
-
-            if (full_icmp.length > 8) {
-                icmpHeader.fields.push({
-                    label: 'Data',
-                    value: '',
-                    offset: 8,
-                    len: full_icmp.length - 8,
-                    className: toHoverKey('Data'),
-                    startByte: offset + 8
-                });
-            }
-
-            headers.push(icmpHeader);
-            return headers;
-        }
-
-        // UDP
-        if (protocol === '11') {
-            if (remaining.length < 8) return headers;
-
-            const full_udp = remaining;
-            const udp_hdr = remaining.slice(0, 8);
-            const udp_decode = decode_udp_header(udp_hdr);
-
-            const udpHeader = {
-                className: 'User Datagram Protocol',
-                startByte: offset,
-                byteCount: full_udp.length,
-                fields: Object.entries(udp_decode).map(([label, field]) => ({
-                    label,
-                    value: field.value,
-                    offset: field.offset,
-                    len: field.length,
-                    className: toHoverKey(label),
-                    startByte: offset + field.offset
-                }))
-            };
-
-            if (remaining.length > 8) {
-                udpHeader.fields.push({
-                    label: 'Data',
-                    value: '',
-                    offset: 8,
-                    len: remaining.length - 8,
-                    className: toHoverKey('Data'),
-                    startByte: offset + 8
-                });
-            }
-
-            headers.push(udpHeader);
-            return headers;
-        }
-
-        // GRE
-        if (protocol === '2f') {
-            if (remaining.length < 4) return headers;
-
-            const gre_decode = decode_gre_header(remaining);
-            const gre_hdr_len = gre_decode.GRE_header_length.value;
-            const full_gre = remaining.slice(0, gre_hdr_len + (remaining.length > gre_hdr_len ? remaining.length - gre_hdr_len : 0));
-
-            const greHeader = {
-                className: 'Generic Routing Encapsulation',
-                startByte: offset,
-                byteCount: full_gre.length,
-                fields: Object.entries(gre_decode)
-                    .filter(([k]) => k !== 'GRE_header_length')
-                    .map(([label, field]) => ({
-                        label,
-                        value: field.value,
-                        offset: field.offset,
-                        len: field.length,
-                        className: toHoverKey(label),
-                        startByte: offset + field.offset
-                    }))
-            };
-
-            if (remaining.length > gre_hdr_len) {
-                greHeader.fields.push({
-                    label: 'Data',
-                    value: '',
-                    offset: gre_hdr_len,
-                    len: remaining.length - gre_hdr_len,
-                    className: toHoverKey('Data'),
-                    startByte: offset + gre_hdr_len
-                });
-            }
-
-            headers.push(greHeader);
-            return headers;
-        }
+        
+        globalOffset++;
     }
+    
+    headerMap.forEach((headerData) => {
+        container.appendChild(headerData.div);
+    });
 
-    // Payload
-    if (remaining.length > 0) {
-        headers.push({
-            className: 'Data',
-            startByte: offset,
-            byteCount: remaining.length,
-            fields: []
-        });
-    }
-
-    return headers;
+    return container;
 }
 
 function createByteDivs(pkt, pktData) {
@@ -1040,188 +1100,42 @@ function createByteDivs(pkt, pktData) {
     inputEl.replaceChildren();
     asciiEl.replaceChildren();
 
-    const decoded = parse_packet_structure(pkt);
+    const decoded = decode_packet(pkt);
+    console.log(decoded);
     const bytes = pkt.split(/ /);
-    const string = pktData['bytes'];
-    const asciiString = pktData['ascii'].replace(/doublePrime/g, '"').replace(/singlePrime/g, "'");
+    const asciiString = pktData.ascii
+        .replace(/doublePrime/g, '"')
+        .replace(/singlePrime/g, "'");
 
-    const totalLines = Math.ceil(string.length / 47);
+    const totalLines = Math.ceil(bytes.length / 16);
 
     for (let line = 0; line < totalLines; line++) {
-        const byteP = document.createElement('p');
-        const byteDivs = [];
-        const processedBytes = new Set();
+        const start = line * 16;
+        const end = Math.min(start + 16, bytes.length);
 
-        const lineStartHex = line * 47 + line;
-        const lineEndHex = Math.min(lineStartHex + 47, string.length);
-        const lineHex = string.substring(lineStartHex, lineEndHex).trim();
+        inputEl.appendChild(
+            renderByteRange({
+                decoded,
+                startByte: start,
+                endByte: end,
+                spanClass: 'byte',
+                dataArray: bytes
+            })
+        );
 
-        const lineStartByte = line * 16;
-        const lineEndByte = Math.min(lineStartByte + 16, bytes.length);
+        asciiEl.appendChild(
+            renderByteRange({
+                decoded,
+                startByte: start,
+                endByte: end,
+                spanClass: 'ascii-char',
+                dataArray: asciiString.split('')
+            })
+        );
 
-        decoded.forEach(header => {
-            const hStart = header.startByte;
-            const hEnd = hStart + header.byteCount;
-
-            if (hStart >= lineEndByte || hEnd <= lineStartByte) return;
-
-            const headerDiv = document.createElement('div');
-            headerDiv.className = toHoverKey(header.className);
-            headerDiv.dataset.startByte = hStart;
-            headerDiv.dataset.byteCount = header.byteCount;
-            headerDiv.style.display = 'inline';
-
-            if (header.fields.length > 0) {
-                header.fields.forEach((field, i) => {
-                    const fStart = field.startByte;
-                    const fEnd = fStart + field.len;
-
-                    if (fStart >= lineEndByte || fEnd <= lineStartByte) return;
-
-                    const fieldDiv = document.createElement('div');
-                    fieldDiv.className = toHoverKey(field.label, header.className);
-                    fieldDiv.dataset.startByte = fStart;
-                    fieldDiv.dataset.byteCount = field.len;
-                    fieldDiv.style.display = 'inline';
-
-                    for (let i = Math.max(fStart, lineStartByte); i < Math.min(fEnd, lineEndByte); i++) {
-                        if (processedBytes.has(i)) continue;
-
-                        const span = document.createElement('span');
-                        span.className = 'byte';
-                        span.dataset.byteIndex = i;
-                        span.textContent = bytes[i];
-                        fieldDiv.appendChild(span);
-                        processedBytes.add(i);
-
-                        if (i < Math.min(fEnd - 1, lineEndByte - 1)) {
-                            const space = document.createElement('span');
-                            space.className = 'byte-space';
-                            space.textContent = ' ';
-                            fieldDiv.appendChild(space);
-                        }
-                    }
-
-                    if (fieldDiv.children.length > 0) {
-                        headerDiv.appendChild(fieldDiv);
-                        if (i < header.fields.length - 1) {
-                            headerDiv.appendChild(document.createTextNode(' '));
-                        }
-                    }
-                });
-            } else {
-                for (let i = Math.max(hStart, lineStartByte); i < Math.min(hEnd, lineEndByte); i++) {
-                    if (processedBytes.has(i)) continue;
-
-                    const span = document.createElement('span');
-                    span.className = 'byte';
-                    span.dataset.byteIndex = i;
-                    span.textContent = bytes[i];
-                    headerDiv.appendChild(span);
-                    processedBytes.add(i);
-
-                    if (i < Math.min(hEnd - 1, lineEndByte - 1)) {
-                        const space = document.createElement('span');
-                        space.className = 'byte-space';
-                        space.textContent = ' ';
-                        headerDiv.appendChild(space);
-                    }
-                }
-            }
-
-            if (headerDiv.children.length > 0) {
-                byteDivs.push(headerDiv);
-            }
-        });
-
-        byteDivs.sort((a, b) => +a.dataset.startByte - +b.dataset.startByte);
-        byteDivs.forEach((div, i) => {
-            byteP.appendChild(div);
-            if (i < byteDivs.length - 1) {
-                const next = byteDivs[i + 1];
-                if (+div.dataset.startByte + +div.dataset.byteCount === +next.dataset.startByte) {
-                    byteP.appendChild(document.createTextNode(' '));
-                }
-            }
-        });
-
-        if (byteDivs.length > 0) {
-            inputEl.appendChild(byteP);
-
-            const rowP = document.createElement('p');
-            rowP.textContent = line.toString().padStart(4, '0');
-            rowsEl.appendChild(rowP);
-        }
-
-        const asciiP = document.createElement('p');
-        asciiP.style.whiteSpace = 'nowrap';
-        const asciiDivs = [];
-        const processedAscii = new Set();
-
-        decoded.forEach(header => {
-            const hStart = header.startByte;
-            const hEnd = hStart + header.byteCount;
-
-            if (hStart >= lineEndByte || hEnd <= lineStartByte) return;
-
-            const headerDiv = document.createElement('div');
-            headerDiv.className = toHoverKey(header.className);
-            headerDiv.dataset.startByte = hStart;
-            headerDiv.dataset.byteCount = header.byteCount;
-            headerDiv.style.display = 'inline';
-
-            if (header.fields.length > 0) {
-                header.fields.forEach(field => {
-                    const fStart = field.startByte;
-                    const fEnd = fStart + field.len;
-
-                    if (fStart >= lineEndByte || fEnd <= lineStartByte) return;
-
-                    const fieldDiv = document.createElement('div');
-                    fieldDiv.className = toHoverKey(field.label, header.className);
-                    fieldDiv.dataset.startByte = fStart;
-                    fieldDiv.dataset.byteCount = field.len;
-                    fieldDiv.style.display = 'inline';
-
-                    for (let i = Math.max(fStart, lineStartByte); i < Math.min(fEnd, lineEndByte); i++) {
-                        if (processedAscii.has(i)) continue;
-
-                        const span = document.createElement('span');
-                        span.className = 'ascii-char';
-                        span.dataset.byteIndex = i;
-                        span.textContent = asciiString[i] || '.';
-                        fieldDiv.appendChild(span);
-                        processedAscii.add(i);
-                    }
-
-                    if (fieldDiv.children.length > 0) {
-                        headerDiv.appendChild(fieldDiv);
-                    }
-                });
-            } else {
-                for (let i = Math.max(hStart, lineStartByte); i < Math.min(hEnd, lineEndByte); i++) {
-                    if (processedAscii.has(i)) continue;
-
-                    const span = document.createElement('span');
-                    span.className = 'ascii-char';
-                    span.dataset.byteIndex = i;
-                    span.textContent = asciiString[i] || '.';
-                    headerDiv.appendChild(span);
-                    processedAscii.add(i);
-                }
-            }
-
-            if (headerDiv.children.length > 0) {
-                asciiDivs.push(headerDiv);
-            }
-        });
-
-        asciiDivs.sort((a, b) => +a.dataset.startByte - +b.dataset.startByte);
-        asciiDivs.forEach(div => asciiP.appendChild(div));
-
-        if (asciiDivs.length > 0) {
-            asciiEl.appendChild(asciiP);
-        }
+        const rowP = document.createElement('p');
+        rowP.textContent = line.toString().padStart(4, '0');
+        rowsEl.appendChild(rowP);
     }
 }
 
@@ -1246,8 +1160,8 @@ function AddHoverInfoAttribute() {
 
     decodeEl.querySelectorAll('.decode_head').forEach(head => {
         head.onclick = () => {
-            const title = head.textContent.trim();
-            const hoverKey = toHoverKey(title);
+            const headerNumber = head.getAttribute('data-header-number');
+            const hoverKey = toHoverKey(head.textContent.trim(), "", headerNumber);
             decodeEl.setAttribute('hoverInfo', hoverKey);
             enableHoverByHoverInfo();
         };
@@ -1259,22 +1173,79 @@ function AddHoverInfoAttribute() {
             const parentCollapse = p.closest('.decode_body');
             const headerLink = parentCollapse?.previousElementSibling?.querySelector('a.decode_head');
             const protocolName = headerLink?.textContent.trim() || '';
+            const headerNumber = headerLink?.getAttribute('data-header-number');
 
-            const hoverKey = toHoverKey(text, protocolName);
+            const hoverKey = toHoverKey(text, protocolName, headerNumber);
             decodeEl.setAttribute('hoverInfo', hoverKey);
             enableHoverByHoverInfo();
         };
     });
 }
 
-function toHoverKey(fieldText, protocolName) {
+function toHoverKey(fieldText, protocolName='', headerNumber='') {
+    if (!fieldText || fieldText === null || fieldText === undefined || fieldText === '') {
+        return 'unknown';
+    }
+
     const match = fieldText.match(/^([^:=]+)[:=]?/);
     const field = match ? match[1].trim() : fieldText.trim();
 
-    const cleanField = field.replace(/\s+/g, '_');
-    const cleanProtocol = protocolName ? protocolName.replace(/\s+/g, '_') : '';
+    let cleanField = field
+        .replace(/\./g, '_')
+        .replace(/\s+/g, '_') +  "_" + headerNumber;
 
-    if (!cleanProtocol) return CSS.escape(cleanField);
+    let cleanProtocol = protocolName ? protocolName
+        .replace(/\./g, '_')
+        .replace(/\s+/g, '_') : '';
+
+    if (cleanField.match(/^\d/)) {
+        cleanField = 'field_' + cleanField;
+    }
+    if (cleanProtocol && cleanProtocol.match(/^\d/)) {
+        cleanProtocol = 'proto_' + cleanProtocol;
+    }
+
+    if (!cleanProtocol) {
+        return CSS.escape(cleanField);
+    }
 
     return CSS.escape(`${cleanProtocol}__${cleanField}`);
+}
+
+function decode_ethertype(type_hex) {
+    switch (type_hex) {
+        case "0800": return "IPv4 (0x0800)";
+        case "0806": return "ARP (0x0806)";
+        case "8100": return "802.1Q Virtual LAN (0x8100)";
+
+        default:
+            if (parseInt(type_hex, 16) < 1500)
+                return parseInt(type_hex, 16).toString() + " bytes";
+
+            return type_hex + " (unknown)";
+    }
+}
+
+function getByteOwnership(i, bytes, decoded) {
+    const byteValue = bytes[i];
+    const labels = [];
+    let className = null;
+    let headerNumber;
+
+    decoded.forEach(header => {
+        if (i >= header.startByte && i < header.startByte + header.byteCount) {
+            if (!className) {
+                className = header.className;
+            }
+            header.fields.forEach(field => {
+                const fieldStart = header.startByte + field.offset;
+                if (i >= fieldStart && i < fieldStart + field.len) {
+                    labels.push(field.label);
+                    headerNumber = header.header_number;
+                }
+            });
+        }
+    });
+
+    return { byteValue, className, labels, headerNumber };
 }

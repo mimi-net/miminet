@@ -233,6 +233,7 @@ a.lastResult {
     outline: 1px solid #99f;
     outline-offset: -1px;
     cursor: pointer;
+    z-index: 999;
 }
 
 .highlight {
@@ -245,4 +246,30 @@ a.lastResult {
 .decode_body p:hover {
     color: var(--si-link-color);
     cursor: pointer;
+}
+
+#bytes div[class] {
+    margin-right: 8px;
+}
+
+#bytes .byte {
+    margin-right: 8px;
+}
+
+#bytes .byte:last-child {
+    margin-right: 0;
+}
+
+#bytes div[class] {
+    gap: 8px;
+    margin-right: 8px;
+}
+
+#bytes div[class]:last-child {
+    margin-right: 0; 
+}
+
+.col-6.text-center.border > div {
+    max-height: 282px;
+    overflow-y: auto;
 }
