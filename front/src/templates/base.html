@@ -61,7 +61,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <a class="btn btn-outline-primary btn-icon me-4" data-target="#ModalCopy" id="copy-network" data-toggle="tooltip" data-bs-placement="bottom" title="Сохранить копию" onclick="CopyNetwork()">
                         <i class='bx bx-copy fs-4 mx-1'></i>
                     </a>
-                    <a {% if request.path != url_for('web_network_shared') %} class="btn btn-outline-primary btn-icon" {% else %} class="btn btn-outline-primary btn-icon disabled" {% endif %} href="#netConfigModal" id="net-settings" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети"><i class='bx bx-cog fs-4 mx-1'></i></a>
+                    <a class="btn btn-outline-primary btn-icon" href="#netConfigModal" id="net-settings" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети"><i class='bx bx-cog fs-4 mx-1'></i></a>
                 </div>
             {% else %}
                 <div class="mx-auto navbar-nav">
@@ -120,23 +120,47 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="netConfigModalLabel">Настройки сети</h5>
+                    <h5 class="modal-title" id="netConfigModalLabel">Настройки</h5>
                     <button id="networkConfigurationCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть">
                     </button>
                 </div>
                 <div class="modal-body">
                     <form id="networkConfigurationForm" method="POST" action="">
                         <div class="form-group">
+                            <h6>Сеть</h6>
                             <label for="network_title" class="text-sm">Название сети</label>
-                            <input type="text" class="form-control form-control-sm" id="network_title" name="network_title" value='{{ network.title }}'>
+                            <input type="text" class="form-control form-control-sm" id="network_title" name="network_title" value='{{ network.title }}' {{ 'disabled' if request.path == url_for('web_network_shared') else '' }}>
 
                             <label for="network_description" class="text-sm pt-2">Описание сети</label>
-                            <textarea rows="3" class="form-control form-control-sm" id="network_description" name="network_description">{{ network.description }}</textarea>
+                            <textarea rows="3" class="form-control form-control-sm" id="network_description" name="network_description" {{ 'disabled' if request.path == url_for('web_network_shared') else '' }}>{{ network.description }}</textarea>
+                        </div>
+                        <div>
+                            <hr class="my-3">
+                            <h6>Анимация</h6>
+                            <label for="animation_settings">Эти настройки применяются для всех сетей.</label>
+                        </div>
+                        <div name="animation_settings">
+                            <div>
+                                <input class="form-check-input" role="switch" type="checkbox" id="ARPFilterCheckbox" name="ARPFilterCheckbox">
+                                <label for="ARPFilterCheckbox">Не анимировать ARP пакеты </label>
+                            </div>
+                            <div>
+                                <input class="form-check-input" role="switch" type="checkbox" id="STPFilterCheckbox" name="STPFilterCheckbox">
+                                <label for="STPFilterCheckbox">Не анимировать STP/RSTP пакеты </label>
+                            </div>
+                            <div>
+                                <input class="form-check-input" role="switch" type="checkbox" id="SYNFilterCheckbox" name="SYNFilterCheckbox">
+                                <label for="SYNFilterCheckbox">Не анимировать SYN/SYN+ACK/FIN пакеты (TCP)</label>
+                            </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button id="networkDeleteButton" type="button" data-toggle="modal" class="btn btn-danger" href="#deleteNetConfirmModal">Удалить сеть</button>
+                    <button id="networkDeleteButton" type="button" data-toggle="modal"
+                        class="btn btn-danger" {{'disabled' if request.path == url_for('web_network_shared') else ''}}
+                        href="#deleteNetConfirmModal">
+                        Удалить сеть
+                    </button>
                     <button id="networkConfigurationCancel" type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
                     <button id="networkConfigurationSubmit" type="button" class="btn btn-primary">Сохранить</button>
                 </div>
@@ -278,12 +302,73 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="{{ url_for('static', filename='/miminet_animation.js') }}"></script>
 
 <script>
+    window.isAuthenticated = {{ current_user.is_authenticated|tojson }};
+
     $(document).ready(function() {
+        const rawUserConfig = {{ (current_user.config or "null") | tojson }};
+        const parsedUserConfig = (() => {
+            try {
+                if (!rawUserConfig) {
+                    return {};
+                }
+
+                if (typeof rawUserConfig === "string") {
+                    const parsed = JSON.parse(rawUserConfig);
+                    return parsed && typeof parsed === "object" ? parsed : {};
+                }
+
+                return typeof rawUserConfig === "object" ? rawUserConfig : {};
+            } catch (err) {
+                console.warn("Cannot parse user config", err);
+                return {};
+            }
+        })();
+
+        const serverAnimationFilters = {
+            hideARP: Boolean(window.isAuthenticated && parsedUserConfig.hideARP),
+            hideSTP: Boolean(window.isAuthenticated && parsedUserConfig.hideSTP),
+            hideSYN: Boolean(window.isAuthenticated && parsedUserConfig.hideSYN),
+        };
+
+        if (typeof UpdateFilterStates === "function") {
+            UpdateFilterStates(serverAnimationFilters);
+            if (packets) {
+                SetPacketFilter();
+            }
+        }
+
+        const resetAnimationFilters = function () {
+            console.log("Resetting filters")
+            if (typeof UpdateFilterStates !== "function") {
+                return;
+            }
+
+            const storedFilters =
+                packetFilterState || serverAnimationFilters;
+            UpdateFilterStates(storedFilters);
+
+            if (packets) {
+                SetPacketFilter();
+            }
+        };
+
+        const escHandler = (evt) => {
+            if (evt.key === 'Escape' || evt.keyCode === 27) {
+                resetAnimationFilters();
+            }
+        };
+
+        $('#netConfigModal').on('shown.bs.modal', () => {
+            document.addEventListener('keydown', escHandler);
+        });
+
         $("#networkConfigurationCancel").click(function(){
+            resetAnimationFilters();
             $('#netConfigModal').modal('hide');
         });
 
         $("#networkConfigurationCancelIcon").click(function(){
+            resetAnimationFilters();
             $('#netConfigModal').modal('hide');
         });
 
@@ -291,6 +376,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             network_title = $("#network_title").val();
             network_description = $("#network_description").val();
             UpdateNetworkConfig();
+            SetPacketFilter();
+            if (window.isAuthenticated && typeof SaveAnimationFilters === "function") {
+                SaveAnimationFilters();
+            }
             $('#netConfigModal').modal('hide');
             $('#network_title_head').text(network_title);
         });
@@ -301,6 +390,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 network_title = $("#network_title").val();
                 network_description = $("#network_description").val();
                 UpdateNetworkConfig();
+                SetPacketFilter();
+                if (window.isAuthenticated && typeof SaveAnimationFilters === "function") {
+                    SaveAnimationFilters();
+                }
                 $('#netConfigModal').modal('hide');
                 $('#network_title_head').text(network_title);
                 return false;

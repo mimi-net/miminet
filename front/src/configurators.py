@@ -20,12 +20,16 @@ class JobArgConfigurator:
     def __init__(self, control_id: str):
         """
         Args:
-            cotrol_id (str): ID of the element with argument data
+            control_id (str): ID of the element with argument data
         """
         self.__control_id: str = control_id
         self.__validators: list[Callable[[str], bool]] = []
         self.__text_filters: list[Callable[[str], str]] = []
         self.__error_msg: str = "Невозможно добавить команду: ошибка в аргументе"
+
+    @property
+    def control_id(self) -> str:
+        return self.__control_id
 
     def set_error_msg(self, msg: str):
         if not msg:
@@ -56,13 +60,22 @@ class JobArgConfigurator:
 
         return self
 
-    def configure(self) -> Optional[str]:
+    def configure(self, value: Optional[str] = None) -> Optional[str]:
         """Get an element from the request and performs validation
+
+        Args:
+            value (Optional[str]): If provided, use this value instead of getting from request
 
         Returns:
             Optional[str]: None if argument didn't pass checks
         """
-        arg = get_data(self.__control_id)
+        if value is not None:
+            arg = value
+        else:
+            arg = get_data(self.control_id)
+
+        if arg is None:
+            return None
 
         if all([validate(arg) for validate in self.__validators]):
             res = arg
@@ -103,15 +116,39 @@ class JobConfigurator:
     def configure(self) -> dict[str, object]:
         """Validate every argument and return dict with job's data"""
         random_id: str = uuid.uuid4().hex  # random id for every added job
-        configured_args = [arg.configure() for arg in self.__args]
+
+        # fetch all raw values
+        raw_values = []
+        for job_arg in self.__args:
+            val = get_data(job_arg.control_id)
+            raw_values.append(val if val is not None else "")
+
+        # check if we have 1.2.3.4/5
+        for i in range(len(raw_values) - 1):
+            val = raw_values[i]
+
+            if val and "/" in val:
+                try:
+                    parts = val.split("/")
+                    if len(parts) == 2 and parts[0] and parts[1]:
+                        raw_values[i] = parts[0]
+                        raw_values[i + 1] = parts[1]
+                except Exception:
+                    pass
+
+        # configure args using processed raw_values
+        configured_args = [
+            self.__args[i].configure(value=raw_values[i])
+            for i in range(len(self.__args))
+        ]
 
         # insert arguments into label string
         command_label: str = self.__print_cmd
 
-        for i, arg in enumerate(configured_args):
-            if arg is None:  # check whether the arguments passed the checks
+        for i, conf_arg in enumerate(configured_args):
+            if conf_arg is None:  # check whether the arguments passed the checks
                 raise ArgCheckError(self.__args[i].error_msg)
-            command_label = command_label.replace(f"[{i}]", arg)
+            command_label = command_label.replace(f"[{i}]", conf_arg)
 
         response = {
             "id": random_id,
@@ -120,8 +157,8 @@ class JobConfigurator:
         }
 
         # add args to response
-        for i, arg in enumerate(configured_args):
-            response[f"arg_{i+1}"] = arg
+        for i, conf_arg in enumerate(configured_args):
+            response[f"arg_{i+1}"] = conf_arg
 
         return response
 
@@ -147,7 +184,7 @@ class AbstractDeviceConfigurator:
         self._device_type: str = device_type
         self._device_node = None  # current device node in miminet network
 
-    __MAX_JOBS_COUNT: int = 20
+    __MAX_JOBS_COUNT: int = 30
 
     def create_job(self, job_id: int, job_sign: str) -> JobConfigurator:
         """
@@ -191,7 +228,7 @@ class AbstractDeviceConfigurator:
         device_id = get_data(element_form_id)
 
         if not device_id:
-            raise ConfigurationError("Не указан параметр {element_form_id}")
+            raise ConfigurationError(f"Не указан параметр {element_form_id}")
 
         # json representation
         self._json_network: dict = json.loads(self._cur_network.network)
@@ -239,20 +276,45 @@ class AbstractDeviceConfigurator:
         if job_id not in self.__jobs.keys():
             return  # if user didn't select job
 
-        job_level = len(
-            self._json_network["jobs"]
-        )  # level in the device configuration list
+        editing_job_id = get_data("editing_job_id")
 
-        if job_level > self.__MAX_JOBS_COUNT:
-            raise ConfigurationError("Превышен лимит на количество задач")
+        jobs_list = self._json_network["jobs"]
+        if editing_job_id:
+            job_level = len([j for j in jobs_list if j["id"] != editing_job_id])
+        else:
+            job_level = len(jobs_list)
+
+        if job_level >= self.__MAX_JOBS_COUNT:
+            raise ConfigurationError(
+                f"Достигнут лимит! В сети максимальное количество команд ({self.__MAX_JOBS_COUNT}). "
+                "Для добавления новой команды удалите существующую."
+            )
 
         job = self.__jobs[job_id]
         job_conf_res = job.configure()
 
+        if editing_job_id:
+            # Find the index of the job being edited to preserve order
+            old_job_index = next(
+                (i for i, j in enumerate(jobs_list) if j["id"] == editing_job_id), None
+            )
+
+            # Remove the old job
+            self._json_network["jobs"] = [
+                j for j in jobs_list if j["id"] != editing_job_id
+            ]
+            # Recalculate level after removal
+            job_level = len(self._json_network["jobs"])
+
         job_conf_res["level"] = job_level
         job_conf_res["host_id"] = self._device_node["data"]["id"]
 
-        self._json_network["jobs"].append(job_conf_res)
+        if editing_job_id and old_job_index is not None:
+            # Insert at the same position where the old job was
+            self._json_network["jobs"].insert(old_job_index, job_conf_res)
+        else:
+            # New job - append to the end
+            self._json_network["jobs"].append(job_conf_res)
 
     def __ip_check(self, ip: str) -> bool:
         try:
@@ -285,14 +347,19 @@ class AbstractDeviceConfigurator:
             if not ip_value:
                 continue
 
-            if not mask_value.isdigit():
-                # Check if we have 1.2.3.4/5 ?
-                ip_mask = ip_value.split("/")
-                if len(ip_mask) == 2:
-                    ip_value = ip_mask[0]
-                    mask_value = ip_mask[1]
-                else:
-                    raise ArgCheckError("Не указана маска IP-адреса для линка")
+            # check if split is needed.
+            if "/" in ip_value:
+                try:
+                    parts = ip_value.split("/")
+                    if len(parts) == 2:
+                        ip_value = parts[0]
+                        mask_value = parts[1]
+                except Exception:
+                    pass
+
+            # then check mask validity
+            if not mask_value or not str(mask_value).isdigit():
+                raise ArgCheckError("Не указана маска IP-адреса для линка")
 
             mask_value = int(mask_value)
 
@@ -415,7 +482,7 @@ class EdgeConfigurator(AbstractDeviceConfigurator):
 
     def _configure(self):
         self._conf_prepare()
-        self._update_loss_percentage()
+        self._update_network_issue()
 
         return {
             "message": "Конфигурация обновлена",
@@ -424,16 +491,15 @@ class EdgeConfigurator(AbstractDeviceConfigurator):
             "jobs": self._json_network["jobs"],
         }
 
-    def _update_loss_percentage(self):
-        loss_percent = get_data("edge_loss")
-
-        loss = int(loss_percent)
-
+    def _update_network_issue(self):
+        loss = int(get_data("edge_loss"))
+        duplicate = int(get_data("edge_duplicate"))
         edge_id = get_data("edge_id")
 
         for edge in self._json_network["edges"]:
             if edge["data"]["id"] == edge_id:
                 edge["data"]["loss_percentage"] = loss
+                edge["data"]["duplicate_percentage"] = duplicate
                 break
         else:
             raise ConfigurationError("Ребро не найдено")

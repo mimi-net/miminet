@@ -64,6 +64,14 @@ def port_check(arg: str) -> bool:
         return False
 
 
+def data_size_check(arg: str) -> bool:
+    """Check data size correctness"""
+    try:
+        return int(arg) in range(0, 65536)
+    except (ValueError, TypeError):
+        return False
+
+
 def name_check(arg: str) -> bool:
     """Check that the name is in the allowed length from 2 to 15,
     from allowed characters: a-z, A-Z, 0-9, -, _."""
@@ -118,7 +126,13 @@ def filter_arg_for_options(
 def ping_options_filter(arg: str) -> str:
     """Get only whitelist options from ping options"""
     flags_without_args = ["-b"]
-    flags_with_args = {"-c": r"([1-9]|10)", "-t": r"\d+", "-i": r"\d+", "-s": r"\d+"}
+    flags_with_args = {
+        "-c": r"([1-9]|10)",
+        "-t": r"\d+",
+        "-i": r"\d+",
+        "-s": r"\d+",
+        "-l": r"\d+",
+    }
 
     return filter_arg_for_options(arg, flags_without_args, flags_with_args)
 
@@ -144,6 +158,7 @@ class ErrorType:
     port = "Неверно указан порт"
     mask = "Неверно указана маска подсети"
     options = "Неверно указаны опции"
+    data_size = "Неверно указан размер данных"
 
 
 def build_error(error_type: str, cmd: str) -> str:
@@ -192,8 +207,8 @@ host_ping_opt_job.add_param("config_host_ping_with_options_ip_input_field").add_
 # send UDP data
 host_udp_job = host.create_job(3, "send -s [0] -p udp [1]:[2]")
 host_udp_job.add_param("config_host_send_udp_data_size_input_field").add_check(
-    port_check
-).set_error_msg(build_error(ErrorType.port, "Отправить данные (UDP)"))
+    data_size_check
+).set_error_msg(build_error(ErrorType.data_size, "Отправить данные (UDP)"))
 host_udp_job.add_param("config_host_send_udp_data_ip_input_field").add_check(
     IPv4_check
 ).set_error_msg(build_error(ErrorType.ip, "Отправить данные (UDP)"))
@@ -204,8 +219,8 @@ host_udp_job.add_param("config_host_send_udp_data_port_input_field").add_check(
 # send TCP data
 host_tcp_job = host.create_job(4, "send -s [0] -p tcp [1]:[2]")
 host_tcp_job.add_param("config_host_send_tcp_data_size_input_field").add_check(
-    port_check
-).set_error_msg(build_error(ErrorType.port, "Отправить данные (TCP)"))
+    data_size_check
+).set_error_msg(build_error(ErrorType.data_size, "Отправить данные (TCP)"))
 host_tcp_job.add_param("config_host_send_tcp_data_ip_input_field").add_check(
     IPv4_check
 ).set_error_msg(build_error(ErrorType.ip, "Отправить данные (TCP)"))
@@ -248,7 +263,11 @@ arp_job.add_param("config_host_add_arp_cache_mac_input_field").add_check(
 ).set_error_msg('MAC-адрес для команды "Добавить запись в ARP-cache" указан неверно')
 
 host_dhclient_job = host.create_job(108, "dhcp client")
-host_dhclient_job.add_param("config_host_add_dhclient_field")
+host_dhclient_job.add_param(
+    "config_host_add_dhclient_interface_select_iface_field"
+).add_check(emptiness_check).set_error_msg(
+    'Не указан интерфейс для команды "Запросить IP адрес автоматически"'
+)
 
 # ~ ~ ~ ROUTER JOBS ~ ~ ~
 
@@ -402,6 +421,11 @@ start_dhcp_server.add_param("config_server_add_dhcp_mask_input_field").add_check
 start_dhcp_server.add_param("config_server_add_dhcp_gateway_input_field").add_check(
     IPv4_check
 ).set_error_msg('Неверно указан IP адрес шлюза для команды "Запустить DHCP сервер"')
+start_dhcp_server.add_param(
+    "config_server_add_dhcp_interface_select_iface_field"
+).add_check(emptiness_check).set_error_msg(
+    'Не указан интерфейс для команды "Запустить DHCP сервер"'
+)
 
 
 # ------ request handlers ------

@@ -11,6 +11,11 @@
     <button id="config_host_main_form_submit_button" type="submit" class="btn btn-success w-100">Сохранить</button>
 </script>
 
+<script id="config_host_edit_banner_script" type="text/plain">
+    <div id="config_host_edit_banner" class="alert alert-primary edit-banner mb-3" style="display: none;">
+    </div>
+</script>
+
 <script id="config_host_name_script" type="text/plain">
     <div class="form-group pb-2">
         <label for="config_host_name" class="text-sm">Имя хоста</label>
@@ -97,7 +102,8 @@
 
 <script id="config_host_add_dhclient" type="text/plain">
     <div class="form-group pt-1" name="config_host_select_input">
-        <input type="number" class="form-control form-control-sm" id="config_host_add_dhclient_field" name="config_host_add_dhclient_field" value='1' autocomplete="none" style="display: none;">
+        <select id="config_host_add_dhclient_interface_select_iface_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_host_add_dhclient_interface_select_iface_field">
+        </select>
     </div>
 </script>
 
@@ -121,7 +127,10 @@
 
 <script id="config_host_job_list_elem_script" type="text/plain">
   <li class="py-1 px-2 list-group-item d-flex justify-content-between align-items-center">
-    <span class="ms-auto"><a href="" id="config_host_job_delete"><i class="bx bx-x fs-xl align-middle"></i></a></span>
+    <span class="ms-auto">
+      <a href="" id="config_host_job_edit" class="me-2"><i class="bx bx-edit fs-xl align-middle"></i></a>
+      <a href="" id="config_host_job_delete"><i class="bx bx-x fs-xl align-middle"></i></a>
+    </span>
   </li>
 </script>
 
