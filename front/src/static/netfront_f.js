@@ -22,6 +22,23 @@ const uid = function(){
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
+const TextboxUid = function(){
+    let textbox_name = "textbox_";
+
+    let textbox;
+    for (let textbox_number = 1; textbox_number < 100; textbox_number++) {
+        textbox = textbox_name + textbox_number;
+
+        let t = nodes.find(t => t.data.id === textbox);
+
+        if (!t) {
+            return textbox;
+        }
+    }
+
+    return "text_" + uid();
+}
+
 const HostUid = function(){
 
     let host_name = "host_";
@@ -806,6 +823,10 @@ const prepareStylesheet = function() {
 
         if (!n){
             return label;
+        }
+
+        if (n.config.type === 'textbox') {
+            return n.config.text || label;
         }
 
         $.each(n.interface, function (i) {
