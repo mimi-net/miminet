@@ -8,5 +8,15 @@
         "private_key_file": "./keys/private.key",
         "public_key_file": "./keys/public.key",
         "deployment_ids": ["1"]
+    }],
+    "http://localhost:7088": [{
+        "default": true,
+        "client_id": "343412",
+        "auth_login_url": "http://localhost:7088/lti/authorize",
+        "auth_token_url": "",
+        "key_set_url": "http://localhost:7088/lti/jwks",
+        "private_key_file": "./keys/private.key",
+        "public_key_file": "./keys/public.key",
+        "deployment_ids": ["1"]
     }]
 }

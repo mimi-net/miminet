@@ -151,7 +151,7 @@ app.add_url_rule("/auth/logout", methods=["GET"], view_func=logout)
 # LTI
 app.add_url_rule("/lti/login", methods=["GET", "POST"], view_func=lti_login)
 app.add_url_rule("/lti/launch", methods=["POST"], view_func=lti_callback)
-app.add_url_rule("/jwks", methods=["GET"], view_func=get_jwks)
+app.add_url_rule("/lti/jwks", methods=["GET"], view_func=get_jwks)
 
 # Network
 app.add_url_rule("/create_network", methods=["GET"], view_func=create_network)
