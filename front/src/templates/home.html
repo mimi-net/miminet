@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %} Веб-эмулятор {% endblock %}
-{% block description %}Эмулятор компьютерной сети для образовательных целей на базе ОС Linux{% endblock %}
+{% block title_tag %}<title data-i18n="docTitleHome"> Веб-эмулятор </title>{% endblock %}
+{% block description %}<meta name="description" content="Эмулятор компьютерной сети для образовательных целей на базе ОС Linux" data-i18n-attr="content:docDescHome">{% endblock %}
 {% block content %}
 
 <section class="py-5 my-lg-5">
@@ -10,7 +10,7 @@
                 <div id="new-network-button" class="card-body d-flex flex-column justify-content-center align-items-center">
                     <h2 class="text-white">+</h2>
                     <a class="stretched-link text-decoration-none" href="{{ url_for('create_network') }}">
-                        <h5 class="text-white">Новая сеть</h5>
+                        <h5 class="text-white" data-i18n="newNetwork">Новая сеть</h5>
                     </a>
                 </div>
             </div>

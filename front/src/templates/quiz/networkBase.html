@@ -1,7 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-
     <!-- Google Tag Manager -->
     <script>(function (w, d, s, l, i) {
         w[l] = w[l] || [];
@@ -18,26 +17,23 @@
     })(window, document, 'script', 'dataLayer', 'GTM-KT5XZVF');</script>
     <!-- End Google Tag Manager -->
 
-
     <link rel="icon" href="{{ url_for('static', filename='/images/favlogo.ico') }}" type="image/x-icon">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="{% block description %}{% endblock %}">
+    {% block description %}{% endblock %}
     <meta name="author" content="Илья Зеленчук, Зинаида Романова">
-
-    <title>{% block title %}{% endblock %}</title>
-
+    {% block title_tag %}
+    <title data-i18n="docTitle">Эмулятор компьютерной сети</title>
+{% endblock %}
     {% block og %}{% endblock %}
 
     <!-- Vendor Styles -->
     <link rel="stylesheet" media="screen" href="/assets/vendor/boxicons/css/boxicons.min.css"/>
     <link rel="stylesheet" media="screen" href="/assets/vendor/nouislider/dist/nouislider.min.css"/>
 
-
     <!-- Main Theme Styles + Bootstrap -->
     <link rel="stylesheet" media="screen" href="/assets/css/theme.min.css">
     <link rel="stylesheet" media="screen" href="/assets/css/style.css">
-
 </head>
 
 <body>
@@ -56,49 +52,36 @@
                     <img src="{{ url_for('static', filename='/images/logo.png') }}" width="170" alt="Miminet">
                 </a>
 
-                {# Test name and section name #}
-                <div class="align-items-baseline"
-                    style="display: flex; flex-direction: row;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">
-                    <div class="col-auto mx-1">
-                        <b class="mb-0" id="test_name"></b>
-                    </div>
-                    <div class="col-auto mx-1">
-                        <b class="mb-0" id="slash_symbol"></b>
-                    </div>
-                    <div class="col-auto mx-1">
-                        <p class="mb-0" style="font-weight: normal" id="section_name"></p>
-                    </div>
+                <div class="align-items-baseline" style="display: flex; flex-direction: row;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">
+                    <div class="col-auto mx-1"><b class="mb-0" id="test_name"></b></div>
+                    <div class="col-auto mx-1"><b class="mb-0" id="slash_symbol">/</b></div>
+                    <div class="col-auto mx-1"><p class="mb-0" style="font-weight: normal" id="section_name"></p></div>
                 </div>
 
-                {% if current_user.is_authenticated %}
-                    <div class="navbar-nav">
-                        <li id="trainer-nav-item" class="nav-item">
-                            <a class="nav-link" href="{{ url_for('get_all_tests_endpoint') }}">Тестирование</a>
-                        </li>
-                        <li id="examples-nav-item" class="nav-item">
-                            <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
-                        </li>
-                        <li id="my-networks-nav-item" class="nav-item">
-                            <a class="nav-link" href="{{ url_for('home') }}">Мои сети</a>
-                        </li>
-                    </div>
-                {% else %}
-                    {% if request.path != url_for('login_index') %}
-                        <div class="navbar-nav">
-                            <li id="trainer-nav-item" class="nav-item">
-                                <a class="nav-link" href="{{ url_for('login_index') }}">Тестирование</a>
-                            </li>
-                            <li id="examples-nav-item" class="nav-item">
-                                <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
-                            </li>
-                            <li id="auth-nav-item" class="nav-item">
-                                <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary">
-                                    <i class="bx fs-5 lh-1 me-1"></i>Вход
-                                </a>
-                            </li>
-                        </div>
+                <div class="navbar-nav ms-auto d-flex flex-row align-items-center">
+                    {% if current_user.is_authenticated %}
+                        <a class="nav-link" href="{{ url_for('get_all_tests_endpoint') }}" data-i18n="navTesting">Тестирование</a>
+                        <a class="nav-link" href="{{ url_for('examples') }}" data-i18n="navExamples">Примеры сетей</a>
+                        <a class="nav-link" href="{{ url_for('home') }}" data-i18n="myNetworksLink">Мои сети</a>
+                    {% else %}
+                        {% if request.path != url_for('login_index') %}
+                            <a class="nav-link" href="{{ url_for('login_index') }}" data-i18n="navTesting">Тестирование</a>
+                            <a class="nav-link" href="{{ url_for('examples') }}" data-i18n="navExamples">Примеры сетей</a>
+                            <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary ms-3" data-i18n="loginButton">
+                                <i class="bx fs-5 lh-1 me-1"></i>Вход
+                            </a>
+                        {% endif %}
                     {% endif %}
-                {% endif %}
+                    <div class="nav-item dropdown ms-3">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bx bx-globe fs-4"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" style="min-width: auto;">
+                            <li><a class="dropdown-item" href="#" onclick="setLanguage('ru'); return false;">Русский</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="setLanguage('en'); return false;">English</a></li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </nav>
     {% endif %}
@@ -108,18 +91,17 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="noJobsModalLabel">Что делать?</h5>
+                    <h5 class="modal-title" id="noJobsModalLabel" data-i18n="modalWhatToDoTitle">Что делать?</h5>
                     <button id="noJobsModalCancelIcon" type="button" class="btn-close" data-dismiss="modal"
-                            aria-label="Закрыть"></button>
+                            aria-label="Закрыть" data-i18n-attr="aria-label:closeBtn"></button>
                 </div>
-
                 <div class="modal-body">
-                    <p>Зачем симулировать сеть, если она ничего не делает?!</p>
-                    <p>Прочитайте задание и настройте сеть: добавьте устройства, сконфигурируйте IP адрес и маску у
+                    <p data-i18n="modalPracticeNoJobsP1">Зачем симулировать сеть, если она ничего не делает?!</p>
+                    <p data-i18n="modalPracticeNoJobsP2">Прочитайте задание и настройте сеть: добавьте устройства, сконфигурируйте IP адрес и маску у
                         хостов, в настройках хоста добавьте необходимую команду.</p>
                 </div>
                 <div class="modal-footer">
-                    <button id="noJobsModalSubmit" type="button" class="btn btn-primary">Ок</button>
+                    <button id="noJobsModalSubmit" type="button" class="btn btn-primary" data-i18n="okBtn">Ок</button>
                 </div>
             </div>
         </div>
@@ -128,8 +110,7 @@
     <div id="alertContainer"></div>
 {% endif %}
 
-{% block content %}
-{% endblock %}
+{% block content %}{% endblock %}
 
 </body>
 
@@ -139,46 +120,32 @@
 <script src="{{ url_for('static', filename='/js/ace.js') }}"></script>
 <script src="{{ url_for('static', filename='/js/lodash.js') }}"></script>
 <script src="{{ url_for('static', filename='/js/cytoscape-edgehandles.min.js') }}"></script>
-
-<!-- Vendor Scripts -->
 <script src="/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/assets/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
 <script src="/assets/vendor/parallax-js/dist/parallax.min.js"></script>
 <script src="/assets/vendor/rellax/rellax.min.js"></script>
 <script src="/assets/vendor/nouislider/dist/nouislider.min.js"></script>
-
-
-<!-- Main Theme Script -->
 <script src="/assets/js/theme.min.js"></script>
 <script src="{{ url_for('static', filename='/icons.js') }}"></script>
 <script src="{{ url_for('static', filename='/netfront_f.js') }}"></script>
 <script src="{{ url_for('static', filename='/miminet_animation.js') }}"></script>
+<script src="{{ url_for('static', filename='/js/i18n.js') }}"></script>
 
 <script>
     $(document).ready(function () {
-        $("#noJobsModalCancelIcon").click(function () {
-            $('#noJobsModal').modal('hide');
-        });
-
-        $("#noJobsModalSubmit").click(function () {
-            $('#noJobsModal').modal('hide');
-        });
-
-        let popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+        $("#noJobsModalCancelIcon").click(function () { $('#noJobsModal').modal('hide'); });
+        $("#noJobsModalSubmit").click(function () { $('#noJobsModal').modal('hide'); });
+        let popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
         let popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
             return new bootstrap.Popover(popoverTriggerEl)
-        })
-
+        });
     });
-
     $(function () {
         $('[data-toggle="tooltip"]').tooltip({trigger: 'hover'});
     });
-
 </script>
 
-{% block network %}
-{% endblock %}
+{% block network %}{% endblock %}
 
 <script src="{{ url_for('static', filename='netfront.js') }}"></script>
 <script src="{{ url_for('static', filename='config.js') }}"></script>

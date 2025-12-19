@@ -1,6 +1,8 @@
 {% extends "base.html" %}
-{% block title %}Результаты{% endblock %}
-{% block description %}Сетевой тренажер для обучения компьютерным сетям{% endblock %}
+{% block title_tag %}
+    <title data-i18n="resultsTitle">Результаты</title>
+{% endblock %}
+{% block description %}<meta name="description" content="Сетевой тренажер для обучения компьютерным сетям" data-i18n-attr="content:workspaceDocDescription">{% endblock %}
 
 {% block content %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
@@ -24,10 +26,10 @@
           <div class="card-body">
             <h5 class="card-title text-info">
               <i class="bx bx-time-five" style="vertical-align: middle; margin-right: 0.5rem;"></i>
-              Ответы появятся позже
+              <span data-i18n="resultsAnswersLater">Ответы появятся позже</span>
             </h5>
             <p class="card-text mb-0" style="font-size: 1.1rem;">
-              Вы завершили экзамен. Результаты станут доступны
+              <span data-i18n="resultsExamFinished">Вы завершили экзамен. Результаты станут доступны</span>
               <strong>{{ data.results_available_from.strftime('%d.%m.%Y %H:%M') }}</strong>.
             </p>
           </div>
@@ -35,7 +37,7 @@
       {% else %}
         <div class="alert alert-info" role="alert">
           <i class="bx bx-hourglass" style="vertical-align: middle; margin-right: 0.5rem;"></i>
-          Ваши ответы находятся на проверке. Пожалуйста, ожидайте результатов.
+          <span data-i18n="resultsPending">Ваши ответы находятся на проверке. Пожалуйста, ожидайте результатов.</span>
         </div>
       {% endif %}
 
@@ -47,7 +49,8 @@
                 <h5 class="mb-0 markdown-content">{{ q.question_text }}</h5>
                 <a href="{{ url_for('web_network') }}?guid={{ q.network_guid }}"
                    target="_blank"
-                   class="btn btn-outline-primary btn-sm">
+                   class="btn btn-outline-primary btn-sm"
+                   data-i18n="viewMyAnswer">
                   Посмотреть мой ответ
                 </a>
               </div>
@@ -57,7 +60,7 @@
       </div>
 
     {% else %}
-      <h2 class="mb-4">Результаты теста</h2>
+      <h2 class="mb-4" data-i18n="resultsTestResults">Результаты теста</h2>
 
       <div class="row">
         {% for q in data.results %}
@@ -73,15 +76,16 @@
                     <span class="markdown-content">{{ q.question_text }}</span>
                   </h5>
                   {% if q.max_score == 0 %}
-                    <p class="card-text mb-0"><strong>Ответ на проверке</strong></p>
+                    <p class="card-text mb-0"><strong data-i18n="resultsOnCheck">Ответ на проверке</strong></p>
                   {% else %}
-                    <p class="card-text mb-0"><strong>Баллы:</strong> {{ q.score }} из {{ q.max_score }}</p>
+                    <p class="card-text mb-0"><strong data-i18n="resultsPoints">Баллы</strong>: {{ q.score }} <span data-i18n="counterOf">из</span> {{ q.max_score }}</p>
                   {% endif %}
                 </div>
                 {% if q.network_guid %}
                   <a href="{{ url_for('web_network') }}?guid={{ q.network_guid }}"
                      target="_blank"
-                     class="btn btn-outline-primary btn-sm">
+                     class="btn btn-outline-primary btn-sm"
+                     data-i18n="viewMyAnswer">
                     Посмотреть мой ответ
                   </a>
                 {% endif %}
@@ -92,18 +96,18 @@
       </div>
 
       <div class="mt-4">
-        <p class="fs-5"><strong>Тест пройден за:</strong> {{ data.time_spent }}</p>
+        <p class="fs-5"><strong data-i18n="resultsTimeSpent">Тест пройден за:</strong> {{ data.time_spent }}</p>
         <p class="fs-5 mt-2">
-          <strong>Итоговый результат:</strong>
+          <strong data-i18n="resultsFinal">Итоговый результат:</strong>
           {% set total_score = data.theory_correct + data.practice_results|sum(attribute='score') %}
           {% set total_max = data.theory_count + data.practice_results|sum(attribute='max_score') %}
-          {{ total_score }} / {{ total_max }} баллов
+          {{ total_score }} / {{ total_max }} <span data-i18n="points">баллов</span>
         </p>
       </div>
     {% endif %}
 
     <div class="d-flex align-items-center text-start mt-4">
-      <button class="btn btn-primary me-3" name="backToTests">
+      <button class="btn btn-primary me-3" name="backToTests" data-i18n="backToTestsBtn">
         Назад к тестам
       </button>
     </div>

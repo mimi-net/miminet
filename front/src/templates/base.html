@@ -1,35 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru"> <!-- Язык будет меняться динамически через JS -->
 <head>
-
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-KT5XZVF');</script>
-<!-- End Google Tag Manager -->
-
+    <!-- End Google Tag Manager -->
 
     <link rel="icon" href="{{ url_for('static', filename='/images/favlogo.ico') }}" type="image/x-icon">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="{% block description %}{% endblock %}">
+    {% block description %}{% endblock %}
     <meta name="author" content="Илья Зеленчук, Зинаида Романова">
-
-    <title>{% block title %}{% endblock %}</title>
-
+{% block title_tag %}
+    <title data-i18n="docTitle">Эмулятор компьютерной сети</title>
+{% endblock %}
     {% block og %}{% endblock %}
 
     <!-- Vendor Styles -->
     <link rel="stylesheet" media="screen" href="/assets/vendor/boxicons/css/boxicons.min.css"/>
     <link rel="stylesheet" media="screen" href="/assets/vendor/nouislider/dist/nouislider.min.css"/>
 
-
     <!-- Main Theme Styles + Bootstrap -->
     <link rel="stylesheet" media="screen" href="/assets/css/theme.min.css">
     <link rel="stylesheet" media="screen" href="/assets/css/style.css">
-
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -44,71 +40,67 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <img src="{{ url_for('static', filename='/images/logo.png') }}" width="170" alt="Miminet">
         </a>
 
+        
         {% if network %}
-            {% if current_user.is_authenticated %}
-                <div class="mx-auto navbar-nav">
-                    {% if request.path != url_for('web_network_shared') %}
-                    <a class="d-inline nav-link" href="{{ url_for('home') }}">Мои сети</a>
-                    <a class="d-inline nav-link" href="#"> / </a>
+            <div class="mx-auto">
+                <div class="navbar-nav">
+                    {% if current_user.is_authenticated and request.path != url_for('web_network_shared') %}
+                    <a class="d-inline nav-link" href="{{ url_for('home') }}" data-i18n="myNetworksLink">Мои сети</a>
+                    <a class="d-inline nav-link px-1" href="#">/</a>
                     {% endif %}
                     <a class="d-inline nav-link" id="network_title_head" href="{{ url_for('web_network', guid=network.guid) }}">{{ network.title }}</a>
                 </div>
-
-                <div class="form-check pe-lg-1">
-                    <a class="btn btn-success btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" id="share-network" title="Сеть доступна по URL" onclick="urlCopyButton()">
-                        <i class='bx bx-share-alt fs-4 mx-1' ></i>
-                    </a>
-                    <a class="btn btn-outline-primary btn-icon me-4" data-target="#ModalCopy" id="copy-network" data-toggle="tooltip" data-bs-placement="bottom" title="Сохранить копию" onclick="CopyNetwork()">
-                        <i class='bx bx-copy fs-4 mx-1'></i>
-                    </a>
-                    <a {% if request.path != url_for('web_network_shared') %} class="btn btn-outline-primary btn-icon" {% else %} class="btn btn-outline-primary btn-icon disabled" {% endif %} href="#netConfigModal" id="net-settings" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети"><i class='bx bx-cog fs-4 mx-1'></i></a>
-                </div>
-            {% else %}
-                <div class="mx-auto navbar-nav">
-                    <a class="d-inline nav-link" id="network_title_head" href="#">{{ network.title }}</a>
-                </div>
-                <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary">
-                    <i class="bx fs-5 lh-1 me-1"></i>Вход
-                </a>
-            {% endif %}
-        {% else %}
-            {% if current_user.is_authenticated %}
-                <div class="navbar-nav">
-		            <li id="courses-nav-item" class="nav-item">
-                         <a class="nav-link" href="{{ url_for('course') }}">Учебные курсы</a>
-                    </li>
-                    <li id="trainer-nav-item" class="nav-item">
-                        <a class="nav-link" href="{{ url_for('get_all_tests_endpoint') }}">Тестирование</a>
-                    </li>
-                    <li id="examples-nav-item" class="nav-item">
-                        <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
-                    </li>
-                    <li id="my-networks-nav-item" class="nav-item">
-                        <a class="nav-link" href="{{ url_for('home') }}">Мои сети</a>
-                    </li>
-                </div>
-            {% else %}
-                {% if request.path != url_for('login_index') %}
-                    <div class="navbar-nav">
-                        <li id="courses-nav-item" class="nav-item">
-                            <a class="nav-link" href="{{ url_for('course') }}">Учебные курсы</a>
-                        </li>
-                        <li id="trainer-nav-item" id="trainer-nav-item" class="nav-item">
-                            <a class="nav-link" href="{{ url_for('login_index') }}">Тестирование</a>
-                        </li>
-                        <li id="examples-nav-item" class="nav-item">
-                            <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
-                        </li>
-                        <li id="auth-nav-item" class="nav-item">
-                            <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary">
-                                <i class="bx fs-5 lh-1 me-1"></i>Вход
-                            </a>
-                        </li>
-                    </div>
-                {% endif %}
-            {% endif %}
+            </div>
         {% endif %}
 
+     
+        <div class="navbar-nav ms-auto">
+            {% if not network %}
+                <!-- Ссылки для главных страниц -->
+                {% if current_user.is_authenticated %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('course') }}" data-i18n="navCourses">Учебные курсы</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('get_all_tests_endpoint') }}" data-i18n="navTesting">Тестирование</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('examples') }}" data-i18n="navExamples">Примеры сетей</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}" data-i18n="myNetworksLink">Мои сети</a></li>
+                {% else %}
+                    {% if request.path != url_for('login_index') %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('course') }}" data-i18n="navCourses">Учебные курсы</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('login_index') }}" data-i18n="navTesting">Тестирование</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('examples') }}" data-i18n="navExamples">Примеры сетей</a></li>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+
+            <!-- Переключатель языка -->
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bx bx-globe fs-4"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" style="min-width: auto;">
+                    <li><a class="dropdown-item" href="#" onclick="setLanguage('ru'); return false;">Русский</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="setLanguage('en'); return false;">English</a></li>
+                </ul>
+            </li>
+
+            <!-- Кнопки действий -->
+            <li class="nav-item ps-3">
+                {% if network %}
+                    {% if current_user.is_authenticated %}
+                        <div class="d-flex align-items-center">
+                            <a class="btn btn-success btn-icon" id="share-network" data-i18n-attr="aria-label:tooltipUrlAvailable" onclick="urlCopyButton()"><i class='bx bx-share-alt fs-4 mx-1'></i></a>
+                            <a class="btn btn-outline-primary btn-icon ms-2" data-target="#ModalCopy" id="copy-network" data-i18n-attr="aria-label:tooltipSaveChanges" onclick="CopyNetwork()"><i class='bx bx-copy fs-4 mx-1'></i></a>
+                            <a {% if request.path != url_for('web_network_shared') %} class="btn btn-outline-primary btn-icon ms-2" {% else %} class="btn btn-outline-primary btn-icon disabled ms-2" {% endif %} href="#netConfigModal" id="net-settings" data-bs-toggle="modal" data-target="#netConfigModal" data-i18n-attr="aria-label:tooltipNetSettings"><i class='bx bx-cog fs-4 mx-1'></i></a>
+                        </div>
+                    {% else %}
+                        <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary" data-i18n="loginButton"><i class="bx fs-5 lh-1 me-1"></i>Вход</a>
+                    {% endif %}
+                {% else %}
+                    {% if not current_user.is_authenticated and request.path != url_for('login_index') %}
+                         <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary" data-i18n="loginButton"><i class="bx fs-5 lh-1 me-1"></i>Вход</a>
+                    {% endif %}
+                {% endif %}
+            </li>
+        </div>
     </div>
 </nav>
 {% endif %}
@@ -120,25 +112,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="netConfigModalLabel">Настройки сети</h5>
-                    <button id="networkConfigurationCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть">
+                    <h5 class="modal-title" id="netConfigModalLabel" data-i18n="modalNetSettingsTitle">Настройки сети</h5>
+                    <button id="networkConfigurationCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть" data-i18n-attr="aria-label:closeBtn">
                     </button>
                 </div>
                 <div class="modal-body">
                     <form id="networkConfigurationForm" method="POST" action="">
                         <div class="form-group">
-                            <label for="network_title" class="text-sm">Название сети</label>
+                            <label for="network_title" class="text-sm" data-i18n="modalNetNameLabel">Название сети</label>
                             <input type="text" class="form-control form-control-sm" id="network_title" name="network_title" value='{{ network.title }}'>
 
-                            <label for="network_description" class="text-sm pt-2">Описание сети</label>
+                            <label for="network_description" class="text-sm pt-2" data-i18n="modalNetDescLabel">Описание сети</label>
                             <textarea rows="3" class="form-control form-control-sm" id="network_description" name="network_description">{{ network.description }}</textarea>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button id="networkDeleteButton" type="button" data-toggle="modal" class="btn btn-danger" href="#deleteNetConfirmModal">Удалить сеть</button>
-                    <button id="networkConfigurationCancel" type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
-                    <button id="networkConfigurationSubmit" type="button" class="btn btn-primary">Сохранить</button>
+                    <button id="networkDeleteButton" type="button" data-toggle="modal" class="btn btn-danger" href="#deleteNetConfirmModal" data-i18n="deleteNetworkBtn">Удалить сеть</button>
+                    <button id="networkConfigurationCancel" type="button" class="btn btn-secondary" data-dismiss="modal" data-i18n="closeBtn">Закрыть</button>
+                    <button id="networkConfigurationSubmit" type="button" class="btn btn-primary" data-i18n="saveBtn">Сохранить</button>
                 </div>
             </div>
         </div>
@@ -148,14 +140,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="netDeleteModalLabel">Вы точно хотите удалить эту сеть?</h5>
-                    <button id="networkDeleteCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть"/>
+                    <h5 class="modal-title" id="netDeleteModalLabel" data-i18n="modalDeleteConfirmTitle">Вы точно хотите удалить эту сеть?</h5>
+                    <button id="networkDeleteCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть" data-i18n-attr="aria-label:closeBtn"/>
                 </div>
                 <div class="modal-body">
                     <form id="networkDeleteForm" method="POST" action="{{ url_for('delete_network', guid=network.guid) }}">
                     </form>
-                    <button type="button" class="btn btn-danger" style="float: left;" id="networkDeleteSubmitButton">Да, удалить!</button>
-                    <button type="button" data-dismiss="modal" class="btn btn-secondary" style="float: right;" id="networkDeleteCancel">Нет</button>
+                    <button type="button" class="btn btn-danger" style="float: left;" id="networkDeleteSubmitButton" data-i18n="yesDeleteBtn">Да, удалить!</button>
+                    <button type="button" data-dismiss="modal" class="btn btn-secondary" style="float: right;" id="networkDeleteCancel" data-i18n="noBtn">Нет</button>
                 </div>
             </div>
         </div>
@@ -165,16 +157,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="noJobsModalLabel">Что делать?</h5>
-                    <button id="noJobsModalCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть"/>
+                    <h5 class="modal-title" id="noJobsModalLabel" data-i18n="modalWhatToDoTitle">Что делать?</h5>
+                    <button id="noJobsModalCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть" data-i18n-attr="aria-label:closeBtn"/>
                 </div>
                 <div class="modal-body">
-                    <p>Зачем эмулировать сеть, если она ничего не делает?!</p>
-                    <p>В настройках хоста добавьте команду, например, вы можете выполнить команду 'ping' на определенный IP адрес или имя хоста.</p>
-                    <p>И не забывайте конфигурировать IP адрес и маску у хостов.</p>
+                    <p data-i18n="modalNoJobsP1">Зачем эмулировать сеть, если она ничего не делает?!</p>
+                    <p data-i18n="modalNoJobsP2">В настройках хоста добавьте команду, например, вы можете выполнить команду 'ping' на определенный IP адрес или имя хоста.</p>
+                    <p data-i18n="modalNoJobsP3">И не забывайте конфигурировать IP адрес и маску у хостов.</p>
                 </div>
                 <div class="modal-footer">
-                    <button id="noJobsModalSubmit" type="button" class="btn btn-primary">Ок</button>
+                    <button id="noJobsModalSubmit" type="button" class="btn btn-primary" data-i18n="okBtn">Ок</button>
                 </div>
             </div>
         </div>
@@ -185,15 +177,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="toomanyHostLabel">Сеть слишком большая!</h5>
-                    <button id="tooManyHostCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть"/>
+                    <h5 class="modal-title" id="toomanyHostLabel" data-i18n="modalTooLargeTitle">Сеть слишком большая!</h5>
+                    <button id="tooManyHostCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть" data-i18n-attr="aria-label:closeBtn"/>
                 </div>
                 <div class="modal-body">
-                    <p>Текущая сеть слишком большая для эмуляции.</p>
-                    <p>Максимальный размер сети доступный для эмуляции в Miminet составляет 80 узлов (хосты, коммутаторы, сервера, маршрутизацторы).</p>
+                    <p data-i18n="modalTooLargeP1">Текущая сеть слишком большая для эмуляции.</p>
+                    <p data-i18n="modalTooLargeP2">Максимальный размер сети доступный для эмуляции в Miminet составляет 80 узлов (хосты, коммутаторы, сервера, маршрутизацторы).</p>
                 </div>
                 <div class="modal-footer">
-                    <button id="tooManyHostModalSubmit" type="button" class="btn btn-primary">Ок</button>
+                    <button id="tooManyHostModalSubmit" type="button" class="btn btn-primary" data-i18n="okBtn">Ок</button>
                 </div>
             </div>
         </div>
@@ -204,12 +196,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Вы успешно сохранили сеть к себе</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"/>
+                    <h5 class="modal-title" id="exampleModalLabel" data-i18n="modalCopySuccessTitle">Вы успешно сохранили сеть к себе</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть" data-i18n-attr="aria-label:closeBtn"/>
                 </div>
                 <div class="modal-body">
-                    <button class="btn btn-primary shadow-primary modal-option" data-option="edit">Перейти к редактированию</button>
-                    <button class="btn btn-secondary shadow-secondary modal-option" data-option="continue">Продолжить здесь</button>
+                    <button class="btn btn-primary shadow-primary modal-option" data-option="edit" data-i18n="goToEditBtn">Перейти к редактированию</button>
+                    <button class="btn btn-secondary shadow-secondary modal-option" data-option="continue" data-i18n="continueHereBtn">Продолжить здесь</button>
                 </div>
             </div>
         </div>
@@ -218,41 +210,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div id="alertContainer"></div>
 {% endif %}
 
-{% block content %}
-{% endblock %}
+{% block content %}{% endblock %}
 
-<!-- Footer -->
-<!-- footer class="footer dark-mode bg-dark border-top border-light pt-5 pb-4 pb-lg-5">
-    <div class="container pt-lg-4">
-        <div class="row pb-5">
-          <div class="col-lg-4 col-md-6">
-            <div class="navbar-brand text-dark p-0 me-0 mb-3 mb-lg-4">
-              <img src="{{ url_for('static', filename='/images/logo.png') }}" width="170" alt="Miminet">
-              Miminet
-            </div>
-            <p class="fs-sm text-light opacity-70 pb-lg-3 mb-4">Веб-эмулятор компьютерной сети для образовательных целей.</p>
-          </div>
-          <div class="col-xl-6 col-lg-7 col-md-5 offset-xl-2 offset-md-1 pt-4 pt-md-1 pt-lg-0">
-            <div id="footer-links" class="row">
-              <div class="col-lg-4">
-                <h6 class="mb-2">
-                  <a href="#useful-links" class="d-block text-dark dropdown-toggle d-lg-none py-2" data-bs-toggle="collapse">Useful Links</a>
-                </h6>
-                <div id="useful-links" class="collapse d-lg-block" data-bs-parent="#footer-links">
-                  <ul class="nav flex-column pb-lg-1 mb-lg-3">
-                    <li class="nav-item"><a href="/" class="nav-link d-inline-block px-0 pt-1 pb-2">Miminet</a></li>
-                  </ul>
-                </div>
-              </div>
-              <div class="col-xl-4 col-lg-5 pt-2 pt-lg-0">
-                <h6 class="mb-2">Наше компьюнити</h6>
-                <a href="https://t.me/MimiNetCommunity" class="fw-medium">t.me/MimiNetCommunity</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </footer -->
 </body>
 
 <script src="{{ url_for('static', filename='/js/jquery-3.6.0.min.js') }}"></script>
@@ -261,32 +220,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="{{ url_for('static', filename='/js/ace.js') }}"></script>
 <script src="{{ url_for('static', filename='/js/lodash.js') }}"></script>
 <script src="{{ url_for('static', filename='/js/cytoscape-edgehandles.min.js') }}"></script>
-
-<!-- Vendor Scripts -->
 <script src="/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/assets/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
 <script src="/assets/vendor/parallax-js/dist/parallax.min.js"></script>
 <script src="/assets/vendor/rellax/rellax.min.js"></script>
 <script src="/assets/vendor/nouislider/dist/nouislider.min.js"></script>
-<!--script type="module" src="/assets/js/range-slider.mjs"></script-->
-
-
-<!-- Main Theme Script -->
 <script src="/assets/js/theme.min.js"></script>
 <script src="{{ url_for('static', filename='/icons.js') }}"></script>
 <script src="{{ url_for('static', filename='/netfront_f.js') }}"></script>
 <script src="{{ url_for('static', filename='/miminet_animation.js') }}"></script>
+<script src="{{ url_for('static', filename='/js/i18n.js') }}"></script>
 
 <script>
     $(document).ready(function() {
-        $("#networkConfigurationCancel").click(function(){
-            $('#netConfigModal').modal('hide');
-        });
-
-        $("#networkConfigurationCancelIcon").click(function(){
-            $('#netConfigModal').modal('hide');
-        });
-
+        $("#networkConfigurationCancel").click(function(){ $('#netConfigModal').modal('hide'); });
+        $("#networkConfigurationCancelIcon").click(function(){ $('#netConfigModal').modal('hide'); });
         $("#networkConfigurationSubmit").click(function(){
             network_title = $("#network_title").val();
             network_description = $("#network_description").val();
@@ -294,7 +242,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             $('#netConfigModal').modal('hide');
             $('#network_title_head').text(network_title);
         });
-
         $('#networkConfigurationForm').keypress(function (e) {
             var key = (e.keyCode || e.which);
             if(key == 13 || key == 3){
@@ -306,76 +253,58 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 return false;
             }
         });
-
         $("#networkDeleteButton").click(function(){
             $('#netConfigModal').modal('hide');
             $('#deleteNetConfirmModal').modal('toggle');
         });
-
-        $("#networkDeleteCancelIcon").click(function(){
-            $('#deleteNetConfirmModal').modal('hide');
-        });
-
-        $("#networkDeleteCancel").click(function(){
-            $('#deleteNetConfirmModal').modal('hide');
-        });
-
-        $("#networkDeleteSubmitButton").click(function(){
-            $("#networkDeleteForm").submit(); // Submit the form
-        });
-
-        $("#noJobsModalCancelIcon").click(function(){
-            $('#noJobsModal').modal('hide');
-        });
-
-        $("#noJobsModalSubmit").click(function(){
-            $('#noJobsModal').modal('hide');
-        });
-
-        $("#tooManyHostCancelIcon").click(function(){
-            $('#tooManyHostModal').modal('hide');
-        });
-
-        $("#tooManyHostModalSubmit").click(function(){
-            $('#tooManyHostModal').modal('hide');
-        });
-
-
-        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+        $("#networkDeleteCancelIcon").click(function(){ $('#deleteNetConfirmModal').modal('hide'); });
+        $("#networkDeleteCancel").click(function(){ $('#deleteNetConfirmModal').modal('hide'); });
+        $("#networkDeleteSubmitButton").click(function(){ $("#networkDeleteForm").submit(); });
+        $("#noJobsModalCancelIcon").click(function(){ $('#noJobsModal').modal('hide'); });
+        $("#noJobsModalSubmit").click(function(){ $('#noJobsModal').modal('hide'); });
+        $("#tooManyHostCancelIcon").click(function(){ $('#tooManyHostModal').modal('hide'); });
+        $("#tooManyHostModalSubmit").click(function(){ $('#tooManyHostModal').modal('hide'); });
+        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
         var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
             return new bootstrap.Popover(popoverTriggerEl)
-        })
-
+        });
     });
 </script>
-
 <script type="text/javascript">
-    function urlCopyButton(){
+    async function getTranslations() {
+      if (typeof translations === 'undefined' || !translations[currentLanguage]) {
+        await loadTranslations(currentLanguage);
+      }
+      return translations[currentLanguage];
+    }
+    async function urlCopyButton(){
         var record_url = document.URL;
         navigator.clipboard.writeText(record_url);
         console.log('Copy url is made!');
 
+        const translations = await getTranslations();
+        const message = translations.alertLinkCopied || 'Ссылка на сеть скопирована';
         var alertElement = document.createElement("div");
         alertElement.classList.add("alert", "alert-success", "fixed-top");
         alertElement.style.textAlign = "center";
         alertElement.style.width = "50%";
         alertElement.style.marginLeft = "auto";
         alertElement.style.marginRight = "auto";
-        alertElement.innerHTML = "Ссылка на сеть скопирована";
+        alertElement.innerHTML = message;
         var alertContainer = document.getElementById("alertContainer");
         alertContainer.appendChild(alertElement);
         setTimeout(function() {
-            alertContainer.removeChild(alertElement);
+            if (alertContainer && alertContainer.contains(alertElement)) {
+               alertContainer.removeChild(alertElement);
+            }
         }, 1000);
-}
-
+    }
     $(function() {
         $('[data-toggle="tooltip"]').tooltip({trigger : 'hover'});
     });
 </script>
 
-{% block network %}
-{% endblock %}
+{% block network %}{% endblock %}
 
 <script src="{{ url_for('static', filename='netfront.js') }}"></script>
 <script src="{{ url_for('static', filename='config.js') }}"></script>

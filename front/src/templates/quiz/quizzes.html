@@ -1,17 +1,16 @@
 {% extends "base.html" %}
-{% block title %} Тестирование {% endblock %}
-{% block description %}Сетевой тренажер для обучения компьютерным сетям{% endblock %}
+{% block title_tag %}
+    <title data-i18n="navTesting">Тестирование по компьютерным сетям</title>
+{% endblock %}
+{% block description %}<meta name="description" content="Сетевой тренажер для обучения компьютерным сетям" data-i18n-attr="content:workspaceDocDescription">{% endblock %}
 
 {% block content %}
 
     <section class="container py-5 my-lg-5">
         <div class="row" style="align-content: center; justify-content: space-between">
             <div class="col-auto">
-                <h1 class="me-3">Тестирование по компьютерным сетям</h1>
+                <h1 class="me-3" data-i18n="quizTitle">Тестирование по компьютерным сетям</h1>
             </div>
-            {#<div class="col">
-                <a href="/admin" class="btn btn-primary">Добавить тест</a>
-            </div>#}
         </div>
 
         <!-- Item -->
@@ -26,8 +25,8 @@
                             {% if quiz.description %}
                                 <p style="margin-bottom: 4px">{{ quiz.description }}</p>
                             {% else %}
-                                <p style="margin-bottom: 20px;"></p> 
-                            {% endif %}                        
+                                <p style="margin-bottom: 20px;"></p>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="col-sm-4">
@@ -40,14 +39,47 @@
             </article>
 
             <script>
-                function morph(int, array) {
-                    return (array = array || ['раздел', 'раздела', 'разделов']) && array[(int % 100 > 4 && int % 100 < 20) ? 2 : [2, 0, 1, 1, 1, 2][(int % 10 < 5) ? int % 10 : 5]];
-                }
+                (function() {
+                    function localizeQuizItem() {
+                        const translations = window.translations[currentLanguage] || {};
+                        const sectionTitles = [
+                            translations.sectionsCount_one || 'раздел',
+                            translations.sectionsCount_few || 'раздела',
+                            translations.sectionsCount_many || 'разделов'
+                        ];
 
-                document.getElementById('{{quiz.test_id}}').innerHTML = {{ quiz.section_count }} + ' ' + morph({{ quiz.section_count}});
+                        function morph(n, titles) {
+                            return titles[(n % 10 === 1 && n % 100 !== 11) ? 0 : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? 1 : 2];
+                        }
+
+                        const sectionCount = parseInt('{{ quiz.section_count }}');
+                        const element = document.getElementById('{{quiz.test_id}}');
+                        if (element) {
+                            element.innerHTML = sectionCount + ' ' + morph(sectionCount, sectionTitles);
+                        }
+                    }
+
+                    if (window.translations && window.currentLanguage) {
+                        localizeQuizItem();
+                    }
+
+                    document.addEventListener('languageChanged', localizeQuizItem);
+                })();
             </script>
         {% endfor %}
 
     </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof window.originalApplyTranslations === 'undefined') {
+                window.originalApplyTranslations = window.applyTranslations;
+                
+                window.applyTranslations = function(lang) {
+                    window.originalApplyTranslations(lang);
+                    const event = new Event('languageChanged');
+                    document.dispatchEvent(event);
+                };
+            }
+        });
+    </script>
 {% endblock %}
-

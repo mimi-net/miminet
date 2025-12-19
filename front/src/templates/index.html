@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Эмулятор компьютерной сети{% endblock %}
-{% block description %}Эмулятор компьютерной сети для образовательных целей на базе ОС Linux{% endblock %}
+{% block title_tag %}<title data-i18n="docTitle">Эмулятор компьютерной сети</title>{% endblock %}
+{% block description %}<meta name="description" content="Эмулятор компьютерной сети для образовательных целей на базе ОС Linux" data-i18n-attr="content:docDescription">{% endblock %}
 {% block content %}
 
 <main>
@@ -12,12 +12,11 @@
                 </div>
                 <div class="col-md-7">
                     <div class="d-flex align-items-center justify-content-center text-center" style="height: 300px;">
-                        <p class="fs-2">Эмулятор компьютерной сети для образовательных целей на базе ОС Linux
-                            <br>
-                            <a href="{{ url_for('home') }}" class="mt-5 btn btn-primary">Создать сеть</a>
-                        </p>
+                        <p class="fs-2"><span data-i18n="mainTitle">Эмулятор компьютерной сети для образовательных целей на базе ОС Linux</span>
+                        	<br>
+                        	<a href="{{ url_for('home') }}" class="mt-5 btn btn-primary" data-i18n="createNetworkBtn">Создать сеть</a>
+						</p>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -25,7 +24,7 @@
 
  <section class="pt-4 pt-lg-0 pb-4 pb-lg-5 bg-secondary">
 	 <div class="container pb-4 pt-5">
-		 <h2 class="h1 text-center text-md-start pb-3 pb-md-0 mb-md-5">Возможности</h2>
+		 <h2 class="h1 text-center text-md-start pb-3 pb-md-0 mb-md-5" data-i18n="featuresTitle">Возможности</h2>
 		 <div class="row row-cols-1 row-cols-md-2">
 			 <div class="col py-4 my-2 my-sm-3">
 				 <div class="card h-100 border-0 shadow-sm text-decoration-none pt-5 px-sm-3 px-md-0 px-lg-3 pb-sm-3 pb-md-0 pb-lg-3 me-xl-2">
@@ -33,8 +32,8 @@
 						 <img src="/assets/icons/cms.svg" class="d-block m-1" width="40" alt="Icon">
 					</div>
 				 	<div class="card-body pt-3">
-						<h2 class="h4 d-inline-flex align-items-center">Вся работа в браузере</h2>
-						<p class="fs-sm text-body mb-0">Нет нужды устанавливать дополнительные программы. Создание и настройка сети выполняется прямо в браузере.</p>
+						<h2 class="h4 d-inline-flex align-items-center" data-i18n="feature1Title">Вся работа в браузере</h2>
+						<p class="fs-sm text-body mb-0" data-i18n="feature1Desc">Нет нужды устанавливать дополнительные программы. Создание и настройка сети выполняется прямо в браузере.</p>
 					</div>
 				 </div>
 			 </div>
@@ -45,8 +44,8 @@
 						 <img src="/assets/icons/timer.svg" class="d-block m-1" width="40" alt="Icon">
 					</div>
 				 	<div class="card-body pt-3">
-						<h2 class="h4 d-inline-flex align-items-center">Точная эмуляция сети</h2>
-						<p class="fs-sm text-body mb-0">Для эмуляции сети используется сетевой стек ОС Linux. Весь процесс занимает всего 10-15 секунд, в зависимости от настроек сети.</p>
+						<h2 class="h4 d-inline-flex align-items-center" data-i18n="feature2Title">Точная эмуляция сети</h2>
+						<p class="fs-sm text-body mb-0" data-i18n="feature2Desc">Для эмуляции сети используется сетевой стек ОС Linux. Весь процесс занимает всего 10-15 секунд, в зависимости от настроек сети.</p>
 					</div>
 				 </div>
 			 </div>
@@ -57,8 +56,8 @@
 						 <img src="/assets/icons/analytics.svg" class="d-block m-1" width="40" alt="Icon">
 					</div>
 				 	<div class="card-body pt-3">
-						<h2 class="h4 d-inline-flex align-items-center">Анимация сети</h2>
-						<p class="fs-sm text-body mb-0">Детальная анимация помогает досконально изучать работу сети и конкретных протоколов. Анимацию можно проматывать до конкретного шага.</p>
+						<h2 class="h4 d-inline-flex align-items-center" data-i18n="feature3Title">Анимация сети</h2>
+						<p class="fs-sm text-body mb-0" data-i18n="feature3Desc">Детальная анимация помогает досконально изучать работу сети и конкретных протоколов. Анимацию можно проматывать до конкретного шага.</p>
 					</div>
 				 </div>
 			 </div>
@@ -69,8 +68,8 @@
 						 <img src="/assets/icons/rocket.svg" class="d-block m-1" width="40" alt="Icon">
 					</div>
 				 	<div class="card-body pt-3">
-						<h2 class="h4 d-inline-flex align-items-center">Разнообразие сетевых настроек</h2>
-						<p class="fs-sm text-body mb-0">Можно запускать TCP/UDP сервер и клиент, детально изучать работу всего TCP/IP стека, устанавливать потери в канале. Есть поддержка NAT, VLAN, IPIP, GRE, VxLAN, STP/RSTP.</p>
+						<h2 class="h4 d-inline-flex align-items-center" data-i18n="feature4Title">Разнообразие сетевых настроек</h2>
+						<p class="fs-sm text-body mb-0" data-i18n="feature4Desc">Можно запускать TCP/UDP сервер и клиент, детально изучать работу всего TCP/IP стека, устанавливать потери в канале. Есть поддержка NAT, VLAN, IPIP, GRE, VxLAN, STP/RSTP.</p>
 					</div>
 				 </div>
 			 </div>
@@ -81,8 +80,8 @@
 						 <img src="/assets/icons/insurance.svg" class="d-block m-1" width="40" alt="Icon">
 					</div>
 				 	<div class="card-body pt-3">
-						<h2 class="h4 d-inline-flex align-items-center">Проверка знаний (тестирование)</h2>
-						<p class="fs-sm text-body mb-0">Автоматическое тестирование по теории и практике. Свяжитесь с нами для добавления своих вопросов и задач!</p>
+						<h2 class="h4 d-inline-flex align-items-center" data-i18n="feature5Title">Проверка знаний (тестирование)</h2>
+						<p class="fs-sm text-body mb-0" data-i18n="feature5Desc">Автоматическое тестирование по теории и практике. Свяжитесь с нами для добавления своих вопросов и задач!</p>
 					</div>
 				 </div>
 			 </div>
@@ -93,8 +92,8 @@
 
  <section class="pt-4 pt-lg-0 pb-lg-5 pb-4 pb-3">
 	 <div class="container pb-4 pt-5">
-		 <h2 class="h1 mb-lg-4 mb-3 text-center">Кто использует Miminet?</h2>
-		 <p class="mb-lg-5 mb-4 pb-lg-0 pb-md-2 mx-auto text-center" style="max-width: 40.75rem;">Miminet уже воспользовались 15 000+ обучающихся.</p>
+		 <h2 class="h1 mb-lg-4 mb-3 text-center" data-i18n="whoUsesTitle">Кто использует Miminet?</h2>
+		 <p class="mb-lg-5 mb-4 pb-lg-0 pb-md-2 mx-auto text-center" style="max-width: 40.75rem;" data-i18n="whoUsesDesc">Miminet уже воспользовались 15 000+ обучающихся.</p>
 
 		 <div class="row">
 			 <div class="col-lg-4 col-md-4 col-sm-4 text-center pb-md-2 mb-3 mb-lg-4">
@@ -121,19 +120,19 @@
  <section class="pt-4 pt-lg-0 bg-secondary">
 	 <div class="container pb-4 pt-5">
 
-		 <h2 class="h1 text-center pb-md-0">Примеры использования</h2>
+		 <h2 class="h1 text-center pb-md-0" data-i18n="useCasesTitle">Примеры использования</h2>
 
 		 <div class="row gy-4 pb-xl-5 pb-md-4 pb-3">
 			 <div class="col-lg-5 col-md-6 order-md-1 order-2 d-flex">
 				 <div class="align-self-center pe-lg-0 pe-md-4">
-					 <h3 class="mb-md-4">На лекциях</h3>
-					 <p class="mb-md-4 mb-3 fs-lg">Интерактивный инструмент для лектора. Можно прямо в браузере рисовать схемы сетей и сразу анимировать их, демонстрируя работу различных протоколов и устройств.</p>
+					 <h3 class="mb-md-4" data-i18n="useCase1Title">На лекциях</h3>
+					 <p class="mb-md-4 mb-3 fs-lg" data-i18n="useCase1Desc">Интерактивный инструмент для лектора. Можно прямо в браузере рисовать схемы сетей и сразу анимировать их, демонстрируя работу различных протоколов и устройств.</p>
 					 <hr class="my-md-4 my-3">
 					 <ul class="list-unstyled d-flex flex-wrap mt-md-n3 mt-n2 ms-md-n4 ms-n3 mb-0 pb-lg-4 pb-md-2 fw-bold">
-						 <li class="mt-md-3 mt-2 ms-md-4 ms-3">Хост</li>
-						 <li class="mt-md-3 mt-2 ms-md-4 ms-3">Коммутатор</li>
-						 <li class="mt-md-3 mt-2 ms-md-4 ms-3">Маршрутизатор</li>
-						 <li class="mt-md-3 mt-2 ms-md-4 ms-3">Сервер</li>
+						 <li class="mt-md-3 mt-2 ms-md-4 ms-3" data-i18n="useCase1Device1">Хост</li>
+						 <li class="mt-md-3 mt-2 ms-md-4 ms-3" data-i18n="useCase1Device2">Коммутатор</li>
+						 <li class="mt-md-3 mt-2 ms-md-4 ms-3" data-i18n="useCase1Device3">Маршрутизатор</li>
+						 <li class="mt-md-3 mt-2 ms-md-4 ms-3" data-i18n="useCase1Device4">Сервер</li>
 					 </ul>
 				 </div>
 			 </div>
@@ -158,11 +157,10 @@
 			 <div class="col-lg-5 col-md-6 order-md-1 order-2 d-flex">
 				 <div class="align-self-center pe-lg-0 pe-md-4">
 
-					 <h3 class="mb-md-4">На практиках</h3>
-					 <p class="mb-md-4 mb-3 fs-lg">Большой набор конфигурируемых параметров. Вы можете собирать простые и сложные конфигурации, эмулировать их и детально изучать работу отдельных протоколов: ARP, IP, TCP, ICMP, GRE и многих других.</p>
+					 <h3 class="mb-md-4" data-i18n="useCase2Title">На практиках</h3>
+					 <p class="mb-md-4 mb-3 fs-lg" data-i18n="useCase2Desc">Большой набор конфигурируемых параметров. Вы можете собирать простые и сложные конфигурации, эмулировать их и детально изучать работу отдельных протоколов: ARP, IP, TCP, ICMP, GRE и многих других.</p>
 					 <hr class="my-md-4 my-3">
 					 <ul class="list-unstyled d-flex flex-wrap mt-md-n3 mt-n2 ms-md-n4 ms-n3 mb-0 pb-lg-4 pb-md-2 fw-bold">
-
 						 <li class="mt-md-3 mt-2 ms-md-4 ms-3">TCP/IP</li>
 						 <li class="mt-md-3 mt-2 ms-md-4 ms-3">VLAN</li>
 						 <li class="mt-md-3 mt-2 ms-md-4 ms-3">STP/RSTP</li>
@@ -176,13 +174,13 @@
 		 <div class="row gy-4">
 			 <div class="col-lg-5 col-md-6 order-md-1 order-2 d-flex">
 				 <div class="align-self-center pe-lg-0 pe-md-4">
-					 <h3 class="mb-md-4">Проверка знаний</h3>
-					 <p class="mb-md-4 mb-3 fs-lg">Раздел "Тестирование" помогает проводить собеседования и проверку знаний у обучающихся. Можно создавать свои наборы тестов из теоретических вопросов и практических заданий с автоматической проверкой.</p>
+					 <h3 class="mb-md-4" data-i18n="useCase3Title">Проверка знаний</h3>
+					 <p class="mb-md-4 mb-3 fs-lg" data-i18n="useCase3Desc">Раздел "Тестирование" помогает проводить собеседования и проверку знаний у обучающихся. Можно создавать свои наборы тестов из теоретических вопросов и практических заданий с автоматической проверкой.</p>
 
 					 <hr class="my-md-4 my-3">
 					 <ul class="list-unstyled d-flex flex-wrap mt-md-n3 mt-n2 ms-md-n4 ms-n3 mb-0 pb-lg-4 pb-md-2 fw-bold">
-						 <li class="mt-md-3 mt-2 ms-md-4 ms-3">100+ Вопросов в базе</li>
-						 <li class="mt-md-3 mt-2 ms-md-4 ms-3">10+ Практических задач</li>
+						 <li class="mt-md-3 mt-2 ms-md-4 ms-3" data-i18n="useCase3Fact1">100+ Вопросов в базе</li>
+						 <li class="mt-md-3 mt-2 ms-md-4 ms-3" data-i18n="useCase3Fact2">10+ Практических задач</li>
 					 </ul>
 				 </div>
 			 </div>
@@ -197,7 +195,7 @@
  </section>
 
  <section class="container pt-4 pt-lg-0 pb-4 pb-lg-5">
-        <h2 class="h1 text-center py-5 pb-md-0">Как это работает?</h2>
+        <h2 class="h1 text-center py-5 pb-md-0" data-i18n="howItWorksTitle">Как это работает?</h2>
         <div class="steps">
           <div class="step pt-0 pt-md-3 pb-3">
             <div class="step-number">
@@ -208,8 +206,8 @@
                 <img src="/images/howto/how_to_1.png" width="250" alt="Нарисуйте свою сеть">
               </div>
               <div class="rellax ps-md-4 ps-xl-5" data-rellax-percentage="0.5" data-rellax-speed="0.4" data-disable-parallax-down="lg">
-                <h3 class="h4">Нарисуйте свою сеть</h3>
-                <p class="mb-0">Вы можете создать компьютерную сеть, в которой будут хосты, свитчи, хабы, раутеры и сервера. Также можете задать настройки для каждого устройства.</p>
+                <h3 class="h4" data-i18n="step1Title">Нарисуйте свою сеть</h3>
+                <p class="mb-0" data-i18n="step1Desc">Вы можете создать компьютерную сеть, в которой будут хосты, свитчи, хабы, раутеры и сервера. Также можете задать настройки для каждого устройства.</p>
               </div>
             </div>
           </div>
@@ -222,8 +220,8 @@
                 <img src="/images/howto/how_to_2.png" width="250" alt="Отправте сеть на эмуляцию">
               </div>
               <div class="rellax ps-md-4 ps-xl-5" data-rellax-percentage="0.5" data-rellax-speed="0.5" data-disable-parallax-down="lg">
-                <h3 class="h4">Отправьте сеть на эмуляцию</h3>
-                <p class="mb-0">На нашем сервере ваша сеть будет эмулироваться с помощью сетевой подсистемы Linux. Для каждого устройства создается сетевой интерфейс со своим уникальным MAC адресом и другими настройками.</p>
+                <h3 class="h4" data-i18n="step2Title">Отправьте сеть на эмуляцию</h3>
+                <p class="mb-0" data-i18n="step2Desc">На нашем сервере ваша сеть будет эмулироваться с помощью сетевой подсистемы Linux. Для каждого устройства создается сетевой интерфейс со своим уникальным MAC адресом и другими настройками.</p>
               </div>
             </div>
           </div>
@@ -236,8 +234,8 @@
                 <img src="/images/howto/how_to_3.png" class="d-dark-mode-none" width="250" alt="Illustration">
               </div>
               <div class="rellax ps-md-4 ps-xl-5" data-rellax-percentage="0.5" data-rellax-speed="0.4" data-disable-parallax-down="lg">
-                <h3 class="h4">Дождитесь эмуляции на сервере</h3>
-                <p class="mb-0">Во время эмуляции сети идет захват всего сетевого трафика, который затем обрабатывается для визуализации.</p>
+                <h3 class="h4" data-i18n="step3Title">Дождитесь эмуляции на сервере</h3>
+                <p class="mb-0" data-i18n="step3Desc">Во время эмуляции сети идет захват всего сетевого трафика, который затем обрабатывается для визуализации.</p>
               </div>
             </div>
           </div>
@@ -250,60 +248,16 @@
                 <img src="/images/howto/how_to_4.png" class="d-dark-mode-none" width="250" alt="Illustration">
               </div>
               <div class="rellax ps-md-4 ps-xl-5" data-rellax-percentage="0.5" data-rellax-speed="0.6" data-disable-parallax-down="lg">
-                <h3 class="h4">Запустите анимацию</h3>
-                <p class="mb-0">Запустите анимацию и наблюдайте за сетевым трафиком в удобном формате.</p>
+                <h3 class="h4" data-i18n="step4Title">Запустите анимацию</h3>
+                <p class="mb-0" data-i18n="step4Desc">Запустите анимацию и наблюдайте за сетевым трафиком в удобном формате.</p>
               </div>
             </div>
           </div>
         </div>
   </section>
 
-
-    <!-- вторая страница, шаг-->
-    <!-- section class="py-5 my-lg-5">
-        <div class="container">
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 pb-xl-3" -->
-  <!-- Step -->
-                <!-- div class="col text-center border-end">
-                     <div class="card d-table border-0 rounded-circle shadow-sm p-3 mx-auto mb-4">
-                        <img class="host" src="{{ url_for('static', filename='/images/pc.png') }}" width="100">
-                    </div>
-                        <h5 class="mb-2">Шаг 1</h5>
-                        <p class="fs mb-0">Добавь устройства</p>
-                </div-->
-  <!-- Step -->
-                <!-- div class="col text-center border-end">
-                     <div class="card d-table border-0 rounded-circle shadow-sm p-3 mx-auto mb-4">
-                        <img class="line" src="{{ url_for('static', filename='/images/line.png') }}" width="90">
-                    </div>
-                        <h5 class="mb-2">Шаг 2</h5>
-                        <p class="fs mb-0">Соедини устройства</p>
-                </div -->
-  <!-- Step -->
-                <!-- div class="col text-center border-end">
-                     <div class="card d-table border-0 rounded-circle shadow-sm p-3 mx-auto mb-4">
-                        <img class="parameters"  src="{{ url_for('static', filename='/images/parameters.png') }}" width="100">
-                    </div>
-                        <h5 class="mb-2">Шаг 3</h5>
-                        <p class="fs mb-0">Настрой параметры</p>
-                </div-->
-  <!-- Step -->
-                 <!-- div class="col text-center">
-                     <div class="card d-table border-0 rounded-circle shadow-sm p-3 mx-auto mb-4">
-                        <img class="parameters" src="{{ url_for('static', filename='/images/topo.png') }}" width="150">
-                        </div>
-                        <h5 class="mb-2">Шаг 4</h5>
-                        <p class="fs mb-0">Запусти с помощью кнопки Эмулировать</p>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section-->
-
   <section class="container pt-4 pt-lg-0 pb-4 pb-lg-5">
-        <h2 class="h1 text-center pb-3 pb-md-0 mb-md-5">Как это работает (видео)</h2>
+        <h2 class="h1 text-center pb-3 pb-md-0 mb-md-5" data-i18n="videoTitle">Как это работает (видео)</h2>
         <div class="col text-center">
             <video class="border-primary" src="{{ url_for('static', filename='/video/video.mp4') }}" width="60%" controls></video>
         </div>
@@ -313,8 +267,8 @@
     <div class="card border-0 bg-gradient-primary">
         <div class="py-md-5 py-4 text-center">
             <div class="card-body" style="background-image: url(/images/contact-bg.png);">
-                <p class="lead text-light opacity-70 mb-3"><font style="vertical-align: inherit;">Остались вопросы?</font></p>
-                <h2 class="h1 text-light pb-3 pb-lg-0 mb-lg-5"><font style="vertical-align: inherit;">Можете связаться с нами</font></h2>
+                <p class="lead text-light opacity-70 mb-3" data-i18n="contactTitle">Остались вопросы?</p>
+                <h2 class="h1 text-light pb-3 pb-lg-0 mb-lg-5" data-i18n="contactSubtitle">Можете связаться с нами</h2>
 
                 <!-- Telegram -->
                 <a href="https://t.me/MimiNetCommunity" class="btn btn-primary btn-secondary btn-telegram">
@@ -331,6 +285,8 @@
 {% endblock %}
 
 {% block network %}
+<script src="/js/i18n.js"></script>
+
 <script>
 
     var graph_network_zoom = 2;
@@ -353,4 +309,3 @@
 
 </script>
 {% endblock %}
-

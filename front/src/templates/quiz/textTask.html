@@ -26,7 +26,8 @@
         <div class="col-auto ms-auto"
              style="flex: 1;display: flex;justify-content: flex-end;align-items: flex-end;margin: 8px 0 8px 0; font-size: 24px; opacity: 85%">
             <button name="finishQuiz" aria-label="Завершить тест" class="btn btn-outline-danger btn-icon"
-                    data-toggle="tooltip" data-bs-placement="right" title="Завершить тест">
+                    data-toggle="tooltip" data-bs-placement="right" title="Завершить тест"
+                    data-i18n-attr="aria-label:finishTestBtn;title:finishTestBtn">
                 <i class="bx bx-x fs-4 mx-1"></i>
             </button>
         </div>
@@ -72,21 +73,21 @@
         <div class="card-body d-flex justify-content-left align-items-center pt-0 pb-1" style="margin-left: 12px">
             {% if is_exam and not available_answer %}
                 {% if question.question_type == 'variable' %}
-                    <button name="answerExamQuestion" class="btn btn-primary" disabled>Ответить</button>
+                    <button name="answerExamQuestion" class="btn btn-primary" disabled data-i18n="answerBtn">Ответить</button>
                 {% else %}
-                    <button name="answerExamQuestion" class="btn btn-primary">Ответить</button>
+                    <button name="answerExamQuestion" class="btn btn-primary" data-i18n="answerBtn">Ответить</button>
                 {% endif %}
             {% else %}
                 {% if question.question_type == 'variable' %}
-                    <button name="answerQuestion" class="btn btn-primary" disabled>Ответить</button>
+                    <button name="answerQuestion" class="btn btn-primary" disabled data-i18n="answerBtn">Ответить</button>
                 {% else %}
-                    <button name="answerQuestion" class="btn btn-primary">Ответить</button>
+                    <button name="answerQuestion" class="btn btn-primary" data-i18n="answerBtn">Ответить</button>
                 {% endif %}
             {% endif %}
-            <button name="nextQuestion" class="btn" hidden></button>
+            <button name="nextQuestion" class="btn" hidden data-i18n="nextQuestionBtn"></button>
             <button name="seeResults" class="btn" hidden></button>
 
-            <span id="answerSavedBanner" class="ms-3 text-success" style="display: none; font-weight: bold;">
+            <span id="answerSavedBanner" class="ms-3 text-success" style="display: none; font-weight: bold;" data-i18n="answerSaved">
                 ✔ Ответ сохранён
             </span>
         </div>
@@ -163,7 +164,6 @@
             new bootstrap.Modal(document.getElementById('imageModal')).show();
     }
 
-    // Enable answer button only when option is selected
     document.addEventListener('DOMContentLoaded', function () {
         let answerBtn = document.querySelector('button[name="answerQuestion"]');
         let examBtn = document.querySelector('button[name="answerExamQuestion"]');

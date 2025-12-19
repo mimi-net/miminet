@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Учебные курсы{% endblock %}
-{% block description %}Учебные курсы по компьютерным сетям с использованием эмулятора Miminet{% endblock %}
+{% block title_tag %}<title data-i18n="docTitleCourses">Учебные курсы</title>{% endblock %}
+{% block description %}<meta name="description" content="Учебные курсы по компьютерным сетям с использованием эмулятора Miminet" data-i18n-attr="content:docDescCourses">{% endblock %}
 {% block content %}
 
 <section class="container py-5 my-lg-5">
 
 	<div class="row justify-content-center pt-1 pb-1 mb-2 mb-md-3 mb-lg-4">
 		<div class="col-lg-8 col-md-9 text-center">
-			<h2 class="h1 mb-4">Курсы по компьютерным сетям</h2>
+			<h2 class="h1 mb-4" data-i18n="coursesTitle">Курсы по компьютерным сетям</h2>
 		</div>
 	</div>
 
@@ -16,12 +16,12 @@
 			<article class="card me-xl-5 mb-4">
 				<div class="card-body">
 					<div class="d-flex justify-content-between mb-3">
-						<a href="#" class="badge fs-sm text-white bg-success text-decoration-none">Бесплатно</a>
+						<a href="#" class="badge fs-sm text-white bg-success text-decoration-none" data-i18n="freeBadge">Бесплатно</a>
 					</div>
 					<h3 class="h4">
-						<a target="_blank" href="https://stepik.org/course/208904/syllabus">Основы компьютерных сетей</a>
+						<a target="_blank" href="https://stepik.org/course/208904/syllabus" data-i18n="course1Title">Основы компьютерных сетей</a>
 					</h3>
-					<p class="mb-4">Курс знакомит слушателя с миром компьютерных сетей, как работает ваша домашняя сеть, сеть в кафе или глобальная сеть Интернет. Это базовый курс и он является обязательным перед более глубоким изучением компьютерных сетей. Для лучшего понимания и усваивания материала в курсе содержится множество примеров из веб-эмулятора Miminet. Данный курс читается на мат-мехе СПбГУ.</p>
+					<p class="mb-4" data-i18n="course1Desc">Курс знакомит слушателя с миром компьютерных сетей, как работает ваша домашняя сеть, сеть в кафе или глобальная сеть Интернет. Это базовый курс и он является обязательным перед более глубоким изучением компьютерных сетей. Для лучшего понимания и усваивания материала в курсе содержится множество примеров из веб-эмулятора Miminet. Данный курс читается на мат-мехе СПбГУ.</p>
                 			<div class="d-flex align-items-center text-muted">
                   				<div class="fs-sm border-end pe-3 me-3">
 			  				<i class="bx bxs-star text-warning"></i>
@@ -32,7 +32,7 @@
 							<span class="fs-sm"> (4.9)</span>
 		  				</div>
                   				<div class="d-flex align-items-center me-3">
-                    					<span class="fs-sm">14 000 учащихся</span>
+                    					<span class="fs-sm">14 000 <span data-i18n="studentsLabel">учащихся</span></span>
                   				</div>
                 			</div>
               			</div>
@@ -45,12 +45,12 @@
 			<article class="card me-xl-5 mb-4">
 				<div class="card-body">
 					<div class="d-flex justify-content-between mb-3">
-						<a href="#" class="badge fs-sm text-white bg-success text-decoration-none">Бесплатно</a>
+						<a href="#" class="badge fs-sm text-white bg-success text-decoration-none" data-i18n="freeBadge">Бесплатно</a>
 					</div>
 					<h3 class="h4">
-						<a target="_blank" href="https://stepik.org/course/240857/syllabus">Программирование компьютерных сетей (Python)</a>
+						<a target="_blank" href="https://stepik.org/course/240857/syllabus" data-i18n="course2Title">Программирование компьютерных сетей (Python)</a>
 					</h3>
-					<p class="mb-4">Практический курс для тех, кто хочет научиться писать свои собственные сетевые приложения на Python под Linux. На курсе вы научитесь: писать свой TCP/UDP сервер и клиент, устанавливать безопасное (SSL) соединение, писать свой сниффер (raw socket, scapy), управлять сетевыми настройками в ОС Linux прямо из Python (pyroute2), работать с tun/tap устройствами и писать собственные туннели (VPN). Данный курс читается на мат-мехе СПбГУ.</p>
+					<p class="mb-4" data-i18n="course2Desc">Практический курс для тех, кто хочет научиться писать свои собственные сетевые приложения на Python под Linux. На курсе вы научитесь: писать свой TCP/UDP сервер и клиент, устанавливать безопасное (SSL) соединение, писать свой сниффер (raw socket, scapy), управлять сетевыми настройками в ОС Linux прямо из Python (pyroute2), работать с tun/tap устройствами и писать собственные туннели (VPN). Данный курс читается на мат-мехе СПбГУ.</p>
                 			<div class="d-flex align-items-center text-muted">
                   				<div class="fs-sm border-end pe-3 me-3">
 			  				<i class="bx bxs-star text-warning"></i>
@@ -61,12 +61,12 @@
 							<span class="fs-sm"> (5)</span>
 		  				</div>
                   				<div class="d-flex align-items-center me-3">
-                    					<span class="fs-sm">300 учащихся</span>
+                    					<span class="fs-sm">300 <span data-i18n="studentsLabel">учащихся</span></span>
                   				</div>
                 			</div>
               			</div>
             		</article>
 		</div>
+    </div>
 </section>
 {% endblock %}
-

@@ -7,24 +7,24 @@
 </script>
 
 <script id="config_edge_save_script" type="text/plain">
-    <button id="config_edge_main_form_submit_button" type="submit" class="btn btn-success w-100">Сохранить</button>
+    <button id="config_edge_main_form_submit_button" type="submit" class="btn btn-success w-100" data-i18n="saveBtn">Сохранить</button>
 </script>
 
 <script id="config_edge_edpoint_script" type="text/plain">
     <div class="form-group pb-2">
-        <label for="edge_source" class="text-sm">Из</label>
+        <label for="edge_source" class="text-sm" data-i18n="edgeFrom">Из</label>
         <input type="text" class="form-control form-control-sm" id="edge_source" name="edge_source" value='' disabled>
     </div>
 
     <div class="form-group pb-2">
-        <label for="edge_target" class="text-sm">В</label>
+        <label for="edge_target" class="text-sm" data-i18n="edgeTo">В</label>
         <input type="text" class="form-control form-control-sm" id="edge_target" name="edge_target" value='' disabled>
     </div>
 </script>
 
 <script id="config_edge_save_loss_script" type="text/plain">
     <div class="form-group pb-2">
-        <label for="edge_loss" class="text-sm">Потери пакетов (%)</label>
+        <label for="edge_loss" class="text-sm" data-i18n="edgePacketLoss">Потери пакетов (%)</label>
         <input type="number"
                id="edge_loss"
                class="form-control form-control-sm"

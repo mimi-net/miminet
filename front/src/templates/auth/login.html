@@ -1,15 +1,21 @@
 {% extends "base.html" %}
-{% block title %}Вход/Регистрация в веб-эмулятор{% endblock %}
-{% block description %}Эмулятор компьютерной сети для образовательных целей на базе ОС Linux{% endblock %}
-{% block content %}
 
+{% block title_tag %}
+    <title data-i18n="docTitleLogin">Вход/Регистрация в веб-эмулятор</title>
+{% endblock %}
+
+{% block description %}
+    <meta name="description" content="Эмулятор компьютерной сети для образовательных целей на базе ОС Linux" data-i18n-attr="content:docDescHome">
+{% endblock %}
+
+{% block content %}
 <section class="vh-100">
 	<div class="container py-3 h-100">
 		<div class="row d-flex align-items-center justify-content-center h-100">
 			<div class="col-md-7 col-lg-5 col-xl-5 offset-xl-1">
-				<h1 class="text-center">Добро пожаловать!</h1>
+				<h1 class="text-center" data-i18n="welcome">Добро пожаловать!</h1>
 				<hr class="my-4">
-				<h6 class="text-center mb-4">Вход с помощью</h6>
+				<h6 class="text-center mb-4" data-i18n="loginWith">Вход с помощью</h6>
 				<div class="row row-cols-1 row-cols-sm-2">
 					<div class="col mb-3">
 					<!-- Google -->
@@ -54,11 +60,10 @@
 					</div>
 				</div>
 
-				<p class="fs-sx text-muted text-center mb-md-0">Регистрируясь, я даю <a href="{{ url_for('cookie_consent') }}">согласие на обработку данных</a>.</p>
+				<p class="fs-sx text-muted text-center mb-md-0" data-i18n="consentAgreement">Регистрируясь, я даю <a href="{{ url_for('cookie_consent') }}">согласие на обработку данных</a>.</p>
 
 			</div>
 		</div>
 	</div>
 </section>
-
 {% endblock %}

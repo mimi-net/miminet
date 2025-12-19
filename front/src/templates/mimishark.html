@@ -1,7 +1,6 @@
-
 {% extends "base.html" %}
-{% block title %}MimiShark{% endblock %}
-{% block description %}Эмуляция компьютерной сети в вебе{% endblock %}
+{% block title_tag %}<title data-i18n="docTitleMimiShark">MimiShark</title>{% endblock %}
+{% block description %}<meta name="description" content="Эмуляция компьютерной сети в вебе" data-i18n-attr="content:workspaceDocDescription">{% endblock %}
 {% block og %}
 <link rel="stylesheet" href="{{url_for('static',filename='assets/css/style.css')}}">
 {% endblock %}
@@ -15,7 +14,7 @@
       </div>
       <div class="d-flex" style="justify-content: end; width: 500px; margin-right: 50px; margin-left: 50px;">
         <div class="nav-item ">
-		<a class="me-2" style="text-decoration: none;" href="/pcaps/{{network.guid}}/{{iface}}.pcap" download="/pcaps/{{network.guid}}/{{iface}}.pcap">Скачать pcap</a>
+		<a class="me-2" style="text-decoration: none;" href="/pcaps/{{network.guid}}/{{iface}}.pcap" download="/pcaps/{{network.guid}}/{{iface}}.pcap" data-i18n="downloadPcap">Скачать pcap</a>
         </div>
       </div>
     </nav>
@@ -32,11 +31,11 @@
         <thead style="position: sticky;top: 0; box-shadow: inset 0 -1px 0 #000000;" class="bg-light thead_bord">
           <tr>
             <th>#</th>
-            <th>Time</th>
-            <th>Source</th>
-            <th>Destination</th>
-            <th>Protocol</th>
-            <th>Length</th>
+            <th data-i18n="tableColTime">Time</th>
+            <th data-i18n="tableColSource">Source</th>
+            <th data-i18n="tableColDestination">Destination</th>
+            <th data-i18n="tableColProtocol">Protocol</th>
+            <th data-i18n="tableColLength">Length</th>
           </tr>
 
         </thead>

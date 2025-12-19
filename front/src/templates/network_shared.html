@@ -1,11 +1,13 @@
 {% extends "base.html" %}
-<!--{% block title %}{{ network.title }}{% endblock %}-->
-{% block description %}Эмуляция компьютерной сети в вебе{% endblock %}
+{% block title_tag %}
+    <title>{{ network.title }}</title>
+{% endblock %}
+{% block description %}<meta name="description" content="Эмуляция компьютерной сети в вебе" data-i18n-attr="content:workspaceDocDescription">{% endblock %}
 {% block og %}
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Miminet">
     <meta property="og:title" content="{{ network.title }}">
-    <meta property="og:description" content="Эмуляция компьютерной сети в вебе">
+    <meta property="og:description" content="Эмуляция компьютерной сети в вебе" data-i18n-attr="content:workspaceDocDescription">
     <meta property="og:url" content="https://miminet.ru{{ url_for(request.endpoint, guid=network.guid) }}">
     <meta property="og:locale" content="ru_RU">
     <meta property="og:image" content="https://miminet.ru/images/preview/{{ network.preview_uri }}">
@@ -26,7 +28,7 @@
                 </a>
                 <div class="ws-name-case position-absolute top-0 start-50 translate-middle-x" style="margin-top: 17px;">
                      {% if request.path != url_for('web_network_shared') %}
-                        <a class="d-inline nav-link" href="{{ url_for('home') }}">Мои сети</a>
+                        <a class="d-inline nav-link" href="{{ url_for('home') }}" data-i18n="myNetworksLink">Мои сети</a>
                         <a class="d-inline nav-link" href="#"> / </a>
                      {% endif %}
                         <a class="d-inline nav-link" id="network_title_head" href="{{ url_for('web_network', guid=network.guid) }}">{{ network.title }}</a>
@@ -41,13 +43,14 @@
                         data-bs-toggle="modal"
                         data-target="#netConfigModal"
                         data-toggle="tooltip"
-                        data-bs-placement="bottom" title="Настройки сети">
+                        data-bs-placement="bottom" title="Настройки сети" data-i18n-attr="title:tooltipNetSettings">
                      </a>
                      <a class="ws-copy-button"
                         data-target="#ModalCopy"
                         data-toggle="tooltip"
                         data-bs-placement="bottom"
                         title="Сохранить копию"
+                        data-i18n-attr="title:tooltipSaveChanges"
                         onclick="CopyNetwork()"
                         style="margin-left: 16px; cursor: pointer;">
                      </a>
@@ -55,18 +58,19 @@
                         data-toggle="tooltip"
                         data-bs-placement="bottom"
                         title="Сеть доступна по URL"
+                        data-i18n-attr="title:tooltipUrlAvailable"
                         onclick="urlCopyButton()"
                         style="margin-left: 16px; cursor: pointer;">
                      </a>
                 </div>
                 <div class="form-check pe-lg-1 position-absolute end-0 top-0" style="margin: 17px;">
-                    <a class="btn btn-success btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" id="share-network" title="Сеть доступна по URL" onclick="urlCopyButton()">
+                    <a class="btn btn-success btn-icon me-4" id="share-network" data-i18n-attr="aria-label:tooltipUrlAvailable" onclick="urlCopyButton()">
                         <i class='bx bx-share-alt fs-4 mx-1' ></i>
                     </a>
-                    <a class="btn btn-outline-primary btn-icon me-4" data-target="#ModalCopy" id="copy-network" data-toggle="tooltip" data-bs-placement="bottom" title="Сохранить копию" onclick="CopyNetwork()">
+                    <a class="btn btn-outline-primary btn-icon me-4" data-target="#ModalCopy" id="copy-network" data-i18n-attr="aria-label:tooltipSaveChanges" onclick="CopyNetwork()">
                         <i class='bx bx-copy fs-4 mx-1'></i>
                     </a>
-                    <a {% if request.path != url_for('web_network_shared') %} class="btn btn-outline-primary btn-icon" {% else %} class="btn btn-outline-primary btn-icon disabled" {% endif %} href="#netConfigModal" id="net-settings" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети"><i class='bx bx-cog fs-4 mx-1'></i></a>
+                    <a {% if request.path != url_for('web_network_shared') %} class="btn btn-outline-primary btn-icon" {% else %} class="btn btn-outline-primary btn-icon disabled" {% endif %} href="#netConfigModal" id="net-settings" data-bs-toggle="modal" data-target="#netConfigModal" data-i18n-attr="aria-label:tooltipNetSettings"><i class='bx bx-cog fs-4 mx-1'></i></a>
                 </div>
             {% else %}
                  <a href="/">
@@ -75,16 +79,16 @@
                 <div class="ws-name-case position-absolute top-0 start-50 translate-middle-x" style="margin-top: 17px;">
                      <a class="nav-link" id="network_title_head" href="#">{{ network.title }}</a>
                 </div>
-                <a href="{{ url_for('login_index') }}" class="position-absolute end-0 top-0 btn btn-outline-primary ws-shadow" style="margin: 17px;">
+                <a href="{{ url_for('login_index') }}" class="position-absolute end-0 top-0 btn btn-outline-primary ws-shadow" style="margin: 17px;" data-i18n="loginButton">
                     <i class="bx fs-5 lh-1 me-1"></i>Вход
                 </a>
             {% endif %}
       </nav>
 
       <div class="position-absolute end-0 top-0" style="margin-right: 17px; margin-top: 100px; pointer-events: none;">
-            <div class="ws-menu-settings-name" style="pointer-events: all;">Настройки</div>
+            <div class="ws-menu-settings-name" style="pointer-events: all;" data-i18n="settingsHeader">Настройки</div>
             <div id="config_content" class="ws-menu-settings overflow-auto" style="pointer-events: all;">
-                <span>Тут будут настройки устройств. Выделите любое на схеме.</span>
+                <span data-i18n="settingsPlaceholder">Тут будут настройки устройств. Выделите любое на схеме.</span>
             </div>
             <div id="config_content_save" class="ws-menu-settings overflow-auto" style="margin-top: 8px; pointer-events: all; display: none;">
             </div>
@@ -92,7 +96,7 @@
 
       <div class="position-absolute start-0 bottom-0" style="margin: 17px; font-weight: 500;">
             <div class="d-flex justify-content-center ws-shadow" id="NetworkPlayer">
-                <button type="button" class="btn btn-primary w-100" id="NetworkRunButton" disabled>Проверка эмуляции</button>
+                <button type="button" class="btn btn-primary w-100" id="NetworkRunButton" disabled data-i18n="emulationCheckButton">Проверка эмуляции</button>
             </div>
             <div id="PacketSlider">
                 <div class="range-slider pt-3" data-start-min="0" data-min="0" data-max="100" data-step="1">
@@ -100,12 +104,12 @@
                     <input class="form-control range-slider-value-min" type="hidden">
                 </div>
             </div>
-            <small id="NetworkPlayerLabel" class=" d-flex justify-content-center text-muted text-center">Ожидание 10-30 сек.</small>
+            <small id="NetworkPlayerLabel" class=" d-flex justify-content-center text-muted text-center" data-i18n="emulationWaitLabel">Ожидание 10-30 сек.</small>
       </div>
 
       <a href="https://t.me/MimiNetCommunity" target="_blank" class="position-absolute bottom-0 end-0 ws-ask-link">
         <div id="NetworkRunButtonHelpLabel" class="ws-ask-button">
-            <img src="{{ url_for('static', filename='/images/tg_logo.png') }}" width="24" style="margin-right: 8px;"/>Задать вопрос
+            <img src="{{ url_for('static', filename='/images/tg_logo.png') }}" width="24" style="margin-right: 8px;"/><span data-i18n="askQuestionLink">Задать вопрос</span>
         </div>
       </a>
       </section>

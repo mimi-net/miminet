@@ -22,7 +22,12 @@ const ClearConfigForm = function (text) {
     let txt = ''
 
     if (!text) {
-        txt = 'Тут будут настройки устройств. Выделите любое на схеме.';
+        const defaultTextKey = 'settingsPlaceholder';
+        txt = (window.translations && window.translations[currentLanguage] && window.translations[currentLanguage][defaultTextKey]) 
+              ? window.translations[currentLanguage][defaultTextKey] 
+              : 'Тут будут настройки устройств. Выделите любое на схеме.';
+    } else {
+        txt = text;
     }
 
     // Clear all child
@@ -56,7 +61,7 @@ const UpdateHostConfigurationForm = function(host_id) {
 
     // Set loading spinner
     $('#config_host_main_form_submit_button').text('');
-    $('#config_host_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
+    $('#config_host_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>'); // TODO: Localize "Сохранение..."
 
     UpdateHostConfiguration(data, host_id);
 };
@@ -74,6 +79,11 @@ const ConfigHostForm = function(host_id){
     // Add new form
     $(config_content_id).append(form);
     $(config_content_save_tag).append(button);
+
+    if (typeof translateDynamicContent === 'function') {
+        translateDynamicContent(document.getElementById('config_content'));
+        translateDynamicContent(document.getElementById('config_content_save'));
+    }
 
     addIpFieldHandlers();
 
@@ -103,6 +113,11 @@ const ConfigRouterForm = function (router_id) {
     $(config_content_id).append(form);
     $(config_content_save_tag).append(button);
 
+    if (typeof translateDynamicContent === 'function') {
+        translateDynamicContent(document.getElementById('config_content'));
+        translateDynamicContent(document.getElementById('config_content_save'));
+    }
+
     addIpFieldHandlers();
 
     // Set host_id
@@ -118,7 +133,7 @@ const ConfigRouterForm = function (router_id) {
 
         // Set loading spinner
         $('#config_router_main_form_submit_button').text('');
-        $('#config_router_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
+        $('#config_router_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>'); // TODO: Localize
 
         UpdateRouterConfiguration(data, router_id);
     }
@@ -140,6 +155,11 @@ const ConfigServerForm = function (server_id) {
     $(config_content_id).append(form);
     $(config_content_save_tag).append(button);
 
+    if (typeof translateDynamicContent === 'function') {
+        translateDynamicContent(document.getElementById('config_content'));
+        translateDynamicContent(document.getElementById('config_content_save'));
+    }
+
     addIpFieldHandlers();
 
     // Set host_id
@@ -155,7 +175,7 @@ const ConfigServerForm = function (server_id) {
 
         // Set loading spinner
         $('#config_server_main_form_submit_button').text('');
-        $('#config_server_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
+        $('#config_server_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>'); // TODO: Localize
 
         UpdateServerConfiguration(data, server_id);
     }
@@ -177,6 +197,11 @@ const ConfigHubForm = function (hub_id) {
     $(config_content_id).append(form);
     $(config_content_save_tag).append(button);
 
+    if (typeof translateDynamicContent === 'function') {
+        translateDynamicContent(document.getElementById('config_content'));
+        translateDynamicContent(document.getElementById('config_content_save'));
+    }
+
     addIpFieldHandlers();
 
     // Set host_id
@@ -192,7 +217,7 @@ const ConfigHubForm = function (hub_id) {
 
         // Set loading spinner
         $('#config_hub_main_form_submit_button').text('');
-        $('#config_hub_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
+        $('#config_hub_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>'); // TODO: Localize
 
         UpdateHubConfiguration(data, hub_id);
     }
@@ -214,6 +239,11 @@ const ConfigSwitchForm = function (switch_id) {
     $(config_content_id).append(form);
     $(config_content_save_tag).append(button);
 
+    if (typeof translateDynamicContent === 'function') {
+        translateDynamicContent(document.getElementById('config_content'));
+        translateDynamicContent(document.getElementById('config_content_save'));
+    }
+
     addIpFieldHandlers();
 
     // Add href for mimishark
@@ -234,7 +264,7 @@ const ConfigSwitchForm = function (switch_id) {
 
         // Set loading spinner
         $('#config_switch_main_form_submit_button').text('');
-        $('#config_switch_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
+        $('#config_switch_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>'); // TODO: Localize
 
         UpdateSwitchConfiguration(data, switch_id);
     }
@@ -257,6 +287,11 @@ const ConfigEdgeForm = function (edge_id) {
     // Add new form
     $(config_content_id).append(form);
     $(config_content_save_tag).append(button);
+
+    if (typeof translateDynamicContent === 'function') {
+        translateDynamicContent(document.getElementById('config_content'));
+        translateDynamicContent(document.getElementById('config_content_save'));
+    }
 
     // Set host_id
     $('#edge_id').val(edge_id);
@@ -281,7 +316,7 @@ const ConfigEdgeForm = function (edge_id) {
         inputsToDisable.prop("disabled", true);
 
         $('#config_edge_main_form_submit_button').html(
-            '<span class="spinner-border spinner-border-sm" role="status"></span> Сохранение...'
+            '<span class="spinner-border spinner-border-sm" role="status"></span> Сохранение...' // TODO: Localize
         );
 
         edgeSaveXHR = UpdateEdgeConfiguration(data);
@@ -291,42 +326,42 @@ const ConfigEdgeForm = function (edge_id) {
     $('#config_edge_main_form_submit_button, #config_edge_end_form').off('click').on('click', handleEdgeClick);
 }
 
+const appendAndTranslate = function(formId, elementId) {
+    const template = document.getElementById(elementId);
+    if (template) {
+        $(formId).prepend(template.innerHTML);
+        if (typeof translateDynamicContent === 'function') {
+            const formElement = $(formId).get(0);
+            if (formElement) {
+                translateDynamicContent(formElement);
+            }
+        }
+    }
+}
+
 const ConfigHubName = function (hostname) {
-
-    var text = document.getElementById('config_hub_name_script').innerHTML;
-
-    $(config_hub_main_form_id).prepend((text));
+    appendAndTranslate(config_hub_main_form_id, 'config_hub_name_script');
     $('#config_hub_name').val(hostname);
 }
 
 const ConfigEdgePercentage = function (edge_loss) {
-
-    var text = document.getElementById('config_edge_save_loss_script').innerHTML;
-
-    $(config_edge_main_form_id).prepend(text);
+    appendAndTranslate(config_edge_main_form_id, 'config_edge_save_loss_script');
     $('#edge_loss').val(edge_loss);
 }
 
 const ConfigEdgeEndpoints = function (edge_source, edge_target) {
-
-    var text = document.getElementById('config_edge_edpoint_script').innerHTML;
-
-    $(config_edge_main_form_id).prepend((text));
+    appendAndTranslate(config_edge_main_form_id, 'config_edge_edpoint_script');
     $('#edge_source').val(edge_source);
     $('#edge_target').val(edge_target);
 }
 
 const ConfigSwitchName = function (hostname) {
-
-    var text = document.getElementById('config_switch_name_script').innerHTML;
-
-    $(config_switch_main_form_id).prepend((text));
+    appendAndTranslate(config_switch_main_form_id, 'config_switch_name_script');
     $('#switch_name').val(hostname);
 }
 
 const ConfigSwtichSTP = function (stp) {
     var elem = document.getElementById('config_switch_checkbox_stp_script');
-
     $(elem.innerHTML).insertBefore('#config_switch_end_form');
 
     if (stp === 1) {
@@ -337,6 +372,9 @@ const ConfigSwtichSTP = function (stp) {
     $('#config_switch_stp').on('click', function () {
         if ($(this).is(':checked')) {
             $(warning_text).insertBefore('#config_switch_end_form');
+            if (typeof translateDynamicContent === 'function') {
+                translateDynamicContent(document.getElementById('config_content'));
+            }
         } else {
             $('#config_warning_stp').remove();
         }
@@ -345,7 +383,6 @@ const ConfigSwtichSTP = function (stp) {
 
 const ConfigSwtichRSTP = function (rstp) {
     var elem = document.getElementById('config_switch_checkbox_rstp_script');
-
     $(elem.innerHTML).insertBefore('#config_switch_end_form');
 
     if (rstp === 1) {
@@ -356,6 +393,9 @@ const ConfigSwtichRSTP = function (rstp) {
     $('#config_switch_rstp').on('click', function () {
         if ($(this).is(':checked')) {
             $(warning_text).insertBefore('#config_switch_end_form');
+            if (typeof translateDynamicContent === 'function') {
+                translateDynamicContent(document.getElementById('config_content'));
+            }
         } else {
             $('#config_warning_rstp').remove();
         }
@@ -372,6 +412,10 @@ const SharedConfigHostForm = function(host_id){
 
     // Add new form
     $(config_content_id).append(form);
+    
+    if (typeof translateDynamicContent === 'function') {
+        translateDynamicContent(document.getElementById('config_content'));
+    }
 
     // Set host_id
     $('#host_id').val( host_id );
@@ -389,6 +433,10 @@ const SharedConfigRouterForm = function (router_id) {
 
     // Add new form
     $(config_content_id).append(form);
+
+    if (typeof translateDynamicContent === 'function') {
+        translateDynamicContent(document.getElementById('config_content'));
+    }
 
     // Set host_id
     $('#router_id').val(router_id);
@@ -408,6 +456,10 @@ const SharedConfigServerForm = function (router_id) {
     // Add new form
     $(config_content_id).append(form);
 
+    if (typeof translateDynamicContent === 'function') {
+        translateDynamicContent(document.getElementById('config_content'));
+    }
+
     // Set host_id
     $('#router_id').val(router_id);
     $('#net_guid').val(network_guid);
@@ -425,6 +477,11 @@ const SharedConfigHubForm = function (hub_id) {
 
     // Add new form
     $(config_content_id).append(form);
+
+    if (typeof translateDynamicContent === 'function') {
+        translateDynamicContent(document.getElementById('config_content'));
+    }
+
     $('#config_hub_main_form_submit_button').prop('disabled', true);
 }
 
@@ -438,6 +495,11 @@ const SharedConfigSwitchForm = function (switch_id) {
 
     // Add new form
     $(config_content_id).append(form);
+
+    if (typeof translateDynamicContent === 'function') {
+        translateDynamicContent(document.getElementById('config_content'));
+    }
+
     $('#config_switch_main_form_submit_button').prop('disabled', true);
 }
 
@@ -451,36 +513,31 @@ const SharedConfigEdgeForm = function (edge_id) {
 
     // Add new form
     $(config_content_id).append(form);
+
+    if (typeof translateDynamicContent === 'function') {
+        translateDynamicContent(document.getElementById('config_content'));
+    }
+    
     $('#config_edge_main_form_submit_button').prop('disabled', true);
 }
 
 
 const ConfigHostName = function (hostname) {
-
-    var text = document.getElementById('config_host_name_script').innerHTML;
-
-    $(config_main_form_id).prepend((text));
+    appendAndTranslate(config_main_form_id, 'config_host_name_script');
     $('#config_host_name').val(hostname);
 }
 
 const ConfigRouterName = function (hostname) {
-
-    var text = document.getElementById('config_router_name_script').innerHTML;
-
-    $(config_main_form_id).prepend((text));
+    appendAndTranslate(config_main_form_id, 'config_router_name_script');
     $('#config_router_name').val(hostname);
 }
 
 const ConfigServerName = function (hostname) {
-
-    var text = document.getElementById('config_server_name_script').innerHTML;
-
-    $(config_main_form_id).prepend((text));
+    appendAndTranslate(config_main_form_id, 'config_server_name_script');
     $('#config_server_name').val(hostname);
 }
 
 const ConfigItemInterface = function (name, ip, netmask, connected_to, item) {
-
     let conf_item = 'config_' + item;
     let elem = document.getElementById(conf_item + '_interface_script');
     let eth = jQuery.extend({}, elem);
@@ -498,13 +555,29 @@ const ConfigItemInterface = function (name, ip, netmask, connected_to, item) {
     let text = eth.innerHTML;
     $(text).insertBefore(tag + '_end_form');
 
+    if (typeof translateDynamicContent === 'function') {
+        const formElement = $(`#${conf_item}_end_form`).closest('form').get(0);
+        if (formElement) {
+            translateDynamicContent(formElement);
+        }
+    }
+
     $('<input type="hidden" name="' + conf_item + '_iface_ids[]" value="' + name + '"/>').insertBefore(tag + ids[1] + name);
     $(tag + ids[1] + name).attr("placeholder", connected_to);
     $(tag + ids[2] + name).val(ip);
     $(tag + ids[3] + name).val(netmask);
 
     if (Array.isArray(pcaps) && pcaps.includes(name)) {
-        $(tag + '_iface_name_label_' + name).html('Линк к (<a href="/' + item + '/mimishark?guid=' + network_guid + '&iface=' + name + '" target="_blank">pcap</a>)');
+        const linkLabel = getTranslation('linkTo');
+        $(tag + '_iface_name_label_' + name).html(
+            '<span data-i18n="linkTo">' + linkLabel + '</span> (<a href="/' + item + '/mimishark?guid=' + network_guid + '&iface=' + name + '" target="_blank">pcap</a>)'
+        );
+        if (typeof translateDynamicContent === 'function') {
+            const labelEl = document.querySelector(tag + '_iface_name_label_' + name);
+            if (labelEl) {
+                translateDynamicContent(labelEl);
+            }
+        }
     } else {
         console.warn('pcaps не определен или не является массивом:', pcaps);
     }
@@ -568,6 +641,13 @@ const UpdateHostForm = function(name) {
 
     $('div[name="config_host_select_input"]').remove();
     $(elem).insertBefore(host_job_list);
+
+    if (typeof translateDynamicContent === 'function') {
+        const parentForm = $(host_job_list).closest('form').get(0);
+        if (parentForm) {
+            translateDynamicContent(parentForm);
+        }
+    }
 };
 
 const ConfigHostJobOnChange = function (evnt) {
@@ -625,7 +705,6 @@ const ConfigHostJobOnChange = function (evnt) {
 }
 
 const ConfigHostJob = function (host_jobs, shared = 0) {
-
     let elem = document.getElementById('config_host_job_script').innerHTML;
     let host_id = document.getElementById('host_id');
 
@@ -634,6 +713,13 @@ const ConfigHostJob = function (host_jobs, shared = 0) {
     }
 
     $(elem).insertBefore(host_id);
+    
+    if (typeof translateDynamicContent === 'function') {
+        const parentForm = $(host_id).closest('form').get(0);
+        if (parentForm) {
+            translateDynamicContent(parentForm);
+        }
+    }
 
     // Set onchange
     document.getElementById('config_host_job_select_field').addEventListener('change', ConfigHostJobOnChange);
@@ -654,7 +740,10 @@ const ConfigHostJob = function (host_jobs, shared = 0) {
         let jid = host_jobs[i].id;
 
         if (i == 0) {
-            $('#config_host_job_list').append('<label class="text-sm">Команды</label>');
+            $('#config_host_job_list').append('<label class="text-sm" data-i18n="commandsLabel">Команды</label>');
+            if (typeof translateDynamicContent === 'function') {
+                translateDynamicContent(document.getElementById('config_host_job_list'));
+            }
         }
 
         elem = document.getElementById('config_host_job_list_elem_script');
@@ -682,26 +771,17 @@ const ConfigHostJob = function (host_jobs, shared = 0) {
 }
 
 const ConfigHostGateway = function (gw) {
-
-    var text = document.getElementById('config_host_default_gw_script').innerHTML;
-
-    $(text).insertBefore('#config_host_end_form');
+    appendAndTranslate('#config_host_end_form', 'config_host_default_gw_script');
     $('#config_host_default_gw').val(gw);
 }
 
 const ConfigRouterGateway = function (gw) {
-
-    var text = document.getElementById('config_router_default_gw_script').innerHTML;
-
-    $(text).insertBefore('#config_router_end_form');
+    appendAndTranslate('#config_router_end_form', 'config_router_default_gw_script');
     $('#config_router_default_gw').val(gw);
 }
 
 const ConfigServerGateway = function (gw) {
-
-    var text = document.getElementById('config_server_default_gw_script').innerHTML;
-
-    $(text).insertBefore('#config_server_end_form');
+    appendAndTranslate('#config_server_end_form', 'config_server_default_gw_script');
     $('#config_server_default_gw').val(gw);
 }
 
@@ -756,7 +836,6 @@ const ConfigRouterJobOnChange = function(evnt) {
 }
 
 const ConfigRouterJob = function (router_jobs, shared = 0) {
-
     let elem = document.getElementById('config_router_job_script').innerHTML;
     let router_id = document.getElementById('router_id');
 
@@ -765,6 +844,13 @@ const ConfigRouterJob = function (router_jobs, shared = 0) {
     }
 
     $(elem).insertBefore(router_id);
+
+    if (typeof translateDynamicContent === 'function') {
+        const parentForm = $(router_id).closest('form').get(0);
+        if (parentForm) {
+            translateDynamicContent(parentForm);
+        }
+    }
 
     // Set onchange
     document.getElementById('config_router_job_select_field').addEventListener('change', ConfigRouterJobOnChange);
@@ -785,7 +871,10 @@ const ConfigRouterJob = function (router_jobs, shared = 0) {
         let jid = router_jobs[i].id;
 
         if (i == 0) {
-            $('#config_router_job_list').append('<label class="text-sm">Команды</label>');
+            $('#config_router_job_list').append('<label class="text-sm" data-i18n="commandsLabel">Команды</label>');
+            if (typeof translateDynamicContent === 'function') {
+                translateDynamicContent(document.getElementById('config_router_job_list'));
+            }
         }
 
         elem = document.getElementById('config_router_job_list_elem_script');
@@ -799,7 +888,6 @@ const ConfigRouterJob = function (router_jobs, shared = 0) {
         job_elem.innerHTML = job_elem.innerHTML.replace(/justify-content-between align-items-center\">/, 'justify-content-between align-items-center\"><small>' + router_jobs[i].print_cmd + '</small>');
 
         let text = job_elem.innerHTML;
-        //$(text).insertBefore(host_id);
         $('#config_router_job_list').append(text);
 
         $('#config_router_job_delete_' + jid).click(function (event) {
@@ -812,7 +900,6 @@ const ConfigRouterJob = function (router_jobs, shared = 0) {
 }
 
 const ConfigServerJob = function (server_jobs, shared = 0) {
-
     let elem = document.getElementById('config_server_job_script').innerHTML;
     let server_id = document.getElementById('server_id');
 
@@ -821,6 +908,13 @@ const ConfigServerJob = function (server_jobs, shared = 0) {
     }
 
     $(elem).insertBefore(server_id);
+    
+    if (typeof translateDynamicContent === 'function') {
+        const parentForm = $(server_id).closest('form').get(0);
+        if (parentForm) {
+            translateDynamicContent(parentForm);
+        }
+    }
 
     // Set onchange
     document.getElementById('config_server_job_select_field').addEventListener('change', ConfigServerJobOnChange);
@@ -841,7 +935,10 @@ const ConfigServerJob = function (server_jobs, shared = 0) {
         let jid = server_jobs[i].id;
 
         if (i == 0) {
-            $('#config_server_job_list').append('<label class="text-sm">Команды</label>');
+            $('#config_server_job_list').append('<label class="text-sm" data-i18n="commandsLabel">Команды</label>');
+            if (typeof translateDynamicContent === 'function') {
+                translateDynamicContent(document.getElementById('config_server_job_list'));
+            }
         }
 
         elem = document.getElementById('config_server_job_list_elem_script');
@@ -855,7 +952,6 @@ const ConfigServerJob = function (server_jobs, shared = 0) {
         job_elem.innerHTML = job_elem.innerHTML.replace(/justify-content-between align-items-center\">/, 'justify-content-between align-items-center\"><small>' + server_jobs[i].print_cmd + '</small>');
 
         let text = job_elem.innerHTML;
-        //$(text).insertBefore(host_id);
         $('#config_server_job_list').append(text);
 
         $('#config_server_job_delete_' + jid).click(function (event) {
@@ -879,10 +975,16 @@ const UpdateServerForm = function(name) {
 
     $('div[name="config_server_select_input"]').remove();
     $(elem).insertBefore(server_job_list);
+
+    if (typeof translateDynamicContent === 'function') {
+        const parentForm = $(server_job_list).closest('form').get(0);
+        if (parentForm) {
+            translateDynamicContent(parentForm);
+        }
+    }
 }
 
 const ConfigServerJobOnChange = function (evnt) {
-
     let elem = null;
     let server_job_list = null;
     let n = null;
@@ -916,7 +1018,6 @@ const ConfigServerJobOnChange = function (evnt) {
         default:
             console.log("Unknown target.value");
     }
-
 }
 
 const DisableFormInputs = function () {
@@ -948,9 +1049,16 @@ const UpdateRouterForm = function(name) {
 
     $('div[name="config_router_select_input"]').remove();
     $(elem).insertBefore(router_job_list);
+
+    if (typeof translateDynamicContent === 'function') {
+        const parentForm = $(router_job_list).closest('form').get(0);
+        if (parentForm) {
+            translateDynamicContent(parentForm);
+        }
+    }
 }
 
-const FillRouterSelect = function(select_id, field_msg = 'Интерфейс начальной точки', return_ip = true) {
+const FillRouterSelect = function(select_id, field_msg = 'Интерфейс начальной точки', return_ip = true) { // TODO: Localize
     /**
     * Fill select element with network hosts.
     * @param  {String} select_id ID(name) of the element to which you need to add data.
