@@ -1,6 +1,5 @@
 import os
 import pathlib
-import uuid
 
 from flask import jsonify, request, session
 from flask_caching import Cache
@@ -47,29 +46,13 @@ def launch():
     launch_data_storage = get_launch_data_storage()
     message_launch = ExtendedFlaskMessageLaunch(flask_request, tool_conf, launch_data_storage=launch_data_storage)
     
-<<<<<<< HEAD
     if request.args.get("returnUrl"):
         session["returnToLtiPlatformUrl"] = request.args.get("returnUrl")
     
     handler = ActionHandlerFactory.create_handler(message_launch)
     return handler.handle()
-=======
-    if request.args.get("returnUrl") != None: session["returnToLtiPlatformUrl"] = request.args.get("returnUrl")
-    session["launch_id"] = message_launch.get_launch_id()
-
-    platformUser = User.query.filter(
-        User.platformUserId == message_launch_data.get("sub"),
-        User.platform == message_launch_data.get("iss")
-    ).first()
-    
-    if platformUser is None:
-        platformUser = User(nick=message_launch_data.get("name", f"platformUser_{uuid.uuid4().hex[:8]}"), platform=message_launch_data.get("iss"), platformUserId=message_launch_data.get("sub"))
-        db.session.add(platformUser)
-        db.session.commit()
->>>>>>> 6a9640608554e0231ba0d7654048cabac9b37878
 
 
-<<<<<<< HEAD
 def send(result):
     if "launch_id" not in session:
         raise Exception("No active LTI launch")
@@ -87,9 +70,6 @@ def send(result):
     result_sender.send(result)
     
     if "returnToLtiPlatformUrl" in session: session.pop("returnToLtiPlatformUrl")
-=======
-    launchSectionId = message_launch_data.get("https://purl.imsglobal.org/spec/lti/claim/custom").get('task')
->>>>>>> 6a9640608554e0231ba0d7654048cabac9b37878
 
 
 def get_jwks():
