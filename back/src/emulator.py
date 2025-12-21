@@ -32,6 +32,12 @@ def emulate(
             f"Превышен лимит! В сети максимальное количество команд ({MAX_JOBS_COUNT}). "
             f"Текущее количество: {len(network.jobs)}"
         )
+    sleep_jobs = [j for j in network.jobs if j.job_id == 7]
+    total_time = sum(int(j.arg_1) for j in sleep_jobs)
+    if total_time > 60 or total_time < 0:
+        raise ValueError(
+            f"Превышен лимит! В сети максимальное количество команд sleep)."
+        )
 
     if len(network.jobs) == 0:
         return [], []

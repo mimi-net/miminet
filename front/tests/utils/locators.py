@@ -130,6 +130,13 @@ class Location:
                 )
                 RSTP_BUTTON = Locator("#config_button_rstp")
                 VLAN_BUTTON = Locator("#config_button_vlan")
+                JOB_SELECT = Locator("#config_switch_job_select_field")
+
+                class Job:
+                    SLEEP_FIELD = Locator("#config_switch_sleep")
+                    LINK_DOWN_OPTION_FIELD = Locator(
+                        "#config_switch_link_down_iface_select_field"
+                    )
 
                 @staticmethod
                 def get_modal_dialog_selector(switch_name: str):
