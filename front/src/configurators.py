@@ -186,6 +186,7 @@ class AbstractDeviceConfigurator:
 
     __MAX_JOBS_COUNT: int = 30
     __SLEEP_JOB_ID: int = 7
+    __MAX_SLEEP_TIME: int = 60
 
     def create_job(self, job_id: int, job_sign: str) -> JobConfigurator:
         """
@@ -318,7 +319,7 @@ class AbstractDeviceConfigurator:
         if job_id == self.__SLEEP_JOB_ID:
             new_job_arg = int(job_conf_res["arg_1"])
             if current_time + new_job_arg > 60:
-                raise ConfigurationError(f"Превышен лимит по времени для команды sleep")
+                raise ConfigurationError(f"Превышен лимит по времени для команды sleep ({self.__MAX_SLEEP_TIME} секунд)")
 
         if editing_job_id and old_job_index is not None:
             # Insert at the same position where the old job was
