@@ -205,18 +205,17 @@ def valid_sleep(time) -> bool:
     return True
 
 
-def set_link_down(job: Job, job_host: Any) -> None:
+def link_down_handler(job: Job, job_host: Any) -> None:
     arg_interface = job.arg_1
     if not net_dev_checker(arg_interface):
         return
     job_host.cmd(f"ip link set {arg_interface} down")
 
 
-def sleep(job: Job, job_host: Any) -> None:
+def sleep_handler(job: Job, job_host: Any) -> None:
     arg_time = job.arg_1
     if not valid_sleep(arg_time):
         return
-    info()
     time.sleep(int(arg_time))
 
 
@@ -487,8 +486,8 @@ class Jobs:
             3: sending_udp_data_handler,
             4: sending_tcp_data_handler,
             5: traceroute_handler,
-            6: set_link_down,
-            7: sleep,
+            6: link_down_handler,
+            7: sleep_handler,
             100: ip_addr_add_handler,
             101: iptables_handler,
             102: ip_route_add_handler,

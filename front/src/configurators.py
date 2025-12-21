@@ -309,18 +309,18 @@ class AbstractDeviceConfigurator:
 
         job_conf_res["level"] = job_level
         job_conf_res["host_id"] = self._device_node["data"]["id"]
-
-        sleep_job_list = []
-        for job in self._json_network["jobs"]:
-            if job["job_id"] == self.__SLEEP_JOB_ID:
-                sleep_job_list.append(job)
+        sleep_job_list = [
+            job
+            for job in self._json_network["jobs"]
+            if job["job_id"] == self.__SLEEP_JOB_ID
+        ]
         current_time = sum(int(j["arg_1"]) for j in sleep_job_list)
 
         if job_id == self.__SLEEP_JOB_ID:
             new_job_arg = int(job_conf_res["arg_1"])
             if current_time + new_job_arg > 60:
                 raise ConfigurationError(
-                    f"Превышен лимит по времени для команды sleep ({self.__MAX_SLEEP_TIME} секунд)"
+                    f"Превышен лимит по времени для команды sleep ({self.__MAX_SLEEP_TIME} секунд на сеть)"
                 )
 
         if editing_job_id and old_job_index is not None:

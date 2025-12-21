@@ -97,7 +97,7 @@ def emptiness_check(arg: str) -> bool:
 
 def time_check(arg: str) -> bool:
     """Check if a string is >=50 or <= 0 or empty"""
-    return range_check(arg, range(0, 50)) and str(arg) != "0"
+    return range_check(arg, range(1, 50))
 
 
 def regex_check(arg: str, regex: str) -> bool:
