@@ -27,6 +27,7 @@ def emulate(
 
     # Validate job limit
     MAX_JOBS_COUNT = 30
+    MAX_TIME_SLEEP = 60
     if len(network.jobs) > MAX_JOBS_COUNT:
         raise ValueError(
             f"Превышен лимит! В сети максимальное количество команд ({MAX_JOBS_COUNT}). "
@@ -36,7 +37,7 @@ def emulate(
     total_time = sum(int(j.arg_1) for j in sleep_jobs)
     if total_time > 60 or total_time < 0:
         raise ValueError(
-            f"Превышен лимит! В сети максимальное количество команд sleep)."
+            f"Превышен лимит! В сети максимальное количество команд sleep {MAX_TIME_SLEEP})."
         )
 
     if len(network.jobs) == 0:
