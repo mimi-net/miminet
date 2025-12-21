@@ -25,6 +25,14 @@ def emulate(
 
     setLogLevel("info")
 
+    # Validate job limit
+    MAX_JOBS_COUNT = 30
+    if len(network.jobs) > MAX_JOBS_COUNT:
+        raise ValueError(
+            f"Превышен лимит! В сети максимальное количество команд ({MAX_JOBS_COUNT}). "
+            f"Текущее количество: {len(network.jobs)}"
+        )
+
     if len(network.jobs) == 0:
         return [], []
 
@@ -35,7 +43,9 @@ def emulate(
         net.start()
 
         # Jobs with high ID have priority over low ones
-        ordered_jobs = sorted(network.jobs, key=lambda job: job.job_id, reverse=True)
+        ordered_jobs = sorted(
+            network.jobs, key=lambda job: job.job_id // 100, reverse=True
+        )
 
         for job in ordered_jobs:
             execute_job(job, net)
@@ -76,6 +86,7 @@ def create_animation(
         edge_source,
         edge_target,
         loss_percentage,
+        duplicate_percentage,
     ) in interfaces_info:
         pcap_out_file1 = "/tmp/capture_" + link1 + "_out.pcapng"
         pcap_out_file2 = "/tmp/capture_" + link2 + "_out.pcapng"
@@ -100,6 +111,7 @@ def create_animation(
             edge_source,
             edge_target,
             loss_percentage,
+            duplicate_percentage,
         )
 
         animation += packets
