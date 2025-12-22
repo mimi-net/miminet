@@ -1,5 +1,4 @@
 const ConfigRSTP = function (currentDevice) {
-
     const buttonScript = document.getElementById('config_button_rstp_script');
     const modalScript  = document.getElementById('config_modal_rstp_script');
     const switchNameContainer = document.getElementById('config_switch_name');
@@ -11,22 +10,25 @@ const ConfigRSTP = function (currentDevice) {
 
     var modalId = 'RstpModal_' + currentDevice.data.id;
 
-    // Guard before using innerHTML
+    // Создание кнопки
     var buttonHTML = buttonScript.innerHTML || '';
     if (!buttonHTML.trim()) {
         console.warn("Button HTML is empty, skipping");
         return;
     }
-    var buttonElem = $(buttonHTML).appendTo('#config_switch_name');
+    var buttonElem = $(buttonHTML).appendTo(switchNameContainer);
     if (!buttonElem || buttonElem.length === 0) return;
+
     buttonElem.val(currentDevice.config.stp);
     buttonElem.attr('data-bs-target', '#' + modalId);
+    buttonElem.attr('id', 'config_button_rstp'); // добавить уникальный id
 
-    // Remove old modal if it exists
+    // Удаляем старое модальное окно
     if ($('#' + modalId).length) {
         $('#' + modalId).remove();
     }
 
+    // Создание модального окна
     var modalHTML = modalScript.innerHTML || '';
     if (!modalHTML.trim()) {
         console.warn("Modal HTML is empty, skipping");
@@ -35,13 +37,10 @@ const ConfigRSTP = function (currentDevice) {
     modalHTML = modalHTML.replace('id="RstpModal"', 'id="' + modalId + '"');
     $(modalHTML).appendTo('body');
 
-    $(document).ready(function () {
-        if ($('[data-bs-toggle="tooltip"]').length) {
-            $('[data-bs-toggle="tooltip"]').tooltip();
-        }
-        eventHandlers(currentDevice, modalId);
-    });
+    // Вешаем обработчики событий
+    eventHandlers(currentDevice, modalId);
 };
+
 
 function eventHandlers(currentDevice, modalId) {
     if (!$('#' + modalId).length) return;
