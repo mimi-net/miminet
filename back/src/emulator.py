@@ -2,8 +2,9 @@ import os
 import os.path
 import subprocess
 import time
-import dpkt 
+import dpkt
 import datetime
+import logging
 from ipmininet.ipnet import IPNet
 from jobs import Jobs
 from network_schema import Job, Network
@@ -11,7 +12,8 @@ from pkt_parser import create_pkt_animation
 from mininet.log import setLogLevel, info, error
 from network_topology import MiminetTopology
 from network import MiminetNetwork
-from logging import logger
+
+logger = logging.getLogger(__name__)
 
 def emulate(
     network: Network,
@@ -138,9 +140,9 @@ def emulate(
         logger.error(
             "miminet_configuration_failed",
             extra={
-                "timestamp": datetime().utcnow().isoformat() + "Z",
+                "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
                 "level": "ERROR",
-                "error": str(e)        
+                "error": str(e),
             }
         )
         
@@ -166,7 +168,7 @@ def emulate(
     logger.info(
         "emulation_finished",
         extra={
-            "timestamp": datetime().utcnow().isoformat() + "Z",
+            "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
             "level": "INFO",
             "pcaps_count": len(pcaps),
             "duration_ms": duration_ms,
