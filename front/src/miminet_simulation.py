@@ -2,7 +2,7 @@ import os
 import uuid
 import logging
 
-import logging_config  # noqa: F401  # enforce JSON logging for simulation endpoints
+import logging_config 
 
 from celery_app import (
     SEND_NETWORK_EXCHANGE,

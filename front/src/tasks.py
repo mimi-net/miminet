@@ -4,7 +4,7 @@ import uuid
 import logging
 import json
 
-import logging_config  # noqa: F401  # configure JSON logging for all modules
+import logging_config  
 from sqlalchemy.orm.exc import StaleDataError
 
 from celery_app import (

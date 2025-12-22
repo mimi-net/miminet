@@ -5,15 +5,15 @@ from psutil import Process
 from ipmininet.ipnet import IPNet
 from mininet.log import info
 import psutil
-
+import logging_config
 from network_topology import MiminetTopology
 from network_schema import Network
-from logging import logger
 from net_utils.vlan import setup_vlans, clean_bridges
 from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
 from datetime import date, datetime
 
 
+logger = logging.getLogger(__name__)
 class MiminetNetwork(IPNet):
     def __init__(self, topo: MiminetTopology, network: Network):
         super().__init__(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)

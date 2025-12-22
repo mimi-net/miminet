@@ -4,7 +4,7 @@ import signal
 import datetime
 import logging
 
-import logging_config  # noqa: F401  # ensure JSON logging in Celery worker
+import logging_config  
 import marshmallow_dataclass
 from celery_app import (
     app,

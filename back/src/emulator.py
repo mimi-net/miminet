@@ -3,7 +3,7 @@ import os.path
 import subprocess
 import time 
 import datetime
-
+import logging_config
 from ipmininet.ipnet import IPNet
 from jobs import Jobs
 from network_schema import Job, Network
