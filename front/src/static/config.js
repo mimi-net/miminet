@@ -792,11 +792,11 @@ const ConfigRouterJobOnChange = function(evnt) {
             FillDeviceSelectIntf("#config_router_add_arp_proxy_iface_select_field", '#router_id', "Выберите линк", false);
         case '109':
             UpdateRouterForm('config_router_add_port_forwarding_tcp_script');
-            FillRouterSelect("#config_router_add_port_forwarding_tcp_iface_select_field", "Выберите линк", false);
+            FillDeviceSelectIntf("#config_router_add_port_forwarding_tcp_iface_select_field", "#router_id", "Выберите линк", false)
             break;
         case '110':
             UpdateRouterForm('config_router_add_port_forwarding_udp_script');
-            FillRouterSelect("#config_router_add_port_forwarding_udp_iface_select_field", "Выберите линк", false);
+            FillDeviceSelectIntf("#config_router_add_port_forwarding_udp_iface_select_field", "#router_id", "Выберите линк", false)
             break;
         default:
             console.log("Unknown target.value");
