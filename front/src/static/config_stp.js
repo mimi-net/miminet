@@ -1,15 +1,24 @@
 const ConfigRSTP = function (currentDevice) {
+
+    const buttonScript = document.getElementById('config_button_rstp_script');
+    const modalScript  = document.getElementById('config_modal_rstp_script');
+
+    if (!buttonScript || !modalScript) {
+        return;
+    }
+
     var modalId = 'RstpModal_' + currentDevice.data.id;
 
-    var buttonHTML = document.getElementById('config_button_rstp_script').innerHTML;
+    var buttonHTML = buttonScript.innerHTML;
     var buttonElem = $(buttonHTML).appendTo('#config_switch_name');
     buttonElem.val(currentDevice.config.stp);
     buttonElem.attr('data-bs-target', '#' + modalId);
 
     $('#' + modalId).remove();
-    var modalHTML = document.getElementById('config_modal_rstp_script').innerHTML;
+
+    var modalHTML = modalScript.innerHTML;
     modalHTML = modalHTML.replace('id="RstpModal"', 'id="' + modalId + '"');
-    var modalElem = $(modalHTML).appendTo('body');
+    $(modalHTML).appendTo('body');
 
     $(document).ready(function () {
         $('[data-bs-toggle="tooltip"]').tooltip();
