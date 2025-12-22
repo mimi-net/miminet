@@ -18,20 +18,21 @@ jobs:
           cd front/
           sed -i 's/MODE=prod/MODE=dev/' .env
           docker compose up -d
-    
+
       - name: Start selenium
         run: |
-           cd front/tests/docker
-           docker compose up -d
+          cd front/tests/docker
+          docker compose up -d
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-            python-version: '3.12.3'
-   
+          python-version: "3.12.3"
+
       - name: Install dependencies
         run: |
-            sudo python -m pip install pip pytest selenium --ignore-installed urllib3
+          sudo python -m pip install pip pytest selenium --ignore-installed urllib3
+          sudo python -m pip install -r front/requirements.txt --ignore-installed
 
       - name: Check availability
         run: |
@@ -40,4 +41,4 @@ jobs:
 
       - name: Run tests
         run: |
-           sudo python3 -m pytest -vv -s front/tests
+          sudo python3 -m pytest -vv -s front/tests

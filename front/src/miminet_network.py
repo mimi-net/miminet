@@ -362,6 +362,7 @@ def post_nodes_edges():
         for edge in edges:
             edge_data = edge.get("data", {})
             edge_data["loss_percentage"] = edge_data.get("loss_percentage", 0)
+            edge_data["duplicate_percentage"] = edge_data.get("duplicate_percentage", 0)
 
         jnet = json.loads(net.network)
         jnet["edges"] = edges

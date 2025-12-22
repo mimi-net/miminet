@@ -59,7 +59,7 @@ def run_miminet(network_json: str):
             )
             continue
 
-    return "", []
+    return "[]", []
 
 
 @app.task(bind=True)

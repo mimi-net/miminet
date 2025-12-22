@@ -152,37 +152,26 @@ class MiminetTopology(IPTopo):
             edge_id = edge.data.id
             source_id = edge.data.source
             target_id = edge.data.target
-            loss_percentage = (
-                edge.data.loss_percentage
-                if edge.data.loss_percentage is not None
-                else 0
-            )
-           
-            logger.info(
-                "Configuring link", 
-                extra={
-                    "timestamp": datetime().utcnow().isoformat() + "Z",
-                    "level": "ERROR",
-                    "event": "link_config",
-                    "edge_id": edge_id,
-                    "source": source_id,
-                    "target": target_id,
-                    "loss_percentage": loss_percentage,
-                }
-            )
-            
-            if source_id not in self.__nodes or target_id not in self.__nodes:
-                logger.error(
-                    "Link references unknown node", 
-                    extra={
-                        "timestamp": datetime().utcnow().isoformat() + "Z",
-                        "level": "ERROR",
-                        "event": "link_config",
-                        "edge_id": edge_id,
-                        "source": source_id,
-                        "target": target_id,
-                        "loss_percentage": loss_percentage,
-                    }
+
+            def _to_percent(val):
+                try:
+                    if val is None:
+                        return 0.0
+                    s = str(val).strip().rstrip("%")
+                    return float(s) if s else 0.0
+                except (ValueError, TypeError):
+                    return 0.0
+
+            loss_percentage = _to_percent(edge.data.loss_percentage)
+            duplicate_percentage = _to_percent(edge.data.duplicate_percentage)
+
+            if source_id not in self.__nodes:
+                raise ValueError(
+                    f"Edge '{edge_id}' references unknown source node '{source_id}'."
+                )
+            if target_id not in self.__nodes:
+                raise ValueError(
+                    f"Edge '{edge_id}' references unknown target node '{target_id}'."
                 )
             # Mininet host objects (https://mininet.org/api/classmininet_1_1node_1_1Host.html)
             src_host = self.__nodes[source_id]
@@ -203,6 +192,7 @@ class MiminetTopology(IPTopo):
                     source_id,
                     target_id,
                     loss_percentage,
+                    duplicate_percentage,
                 )
             )
             
@@ -214,6 +204,7 @@ class MiminetTopology(IPTopo):
                 interface_name_2=trg_iface.name,
                 delay="15ms",
                 loss_percentage=loss_percentage,
+                duplicate_percentage=duplicate_percentage,
             )
             
             logger.debug(
@@ -281,6 +272,7 @@ class MiminetTopology(IPTopo):
         delay="2ms",
         max_queue_size=None,
         loss_percentage=0,
+        duplicate_percentage=0,
     ):
         """Connects two hosts through a virtual switch."""
         # Create unique switch name
@@ -295,6 +287,7 @@ class MiminetTopology(IPTopo):
                 "delay": delay,
                 "max_queue_size": max_queue_size,
                 "loss": loss_percentage,
+                "duplicate": duplicate_percentage,
             }
         }
 
@@ -303,6 +296,7 @@ class MiminetTopology(IPTopo):
                 "delay": delay,
                 "max_queue_size": max_queue_size,
                 "loss": loss_percentage,
+                "duplicate": duplicate_percentage,
             }
         }
 

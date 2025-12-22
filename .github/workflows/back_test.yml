@@ -38,6 +38,8 @@ jobs:
           make \
           libpcap-dev \
           libbsd-dev \
+          dnsmasq \
+          isc-dhcp-client \
           openvswitch-switch \
           git
           sudo touch /etc/network/interfaces

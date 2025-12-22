@@ -1,0 +1,100 @@
+{
+    "nodes": [
+      {
+        "classes": [
+          "server"
+        ],
+        "config": {
+          "default_gw": "",
+          "label": "server_1",
+          "type": "server"
+        },
+        "data": {
+          "id": "server_1",
+          "label": "server_1"
+        },
+        "interface": [
+          {
+            "connect": "edge_mgs0xasfnc0ls2lyzkd",
+            "id": "iface_75316443",
+            "ip": "192.168.0.2",
+            "name": "iface_75316443",
+            "netmask": 24
+          }
+        ],
+        "position": {
+          "x": 453.25,
+          "y": 138
+        }
+      },
+      {
+        "classes": [
+          "host"
+        ],
+        "config": {
+          "default_gw": "",
+          "label": "host_1",
+          "type": "host"
+        },
+        "data": {
+          "id": "host_1",
+          "label": "host_1"
+        },
+        "interface": [
+          {
+            "connect": "edge_mgs0xasfnc0ls2lyzkd",
+            "id": "iface_87480866",
+            "ip": "192.168.0.1",
+            "name": "iface_87480866",
+            "netmask": 24
+          }
+        ],
+        "position": {
+          "x": 454.75,
+          "y": 234.5999984741211
+        }
+      }
+    ],
+    "edges": [
+      {
+        "data": {
+          "id": "edge_mgs0xasfnc0ls2lyzkd",
+          "source": "host_1",
+          "target": "server_1",
+          "loss_percentage": 0
+        }
+      }
+    ],
+    "jobs": [
+      {
+        "id": "0f3c8222645c498792a9d5ac9c4e14d0",
+        "job_id": 1,
+        "print_cmd": "ping -c 1 192.168.0.100",
+        "arg_1": "192.168.0.100",
+        "level": 2,
+        "host_id": "server_1"
+      },
+      {
+        "id": "4c833ea0075f47b392f00960ee766397",
+        "job_id": 203,
+        "print_cmd": "dhcp ip range: 192.168.0.100,192.168.0.100/24 gw: 192.168.0.2",
+        "arg_1": "192.168.0.100",
+        "arg_2": "192.168.0.100",
+        "arg_3": "24",
+        "arg_4": "192.168.0.2",
+        "arg_5": "iface_75316443",
+        "level": 2,
+        "host_id": "server_1"
+      }
+    ],
+    "config": {
+      "zoom": 2,
+      "pan_x": 0.9999999999995453,
+      "pan_y": 63.99999999999969
+    },
+    "pcap": [
+      "iface_75316443",
+      "iface_87480866"
+    ],
+    "packets": "[]"
+  }
