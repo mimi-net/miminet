@@ -280,7 +280,6 @@ class Location:
                         "#config_router_add_port_forwarding_udp_dest_port_input_field"
                     )
 
-
             class Server(CommonDevice):
                 MAIN_FORM = Locator("#config_main_form")
                 NAME_FIELD = Locator("#config_server_name")

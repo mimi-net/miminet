@@ -156,7 +156,9 @@ def add_gre_checker(ip_start, ip_end, ip_iface, name_iface) -> bool:
 
     return True
 
+
 def port_forwarding_checker(iface, port, dest_addr, dest_port) -> bool:
+    """Checker args for port_forwarding_tcp and port_forwarding_udp"""
     if not valid_ip(dest_addr):
         return False
 
@@ -307,6 +309,8 @@ def iptables_handler(job: Job, job_host: Any) -> None:
 
 
 def port_forwarding_tcp_handler(job: Job, job_host: Any) -> None:
+    """Method for adding tcp port forwarding"""
+
     arg_iface = job.arg_1
     arg_port = job.arg_2
     arg_dest_addr = job.arg_3
@@ -315,10 +319,14 @@ def port_forwarding_tcp_handler(job: Job, job_host: Any) -> None:
     if not port_forwarding_checker(arg_iface, arg_port, arg_dest_addr, arg_dest_port):
         return
 
-    job_host.cmd(f"iptables -t nat -A PREROUTING -p tcp -i {arg_iface} --dport {arg_port} -j DNAT --to-destination {arg_dest_addr}:{arg_dest_port}")
+    job_host.cmd(
+        f"iptables -t nat -A PREROUTING -p tcp -i {arg_iface} --dport {arg_port} -j DNAT --to-destination {arg_dest_addr}:{arg_dest_port}"
+    )
 
 
 def port_forwarding_udp_handler(job: Job, job_host: Any) -> None:
+    """Method for adding udp port forwarding"""
+
     arg_iface = job.arg_1
     arg_port = job.arg_2
     arg_dest_addr = job.arg_3
@@ -327,7 +335,9 @@ def port_forwarding_udp_handler(job: Job, job_host: Any) -> None:
     if not port_forwarding_checker(arg_iface, arg_port, arg_dest_addr, arg_dest_port):
         return
 
-    job_host.cmd(f"iptables -t nat -A PREROUTING -p udp -i {arg_iface} --dport {arg_port} -j DNAT --to-destination {arg_dest_addr}:{arg_dest_port}")
+    job_host.cmd(
+        f"iptables -t nat -A PREROUTING -p udp -i {arg_iface} --dport {arg_port} -j DNAT --to-destination {arg_dest_addr}:{arg_dest_port}"
+    )
 
 
 def ip_route_add_handler(job: Job, job_host: Any) -> None:

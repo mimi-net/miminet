@@ -2,9 +2,9 @@ from typing import Tuple
 
 import pytest
 
-from front.tests.conftest import MiminetTester
-from front.tests.utils.checkers import TestNetworkComparator
-from front.tests.utils.networks import MiminetTestNetwork, NodeType
+from conftest import MiminetTester
+from utils.checkers import TestNetworkComparator
+from utils.networks import MiminetTestNetwork, NodeType
 from utils.locators import Location
 
 
@@ -32,19 +32,25 @@ class TestPortForwardingTCP:
         iface_id = network.nodes[1]["interface"][0]["id"]
 
         if protocol == "tcp":
-            router_config.add_jobs(109, {
-                Location.Network.ConfigPanel.Router.Job.PORT_FORWARDING_TCP_LINK_SELECT.selector: iface_id,
-                Location.Network.ConfigPanel.Router.Job.PORT_FORWARDING_TCP_PORT_FIELD.selector: "80",
-                Location.Network.ConfigPanel.Router.Job.PORT_FORWARDING_TCP_DEST_IP_FIELD.selector: "10.0.0.1",
-                Location.Network.ConfigPanel.Router.Job.PORT_FORWARDING_TCP_DEST_PORT_FIELD.selector: "8000"}
-                                   )
+            router_config.add_jobs(
+                109,
+                {
+                    Location.Network.ConfigPanel.Router.Job.PORT_FORWARDING_TCP_LINK_SELECT.selector: iface_id,
+                    Location.Network.ConfigPanel.Router.Job.PORT_FORWARDING_TCP_PORT_FIELD.selector: "80",
+                    Location.Network.ConfigPanel.Router.Job.PORT_FORWARDING_TCP_DEST_IP_FIELD.selector: "10.0.0.1",
+                    Location.Network.ConfigPanel.Router.Job.PORT_FORWARDING_TCP_DEST_PORT_FIELD.selector: "8000",
+                },
+            )
         elif protocol == "udp":
-            router_config.add_jobs(110, {
-                Location.Network.ConfigPanel.Router.Job.PORT_FORWARDING_UDP_LINK_SELECT.selector: iface_id,
-                Location.Network.ConfigPanel.Router.Job.PORT_FORWARDING_UDP_PORT_FIELD.selector: "80",
-                Location.Network.ConfigPanel.Router.Job.PORT_FORWARDING_UDP_DEST_IP_FIELD.selector: "10.0.0.1",
-                Location.Network.ConfigPanel.Router.Job.PORT_FORWARDING_UDP_DEST_PORT_FIELD.selector: "8000"}
-                                   )
+            router_config.add_jobs(
+                110,
+                {
+                    Location.Network.ConfigPanel.Router.Job.PORT_FORWARDING_UDP_LINK_SELECT.selector: iface_id,
+                    Location.Network.ConfigPanel.Router.Job.PORT_FORWARDING_UDP_PORT_FIELD.selector: "80",
+                    Location.Network.ConfigPanel.Router.Job.PORT_FORWARDING_UDP_DEST_IP_FIELD.selector: "10.0.0.1",
+                    Location.Network.ConfigPanel.Router.Job.PORT_FORWARDING_UDP_DEST_PORT_FIELD.selector: "8000",
+                },
+            )
         router_config.submit()
 
         server_config = network.open_node_config(2)
@@ -53,7 +59,11 @@ class TestPortForwardingTCP:
 
         yield (protocol, network)
 
-    def test_port_forwarding(self, selenium: MiminetTester, protocol_and_network: Tuple[str, MiminetTestNetwork]):
+    def test_port_forwarding(
+        self,
+        selenium: MiminetTester,
+        protocol_and_network: Tuple[str, MiminetTestNetwork],
+    ):
         protocol = protocol_and_network[0]
         network = protocol_and_network[1]
         assert TestNetworkComparator.compare_nodes(network.nodes, self.JSON_NODES)
@@ -65,109 +75,73 @@ class TestPortForwardingTCP:
 
     JSON_NODES = [
         {
-            "classes": [
-                "host"
-            ],
-            "config": {
-                "default_gw": "77.0.0.2",
-                "label": "host_1",
-                "type": "host"
-            },
-            "data": {
-                "id": "host_1",
-                "label": "host_1"
-            },
+            "classes": ["host"],
+            "config": {"default_gw": "77.0.0.2", "label": "host_1", "type": "host"},
+            "data": {"id": "host_1", "label": "host_1"},
             "interface": [
                 {
                     "connect": "edge_mjewlu699fb9rlmwpqa",
                     "id": "iface_34414560",
                     "ip": "77.0.0.1",
                     "name": "iface_34414560",
-                    "netmask": 30
+                    "netmask": 30,
                 }
             ],
-            "position": {
-                "x": 239.75,
-                "y": 224.09375
-            }
+            "position": {"x": 239.75, "y": 224.09375},
         },
         {
-            "classes": [
-                "l3_router"
-            ],
-            "config": {
-                "default_gw": "",
-                "label": "router_1",
-                "type": "router"
-            },
-            "data": {
-                "id": "router_1",
-                "label": "router_1"
-            },
+            "classes": ["l3_router"],
+            "config": {"default_gw": "", "label": "router_1", "type": "router"},
+            "data": {"id": "router_1", "label": "router_1"},
             "interface": [
                 {
                     "connect": "edge_mjewlu699fb9rlmwpqa",
                     "id": "iface_63630075",
                     "ip": "77.0.0.2",
                     "name": "iface_63630075",
-                    "netmask": 30
+                    "netmask": 30,
                 },
                 {
                     "connect": "edge_mjewludcu7hg7klkmnh",
                     "id": "iface_45325888",
                     "ip": "10.0.0.2",
                     "name": "iface_45325888",
-                    "netmask": 30
-                }
+                    "netmask": 30,
+                },
             ],
-            "position": {
-                "x": 479.75,
-                "y": 106.1875
-            }
+            "position": {"x": 479.75, "y": 106.1875},
         },
         {
-            "classes": [
-                "server"
-            ],
-            "config": {
-                "default_gw": "",
-                "label": "server_1",
-                "type": "server"
-            },
-            "data": {
-                "id": "server_1",
-                "label": "server_1"
-            },
+            "classes": ["server"],
+            "config": {"default_gw": "", "label": "server_1", "type": "server"},
+            "data": {"id": "server_1", "label": "server_1"},
             "interface": [
                 {
                     "connect": "edge_mjewludcu7hg7klkmnh",
                     "id": "iface_67026608",
                     "ip": "10.0.0.1",
                     "name": "iface_67026608",
-                    "netmask": 30
+                    "netmask": 30,
                 }
             ],
-            "position": {
-                "x": 479.75,
-                "y": 223.484375
-            }
-        }
+            "position": {"x": 479.75, "y": 223.484375},
+        },
     ]
     JSON_EDGES = [
         {
             "data": {
                 "id": "edge_mjewlu699fb9rlmwpqa",
                 "source": "host_1",
-                "target": "router_1"
+                "target": "router_1",
             }
         },
         {
             "data": {
                 "id": "edge_mjewludcu7hg7klkmnh",
                 "source": "router_1",
-                "target": "server_1"
+                "target": "server_1",
             }
-        }
+        },
     ]
     JSON_TCP_JOBS = [
         {
@@ -179,7 +153,7 @@ class TestPortForwardingTCP:
             "id": "d2ad1e858d74427e8848e07267a7e784",
             "job_id": 109,
             "level": 0,
-            "print_cmd": "port forwarding -p tcp -i iface_63630075 from 80 to 10.0.0.1:8000"
+            "print_cmd": "port forwarding -p tcp -i iface_63630075 from 80 to 10.0.0.1:8000",
         }
     ]
     JSON_UDP_JOBS = [
@@ -192,6 +166,6 @@ class TestPortForwardingTCP:
             "id": "2d17acb877d94117b01d41a404016078",
             "job_id": 110,
             "level": 0,
-            "print_cmd": "port forwarding -p udp -i iface_28208318 from 80 to 10.0.0.1:8000"
+            "print_cmd": "port forwarding -p udp -i iface_28208318 from 80 to 10.0.0.1:8000",
         }
     ]
