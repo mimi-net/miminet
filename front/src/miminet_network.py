@@ -2,6 +2,9 @@ import json
 import os
 import uuid
 import shutil
+import logging
+
+import logging_config  # noqa: F401  # enforce JSON logging for this module
 
 from flask import (
     flash,
@@ -17,6 +20,8 @@ from miminet_config import check_image_with_pil
 from miminet_model import Network, Simulate, db, SimulateLog
 import datetime
 from sqlalchemy import not_
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -554,6 +559,16 @@ def get_emulation_queue_size():
         SimulateLog.query.filter(not_(SimulateLog.ready))
         .filter(SimulateLog.simulate_start <= time_filter)
         .count()
+    )
+
+    logger.info(
+        "emulation_queue_size",
+        extra={
+            "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+            "level": "INFO",
+            "time_filter": time_filter_req,
+            "count": emulated_networks_count,
+        },
     )
 
     return make_response(
