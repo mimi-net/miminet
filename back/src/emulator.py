@@ -1,8 +1,9 @@
 import os
 import os.path
 import subprocess
-import time 
+import time
 import datetime
+import logging
 import logging_config
 from ipmininet.ipnet import IPNet
 from jobs import Jobs
@@ -11,7 +12,8 @@ from pkt_parser import create_pkt_animation
 from mininet.log import setLogLevel, error
 from network_topology import MiminetTopology
 from network import MiminetNetwork
-from logging import logger
+
+logger = logging.getLogger(__name__)
 
 def emulate(
     network: Network,
@@ -28,11 +30,11 @@ def emulate(
     start_ts = time.time()
 
     logger.info(
-        "emulation_started", 
+        "emulation_started",
         extra={
-            "timestamp": datetime().utcnow().isoformat() + "Z",
+            "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
             "level": "INFO",
-            "jobs_count": len(network.jobs) if getattr(network, "jobs", None) else 0
+            "jobs_count": len(network.jobs) if getattr(network, "jobs", None) else 0,
         }
     )
     
@@ -70,9 +72,9 @@ def emulate(
         logger.error(
             "miminet_configuration_failed",
             extra={
-                "timestamp": datetime().utcnow().isoformat() + "Z",
+                "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
                 "level": "ERROR",
-                "error": str(e)        
+                "error": str(e),
             }
         )
         
@@ -88,7 +90,7 @@ def emulate(
     logger.info(
         "emulation_finished",
         extra={
-            "timestamp": datetime().utcnow().isoformat() + "Z",
+            "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
             "level": "INFO",
             "pcaps_count": len(pcaps),
             "duration_ms": duration_ms,
