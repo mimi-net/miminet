@@ -4,8 +4,7 @@ import uuid
 import shutil
 import logging
 
-import logging_config  # noqa: F401  # enforce JSON logging for this module
-
+import logging_config  
 from flask import (
     flash,
     jsonify,

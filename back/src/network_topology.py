@@ -8,6 +8,7 @@ from network_schema import Network, Node, NodeConfig, NodeInterface
 from pkt_parser import is_ipv4_address
 import logging
 import datetime
+import logging_config
 
 logger = logging.getLogger(__name__)
 
