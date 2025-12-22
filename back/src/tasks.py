@@ -2,6 +2,9 @@ import json
 import os
 import signal
 import datetime
+import logging
+
+import logging_config  # noqa: F401  # ensure JSON logging in Celery worker
 import marshmallow_dataclass
 from celery_app import (
     app,
@@ -9,9 +12,10 @@ from celery_app import (
     SEND_NETWORK_RESPONSE_ROUTING_KEY,
 )
 from mininet.log import setLogLevel, error
-from logging import logger
 from network_schema import Network
 from emulator import emulate
+
+logger = logging.getLogger(__name__)
 
 
 def run_miminet(network_json: str):
@@ -44,14 +48,14 @@ def run_miminet(network_json: str):
             # Sometimes mininet doesn't work correctly and simulation needs to be redone,
             # Example of mininet error: https://github.com/mininet/mininet/issues/737.
             logger.warning(
-                "emulating_rerty",
+                "emulating_retry",
                 extra={
-                    "timestamp": datetime().utcnow().isoformat() + "Z",
+                    "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
                     "level": "WARNING",
-                    "task_id":  getattr(self, 'request', None) and getattr(self.request, 'id', None),
+                    "task_id": None,
                     "attempt": attempt + 1,
-                    "error": str(e)
-                }
+                    "error": str(e),
+                },
             )
             continue
 
