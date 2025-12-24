@@ -159,16 +159,13 @@ def add_gre_checker(ip_start, ip_end, ip_iface, name_iface) -> bool:
 
 def port_forwarding_checker(iface, port, dest_addr, dest_port) -> bool:
     """Checker args for port_forwarding_tcp and port_forwarding_udp"""
-    if not valid_ip(dest_addr):
-        return False
 
-    if not valid_port(port) or not valid_port(dest_port):
-        return False
-
-    if not valid_iface(iface):
-        return False
-
-    return True
+    return (
+        valid_ip(dest_addr)
+        and valid_port(port)
+        and valid_port(dest_port)
+        and valid_iface(iface)
+    )
 
 
 def valid_port(port) -> bool:
