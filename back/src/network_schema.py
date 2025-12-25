@@ -1,7 +1,10 @@
 """Classes for deserializing a Miminet network"""
 
 from dataclasses import dataclass
-from typing import Union, Optional
+from typing import Optional, TYPE_CHECKING, Union
+
+if TYPE_CHECKING:
+    from mstp_schema import MstInstance
 
 
 @dataclass
@@ -16,22 +19,6 @@ class NodeData:
 
     id: str
     label: str
-
-
-@dataclass
-class MstInstance:
-    """
-    Represents an MST (Multiple Spanning Tree) instance configuration.
-
-    Attributes:
-        instance_id (int): MST instance ID (0-64).
-        vlans (list[int]): List of VLAN IDs mapped to this instance.
-        priority (Optional[int]): Bridge priority for this MST instance.
-    """
-
-    instance_id: int
-    vlans: list[int]
-    priority: Optional[int] = None
 
 
 @dataclass
@@ -56,7 +43,7 @@ class NodeConfig:
     priority: Optional[int] = None
     mst_region: Optional[str] = None
     mst_revision: Optional[int] = None
-    mst_instances: Optional[list[MstInstance]] = None
+    mst_instances: Optional[list["MstInstance"]] = None
     default_gw: str = ""
 
 

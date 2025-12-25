@@ -6,8 +6,6 @@ from typing import Optional, Type, Tuple
 from selenium.common.exceptions import NoSuchElementException
 from json import dumps as json_dumps
 from selenium.webdriver.support.ui import Select
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
 
 class NodeType:
