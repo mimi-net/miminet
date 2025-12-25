@@ -45,24 +45,22 @@ def configure_mstp_bridge(switch: IPSwitch, node: Node) -> None:
     result = switch.cmd("which mstpctl 2>/dev/null || echo 'not found'")
 
     if "not found" in result:
-        print(f"Warning: mstpctl not found, using STP fallback for "
-              f"{switch.name}")
+        print(f"Warning: mstpctl not found, using STP fallback for " f"{switch.name}")
         switch.cmd(f"ip link set {bridge_name} type bridge stp_state 1")
         if config.priority is not None:
-            switch.cmd(f"ip link set {bridge_name} type bridge priority "
-                       f"{config.priority}")
+            switch.cmd(
+                f"ip link set {bridge_name} type bridge priority " f"{config.priority}"
+            )
         return
 
     switch.cmd(f"mstpctl addbridge {bridge_name}")
     switch.cmd(f"mstpctl setforcevers {bridge_name} mstp")
 
     if config.mst_region:
-        switch.cmd(f"mstpctl setmstconfid {bridge_name} 0 "
-                   f"{config.mst_region}")
+        switch.cmd(f"mstpctl setmstconfid {bridge_name} 0 " f"{config.mst_region}")
 
     if config.mst_revision is not None:
-        switch.cmd(f"mstpctl setmstconfid {bridge_name} 1 "
-                   f"{config.mst_revision}")
+        switch.cmd(f"mstpctl setmstconfid {bridge_name} 1 " f"{config.mst_revision}")
 
     if config.priority is not None:
         switch.cmd(f"mstpctl settreeprio {bridge_name} 0 {config.priority}")
@@ -75,8 +73,9 @@ def configure_mstp_bridge(switch: IPSwitch, node: Node) -> None:
         configure_mstp_interface_vlan(switch, bridge_name, iface)
 
 
-def configure_mst_instance(switch: IPSwitch, bridge_name: str,
-                           mst_instance: MstInstance) -> None:
+def configure_mst_instance(
+    switch: IPSwitch, bridge_name: str, mst_instance: MstInstance
+) -> None:
     """Configure a single MST instance with VLAN mappings."""
     instance_id = mst_instance.instance_id
     vlans = mst_instance.vlans
@@ -86,16 +85,14 @@ def configure_mst_instance(switch: IPSwitch, bridge_name: str,
 
     if priority is not None:
         _validate_mstp_priority(priority, f"MST instance {instance_id}")
-        switch.cmd(f"mstpctl settreeprio {bridge_name} {instance_id} "
-                   f"{priority}")
+        switch.cmd(f"mstpctl settreeprio {bridge_name} {instance_id} " f"{priority}")
 
     fid = instance_id
 
     for vlan in vlans:
         switch.cmd(f"mstpctl setvid2fid {bridge_name} {vlan}:{fid}")
 
-    switch.cmd(f"mstpctl setfid2mstid {bridge_name} "
-               f"{fid}:{instance_id}")
+    switch.cmd(f"mstpctl setfid2mstid {bridge_name} " f"{fid}:{instance_id}")
 
 
 def configure_mstp_interface_vlan(
@@ -105,13 +102,11 @@ def configure_mstp_interface_vlan(
     if iface.vlan is None:
         return
 
-    switch.cmd(f"bridge vlan del dev {iface.name} vid 1 2>/dev/null || "
-               f"true")
+    switch.cmd(f"bridge vlan del dev {iface.name} vid 1 2>/dev/null || " f"true")
 
     if iface.type_connection == 0:
         vlan = iface.vlan
-        switch.cmd(f"bridge vlan add dev {iface.name} vid {vlan} pvid "
-                   f"untagged")
+        switch.cmd(f"bridge vlan add dev {iface.name} vid {vlan} pvid " f"untagged")
     elif iface.type_connection == 1:
         vlans = iface.vlan if isinstance(iface.vlan, list) else [iface.vlan]
         for vlan in vlans:
