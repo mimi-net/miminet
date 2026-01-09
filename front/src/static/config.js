@@ -790,7 +790,13 @@ const ConfigRouterJobOnChange = function(evnt) {
         case '107':
             UpdateRouterForm('config_router_add_arp_proxy_script');
             FillDeviceSelectIntf("#config_router_add_arp_proxy_iface_select_field", '#router_id', "Выберите линк", false);
-
+        case '109':
+            UpdateRouterForm('config_router_add_port_forwarding_tcp_script');
+            FillDeviceSelectIntf("#config_router_add_port_forwarding_tcp_iface_select_field", "#router_id", "Выберите линк", false)
+            break;
+        case '110':
+            UpdateRouterForm('config_router_add_port_forwarding_udp_script');
+            FillDeviceSelectIntf("#config_router_add_port_forwarding_udp_iface_select_field", "#router_id", "Выберите линк", false)
             break;
         default:
             console.log("Unknown target.value");
@@ -1251,6 +1257,22 @@ const EditJobInRouter = function(router_id, job_id, network_guid) {
                 UpdateRouterForm('config_router_add_arp_proxy_script');
                 FillDeviceSelectIntf("#config_router_add_arp_proxy_iface_select_field", '#router_id', "Выберите линк", false);
                 $('#config_router_add_arp_proxy_iface_select_field').val(job.arg_1 || '');
+                break;
+            case '109': // Добавить Port Forwarding для TCP
+                UpdateRouterForm('config_router_add_port_forwarding_tcp_script');
+                FillDeviceSelectIntf("#config_router_add_port_forwarding_tcp_iface_select_field", "#router_id", "Выберите линк", false);
+                $('#config_router_add_port_forwarding_tcp_iface_select_field').val(job.arg_1 || '');
+                $('#config_router_add_port_forwarding_tcp_port_input_field').val(job.arg_2 || '')
+                $('#config_router_add_port_forwarding_tcp_dest_ip_input_field').val(job.arg_3 || '')
+                $('#config_router_add_port_forwarding_tcp_dest_port_input_field').val(job.arg_4 || '')
+                break;
+            case '110': // Добавить Port Forwarding для UDP
+                UpdateRouterForm('config_router_add_port_forwarding_udp_script');
+                FillDeviceSelectIntf("#config_router_add_port_forwarding_udp_iface_select_field", "#router_id", "Выберите линк", false);
+                $('#config_router_add_port_forwarding_udp_iface_select_field').val(job.arg_1 || '');
+                $('#config_router_add_port_forwarding_udp_port_input_field').val(job.arg_2 || '')
+                $('#config_router_add_port_forwarding_udp_dest_ip_input_field').val(job.arg_3 || '')
+                $('#config_router_add_port_forwarding_udp_dest_port_input_field').val(job.arg_4 || '')
                 break;
             default:
                 console.error('Unknown job type for editing:', job.job_id);
