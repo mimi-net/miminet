@@ -40,7 +40,6 @@ def run_simulation() -> Response:
 
         # Get saved emulations
         sims = Simulate.query.filter(Simulate.network_id == net.id).all()
-
         # Remove all previous emulations
         for s in sims:
             db.session.delete(s)
@@ -90,7 +89,6 @@ def check_simulation():
         return make_response(jsonify(ret), 400)
 
     sim = Simulate.query.filter(Simulate.id == sim_id).first()
-
     if not sim:
         ret = {"message": "Нет такой симуляции."}
         return make_response(jsonify(ret), 400)

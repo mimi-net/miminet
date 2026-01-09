@@ -39,6 +39,13 @@ const HostWarningMsg = function (msg) {
 
     $(config_content_id).prepend(warning_msg);
 }
+const SwitchWarningMsg = function (msg) {
+
+    let warning_msg = '<div class="alert alert-info alert-dismissible fade show" role="alert">' +
+        msg + '<button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+
+    $(config_content_id).prepend(warning_msg);
+}
 
 const ServerWarningMsg = function (msg) {
 
@@ -60,10 +67,12 @@ const HostErrorMsg = function (msg) {
     $("#config_main_form :input").prop("disabled", false);
     $("#config_router_main_form :input").prop("disabled", false);
     $("#config_server_main_form :input").prop("disabled", false);
+    $("config_switch_main_form :input").prop("disabled", false)
 
     $('#config_host_main_form_submit_button').text('Сохранить').removeClass('disabled');
     $('#config_router_main_form_submit_button').text('Сохранить').removeClass('disabled');
     $('#config_server_main_form_submit_button').text('Сохранить').removeClass('disabled');
+    $('#config_switch_main_form_submit_button').text('Сохранить').removeClass('disabled');
 }
 
 const UpdateJobCounter = function (counterId, deviceId = null) {
@@ -272,7 +281,7 @@ const ConfigSwitchForm = function (switch_id) {
         $('#config_switch_main_form_submit_button').text('');
         $('#config_switch_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
 
-        UpdateSwitchConfiguration(data, switch_id);
+        DeleteAndSaveJob('switch', UpdateSwitchConfiguration, data, switch_id);
     }
 
     $('#config_switch_main_form_submit_button, #config_switch_end_form').on('click', handleSwitchClick);
@@ -747,6 +756,99 @@ const ConfigServerGateway = function (gw) {
     $('#config_server_default_gw').val(gw);
 }
 
+const UpdateSwitchForm = function(name) {
+    elem = document.getElementById(name).innerHTML;
+    switch_job_list = document.getElementById('config_switch_job_list');
+
+    if (!elem || !switch_job_list) {
+        return;
+    }
+
+    $('div[name="config_switch_select_input"]').remove();
+    $(elem).insertBefore(switch_job_list);
+};
+
+const ConfigSwitchJobOnChange = function(evnt) {
+    switch (evnt.target.value) {
+        case '0':
+            $('div[name="config_switch_select_input"]').remove();
+
+            break;
+        case '6':
+             UpdateSwitchForm('config_switch_link_down_script');
+             FillDeviceSelectIntf("#config_switch_link_down_iface_select_field", '#switch_id', "Выберите линк", false);
+            break;
+        case '7':
+            UpdateSwitchForm('config_switch_sleep_script');
+    }
+}
+const ConfigSwitchJob = function (switch_jobs, shared = 0) {
+
+    let elem = document.getElementById('config_switch_job_script').innerHTML;
+    let switch_id = document.getElementById('switch_id');
+
+    if (!elem || !switch_id) {
+        return;
+    }
+
+    $(elem).insertBefore(switch_id);
+
+    // Set onchange
+    document.getElementById('config_switch_job_select_field').addEventListener('change', ConfigSwitchJobOnChange);
+
+    // Update job counter with device ID
+    UpdateJobCounter('config_switch_job_counter', switch_id.value);
+
+    elem = document.getElementById('config_switch_job_list_script').innerHTML;
+    if (!elem) {
+        return;
+    }
+
+    $(elem).insertBefore(switch_id);
+
+    // Print jobs if we have
+    if (!switch_jobs) {
+        return;
+    }
+
+    $.each(switch_jobs, function (i) {
+        let jid = switch_jobs[i].id;
+
+        if (i == 0) {
+            $('#config_switch_job_list').append('<label class="text-sm">Команды</label>');
+        }
+
+        elem = document.getElementById('config_switch_job_list_elem_script');
+
+        if (!elem) {
+            return;
+        }
+
+        let job_elem = jQuery.extend({}, elem);
+        job_elem.innerHTML = job_elem.innerHTML.replace(/config_switch_job_delete/g, 'config_switch_job_delete_' + jid);
+        job_elem.innerHTML = job_elem.innerHTML.replace(/config_switch_job_edit/g, 'config_switch_job_edit_' + jid);
+        job_elem.innerHTML = job_elem.innerHTML.replace(/justify-content-between align-items-center\">/, 'justify-content-between align-items-center\"><small>' + switch_jobs[i].print_cmd + '</small>');
+
+        let text = job_elem.innerHTML;
+        //$(text).insertBefore(host_id);
+        $('#config_switch_job_list').append(text);
+
+        $('#config_switch_job_delete_' + jid).click(function (event) {
+            event.preventDefault();
+            if (!shared) {
+                DeleteJobFromSwitch(switch_id.value, jid, network_guid);
+            }
+        });
+
+        $('#config_switch_job_edit_' + jid).click(function (event) {
+            event.preventDefault();
+            if (!shared) {
+                EditJobInSwitch(switch_id.value, jid, network_guid);
+            }
+        });
+    });
+}
+
 const ConfigRouterJobOnChange = function(evnt) {
 
     switch (evnt.target.value) {
@@ -1038,6 +1140,7 @@ const FillDeviceSelectIntf = function(select_id, device, field_msg = 'Интер
     }
 
     device_node = nodes.find(n => n.data.id === device_id);
+    device_type = device.slice(1, -3 ) //example : #router_id  -> router
     
     if (!device_node) {
         console.log("Не нашел device_node");
@@ -1050,11 +1153,10 @@ const FillDeviceSelectIntf = function(select_id, device, field_msg = 'Интер
     } else {
         $(select_id).append(`<option selected value="0">${field_msg}</option>`);
     }
-
     $(select_id).on('change', function () {
         let selectedOption = $(this).find('option:selected'); // Получаем выбранный элемент
         let selectedLabel = selectedOption.text(); // Получаем текст выбранного элемента
-        document.getElementById('router_connection_host_label_hidden').value = selectedLabel; // Записываем его в скрытое поле
+        document.getElementById(device_type + '_connection_host_label_hidden').value = selectedLabel; // Записываем его в скрытое поле
     });
 
     device_node.interface.forEach(function(iface) {
@@ -1098,6 +1200,7 @@ const FillDeviceSelectIntf = function(select_id, device, field_msg = 'Интер
 
     });
 }
+
 
 const DisableVXLANInputs = function (n) {
     var modalId = 'VxlanConfigModal' + n.data.id;
@@ -1344,6 +1447,51 @@ const EditJobInServer = function(server_id, job_id, network_guid) {
 
         setTimeout(() => {
             const formArea = $('div[name="config_server_select_input"]');
+            if (formArea.length > 0) {
+                formArea.addClass('editing-form-area');
+            }
+        }, 100);
+        }, 200)
+    }
+};
+const EditJobInSwitch = function(switch_id, job_id, network_guid) {
+    const job = jobs.find(j => j.id === job_id);
+
+    if (!job) {
+        console.error('Job not found:', job_id);
+        return;
+    }
+
+    EnterEditMode('switch', job_id, job.job_id);
+
+    // Set the select field to the job type
+    const selectField = document.getElementById('config_switch_job_select_field');
+    if (selectField) {
+        selectField.value = job.job_id.toString();
+
+        // Trigger change event to show the form
+        const event = new Event('change');
+        selectField.dispatchEvent(event);
+
+        // Fill in the form fields with job data
+        setTimeout(() => {
+            switch(job.job_id.toString()) {
+            case '6': 
+                UpdateSwitchForm('config_switch_link_down_script');
+                FillDeviceSelectIntf('#config_switch_link_down_iface_select_field','#switch_id' , "Выберете линк", false)
+                $('#config_switch_link_down_iface_select_field').val(job.arg_1 || '');
+                break;
+            case '7': 
+                UpdateSwitchForm('config_switch_sleep_script');
+                $('#config_switch_sleep').val(job.arg_1 || '');
+                break;
+            
+            default:
+                console.error('Unknown job type for editing:', job.job_id);
+        }
+
+        setTimeout(() => {
+            const formArea = $('div[name="config_switch_select_input"]');
             if (formArea.length > 0) {
                 formArea.addClass('editing-form-area');
             }

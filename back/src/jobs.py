@@ -1,7 +1,7 @@
 import re
 import shlex
 import ipaddress
-
+import time
 from netaddr import EUI, AddrFormatError
 from typing import Any, Callable, List, Dict
 from network_schema import Job
@@ -203,6 +203,31 @@ def valid_iface(iface) -> bool:
     if not re.match(r"^[a-z][a-z0-9_-]{0,14}$", iface):
         return False
     return True
+
+
+def valid_sleep(time) -> bool:
+    try:
+        _ = int(time)
+    except (ValueError, TypeError):
+        return False
+    if int(time) > 50 or int(time) <= 0:
+        return False
+
+    return True
+
+
+def link_down_handler(job: Job, job_host: Any) -> None:
+    arg_interface = job.arg_1
+    if not net_dev_checker(arg_interface):
+        return
+    job_host.cmd(f"ip link set {arg_interface} down")
+
+
+def sleep_handler(job: Job, job_host: Any) -> None:
+    arg_time = job.arg_1
+    if not valid_sleep(arg_time):
+        return
+    time.sleep(int(arg_time))
 
 
 def ping_handler(job: Job, job_host: Any) -> None:
@@ -504,6 +529,8 @@ class Jobs:
             3: sending_udp_data_handler,
             4: sending_tcp_data_handler,
             5: traceroute_handler,
+            6: link_down_handler,
+            7: sleep_handler,
             100: ip_addr_add_handler,
             101: iptables_handler,
             102: ip_route_add_handler,

@@ -17,6 +17,45 @@
         <input type="text" class="form-control form-control-sm" id="switch_name" name="config_switch_name" value='' maxlength="32">
     </div>
 </script>
+<script id="config_switch_job_script" type="text/plain">
+    <div class="form-group" id="config_switch_jobs">
+        <label for="config_switch_job_select_field" class="text-sm">Выполнить команду</label>
+        <select id="config_switch_job_select_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_switch_job_select_field">
+            <option selected value="0">---</option>
+            <option value="6">Отключить Линк</option>
+            <option value="7">Заснуть</option>
+        </select>
+    </div>
+</script>
+
+<script id="config_switch_link_down_script" type="text/plain">
+    <div class="form-group pt-1" name="config_switch_select_input">
+        <select id="config_switch_link_down_iface_select_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_switch_link_down_iface_select_field">
+        </select>
+
+        <input type="hidden" id="switch_connection_host_label_hidden" name="switch_connection_host_label_hidden" value="">
+    </div>
+</script>
+
+<script id="config_switch_sleep_script" type="text/plain">
+    <div class="form-group pt-1" name="config_switch_select_input">
+        <input type="text" class="form-control form-control-sm" id="config_switch_sleep" name="config_switch_sleep" placeholder='Количество секунд (от 1 до 50)'>
+    </div>
+</script>
+
+<script id="config_switch_job_list_script" type="text/plain">
+    <ul class="list-group pt-2" id="config_switch_job_list">
+    </ul>
+</script>
+
+<script id="config_switch_job_list_elem_script" type="text/plain">
+    <li class="py-1 px-2 list-group-item d-flex justify-content-between align-items-center">
+    <span class="ms-auto">
+      <a href="" id="config_switch_job_edit" class="me-2"><i class="bx bx-edit fs-xl align-middle"></i></a>
+      <a href="" id="config_switch_job_delete"><i class="bx bx-x fs-xl align-middle"></i></a>
+    </span>
+  </li>
+</script>
 
 <script id="config_switch_checkbox_stp_script" type="text/plain">
     <div class="form-group form-switch">

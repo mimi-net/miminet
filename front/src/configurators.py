@@ -185,6 +185,8 @@ class AbstractDeviceConfigurator:
         self._device_node = None  # current device node in miminet network
 
     __MAX_JOBS_COUNT: int = 30
+    __SLEEP_JOB_ID: int = 7
+    __MAX_SLEEP_TIME: int = 60
 
     def create_job(self, job_id: int, job_sign: str) -> JobConfigurator:
         """
@@ -269,10 +271,9 @@ class AbstractDeviceConfigurator:
         job_id_str = get_data(f"config_{self._device_type}_job_select_field")
 
         if not job_id_str:
-            raise ConfigurationError("Не указан параметр job_id")
+            return
 
         job_id = int(job_id_str)
-
         if job_id not in self.__jobs.keys():
             return  # if user didn't select job
 
@@ -308,6 +309,19 @@ class AbstractDeviceConfigurator:
 
         job_conf_res["level"] = job_level
         job_conf_res["host_id"] = self._device_node["data"]["id"]
+        sleep_job_list = [
+            job
+            for job in self._json_network["jobs"]
+            if job["job_id"] == self.__SLEEP_JOB_ID
+        ]
+        current_time = sum(int(j["arg_1"]) for j in sleep_job_list)
+
+        if job_id == self.__SLEEP_JOB_ID:
+            new_job_arg = int(job_conf_res["arg_1"])
+            if current_time + new_job_arg > 60:
+                raise ConfigurationError(
+                    f"Превышен лимит по времени для команды sleep ({self.__MAX_SLEEP_TIME} секунд на сеть)"
+                )
 
         if editing_job_id and old_job_index is not None:
             # Insert at the same position where the old job was
@@ -415,7 +429,11 @@ class SwitchConfigurator(AbstractDeviceConfigurator):
     def _configure(self):
         self._conf_prepare()
         self._conf_label_update()
-
+        res = {}
+        try:  # catch argument check errors
+            self._conf_jobs()
+        except ArgCheckError as e:
+            res.update({"warning": str(e)})
         # RSTP/STP setup
         switch_stp = get_data("config_rstp_stp")
 
@@ -430,8 +448,14 @@ class SwitchConfigurator(AbstractDeviceConfigurator):
 
         if stp_priority:
             self._device_node["config"]["priority"] = int(stp_priority)
-
-        return {"message": "Конфигурация обновлена", "nodes": self._nodes}
+        res.update(
+            {
+                "message": "Конфигурация обновлена",
+                "nodes": self._nodes,
+                "jobs": self._json_network["jobs"],
+            }
+        )
+        return res
 
 
 class HostConfigurator(AbstractDeviceConfigurator):
