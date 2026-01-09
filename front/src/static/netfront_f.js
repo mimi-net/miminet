@@ -148,6 +148,10 @@ const ActionWithInterface = function (n, i, fun) {
 
 }
 
+const ShowTextboxConfig = function(n, shared = 0) {
+  return
+}
+
 const ShowHostConfig = function(n, shared = 0){
 
     // Exit edit mode when switching to different device
