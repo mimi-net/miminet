@@ -4,6 +4,7 @@ import uuid
 import logging
 import json
 
+import logging_config  
 from sqlalchemy.orm.exc import StaleDataError
 
 from celery_app import (
@@ -20,6 +21,12 @@ from quiz.service.session_question_service import (
     answer_on_exam_question,
     answer_on_exam_without_session,
 )
+
+logger = logging.getLogger(__name__)
+
+
+def _log(level, event, extra):
+    logger.log(level, event, extra=extra)
 
 
 @app.task(bind=True, queue="common-results-queue")
@@ -101,7 +108,11 @@ def perform_task_check(session_question_id, data_list):
                 )
 
             except Exception as e:
-                logging.error(f"Ошибка при создании задачи: {e}.")
+                _log(
+                    logging.ERROR,
+                    "check_task_emulation_create_failed",
+                    {"error": str(e), "guid": guid},
+                )
 
         answer_on_exam_without_session(networks_to_check, guid)
 
@@ -128,7 +139,14 @@ def perform_task_check(session_question_id, data_list):
                 )
 
             except Exception as e:
-                logging.error(f"Ошибка при создании задачи: {e}.")
+                _log(
+                    logging.ERROR,
+                    "check_task_emulation_create_failed",
+                    {
+                        "error": str(e),
+                        "session_question_id": session_question_id,
+                    },
+                )
 
         with flask_app.app_context():
             answer_on_exam_question(session_question_id, networks_to_check)
@@ -141,13 +159,42 @@ def create_emulation_task(net_schema):
     net_schema = (
         json.dumps(net_schema) if not isinstance(net_schema, str) else net_schema
     )
+    routing_key = str(uuid.uuid4())
 
-    async_obj = app.send_task(
-        "tasks.mininet_worker",
-        [net_schema],
-        routing_key=str(uuid.uuid4()),
-        exchange=SEND_NETWORK_EXCHANGE,
-        exchange_type=EXCHANGE_TYPE,
+    # Log start of sending task to RabbitMQ
+    _log(
+        logging.INFO,
+        "rabbitmq_send_task_start",
+        {"routing_key": routing_key, "exchange": SEND_NETWORK_EXCHANGE.name},
+    )
+
+    try:
+        async_obj = app.send_task(
+            "tasks.mininet_worker",
+            [net_schema],
+            routing_key=routing_key,
+            exchange=SEND_NETWORK_EXCHANGE,
+            exchange_type=EXCHANGE_TYPE,
+        )
+    except Exception as e:
+        # Log broker rejection (incl. disk_free_limit)
+        _log(
+            logging.ERROR,
+            "rabbitmq_send_task_failed",
+            {
+                "routing_key": routing_key,
+                "exchange": SEND_NETWORK_EXCHANGE.name,
+                "error": str(e),
+                "hint": "Check RabbitMQ disk_free_limit and broker availability",
+            },
+        )
+        raise
+
+    # Log successful scheduling of task in queue
+    _log(
+        logging.INFO,
+        "rabbitmq_send_task_scheduled",
+        {"routing_key": routing_key, "task_id": async_obj.id},
     )
 
     async_res = AsyncResult(id=async_obj.id, app=app)
@@ -156,7 +203,27 @@ def create_emulation_task(net_schema):
         with allow_join_result():
             animation, _ = async_res.wait(timeout=120)
 
+            # Log successful result receipt from worker
+            _log(
+                logging.INFO,
+                "rabbitmq_receive_result_success",
+                {"routing_key": routing_key, "task_id": async_obj.id},
+            )
             return animation
     except TimeoutError:
+        # Log timeout while waiting for result
+        _log(
+            logging.ERROR,
+            "rabbitmq_receive_result_timeout",
+            {"routing_key": routing_key, "task_id": async_obj.id},
+        )
         # TODO improve error message (add user info)
         raise Exception(f"""Check task failed!\nNetwork Schema: {net_schema}.""")
+    except Exception as e:
+        # Log any other errors while waiting for result
+        _log(
+            logging.ERROR,
+            "rabbitmq_receive_result_failed",
+            {"routing_key": routing_key, "task_id": async_obj.id, "error": str(e)},
+        )
+        raise

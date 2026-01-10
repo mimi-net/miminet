@@ -11,6 +11,7 @@ import celeryconfig
 from celery import Celery
 from dotenv import load_dotenv
 from kombu import Exchange, Queue
+import logging_config  
 
 load_dotenv()
 

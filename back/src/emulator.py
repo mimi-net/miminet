@@ -1,7 +1,10 @@
 import os
 import os.path
 import subprocess
-
+import time
+import datetime
+import logging
+import logging_config
 from ipmininet.ipnet import IPNet
 from jobs import Jobs
 from network_schema import Job, Network
@@ -10,6 +13,7 @@ from mininet.log import setLogLevel, error
 from network_topology import MiminetTopology
 from network import MiminetNetwork
 
+logger = logging.getLogger(__name__)
 
 def emulate(
     network: Network,
@@ -23,6 +27,17 @@ def emulate(
         tuple: animation list and pcap files.
     """
 
+    start_ts = time.time()
+
+    logger.info(
+        "emulation_started",
+        extra={
+            "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+            "level": "INFO",
+            "jobs_count": len(network.jobs) if getattr(network, "jobs", None) else 0,
+        }
+    )
+    
     setLogLevel("info")
 
     # Validate job limit
@@ -53,6 +68,16 @@ def emulate(
         net.stop()
 
     except Exception as e:
+
+        logger.error(
+            "miminet_configuration_failed",
+            extra={
+                "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+                "level": "ERROR",
+                "error": str(e),
+            }
+        )
+        
         error(f"An error occurred during mininet configuration: {str(e)}")
         subprocess.call("mn -c", shell=True)
 
@@ -61,6 +86,17 @@ def emulate(
     animation, pcaps = create_animation(topo.interfaces)
     animation = group_packets_by_time(animation)
 
+    duration_ms = int((time.time() - start_ts) * 1000)
+    logger.info(
+        "emulation_finished",
+        extra={
+            "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+            "level": "INFO",
+            "pcaps_count": len(pcaps),
+            "duration_ms": duration_ms,
+        }
+    )
+    
     return animation, pcaps
 
 
