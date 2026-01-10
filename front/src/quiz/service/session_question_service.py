@@ -17,6 +17,9 @@ from quiz.util.dto import (
     PracticeAnswerResultDto,
     calculate_max_score,
 )
+
+import lti.lti_support as lti
+from flask import session
 from quiz.service.network_upload_service import prepare_task
 
 MOSCOW_TZ = ZoneInfo("Europe/Moscow")
@@ -404,6 +407,8 @@ def answer_on_session_question(session_question_id: str, answer, user: User):
         if score != max_score and len(hints) == 0:
             hints.append("По вашему решению не предусмотрены подсказки.")
 
+        if "launch_id" in session: lti.score(score)
+        
         network = Network.query.filter_by(guid=session_question.network_guid).first()
         network.author_id = 0
         db.session.add(network)

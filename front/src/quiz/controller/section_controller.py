@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-from flask import request, make_response, jsonify, abort, render_template
+from flask import redirect, request, make_response, jsonify, abort, render_template, url_for
 from flask_login import login_required, current_user
 
 from quiz.service.section_service import (
@@ -16,6 +16,7 @@ from quiz.service.section_service import (
 from quiz.service.test_service import get_test
 from quiz.util.encoder import UUIDEncoder
 
+from quiz.facade.quiz_session_facade import start_session, finish_old_sessions
 
 @login_required
 def create_section_endpoint():
@@ -34,14 +35,11 @@ def create_section_endpoint():
 
     return make_response(jsonify(ret), res[1])
 
-
 @login_required
-def get_section_endpoint():
-    res = get_section(request.args["id"])
-    if res[1] == 404:
-        abort(404)
-
-    return make_response(jsonify(res), res[0])
+def get_section_endpoint(section):
+    finish_old_sessions(current_user)
+    session = start_session(section, current_user)
+    return redirect(url_for('get_question_by_session_question_id_endpoint', question_id=session[1][-1]))
 
 
 @login_required

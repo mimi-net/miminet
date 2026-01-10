@@ -1,0 +1,22 @@
+{
+    "https://lti-ri.imsglobal.org": [{
+        "default": true,
+        "client_id": "343412",
+        "auth_login_url": "https://lti-ri.imsglobal.org/platforms/4477/authorizations/new",
+        "auth_token_url": "https://lti-ri.imsglobal.org/platforms/4477/access_tokens",
+        "key_set_url": "https://lti-ri.imsglobal.org/platforms/4477/platform_keys/4105.json",
+        "private_key_file": "./keys/private.key",
+        "public_key_file": "./keys/public.key",
+        "deployment_ids": ["1"]
+    }],
+    "http://localhost:7088": [{
+        "default": true,
+        "client_id": "343412",
+        "auth_login_url": "http://localhost:7088/lti/authorize",
+        "auth_token_url": "",
+        "key_set_url": "http://localhost:7088/lti/jwks",
+        "private_key_file": "./keys/private.key",
+        "public_key_file": "./keys/public.key",
+        "deployment_ids": ["1"]
+    }]
+}
