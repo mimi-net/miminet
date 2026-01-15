@@ -1,17 +1,19 @@
+import logging
 import os
 import time
 from psutil import Process
 from ipmininet.ipnet import IPNet
 from mininet.log import info
 import psutil
-
+import logging_config
 from network_topology import MiminetTopology
 from network_schema import Network
-
 from net_utils.vlan import setup_vlans, clean_bridges
 from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
+from datetime import date, datetime
 
 
+logger = logging.getLogger(__name__)
 class MiminetNetwork(IPNet):
     def __init__(self, topo: MiminetTopology, network: Network):
         super().__init__(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
@@ -49,10 +51,30 @@ class MiminetNetwork(IPNet):
 
             if not os.path.exists(pcap_out_file1):
                 self.__clear_files()
+                logger.error(
+                    "pcap_out_file_not_found", 
+                    extra={
+                        "timestamp": datetime().utcnow().isoformat() + "Z",
+                        "level": "ERROR",
+                        "task_id": getattr(self, "task_id", None),
+                        "interface": link1,
+                        "expected_file": pcap_out_file1,
+                    }
+                )
                 raise ValueError(f"No capture for interface '{link1}'.")
 
             if not os.path.exists(pcap_out_file2):
                 self.__clear_files()
+                logger.error(
+                    "pcap_file_not_found",
+                    extra={
+                        "timestamp": datetime().utcnow().isoformat() + "Z",
+                        "level": "ERROR",
+                        "task_id": getattr(self, "task_id", None),
+                        "interface": link2,
+                        "expected_file": pcap_out_file2,
+                    }
+                )
                 raise ValueError(f"No capture for interface '{link2}'.")
 
     def __clear_files(self):
@@ -78,13 +100,28 @@ class MiminetNetwork(IPNet):
         current_process = Process()
         children = current_process.children(recursive=True)
         allowed = ("mimidump", "bash")
+        killed_count = 0
+        zombie_count = 0
 
         for child in children:
             if child.status() == psutil.STATUS_ZOMBIE:
                 # in case we already have zombies
                 child.wait()
+                zombie_count += 1
             elif child.name() not in allowed:
                 # finish other processes
                 info(f"Killed: {child.name()} {child.pid}")
                 child.kill()
                 child.wait()
+                killed_count += 1
+        if zombie_count > 0 or killed_count > 0:
+            logger.warning(
+                "cleanup_incomplete",
+                extra={
+                    "timestamp": datetime().utcnow().isoformat() + "Z",
+                    "level": "ERROR",    
+                    "killed_processes": killed_count,
+                    "zombies_left": zombie_count  
+                }
+            )        
+
