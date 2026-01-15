@@ -1,0 +1,149 @@
+{
+    "nodes": [
+        {
+            "classes": [
+                "server"
+            ],
+            "config": {
+                "default_gw": "10.0.0.2",
+                "label": "server_1",
+                "type": "server"
+            },
+            "data": {
+                "id": "server_1",
+                "label": "server_1"
+            },
+            "interface": [
+                {
+                    "connect": "edge_miiujtc6sj4wul749va",
+                    "id": "iface_87626741",
+                    "ip": "10.0.0.1",
+                    "name": "iface_87626741",
+                    "netmask": 30
+                }
+            ],
+            "position": {
+                "x": 362.75,
+                "y": 158.99999999999994
+            }
+        },
+        {
+            "classes": [
+                "l3_router"
+            ],
+            "config": {
+                "default_gw": "",
+                "label": "router_1",
+                "type": "router"
+            },
+            "data": {
+                "id": "router_1",
+                "label": "router_1"
+            },
+            "interface": [
+                {
+                    "connect": "edge_miiujtc6sj4wul749va",
+                    "id": "iface_81748633",
+                    "ip": "10.0.0.2",
+                    "name": "iface_81748633",
+                    "netmask": 30
+                },
+                {
+                    "connect": "edge_miiujup6w4rb8s84kr",
+                    "id": "iface_64188382",
+                    "ip": "20.0.0.2",
+                    "name": "iface_64188382",
+                    "netmask": 30
+                }
+            ],
+            "position": {
+                "x": 435.25,
+                "y": 81.19999694824219
+            }
+        },
+        {
+            "classes": [
+                "host"
+            ],
+            "config": {
+                "default_gw": "",
+                "label": "host_1",
+                "type": "host"
+            },
+            "data": {
+                "id": "host_1",
+                "label": "host_1"
+            },
+            "interface": [
+                {
+                    "connect": "edge_miiujup6w4rb8s84kr",
+                    "id": "iface_66173761",
+                    "ip": "20.0.0.1",
+                    "name": "iface_66173761",
+                    "netmask": 30
+                }
+            ],
+            "position": {
+                "x": 501.25,
+                "y": 162.5999984741211
+            }
+        }
+    ],
+    "edges": [
+        {
+            "data": {
+                "id": "edge_miiujtc6sj4wul749va",
+                "source": "server_1",
+                "target": "router_1",
+                "loss_percentage": 0
+            }
+        },
+        {
+            "data": {
+                "id": "edge_miiujup6w4rb8s84kr",
+                "source": "router_1",
+                "target": "host_1",
+                "loss_percentage": 0
+            }
+        }
+    ],
+    "jobs": [
+        {
+            "id": "d235e4fa3f1d4a2c9007090a22f69286",
+            "job_id": 201,
+            "print_cmd": "nc 10.0.0.1 -l 8000",
+            "arg_1": "10.0.0.1",
+            "arg_2": "8000",
+            "level": 2,
+            "host_id": "server_1"
+        },
+        {
+            "id": "823b1022146e42789acb34e41b1afe43",
+            "job_id": 109,
+            "print_cmd": "port forwarding -p tcp -i iface_64188382 from 8080 to 10.0.0.1:8000",
+            "arg_1": "iface_64188382",
+            "arg_2": "8080",
+            "arg_3": "10.0.0.1",
+            "arg_4": "8000",
+            "level": 2,
+            "host_id": "router_1"
+        },
+        {
+            "id": "72f49a7844d247a889a77c4f0f14e65c",
+            "job_id": 4,
+            "print_cmd": "send -s 20 -p tcp 20.0.0.2:8080",
+            "arg_1": "20",
+            "arg_2": "20.0.0.2",
+            "arg_3": "8080",
+            "level": 2,
+            "host_id": "host_1"
+        }
+    ],
+    "config": {
+        "zoom": 2.0,
+        "pan_x": 96.84735012565261,
+        "pan_y": 152.38988839387912
+    },
+    "pcap": [],
+    "packets": "null"
+}
