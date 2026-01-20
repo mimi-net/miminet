@@ -6,6 +6,7 @@ $('#config_router').load("/config_router.html");
 $('#config_server').load("/config_server.html");
 $('#config_vlan').load("/config_vlan.html");
 $('#config_vxlan').load("/config_vxlan.html");
+$("#config_textbox").load("/config_textbox.html")
 
 const config_content_id = "#config_content";
 const config_main_form_id = "#config_main_form";
@@ -103,10 +104,61 @@ const UpdateHostConfigurationForm = function(host_id) {
     DeleteAndSaveJob('host', UpdateHostConfiguration, data, host_id);
 };
 
-const ConfigHostForm = function(host_id){
-    var form = document.getElementById('config_host_main_form_script').innerHTML;
-    var button = document.getElementById('config_host_save_script').innerHTML;
-    var banner = document.getElementById('config_host_edit_banner_script').innerHTML;
+const UpdateTextboxConfigurationForm = function (textbox_id) {
+	let data = $("#config_textbox_main_form").serialize();
+
+	// Disable all input fields
+	$("#config_textbox_main_form :input").prop("disabled", true);
+
+	// Set loading spinner
+	$("#config_textbox_main_form_submit_button").text("");
+	$("#config_textbox_main_form_submit_button").append(
+		'<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>',
+	);
+
+	UpdateTextboxConfiguration(data, textbox_id);
+};
+
+const ConfigTextboxForm = function (textbox_id) {
+
+	var form = document.getElementById(
+		"config_textbox_main_form_script",
+	).innerHTML;
+	var button = document.getElementById(
+		"config_textbox_save_script",
+	).innerHTML;
+
+	$(config_content_id).empty();
+	$(config_content_save_tag).empty();
+
+	document.getElementById(config_content_save_id).style.display = "block";
+
+	$(config_content_id).append(form);
+	$(config_content_save_tag).append(button);
+
+	$("#textbox_id").val(textbox_id);
+	$("#net_guid").val(network_guid);
+
+	function handleTextboxClick(event) {
+		event.preventDefault();
+		let data = $("#config_textbox_main_form").serialize();
+		UpdateTextboxConfiguration(data, textbox_id);
+	}
+
+	$("#config_textbox_main_form_submit_button, #config_textbox_end_form").on(
+		"click",
+		handleTextboxClick,
+	);
+};
+
+const ConfigHostForm = function (host_id) {
+	var form = document.getElementById(
+		"config_host_main_form_script",
+	).innerHTML;
+	var button = document.getElementById("config_host_save_script").innerHTML;
+	var banner = document.getElementById(
+		"config_host_edit_banner_script",
+	).innerHTML;
 
     // Clear all child
     $(config_content_id).empty();
@@ -377,8 +429,15 @@ const ConfigHubName = function (hostname) {
 
     var text = document.getElementById('config_hub_name_script').innerHTML;
 
-    $(config_hub_main_form_id).prepend((text));
-    $('#config_hub_name').val(hostname);
+	$(config_hub_main_form_id).prepend(text);
+	$("#config_hub_name").val(hostname);
+};
+
+const ConfigTextboxContent = function(textbox_name) {
+	var text = document.getElementById("config_textbox_content_script").innerHTML;
+
+	$("#config_textbox_main_form").prepend(text);
+	$("#config_textbox_content").val(textbox_name)
 }
 
 const ConfigEdgeNetworkIssues = function (edge_loss, edge_duplicate) {

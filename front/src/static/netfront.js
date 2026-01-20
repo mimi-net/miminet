@@ -108,7 +108,7 @@ $('#network_scheme').droppable({
                     config: {
                         type: 'textbox',
                         label: node_id,
-                        text: 'Введите текст здесь'
+                        text: "Textbox"
                     },
                     interface: [],
                 });

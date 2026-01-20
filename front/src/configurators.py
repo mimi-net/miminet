@@ -421,6 +421,23 @@ class HubConfigurator(AbstractDeviceConfigurator):
 
         return {"message": "Конфигурация обновлена", "nodes": self._nodes}
 
+class TextboxConfigurator(AbstractDeviceConfigurator):
+    def __init__(self):
+        super().__init__(device_type="textbox")
+
+    def _conf_content_update(self):
+        label = get_data(f"config_{self._device_type}_content")
+
+        if label:
+            self._device_node["config"]["label"] = label
+            self._device_node["data"]["label"] = self._device_node["config"]["label"]
+
+    def _configure(self):
+        self._conf_prepare()
+        self._conf_content_update()
+
+        return {"message": "Конфигурация обновлена", "nodes": self._nodes}
+
 
 class SwitchConfigurator(AbstractDeviceConfigurator):
     def __init__(self):

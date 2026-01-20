@@ -40,6 +40,7 @@ from miminet_host import (
     delete_job,
     save_host_config,
     save_hub_config,
+    save_textbox_config,
     save_router_config,
     save_server_config,
     save_switch_config,
@@ -236,6 +237,9 @@ app.add_url_rule(
 app.add_url_rule("/host/delete_job", methods=["GET", "POST"], view_func=delete_job)
 app.add_url_rule(
     "/host/hub_save_config", methods=["GET", "POST"], view_func=save_hub_config
+)
+app.add_url_rule(
+    "/host/textbox_save_config", methods=["GET", "POST"], view_func=save_textbox_config
 )
 app.add_url_rule(
     "/host/switch_save_config", methods=["GET", "POST"], view_func=save_switch_config

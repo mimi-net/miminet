@@ -149,7 +149,17 @@ const ActionWithInterface = function (n, i, fun) {
 }
 
 const ShowTextboxConfig = function(n, shared = 0) {
-  return
+
+    let textbox_name = n.config.label;
+    textbox_name = textbox_name || n.data.id
+
+    if (shared) {
+        SharedConfigTextboxForm(n.data.id);
+    } else {
+        ConfigTextboxForm(n.data.id)
+    }
+
+    ConfigTextboxContent(textbox_name);
 }
 
 const ShowHostConfig = function(n, shared = 0){
@@ -1254,6 +1264,8 @@ const DrawGraph = function() {
             ShowRouterConfig(n);
         } else if (n.config.type === 'server'){
             ShowServerConfig(n);
+        } else if (n.config.type === 'textbox'){
+            ShowTextboxConfig(n);
         }
     });
 
@@ -2094,6 +2106,44 @@ const UpdateHubConfiguration = function (data, hub_id)
         dataType: 'json'
     });
 }
+
+const UpdateTextboxConfiguration = function (data, textbox_id) {
+	SetNetworkPlayerState(-1);
+
+	$.ajax({
+		type: "POST",
+		url: "/host/textbox_save_config",
+		data: data,
+		success: function (data, textStatus, xhr) {
+			if (xhr.status === 200) {
+                
+                nodes = data.nodes;
+                DrawGraph();
+
+                let n = nodes.find((n) => n.data.id === textbox_id);
+
+                if (!n) {
+                    ClearConfigForm("Нет такого текстового блока");
+                    return;
+                }
+
+                if (n.config.type === "textbox") {
+                    ShowTextboxConfig(n);
+                } else {
+                    ClearConfigForm("Нет такого текстового блока");
+                    return;
+                }
+
+			}
+		},
+        error: function(xhr) {
+            console.log("Cannot update textbox config");
+            console.log(xhr);
+        },
+        dataType: 'json'
+
+	});
+};
 
 // Update Switch configuration
 const UpdateSwitchConfiguration = function (data, switch_id)
