@@ -57,7 +57,7 @@ class Network(db.Model):  # type:ignore[name-defined]
     author_id = db.Column(BigInteger, ForeignKey("user.id"), nullable=False)
 
     guid = db.Column(Text, nullable=False, unique=True)
-    title = db.Column(Text, default="Новая сеть", nullable=False)
+    title = db.Column(Text, nullable=False)
 
     description = db.Column(Text, default="", nullable=True)
 
