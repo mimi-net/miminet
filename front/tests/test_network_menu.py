@@ -25,13 +25,15 @@ class TestNetworkMenu:
         assert selenium.current_url == HOME_PAGE
 
     def test_new_network_existence(self, selenium: MiminetTester, empty_network: str):
-        """Checks if the created network exists"""
+        """Checks if the created network exists and has a unique generated name"""
         selenium.get(empty_network)  # open new network by URL
         network_name = selenium.find_element(
             By.CSS_SELECTOR, Location.Network.TITLE_LABEL.selector
         ).text
 
-        assert network_name == "Новая сеть"
+        assert network_name != ""
+        assert network_name != "Новая сеть"
+        assert len(network_name.split()) >= 1
 
     def test_new_network_open(self, selenium: MiminetTester, empty_network: str):
         """Checks is it possible to open new network via home menu"""

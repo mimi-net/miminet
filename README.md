@@ -138,7 +138,7 @@ export provider=vbox/vmware
 ### <a name="backend-test"></a> Backend
 1. Установка необходимых пакетов:
 ```bash
-pyhton -m venv .venv
+python -m venv .venv
 source .venv/bin/activate
 pip install -r back/requirements.txt
 ```
