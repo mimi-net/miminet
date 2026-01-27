@@ -29,12 +29,20 @@ class Location:
 
         # "Мои сети"
         MY_NETWORKS_BUTTON = Locator("#my-networks-nav-item")
+        # Переключение языка (dropdown с иконкой глобуса)
+        LANGUAGE_DROPDOWN = Locator("a.nav-link.dropdown-toggle[data-bs-toggle='dropdown']")
         # "Примеры сетей"
         NETWORK_EXAMPLES_BUTTON = Locator("#examples-nav-item")
         # "Тестирование"
         TRAINER_BUTTON = Locator("#trainer-nav-item")
         # "Учебные курсы"
         TRAINING_COURSES_BUTTON = Locator("#courses-nav-item")
+
+    class MainPage:
+        """Main (landing) page."""
+
+        # Кнопка "Создать сеть" / "Create a network"
+        CREATE_NETWORK_BUTTON = Locator('a[data-i18n="createNetworkBtn"]')
 
     class MyNetworks:
         """User's networks page"""
@@ -65,6 +73,10 @@ class Location:
         EMULATE_PLAYER_PAUSE_BUTTON = Locator("#NetworkPlayPauseButton")
         # Network title
         TITLE_LABEL = Locator("#network_title_head")
+        # Лейбл плеера сети (ожидание / шаги / пакеты)
+        PLAYER_LABEL = Locator("#NetworkPlayerLabel")
+        # Кнопка "Задать вопрос" / "Ask a question"
+        ASK_QUESTION_BUTTON = Locator("#NetworkRunButtonHelpLabel")
 
         class TopButton:
             """Data for identifying and locating top buttons of network interacting page."""

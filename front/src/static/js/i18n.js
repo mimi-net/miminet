@@ -64,28 +64,15 @@ async function setLanguage(lang) {
   localStorage.setItem('language', lang);
 }
 
-async function detectLanguageByIP() {
-  try {
-    const response = await fetch('https://ipapi.co/json/');
-    if (!response.ok) throw new Error('Could not fetch IP geolocation data');
-    const data = await response.json();
-    const country = data.country_code;
-
-    await setLanguage(country !== 'RU' ? 'en' : 'ru');
-  } catch (error) {
-    console.error('IP detection failed, defaulting to browser language:', error);
-    await setLanguage(currentLanguage);
-  }
-}
-
-
 document.addEventListener('DOMContentLoaded', async () => {
   const savedLang = localStorage.getItem('language');
 
   if (savedLang) {
     await setLanguage(savedLang); 
   } else {
-    await detectLanguageByIP(); 
+    // Используем язык браузера напрямую, без внешних API
+    const browserLang = navigator.language.slice(0, 2) || 'ru';
+    await setLanguage(browserLang);
   }
 });
 function translateDynamicContent(parentElement) {

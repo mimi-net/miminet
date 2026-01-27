@@ -13,7 +13,9 @@ class TestAvailability:
         """Checks if it possible to open home page (are we authorized or not)"""
         selenium.get(HOME_PAGE)
 
-        assert selenium.title == "Веб-эмулятор"
+        # Проверяем, что заголовок существует (не зависит от языка)
+        # "Веб-эмулятор" на русском или "Web-Emulator" на английском
+        assert selenium.title in ["Веб-эмулятор", "Web-Emulator"]
 
     @pytest.mark.parametrize(
         "endpoint",
