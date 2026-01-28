@@ -102,16 +102,25 @@ $('#network_scheme').droppable({
             let node_id = TextboxUid();
             nodes.push(
                 {
-                    data: {id: node_id, label: node_id},
-                    position: {x: CalculateDropOffset(ui.position.left, ui.position.top).x, y: CalculateDropOffset(ui.position.left, ui.position.top).y},
-                    classes: ['textbox'],
+                    data: { 
+                        id: node_id, 
+                        label: "Новое текстовое поле", 
+                        connectable: false,
+                        type: 'textbox', 
+                        width: 150, 
+                        height: 80 
+                    },
+                    position: {
+                        x: CalculateDropOffset(ui.position.left, ui.position.top).x,
+                        y: CalculateDropOffset(ui.position.left, ui.position.top).y,
+                    },
+                    classes: ["textbox"],
                     config: {
                         type: 'textbox',
-                        label: node_id,
-                        text: "Textbox"
+                        label: "Новое текстовое поле",
                     },
                     interface: [],
-                });
+			});
 
         }
         else {
