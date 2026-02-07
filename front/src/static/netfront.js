@@ -102,13 +102,9 @@ $('#network_scheme').droppable({
             let node_id = TextboxUid();
             nodes.push(
                 {
-                    data: { 
-                        id: node_id, 
-                        label: "Новое текстовое поле", 
-                        connectable: false,
-                        type: 'textbox', 
-                        width: 150, 
-                        height: 80 
+                    data: {
+                        id: node_id,
+                        label: "Новое текстовое поле",
                     },
                     position: {
                         x: CalculateDropOffset(ui.position.left, ui.position.top).x,
@@ -118,6 +114,12 @@ $('#network_scheme').droppable({
                     config: {
                         type: 'textbox',
                         label: "Новое текстовое поле",
+                        width: 150,
+                        height: 80,
+                        tb_fontsize: 12,
+                        color: 'black',
+                        fontweight: 'normal',
+                        fontstyle: 'normal',
                     },
                     interface: [],
 			});

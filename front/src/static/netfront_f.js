@@ -151,6 +151,10 @@ const ActionWithInterface = function (n, i, fun) {
 const ShowTextboxConfig = function(n, shared = 0) {
 
     let textbox_name = n.config.label;
+    let textbox_fontsize = n.config.tb_fontsize;
+    let textbox_font_color = n.config.color
+    let textbox_font_style = n.config.fontstyle
+    let textbox_font_weight = n.config.fontweight
     textbox_name = textbox_name || n.data.id
 
     if (shared) {
@@ -158,7 +162,8 @@ const ShowTextboxConfig = function(n, shared = 0) {
     } else {
         ConfigTextboxForm(n.data.id)
     }
-
+    ConfigTextboxFontColor(textbox_font_color)
+    ConfigTextboxFontControls(textbox_fontsize, textbox_font_style, textbox_font_weight);
     ConfigTextboxContent(textbox_name);
 }
 
@@ -975,16 +980,6 @@ const prepareStylesheet = function() {
 			display: "none",
 		})
 
-        .selector(".eh-preview")
-        .css({
-            "background-color": "blue",
-            "line-color": "blue",
-            "target-arrow-color": "blue",
-            "source-arrow-color": "blue",
-            "opacity": 0.5
-        })
-
-
         .selector(".eh-ghost-edge")
 		.css({
 			"background-color": "blue",
@@ -1032,23 +1027,29 @@ const prepareStylesheet = function() {
       }
     }
 
-    sheet.selector('node[type="textbox"]')
+    const getConfig = function(ele, property, defaultValue) {
+        let n = nodes.find(n => n.data.id === ele.id());
+        return (n && n.config && n.config[property] !== undefined) ? n.config[property] : defaultValue;
+    };
+
+    sheet.selector('.textbox')
     .css({
         'shape': 'rectangle',
         'background-opacity': 0,
-        'border-width': 0, 
+        'border-width': 0,
         'content': 'data(label)',
-        'width': function(ele) { return ele.data('width') || 100; },
-        'height': function(ele) { return ele.data('height') || 50; },
+        'width': function (ele) {
+            return getConfig(ele,'width',50)
+        },
+        'height': function(ele) { return getConfig(ele,'height',50) },
         'text-valign': 'center',
         'text-halign': 'center',
-        'text-wrap': 'wrap', 
-        'text-max-width': function(ele) { return ele.data('width') || 100; }, 
-        'color': function(ele) { return ele.data('color') || '#000000'; },
-        'font-size': function(ele) { return ele.data('fontsize') || 12; },
-        'font-weight': function(ele) { return ele.data('fontweight') || 'normal'; },
-        'font-style': function(ele) { return ele.data('fontstyle') || 'normal'; },
-        'text-decoration': function(ele) { return ele.data('textdecoration') || 'none'; }
+        'text-wrap': 'wrap',
+        'text-max-width': function(ele) { return getConfig(ele,'width',50) },
+        'color': function(ele) { return getConfig(ele,'color','#000000')  },
+        'font-size': function(ele) { return getConfig(ele,'tb_fontsize',12) },
+        'font-style': function(ele) {return getConfig(ele, 'fontstyle', 'normal')},
+        'font-weight': function(ele) {return getConfig(ele, 'fontweight', 'normal')}
     });
 
     return sheet;
@@ -1207,6 +1208,9 @@ const DrawGraph = function() {
         hideResizeFrame();
         activeNodeId = node.id();
 
+        let n = nodes.find(n => n.data.id === node.id());
+        if (!n || !n.config) return;
+
         const frame = $('<div id="resize-frame" class="resize-frame"></div>');
         $('body').append(frame);
 
@@ -1224,52 +1228,54 @@ const DrawGraph = function() {
             handle.on('mousedown', function(e) {
                 e.stopPropagation(); 
                 e.preventDefault();
-                
+
                 const startX = e.pageX;
                 const startY = e.pageY;
-                const startW = node.data('width') || 100;
-                const startH = node.data('height') || 50;
-                
-                const startPos = { x: node.position().x, y: node.position().y }; 
-                
+                const startW = n.config.width || 100;
+                const startH = n.config.height || 50;
+                const startPos = {x: node.position().x, y: node.position().y};
                 const zoom = cy.zoom();
-                
+
                 node.ungrabify();
 
                 $(document).on('mousemove.resizing', function(ev) {
                     const dx = (ev.pageX - startX) / zoom;
                     const dy = (ev.pageY - startY) / zoom;
-                    
-                    let newW = startW; 
-                    let newH = startH; 
-                    let newX = startPos.x; 
+
+                    let newW = startW;
+                    let newH = startH;
+                    let newX = startPos.x;
                     let newY = startPos.y;
 
                     // Horizontal Resize
-                    if (h.d.includes('e')) { 
-                        newW = Math.max(30, startW + dx); 
+                    if (h.d.includes('e')) {
+                        newW = Math.max(30, startW + dx);
                         newX += (newW - startW) / 2; // Shift center right
                     }
-                    if (h.d.includes('w')) { 
-                        newW = Math.max(30, startW - dx); 
+                    if (h.d.includes('w')) {
+                        newW = Math.max(30, startW - dx);
                         newX -= (newW - startW) / 2; // Shift center left
                     }
 
                     // Vertical Resize
-                    if (h.d.includes('s')) { 
-                        newH = Math.max(30, startH + dy); 
+                    if (h.d.includes('s')) {
+                        newH = Math.max(30, startH + dy);
                         newY += (newH - startH) / 2; // Shift center down
                     }
-                    if (h.d.includes('n')) { 
-                        newH = Math.max(30, startH - dy); 
+                    if (h.d.includes('n')) {
+                        newH = Math.max(30, startH - dy);
                         newY -= (newH - startH) / 2; // Shift center up
                     }
 
-                    // Apply changes
-                    node.data('width', newW);
-                    node.data('height', newH);
-                    node.position({ x: newX, y: newY });
-                    
+                    n.config.width = newW;
+                    n.config.height = newH;
+
+                    node.style('width', newW);
+                    node.style('height', newH);
+                    node.style('text-max-width', newW);
+
+                    node.position({x: newX, y: newY});
+
                     updateResizeFrame();
                 });
 
@@ -1283,11 +1289,11 @@ const DrawGraph = function() {
 
             frame.append(handle);
         });
-        
+
         updateResizeFrame();
     };
 
-    cy.on('tap', 'node[type="textbox"]', (e) => initResizeFrame(e.target));
+    cy.on('tap', '.textbox', (e) => initResizeFrame(e.target));
     cy.on('tap', (e) => { if (e.target === cy) hideResizeFrame(); });
     cy.on('zoom pan position', updateResizeFrame);
 
@@ -1297,14 +1303,12 @@ const DrawGraph = function() {
 
         if (sNode && sNode.config && sNode.config.type === 'textbox') return false;
         if (tNode && tNode.config && tNode.config.type === 'textbox') return false;
-        if (src.data('type') === 'textbox' || tgt.data('type') === 'textbox') return false;
 
-        return !src.same(tgt); 
+        return !src.same(tgt);
     }
 
     let customDefaults = {
-        handleNodes: 'node[type!="textbox"]',
-
+        handleNodes: '.host, .l2_switch, .l1_hub, .l3_router, .server',
         canConnect: (src, tgt) => allowEdges(src, tgt),
 
         edgeParams: (src, tgt) => allowEdges(src, tgt) ? {} : null,
@@ -1449,7 +1453,7 @@ const DrawGraph = function() {
     // Add edge to the edges[] and then save it to the server.
     cy.on('ehcomplete', (event, sourceNode, targetNode, addedEdge) => {
         AddEdge(sourceNode._private.data.id, targetNode._private.data.id);
-        DrawGraph(); 
+        DrawGraph();
         PostNodesEdges();
         TakeGraphPictureAndUpdate();
 
@@ -1541,19 +1545,27 @@ const DrawGraph = function() {
     });
     
 
-    cy.on('tap', 'node[type="textbox"]', (e) => {
-        e.originalEvent.stopPropagation(); 
+    cy.on('tap', '.textbox', (e) => {
+        e.originalEvent.stopPropagation();
         initResizeFrame(e.target);
     });
 
     cy.on('tap', (e) => {
-        if (e.target === cy || (e.target.isNode && e.target.isNode() && e.target.data('type') !== 'textbox')) {
+        if (e.target === cy) {
             hideResizeFrame();
+            return;
+        }
+
+        if (e.target.isNode && e.target.isNode()) {
+            let n = nodes.find(n => n.data.id === e.target.id());
+            if (n && n.config && n.config.type !== 'textbox') {
+                hideResizeFrame();
+            }
         }
     });
 
     cy.on('zoom pan', updateResizeFrame);
-    
+
     cy.on('dragstart', (e) => {
         if (e.target.id() !== activeNodeId) {
             hideResizeFrame();
