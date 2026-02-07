@@ -139,10 +139,9 @@ const ConfigTextboxForm = function (textbox_id) {
 	$("#textbox_id").val(textbox_id);
 	$("#net_guid").val(network_guid);
 
-	function handleTextboxClick(event) {
+    function handleTextboxClick(event) {
 		event.preventDefault();
-		let data = $("#config_textbox_main_form").serialize();
-		UpdateTextboxConfiguration(data, textbox_id);
+		UpdateTextboxConfigurationForm(textbox_id);
 	}
 
 	$("#config_textbox_main_form_submit_button, #config_textbox_end_form").on(
@@ -438,6 +437,114 @@ const ConfigTextboxContent = function(textbox_name) {
 
 	$("#config_textbox_main_form").prepend(text);
 	$("#config_textbox_content").val(textbox_name)
+}
+
+const ConfigTextboxFontColor = function(textbox_font_color) {
+    var colorScript = document.getElementById("config_textbox_font_color_script").innerHTML;
+    $("#config_textbox_main_form").prepend(colorScript);
+
+    var input = $("#config_textbox_font_color");
+
+    var currentColor = textbox_font_color || "#000000";
+    input.val(currentColor);
+
+    const highlightColor = (selectedColor) => {
+        if (!selectedColor) return;
+        selectedColor = selectedColor.toLowerCase();
+
+        var $form = $("#config_textbox_main_form");
+        var $presets = $form.find(".color-preset");
+        var $customWrapper = $form.find(".custom-color-wrapper");
+
+        $presets.add($customWrapper).css({
+            "outline": "none"
+        });
+
+        let foundPreset = false;
+        $presets.each(function() {
+            var $el = $(this);
+            var presetColor = $el.data("color");
+            if (presetColor && presetColor.toLowerCase() === selectedColor) {
+                $el.css({
+                    "outline": "2px solid #0d6efd",
+                    "outline-offset": "2px"
+                });
+                foundPreset = true;
+                return false;
+            }
+        });
+
+        if (!foundPreset) {
+            $customWrapper.css({
+                "outline": "2px solid #0d6efd",
+                "outline-offset": "2px"
+            });
+        }
+    };
+
+    highlightColor(currentColor);
+
+    $("#config_textbox_main_form").on("click", ".color-preset", function() {
+        var selectedColor = $(this).data("color");
+        input.val(selectedColor);
+        highlightColor(selectedColor);
+    });
+
+    input.on("input change", function() {
+        highlightColor($(this).val());
+    });
+}
+
+const ConfigTextboxFontControls = function(size, style, weight) {
+    if ($("#config_textbox_font_size").length === 0) {
+        var controls = document.getElementById("config_textbox_font_controls_script").innerHTML;
+        $("#config_textbox_main_form").prepend(controls);
+    }
+
+    $("#config_textbox_font_size").val(size);
+
+    var inputStyle = $("#config_textbox_font_style");
+    var btnStyle = $("#btn_toggle_style");
+    var inputWeight = $("#config_textbox_font_weight");
+    var btnWeight = $("#btn_toggle_weight");
+
+    inputStyle.val(style || 'normal');
+    if (style === 'italic') {
+        btnStyle.removeClass('btn-outline-secondary').addClass('btn-primary active');
+    } else {
+        btnStyle.removeClass('btn-primary active').addClass('btn-outline-secondary');
+    }
+
+    inputWeight.val(weight || 'normal');
+    if (weight === 'bold') {
+        btnWeight.removeClass('btn-outline-secondary').addClass('btn-primary active');
+    } else {
+        btnWeight.removeClass('btn-primary active').addClass('btn-outline-secondary');
+    }
+
+    $("#config_textbox_main_form").off('click', '#btn_toggle_style').on('click', '#btn_toggle_style', function() {
+        var btn = $(this);
+        var input = $("#config_textbox_font_style");
+        if (input.val() === 'italic') {
+            input.val('normal');
+            btn.removeClass('btn-primary active').addClass('btn-outline-secondary');
+        } else {
+            input.val('italic');
+            btn.removeClass('btn-outline-secondary').addClass('btn-primary active');
+        }
+    });
+
+    $("#config_textbox_main_form").off('click', '#btn_toggle_weight').on('click', '#btn_toggle_weight', function() {
+        var btn = $(this);
+        var input = $("#config_textbox_font_weight");
+        if (input.val() === 'bold') {
+            input.val('normal');
+            btn.removeClass('btn-primary active').addClass('btn-outline-secondary');
+        } else {
+            input.val('bold');
+            btn.removeClass('btn-outline-secondary').addClass('btn-primary active');
+        }
+    });
 }
 
 const ConfigEdgeNetworkIssues = function (edge_loss, edge_duplicate) {

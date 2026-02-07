@@ -427,10 +427,26 @@ class TextboxConfigurator(AbstractDeviceConfigurator):
 
     def _conf_content_update(self):
         label = get_data(f"config_{self._device_type}_content")
+        fontsize = get_data("config_textbox_font_size")
+        font_color = get_data("config_textbox_font_color")
+        font_style = get_data("config_textbox_font_style")
+        font_weight = get_data("config_textbox_font_weight")
 
         if label:
             self._device_node["config"]["label"] = label
             self._device_node["data"]["label"] = self._device_node["config"]["label"]
+
+        if fontsize:
+            self._device_node["config"]["tb_fontsize"] = int(fontsize)
+
+        if font_color:
+            self._device_node["config"]["color"] = font_color
+
+        if font_style:
+            self._device_node["config"]["fontstyle"] = font_style
+
+        if font_weight:
+            self._device_node["config"]["fontweight"] = font_weight
 
     def _configure(self):
         self._conf_prepare()

@@ -46,6 +46,8 @@ class MiminetTopology(IPTopo):
         node_type: str = config.type  # network device type
         node_id: str = node.data.id  # network device name(label)
 
+        if node_type == "textbox":
+            return
         if node_type == "l2_switch":
             self.__handle_l2_switch(node_id, config)
         elif node_type in ("host", "server"):
@@ -126,6 +128,8 @@ class MiminetTopology(IPTopo):
         interfaces = []
 
         for node in self.__network.nodes:
+            if node.config.type == "textbox":
+                continue
             # Caches node by ID for quick lookup later
             self.__id_to_node[node.data.id] = node
 
