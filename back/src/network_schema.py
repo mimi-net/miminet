@@ -37,6 +37,7 @@ class NodeConfig:
     priority: Optional[int] = None
     default_gw: str = ""
 
+
 @dataclass
 class TextboxNodeConfig(NodeConfig):
     width: int = 0
@@ -45,6 +46,7 @@ class TextboxNodeConfig(NodeConfig):
     color: str = ""
     fontweight: str = ""
     fontstyle: str = ""
+
 
 @dataclass
 class NodeInterface:
