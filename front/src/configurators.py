@@ -421,6 +421,7 @@ class HubConfigurator(AbstractDeviceConfigurator):
 
         return {"message": "Конфигурация обновлена", "nodes": self._nodes}
 
+
 class TextboxConfigurator(AbstractDeviceConfigurator):
     def __init__(self):
         super().__init__(device_type="textbox")
