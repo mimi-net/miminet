@@ -39,16 +39,6 @@ class NodeConfig:
 
 
 @dataclass
-class TextboxNodeConfig(NodeConfig):
-    width: int = 0
-    height: int = 0
-    tb_fontsize: int = 0
-    color: str = ""
-    fontweight: str = ""
-    fontstyle: str = ""
-
-
-@dataclass
 class NodeInterface:
     """
     Represents an interface of a network node.
@@ -103,7 +93,7 @@ class Node:
         classes (list[str]): Node classes (e.g., ["l2_switch"]).
     """
 
-    config: NodeConfig | TextboxNodeConfig
+    config: NodeConfig
     data: NodeData
     interface: list[NodeInterface]
     classes: list[str]
