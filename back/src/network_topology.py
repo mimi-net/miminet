@@ -6,6 +6,7 @@ from ipmininet.iptopo import IPTopo
 from ipmininet.router.config import RouterConfig
 from network_schema import Network, Node, NodeConfig, NodeInterface
 from pkt_parser import is_ipv4_address
+from node_types import NodeType
 
 
 class MiminetTopology(IPTopo):
@@ -46,16 +47,17 @@ class MiminetTopology(IPTopo):
         node_type: str = config.type  # network device type
         node_id: str = node.data.id  # network device name(label)
 
-        if node_type == "textbox":
-            return
-        if node_type == "l2_switch":
+        if node_type == NodeType.SWITCH:
             self.__handle_l2_switch(node_id, config)
-        elif node_type in ("host", "server"):
+        elif node_type in (NodeType.HOST, NodeType.SERVER):
             self.__handle_host_or_server(node_id, config)
-        elif node_type == "l1_hub":
+        elif node_type == NodeType.HUB:
             self.__handle_l1_hub(node_id)
-        elif node_type == "router":
+        elif node_type == NodeType.ROUTER:
             self.__handle_router(node_id, config)
+        else:
+            print(f"Unknown node type: {node_type}")
+            return
 
     def __handle_l2_switch(self, node_id: str, config: NodeConfig):
         assert config.stp in (0, 1, 2), "Incorrect STP mode"

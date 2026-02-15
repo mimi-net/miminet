@@ -3,6 +3,7 @@ import re
 from ipmininet.ipnet import IPNet
 
 from network_schema import Node
+from node_types import NodeType
 
 
 def setup_vtep_interfaces(net: IPNet, nodes: list[Node]) -> None:
@@ -14,7 +15,7 @@ def setup_vtep_interfaces(net: IPNet, nodes: list[Node]) -> None:
         nodes (list[Node]): A list of nodes to configure.
     """
     for node in nodes:
-        if node.config.type == "router":
+        if node.config.type == NodeType.ROUTER:
             router = net.get(node.data.id)
 
             # Configure VXLAN network interfaces (connection_type == 1)

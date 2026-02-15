@@ -2,7 +2,10 @@ import json
 import os
 import signal
 
+from marshmallow import Schema
 import marshmallow_dataclass
+
+from node_types import NodeType
 from celery_app import (
     app,
     SEND_NETWORK_RESPONSE_EXCHANGE,
@@ -12,6 +15,25 @@ from mininet.log import setLogLevel, error
 
 from network_schema import Network
 from emulator import emulate
+
+_network_schema: Schema | None = None
+
+
+def _filter_unknown_nodes(data: dict) -> dict:
+    allowed = set(NodeType)
+    data["nodes"] = [
+        node
+        for node in data.get("nodes", [])
+        if node.get("config", {}).get("type") in allowed
+    ]
+    return data
+
+
+def get_network_schema() -> Schema:
+    global _network_schema
+    if _network_schema is None:
+        _network_schema = marshmallow_dataclass.class_schema(Network)()
+    return _network_schema
 
 
 def run_miminet(network_json: str):
@@ -31,9 +53,9 @@ def run_miminet(network_json: str):
         print("Set default handler to SIGCHLD")
         signal.signal(signal.SIGCHLD, signal.SIG_IGN)
 
-    jnet = json.loads(network_json)
-    network_schema = marshmallow_dataclass.class_schema(Network)()
-    network_json = network_schema.load(jnet, unknown="include")
+    jnet = _filter_unknown_nodes(json.loads(network_json))
+    schema = get_network_schema()
+    network_json = schema.load(jnet, unknown="include")
 
     for _ in range(4):
         try:
