@@ -1116,7 +1116,7 @@ const DrawGraph = function() {
     $(document).on('keyup', function(e){
 
         const evtTarget = e.target;
-        if (evtTarget && (evtTarget.tagName === 'INPUT' || evtTarget.tagName === 'TEXTAREA' || t.isContentEditable)) {
+        if (evtTarget && evtTarget.form) {
             return;
         }
 
