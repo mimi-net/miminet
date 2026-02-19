@@ -3,8 +3,8 @@
 from ipmininet.ipnet import IPNet  # type: ignore
 from ipmininet.ipswitch import IPSwitch  # type: ignore
 
-from mstp_schema import MstInstance
-from network_schema import Node, NodeInterface
+from src.net_utils.mstp_schema import MstInstance
+from src.network_schema import Node, NodeInterface
 
 
 def _validate_mstp_priority(priority: int, label: str) -> None:

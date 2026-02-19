@@ -1,14 +1,15 @@
 import os
 import os.path
 import subprocess
+import json
 
 from ipmininet.ipnet import IPNet
-from jobs import Jobs
-from network_schema import Job, Network
-from pkt_parser import create_pkt_animation
+from src.jobs import Jobs
+from src.network_schema import Job, Network
+from src.pkt_parser import create_pkt_animation
 from mininet.log import setLogLevel, error
-from network_topology import MiminetTopology
-from network import MiminetNetwork
+from src.network_topology import MiminetTopology
+from src.network import MininetNetwork
 
 
 def emulate(
@@ -38,7 +39,7 @@ def emulate(
 
     try:
         topo = MiminetTopology(network)
-        net = MiminetNetwork(topo, network)
+        net = MininetNetwork(topo, network)
 
         net.start()
 
@@ -61,12 +62,19 @@ def emulate(
     animation, pcaps = create_animation(topo.interfaces)
     animation = group_packets_by_time(animation)
 
-    return animation, pcaps
+    return json.dumps(animation), pcaps
 
+
+from typing import Union, Tuple, List
 
 def create_animation(
     interfaces_info,
-) -> tuple[list[list] | list, list | list[tuple[bytes, str]]]:
+) -> Tuple[
+    Union[List[list], list],
+    Union[list, List[Tuple[bytes, str]]]
+]:
+
+
     """Creates an animation using saved pcap files.
 
     Args:

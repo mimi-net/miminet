@@ -1,10 +1,8 @@
 """Classes for deserializing a Miminet network"""
 
 from dataclasses import dataclass
-from typing import Optional, TYPE_CHECKING, Union
-
-if TYPE_CHECKING:
-    from mstp_schema import MstInstance
+from typing import Union, List, Optional
+from src.net_utils.mstp_schema import MstInstance
 
 
 @dataclass
@@ -43,7 +41,7 @@ class NodeConfig:
     priority: Optional[int] = None
     mst_region: Optional[str] = None
     mst_revision: Optional[int] = None
-    mst_instances: Optional[list["MstInstance"]] = None
+    mst_instances: Optional[list[MstInstance]] = None
     default_gw: str = ""
 
 
@@ -68,7 +66,7 @@ class NodeInterface:
     name: str = ""
     ip: str = ""
     netmask: int = 0
-    vlan: Union[int, list[int], None] = None
+    vlan: Optional[Union[int, List[int]]] = None
     type_connection: Optional[int] = None
     vxlan_vni: Optional[int] = None
     vxlan_connection_type: Optional[int] = None
@@ -161,11 +159,15 @@ class Job:
     job_id: int
     host_id: str
     print_cmd: str
-    arg_1: str | int = ""
-    arg_2: str | int = ""
-    arg_3: str | int = ""
-    arg_4: str | int = ""
-    arg_5: str | int = ""
+
+    arg_1: Optional[str] = None
+    arg_2: Optional[str] = None
+    arg_3: Optional[str] = None
+    arg_4: Optional[str] = None
+    arg_5: Optional[str] = None
+
+
+
 
 
 @dataclass
@@ -204,5 +206,5 @@ class Network:
     edges: list[Edge]
     jobs: list[Job]
     config: NetworkConfig
-    pcap: list[str] | None
+    pcap: Optional[List[str]] = None
     packets: str = ""

@@ -17,7 +17,11 @@ NETWORK_FILE_SUFFIX = "_network.json"
 ANSWER_FILE_SUFFIX = "_answer.json"
 
 # Packets that can be skipped (contain not very informative data)
-EXCLUDE_PATTERNS = [re.compile(r"^ARP"), re.compile(r"RSTP")]
+EXCLUDE_PATTERNS = [
+    re.compile(r"^ARP"),
+    re.compile(r"RSTP"),
+    re.compile(r"255"),
+]
 
 # Dynamic regex patterns that should be replaced by static patterns
 # example: TCP dynamic port
@@ -30,26 +34,35 @@ SUBSTITUTIONS = [
 ]
 
 
-def read_files(network_filename: str, answer_filename: str):
-    """Read both expected and actual json files."""
-    expected_path = TEST_JSON_DIR / network_filename
-    answer_path = TEST_JSON_DIR / answer_filename
+def read_files(expected_file: str, answer_file: str):
+    base_dir = Path(__file__).parent
+    test_dir = base_dir / TEST_JSON_DIR
 
-    with expected_path.open("r") as exp_file, answer_path.open("r") as act_file:
-        info(f"Reading files: {network_filename}, {answer_filename}.")
-        return exp_file.read(), act_file.read()
+    expected_path = test_dir / expected_file
+    answer_path = test_dir / answer_file
+
+    with expected_path.open("r", encoding="utf-8") as exp_file, answer_path.open("r", encoding="utf-8") as act_file:
+        expected_json = json.load(exp_file)
+        answer_json = json.load(act_file)
+
+    return expected_json, answer_json
 
 
-def load_test_files(directory: Path):
+def load_test_files(directory: Path | str):
     """Load test and answer JSON files, pairing them."""
 
-    test_dir = Path(directory)
+    base_dir = Path(__file__).parent
+    test_dir = base_dir / directory
 
     if not test_dir.is_dir():
-        raise FileNotFoundError(f"Directory '{directory}' not found.")
+        raise FileNotFoundError(f"Directory '{test_dir}' not found.")
 
-    network_files = sorted(f.name for f in test_dir.glob(f"*{NETWORK_FILE_SUFFIX}"))
-    answer_files = sorted(f.name for f in test_dir.glob(f"*{ANSWER_FILE_SUFFIX}"))
+    network_files = sorted(
+        f.name for f in test_dir.glob(f"*{NETWORK_FILE_SUFFIX}")
+    )
+    answer_files = sorted(
+        f.name for f in test_dir.glob(f"*{ANSWER_FILE_SUFFIX}")
+    )
 
     if len(network_files) != len(answer_files):
         raise ValueError("Mismatch between network and answer JSON files.")
@@ -65,19 +78,33 @@ def normalize_packet_data(packet_data: str) -> str:
     for pattern, repl in SUBSTITUTIONS:
         packet_data = pattern.sub(repl, packet_data)
 
+    if "ICMP echo-reply" in packet_data:
+        packet_data = packet_data.replace("192.168.1.255", "192.168.1.X")
+        packet_data = packet_data.replace("192.168.1.50", "192.168.1.X")
+
     return packet_data.replace("\n", "\\n").strip()
 
 
 def extract_important_fields(packets_json: str) -> list[dict[str, str]]:
     """Extracts relevant fields from emulation packets, excluding uninformative ones."""
 
-    packets = json.loads(packets_json)
+    if isinstance(packets_json, str):
+        packets = json.loads(packets_json)
+    else:
+        packets = packets_json
+
     important_packets = []
 
     for packet_group in packets:
         for packet in packet_group:
             pkg_label = packet["data"]["label"]
             pkg_type = packet["config"]["type"]
+
+        if pkg_type.startswith("ICMP echo-request") and packet["config"]["source"].startswith("server"):
+            continue
+
+        if pkg_type.startswith("ICMP echo-reply") and packet["config"]["source"].startswith("server"):
+            continue
 
             # Skip uninformative packets
             if any(pattern.match(pkg_label) for pattern in EXCLUDE_PATTERNS):

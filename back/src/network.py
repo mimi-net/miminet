@@ -5,16 +5,16 @@ from ipmininet.ipnet import IPNet
 from mininet.log import info
 import psutil
 
-from network_topology import MiminetTopology
-from network_schema import Network
+from src.network_topology import MininetTopology
+from src.network_schema import Network
 
-from net_utils.vlan import setup_vlans, clean_bridges
-from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
-from net_utils.mstp import setup_mstp, clean_mstp_bridges
+from src.net_utils.vlan import setup_vlans, clean_bridges
+from src.net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
+from src.net_utils.mstp import setup_mstp, clean_mstp_bridges
 
 
 class MiminetNetwork(IPNet):
-    def __init__(self, topo: MiminetTopology, network: Network):
+    def __init__(self, topo: MininetTopology, network: Network):
         super().__init__(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
         self.__network_topology = topo
         self.__network_schema = network
@@ -91,3 +91,5 @@ class MiminetNetwork(IPNet):
                 info(f"Killed: {child.name()} {child.pid}")
                 child.kill()
                 child.wait()
+
+MininetNetwork = MiminetNetwork

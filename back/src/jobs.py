@@ -3,8 +3,8 @@ import shlex
 import ipaddress
 
 from netaddr import EUI, AddrFormatError
-from typing import Any, Callable, List, Dict
-from network_schema import Job
+from typing import Any, Callable, List, Dict, Union, Tuple
+from src.network_schema import Job
 from mininet.log import info
 from ipmininet.host.config.dnsmasq import Dnsmasq
 
@@ -193,7 +193,6 @@ def valid_iface(iface) -> bool:
         return False
     return True
 
-
 def ping_handler(job: Job, job_host: Any) -> None:
     """Execute ping -c 1"""
     arg_ip = job.arg_1
@@ -202,7 +201,6 @@ def ping_handler(job: Job, job_host: Any) -> None:
         return
 
     job_host.cmd(f"ping -c 1 {arg_ip}")
-
 
 def ping_with_options_handler(job: Job, job_host: Any) -> None:
     """Execute ping with options"""
@@ -218,8 +216,7 @@ def ping_with_options_handler(job: Job, job_host: Any) -> None:
 
     job_host.cmd(f"ping -c 1 {arg_opt} {arg_ip}")
 
-
-def get_sending_data_argument(job: Job) -> tuple[str | int, str | int, str | int]:
+def get_sending_data_argument(job: Job) -> Tuple[Union[str, int], Union[str, int], Union[str, int]]:
     """Method for get arguments for sending udp and tcp data"""
 
     arg_size = job.arg_1

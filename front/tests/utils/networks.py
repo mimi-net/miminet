@@ -160,6 +160,7 @@ class MiminetTestNetwork:
 
         local_x, local_y = self.__calc_panel_offset(panel, x, y)
 
+        self.__selenium.wait_until_appear(*node_type)
         device_button = self.__selenium.find_element(*node_type)
         self.__selenium.drag_and_drop(device_button, panel, local_x, local_y)
         self.__selenium.wait_for(lambda _: old_nodes_len < len(self.nodes), timeout=5)
@@ -313,6 +314,10 @@ class NodeConfig:
         )
 
         with self.__selenium.run_in_modal_context(*modal_el) as dialog:
+            self.__selenium.wait_until_appear(
+                By.CSS_SELECTOR,
+                Location.Network.ConfigPanel.Switch.StpPanel.STP_BUTTON.selector)
+            
             dialog.find_element(
                 By.CSS_SELECTOR,
                 Location.Network.ConfigPanel.Switch.StpPanel.STP_BUTTON.selector,

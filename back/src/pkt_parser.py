@@ -19,7 +19,8 @@ def is_ipv4_address(dotquad: str) -> bool:
     return len(octets) == 4 and all(o.isdigit() and 0 <= int(o) < 256 for o in octets)
 
 
-def int_to_ip(ip_int: int | None) -> str:
+from typing import Optional
+def int_to_ip(ip_int: Optional[int]) -> str:
     if ip_int is not None:
         octet1 = (ip_int >> 24) & 0xFF
         octet2 = (ip_int >> 16) & 0xFF
