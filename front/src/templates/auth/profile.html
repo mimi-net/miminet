@@ -1,10 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-</body>
-</html>
+{% block title %}Профиль{% endblock %}
+
+{% block content %}
+<div class="container py-5 mt-5">
+  <h1 class="mb-4">Настройка профиля</h1>
+
+  <div class="row g-4 align-items-start">
+    <div class="col-12 col-lg-4">
+      <div class="card p-4">
+        <img src="{{ url_for('static', filename='avatar/' + user.avatar_uri) }}" alt="Аватар пользователя"
+          class="rounded-circle mx-auto d-block" style="width: 200px; height: 200px; object-fit: cover;">
+
+        <form id="avatar-upload-form" method="post" enctype="multipart/form-data" class="mt-4">
+          <input type="file" class="d-none" id="avatar" name="avatar" accept=".bmp,.png,.jpg,.jpeg,image/*">
+          <button type="button" id="avatar-upload-button" class="btn text-white w-100"
+            style="background-color: #7ca6f7; border-color: #7ca6f7;">
+            <i class="bx bx-upload me-1"></i>
+            Загрузить
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-8">
+      <form method="post" class="card p-4">
+        <div class="mb-3">
+          <label for="first_name" class="form-label">Имя</label>
+          <input type="text" class="form-control" id="first_name" name="first_name" value="{{ first_name }}" required>
+        </div>
+
+        <div class="mb-4">
+          <label for="last_name" class="form-label">Фамилия</label>
+          <input type="text" class="form-control" id="last_name" name="last_name" value="{{ last_name }}">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const avatarInput = document.getElementById('avatar');
+    const avatarButton = document.getElementById('avatar-upload-button');
+    const avatarForm = document.getElementById('avatar-upload-form');
+
+    if (!avatarInput || !avatarButton || !avatarForm) {
+      return;
+    }
+
+    avatarButton.addEventListener('click', function () {
+      avatarInput.click();
+    });
+
+    avatarInput.addEventListener('change', function () {
+      if (avatarInput.files && avatarInput.files.length > 0) {
+        avatarForm.submit();
+      }
+    });
+  })();
+</script>
+{% endblock %}

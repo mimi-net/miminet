@@ -183,6 +183,7 @@ app.add_url_rule("/auth/google_callback", methods=["GET"], view_func=google_call
 app.add_url_rule("/auth/yandex_callback", methods=["GET"], view_func=yandex_callback)
 app.add_url_rule("/auth/tg_callback", methods=["GET"], view_func=tg_callback)
 app.add_url_rule("/user/profile.html", methods=["GET", "POST"], view_func=user_profile)
+app.add_url_rule("/profile", methods=["GET", "POST"], view_func=user_profile)
 app.add_url_rule("/auth/logout", methods=["GET"], view_func=logout)
 
 # Network

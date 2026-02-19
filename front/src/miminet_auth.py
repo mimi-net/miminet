@@ -26,6 +26,7 @@ from miminet_config import make_example_net_switch_and_hub
 from pip._vendor import cachecontrol
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.utils import secure_filename
 
 DEFAULT_USER_CONFIG = {
     "hideARP": False,
@@ -144,21 +145,45 @@ def login_index():
 @login_required
 def user_profile():
     user = User.query.filter_by(id=current_user.id).first()
+    nick_parts = (user.nick or "").strip().split(maxsplit=1)
+    first_name = nick_parts[0] if nick_parts else ""
+    last_name = nick_parts[1] if len(nick_parts) > 1 else ""
 
     if request.method == "POST":
-        last_name = request.form.get("last_name").strip()
-        first_name = request.form.get("first_name").strip()
-        middle_name = request.form.get("middle_name").strip()
-        how_to_contact = request.form.get("how_to_contact").strip()
+        last_name = request.form.get("last_name", "").strip()
+        first_name = request.form.get("first_name", "").strip()
+        avatar = request.files.get("avatar")
+        has_updates = False
+
+        if avatar and avatar.filename:
+            if not allowed_file(avatar.filename):
+                flash("Допустимые форматы: bmp, png, jpg, jpeg", category="error")
+                return render_template(
+                    "auth/profile.html",
+                    user=user,
+                    first_name=first_name,
+                    last_name=last_name,
+                )
+
+            ext = os.path.splitext(secure_filename(avatar.filename))[1].lower() or ".jpg"
+            avatar_uri = os.urandom(16).hex() + ext
+            avatar_dir = "/app/static/avatar"
+            os.makedirs(avatar_dir, exist_ok=True)
+            avatar.save(os.path.join(avatar_dir, avatar_uri))
+            user.avatar_uri = avatar_uri
+            has_updates = True
 
         if first_name:
-            user.first_name = first_name
-            user.middle_name = middle_name
-            user.last_name = last_name
-            user.how_to_contact = how_to_contact
-            db.session.commit()
+            user.nick = f"{first_name} {last_name}".strip()
+            has_updates = True
 
-    return render_template("auth/profile.html", user=user)
+        if has_updates:
+            db.session.commit()
+            return redirect(url_for("user_profile"))
+
+    return render_template(
+        "auth/profile.html", user=user, first_name=first_name, last_name=last_name
+    )
 
 
 def _load_user_config(user: User) -> dict:
@@ -362,14 +387,16 @@ def vk_callback():
     if user is None:
         # Yes
         try:
-            avatar_uri = os.urandom(16).hex()
-            avatar_uri = avatar_uri + ".jpg"
+            avatar_uri = "empty.jpg"
 
-            if "photo_100" in vk_user["response"][0]:
-                r = requests.get(
-                    vk_user["response"][0]["photo_100"], allow_redirects=True
-                )
-            open("static/avatar/" + avatar_uri, "wb").write(r.content)
+            photo_uri = vk_user.get("response", [{}])[0].get("photo_100")
+            if photo_uri:
+                generated_avatar_uri = os.urandom(16).hex() + ".jpg"
+                r = requests.get(photo_uri, allow_redirects=True, timeout=10)
+                if r.ok:
+                    with open(os.path.join(UPLOAD_FOLDER, generated_avatar_uri), "wb") as f:
+                        f.write(r.content)
+                    avatar_uri = generated_avatar_uri
 
             new_user = User(
                 nick=vk_user["response"][0]["first_name"]
