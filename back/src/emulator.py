@@ -62,19 +62,14 @@ def emulate(
     animation, pcaps = create_animation(topo.interfaces)
     animation = group_packets_by_time(animation)
 
-    return json.dumps(animation), pcaps
+    return animation, pcaps
 
 
 from typing import Union, Tuple, List
 
 def create_animation(
     interfaces_info,
-) -> Tuple[
-    Union[List[list], list],
-    Union[list, List[Tuple[bytes, str]]]
-]:
-
-
+) -> Tuple[Union[List[list], list], Union[list, List[Tuple[bytes, str]]]]:
     """Creates an animation using saved pcap files.
 
     Args:
