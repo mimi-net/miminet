@@ -93,17 +93,18 @@ def run_miminet(network_json: str):
 
     for _ in range(4):
         try:
-            network_obj: Network = network_schema.load(jnet, unknown="include")
-            animation, pcaps = emulate(network_obj)
-            
-            # Convert to JSON string only if needed for external use
-            animation_json: str = json.dumps(animation)
-            return animation_json, pcaps
+            animation, pcaps = emulate(network_json)
+
+            if not isinstance(animation, str):
+                animation = json.dumps(animation)
+
+            return animation, pcaps
 
         except Exception as e:
             error(e)
 
     raise RuntimeError("Emulation failed after 4 attempts")
+
 
 @app.task(bind=True)
 def mininet_worker(self, network_json: str):
