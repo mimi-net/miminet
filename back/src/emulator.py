@@ -67,6 +67,7 @@ def emulate(
 
 from typing import Union, Tuple, List
 
+
 def create_animation(
     interfaces_info,
 ) -> Tuple[Union[List[list], list], Union[list, List[Tuple[bytes, str]]]]:
