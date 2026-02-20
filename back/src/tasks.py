@@ -18,10 +18,12 @@ except ImportError:
 
 # --- pytest / no-celery fallback ---
 if app is None:
+
     class _FakeApp:
         def task(self, *args, **kwargs):
             def decorator(fn):
                 return fn
+
             return decorator
 
     app = _FakeApp()
@@ -31,6 +33,7 @@ from mininet.log import setLogLevel, error
 
 from src.network_schema import Network
 from src.emulator import emulate
+
 
 def run_miminet(network_json: str):
     setLogLevel("info")
@@ -66,7 +69,11 @@ def run_miminet(network_json: str):
                 if not isinstance(iface, dict):
                     continue
 
-                if "vlan" in iface and iface["vlan"] is not None and not isinstance(iface["vlan"], int):
+                if (
+                    "vlan" in iface
+                    and iface["vlan"] is not None
+                    and not isinstance(iface["vlan"], int)
+                ):
                     try:
                         iface["vlan"] = int(iface["vlan"])
                     except (TypeError, ValueError):
@@ -86,13 +93,12 @@ def run_miminet(network_json: str):
 
     for _ in range(4):
         try:
-            animation, pcaps = emulate(network_json)
-
-            if not isinstance(animation, str):
-                animation = json.dumps(animation)
-
-            return animation, pcaps
-
+            network_obj: Network = network_schema.load(jnet, unknown="include")
+            animation, pcaps = emulate(network_obj)
+            
+            # Convert to JSON string only if needed for external use
+            animation_json: str = json.dumps(animation)
+            return animation_json, pcaps
 
         except Exception as e:
             error(e)
