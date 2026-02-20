@@ -41,7 +41,9 @@ def read_files(expected_file: str, answer_file: str):
     expected_path = test_dir / expected_file
     answer_path = test_dir / answer_file
 
-    with expected_path.open("r", encoding="utf-8") as exp_file, answer_path.open("r", encoding="utf-8") as act_file:
+    with expected_path.open("r", encoding="utf-8") as exp_file, answer_path.open(
+        "r", encoding="utf-8"
+    ) as act_file:
         expected_json = json.load(exp_file)
         answer_json = json.load(act_file)
 
@@ -57,12 +59,8 @@ def load_test_files(directory: Path | str):
     if not test_dir.is_dir():
         raise FileNotFoundError(f"Directory '{test_dir}' not found.")
 
-    network_files = sorted(
-        f.name for f in test_dir.glob(f"*{NETWORK_FILE_SUFFIX}")
-    )
-    answer_files = sorted(
-        f.name for f in test_dir.glob(f"*{ANSWER_FILE_SUFFIX}")
-    )
+    network_files = sorted(f.name for f in test_dir.glob(f"*{NETWORK_FILE_SUFFIX}"))
+    answer_files = sorted(f.name for f in test_dir.glob(f"*{ANSWER_FILE_SUFFIX}"))
 
     if len(network_files) != len(answer_files):
         raise ValueError("Mismatch between network and answer JSON files.")
@@ -93,17 +91,21 @@ def extract_important_fields(packets_json: str) -> list[dict[str, str]]:
     else:
         packets = packets_json
 
-    important_packets = []
+    important_packets: list[dict[str, str]] = []
 
     for packet_group in packets:
         for packet in packet_group:
             pkg_label = packet["data"]["label"]
             pkg_type = packet["config"]["type"]
 
-        if pkg_type.startswith("ICMP echo-request") and packet["config"]["source"].startswith("server"):
+        if pkg_type.startswith("ICMP echo-request") and packet["config"][
+            "source"
+        ].startswith("server"):
             continue
 
-        if pkg_type.startswith("ICMP echo-reply") and packet["config"]["source"].startswith("server"):
+        if pkg_type.startswith("ICMP echo-reply") and packet["config"][
+            "source"
+        ].startswith("server"):
             continue
 
             # Skip uninformative packets
