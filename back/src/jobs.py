@@ -193,6 +193,7 @@ def valid_iface(iface) -> bool:
         return False
     return True
 
+
 def ping_handler(job: Job, job_host: Any) -> None:
     """Execute ping -c 1"""
     arg_ip = job.arg_1
@@ -201,6 +202,7 @@ def ping_handler(job: Job, job_host: Any) -> None:
         return
 
     job_host.cmd(f"ping -c 1 {arg_ip}")
+
 
 def ping_with_options_handler(job: Job, job_host: Any) -> None:
     """Execute ping with options"""
@@ -216,7 +218,10 @@ def ping_with_options_handler(job: Job, job_host: Any) -> None:
 
     job_host.cmd(f"ping -c 1 {arg_opt} {arg_ip}")
 
-def get_sending_data_argument(job: Job) -> Tuple[Union[str, int], Union[str, int], Union[str, int]]:
+
+def get_sending_data_argument(
+    job: Job,
+) -> Tuple[Union[str, int], Union[str, int], Union[str, int]]:
     """Method for get arguments for sending udp and tcp data"""
 
     arg_size = job.arg_1

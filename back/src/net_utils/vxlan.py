@@ -3,7 +3,9 @@ import re
 from ipmininet.ipnet import IPNet
 
 from typing import Any
+
 Node = Any
+
 
 def setup_vtep_interfaces(net: IPNet, nodes: list[Node]) -> None:
     """

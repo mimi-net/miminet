@@ -316,8 +316,9 @@ class NodeConfig:
         with self.__selenium.run_in_modal_context(*modal_el) as dialog:
             self.__selenium.wait_until_appear(
                 By.CSS_SELECTOR,
-                Location.Network.ConfigPanel.Switch.StpPanel.STP_BUTTON.selector)
-            
+                Location.Network.ConfigPanel.Switch.StpPanel.STP_BUTTON.selector,
+            )
+
             dialog.find_element(
                 By.CSS_SELECTOR,
                 Location.Network.ConfigPanel.Switch.StpPanel.STP_BUTTON.selector,
