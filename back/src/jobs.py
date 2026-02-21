@@ -205,7 +205,7 @@ def ping_handler(job: Job, job_host: Any) -> None:
 def ping_with_options_handler(job: Job, job_host: Any) -> None:
     """Execute ping with options"""
 
-    arg_opt = job.arg_1
+    arg_opt = job.arg_1 or ""
     arg_ip = job.arg_2
 
     if not valid_ip(arg_ip):
@@ -223,7 +223,7 @@ def get_sending_data_argument(job: Job) -> Tuple[Union[str, int], Union[str, int
     arg_ip = job.arg_2
     arg_port = job.arg_3
 
-    return arg_size, arg_ip, arg_port
+    return (arg_size or ""), (arg_ip or ""), (arg_port or "")
 
 
 def sending_udp_data_handler(job: Job, job_host: Any) -> None:
@@ -255,7 +255,7 @@ def sending_tcp_data_handler(job: Job, job_host: Any) -> None:
 def traceroute_handler(job: Job, job_host: Any) -> None:
     """Method for executing traceroute"""
 
-    arg_opt = job.arg_1
+    arg_opt = job.arg_1 or ""
     arg_ip = job.arg_2
 
     if not valid_ip(arg_ip):
@@ -353,7 +353,7 @@ def arp_handler(job: Job, job_host: Any) -> None:
 
 def subinterface_with_vlan(job: Job, job_host: Any) -> None:
     """Method for adding subinterface with vlan"""
-    arg_intf = job.arg_1
+    arg_intf = job.arg_1 or ""
     arg_ip = job.arg_2
     arg_mask = job.arg_3
     arg_vlan = job.arg_4

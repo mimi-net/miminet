@@ -18,12 +18,10 @@ except ImportError:
 
 # --- pytest / no-celery fallback ---
 if app is None:
-
     class _FakeApp:
         def task(self, *args, **kwargs):
             def decorator(fn):
                 return fn
-
             return decorator
 
     app = _FakeApp()
@@ -33,9 +31,9 @@ from mininet.log import setLogLevel, error
 
 from src.network_schema import Network
 from src.emulator import emulate
+from typing import Union
 
-
-def run_miminet(network_json: str):
+def run_miminet(network_json: Union[str, dict, list]):
     setLogLevel("info")
 
     if os.name == "posix":
@@ -69,17 +67,13 @@ def run_miminet(network_json: str):
                 if not isinstance(iface, dict):
                     continue
 
-                if (
-                    "vlan" in iface
-                    and iface["vlan"] is not None
-                    and not isinstance(iface["vlan"], int)
-                ):
+                if "vlan" in iface and iface["vlan"] is not None and not isinstance(iface["vlan"], int):
                     try:
                         iface["vlan"] = int(iface["vlan"])
                     except (TypeError, ValueError):
                         iface.pop("vlan", None)
 
-    network_json = network_schema.load(jnet, unknown="include")
+    network = network_schema.load(jnet, unknown="include")
 
     if isinstance(jnet, dict) and "jobs" in jnet and isinstance(jnet["jobs"], list):
         for job in jnet["jobs"]:
@@ -89,22 +83,19 @@ def run_miminet(network_json: str):
                 if "arg_3" in job and not isinstance(job["arg_3"], str):
                     job["arg_3"] = str(job["arg_3"])
 
-    network_json = network_schema.load(jnet, unknown="include")
+    network = network_schema.load(jnet, unknown="include")
 
     for _ in range(4):
         try:
-            animation, pcaps = emulate(network_json)
+            animation, pcaps = emulate(network)
 
-            if not isinstance(animation, str):
-                animation = json.dumps(animation)
-
-            return animation, pcaps
+            animation_str = animation if isinstance(animation, str) else json.dumps(animation)
+            return animation_str, pcaps
 
         except Exception as e:
             error(e)
 
     raise RuntimeError("Emulation failed after 4 attempts")
-
 
 @app.task(bind=True)
 def mininet_worker(self, network_json: str):

@@ -14,7 +14,7 @@ from src.network import MininetNetwork
 
 def emulate(
     network: Network,
-) -> tuple[list[list], list[tuple[bytes, str]]]:
+) -> tuple[str, list[tuple[bytes, str]]]:
     """Run mininet emulation.
 
     Args:
@@ -35,7 +35,7 @@ def emulate(
         )
 
     if len(network.jobs) == 0:
-        return [], []
+        return "[]", []
 
     try:
         topo = MiminetTopology(network)
@@ -62,15 +62,19 @@ def emulate(
     animation, pcaps = create_animation(topo.interfaces)
     animation = group_packets_by_time(animation)
 
-    return animation, pcaps
+    return json.dumps(animation), pcaps
 
 
 from typing import Union, Tuple, List
 
-
 def create_animation(
     interfaces_info,
-) -> Tuple[Union[List[list], list], Union[list, List[Tuple[bytes, str]]]]:
+) -> Tuple[
+    Union[List[list], list],
+    Union[list, List[Tuple[bytes, str]]]
+]:
+
+
     """Creates an animation using saved pcap files.
 
     Args:
