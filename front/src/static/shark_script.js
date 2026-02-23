@@ -473,7 +473,7 @@ function decode_gre_header (gre_hdr) {
 		return {};
 	}
 
-	let flags_and_version = gre_hdr.slice(0,2);
+	let flags_and_version = (parseInt(gre_hdr[0],16)<<8)|parseInt(gre_hdr[1],16);
 	const C = flags_and_version & 32768;
 	const R = flags_and_version & 16384;
 	const K = flags_and_version & 8192;
@@ -865,27 +865,29 @@ function add_gre_header(pkt, header_number, offset = 0) {
     const pkt_decode = decode_gre_header(pkt);
     const fields = [];
 
-    let gre_hdr_len = 8;
+    let gre_hdr_len = 4;
 
     for (const k in pkt_decode) {
 
         if (k === "GRE_header_length") {
-            gre_hdr_len = pkt_decode[k];
+            gre_hdr_len = pkt_decode[k].value;
             continue;
         }
 
-        const decode_p = document.createElement("p");
-        decode_p.innerHTML = `${k} ${pkt_decode[k]}`;
-        decode_div.appendChild(decode_p);
+		const field = pkt_decode[k];
 
-        fields.push({
-            label: k,
-            value: pkt_decode[k],
-            offset: 0,
-            len: 0,
-            className: toHoverKey(k),
-            startByte: offset
-        });
+		const decode_p = document.createElement("p");
+		decode_p.innerHTML = `${k} ${field.value}`;
+		decode_div.appendChild(decode_p);
+
+		fields.push({
+			label: k,
+			value: field.value,
+			offset: field.offset,
+			len: field.length,
+			className: toHoverKey(k),
+			startByte: offset + field.offset
+		});
     }
 
     add_payload_info(pkt, gre_hdr_len, decode_div, fields, offset);
@@ -1033,7 +1035,7 @@ function decode_packet(pkt) {
 
 				// Who is next?
 				eth_type = pkt.slice(2,4).join("");
-				pkt = pkt.slice(h_len);
+				pkt = pkt.slice(gre.byteCount);
 				continue;
 
 			// Unknown protocol
