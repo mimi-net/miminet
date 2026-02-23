@@ -321,6 +321,13 @@ const ShowSwitchConfig = function(n, shared = 0){
 
     // Add hostname
     ConfigSwitchName(hostname);
+    let switch_jobs = [];
+
+    if (jobs){
+        switch_jobs = jobs.filter(j => j.host_id === n.data.id);
+    }
+
+    ConfigSwitchJob(switch_jobs, shared);
 
     //Add checkbox STP
 //    ConfigSwtichSTP(n.config.stp);
@@ -472,7 +479,7 @@ const PostNodesEdges = function(){
     $.ajax({
         type: 'POST',
         url: '/post_nodes_edges?guid=' + network_guid,
-        data: JSON.stringify([nodes, edges]),
+        data: JSON.stringify([nodes, edges, jobs]),
         success: function(data) {},
         error: function(err) {console.log('Cannot post edges to server')},
         contentType: "application/json",
@@ -597,7 +604,7 @@ const DeleteJob = function(node_id){
             jobs_to_delete.push(idx);
         }
     });
-
+    jobs_to_delete.reverse()
     $.each(jobs_to_delete, function (idx, val){
         jobs.splice(val, 1);
     });
@@ -1137,11 +1144,20 @@ const DrawGraph = function() {
 
             // Save the network state.
             SaveNetworkObject();
-
+            
+            // If the source or target is a switch, delete the jobs.
+            let ed = edges.find(ed => ed.data.id === selected_edge_id);
+            if (ed){
+                if (ed.data.source.startsWith("l2sw")){
+                    DeleteJob(ed.data.source)
+                }
+                if (ed.data.target.startsWith("l2sw")){
+                    DeleteJob(ed.data.target)
+                }
+            }
             DeleteEdge(selected_edge_id);
 
             ClearConfigForm('');
-            selecteed_node_id = 0;
             selected_edge_id = 0;
 
             PostNodesEdges();               // Update network on server
@@ -1330,7 +1346,6 @@ const CheckSimulation = function (simulation_id)
         url: '/check_simulation?simulation_id=' + simulation_id + '&network_guid=' + network_guid,
         data: '',
         success: function(data, textStatus, xhr) {
-            lastSimulationId = data.simulation_id
             // If we got 210 (processing) wait 2 sec and call themself again
             if (xhr.status === 210)
             {
@@ -1452,15 +1467,12 @@ const UpdateHostConfiguration = function (data, host_id)
                 if (editingJobId && editingDeviceType === 'host') {
                     ExitEditMode('host');
                 }
-
                 if (!data.warning){
-
                     // Update nodes
                     nodes = data.nodes;
-
                     // Update jobs
                     jobs = data.jobs;
-
+                    
                     // Update graph
                     DrawGraph();
                 }
@@ -1603,6 +1615,55 @@ const DeleteJobFromRouter = function (router_id, job_id, network_guid)
 
                 // Update job counter after deletion
                 UpdateJobCounter('config_router_job_counter', router_id);
+            }
+        },
+        error: function(xhr) {
+            console.log('Не удалось удалить команду');
+            console.log(xhr);
+        },
+        dataType: 'json'
+    });
+}
+
+const DeleteJobFromSwitch = function (switch_id, job_id, network_guid)
+{
+    // Reset network player
+    SetNetworkPlayerState(-1);
+
+    let data = {
+      id: job_id,
+      guid: network_guid,
+    };
+
+    $.ajax({
+        type: 'POST',
+        url: '/host/delete_job',
+        data: data,
+        encode: true,
+        success: function(data, textStatus, xhr) {
+
+            if (xhr.status === 200)
+            {
+                // Update jobs
+                jobs = data.jobs;
+
+                // Update graph
+                DrawGraph();
+
+                // Ok, let's try to update host config form
+                let n = nodes.find(n => n.data.id === switch_id);
+
+                if (!n) {
+                    ClearConfigForm('Нет такого хоста');
+                    return;
+                }
+
+                if (n.config.type === 'l2_switch'){
+                    ShowSwitchConfig(n);
+                } else {
+                    ClearConfigForm('Узел есть, но это не свитч');
+                }
+                UpdateJobCounter('config_switch_job_counter', switch_id);
             }
         },
         error: function(xhr) {
@@ -1881,14 +1942,23 @@ const UpdateSwitchConfiguration = function (data, switch_id)
 
             if (xhr.status === 200)
             {
-                // Update nodes
-                nodes = data.nodes;
+                if (editingJobId && editingDeviceType === 'switch') {
+                    ExitEditMode('switch');
+                }
+                if (!data.warning){
+
+                    // Update nodes
+                    nodes = data.nodes;
+
+                    // Update jobs
+                    jobs = data.jobs;
+
+                    // Update graph
+                    DrawGraph();
+                }
 
                 // We don't clear packets and RunButtonState.
                 // Hub can change only names
-
-                // Update graph
-                DrawGraph();
 
                 // Ok, let's try to update host config form
                 let n = nodes.find(n => n.data.id === switch_id);
@@ -1903,11 +1973,26 @@ const UpdateSwitchConfiguration = function (data, switch_id)
                 } else {
                     ClearConfigForm('Нет такого свитча');
                 }
+                if (data.warning){
+                    SwitchWarningMsg(data.warning)
+                }
+                UpdateJobCounter('config_switch_job_counter', switch_id);
             }
         },
         error: function(xhr) {
-            console.log('Cannot update host config');
+            console.log('Cannot update switch config');
             console.log(xhr);
+            // Show error message to user
+            let errorMsg = 'Ошибка при сохранении конфигурации свитча';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMsg = xhr.responseJSON.message;
+            }
+            HostErrorMsg(errorMsg);
+
+            // Exit edit mode on error to allow retry
+            if (editingJobId && editingDeviceType === 'switch') {
+                ExitEditMode('switch');
+            }
         },
         dataType: 'json'
     });
@@ -1922,6 +2007,7 @@ const RunSimulation = function (network_guid)
         success: function(data, textStatus, xhr) {
             if (xhr.status === 201)
             {
+                lastSimulationId = data.simulation_id
                 console.log("Simulation is running!");
                 // Ok, run CheckSimulation
                 if (data.simulation_id)

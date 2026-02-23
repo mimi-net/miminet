@@ -63,7 +63,8 @@
 1. ```git clone git@github.com:mimi-net/miminet.git```
 2. Копируем ```vk_auth.json``` из группового чата в ```front/src```, чтобы можно было авторизоваться на сайте.
 3. Создаём файл ```miminet_secret.conf``` в ```front/src``` и пишем туда случайные буквы/цифры, чтобы не авторизовываться после каждого перезапуска докера.
-4. Запускаем приложение (например, через [start_all_containers.sh](./start_all_containers.sh)).
+4. В файле .env (папка ```front```) поменять MODE=prod на MODE=dev.
+5. Запускаем приложение (например, через [start_all_containers.sh](./start_all_containers.sh)).
 6. Заходим на localhost и проверяем, что всё работает.
 
 ## <a name="migration"></a>Database migrations

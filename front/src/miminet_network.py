@@ -354,6 +354,7 @@ def post_nodes_edges():
     if request.method == "POST":
         nodes = request.json[0]
         edges = request.json[1]
+        jobs = request.json[2]
 
         for edge in edges:
             edge_data = edge.get("data", {})
@@ -363,27 +364,10 @@ def post_nodes_edges():
         jnet = json.loads(net.network)
         jnet["edges"] = edges
         jnet["nodes"] = nodes
+        jnet["jobs"] = jobs
 
         # Remove all pcaps
         jnet["pcap"] = []
-
-        # If we delete host, remove all jobs without hosts
-        new_jobs = []
-        jobs = jnet["jobs"]
-        for job in jobs:
-            job_host = job.get("host_id")
-
-            if not job_host:
-                continue
-
-            nn = list(filter(lambda x: x["data"]["id"] == job_host, nodes))
-
-            # Good, append job and continue
-            if nn:
-                new_jobs.append(job)
-                continue
-
-        jnet["jobs"] = new_jobs
 
         net.network = json.dumps(jnet)
 
@@ -545,7 +529,6 @@ def get_emulation_queue_size():
     """Answer with current emulation queue size filtered by emulation time."""
     time_filter_req: str = request.args.get("time-filter", type=str).replace(" ", "+")
     time_filter: datetime.datetime = datetime.datetime.fromisoformat(time_filter_req)
-
     if not time_filter:
         return make_response(
             jsonify({"message": "Пропущен параметр 'time-filter'."}), 400

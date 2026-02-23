@@ -130,6 +130,13 @@ class Location:
                 )
                 RSTP_BUTTON = Locator("#config_button_rstp")
                 VLAN_BUTTON = Locator("#config_button_vlan")
+                JOB_SELECT = Locator("#config_switch_job_select_field")
+
+                class Job:
+                    SLEEP_FIELD = Locator("#config_switch_sleep")
+                    LINK_DOWN_OPTION_FIELD = Locator(
+                        "#config_switch_link_down_iface_select_field"
+                    )
 
                 @staticmethod
                 def get_modal_dialog_selector(switch_name: str):
@@ -254,6 +261,30 @@ class Location:
                     )
                     GRE_NAME_IFACE_FIELD = Locator(
                         "#config_router_add_gre_interface_name_field"
+                    )
+                    PORT_FORWARDING_TCP_LINK_SELECT = Locator(
+                        "#config_router_add_port_forwarding_tcp_iface_select_field"
+                    )
+                    PORT_FORWARDING_TCP_PORT_FIELD = Locator(
+                        "#config_router_add_port_forwarding_tcp_port_input_field"
+                    )
+                    PORT_FORWARDING_TCP_DEST_IP_FIELD = Locator(
+                        "#config_router_add_port_forwarding_tcp_dest_ip_input_field"
+                    )
+                    PORT_FORWARDING_TCP_DEST_PORT_FIELD = Locator(
+                        "#config_router_add_port_forwarding_tcp_dest_port_input_field"
+                    )
+                    PORT_FORWARDING_UDP_LINK_SELECT = Locator(
+                        "#config_router_add_port_forwarding_udp_iface_select_field"
+                    )
+                    PORT_FORWARDING_UDP_PORT_FIELD = Locator(
+                        "#config_router_add_port_forwarding_udp_port_input_field"
+                    )
+                    PORT_FORWARDING_UDP_DEST_IP_FIELD = Locator(
+                        "#config_router_add_port_forwarding_udp_dest_ip_input_field"
+                    )
+                    PORT_FORWARDING_UDP_DEST_PORT_FIELD = Locator(
+                        "#config_router_add_port_forwarding_udp_dest_port_input_field"
                     )
 
             class Server(CommonDevice):

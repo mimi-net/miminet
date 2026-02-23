@@ -95,6 +95,11 @@ def emptiness_check(arg: str) -> bool:
     return bool(arg and str(arg).strip()) and str(arg) != "0"
 
 
+def time_check(arg: str) -> bool:
+    """Check if a string is >=50 or <= 0 or empty"""
+    return range_check(arg, range(1, 51))
+
+
 def regex_check(arg: str, regex: str) -> bool:
     """Check if a string matches the given regex"""
     return bool(re.match(regex, arg))
@@ -295,6 +300,52 @@ nat_job.add_param("config_router_add_nat_masquerade_iface_select_field").add_che
     emptiness_check
 ).set_error_msg('Не указан интерфейс для команды "Включить NAT masquerade"')
 
+# add Port forwarding TCP
+port_forwarding_tcp_job = router.create_job(
+    109, "port forwarding -p tcp -i [0] from [1] to [2]:[3]"
+)
+port_forwarding_tcp_job.add_param(
+    "config_router_add_port_forwarding_tcp_iface_select_field"
+).add_check(emptiness_check).set_error_msg("Добавить Port forwarding для TCP")
+port_forwarding_tcp_job.add_param(
+    "config_router_add_port_forwarding_tcp_port_input_field"
+).add_check(port_check).set_error_msg(
+    build_error(ErrorType.port, "Добавить Port forwarding для TCP")
+)
+port_forwarding_tcp_job.add_param(
+    "config_router_add_port_forwarding_tcp_dest_ip_input_field"
+).add_check(IPv4_check).set_error_msg(
+    build_error(ErrorType.ip, "Добавить Port forwarding для TCP")
+)
+port_forwarding_tcp_job.add_param(
+    "config_router_add_port_forwarding_tcp_dest_port_input_field"
+).add_check(port_check).set_error_msg(
+    build_error(ErrorType.port, "Добавить Port forwarding для TCP")
+)
+
+# add Port forwarding UDP
+port_forwarding_udp_job = router.create_job(
+    110, "port forwarding -p udp -i [0] from [1] to [2]:[3]"
+)
+port_forwarding_udp_job.add_param(
+    "config_router_add_port_forwarding_udp_iface_select_field"
+).add_check(emptiness_check).set_error_msg("Добавить Port forwarding для UDP")
+port_forwarding_udp_job.add_param(
+    "config_router_add_port_forwarding_udp_port_input_field"
+).add_check(port_check).set_error_msg(
+    build_error(ErrorType.port, "Добавить Port forwarding для UDP")
+)
+port_forwarding_udp_job.add_param(
+    "config_router_add_port_forwarding_udp_dest_ip_input_field"
+).add_check(IPv4_check).set_error_msg(
+    build_error(ErrorType.ip, "Добавить Port forwarding для UDP")
+)
+port_forwarding_udp_job.add_param(
+    "config_router_add_port_forwarding_udp_dest_port_input_field"
+).add_check(port_check).set_error_msg(
+    build_error(ErrorType.port, "Добавить Port forwarding для UDP")
+)
+
 # Add route
 router_add_route_job = router.create_job(102, "ip route add [0]/[1] via [2]")
 router_add_route_job.add_param("config_router_add_route_ip_input_field").add_check(
@@ -374,6 +425,22 @@ arp_proxy_job.add_param("config_router_add_arp_proxy_iface_select_field").add_ch
 arp_proxy_job.add_param("router_connection_host_label_hidden").add_check(
     emptiness_check
 ).set_error_msg('Не указан интерфейс для команды "Добавить ARP Proxy-интерфейс"')
+
+
+# ~ ~ ~ SWITCH JOBS ~ ~ ~
+link_down_job = switch.create_job(6, "link down [1]")
+link_down_job.add_param("config_switch_link_down_iface_select_field").add_check(
+    emptiness_check
+).set_error_msg('Не указан интерфейс для команды "Удалить линк"')
+link_down_job.add_param("switch_connection_host_label_hidden").add_check(
+    emptiness_check
+).set_error_msg('Не указан интерфейс для команды "Удалить линк"')
+
+sleep_job = switch.create_job(7, "sleep [0] seconds")
+sleep_job.add_param("config_switch_sleep").add_check(time_check).set_error_msg(
+    build_error(ErrorType.options, "sleep")
+)
+
 
 # ~ ~ ~ SERVER JOBS ~ ~ ~
 
