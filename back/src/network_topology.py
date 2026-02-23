@@ -6,6 +6,7 @@ from ipmininet.ipovs_switch import IPOVSSwitch
 from ipmininet.iptopo import IPTopo
 from ipmininet.router.config import RouterConfig
 from typing import List, TYPE_CHECKING
+
 if TYPE_CHECKING:
     from src.network_schema import Network, Node, NodeConfig, NodeInterface
 from src.pkt_parser import is_ipv4_address
@@ -304,5 +305,5 @@ class MiminetTopology(IPTopo):
 
         super().post_build(net)
 
-MininetTopology = MiminetTopology
 
+MininetTopology = MiminetTopology

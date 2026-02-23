@@ -167,9 +167,6 @@ class Job:
     arg_5: Optional[str] = None
 
 
-
-
-
 @dataclass
 class NetworkConfig:
     """
