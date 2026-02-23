@@ -227,7 +227,7 @@ def sleep_handler(job: Job, job_host: Any) -> None:
     arg_time = job.arg_1
     if not valid_sleep(arg_time):
         return
-    time.sleep(int(arg_time))
+    time.sleep(int(arg_time or 0))
 
 
 def ping_handler(job: Job, job_host: Any) -> None:
