@@ -3,7 +3,7 @@ import shlex
 import ipaddress
 import time
 from netaddr import EUI, AddrFormatError
-from typing import Any, Callable, List, Dict, Union, Tuple
+from typing import Any, Callable, List, Dict, Tuple
 from src.network_schema import Job
 from mininet.log import info
 from ipmininet.host.config.dnsmasq import Dnsmasq
