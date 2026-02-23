@@ -59,7 +59,7 @@ def traceroute_options_filter(arg: str) -> str:
     return filter_arg_for_options(arg, flags_without_args, flags_with_args)
 
 
-def udp_tcp_args_checker(ip, size, port) -> bool:
+def udp_tcp_args_checker(ip: str, size: str, port: str) -> bool:
     """Check all args in tcp and udp data handler on correct"""
     if not valid_ip(ip):
         return False
@@ -257,14 +257,14 @@ def ping_with_options_handler(job: Job, job_host: Any) -> None:
 
 def get_sending_data_argument(
     job: Job,
-) -> Tuple[Union[str, int], Union[str, int], Union[str, int]]:
+) -> Tuple[str, str, str]:
     """Method for get arguments for sending udp and tcp data"""
 
     arg_size = job.arg_1
     arg_ip = job.arg_2
     arg_port = job.arg_3
 
-    return (arg_size or ""), (arg_ip or ""), (arg_port or "")
+    return str(arg_size or ""), str(arg_ip or ""), str(arg_port or "")
 
 
 def sending_udp_data_handler(job: Job, job_host: Any) -> None:
