@@ -10,6 +10,7 @@ from src.pkt_parser import create_pkt_animation
 from mininet.log import setLogLevel, error
 from src.network_topology import MiminetTopology
 from src.network import MininetNetwork
+from typing import Union, Tuple, List
 
 
 def emulate(
@@ -63,9 +64,6 @@ def emulate(
     animation = group_packets_by_time(animation)
 
     return json.dumps(animation), pcaps
-
-
-from typing import Union, Tuple, List
 
 
 def create_animation(

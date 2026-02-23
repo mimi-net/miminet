@@ -5,6 +5,7 @@ import string
 import dpkt
 from dpkt.pcap import Reader
 from dpkt.utils import inet_to_str, mac_to_str
+from typing import Optional
 
 
 def packet_uuid(
@@ -17,9 +18,6 @@ def packet_uuid(
 def is_ipv4_address(dotquad: str) -> bool:
     octets = dotquad.split(".")
     return len(octets) == 4 and all(o.isdigit() and 0 <= int(o) < 256 for o in octets)
-
-
-from typing import Optional
 
 
 def int_to_ip(ip_int: Optional[int]) -> str:

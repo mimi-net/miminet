@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import List
 from ipmininet.ipnet import IPNet
 from ipmininet.ipswitch import IPSwitch
 from ipmininet.ipovs_switch import IPOVSSwitch

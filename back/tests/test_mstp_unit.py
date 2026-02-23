@@ -7,7 +7,7 @@ sys.modules["ipmininet.ipswitch"] = SimpleNamespace(IPSwitch=object)  # type: ig
 
 sys.path.append("../src")
 
-from net_utils.mstp import get_mst_instance_for_vlan
+from net_utils.mstp import get_mst_instance_for_vlan  # noqa: E402
 
 
 def test_vlan_to_mst_instance_mapping():
