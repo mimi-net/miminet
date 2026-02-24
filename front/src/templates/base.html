@@ -303,6 +303,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script>
     window.isAuthenticated = {{ current_user.is_authenticated|tojson }};
+    window.isSharedNetwork = {{ (request.endpoint == 'web_network_shared') | tojson }};
+
+    const shared = window.isSharedNetwork ? 1 : 0
 
     $(document).ready(function() {
         const rawUserConfig = {{ (current_user.config or "null") | tojson }};
@@ -333,7 +336,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (typeof UpdateFilterStates === "function") {
             UpdateFilterStates(serverAnimationFilters);
             if (packets) {
-                SetPacketFilter();
+                SetPacketFilter(shared);
             }
         }
 
@@ -348,7 +351,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             UpdateFilterStates(storedFilters);
 
             if (packets) {
-                SetPacketFilter();
+                SetPacketFilter(shared);
             }
         };
 
@@ -376,7 +379,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             network_title = $("#network_title").val();
             network_description = $("#network_description").val();
             UpdateNetworkConfig();
-            SetPacketFilter();
+            SetPacketFilter(shared);
             if (window.isAuthenticated && typeof SaveAnimationFilters === "function") {
                 SaveAnimationFilters();
             }
@@ -390,7 +393,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 network_title = $("#network_title").val();
                 network_description = $("#network_description").val();
                 UpdateNetworkConfig();
-                SetPacketFilter();
+                SetPacketFilter(shared);
                 if (window.isAuthenticated && typeof SaveAnimationFilters === "function") {
                     SaveAnimationFilters();
                 }

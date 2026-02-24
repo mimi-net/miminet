@@ -2095,7 +2095,7 @@ const SaveAnimationFilters = function () {
     });
 };
 
-const SetPacketFilter = function () {
+const SetPacketFilter = function (shared = 0) {
     // If network player UI is absent (e.g., not on network page), skip.
     if (!document.getElementById("NetworkPlayer") || !document.getElementById("PacketSliderInput")) {
         return;
@@ -2117,7 +2117,11 @@ const SetPacketFilter = function () {
 
     if (packets) {
         FilterPackets();
-        SetNetworkPlayerState(0);
+        if (shared) {
+            SetSharedNetworkPlayerState();
+        } else {
+            SetNetworkPlayerState(0);
+        }
     }
 };
 
