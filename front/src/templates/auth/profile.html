@@ -24,18 +24,66 @@
     </div>
 
     <div class="col-12 col-lg-8">
-      <form method="post" class="card p-4">
-        <div class="mb-3">
+      <form method="post" class="card p-3">
+        <div class="mb-2">
           <label for="first_name" class="form-label">Имя</label>
           <input type="text" class="form-control" id="first_name" name="first_name" value="{{ first_name }}" required>
         </div>
 
-        <div class="mb-4">
+        <div class="mb-2">
           <label for="last_name" class="form-label">Фамилия</label>
           <input type="text" class="form-control" id="last_name" name="last_name" value="{{ last_name }}">
         </div>
 
-        <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+        <button type="submit" class="btn btn-primary mb-2">Сохранить изменения</button>
+
+        <hr class="my-4">
+        <h5 class="mb-3">Социальные сети</h5>
+
+        {% set vk_link = 'https://vk.com/id' ~ user.vk_id if user.vk_id else '' %}
+        {% set google_link = 'https://myaccount.google.com/' if user.google_id else '' %}
+        {% set yandex_link = 'https://id.yandex.ru/' if user.yandex_id else '' %}
+        {% set tg_link = 'tg://user?id=' ~ user.tg_id if user.tg_id else '' %}
+
+        <div class="mb-3 d-flex gap-2 align-items-center">
+          <a href="{{ url_for('vk_login') }}" class="btn btn-secondary btn-vk btn-icon flex-shrink-0"
+            title="Привязать VK">
+            <i class="bx bxl-vk"></i>
+          </a>
+          <input class="form-control" readonly value="{{ vk_link if vk_link else 'VK не привязан' }}">
+        </div>
+
+        <div class="mb-3 d-flex gap-2 align-items-center">
+          <a href="{{ url_for('google_login') }}" class="btn btn-secondary btn-google btn-icon flex-shrink-0"
+            title="Привязать Google">
+            <i class="bx bxl-google"></i>
+          </a>
+          <input class="form-control" readonly value="{{ google_link if google_link else 'Google не привязан' }}">
+        </div>
+
+        <div class="mb-3 d-flex gap-2 align-items-center">
+          <a href="{{ url_for('yandex_login') }}" class="btn btn-secondary btn-yandex btn-icon flex-shrink-0"
+            title="Привязать Yandex">
+            <img src="{{ url_for('static', filename='images/yandex_icon.png') }}" style="width: 24px; height: 24px;"
+              alt="Yandex">
+          </a>
+          <input class="form-control" readonly value="{{ yandex_link if yandex_link else 'Yandex не привязан' }}">
+        </div>
+
+        <div class="mb-0 d-flex gap-2 align-items-center">
+          {% if user.tg_id %}
+          <span class="btn btn-secondary btn-telegram btn-icon flex-shrink-0" aria-disabled="true">
+            <i class="bx bxl-telegram"></i>
+          </span>
+          <input class="form-control" readonly value="{{ tg_link }}">
+          {% else %}
+          <a href="{{ url_for('login_index', next='user_profile') }}"
+            class="btn btn-secondary btn-telegram btn-icon flex-shrink-0" title="Привязать Telegram">
+            <i class="bx bxl-telegram"></i>
+          </a>
+          <input class="form-control" readonly value="Telegram не привязан">
+          {% endif %}
+        </div>
       </form>
     </div>
   </div>
