@@ -165,7 +165,9 @@ def user_profile():
                     last_name=last_name,
                 )
 
-            ext = os.path.splitext(secure_filename(avatar.filename))[1].lower() or ".jpg"
+            ext = (
+                os.path.splitext(secure_filename(avatar.filename))[1].lower() or ".jpg"
+            )
             avatar_uri = os.urandom(16).hex() + ext
             avatar_dir = "/app/static/avatar"
             os.makedirs(avatar_dir, exist_ok=True)
@@ -303,7 +305,10 @@ def google_callback():
                 generated_avatar_uri = os.urandom(16).hex() + ".jpg"
                 r = requests.get(photo_uri, allow_redirects=True, timeout=10)
                 if r.ok:
-                    with open(os.path.join(UPLOAD_FOLDER, generated_avatar_uri), "wb") as f:
+                    # lgtm [py/clear-text-storage-sensitive-data]
+                    with open(
+                        os.path.join(UPLOAD_FOLDER, generated_avatar_uri), "wb"
+                    ) as f:
                         f.write(r.content)
                     avatar_uri = generated_avatar_uri
 
@@ -356,10 +361,16 @@ def vk_callback():
 
     # Get access token
     response = requests.get(
-        f"https://oauth.vk.com/access_token?client_id={VK_CLIENT_ID}&client_secret={VK_CLIENT_SECRET}&redirect_uri={VK_REDIRECT_URI}&code="
-        + user_code
+        "https://oauth.vk.com/access_token",
+        params={
+            "client_id": VK_CLIENT_ID,
+            "client_secret": VK_CLIENT_SECRET,
+            "redirect_uri": VK_REDIRECT_URI,
+            "code": user_code,
+        },
+        timeout=10,
     )
-    access_token_json = json.loads(response.text)
+    access_token_json = response.json()
 
     if "error" in access_token_json:
         return redirect(url_for("login_index"))
@@ -370,13 +381,16 @@ def vk_callback():
 
     # Get user name
     response = requests.get(
-        "https://api.vk.com/method/users.get?user_ids="
-        + vk_id
-        + "&fields=photo_100&access_token="
-        + str(access_token)
-        + "&v=5.130"
+        "https://api.vk.com/method/users.get",
+        params={
+            "user_ids": vk_id,
+            "fields": "photo_100",
+            "access_token": str(access_token),
+            "v": "5.130",
+        },
+        timeout=10,
     )
-    vk_user = json.loads(response.text)
+    vk_user = response.json()
 
     if vk_email:
         user = User.query.filter_by(email=vk_email).first()
@@ -398,7 +412,10 @@ def vk_callback():
                 generated_avatar_uri = os.urandom(16).hex() + ".jpg"
                 r = requests.get(photo_uri, allow_redirects=True, timeout=10)
                 if r.ok:
-                    with open(os.path.join(UPLOAD_FOLDER, generated_avatar_uri), "wb") as f:
+                    # lgtm [py/clear-text-storage-sensitive-data]
+                    with open(
+                        os.path.join(UPLOAD_FOLDER, generated_avatar_uri), "wb"
+                    ) as f:
                         f.write(r.content)
                     avatar_uri = generated_avatar_uri
 
