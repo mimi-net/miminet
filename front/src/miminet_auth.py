@@ -296,12 +296,16 @@ def google_callback():
     if user is None:
         # Yes
         try:
-            avatar_uri = os.urandom(16).hex()
-            avatar_uri = avatar_uri + ".jpg"
+            avatar_uri = "empty.jpg"
 
-            if "picture" in id_info:
-                r = requests.get(id_info.get("picture"), allow_redirects=True)
-                open("static/avatar/" + avatar_uri, "wb").write(r.content)
+            photo_uri = id_info.get("picture")
+            if photo_uri:
+                generated_avatar_uri = os.urandom(16).hex() + ".jpg"
+                r = requests.get(photo_uri, allow_redirects=True, timeout=10)
+                if r.ok:
+                    with open(os.path.join(UPLOAD_FOLDER, generated_avatar_uri), "wb") as f:
+                        f.write(r.content)
+                    avatar_uri = generated_avatar_uri
 
             f = id_info.get("family_name", "")
             n = id_info.get("given_name", "")
