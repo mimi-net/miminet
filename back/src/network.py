@@ -39,7 +39,18 @@ class MiminetNetwork(IPNet):
         teardown_vtep_bridges(self, self.__network_schema.nodes)
 
         self.__clean_services()
+
+        # call capture stop for all hosts
+        self.__stop_host_captures()
+
         super().stop()
+
+    def __stop_host_captures(self):
+        """Send SIGINT to mimidump on host interfaces so it flushes pcap data."""
+        for host in self.hosts:
+            for intf in host.intfList():
+                for capture in intf.params.get("captures", []):
+                    capture.stop(intf=intf)
 
     def __check_files(self):
         """Checking for the existence of pcap files."""

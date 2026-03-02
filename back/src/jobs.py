@@ -487,24 +487,15 @@ def arp_proxy_enable(job: Job, job_host: Any) -> None:
 def dhcp_client(job: Job, job_host):
     job_host.cmd(f"ifconfig {job.arg_1} 0")
     job_host.cmd("rm /var/lib/dhcp/dhclient.leases")
-    job_host.cmd(
-        "echo 'initial-interval 1;\nreboot 2;\nretry 2;\nselect-timeout 3;\ntimeout 12;' > /tmp/dhclient.conf"
-    )
+    job_host.cmd("echo 'initial-interval 6;' > /tmp/dhclient.conf")
     out = job_host.cmd(
-        f"timeout -k 1 15 dhclient -d -v -4 -cf /tmp/dhclient.conf {job.arg_1} && "
+        f"timeout -k 1 5 dhclient -d -v -4 -cf /tmp/dhclient.conf {job.arg_1} && "
         + "ip route show && rm -f /tmp/dhclient.conf"
     )
     info(out)
 
 
 def dhcp_server(job: Job, job_host):
-    # Clean up any existing DHCP lease files to ensure deterministic behavior
-    # This prevents dnsmasq from reusing old leases and skipping the gratuitous ARP/ICMP check
-    # We clean the files but allow dnsmasq to create new ones during the test
-    job_host.cmd("rm -f /var/lib/misc/dnsmasq.leases")
-    job_host.cmd("rm -f /var/lib/dnsmasq/dnsmasq.leases")
-    job_host.cmd("rm -f /tmp/dnsmasq.leases")
-
     ip_range_start = job.arg_1
     ip_range_end = job.arg_2
     mask = job.arg_3
