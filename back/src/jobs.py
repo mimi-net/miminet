@@ -511,7 +511,7 @@ def dhcp_server(job: Job, job_host):
     job_host.build_daemon(daemon)
 
     # Ensure deterministic DHCP behavior:
-    # disable "ping before offer" and make server authoritative
+    # disable "ping before offer"
     # maybe should add it in ipmiminet PR
     cfg_file = daemon.cfg_filenames[0]
     job_host.cmd(f"echo 'no-ping' >> {cfg_file}")
