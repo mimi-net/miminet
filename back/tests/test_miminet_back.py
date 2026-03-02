@@ -68,19 +68,14 @@ def normalize_packet_data(packet_data: str) -> str:
     return packet_data.replace("\n", "\\n").strip()
 
 
-def remove_consecutive_duplicates(
+def remove_duplicate_packets(
     packets: list[dict[str, str]],
 ) -> list[dict[str, str]]:
-    """Remove consecutive duplicate packets (e.g. DHCP retransmissions)."""
-    if not packets:
-        return packets
-
-    deduplicated = [packets[0]]
-    for packet in packets[1:]:
-        if packet != deduplicated[-1]:
-            deduplicated.append(packet)
-
-    return deduplicated
+    seen: list[dict[str, str]] = []
+    for packet in packets:
+        if packet not in seen:
+            seen.append(packet)
+    return seen
 
 
 def extract_important_fields(packets_json: str) -> list[dict[str, str]]:
@@ -108,9 +103,9 @@ def extract_important_fields(packets_json: str) -> list[dict[str, str]]:
                 }
             )
 
-    important_packets.sort(key=lambda x: (x["path"], x["source"]))
+    important_packets.sort(key=lambda x: (x["path"], x["source"], x["label"]))
 
-    important_packets = remove_consecutive_duplicates(important_packets)
+    important_packets = remove_duplicate_packets(important_packets)
 
     info("Extracted important fields from packets.")
     return important_packets
