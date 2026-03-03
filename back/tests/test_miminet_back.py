@@ -71,11 +71,14 @@ def normalize_packet_data(packet_data: str) -> str:
 def remove_duplicate_packets(
     packets: list[dict[str, str]],
 ) -> list[dict[str, str]]:
-    seen: list[dict[str, str]] = []
-    for packet in packets:
-        if packet not in seen:
-            seen.append(packet)
-    return seen
+    res = []
+    seen = set()
+    for pck in packets:
+        fs = frozenset(pck.items())
+        if fs not in seen:
+            seen.add(fs)
+            res.append(pck)
+    return res
 
 
 def extract_important_fields(packets_json: str) -> list[dict[str, str]]:
