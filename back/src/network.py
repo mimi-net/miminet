@@ -39,7 +39,6 @@ class MiminetNetwork(IPNet):
         teardown_vtep_bridges(self, self.__network_schema.nodes)
 
         self.__clean_services()
-
         super().stop()
 
     def __check_files(self):
