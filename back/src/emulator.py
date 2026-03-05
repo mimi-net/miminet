@@ -1,18 +1,15 @@
 import os
 import os.path
 import subprocess
-import logging
 import time
 
 from ipmininet.ipnet import IPNet
 from jobs import Jobs
 from network_schema import Job, Network
 from pkt_parser import create_pkt_animation
-from mininet.log import setLogLevel, error
+from mininet.log import setLogLevel, info, error
 from network_topology import MiminetTopology
 from network import MiminetNetwork
-
-_log = logging.getLogger("miminet_emulator")
 
 
 def emulate(
@@ -58,50 +55,71 @@ def emulate(
             network.jobs, key=lambda job: job.job_id // 100, reverse=True
         )
 
-        _log.info(
-            "[emulator] Job execution order (%d jobs): %s",
-            len(ordered_jobs),
-            ", ".join(
-                f"[host={j.host_id} job_id={j.job_id} cmd={j.print_cmd!r}]"
-                for j in ordered_jobs
-            ),
+        info(
+            "[emulator] Job execution order (%d jobs): %s\n"
+            % (
+                len(ordered_jobs),
+                ", ".join(
+                    f"[host={j.host_id} job_id={j.job_id} cmd={j.print_cmd!r}]"
+                    for j in ordered_jobs
+                ),
+            )
         )
 
         for job in ordered_jobs:
-            _log.info(
-                "[emulator] Executing job: host=%s job_id=%s cmd=%r args=(%r, %r, %r, %r, %r)",
-                job.host_id,
-                job.job_id,
-                job.print_cmd,
-                job.arg_1,
-                job.arg_2,
-                job.arg_3,
-                job.arg_4,
-                job.arg_5,
+            info(
+                "[emulator] Executing job: host=%s job_id=%s cmd=%r args=(%r, %r, %r, %r, %r)\n"
+                % (
+                    job.host_id,
+                    job.job_id,
+                    job.print_cmd,
+                    job.arg_1,
+                    job.arg_2,
+                    job.arg_3,
+                    job.arg_4,
+                    job.arg_5,
+                )
             )
             t0 = time.monotonic()
             execute_job(job, net)
             elapsed = time.monotonic() - t0
-            _log.info(
-                "[emulator] Finished job: host=%s job_id=%s elapsed=%.2fs",
-                job.host_id,
-                job.job_id,
-                elapsed,
+            info(
+                "[emulator] Finished job: host=%s job_id=%s elapsed=%.2fs\n"
+                % (job.host_id, job.job_id, elapsed)
             )
 
-        # Log pcap file sizes before stop() sends SIGINT to mimidump —
-        # this tells us whether all expected traffic was captured in time.
-        for link1, link2, *_ in topo.interfaces:
-            for fname in [
-                f"/tmp/capture_{link1}_out.pcapng",
-                f"/tmp/capture_{link2}_out.pcapng",
-            ]:
-                size = os.path.getsize(fname) if os.path.exists(fname) else -1
-                _log.info(
-                    "[emulator] pcap size before stop: %s = %d bytes", fname, size
+        # Log pcap file sizes AND actual paths used by mimidump before stop().
+        # mimidump writes to {intf.node.cwd}/capture_{intf.name}_out.pcapng —
+        # for hosts cwd may differ from /tmp (routers use /tmp, plain hosts may use /).
+        for link1, link2, edge_id, edge_source, edge_target, *_ in topo.interfaces:
+            for iface_name, node_name in [(link1, edge_source), (link2, edge_target)]:
+                node = net.get(node_name)
+                node_cwd = getattr(node, "cwd", "/tmp")
+                actual_path = f"{node_cwd}/capture_{iface_name}_out.pcapng"
+                expected_path = f"/tmp/capture_{iface_name}_out.pcapng"
+                actual_size = (
+                    os.path.getsize(actual_path) if os.path.exists(actual_path) else -1
+                )
+                expected_size = (
+                    os.path.getsize(expected_path)
+                    if os.path.exists(expected_path)
+                    else -1
+                )
+                info(
+                    "[emulator] pcap before stop: node=%s iface=%s "
+                    "node_cwd=%r actual_path=%s(%d bytes) expected_path=%s(%d bytes)\n"
+                    % (
+                        node_name,
+                        iface_name,
+                        node_cwd,
+                        actual_path,
+                        actual_size,
+                        expected_path,
+                        expected_size,
+                    )
                 )
 
-        _log.info("[emulator] calling net.stop()")
+        info("[emulator] calling net.stop()\n")
         net.stop()
 
     except Exception as e:
@@ -118,10 +136,10 @@ def emulate(
             f"/tmp/capture_{link2}_out.pcapng",
         ]:
             size = os.path.getsize(fname) if os.path.exists(fname) else -1
-            _log.info("[emulator] pcap size after stop: %s = %d bytes", fname, size)
-    _log.info("[emulator] Animation groups before grouping: %d", len(animation))
+            info("[emulator] pcap size after stop: %s = %d bytes\n" % (fname, size))
+    info("[emulator] Animation groups before grouping: %d\n" % len(animation))
     animation = group_packets_by_time(animation)
-    _log.info("[emulator] Animation groups after time-grouping: %d", len(animation))
+    info("[emulator] Animation groups after time-grouping: %d\n" % len(animation))
 
     return animation, pcaps
 
