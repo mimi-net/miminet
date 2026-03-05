@@ -2,6 +2,7 @@ import os
 import os.path
 import subprocess
 import logging
+import time
 
 from ipmininet.ipnet import IPNet
 from jobs import Jobs
@@ -69,12 +70,38 @@ def emulate(
         for job in ordered_jobs:
             _log.info(
                 "[emulator] Executing job: host=%s job_id=%s cmd=%r args=(%r, %r, %r, %r, %r)",
-                job.host_id, job.job_id, job.print_cmd,
-                job.arg_1, job.arg_2, job.arg_3, job.arg_4, job.arg_5,
+                job.host_id,
+                job.job_id,
+                job.print_cmd,
+                job.arg_1,
+                job.arg_2,
+                job.arg_3,
+                job.arg_4,
+                job.arg_5,
             )
+            t0 = time.monotonic()
             execute_job(job, net)
-            _log.info("[emulator] Finished job: host=%s job_id=%s", job.host_id, job.job_id)
+            elapsed = time.monotonic() - t0
+            _log.info(
+                "[emulator] Finished job: host=%s job_id=%s elapsed=%.2fs",
+                job.host_id,
+                job.job_id,
+                elapsed,
+            )
 
+        # Log pcap file sizes before stop() sends SIGINT to mimidump —
+        # this tells us whether all expected traffic was captured in time.
+        for link1, link2, *_ in topo.interfaces:
+            for fname in [
+                f"/tmp/capture_{link1}_out.pcapng",
+                f"/tmp/capture_{link2}_out.pcapng",
+            ]:
+                size = os.path.getsize(fname) if os.path.exists(fname) else -1
+                _log.info(
+                    "[emulator] pcap size before stop: %s = %d bytes", fname, size
+                )
+
+        _log.info("[emulator] calling net.stop()")
         net.stop()
 
     except Exception as e:
@@ -84,6 +111,14 @@ def emulate(
         raise e
 
     animation, pcaps = create_animation(topo.interfaces)
+    # Log pcap sizes after stop to compare with pre-stop sizes
+    for link1, link2, *_ in topo.interfaces:
+        for fname in [
+            f"/tmp/capture_{link1}_out.pcapng",
+            f"/tmp/capture_{link2}_out.pcapng",
+        ]:
+            size = os.path.getsize(fname) if os.path.exists(fname) else -1
+            _log.info("[emulator] pcap size after stop: %s = %d bytes", fname, size)
     _log.info("[emulator] Animation groups before grouping: %d", len(animation))
     animation = group_packets_by_time(animation)
     _log.info("[emulator] Animation groups after time-grouping: %d", len(animation))
