@@ -1,6 +1,7 @@
 import os
 import os.path
 import subprocess
+import logging
 
 from ipmininet.ipnet import IPNet
 from jobs import Jobs
@@ -9,6 +10,8 @@ from pkt_parser import create_pkt_animation
 from mininet.log import setLogLevel, error
 from network_topology import MiminetTopology
 from network import MiminetNetwork
+
+_log = logging.getLogger("miminet_emulator")
 
 
 def emulate(
@@ -54,8 +57,23 @@ def emulate(
             network.jobs, key=lambda job: job.job_id // 100, reverse=True
         )
 
+        _log.info(
+            "[emulator] Job execution order (%d jobs): %s",
+            len(ordered_jobs),
+            ", ".join(
+                f"[host={j.host_id} job_id={j.job_id} cmd={j.print_cmd!r}]"
+                for j in ordered_jobs
+            ),
+        )
+
         for job in ordered_jobs:
+            _log.info(
+                "[emulator] Executing job: host=%s job_id=%s cmd=%r args=(%r, %r, %r, %r, %r)",
+                job.host_id, job.job_id, job.print_cmd,
+                job.arg_1, job.arg_2, job.arg_3, job.arg_4, job.arg_5,
+            )
             execute_job(job, net)
+            _log.info("[emulator] Finished job: host=%s job_id=%s", job.host_id, job.job_id)
 
         net.stop()
 
@@ -66,7 +84,9 @@ def emulate(
         raise e
 
     animation, pcaps = create_animation(topo.interfaces)
+    _log.info("[emulator] Animation groups before grouping: %d", len(animation))
     animation = group_packets_by_time(animation)
+    _log.info("[emulator] Animation groups after time-grouping: %d", len(animation))
 
     return animation, pcaps
 
