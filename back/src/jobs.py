@@ -509,7 +509,6 @@ def dhcp_server(job: Job, job_host):
         intfs=intfs,
     )
     job_host.build_daemon(daemon)
-
     job_host.start_daemon(daemon)
 
 
