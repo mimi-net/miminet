@@ -183,19 +183,34 @@ def create_animation(
             raise ValueError("No capture for interface: " + link2)
 
         # Log pcap sizes and packet counts before parsing
-        for fname, iface, node_name in [
-            (pcap_out_file1, link1, edge_source),
-            (pcap_out_file2, link2, edge_target),
+        for fname, iface, node_name, direction in [
+            (pcap_file1, link1, edge_source, "INOUT"),
+            (pcap_out_file1, link1, edge_source, "OUT"),
+            (pcap_file2, link2, edge_target, "INOUT"),
+            (pcap_out_file2, link2, edge_target, "OUT"),
         ]:
+            if not os.path.exists(fname):
+                info(
+                    "[create_animation] pcap: node=%s iface=%s direction=%s MISSING\n"
+                    % (node_name, iface, direction)
+                )
+                continue
             fsize = os.path.getsize(fname)
+            count_pcap = count_pcapng = -1
             try:
                 with open(fname, "rb") as _f:
-                    _count = sum(1 for _ in dpkt.pcapng.Reader(_f))
+                    count_pcap = sum(1 for _ in dpkt.pcap.Reader(_f))
             except Exception:
-                _count = -1
+                pass
+            try:
+                with open(fname, "rb") as _f:
+                    count_pcapng = sum(1 for _ in dpkt.pcapng.Reader(_f))
+            except Exception:
+                pass
             info(
-                "[create_animation] pcap: node=%s iface=%s file=%s size=%d pkt_count=%d\n"
-                % (node_name, iface, fname, fsize, _count)
+                "[create_animation] pcap: node=%s iface=%s direction=%s "
+                "file=%s size=%d pcap_count=%d pcapng_count=%d\n"
+                % (node_name, iface, direction, fname, fsize, count_pcap, count_pcapng)
             )
 
         with open(pcap_file1, "rb") as file1, open(pcap_file2, "rb") as file2:
