@@ -5,21 +5,19 @@ import logging
 import sys
 from pathlib import Path
 
-from mininet.log import setLogLevel, info, error
+from mininet.log import setLogLevel, info, warning, error
 import pytest
 from src.tasks import run_miminet
 
 setLogLevel("info")
 
-# Set up a dedicated logger that always writes to stdout/stderr regardless of
-# mininet's log level so we can see detailed diagnostics in CI output.
+# _log is used only for debug-level tracing (no equivalent in mininet)
+# and for error output in _log_packet_diff.
 _log = logging.getLogger("miminet_test")
 _log.setLevel(logging.DEBUG)
 if not _log.handlers:
     _handler = logging.StreamHandler(sys.stdout)
-    _handler.setFormatter(
-        logging.Formatter("[%(levelname)s] %(name)s: %(message)s")
-    )
+    _handler.setFormatter(logging.Formatter("[%(levelname)s] %(name)s: %(message)s"))
     _log.addHandler(_handler)
 
 # Directory with test files
@@ -83,9 +81,7 @@ def normalize_packet_data(packet_data: str) -> str:
 
 def _fmt_packet(pkt: dict) -> str:
     """Format a single packet dict for human-readable log output."""
-    return (
-        f"  [{pkt['path']}] {pkt['source']} -> {pkt['target']} | {pkt['label']}"
-    )
+    return f"  [{pkt['path']}] {pkt['source']} -> {pkt['target']} | {pkt['label']}"
 
 
 def _log_packet_diff(
@@ -103,18 +99,22 @@ def _log_packet_diff(
     extra = [p for p in actual if frozenset(p.items()) not in expected_set]
 
     if missing:
-        _log.error("--- MISSING packets (in expected but NOT in actual) [%d] ---", len(missing))
+        _log.error(
+            "--- MISSING packets (in expected but NOT in actual) [%d] ---", len(missing)
+        )
         for p in missing:
             _log.error(_fmt_packet(p))
     else:
-        _log.info("No missing packets.")
+        info("No missing packets.")
 
     if extra:
-        _log.error("+++ EXTRA packets (in actual but NOT in expected) [%d] +++", len(extra))
+        _log.error(
+            "+++ EXTRA packets (in actual but NOT in expected) [%d] +++", len(extra)
+        )
         for p in extra:
             _log.error(_fmt_packet(p))
     else:
-        _log.info("No extra packets.")
+        info("No extra packets.")
 
     _log.error("--- Full ACTUAL list (%d packets) ---", len(actual))
     for i, p in enumerate(actual):
@@ -138,7 +138,9 @@ def remove_duplicate_packets(
     return res
 
 
-def extract_important_fields(packets_json: str, label: str = "") -> list[dict[str, str]]:
+def extract_important_fields(
+    packets_json: str, label: str = ""
+) -> list[dict[str, str]]:
     """Extracts relevant fields from emulation packets, excluding uninformative ones.
 
     Args:
@@ -217,9 +219,16 @@ class Case:
     json_answer: str  # Answer that emulation should return
 
 
+def _case_name(network_filename: str) -> str:
+    """Extract base name from network filename, e.g. 'dhcp_one_host_network.json' -> 'dhcp_one_host'."""
+    return network_filename.removesuffix(NETWORK_FILE_SUFFIX)
+
+
 # Generate test cases
 TEST_FILES = load_test_files(TEST_JSON_DIR)
-TEST_CASES = [Case(*read_files(n, a)) for n, a in TEST_FILES]
+TEST_CASES = [
+    pytest.param(Case(*read_files(n, a)), id=_case_name(n)) for n, a in TEST_FILES
+]
 
 
 @pytest.mark.parametrize("test", TEST_CASES)
@@ -227,50 +236,51 @@ def test_miminet_work(test: Case, request) -> None:
     """Test network emulation using Mininet."""
     test_name = request.node.name
     info(f"Running test: {test_name}.")
-    _log.info("=== START test: %s ===", test_name)
+    info(f"=== START test: {test_name} ===")
 
     # Log the network topology being tested (jobs section is most informative)
     try:
         net_json = json.loads(test.json_network)
-        _log.info(
-            "Network jobs (%d): %s",
-            len(net_json.get("jobs", [])),
-            json.dumps(
+        info(
+            f"Network jobs ({len(net_json.get('jobs', []))}): "
+            + json.dumps(
                 [
-                    {"host": j.get("host_id"), "job_id": j.get("job_id"), "cmd": j.get("print_cmd")}
+                    {
+                        "host": j.get("host_id"),
+                        "job_id": j.get("job_id"),
+                        "cmd": j.get("print_cmd"),
+                    }
                     for j in net_json.get("jobs", [])
                 ],
                 indent=2,
-            ),
+            )
         )
-        _log.info(
-            "Network nodes (%d): %s",
-            len(net_json.get("nodes", [])),
-            ", ".join(
+        info(
+            f"Network nodes ({len(net_json.get('nodes', []))}): "
+            + ", ".join(
                 f"{n['data']['id']}({n['classes'][0]})"
                 for n in net_json.get("nodes", [])
-            ),
+            )
         )
     except Exception as parse_exc:
-        _log.warning("Could not parse network JSON for logging: %s", parse_exc)
+        warning(f"Could not parse network JSON for logging: {parse_exc}")
 
     # Emulate network behavior based on the test case
-    _log.info("Starting emulation for: %s", test_name)
+    info(f"Starting emulation for: {test_name}")
     animation, _ = run_miminet(test.json_network)
-    _log.info("Emulation finished for: %s", test_name)
+    info(f"Emulation finished for: {test_name}")
 
     # Log the raw animation JSON for dhcp tests so we can inspect it in CI
     if "dhcp" in test_name.lower():
-        _log.info("Raw animation JSON:\n%s", json.dumps(json.loads(animation), indent=2))
+        info(f"Raw animation JSON:\n{json.dumps(json.loads(animation), indent=2)}")
 
     # Extract important packet fields while ignoring excluded packets
     actual_packets = extract_important_fields(animation, label="actual")
     expected_packets = extract_important_fields(test.json_answer, label="expected")
 
-    _log.info(
-        "Comparison: actual=%d packets, expected=%d packets",
-        len(actual_packets),
-        len(expected_packets),
+    info(
+        f"Comparison: actual={len(actual_packets)} packets, "
+        f"expected={len(expected_packets)} packets"
     )
 
     try:
@@ -280,5 +290,5 @@ def test_miminet_work(test: Case, request) -> None:
         _log_packet_diff(test_name, actual_packets, expected_packets)
         raise e
 
-    _log.info("=== PASS test: %s ===", test_name)
+    info(f"=== PASS test: {test_name} ===")
     info(f"Finish test {test_name}.")
