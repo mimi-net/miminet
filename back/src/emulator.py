@@ -191,7 +191,7 @@ def create_animation(
             try:
                 with open(fname, "rb") as _f:
                     _count = sum(1 for _ in dpkt.pcapng.Reader(_f))
-            except Exception as _e:
+            except Exception:
                 _count = -1
             info(
                 "[create_animation] pcap: node=%s iface=%s file=%s size=%d pkt_count=%d\n"
