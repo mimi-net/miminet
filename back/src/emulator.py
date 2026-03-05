@@ -3,6 +3,8 @@ import os.path
 import subprocess
 import time
 
+import dpkt
+
 from ipmininet.ipnet import IPNet
 from jobs import Jobs
 from network_schema import Job, Network
@@ -179,6 +181,22 @@ def create_animation(
 
         if not os.path.exists(pcap_out_file2):
             raise ValueError("No capture for interface: " + link2)
+
+        # Log pcap sizes and packet counts before parsing
+        for fname, iface, node_name in [
+            (pcap_out_file1, link1, edge_source),
+            (pcap_out_file2, link2, edge_target),
+        ]:
+            fsize = os.path.getsize(fname)
+            try:
+                with open(fname, "rb") as _f:
+                    _count = sum(1 for _ in dpkt.pcapng.Reader(_f))
+            except Exception as _e:
+                _count = -1
+            info(
+                "[create_animation] pcap: node=%s iface=%s file=%s size=%d pkt_count=%d\n"
+                % (node_name, iface, fname, fsize, _count)
+            )
 
         with open(pcap_file1, "rb") as file1, open(pcap_file2, "rb") as file2:
             pcap_list.append((file1.read(), link1))
