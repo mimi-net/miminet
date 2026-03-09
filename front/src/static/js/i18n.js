@@ -70,7 +70,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (savedLang) {
     await setLanguage(savedLang); 
   } else {
-    // Используем язык браузера напрямую, без внешних API
     const browserLang = navigator.language.slice(0, 2) || 'ru';
     await setLanguage(browserLang);
   }
