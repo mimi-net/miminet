@@ -272,5 +272,8 @@
   "packets_few": "packets",
   "packets_many": "packets",
   "packets_zero": "0 packets",
-  "queuePosition": "Queue position"
+  "queuePosition": "Queue position",
+  "langSelectorAria": "Language selector",
+  "loadingError": "Data loading error",
+  "translationMissing": "Translation missing"
 }

@@ -4,10 +4,11 @@ from typing import Optional
 class Locator:
     """Holds different types of locators for UI elements."""
 
-    def __init__(self, selector=None, xpath=None, text=None, **kwargs):
+    def __init__(self, selector=None, xpath=None, text=None, attrs=None, **kwargs):
         self.xpath = xpath
         self.selector = selector
         self.text = text
+        self.attrs = attrs or {}
 
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -28,7 +29,7 @@ class Location:
         """Top buttons for navigating Miminet."""
 
         # "Мои сети"
-        MY_NETWORKS_BUTTON = Locator("#my-networks-nav-item")
+        MY_NETWORKS_BUTTON = Locator('a.nav-link[data-i18n="myNetworksLink"]')
         # Переключение языка (dropdown с иконкой глобуса)
         LANGUAGE_DROPDOWN = Locator("a.nav-link.dropdown-toggle[data-bs-toggle='dropdown']")
         # "Примеры сетей"
@@ -68,7 +69,7 @@ class Location:
         # Modal dialog for user warnings
         MODAL_DIALOG = Locator(xpath="/html/body/div[5]/div")
         # "Эмулировать"
-        EMULATE_BUTTON = Locator("#NetworkEmulateButton", text="Эмулировать")
+        EMULATE_BUTTON = Locator("#NetworkEmulateButton", attrs={"data-i18n": "emulateBtn"})
         # Pause animation button
         EMULATE_PLAYER_PAUSE_BUTTON = Locator("#NetworkPlayPauseButton")
         # Network title
@@ -124,7 +125,7 @@ class Location:
                 MAIN_FORM = Locator("#config_switch_main_form")
                 NAME_FIELD = Locator("#switch_name")
                 SUBMIT_BUTTON = Locator(
-                    "#config_switch_main_form_submit_button", text="Сохранить"
+                    "#config_switch_main_form_submit_button", attrs={"data-i18n": "saveBtn"}
                 )
                 RSTP_BUTTON = Locator("#config_button_rstp")
                 VLAN_BUTTON = Locator("#config_button_vlan")
@@ -162,7 +163,7 @@ class Location:
                 NAME_FIELD = Locator("#config_host_name")
                 DEFAULT_GATEWAY_FIELD = Locator("#config_host_default_gw")
                 SUBMIT_BUTTON = Locator(
-                    "#config_host_main_form_submit_button", text="Сохранить"
+                    "#config_host_main_form_submit_button", attrs={"data-i18n": "saveBtn"}
                 )
                 JOB_SELECT = Locator("#config_host_job_select_field")
 
@@ -200,7 +201,7 @@ class Location:
                 NAME_FIELD = Locator("#config_hub_name")
                 SUBMIT_BUTTON = Locator(
                     "#config_hub_main_form_submit_button",
-                    text="Сохранить",
+                    attrs={"data-i18n": "saveBtn"},
                 )
 
             class Router(CommonDevice):
@@ -208,7 +209,7 @@ class Location:
                 NAME_FIELD = Locator("#config_router_name")
                 DEFAULT_GATEWAY_FIELD = Locator("#config_router_default_gw")
                 SUBMIT_BUTTON = Locator(
-                    "#config_router_main_form_submit_button", text="Сохранить"
+                    "#config_router_main_form_submit_button", attrs={"data-i18n": "saveBtn"}
                 )
                 JOB_SELECT = Locator("#config_router_job_select_field")
 
@@ -256,7 +257,7 @@ class Location:
                 DEFAULT_GATEWAY_FIELD = Locator("#config_server_default_gw")
                 SUBMIT_BUTTON = Locator(
                     "#config_server_main_form_submit_button",
-                    text="Сохранить",
+                    attrs={"data-i18n": "saveBtn"},
                 )
                 JOB_SELECT = Locator("#config_server_job_select_field")
 
@@ -307,14 +308,14 @@ class Location:
             MODAL_ERROR_DIALOG = Locator("#config_content > div")
 
 
-DEVICE_BUTTON_SELECTORS = [
+DEVICE_BUTTON_SELECTORS =[
     Location.Network.DevicePanel.SWITCH.selector,
     Location.Network.DevicePanel.HOST.selector,
     Location.Network.DevicePanel.HUB.selector,
     Location.Network.DevicePanel.ROUTER.selector,
     Location.Network.DevicePanel.SERVER.selector,
 ]
-DEVICE_BUTTON_CLASSES = [
+DEVICE_BUTTON_CLASSES =[
     Location.Network.DevicePanel.SWITCH.device_class,
     Location.Network.DevicePanel.HOST.device_class,
     Location.Network.DevicePanel.HUB.device_class,

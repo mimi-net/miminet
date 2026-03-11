@@ -40,7 +40,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <img src="{{ url_for('static', filename='/images/logo.png') }}" width="170" alt="Miminet">
         </a>
 
-        
         {% if network %}
             <div class="mx-auto">
                 <div class="navbar-nav">
@@ -53,7 +52,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </div>
         {% endif %}
 
-     
         <div class="navbar-nav ms-auto">
             {% if not network %}
                 <!-- Ссылки для главных страниц -->
@@ -73,7 +71,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
             <!-- Переключатель языка -->
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <!-- ИЗМЕНЕНО: Добавлен aria-label и data-i18n-attr для доступности (a11y) -->
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Выбор языка" data-i18n-attr="aria-label:langSelectorAria">
                     <i class="bx bx-globe fs-4"></i>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" style="min-width: auto;">
@@ -104,7 +103,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 </nav>
 {% endif %}
-
 
 {% if network %}
 <!-- Net configuration -->
@@ -141,7 +139,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="netDeleteModalLabel" data-i18n="modalDeleteConfirmTitle">Вы точно хотите удалить эту сеть?</h5>
-                    <button id="networkDeleteCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть" data-i18n-attr="aria-label:closeBtn"/>
+                    <button id="networkDeleteCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть" data-i18n-attr="aria-label:closeBtn"></button>
                 </div>
                 <div class="modal-body">
                     <form id="networkDeleteForm" method="POST" action="{{ url_for('delete_network', guid=network.guid) }}">
@@ -158,7 +156,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="noJobsModalLabel" data-i18n="modalWhatToDoTitle">Что делать?</h5>
-                    <button id="noJobsModalCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть" data-i18n-attr="aria-label:closeBtn"/>
+                    <button id="noJobsModalCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть" data-i18n-attr="aria-label:closeBtn"></button>
                 </div>
                 <div class="modal-body">
                     <p data-i18n="modalNoJobsP1">Зачем эмулировать сеть, если она ничего не делает?!</p>
@@ -172,13 +170,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
     </div>
 
-
     <div class="modal" id="tooManyHostModal" tabindex="-1" role="dialog" aria-labelledby="tooManyHostLabel" aria-hidden="true" data-focus-on="input:first">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="toomanyHostLabel" data-i18n="modalTooLargeTitle">Сеть слишком большая!</h5>
-                    <button id="tooManyHostCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть" data-i18n-attr="aria-label:closeBtn"/>
+                    <button id="tooManyHostCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть" data-i18n-attr="aria-label:closeBtn"></button>
                 </div>
                 <div class="modal-body">
                     <p data-i18n="modalTooLargeP1">Текущая сеть слишком большая для эмуляции.</p>
@@ -191,13 +188,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
     </div>
 
-
 <div class="modal" id="ModalCopy" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel" data-i18n="modalCopySuccessTitle">Вы успешно сохранили сеть к себе</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть" data-i18n-attr="aria-label:closeBtn"/>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть" data-i18n-attr="aria-label:closeBtn"></button>
                 </div>
                 <div class="modal-body">
                     <button class="btn btn-primary shadow-primary modal-option" data-option="edit" data-i18n="goToEditBtn">Перейти к редактированию</button>
@@ -264,26 +260,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         $("#noJobsModalSubmit").click(function(){ $('#noJobsModal').modal('hide'); });
         $("#tooManyHostCancelIcon").click(function(){ $('#tooManyHostModal').modal('hide'); });
         $("#tooManyHostModalSubmit").click(function(){ $('#tooManyHostModal').modal('hide'); });
-        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+        var popoverTriggerList =[].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
         var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
             return new bootstrap.Popover(popoverTriggerEl)
         });
     });
 </script>
 <script type="text/javascript">
-    async function getTranslations() {
-      if (typeof translations === 'undefined' || !translations[currentLanguage]) {
-        await loadTranslations(currentLanguage);
-      }
-      return translations[currentLanguage];
-    }
     async function urlCopyButton(){
         var record_url = document.URL;
         navigator.clipboard.writeText(record_url);
         console.log('Copy url is made!');
 
-        const translations = await getTranslations();
-        const message = translations.alertLinkCopied || 'Ссылка на сеть скопирована';
+        const message = (window.i18n && window.i18n.getTranslation) 
+            ? window.i18n.getTranslation('alertLinkCopied') 
+            : 'Ссылка на сеть скопирована';
+            
         var alertElement = document.createElement("div");
         alertElement.classList.add("alert", "alert-success", "fixed-top");
         alertElement.style.textAlign = "center";

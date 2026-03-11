@@ -38,7 +38,7 @@ class TestI18n:
         )
         lang_link.click()
 
-        # Ждём, пока переводы применятся
+        # Ждём, пока переводы применятся через проверку lang у <html>
         WebDriverWait(selenium, 5).until(
             lambda driver: driver.execute_script(
                 "return document.documentElement.lang"
@@ -57,7 +57,8 @@ class TestI18n:
         """Проверяет перевод текстов на главной странице"""
         selenium.get(MAIN_PAGE)
 
-        # Проверяем русский язык (по умолчанию)
+        # Явно задаем русский язык перед стартом проверок
+        self._switch_language(selenium, "ru")
         create_button = selenium.find_element(
             By.CSS_SELECTOR, Location.MainPage.CREATE_NETWORK_BUTTON.selector
         )
@@ -70,16 +71,11 @@ class TestI18n:
         )
         assert "Create a network" in create_button.text
 
-        # Возвращаемся на русский
-        self._switch_language(selenium, "ru")
-        create_button = selenium.find_element(
-            By.CSS_SELECTOR, Location.MainPage.CREATE_NETWORK_BUTTON.selector
-        )
-        assert "Создать сеть" in create_button.text
-
     def test_network_page_translation(self, selenium: MiminetTester, empty_network: str):
         """Проверяет перевод текстов на странице сети"""
         selenium.get(empty_network)
+        
+        self._switch_language(selenium, "ru")
 
         # Проверяем русский язык
         emulate_button = selenium.find_element(
@@ -112,22 +108,17 @@ class TestI18n:
         assert copy_button.is_displayed()
         assert settings_button.is_displayed()
 
-        # Возвращаемся на русский
-        self._switch_language(selenium, "ru")
-        emulate_button = selenium.find_element(
-            By.CSS_SELECTOR, Location.Network.EMULATE_BUTTON.selector
-        )
-        assert "Эмулировать" in emulate_button.text
-
     def test_network_player_label_translation(self, selenium: MiminetTester, empty_network: str):
         """Проверяет перевод меток плеера сети"""
         selenium.get(empty_network)
+        
+        self._switch_language(selenium, "ru")
 
         # Проверяем начальную метку ожидания на русском
         wait_label = selenium.find_element(
             By.CSS_SELECTOR, Location.Network.PLAYER_LABEL.selector
         )
-        assert "Ожидание" in wait_label.text or "Waiting" in wait_label.text
+        assert "Ожидание" in wait_label.text
 
         # Переключаемся на английский
         self._switch_language(selenium, "en")
@@ -138,21 +129,16 @@ class TestI18n:
         )
         assert "Waiting" in wait_label.text
 
-        # Возвращаемся на русский
-        self._switch_language(selenium, "ru")
-        wait_label = selenium.find_element(
-            By.CSS_SELECTOR, Location.Network.PLAYER_LABEL.selector
-        )
-        assert "Ожидание" in wait_label.text
-
     def test_ask_question_button_with_icon(self, selenium: MiminetTester, empty_network: str):
         """Проверяет, что кнопка 'Задать вопрос' содержит иконку Telegram на обоих языках"""
         selenium.get(empty_network)
+        self._switch_language(selenium, "ru")
 
         # Проверяем на русском
         ask_button = selenium.find_element(
             By.CSS_SELECTOR, Location.Network.ASK_QUESTION_BUTTON.selector
         )
+        
         # Проверяем, что есть иконка
         icon = ask_button.find_element(By.TAG_NAME, "img")
         assert icon.get_attribute("src") is not None
@@ -185,7 +171,7 @@ class TestI18n:
         # Перезагружаем страницу
         selenium.refresh()
 
-        # Проверяем, что язык сохранился
+        # Проверяем, что язык сохранился в DOM
         WebDriverWait(selenium, 5).until(
             lambda driver: driver.execute_script(
                 "return document.documentElement.lang"
@@ -221,11 +207,13 @@ class TestI18n:
         """Проверяет перевод кнопок навигации"""
         selenium.get(MAIN_PAGE)
 
+        self._switch_language(selenium, "ru")
+
         # Проверяем русский
         my_networks = selenium.find_element(
             By.CSS_SELECTOR, Location.NavigationButton.MY_NETWORKS_BUTTON.selector
         )
-        assert "Мои сети" in my_networks.text or "My Networks" in my_networks.text
+        assert "Мои сети" in my_networks.text
 
         # Переключаемся на английский
         self._switch_language(selenium, "en")
@@ -233,10 +221,3 @@ class TestI18n:
             By.CSS_SELECTOR, Location.NavigationButton.MY_NETWORKS_BUTTON.selector
         )
         assert "My Networks" in my_networks.text
-
-        # Возвращаемся на русский
-        self._switch_language(selenium, "ru")
-        my_networks = selenium.find_element(
-            By.CSS_SELECTOR, Location.NavigationButton.MY_NETWORKS_BUTTON.selector
-        )
-        assert "Мои сети" in my_networks.text

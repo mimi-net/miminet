@@ -272,5 +272,8 @@
   "packets_few": "пакета",
   "packets_many": "пакетов",
   "packets_zero": "0 пакетов",
-  "queuePosition": "Место в очереди"
+  "queuePosition": "Место в очереди",
+  "langSelectorAria": "Выбор языка",
+  "loadingError": "Ошибка загрузки данных",
+  "translationMissing": "Перевод отсутствует"
 }

@@ -2,7 +2,7 @@ from selenium.webdriver.common.by import By
 from utils.locators import Location
 from conftest import HOME_PAGE, MiminetTester
 import random
-from typing import Optional, Type, Tuple
+from typing import Optional, Type, Tuple, Union
 from selenium.common.exceptions import NoSuchElementException
 from json import dumps as json_dumps
 from selenium.webdriver.support.ui import Select
@@ -101,11 +101,11 @@ class MiminetTestNetwork:
 
         self.__url = self.__selenium.current_url
 
-    def open_node_config(self, device_node: dict | int):
+    def open_node_config(self, device_node: Union[dict, int]):
         """Opens the configuration menu for a specific node.
 
         Args:
-            device_node (dict | int): Device node for which to open the configuration.
+            device_node (dict или int): Device node for which to open the configuration.
 
         Returns:
             NodeConfig: An instance of the NodeConfig class, providing access to the configuration menu.
