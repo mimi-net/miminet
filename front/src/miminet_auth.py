@@ -37,7 +37,9 @@ DEFAULT_USER_CONFIG = {
 # Global variables
 UPLOAD_FOLDER = "static/avatar/"
 UPLOAD_TMP_FOLDER = "static/tmp/avatar/"
+AVATAR_UPLOAD_FOLDER = "/app/static/avatar"
 ALLOWED_EXTENSIONS = {"bmp", "png", "jpg", "jpeg"}
+MAX_AVATAR_SIZE = 1 * 1024 * 1024
 
 login_manager = LoginManager()
 login_manager.login_view = "login_index"
@@ -155,7 +157,31 @@ def user_profile():
         avatar = request.files.get("avatar")
         has_updates = False
 
+        if len(first_name) < 1 or len(first_name) > 50:
+            flash("Имя должно быть от 1 до 50 символов.", category="error")
+            return render_template("auth/profile.html", user=user, first_name=first_name, last_name=last_name)
+        if not all(c.isalpha() or c in " -'" for c in first_name): 
+            flash("Имя содержит недопустимые символы (только буквы, пробелы, дефисы и апострофы).", category="error")
+            return render_template("auth/profile.html", user=user, first_name=first_name, last_name=last_name)
+        
+        if len(last_name) > 50:
+            flash("Фамилия должна быть до 50 символов.", category="error")
+            return render_template("auth/profile.html", user=user, first_name=first_name, last_name=last_name)
+        if last_name and not all(c.isalpha() or c in " -'" for c in last_name):
+            flash("Фамилия содержит недопустимые символы (только буквы, пробелы, дефисы и апострофы).", category="error")
+            return render_template("auth/profile.html", user=user, first_name=first_name, last_name=last_name)
+    
+
         if avatar and avatar.filename:
+            avatar.seek(0, os.SEEK_END)
+            file_size = avatar.tell()
+            avatar.seek(0) 
+            
+            if file_size > MAX_AVATAR_SIZE:
+                flash("Размер файла не должен превышать 1 МБ", category="error")
+                return redirect(url_for("user_profile"))
+    
+            
             if not allowed_file(avatar.filename):
                 flash("Допустимые форматы: bmp, png, jpg, jpeg", category="error")
                 return render_template(
@@ -169,11 +195,22 @@ def user_profile():
                 os.path.splitext(secure_filename(avatar.filename))[1].lower() or ".jpg"
             )
             avatar_uri = os.urandom(16).hex() + ext
-            avatar_dir = "/app/static/avatar"
-            os.makedirs(avatar_dir, exist_ok=True)
-            avatar.save(os.path.join(avatar_dir, avatar_uri))
-            user.avatar_uri = avatar_uri
-            has_updates = True
+            os.makedirs(AVATAR_UPLOAD_FOLDER, exist_ok=True)
+            try:
+                logger.info(f"Attempting to save avatar: filename={avatar.filename}, size={file_size}, uri={avatar_uri}")
+                avatar.save(os.path.join(AVATAR_UPLOAD_FOLDER, avatar_uri))
+                user.avatar_uri = avatar_uri
+                has_updates = True
+                logger.info(f"Avatar uploaded for user {current_user.id}")
+            except Exception as e:
+                logger.error(f"Failed to save avatar: {e}", exc_info=True)
+                flash("Ошибка загрузки аватара", category="error")
+                return render_template(
+                    "auth/profile.html",
+                    user=user,
+                    first_name=first_name,
+                    last_name=last_name,
+                )
 
         if first_name:
             user.nick = f"{first_name} {last_name}".strip()
@@ -303,14 +340,18 @@ def google_callback():
             photo_uri = id_info.get("picture")
             if photo_uri:
                 generated_avatar_uri = os.urandom(16).hex() + ".jpg"
-                r = requests.get(photo_uri, allow_redirects=True, timeout=10)
-                if r.ok:
-                    # lgtm [py/clear-text-storage-sensitive-data]
-                    with open(
-                        os.path.join(UPLOAD_FOLDER, generated_avatar_uri), "wb"
-                    ) as f:
+                try:
+                    r = requests.get(photo_uri, allow_redirects=True, timeout=10)
+                    r.raise_for_status()  # Проверяет HTTP-ошибки (например, 404)
+                    with open(os.path.join(UPLOAD_FOLDER, generated_avatar_uri), "wb") as f:
                         f.write(r.content)
                     avatar_uri = generated_avatar_uri
+                except requests.RequestException as e:
+                    logger.error(f"Failed to download avatar from Google for user {id_info.get('sub')}: {e}")
+                    avatar_uri = "empty.jpg"  # Дефолтный аватар при ошибке
+                except (IOError, PermissionError) as e:
+                    logger.error(f"Failed to save avatar file for user {id_info.get('sub')}: {e}")
+                    avatar_uri = "empty.jpg"
 
             f = id_info.get("family_name", "")
             n = id_info.get("given_name", "")
@@ -375,9 +416,13 @@ def vk_callback():
     if "error" in access_token_json:
         return redirect(url_for("login_index"))
 
-    vk_id = str(access_token_json.get("user_id"))
     access_token = access_token_json.get("access_token")
     vk_email = access_token_json.get("email")
+
+    try:
+        vk_id = str(int(access_token_json["user_id"]))
+    except (KeyError, ValueError, TypeError):
+        return redirect(url_for("login_index"))
 
     # Get user name
     response = requests.get(
@@ -410,14 +455,18 @@ def vk_callback():
             photo_uri = vk_user.get("response", [{}])[0].get("photo_100")
             if photo_uri:
                 generated_avatar_uri = os.urandom(16).hex() + ".jpg"
-                r = requests.get(photo_uri, allow_redirects=True, timeout=10)
-                if r.ok:
-                    # lgtm [py/clear-text-storage-sensitive-data]
-                    with open(
-                        os.path.join(UPLOAD_FOLDER, generated_avatar_uri), "wb"
-                    ) as f:
+                try:
+                    r = requests.get(photo_uri, allow_redirects=True, timeout=10)
+                    r.raise_for_status()
+                    with open(os.path.join(UPLOAD_FOLDER, generated_avatar_uri), "wb") as f:
                         f.write(r.content)
                     avatar_uri = generated_avatar_uri
+                except requests.RequestException as e:
+                    logger.error(f"Failed to download avatar from VK for user {vk_id}: {e}")
+                    avatar_uri = "empty.jpg"
+                except (IOError, PermissionError) as e:
+                    logger.error(f"Failed to save avatar file for user {vk_id}: {e}")
+                    avatar_uri = "empty.jpg"
 
             new_user = User(
                 nick=vk_user["response"][0]["first_name"]
