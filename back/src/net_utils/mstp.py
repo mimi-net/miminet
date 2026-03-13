@@ -152,4 +152,3 @@ def get_mst_instance_for_vlan(node: Node, vlan_id: int) -> int:
             if vlan_id in mst_instance.vlans:
                 return mst_instance.instance_id
     return 0  # Default to CIST (Common and Internal Spanning Tree)
-
