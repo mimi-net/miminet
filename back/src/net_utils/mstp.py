@@ -1,4 +1,5 @@
 """MSTP (Multiple Spanning Tree Protocol) configuration utilities."""
+
 import shlex
 from ipmininet.ipnet import IPNet  # type: ignore
 from ipmininet.ipswitch import IPSwitch  # type: ignore
@@ -9,7 +10,9 @@ from src.network_schema import Node, NodeInterface
 
 def _validate_mstp_priority(priority: int, label: str) -> None:
     if not 0 <= priority <= 61440 or priority % 4096 != 0:
-        raise ValueError(f"{label} priority must be between 0 and 61440 in steps of 4096 (got {priority}).")
+        raise ValueError(
+            f"{label} priority must be between 0 and 61440 in steps of 4096 (got {priority})."
+        )
 
 
 def setup_mstp(net: IPNet, nodes: list[Node]) -> None:
@@ -49,14 +52,18 @@ def configure_mstp_bridge(switch: IPSwitch, node: Node) -> None:
         print(f"Warning: mstpctl not found, using STP fallback for {switch.name}")
         switch.cmd(f"ip link set {bridge_name_q} type bridge stp_state 1")
         if config.priority is not None:
-            switch.cmd(f"ip link set {bridge_name_q} type bridge priority {config.priority}")
+            switch.cmd(
+                f"ip link set {bridge_name_q} type bridge priority {config.priority}"
+            )
         return
 
     switch.cmd(f"mstpctl addbridge {bridge_name_q}")
     switch.cmd(f"mstpctl setforcevers {bridge_name_q} mstp")
 
     if config.mst_region:
-        switch.cmd(f"mstpctl setmstconfid {bridge_name_q} 0 {shlex.quote(config.mst_region)}")
+        switch.cmd(
+            f"mstpctl setmstconfid {bridge_name_q} 0 {shlex.quote(config.mst_region)}"
+        )
 
     if config.mst_revision is not None:
         switch.cmd(f"mstpctl setmstconfid {bridge_name_q} 1 {config.mst_revision}")
