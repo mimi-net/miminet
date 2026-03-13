@@ -1,0 +1,104 @@
+[
+    [
+        {
+            "data": {
+                "id": "pkt_JKWLD3R9",
+                "label": "ARP-request\nWho has 20.0.0.2? Tell 20.0.0.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\nWho has 20.0.0.2? Tell 20.0.0.1",
+                "path": "edge_milrbuuq9kwwq000dvd",
+                "source": "host_1",
+                "target": "router_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764509644543276"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_Y9KGCA8A",
+                "label": "ARP-response\n20.0.0.2 at 82:c9:00:6a:e0:21",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-response\n20.0.0.2 at 82:c9:00:6a:e0:21",
+                "path": "edge_milrbuuq9kwwq000dvd",
+                "source": "router_1",
+                "target": "host_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764509644558349"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_F6M0LV0K",
+                "label": "UDP 58738 > 8080\n20.0.0.1 > 20.0.0.2",
+                "type": "packet"
+            },
+            "config": {
+                "type": "UDP 58738 > 8080\n20.0.0.1 > 20.0.0.2",
+                "path": "edge_milrbuuq9kwwq000dvd",
+                "source": "host_1",
+                "target": "router_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764509644573517"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_4S9C2DWZ",
+                "label": "ARP-request\nWho has 10.0.0.1? Tell 10.0.0.2",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\nWho has 10.0.0.1? Tell 10.0.0.2",
+                "path": "edge_milrbw17ye2gzkkqxk9",
+                "source": "router_1",
+                "target": "server_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764509644588668"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_6PHI22D6",
+                "label": "ARP-response\n10.0.0.1 at 00:00:00:00:00:02",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-response\n10.0.0.1 at 00:00:00:00:00:02",
+                "path": "edge_milrbw17ye2gzkkqxk9",
+                "source": "server_1",
+                "target": "router_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764509644603933"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_DKNMZY49",
+                "label": "UDP 58738 > 8000\n20.0.0.1 > 10.0.0.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "UDP 58738 > 8000\n20.0.0.1 > 10.0.0.1",
+                "path": "edge_milrbw17ye2gzkkqxk9",
+                "source": "router_1",
+                "target": "server_1",
+                "loss_percentage": 0
+            },
+            "timestamp": "1764509644619137"
+        }
+    ]
+]

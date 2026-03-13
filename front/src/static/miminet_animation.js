@@ -243,7 +243,17 @@ var PacketPlayer = (function () {
                             this.easingImpl = (() => {
                                 return (start, end, percent) => {
                                     if (curve.ctrlpts) {
-                                        let middle = (start == curve.startX || start == curve.endX) ? curve.ctrlpts[0] : curve.ctrlpts[1];
+                                        // Cytoscape animates in MODEL coordinates, not rendered coordinates
+                                        // Check if we're animating X or Y coordinate by comparing with curve coordinates
+                                        const tolerance = 0.01;
+                                        const isClose = (a, b) => Math.abs(a - b) < tolerance;
+
+                                        let isXAnimation =
+                                            isClose(start, curve.startX) || isClose(end, curve.startX) ||
+                                            isClose(start, curve.endX) || isClose(end, curve.endX);
+
+                                        let middle = isXAnimation ? curve.ctrlpts[0] : curve.ctrlpts[1];
+
                                         return (1 - percent) * (1 - percent) * start + 2 * (percent) * (1 - percent) * (middle) + percent * percent * end
                                     } else {
                                         return start + (end - start) * percent;

@@ -22,7 +22,7 @@
     </div>
 </script>
 
-<script id="config_edge_save_loss_script" type="text/plain">
+<script id="config_edge_set_network_issues_script" type="text/plain">
     <div class="form-group pb-2">
         <label for="edge_loss" class="text-sm">Потери пакетов (%)</label>
         <input type="number"
@@ -36,5 +36,18 @@
                oninput="this.value = this.value.replace(/[^0-9]/g, '');
                         this.value = Math.max(0, Math.min(100, parseInt(this.value) || 0));"
                value="{{ edge.data.loss_percentage if edge and edge.data else 0 }}">
+
+        <label for="edge_duplicate" class="text-sm">Дублирование пакетов (%)</label>
+        <input type="number"
+               id="edge_duplicate"
+               class="form-control form-control-sm"
+               name="edge_duplicate"
+               min="0"
+               max="100"
+               step="1"
+               placeholder="0"
+               oninput="this.value = this.value.replace(/[^0-9]/g, '');
+                        this.value = Math.max(0, Math.min(100, parseInt(this.value) || 0));"
+               value="{{ edge.data.duplicate_percentage if edge and edge.data else 0 }}">
     </div>
 </script>

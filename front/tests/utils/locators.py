@@ -48,7 +48,7 @@ class Location:
             Args:
                 id (int): Position of network in networks list. Starts from 0."""
             assert id >= 0, "Network button can't have index less than 0."
-            return f"/html/body/section/div/div/div[{id+2}]"
+            return f"/html/body/section/div/div/div[{id + 2}]"
 
     class Network:
         """Specific network page."""
@@ -85,6 +85,20 @@ class Location:
             DELETE_MODAL_BUTTON = Locator("#networkDeleteButton")
             DELETE_SUBMIT_BUTTON = Locator("#networkDeleteSubmitButton")
 
+        class Options:
+            NETWORK_TITLE = Locator("#network_title")
+            NETWORK_DESCRIPTION = Locator("#network_desctiption")
+
+            # Animation filters
+            ARP_FILTER = Locator("#ARPFilterCheckbox")
+            STP_FILTER = Locator("#STPFilterCheckbox")
+            SYN_FILTER = Locator("#SYNFilterCheckbox")
+
+            # Buttons
+            SUBMIT_BUTTON = Locator("#networkConfigurationSubmit")
+            CANCEL_BUTTON = Locator("#networkConfigurationCancel")
+            DELETE_BUTTON = Locator("#networkDeleteButton")
+
         class DevicePanel:
             """Panel with network devices."""
 
@@ -116,6 +130,13 @@ class Location:
                 )
                 RSTP_BUTTON = Locator("#config_button_rstp")
                 VLAN_BUTTON = Locator("#config_button_vlan")
+                JOB_SELECT = Locator("#config_switch_job_select_field")
+
+                class Job:
+                    SLEEP_FIELD = Locator("#config_switch_sleep")
+                    LINK_DOWN_OPTION_FIELD = Locator(
+                        "#config_switch_link_down_iface_select_field"
+                    )
 
                 @staticmethod
                 def get_modal_dialog_selector(switch_name: str):
@@ -143,7 +164,7 @@ class Location:
                         Args:
                             id (int): Position of row in VLAN table. Starts from 0."""
                         assert id >= 0, "Row can't have index less than 0."
-                        return f'//*[@id="config_table_vlan_{switch_name}"]/table/tbody/tr[{id+1}]'
+                        return f'//*[@id="config_table_vlan_{switch_name}"]/table/tbody/tr[{id + 1}]'
 
             class Host(CommonDevice):
                 MAIN_FORM = Locator("#config_main_form")
@@ -241,6 +262,30 @@ class Location:
                     GRE_NAME_IFACE_FIELD = Locator(
                         "#config_router_add_gre_interface_name_field"
                     )
+                    PORT_FORWARDING_TCP_LINK_SELECT = Locator(
+                        "#config_router_add_port_forwarding_tcp_iface_select_field"
+                    )
+                    PORT_FORWARDING_TCP_PORT_FIELD = Locator(
+                        "#config_router_add_port_forwarding_tcp_port_input_field"
+                    )
+                    PORT_FORWARDING_TCP_DEST_IP_FIELD = Locator(
+                        "#config_router_add_port_forwarding_tcp_dest_ip_input_field"
+                    )
+                    PORT_FORWARDING_TCP_DEST_PORT_FIELD = Locator(
+                        "#config_router_add_port_forwarding_tcp_dest_port_input_field"
+                    )
+                    PORT_FORWARDING_UDP_LINK_SELECT = Locator(
+                        "#config_router_add_port_forwarding_udp_iface_select_field"
+                    )
+                    PORT_FORWARDING_UDP_PORT_FIELD = Locator(
+                        "#config_router_add_port_forwarding_udp_port_input_field"
+                    )
+                    PORT_FORWARDING_UDP_DEST_IP_FIELD = Locator(
+                        "#config_router_add_port_forwarding_udp_dest_ip_input_field"
+                    )
+                    PORT_FORWARDING_UDP_DEST_PORT_FIELD = Locator(
+                        "#config_router_add_port_forwarding_udp_dest_port_input_field"
+                    )
 
             class Server(CommonDevice):
                 MAIN_FORM = Locator("#config_main_form")
@@ -281,6 +326,13 @@ class Location:
                         "#config_server_add_dhcp_interface_select_iface_field"
                     )
 
+            class Edge(CommonDevice):
+                # New edge config structure: separate form and fields in config_edge.html
+                MAIN_FORM = Locator("#config_edge_main_form")
+                SUBMIT_BUTTON = Locator("#config_edge_main_form_submit_button")
+                END_FORM_BUTTON = Locator("#config_edge_end_form")
+                DUPLICATE_FIELD = Locator("#edge_duplicate")
+
             # The only stable way for finding ip/subnet mask on page is using XPATHs
 
             @staticmethod
@@ -289,7 +341,7 @@ class Location:
                 Args:
                     id (int): Position of link in links list. Starts from 0."""
                 assert id >= 0, "IP field can't have index less than 0."
-                return f"/html/body/main/section/div[2]/div[2]/div[2]/form/div[{4 + id * 2}]/input[1]"
+                return f"/html/body//form[@id='config_main_form']/div[{4 + id * 2}]/input[1]"
 
             @staticmethod
             def get_mask_field_xpath(id: int = 0):
@@ -297,9 +349,11 @@ class Location:
                 Args:
                     id (int): Position of link in links list. Starts from 0."""
                 assert id >= 0, "Subnet mask field can't have index less than 0."
-                return f"/html/body/main/section/div[2]/div[2]/div[2]/form/div[{4 + id * 2}]/input[2]"
+                return f"/html/body//form[@id='config_main_form']/div[{4 + id * 2}]/input[2]"
 
-            MODAL_ERROR_DIALOG = Locator("#config_content > div")
+            MODAL_ERROR_DIALOG = Locator(
+                "#config_content > .alert-danger, #config_content > .alert-info:not(.edit-banner)"
+            )
 
 
 DEVICE_BUTTON_SELECTORS = [

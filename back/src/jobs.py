@@ -1,7 +1,7 @@
 import re
 import shlex
 import ipaddress
-
+import time
 from netaddr import EUI, AddrFormatError
 from typing import Any, Callable, List, Dict
 from network_schema import Job
@@ -157,6 +157,17 @@ def add_gre_checker(ip_start, ip_end, ip_iface, name_iface) -> bool:
     return True
 
 
+def port_forwarding_checker(iface, port, dest_addr, dest_port) -> bool:
+    """Checker args for port_forwarding_tcp and port_forwarding_udp"""
+
+    return (
+        valid_ip(dest_addr)
+        and valid_port(port)
+        and valid_port(dest_port)
+        and valid_iface(iface)
+    )
+
+
 def valid_port(port) -> bool:
     """Check if given arg is port or not"""
     try:
@@ -192,6 +203,31 @@ def valid_iface(iface) -> bool:
     if not re.match(r"^[a-z][a-z0-9_-]{0,14}$", iface):
         return False
     return True
+
+
+def valid_sleep(time) -> bool:
+    try:
+        _ = int(time)
+    except (ValueError, TypeError):
+        return False
+    if int(time) > 50 or int(time) <= 0:
+        return False
+
+    return True
+
+
+def link_down_handler(job: Job, job_host: Any) -> None:
+    arg_interface = job.arg_1
+    if not net_dev_checker(arg_interface):
+        return
+    job_host.cmd(f"ip link set {arg_interface} down")
+
+
+def sleep_handler(job: Job, job_host: Any) -> None:
+    arg_time = job.arg_1
+    if not valid_sleep(arg_time):
+        return
+    time.sleep(int(arg_time))
 
 
 def ping_handler(job: Job, job_host: Any) -> None:
@@ -292,6 +328,38 @@ def iptables_handler(job: Job, job_host: Any) -> None:
         return
 
     job_host.cmd(f"iptables -t nat -A POSTROUTING -o {arg_dev} -j MASQUERADE")
+
+
+def port_forwarding_tcp_handler(job: Job, job_host: Any) -> None:
+    """Method for adding tcp port forwarding"""
+
+    arg_iface = job.arg_1
+    arg_port = job.arg_2
+    arg_dest_addr = job.arg_3
+    arg_dest_port = job.arg_4
+
+    if not port_forwarding_checker(arg_iface, arg_port, arg_dest_addr, arg_dest_port):
+        return
+
+    job_host.cmd(
+        f"iptables -t nat -A PREROUTING -p tcp -i {arg_iface} --dport {arg_port} -j DNAT --to-destination {arg_dest_addr}:{arg_dest_port}"
+    )
+
+
+def port_forwarding_udp_handler(job: Job, job_host: Any) -> None:
+    """Method for adding udp port forwarding"""
+
+    arg_iface = job.arg_1
+    arg_port = job.arg_2
+    arg_dest_addr = job.arg_3
+    arg_dest_port = job.arg_4
+
+    if not port_forwarding_checker(arg_iface, arg_port, arg_dest_addr, arg_dest_port):
+        return
+
+    job_host.cmd(
+        f"iptables -t nat -A PREROUTING -p udp -i {arg_iface} --dport {arg_port} -j DNAT --to-destination {arg_dest_addr}:{arg_dest_port}"
+    )
 
 
 def ip_route_add_handler(job: Job, job_host: Any) -> None:
@@ -461,6 +529,8 @@ class Jobs:
             3: sending_udp_data_handler,
             4: sending_tcp_data_handler,
             5: traceroute_handler,
+            6: link_down_handler,
+            7: sleep_handler,
             100: ip_addr_add_handler,
             101: iptables_handler,
             102: ip_route_add_handler,
@@ -470,6 +540,8 @@ class Jobs:
             106: add_gre,
             107: arp_proxy_enable,
             108: dhcp_client,
+            109: port_forwarding_tcp_handler,
+            110: port_forwarding_udp_handler,
             200: open_udp_server_handler,
             201: open_tcp_server_handler,
             202: block_tcp_udp_port,

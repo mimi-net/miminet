@@ -224,3 +224,86 @@ a.lastResult {
             user-select: none;
 }
 
+#decode {
+    line-height: 1.1;
+}
+
+.byte:hover,
+.ascii-char:hover {
+    outline: 1px solid #99f;
+    outline-offset: -1px;
+    cursor: pointer;
+    z-index: 999;
+}
+
+.highlight {
+    background: #a2c9e8 !important;
+    color: #fff !important;
+    transition: background 0.15s ease;
+    box-shadow: 0 0 0 1px #a2c9e8;
+}
+
+.decode_body p:hover {
+    color: var(--si-link-color);
+    cursor: pointer;
+}
+
+#bytes div[class] {
+    margin-right: 8px;
+}
+
+#bytes .byte {
+    margin-right: 8px;
+}
+
+#bytes .byte:last-child {
+    margin-right: 0;
+}
+
+#bytes div[class] {
+    gap: 8px;
+    margin-right: 8px;
+}
+
+#bytes div[class]:last-child {
+    margin-right: 0; 
+}
+
+.col-6.text-center.border > div {
+    max-height: 282px;
+    overflow-y: auto;
+
+/* Edit mode styles */
+.editing-command {
+    background-color: #f0f9ff !important;
+    border-left: 4px solid #38bdf8 !important;
+    box-shadow: 0 2px 4px rgba(56, 189, 248, 0.15) !important;
+    transition: all 0.3s ease;
+}
+
+/* Highlight editing form area */
+.editing-form-area {
+    background-color: #f0f9ff !important;
+    border-left: 4px solid #38bdf8 !important;
+    box-shadow: 0 2px 4px rgba(56, 189, 248, 0.15) !important;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    transition: all 0.3s ease;
+}
+
+.edit-banner {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
