@@ -35,8 +35,6 @@ DEFAULT_USER_CONFIG = {
 }
 
 # Global variables
-UPLOAD_FOLDER = "static/avatar/"
-UPLOAD_TMP_FOLDER = "static/tmp/avatar/"
 AVATAR_UPLOAD_FOLDER = "/app/static/avatar"
 ALLOWED_EXTENSIONS = {"bmp", "png", "jpg", "jpeg"}
 MAX_AVATAR_SIZE = 1 * 1024 * 1024
@@ -46,6 +44,25 @@ login_manager.login_view = "login_index"
 
 # create an alias of login_required decorator
 login_required = login_required
+
+
+def generate_avatar_uri(extension=".jpg"):
+    avatar_hash = os.urandom(16).hex()
+    return os.path.join(avatar_hash[0], avatar_hash[1], avatar_hash + extension)
+
+
+def get_avatar_path(avatar_uri):
+    return os.path.join(AVATAR_UPLOAD_FOLDER, avatar_uri)
+
+
+def save_avatar_blob(avatar_uri, blob):
+    avatar_path = get_avatar_path(avatar_uri)
+    os.makedirs(os.path.dirname(avatar_path), exist_ok=True)
+    with open(avatar_path, "wb") as avatar_file:
+        avatar_file.write(blob)
+
+    return avatar_path
+
 
 # Google auth (https://github.com/code-specialist/flask_google_login/blob/main/app.py)
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
@@ -159,29 +176,53 @@ def user_profile():
 
         if len(first_name) < 1 or len(first_name) > 50:
             flash("Имя должно быть от 1 до 50 символов.", category="error")
-            return render_template("auth/profile.html", user=user, first_name=first_name, last_name=last_name)
-        if not all(c.isalpha() or c in " -'" for c in first_name): 
-            flash("Имя содержит недопустимые символы (только буквы, пробелы, дефисы и апострофы).", category="error")
-            return render_template("auth/profile.html", user=user, first_name=first_name, last_name=last_name)
-        
+            return render_template(
+                "auth/profile.html",
+                user=user,
+                first_name=first_name,
+                last_name=last_name,
+            )
+        if not all(c.isalpha() or c in " -'" for c in first_name):
+            flash(
+                "Имя содержит недопустимые символы (только буквы, пробелы, дефисы и апострофы).",
+                category="error",
+            )
+            return render_template(
+                "auth/profile.html",
+                user=user,
+                first_name=first_name,
+                last_name=last_name,
+            )
+
         if len(last_name) > 50:
             flash("Фамилия должна быть до 50 символов.", category="error")
-            return render_template("auth/profile.html", user=user, first_name=first_name, last_name=last_name)
+            return render_template(
+                "auth/profile.html",
+                user=user,
+                first_name=first_name,
+                last_name=last_name,
+            )
         if last_name and not all(c.isalpha() or c in " -'" for c in last_name):
-            flash("Фамилия содержит недопустимые символы (только буквы, пробелы, дефисы и апострофы).", category="error")
-            return render_template("auth/profile.html", user=user, first_name=first_name, last_name=last_name)
-    
+            flash(
+                "Фамилия содержит недопустимые символы (только буквы, пробелы, дефисы и апострофы).",
+                category="error",
+            )
+            return render_template(
+                "auth/profile.html",
+                user=user,
+                first_name=first_name,
+                last_name=last_name,
+            )
 
         if avatar and avatar.filename:
             avatar.seek(0, os.SEEK_END)
             file_size = avatar.tell()
-            avatar.seek(0) 
-            
+            avatar.seek(0)
+
             if file_size > MAX_AVATAR_SIZE:
                 flash("Размер файла не должен превышать 1 МБ", category="error")
                 return redirect(url_for("user_profile"))
-    
-            
+
             if not allowed_file(avatar.filename):
                 flash("Допустимые форматы: bmp, png, jpg, jpeg", category="error")
                 return render_template(
@@ -191,14 +232,14 @@ def user_profile():
                     last_name=last_name,
                 )
 
-            ext = (
-                os.path.splitext(secure_filename(avatar.filename))[1].lower() or ".jpg"
-            )
-            avatar_uri = os.urandom(16).hex() + ext
-            os.makedirs(AVATAR_UPLOAD_FOLDER, exist_ok=True)
+            ext = os.path.splitext(secure_filename(avatar.filename))[1].lower() or ".jpg"
+            avatar_uri = generate_avatar_uri(ext)
+
             try:
-                logger.info(f"Attempting to save avatar: filename={avatar.filename}, size={file_size}, uri={avatar_uri}")
-                avatar.save(os.path.join(AVATAR_UPLOAD_FOLDER, avatar_uri))
+                logger.info(
+                    f"Attempting to save avatar: filename={avatar.filename}, size={file_size}, uri={avatar_uri}"
+                )
+                save_avatar_blob(avatar_uri, avatar.read())
                 user.avatar_uri = avatar_uri
                 has_updates = True
                 logger.info(f"Avatar uploaded for user {current_user.id}")
@@ -339,18 +380,21 @@ def google_callback():
 
             photo_uri = id_info.get("picture")
             if photo_uri:
-                generated_avatar_uri = os.urandom(16).hex() + ".jpg"
+                generated_avatar_uri = generate_avatar_uri()
                 try:
                     r = requests.get(photo_uri, allow_redirects=True, timeout=10)
                     r.raise_for_status()  # Проверяет HTTP-ошибки (например, 404)
-                    with open(os.path.join(UPLOAD_FOLDER, generated_avatar_uri), "wb") as f:
-                        f.write(r.content)
+                    save_avatar_blob(generated_avatar_uri, r.content)
                     avatar_uri = generated_avatar_uri
                 except requests.RequestException as e:
-                    logger.error(f"Failed to download avatar from Google for user {id_info.get('sub')}: {e}")
+                    logger.error(
+                        f"Failed to download avatar from Google for user {id_info.get('sub')}: {e}"
+                    )
                     avatar_uri = "empty.jpg"  # Дефолтный аватар при ошибке
                 except (IOError, PermissionError) as e:
-                    logger.error(f"Failed to save avatar file for user {id_info.get('sub')}: {e}")
+                    logger.error(
+                        f"Failed to save avatar file for user {id_info.get('sub')}: {e}"
+                    )
                     avatar_uri = "empty.jpg"
 
             f = id_info.get("family_name", "")
@@ -454,12 +498,11 @@ def vk_callback():
 
             photo_uri = vk_user.get("response", [{}])[0].get("photo_100")
             if photo_uri:
-                generated_avatar_uri = os.urandom(16).hex() + ".jpg"
+                generated_avatar_uri = generate_avatar_uri()
                 try:
                     r = requests.get(photo_uri, allow_redirects=True, timeout=10)
                     r.raise_for_status()
-                    with open(os.path.join(UPLOAD_FOLDER, generated_avatar_uri), "wb") as f:
-                        f.write(r.content)
+                    save_avatar_blob(generated_avatar_uri, r.content)
                     avatar_uri = generated_avatar_uri
                 except requests.RequestException as e:
                     logger.error(f"Failed to download avatar from VK for user {vk_id}: {e}")

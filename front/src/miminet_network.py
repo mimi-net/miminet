@@ -19,6 +19,9 @@ import datetime
 from sqlalchemy import not_
 
 
+PREVIEW_IMAGES_ROOT = "static/images/preview"
+
+
 @login_required
 def create_network():
     user = current_user
@@ -292,7 +295,43 @@ def web_network():
 
 
 def generate_image_uri(extension=".png"):
-    return os.urandom(16).hex() + extension
+    image_hash = os.urandom(16).hex()
+    return os.path.join(image_hash[0], image_hash[1], image_hash + extension)
+
+
+def get_preview_image_path(preview_uri):
+    return os.path.join(PREVIEW_IMAGES_ROOT, preview_uri)
+
+
+def save_preview_image(preview_uri, picture_blob):
+    picture_path = get_preview_image_path(preview_uri)
+    os.makedirs(os.path.dirname(picture_path), exist_ok=True)
+
+    with open(picture_path, "wb") as picture_file:
+        picture_file.write(picture_blob)
+
+    return picture_path
+
+
+def remove_preview_image(preview_uri):
+    preview_path = get_preview_image_path(preview_uri)
+    if not os.path.isfile(preview_path):
+        return
+
+    os.unlink(preview_path)
+
+    parent_dir = os.path.dirname(preview_path)
+    for _ in range(2):
+        if parent_dir == PREVIEW_IMAGES_ROOT:
+            break
+
+        try:
+            os.rmdir(parent_dir)
+        except OSError:
+            break
+
+        parent_dir = os.path.dirname(parent_dir)
+
 
 
 # Depricated?
@@ -438,12 +477,12 @@ def upload_network_picture():
         picture_blob_uri = generate_image_uri()
 
         try:
-            open("static/images/preview/" + picture_blob_uri, "wb").write(picture_blob)
+            picture_path = save_preview_image(picture_blob_uri, picture_blob)
         except Exception:
             ret = {"message": "Не могу сохранить PNG"}
             return make_response(jsonify(ret), 400)
 
-        if not check_image_with_pil("static/images/preview/" + picture_blob_uri):
+        if not check_image_with_pil(picture_path):
             ret = {"message": "Это не PNG"}
             return make_response(jsonify(ret), 400)
 
@@ -452,8 +491,7 @@ def upload_network_picture():
             net.preview_uri != "first_network.jpg"
             and net.preview_uri != "switch_and_hub.png"
         ):
-            if os.path.isfile("static/images/preview" + "/" + net.preview_uri):
-                os.unlink("static/images/preview" + "/" + net.preview_uri)
+            remove_preview_image(net.preview_uri)
 
         net.preview_uri = picture_blob_uri
         db.session.commit()
@@ -489,9 +527,11 @@ def copy_network():
 
         new_picture_blob_uri = generate_image_uri()
         try:
+            new_picture_blob_path = get_preview_image_path(new_picture_blob_uri)
+            os.makedirs(os.path.dirname(new_picture_blob_path), exist_ok=True)
             shutil.copy2(
-                "static/images/preview/" + net.preview_uri,
-                "static/images/preview/" + new_picture_blob_uri,
+                get_preview_image_path(net.preview_uri),
+                new_picture_blob_path,
             )
         except Exception:
             ret = {"message": "Не могу сохранить копию PNG"}
