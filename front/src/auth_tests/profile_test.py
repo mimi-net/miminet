@@ -92,13 +92,11 @@ def test_user_profile_post_saves_avatar_and_commits(mocker):
     user_model = mocker.patch("miminet_auth.User")
     user_model.query.filter_by.return_value.first.return_value = user
     mocker.patch("miminet_auth.os.urandom", return_value=b"\x01" * 16)
-    mocker.patch("werkzeug.datastructures.FileStorage.save")
+    mocker.patch("builtins.open", mocker.mock_open())
     makedirs_mock = mocker.patch("miminet_auth.os.makedirs")
     commit_mock = mocker.patch("miminet_auth.db.session.commit")
 
     data = {
-        "first_name": "",
-        "last_name": "",
         "avatar": (io.BytesIO(b"img"), "my-avatar.JPG"),
     }
     with app.test_request_context(
@@ -108,8 +106,8 @@ def test_user_profile_post_saves_avatar_and_commits(mocker):
 
     assert response.status_code == 302
     assert response.location.endswith("/profile")
-    assert user.avatar_uri == ("01" * 16) + ".jpg"
-    makedirs_mock.assert_called_once_with("/app/static/avatar", exist_ok=True)
+    assert user.avatar_uri == f"0/1/{('01' * 16)}.jpg"
+    makedirs_mock.assert_called_once_with("/app/static/avatar/0/1", exist_ok=True)
     commit_mock.assert_called_once()
 
 

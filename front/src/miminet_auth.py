@@ -169,8 +169,16 @@ def user_profile():
     last_name = nick_parts[1] if len(nick_parts) > 1 else ""
 
     if request.method == "POST":
-        last_name = request.form.get("last_name", "").strip()
-        first_name = request.form.get("first_name", "").strip()
+        submitted_first_name = request.form.get("first_name")
+        submitted_last_name = request.form.get("last_name")
+        first_name = (
+            submitted_first_name.strip()
+            if submitted_first_name is not None
+            else first_name
+        )
+        last_name = (
+            submitted_last_name.strip() if submitted_last_name is not None else last_name
+        )
         avatar = request.files.get("avatar")
         has_updates = False
 
@@ -255,8 +263,9 @@ def user_profile():
                     last_name=last_name,
                 )
 
-        if first_name:
-            user.nick = f"{first_name} {last_name}".strip()
+        new_nick = f"{first_name} {last_name}".strip()
+        if new_nick != user.nick:
+            user.nick = new_nick
             has_updates = True
 
         if has_updates:
