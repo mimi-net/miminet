@@ -4,7 +4,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import migrate_avatar_files as script
+import migrate_avatar_files as script  # noqa: E402
 
 
 def test_build_target_rel():
