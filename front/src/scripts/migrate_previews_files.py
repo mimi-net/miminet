@@ -27,7 +27,6 @@ import sys
 from pathlib import Path
 from typing import Any, Optional
 
-
 CURRENT_DIR = Path(__file__).resolve().parent
 SRC_DIR = CURRENT_DIR.parent
 if str(SRC_DIR) not in sys.path:
@@ -53,6 +52,7 @@ def ensure_db_models_loaded():
 
     Network = loaded_network
     db = loaded_db
+
 
 DEFAULT_PREVIEW_ROOT = SRC_DIR / "static" / "images" / "preview"
 SYSTEM_PREVIEWS = {"first_network.jpg", "switch_and_hub.png"}
@@ -101,7 +101,9 @@ def iter_flat_files(source_root: Path):
             yield entry
 
 
-def migrate_files(source_root: Path, preview_root: Path, dry_run: bool) -> tuple[int, int, int]:
+def migrate_files(
+    source_root: Path, preview_root: Path, dry_run: bool
+) -> tuple[int, int, int]:
     moved = 0
     skipped = 0
     errors = 0
@@ -160,7 +162,9 @@ def migrate_db(batch_size: int, dry_run: bool) -> tuple[int, int]:
                 continue
 
             if not is_legacy_flat_preview_uri(preview_uri):
-                print(f"[SKIP] unsupported preview_uri format for network_id={network_id}: {preview_uri}")
+                print(
+                    f"[SKIP] unsupported preview_uri format for network_id={network_id}: {preview_uri}"
+                )
                 skipped += 1
                 continue
 
@@ -189,9 +193,15 @@ def migrate_db(batch_size: int, dry_run: bool) -> tuple[int, int]:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Migrate preview images to hash buckets")
-    parser.add_argument("--dry-run", action="store_true", help="Print actions without changing files/DB")
-    parser.add_argument("--batch-size", type=int, default=1000, help="DB commit batch size")
+    parser = argparse.ArgumentParser(
+        description="Migrate preview images to hash buckets"
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Print actions without changing files/DB"
+    )
+    parser.add_argument(
+        "--batch-size", type=int, default=1000, help="DB commit batch size"
+    )
     parser.add_argument(
         "--preview-root",
         type=Path,
@@ -249,7 +259,9 @@ def main() -> int:
             app = get_app()
         except ModuleNotFoundError as exc:
             print(f"[WARN] Cannot run DB migration without app dependencies: {exc}")
-            print("[WARN] DB step skipped. Install app dependencies (for example: flask) to enable --only-db/update mode")
+            print(
+                "[WARN] DB step skipped. Install app dependencies (for example: flask) to enable --only-db/update mode"
+            )
         else:
             with app.app_context():
                 db_updated, db_skipped = migrate_db(

@@ -18,7 +18,6 @@ from miminet_model import Network, Simulate, db, SimulateLog
 import datetime
 from sqlalchemy import not_
 
-
 PREVIEW_IMAGES_ROOT = "static/images/preview"
 
 
@@ -331,7 +330,6 @@ def remove_preview_image(preview_uri):
             break
 
         parent_dir = os.path.dirname(parent_dir)
-
 
 
 # Depricated?

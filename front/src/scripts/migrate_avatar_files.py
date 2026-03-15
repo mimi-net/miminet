@@ -90,7 +90,9 @@ def iter_flat_files(source_root: Path):
             yield entry
 
 
-def migrate_files(source_root: Path, avatar_root: Path, dry_run: bool) -> tuple[int, int, int]:
+def migrate_files(
+    source_root: Path, avatar_root: Path, dry_run: bool
+) -> tuple[int, int, int]:
     moved = 0
     skipped = 0
     errors = 0
@@ -149,7 +151,9 @@ def migrate_db(batch_size: int, dry_run: bool) -> tuple[int, int]:
                 continue
 
             if not is_legacy_flat_avatar_uri(avatar_uri):
-                print(f"[SKIP] unsupported avatar_uri format for user_id={user_id}: {avatar_uri}")
+                print(
+                    f"[SKIP] unsupported avatar_uri format for user_id={user_id}: {avatar_uri}"
+                )
                 skipped += 1
                 continue
 
@@ -178,9 +182,15 @@ def migrate_db(batch_size: int, dry_run: bool) -> tuple[int, int]:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Migrate avatar images to hash buckets")
-    parser.add_argument("--dry-run", action="store_true", help="Print actions without changing files/DB")
-    parser.add_argument("--batch-size", type=int, default=1000, help="DB commit batch size")
+    parser = argparse.ArgumentParser(
+        description="Migrate avatar images to hash buckets"
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Print actions without changing files/DB"
+    )
+    parser.add_argument(
+        "--batch-size", type=int, default=1000, help="DB commit batch size"
+    )
     parser.add_argument(
         "--avatar-root",
         type=Path,
@@ -238,7 +248,9 @@ def main() -> int:
             app = get_app()
         except ModuleNotFoundError as exc:
             print(f"[WARN] Cannot run DB migration without app dependencies: {exc}")
-            print("[WARN] DB step skipped. Install app dependencies (for example: flask) to enable --only-db/update mode")
+            print(
+                "[WARN] DB step skipped. Install app dependencies (for example: flask) to enable --only-db/update mode"
+            )
         else:
             with app.app_context():
                 db_updated, db_skipped = migrate_db(

@@ -232,7 +232,9 @@ def user_profile():
                     last_name=last_name,
                 )
 
-            ext = os.path.splitext(secure_filename(avatar.filename))[1].lower() or ".jpg"
+            ext = (
+                os.path.splitext(secure_filename(avatar.filename))[1].lower() or ".jpg"
+            )
             avatar_uri = generate_avatar_uri(ext)
 
             try:
@@ -505,7 +507,9 @@ def vk_callback():
                     save_avatar_blob(generated_avatar_uri, r.content)
                     avatar_uri = generated_avatar_uri
                 except requests.RequestException as e:
-                    logger.error(f"Failed to download avatar from VK for user {vk_id}: {e}")
+                    logger.error(
+                        f"Failed to download avatar from VK for user {vk_id}: {e}"
+                    )
                     avatar_uri = "empty.jpg"
                 except (IOError, PermissionError) as e:
                     logger.error(f"Failed to save avatar file for user {vk_id}: {e}")

@@ -115,12 +115,16 @@ def test_main_dry_run_skips_db_if_app_deps_missing(tmp_path, mocker):
     root.mkdir()
     (root / "ab123.jpg").write_bytes(b"1")
 
-    mocker.patch.object(sys, "argv", [
-        "migrate_avatar_images.py",
-        "--dry-run",
-        "--avatar-root",
-        str(root),
-    ])
+    mocker.patch.object(
+        sys,
+        "argv",
+        [
+            "migrate_avatar_images.py",
+            "--dry-run",
+            "--avatar-root",
+            str(root),
+        ],
+    )
     mocker.patch.object(script, "get_app", side_effect=ModuleNotFoundError("flask"))
 
     assert script.main() == 0
@@ -131,12 +135,16 @@ def test_main_non_dry_run_skips_db_if_app_deps_missing(tmp_path, mocker):
     root.mkdir()
     (root / "ab123.jpg").write_bytes(b"1")
 
-    mocker.patch.object(sys, "argv", [
-        "migrate_avatar_images.py",
-        "--avatar-root",
-        str(root),
-        "--only-db",
-    ])
+    mocker.patch.object(
+        sys,
+        "argv",
+        [
+            "migrate_avatar_images.py",
+            "--avatar-root",
+            str(root),
+            "--only-db",
+        ],
+    )
     mocker.patch.object(script, "get_app", side_effect=ModuleNotFoundError("flask"))
 
     assert script.main() == 0
