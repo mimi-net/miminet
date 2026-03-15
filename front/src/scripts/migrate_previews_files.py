@@ -25,6 +25,7 @@ import hashlib
 import shutil
 import sys
 from pathlib import Path
+from typing import Any, Optional
 
 
 CURRENT_DIR = Path(__file__).resolve().parent
@@ -32,8 +33,8 @@ SRC_DIR = CURRENT_DIR.parent
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-Network = None
-db = None
+Network: Optional[Any] = None
+db: Optional[Any] = None
 
 
 def get_app():
@@ -139,6 +140,9 @@ def migrate_files(source_root: Path, preview_root: Path, dry_run: bool) -> tuple
 
 def migrate_db(batch_size: int, dry_run: bool) -> tuple[int, int]:
     ensure_db_models_loaded()
+
+    if Network is None or db is None:
+        raise RuntimeError("DB models not loaded")
 
     updated = 0
     skipped = 0
