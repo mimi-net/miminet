@@ -177,7 +177,9 @@ def user_profile():
             else first_name
         )
         last_name = (
-            submitted_last_name.strip() if submitted_last_name is not None else last_name
+            submitted_last_name.strip()
+            if submitted_last_name is not None
+            else last_name
         )
         avatar = request.files.get("avatar")
         has_updates = False
