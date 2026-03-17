@@ -960,6 +960,44 @@ const prepareStylesheet = function() {
     return sheet;
   };
 
+const SnapNodesToGrid = function(cy_instance) {
+    if (!cy_instance) return;
+
+    let anyMoved = false;
+    const baseGridSize = 25;
+
+    cy_instance.nodes().each(function(ele) {
+        if (!ele.isNode()) return;
+
+        const pos = ele.position();
+        
+        // Calculate snapped position
+        const newX = Math.round(pos.x / baseGridSize) * baseGridSize;
+        const newY = Math.round(pos.y / baseGridSize) * baseGridSize;
+        
+        // If coordinate differs significantly (float error)
+        if (Math.abs(newX - pos.x) > 0.5 || Math.abs(newY - pos.y) > 0.5) {
+            
+            // Move cy node
+            ele.position({x: newX, y: newY});
+            
+            // Update global nodes array
+            if (typeof nodes !== 'undefined') {
+                 let n = nodes.find(n => n.data.id === ele.id());
+                 if (n) {
+                     n.position.x = newX;
+                     n.position.y = newY;
+                     anyMoved = true;
+                 }
+            }
+        }
+    });
+
+    if (anyMoved) {
+        MoveNodes();
+    }
+}
+
 const DrawGraph = function() {
 
     // Do we already have one?
@@ -1023,6 +1061,9 @@ const DrawGraph = function() {
 
     cy.add(nodes);
     cy.add(edges);
+
+    // Auto-snap existing network nodes on load
+    SnapNodesToGrid(cy);
 
     // Changing zoom
     cy.on('zoom', function(evt){
@@ -2729,55 +2770,61 @@ const DeleteAndSaveJob = function(deviceType, updateFunction, formData, deviceId
 const initGrid = function(cy) {
     if (!cy) return;
 
+    // Clean up previous listener
+    if (typeof gridCanvasLayer !== 'undefined' && gridCanvasLayer && gridCanvasLayer.resizeAndDrawCanvas) {
+        window.removeEventListener('resize', gridCanvasLayer.resizeAndDrawCanvas);
+    }
+
     // Remove old grid canvas if exists
     const oldCanvas = document.getElementById('grid-canvas-static');
     if (oldCanvas) {
         oldCanvas.remove();
-        console.log('[GRID] Removed old canvas');
     }
 
-    // Create canvas with FIXED position (completely independent of page scroll/transforms)
+    // Create canvas with absolute positioning to overlay on top of cytoscape container
     const canvas = document.createElement('canvas');
     canvas.id = 'grid-canvas-static';
-    canvas.style.position = 'fixed';
+    canvas.style.position = 'absolute';
     canvas.style.top = '0';
     canvas.style.left = '0';
-    canvas.style.width = '100vw';
-    canvas.style.height = '100vh';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
     canvas.style.pointerEvents = 'none';
-    canvas.style.zIndex = '1';
 
-    document.body.appendChild(canvas);
+    const container = cy.container();
+    container.insertBefore(canvas, container.firstChild);
 
     const ctx = canvas.getContext('2d');
 
     const resizeAndDrawCanvas = function() {
         const pixelRatio = window.devicePixelRatio || 1;
         
-        // Canvas always full viewport with position: fixed
-        canvas.width = window.innerWidth * pixelRatio;
-        canvas.height = window.innerHeight * pixelRatio;
+        // Use container dimensions instead of window dimensions to prevent distortion
+        // when container is not full screen
+        canvas.width = container.clientWidth * pixelRatio;
+        canvas.height = container.clientHeight * pixelRatio;
 
-        console.log('[GRID] Canvas sized to viewport:', canvas.width, 'x', canvas.height, 'ratio:', pixelRatio);
-        
         // Always redraw when resizing
         if (gridCanvasLayer) {
             drawGrid();
         }
     };
-    
-    // Store references
+
     gridCanvasLayer = {
         canvas: canvas,
         ctx: ctx,
         resizeAndDrawCanvas: resizeAndDrawCanvas
     };
-    
-    console.log('[GRID] Canvas element:', canvas);
-    console.log('[GRID] Canvas computed style:', window.getComputedStyle(canvas).position);
-    
-    // Initial resize and draw
+
     resizeAndDrawCanvas();
+
+    // Add event listener for resize
+    window.addEventListener('resize', resizeAndDrawCanvas);
+
+    // Add cy resize listener to handle container resizing specifically
+    if (cy) {
+        cy.on('resize', resizeAndDrawCanvas);
+    }
 
     // Initialize current zoom from cytoscape
     if (cy && cy.zoom) {
@@ -2785,13 +2832,11 @@ const initGrid = function(cy) {
     }
 
     // Draw grid
-    console.log('[GRID] Drawing initial FIXED grid with zoom:', currentGridZoom);
     drawGrid();
 };
 
 const drawGrid = function() {
     if (!gridCanvasLayer) {
-        console.warn('[GRID] gridCanvasLayer not initialized');
         return;
     }
 
@@ -2799,11 +2844,8 @@ const drawGrid = function() {
     const ctx = gridCanvasLayer.ctx;
 
     if (!canvas || !ctx) {
-        console.warn('[GRID] canvas or ctx not found');
         return;
     }
-
-    console.log('[GRID] drawGrid called, gridEnabled:', gridEnabled, 'currentGridZoom:', currentGridZoom);
 
     // Scale grid with zoom: at max zoom (2.0) = 50px like before, at min zoom (0.5) = small cells
     const gridSize = 25 * currentGridZoom; // 25 * 2.0 = 50px (max zoom), 25 * 0.5 = 12.5px (min zoom)
@@ -2826,7 +2868,6 @@ const drawGrid = function() {
     ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
 
     // Draw grid lines across entire viewport
-    // Side panels will cover grid with their white backgrounds (z-index: 10 > grid z-index: 1)
     ctx.strokeStyle = 'rgba(200, 200, 200, 0.4)';
     ctx.lineWidth = 1;
 
