@@ -12,6 +12,10 @@ let packetFilterState = {
     hideSYN: false,
 };
 
+let gridCanvasLayer = undefined;
+let gridEnabled = true;
+let currentGridZoom = 1.0;
+
 const uid = function(){
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
@@ -956,6 +960,44 @@ const prepareStylesheet = function() {
     return sheet;
   };
 
+const SnapNodesToGrid = function(cy_instance) {
+    if (!cy_instance) return;
+
+    let anyMoved = false;
+    const baseGridSize = 25;
+
+    cy_instance.nodes().each(function(ele) {
+        if (!ele.isNode()) return;
+
+        const pos = ele.position();
+        
+        // Calculate snapped position
+        const newX = Math.round(pos.x / baseGridSize) * baseGridSize;
+        const newY = Math.round(pos.y / baseGridSize) * baseGridSize;
+        
+        // If coordinate differs significantly (float error)
+        if (Math.abs(newX - pos.x) > 0.5 || Math.abs(newY - pos.y) > 0.5) {
+            
+            // Move cy node
+            ele.position({x: newX, y: newY});
+            
+            // Update global nodes array
+            if (typeof nodes !== 'undefined') {
+                 let n = nodes.find(n => n.data.id === ele.id());
+                 if (n) {
+                     n.position.x = newX;
+                     n.position.y = newY;
+                     anyMoved = true;
+                 }
+            }
+        }
+    });
+
+    if (anyMoved) {
+        MoveNodes();
+    }
+}
+
 const DrawGraph = function() {
 
     // Do we already have one?
@@ -1005,7 +1047,7 @@ const DrawGraph = function() {
         },
 
         hoverDelay: 150, // time spent hovering over a target node before it is considered selected
-        snap: true, // when enabled, the edge can be drawn by just moving close to a target node (can be confusing on compound graphs)
+        snap: false, // when enabled, the edge can be drawn by just moving close to a target node (can be confusing on compound graphs)
         snapThreshold: 50, // the target node must be less than or equal to this many pixels away from the cursor/finger
         snapFrequency: 15, // the number of times per second (Hz) that snap checks done (lower is less expensive)
         noEdgeEventsInDraw: true, // set events:no to edges during draws, prevents mouseouts on compounds
@@ -1020,6 +1062,9 @@ const DrawGraph = function() {
     cy.add(nodes);
     cy.add(edges);
 
+    // Auto-snap existing network nodes on load
+    SnapNodesToGrid(cy);
+
     // Changing zoom
     cy.on('zoom', function(evt){
 
@@ -1029,6 +1074,12 @@ const DrawGraph = function() {
         }
 
         NetworkUpdateTimeoutId = setTimeout(UpdateNetworkConfig, 2000);
+        
+        // Update grid zoom and redraw
+        if (gridCanvasLayer) {
+            currentGridZoom = cy.zoom();
+            drawGrid();
+        }
     });
 
     // Changing the pan
@@ -1040,6 +1091,11 @@ const DrawGraph = function() {
         }
 
         NetworkUpdateTimeoutId = setTimeout(UpdateNetworkConfig, 2000);
+        
+        // Update grid when panning to keep it aligned with nodes
+        if (gridCanvasLayer) {
+            drawGrid();
+        }
     });
 
     // Looking for a position changing
@@ -1052,8 +1108,25 @@ const DrawGraph = function() {
             return;
         }
 
-        n.position.x = this.position().x;
-        n.position.y = this.position().y;
+        // Get current position
+        let posX = this.position().x;
+        let posY = this.position().y;
+
+        // Snap to grid (like draw.io)
+        const baseGridSize = 25;
+        
+        // Snap position to nearest grid intersection
+        posX = Math.round(posX / baseGridSize) * baseGridSize;
+        posY = Math.round(posY / baseGridSize) * baseGridSize;
+        
+        // Apply snapped position back to node
+        this.position({
+            x: posX,
+            y: posY
+        });
+
+        n.position.x = posX;
+        n.position.y = posY;
 
         MoveNodes();
         TakeGraphPictureAndUpdate();
@@ -1193,6 +1266,9 @@ const DrawGraph = function() {
         }
 
     });
+    
+    // Initialize grid
+    initGrid(cy);
 }
 
 const DrawGraphStatic = function(nodes, edges, shared=0) {
@@ -1235,6 +1311,10 @@ const DrawGraphStatic = function(nodes, edges, shared=0) {
     cy.add(nodes);
     cy.add(edges);
     cy.nodes().ungrabify();
+    
+    // Initialize grid
+    initGrid(cy);
+    
     return;
 }
 
@@ -1312,6 +1392,9 @@ const DrawSharedGraph = function(nodes, edges) {
             ShowServerConfig(n, shared=1);
         }
     });
+    
+    // Initialize grid
+    initGrid(cy);
 }
 
 const DrawIndexGraphStatic = function(nodes, edges, container_id, graph_network_zoom,
@@ -2458,6 +2541,11 @@ const CalculateDropOffset = function(elem_x, elem_y)
 
         ret.x = (elem_x - ret.x) / global_cy.zoom();
         ret.y = (elem_y - ret.y) / global_cy.zoom();
+        
+        // Apply snap-to-grid
+        const baseGridSize = 25;
+        ret.x = Math.round(ret.x / baseGridSize) * baseGridSize;
+        ret.y = Math.round(ret.y / baseGridSize) * baseGridSize;
     }
 
     return ret;
@@ -2682,3 +2770,147 @@ const DeleteAndSaveJob = function(deviceType, updateFunction, formData, deviceId
 
     updateFunction(formData, deviceId);
 };
+
+// Grid drawing functions
+const initGrid = function(cy) {
+    if (!cy) return;
+
+    // Clean up previous listener
+    if (typeof gridCanvasLayer !== 'undefined' && gridCanvasLayer && gridCanvasLayer.resizeAndDrawCanvas) {
+        window.removeEventListener('resize', gridCanvasLayer.resizeAndDrawCanvas);
+    }
+
+    // Remove old grid canvas if exists
+    const oldCanvas = document.getElementById('grid-canvas-static');
+    if (oldCanvas) {
+        oldCanvas.remove();
+    }
+
+    // Create canvas with absolute positioning to overlay on top of cytoscape container
+    const canvas = document.createElement('canvas');
+    canvas.id = 'grid-canvas-static';
+    canvas.style.position = 'absolute';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.pointerEvents = 'none';
+
+    const container = cy.container();
+    container.insertBefore(canvas, container.firstChild);
+
+    const ctx = canvas.getContext('2d');
+
+    const resizeAndDrawCanvas = function() {
+        const pixelRatio = window.devicePixelRatio || 1;
+        
+        // Use container dimensions instead of window dimensions to prevent distortion
+        // when container is not full screen
+        canvas.width = container.clientWidth * pixelRatio;
+        canvas.height = container.clientHeight * pixelRatio;
+
+        // Always redraw when resizing
+        if (gridCanvasLayer) {
+            drawGrid();
+        }
+    };
+
+    gridCanvasLayer = {
+        canvas: canvas,
+        ctx: ctx,
+        resizeAndDrawCanvas: resizeAndDrawCanvas
+    };
+
+    resizeAndDrawCanvas();
+
+    // Add event listener for resize
+    window.addEventListener('resize', resizeAndDrawCanvas);
+
+    // Add cy resize listener to handle container resizing specifically
+    if (cy) {
+        cy.on('resize', resizeAndDrawCanvas);
+    }
+
+    // Initialize current zoom from cytoscape
+    if (cy && cy.zoom) {
+        currentGridZoom = cy.zoom();
+    }
+
+    // Draw grid
+    drawGrid();
+};
+
+const drawGrid = function() {
+    if (!gridCanvasLayer) {
+        return;
+    }
+
+    const canvas = gridCanvasLayer.canvas;
+    const ctx = gridCanvasLayer.ctx;
+
+    if (!canvas || !ctx) {
+        return;
+    }
+
+    // Scale grid with zoom: at max zoom (2.0) = 50px like before, at min zoom (0.5) = small cells
+    const gridSize = 25 * currentGridZoom; // 25 * 2.0 = 50px (max zoom), 25 * 0.5 = 12.5px (min zoom)
+    const pixelRatio = window.devicePixelRatio || 1;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const screenWidth = canvas.width / pixelRatio;
+    const screenHeight = canvas.height / pixelRatio;
+
+    // Get pan offset to align grid with cytoscape coordinate system
+    let panX = 0;
+    let panY = 0;
+    if (global_cy && global_cy.pan) {
+        const pan = global_cy.pan();
+        panX = pan.x;
+        panY = pan.y;
+    }
+
+    ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+
+    // Draw grid lines across entire viewport
+    ctx.strokeStyle = 'rgba(200, 200, 200, 0.4)';
+    ctx.lineWidth = 1;
+
+    ctx.beginPath();
+
+    // Calculate grid origin with pan offset
+    // Grid should be offset by pan to stay aligned with nodes
+    const gridOriginX = panX % gridSize;
+    const gridOriginY = panY % gridSize;
+
+    // Vertical lines across entire viewport
+    let verticalCount = 0;
+    const startX = Math.floor(-gridOriginX / gridSize) * gridSize + gridOriginX;
+    for (let x = startX; x <= screenWidth; x += gridSize) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, screenHeight);
+        verticalCount++;
+    }
+
+    // Horizontal lines across entire viewport
+    let horizontalCount = 0;
+    const startY = Math.floor(-gridOriginY / gridSize) * gridSize + gridOriginY;
+    for (let y = startY; y <= screenHeight; y += gridSize) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(screenWidth, y);
+        horizontalCount++;
+    }
+
+    ctx.stroke();
+};
+
+
+// Update grid when config panel opens/closes
+const updateGridForConfigPanel = function() {
+    if (gridCanvasLayer && gridCanvasLayer.resizeAndDrawCanvas) {
+        // Small delay to let DOM update
+        setTimeout(function() {
+            gridCanvasLayer.resizeAndDrawCanvas();
+        }, 50);
+    }
+}

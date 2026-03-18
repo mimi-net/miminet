@@ -272,6 +272,7 @@ a.lastResult {
 .col-6.text-center.border > div {
     max-height: 282px;
     overflow-y: auto;
+}
 
 /* Edit mode styles */
 .editing-command {
