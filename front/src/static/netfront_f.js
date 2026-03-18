@@ -1188,6 +1188,11 @@ const DrawGraph = function() {
 
     $(document).on('keyup', function(e){
 
+        const evtTarget = e.target;
+        if (evtTarget && evtTarget.form) {
+            return;
+        }
+
         if (e.keyCode == 46 && selecteed_node_id) {
 
             // Save the network state.
