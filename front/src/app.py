@@ -319,17 +319,17 @@ app.register_blueprint(image_routes)
 # Init Flask-admin
 admin = Admin(
     app,
-    index_view=MiminetAdminIndexView(),
+    index_view=MiminetAdminIndexView(name="Обзор"),
     name="Miminet Admin",
 )
 
 
-admin.add_view(TestView(Test, db.session))
-admin.add_view(SectionView(Section, db.session))
-admin.add_view(QuestionView(Question, db.session))
-admin.add_view(AnswerView(Answer, db.session))
-admin.add_view(QuestionCategoryView(QuestionCategory, db.session))
-admin.add_view(SessionQuestionView(SessionQuestion, db.session))
+admin.add_view(TestView(Test, db.session, name="Тесты"))
+admin.add_view(SectionView(Section, db.session, name="Разделы"))
+admin.add_view(QuestionView(Question, db.session, name="Задания"))
+admin.add_view(AnswerView(Answer, db.session, name="Варианты"))
+admin.add_view(QuestionCategoryView(QuestionCategory, db.session, name="Категории"))
+admin.add_view(SessionQuestionView(SessionQuestion, db.session, name="Решения"))
 admin.add_view(
     CreateCheckTaskView(
         Network,

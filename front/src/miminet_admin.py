@@ -11,6 +11,7 @@ from flask_admin.model import typefmt
 from flask_admin.actions import action
 from flask_login import current_user
 from markupsafe import Markup
+from sqlalchemy.orm import selectinload
 from wtforms import (
     SelectField,
     TextAreaField,
@@ -32,14 +33,92 @@ from quiz.entity.entity import (
     QuestionCategory,
     SessionQuestion,
 )
+from quiz.util.dto import calculate_question_count
 
 ADMIN_ROLE_LEVEL = 1
+
+
+def _pluralize_ru(value, forms):
+    remainder_hundred = value % 100
+    remainder_ten = value % 10
+
+    if 11 <= remainder_hundred <= 14:
+        return forms[2]
+    if remainder_ten == 1:
+        return forms[0]
+    if 2 <= remainder_ten <= 4:
+        return forms[1]
+    return forms[2]
+
+
+def _format_count(value, forms):
+    return f"{value} {_pluralize_ru(value, forms)}"
+
+
+def _build_test_cards(tests):
+    cards = []
+
+    for test in tests:
+        sections = [section for section in test.sections if not section.is_deleted]
+        question_count = sum(calculate_question_count(section) for section in sections)
+        finished_sessions = sum(
+            1
+            for section in sections
+            for session in section.quiz_sessions
+            if not session.is_deleted and session.finished_at is not None
+        )
+        preview_sections = sections[:3]
+
+        cards.append(
+            {
+                "name": test.name,
+                "description": test.description,
+                "status_label": (
+                    "Опубликован" if test.is_ready else "Черновик"
+                ),
+                "retakeable_label": (
+                    "Можно перепроходить"
+                    if test.is_retakeable
+                    else "Одна попытка на раздел"
+                ),
+                "section_label": _format_count(
+                    len(sections), ('раздел', 'раздела', 'разделов')
+                ),
+                "question_label": _format_count(
+                    question_count, ('задание', 'задания', 'заданий')
+                ),
+                "attempts_label": _format_count(
+                    finished_sessions,
+                    (
+                        'завершенное прохождение',
+                        'завершенных прохождения',
+                        'завершенных прохождений',
+                    ),
+                ),
+                "section_names": [section.name for section in preview_sections],
+                "hidden_section_count": max(len(sections) - len(preview_sections), 0),
+            }
+        )
+
+    return cards
 
 
 class MiminetAdminIndexView(AdminIndexView):
     @expose("/")
     def index(self):
-        return self.render("admin/index.html")
+        tests = (
+            Test.query.filter(
+                Test.created_by_id == current_user.id,
+                Test.is_deleted.is_(False),
+            )
+            .options(
+                selectinload(Test.sections).selectinload(Section.quiz_sessions),
+                selectinload(Test.sections).selectinload(Section.questions),
+            )
+            .order_by(Test.created_on.desc())
+            .all()
+        )
+        return self.render("admin/index.html", test_cards=_build_test_cards(tests))
 
     def is_accessible(self):
         if current_user.is_authenticated:
