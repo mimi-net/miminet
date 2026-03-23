@@ -17,6 +17,7 @@ from flask_login import (
     login_user,
     logout_user,
 )
+from flask_jwt_extended import create_access_token, create_refresh_token, set_access_cookies, set_refresh_cookies, unset_jwt_cookies
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from requests_oauthlib import OAuth2Session
@@ -113,10 +114,19 @@ def allowed_file(filename):
 
 
 def login_index():
-    if current_user.is_authenticated:
-        return redirect(url_for("user_profile"))
-
     next_url = request.args.get("next")
+
+    if current_user.is_authenticated:
+        access_token = create_access_token(identity=str(current_user.id))
+        refresh_token = create_refresh_token(identity=str(current_user.id))
+
+        if next_url:
+            response = redirect_next_url(fallback=next_url)
+        else:
+            response = redirect_next_url(fallback=url_for('home'))
+        set_access_cookies(response, access_token)
+        set_refresh_cookies(response, refresh_token)
+        return response
 
     if next_url:
         session["next_url"] = next_url
@@ -206,7 +216,9 @@ def password_recovery():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for("index"))
+    response = redirect(url_for("index"))
+    unset_jwt_cookies(response)
+    return response
 
 
 def google_login():
@@ -394,6 +406,14 @@ def vk_callback():
         user = User.query.filter_by(vk_id=vk_id).first()
 
     login_user(user, remember=True)
+    access_token = create_access_token(identity=str(user.id))
+    refresh_token = create_refresh_token(identity=str(user.id))
+
+    response = redirect_next_url(fallback=url_for("home"))
+    set_access_cookies(response, access_token)
+    set_refresh_cookies(response, refresh_token)
+
+    print(f"access_token: {access_token}; refresh_token: {refresh_token}")
 
     if user_is_new:
         u = uuid.uuid4()
@@ -407,7 +427,7 @@ def vk_callback():
         db.session.add(n)
         db.session.commit()
 
-    return redirect_next_url(fallback=url_for("home"))
+    return response
 
 
 def yandex_login(yandex_json=yandex_json):

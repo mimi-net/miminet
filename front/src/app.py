@@ -1,12 +1,15 @@
 import sys
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
-from flask import Flask, make_response, render_template
+from flask import Flask, make_response, render_template, Response, jsonify, render_template_string, request, url_for, \
+    redirect
 from flask_admin import Admin
+from flask_cors import CORS
 from flask_login import current_user, login_required
 from flask_migrate import Migrate
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token, create_refresh_token, set_access_cookies, set_refresh_cookies, verify_jwt_in_request
 
 from miminet_admin import (
     MiminetAdminIndexView,
@@ -44,7 +47,7 @@ from miminet_host import (
     save_switch_config,
     save_edge_config,
 )
-from miminet_model import Network, db, init_db
+from miminet_model import Network, db, init_db, User
 from miminet_network import (
     copy_network,
     create_network,
@@ -101,12 +104,39 @@ app = Flask(
     __name__, static_url_path="", static_folder="static", template_folder="templates"
 )
 
+app.config.update(
+    JWT_SECRET_KEY=os.environ.get('JWT_SECRET_KEY', "secret-key"),
+    JWT_TOKEN_LOCATION = ['cookies'],
+    JWT_COOKIE_DOMAIN = '.local.tst',
+    JWT_COOKIE_SECURE = False,#True,
+    JWT_COOKIE_CSRF_PROTECT = False,
+    JWT_COOKIE_SAMESITE = None,
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=3),
+    JWT_REFRESH_TOKEN_EXPIRES = timedelta(minutes=30)
+)
+
+CORS(app,
+     resources={
+         r"/*": {
+             "origins": ["http://quiz.local.tst", "http://local.tst"],
+             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+             "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"],
+             "supports_credentials": True,
+             "max_age": 3600
+         }
+     },
+     intercept_exceptions=False
+)
+
 # SQLAlchimy config
 load_dotenv()
 
 # Получаем режим работы из переменных окружения
 MODE = os.getenv("MODE", "dev")
 
+PUBLIC_CONFIG_KEYS = [
+    'EXTERNAL_BASE_URL',
+]
 
 def get_database_uri(mode):
     """
@@ -168,6 +198,7 @@ migrate = Migrate(app, db)
 
 # Init LoginManager
 login_manager.init_app(app)
+jwt = JWTManager(app)
 
 # Init Sitemap
 zero_days_ago = (datetime.now()).date().isoformat()
@@ -230,7 +261,6 @@ app.add_url_rule(
 app.add_url_rule(
     "/host/server_save_config", methods=["GET", "POST"], view_func=save_server_config
 )
-app.add_url_rule("/host/delete_job", methods=["GET", "POST"], view_func=delete_job)
 app.add_url_rule(
     "/host/hub_save_config", methods=["GET", "POST"], view_func=save_hub_config
 )
@@ -240,6 +270,7 @@ app.add_url_rule(
 app.add_url_rule(
     "/edge/save_config", methods=["GET", "POST"], view_func=save_edge_config
 )
+app.add_url_rule("/host/delete_job", methods=["GET", "POST"], view_func=delete_job)
 
 # MimiShark
 app.add_url_rule("/host/mimishark", methods=["GET"], view_func=mimishark_page)
@@ -338,6 +369,68 @@ admin.add_view(
     )
 )
 
+def is_api_request():
+    if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
+        return True
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return True
+    if request.content_type and 'application/json' in request.content_type:
+        return True
+    return False
+
+@jwt.expired_token_loader
+def expired_token_callback(jwt_header, jwt_payload):
+    if is_api_request():
+        return jsonify({"msg": "Token expired"}), 401
+    else:
+        return redirect(url_for("login_index", next=request.url))
+
+@jwt.invalid_token_loader
+def invalid_token_callback(error):
+    if is_api_request():
+        return jsonify({"msg": "Invalid token"}), 422
+    else:
+        return redirect(url_for("login_index", next=request.url))
+
+@jwt.unauthorized_loader
+def missing_token_callback(error):
+    if is_api_request():
+        return jsonify({"msg": "Missing token"}), 401
+    else:
+        return redirect(url_for("login_index", next=request.url))
+
+# @app.context_processor
+# def inject_user():
+#     try:
+#         verify_jwt_in_request()
+#         current_user_id = get_jwt_identity()
+#         user = User.query.filter(User.id == current_user_id).first()
+#         return dict(current_user_id=current_user_id, is_authenticated=True, user=user)
+#     except:
+#         return dict(current_user_id=None, is_authenticated=False, user=None)
+
+@app.route("/config.js")
+def confing_js():
+    config = {key: os.getenv(key) for key in PUBLIC_CONFIG_KEYS if os.getenv(key)}
+
+    js_content = render_template_string(
+        open('templates/config.js', 'r', encoding='utf-8').read(),
+        **config
+    )
+
+    return Response(js_content, mimetype='application/javascript')
+
+@app.route('/refresh_access', methods=['POST', 'GET'])
+@jwt_required(refresh=True)
+def refresh_access():
+    identity = get_jwt_identity()
+    access_token = create_access_token(identity=identity)
+    refresh_token = create_refresh_token(identity=identity)
+
+    response = jsonify({'msg': 'access token refreshed'})
+    set_access_cookies(response, access_token)
+    set_refresh_cookies(response, refresh_token)
+    return response
 
 @app.route("/")
 def index():  # put application's code here

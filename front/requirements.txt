@@ -52,3 +52,5 @@ wtforms==3.2.1
 jsonschema==4.25.1
 Flask-Admin==2.0.1
 psycopg2-binary==2.9.10
+flask_jwt_extended==4.7.1
+flask_cors==6.0.2

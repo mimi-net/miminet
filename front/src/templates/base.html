@@ -473,8 +473,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 {% block network %}
 {% endblock %}
 
-<script src="{{ url_for('static', filename='netfront.js') }}"></script>
+<script src="{{ url_for('static', filename='jwt_auth.js') }}"></script>
 <script src="{{ url_for('static', filename='config.js') }}"></script>
+<script src="{{ url_for('static', filename='netfront.js') }}"></script>
+<script src="{{ url_for('static', filename='config_devices.js') }}"></script>
 <script src="{{ url_for('static', filename='config_vlan.js') }}"></script>
 <script src="{{ url_for('static', filename='config_vxlan.js') }}"></script>
 <script src="{{ url_for('static', filename='config_stp.js') }}"></script>

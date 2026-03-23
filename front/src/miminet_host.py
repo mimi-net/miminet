@@ -5,6 +5,7 @@ import shlex
 from typing import List, Dict
 
 from flask import jsonify, make_response, request, Response
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_login import current_user, login_required
 from miminet_model import Network, Simulate, db
 from configurators import (
@@ -498,37 +499,37 @@ start_dhcp_server.add_param(
 # ------ request handlers ------
 
 
-@login_required
+@jwt_required()
 def save_hub_config():
     return hub.configure()
 
 
-@login_required
+@jwt_required()
 def save_switch_config():
     return switch.configure()
 
 
-@login_required
+@jwt_required()
 def save_host_config():
     return host.configure()
 
 
-@login_required
+@jwt_required()
 def save_router_config():
     return router.configure()
 
 
-@login_required
+@jwt_required()
 def save_server_config():
     return server.configure()
 
 
-@login_required
+@jwt_required()
 def save_edge_config():
     return edge.configure()
 
 
-@login_required
+@jwt_required()
 def delete_job():
     """
     Called when job is removed for an network device
@@ -537,7 +538,7 @@ def delete_job():
     def build_response(msg: str) -> Response:
         return make_response(jsonify({"message": msg}), 400)
 
-    user = current_user
+    user_id = get_jwt_identity()
     network_guid = get_data("guid")
     job_id = get_data("id")
 
@@ -549,7 +550,7 @@ def delete_job():
 
     cur_network: Network = (
         Network.query.filter(Network.guid == network_guid)
-        .filter(Network.author_id == user.id)
+        .filter(Network.author_id == user_id)
         .first()
     )
 

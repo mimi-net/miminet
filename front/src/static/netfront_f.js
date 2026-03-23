@@ -473,9 +473,9 @@ const InterfaceUid = function(){
 }
 
 const PostNodesEdges = function(){
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/post_nodes_edges?guid=' + network_guid,
+        url: ExternalUrlFor('/post_nodes_edges?guid=' + network_guid),
         data: JSON.stringify([nodes, edges, jobs]),
         success: function(data) {},
         error: function(err) {console.log('Cannot post edges to server')},
@@ -711,9 +711,9 @@ const DeleteEdge = function (edge_id) {
 }
 
 const PostNodes = function(){
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/post_network_nodes?guid=' + network_guid,
+        url: ExternalUrlFor('/post_network_nodes?guid=' + network_guid),
         data: JSON.stringify(nodes),
         success: function(data) {},
         error: function(err) {console.log('Cannot post nodes to server')},
@@ -724,9 +724,9 @@ const PostNodes = function(){
 
 const MoveNodes = function(){
 
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/move_network_nodes?guid=' + network_guid,
+        url: ExternalUrlFor('/move_network_nodes?guid=' + network_guid),
         data: JSON.stringify(nodes),
         success: function(data) {},
         error: function(err) {console.log('Cannot post nodes to server')},
@@ -1343,9 +1343,9 @@ const DrawIndexGraphStatic = function(nodes, edges, container_id, graph_network_
 // Check whether simulation is over and we can run packets
 const CheckSimulation = function (simulation_id)
 {
-    $.ajax({
+    ajaxWithAuth({
         type: 'GET',
-        url: '/check_simulation?simulation_id=' + simulation_id + '&network_guid=' + network_guid,
+        url: ExternalUrlFor('/check_simulation?simulation_id=' + simulation_id + '&network_guid=' + network_guid),
         data: '',
         success: function(data, textStatus, xhr) {
             // If we got 210 (processing) wait 2 sec and call themself again
@@ -1385,9 +1385,9 @@ const CheckSimulation = function (simulation_id)
 const UpdateEdgeConfiguration = (data) => {
     SetNetworkPlayerState(-1);
 
-    return $.ajax({
+    return ajaxWithAuth({
         type: 'POST',
-        url: '/edge/save_config',
+        url: ExternalUrlFor('/edge/save_config'),
         data: data,
         complete: function() {
             DrawGraph();
@@ -1406,9 +1406,9 @@ const InsertWaitingTime = function ()
 {
     // Get last emulation task time
     // and send request to get count of emulating networks before this time
-    $.ajax({
+    ajaxWithAuth({
         type: 'GET',
-        url: 'emulation_queue/time',
+        url: ExternalUrlFor('/emulation_queue/time'),
         data: '',
         success: function(data) {
             // Run helper function with time param
@@ -1424,9 +1424,9 @@ const InsertWaitingTime = function ()
 
 const InsertWaitingTimeHelper = function(time_filter) {
     // Insert field with queue size
-    $.ajax({
+    ajaxWithAuth({
         type: 'GET',
-        url: 'emulation_queue/size?time-filter=' + time_filter.toString(),
+        url: ExternalUrlFor('/emulation_queue/size?time-filter=' + time_filter.toString()),
         data: '',
         success: function(data) {
             const queue_size = parseInt(data.size);
@@ -1457,9 +1457,9 @@ const UpdateHostConfiguration = function (data, host_id)
     // Reset network player
     SetNetworkPlayerState(-1);
 
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/host/save_config',
+        url: ExternalUrlFor('/host/save_config'),
         data: data,
         success: function(data, textStatus, xhr) {
 
@@ -1533,9 +1533,9 @@ const DeleteJobFromHost = function (host_id, job_id, network_guid)
       guid: network_guid,
     };
 
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/host/delete_job',
+        url: ExternalUrlFor('/host/delete_job'),
         data: data,
         encode: true,
         success: function(data, textStatus, xhr) {
@@ -1734,9 +1734,9 @@ const UpdateRouterConfiguration = function (data, router_id)
     // Reset network player
     SetNetworkPlayerState(-1);
 
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/host/router_save_config',
+        url: ExternalUrlFor('/host/router_save_config'),
         data: data,
         success: function(data, textStatus, xhr) {
 
@@ -1814,9 +1814,9 @@ const UpdateServerConfiguration = function (data, router_id)
     // Reset network player
     SetNetworkPlayerState(-1);
 
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/host/server_save_config',
+        url: ExternalUrlFor('/host/server_save_config'),
         data: data,
         success: function(data, textStatus, xhr) {
 
@@ -1890,9 +1890,9 @@ const UpdateServerConfiguration = function (data, router_id)
 // Update hub configuration
 const UpdateHubConfiguration = function (data, hub_id)
 {
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/host/hub_save_config',
+        url: ExternalUrlFor('/host/hub_save_config'),
         data: data,
         success: function(data, textStatus, xhr) {
 
@@ -1936,9 +1936,9 @@ const UpdateSwitchConfiguration = function (data, switch_id)
     // Reset network player
     SetNetworkPlayerState(-1);
 
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/host/switch_save_config',
+        url: ExternalUrlFor('/host/switch_save_config'),
         data: data,
         success: function(data, textStatus, xhr) {
 
@@ -2002,9 +2002,9 @@ const UpdateSwitchConfiguration = function (data, switch_id)
 
 const RunSimulation = function (network_guid)
 {
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/run_simulation?guid=' + network_guid,
+        url: ExternalUrlFor('/run_simulation?guid=' + network_guid),
         data: '',
         success: function(data, textStatus, xhr) {
             if (xhr.status === 201)
@@ -2420,9 +2420,9 @@ const TakeGraphPictureAndUpdate = function()
 
     let png_blob = global_cy.png({output: 'blob', maxWidth: 512, maxHeight: 512});
 
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/network/upload_network_picture?guid=' + network_guid,
+        url: ExternalUrlFor('/network/upload_network_picture?guid=' + network_guid),
         data: png_blob,
         processData: false,
         error: function(xhr) {
@@ -2472,9 +2472,9 @@ const UpdateNetworkConfig = function()
     let data = {'network_title' : network_title, 'network_description' : network_description,
     'zoom' : global_cy.zoom(),'pan_x' : global_cy.pan().x, 'pan_y' : global_cy.pan().y};
 
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/network/update_network_config?guid=' + network_guid,
+        url: ExternalUrlFor('/network/update_network_config?guid=' + network_guid),
         data: JSON.stringify(data),
         contentType: "application/json; charset=utf-8",
         success: function(data, textStatus, xhr) {
@@ -2490,9 +2490,9 @@ const UpdateNetworkConfig = function()
 
 const CopyNetwork = function ()
 {
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/network/copy_network?guid=' + network_guid,
+        url: ExternalUrlFor('/network/copy_network?guid=' + network_guid),
         data: '',
         success: function(data, textStatus, xhr) {
             if (xhr.status === 200)
