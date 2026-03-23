@@ -12,6 +12,8 @@ let packetFilterState = {
     hideSYN: false,
 };
 
+const LINK_DOWN_JOB_ID = 6;
+
 let gridCanvasLayer = undefined;
 let gridEnabled = true;
 let currentGridZoom = 1.0;
@@ -938,6 +940,23 @@ const prepareStylesheet = function() {
         .selector('.eh-ghost-edge.eh-preview-active')
         .css({
             'opacity': 0
+        })
+
+        .selector('edge.link-down')
+        .css({
+            'line-style': 'dashed',
+            'line-color': '#E74C3C',
+            'line-dash-pattern': [6, 3],
+            'opacity': 0.7,
+        })
+
+        .selector('edge.link-down-active')
+        .css({
+            'line-style': 'dashed',
+            'line-color': '#999',
+            'line-dash-pattern': [6, 3],
+            'opacity': 0.5,
+            'width': 1,
         });
 
     const appendIconClass = function(stylesheet, cssClass) {
@@ -998,6 +1017,31 @@ const SnapNodesToGrid = function(cy_instance) {
     }
 }
 
+const FindEdgeIdByJob = function(job) {
+    const node = nodes.find(n => n.data.id === job.host_id);
+    if (!node || !Array.isArray(node.interface)) return null;
+    const iface = node.interface.find(i => i.id === job.arg_1);
+    return iface?.connect || null;
+};
+
+const MarkLinkDownEdges = function(cy_instance) {
+    if (!cy_instance) return;
+
+    cy_instance.edges('.link-down, .link-down-active')
+        .removeClass('link-down')
+        .removeClass('link-down-active')
+        .removeStyle();
+
+    jobs.forEach(function(j) {
+        if (j.job_id == LINK_DOWN_JOB_ID) {
+            const edgeId = FindEdgeIdByJob(j);
+            if (edgeId) {
+                cy_instance.edges('[id="' + edgeId + '"]').addClass('link-down');
+            }
+        }
+    });
+};
+
 const DrawGraph = function() {
 
     // Do we already have one?
@@ -1012,6 +1056,7 @@ const DrawGraph = function() {
         cy.autounselectify(true);
         cy.add(nodes);
         cy.add(edges);
+        MarkLinkDownEdges(cy);
         cy.nodes().grabify();
         global_eh.enable();
         return;
@@ -1061,6 +1106,9 @@ const DrawGraph = function() {
 
     cy.add(nodes);
     cy.add(edges);
+
+    // Mark edges that have a link-down job configured
+    MarkLinkDownEdges(cy);
 
     // Auto-snap existing network nodes on load
     SnapNodesToGrid(cy);
@@ -1310,11 +1358,12 @@ const DrawGraphStatic = function(nodes, edges, shared=0) {
     cy.autounselectify(false);
     cy.add(nodes);
     cy.add(edges);
+    MarkLinkDownEdges(cy);
     cy.nodes().ungrabify();
-    
+
     // Initialize grid
     initGrid(cy);
-    
+
     return;
 }
 
@@ -1350,6 +1399,7 @@ const DrawSharedGraph = function(nodes, edges) {
 
     cy.add(nodes);
     cy.add(edges);
+    MarkLinkDownEdges(cy);
 
     // Click on object
     cy.on('click', function (evt) {

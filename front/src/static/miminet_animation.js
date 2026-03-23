@@ -67,6 +67,9 @@ var PacketPlayer = (function () {
             network_cy.remove(p_item);
         });
 
+        // Restore design-time link-down styling
+        MarkLinkDownEdges(network_cy);
+
         setAnimationTrafficStep(0);
         clearAnimationPackets();
         setPlayerPause(0);
@@ -84,6 +87,38 @@ var PacketPlayer = (function () {
         setPlayerPause(1);
     }
 
+    const flashEdge = function(edge, opacitySequence, duration) {
+        let chain = Promise.resolve();
+        opacitySequence.forEach(function(opacity) {
+            chain = chain.then(function() {
+                return edge.animation({
+                    style: { 'opacity': opacity }
+                }, { duration: duration }).play().promise('completed');
+            });
+        });
+        return chain;
+    };
+
+    const AnimateLinkDown = function(step) {
+        if (!network_cy) return;
+
+        jobs.forEach(function(j) {
+            if (j.job_id == LINK_DOWN_JOB_ID && j.level == step) {
+                const edgeId = FindEdgeIdByJob(j);
+                if (!edgeId) return;
+
+                const edge = network_cy.edges('[id="' + edgeId + '"]');
+                if (edge.length === 0) return;
+
+                flashEdge(edge, [0.3, 1, 0.3], 150).then(function() {
+                    edge.removeClass('link-down');
+                    edge.addClass('link-down-active');
+                    edge.removeStyle();
+                });
+            }
+        });
+    };
+
     const PlayNextStep = function(){
 
         // Clear animated packets.
@@ -100,6 +135,9 @@ var PacketPlayer = (function () {
             $('#NetworkStopButton').click();
             return;
         }
+
+        // Animate link-down edges for this step
+        AnimateLinkDown(ats);
 
         PlayStep();
         increaseAnimationTrafficStep();
