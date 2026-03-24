@@ -144,11 +144,17 @@ const buildClipboardPayload = function(cy) {
         }
     });
 
-    // Collect edges where both endpoints are selected
+    // Collect only explicitly selected edges (not auto-inferred)
+    const selectedEdgeIds = new Set();
+    cy.edges(':selected').forEach(function(ele) {
+        selectedEdgeIds.add(ele.id());
+    });
+
     const copiedEdges = [];
     const copiedEdgeIds = new Set();
     edges.forEach(function(e) {
-        if (selectedNodeIds.has(e.data.source) && selectedNodeIds.has(e.data.target)) {
+        if (selectedEdgeIds.has(e.data.id) &&
+            selectedNodeIds.has(e.data.source) && selectedNodeIds.has(e.data.target)) {
             copiedEdges.push(JSON.parse(JSON.stringify(e)));
             copiedEdgeIds.add(e.data.id);
         }
