@@ -11,6 +11,7 @@ from flask_admin.model import typefmt
 from flask_admin.actions import action
 from flask_login import current_user
 from markupsafe import Markup
+from sqlalchemy import func
 from sqlalchemy.orm import selectinload
 from wtforms import (
     SelectField,
@@ -31,6 +32,7 @@ from quiz.entity.entity import (
     Section,
     Question,
     QuestionCategory,
+    QuizSession,
     SessionQuestion,
 )
 from quiz.util.dto import calculate_question_count
@@ -103,22 +105,203 @@ def _build_test_cards(tests):
     return cards
 
 
+def _get_admin_tests(user_id):
+    return (
+        Test.query.filter(
+            Test.created_by_id == user_id,
+            Test.is_deleted.is_(False),
+        )
+        .options(
+            selectinload(Test.sections).selectinload(Section.quiz_sessions),
+            selectinload(Test.sections).selectinload(Section.questions),
+        )
+        .order_by(Test.created_on.desc())
+        .all()
+    )
+
+
+def _calculate_session_score(quiz_session):
+    score = 0
+    max_score = 0
+
+    for session_question in quiz_session.sessions:
+        if session_question.is_deleted:
+            continue
+
+        question = session_question.question
+        is_practice = question is not None and question.question_type == 0
+
+        if is_practice:
+            score += session_question.score or 0
+            max_score += session_question.max_score or 0
+        else:
+            score += 1 if session_question.is_correct else 0
+            max_score += 1
+
+    return score, max_score
+
+
+def _build_statistics_groups(section_columns):
+    groups = []
+
+    for section in section_columns:
+        if not groups or groups[-1]["test_id"] != section["test_id"]:
+            groups.append(
+                {
+                    "test_id": section["test_id"],
+                    "test_name": section["test_name"],
+                    "colspan": 1,
+                }
+            )
+        else:
+            groups[-1]["colspan"] += 1
+
+    return groups
+
+
+def _build_statistics_data(tests):
+    section_columns = []
+
+    for test in tests:
+        sections = [section for section in test.sections if not section.is_deleted]
+        sections.sort(key=lambda section: section.id or 0)
+
+        for section in sections:
+            section_columns.append(
+                {
+                    "id": section.id,
+                    "test_id": test.id,
+                    "test_name": test.name,
+                    "section_name": section.name,
+                }
+            )
+
+    if not section_columns:
+        return section_columns, []
+
+    section_ids = [section["id"] for section in section_columns]
+    latest_sessions_subquery = (
+        db.session.query(
+            QuizSession.id.label("session_id"),
+            func.row_number()
+            .over(
+                partition_by=(QuizSession.created_by_id, QuizSession.section_id),
+                order_by=(QuizSession.finished_at.desc(), QuizSession.id.desc()),
+            )
+            .label("row_num"),
+        )
+        .filter(
+            QuizSession.section_id.in_(section_ids),
+            QuizSession.is_deleted.is_(False),
+            QuizSession.finished_at.isnot(None),
+            QuizSession.created_by_id.isnot(None),
+        )
+        .subquery()
+    )
+
+    sessions = (
+        db.session.query(QuizSession)
+        .join(
+            latest_sessions_subquery,
+            latest_sessions_subquery.c.session_id == QuizSession.id,
+        )
+        .filter(latest_sessions_subquery.c.row_num == 1)
+        .options(
+            selectinload(QuizSession.sessions).selectinload(SessionQuestion.question),
+            selectinload(QuizSession.created_by_user),
+        )
+        .all()
+    )
+
+    latest_session_by_user_section = {}
+    users_by_id = {}
+
+    for session in sessions:
+        key = (session.created_by_id, session.section_id)
+        if key in latest_session_by_user_section:
+            continue
+
+        latest_session_by_user_section[key] = session
+        users_by_id[session.created_by_id] = session.created_by_user
+
+    rows = []
+
+    for user_id, user in users_by_id.items():
+        cells = []
+        total_score = 0
+        completed_sections = 0
+
+        for section in section_columns:
+            session = latest_session_by_user_section.get((user_id, section["id"]))
+
+            if session is None:
+                cells.append({"has_result": False})
+                continue
+
+            score, max_score = _calculate_session_score(session)
+            total_score += score
+            completed_sections += 1
+            cells.append(
+                {
+                    "has_result": True,
+                    "score": score,
+                    "max_score": max_score,
+                    "guid": session.guid,
+                }
+            )
+
+        if user and user.nick:
+            user_name = user.nick
+        elif user and user.email:
+            user_name = user.email
+        else:
+            user_name = f"Пользователь {user_id}"
+
+        rows.append(
+            {
+                "user_id": user_id,
+                "user_name": user_name,
+                "can_open_profile": user is not None,
+                "total_score": total_score,
+                "completed_sections": completed_sections,
+                "cells": cells,
+            }
+        )
+
+    rows.sort(
+        key=lambda row: (
+            -row["total_score"],
+            -row["completed_sections"],
+            row["user_name"].casefold(),
+        )
+    )
+
+    for position, row in enumerate(rows, start=1):
+        row["position"] = position
+
+    return section_columns, rows
+
+
 class MiminetAdminIndexView(AdminIndexView):
     @expose("/")
     def index(self):
-        tests = (
-            Test.query.filter(
-                Test.created_by_id == current_user.id,
-                Test.is_deleted.is_(False),
-            )
-            .options(
-                selectinload(Test.sections).selectinload(Section.quiz_sessions),
-                selectinload(Test.sections).selectinload(Section.questions),
-            )
-            .order_by(Test.created_on.desc())
-            .all()
+        tests = _get_admin_tests(current_user.id)
+        return self.render(
+            "admin/index.html",
+            test_cards=_build_test_cards(tests),
+            statistics_url=url_for("admin.statistics"),
         )
-        return self.render("admin/index.html", test_cards=_build_test_cards(tests))
+
+    @expose("/statistics")
+    def statistics(self):
+        tests = _get_admin_tests(current_user.id)
+        section_columns, user_rows = _build_statistics_data(tests)
+        return self.render(
+            "admin/statistics.html",
+            section_columns=section_columns,
+            test_groups=_build_statistics_groups(section_columns),
+            user_rows=user_rows,
+        )
 
     def is_accessible(self):
         if current_user.is_authenticated:
@@ -601,3 +784,4 @@ class CreateCheckTaskView(MiminetAdminModelView):
                 flash(f"Ошибка: {str(e)}", "error")
 
         return self.render("admin/create_check_task.html", form=form)
+

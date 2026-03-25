@@ -9,7 +9,7 @@ import hashlib
 
 import google.auth.transport.requests
 import requests
-from flask import flash, redirect, render_template, request, session, url_for, jsonify
+from flask import flash, redirect, render_template, request, session, url_for, jsonify, abort
 from flask_login import (
     LoginManager,
     current_user,
@@ -38,6 +38,7 @@ DEFAULT_USER_CONFIG = {
 AVATAR_UPLOAD_FOLDER = "/app/static/avatar"
 ALLOWED_EXTENSIONS = {"bmp", "png", "jpg", "jpeg"}
 MAX_AVATAR_SIZE = 1 * 1024 * 1024
+PROFILE_VIEWER_MIN_ROLE = 1
 
 login_manager = LoginManager()
 login_manager.login_view = "login_index"
@@ -278,6 +279,26 @@ def user_profile():
         "auth/profile.html", user=user, first_name=first_name, last_name=last_name
     )
 
+
+@login_required
+def user_profile_view(user_id: int):
+    if current_user.id != user_id and (current_user.role or 0) < PROFILE_VIEWER_MIN_ROLE:
+        abort(403)
+
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        abort(404)
+
+    nick_parts = (user.nick or "").strip().split(maxsplit=1)
+    first_name = nick_parts[0] if nick_parts else ""
+    last_name = nick_parts[1] if len(nick_parts) > 1 else ""
+
+    return render_template(
+        "auth/profile_readonly.html",
+        user=user,
+        first_name=first_name,
+        last_name=last_name,
+    )
 
 def _load_user_config(user: User) -> dict:
     try:

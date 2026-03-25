@@ -47,7 +47,7 @@
         font-weight: 600;
         text-decoration: none;
         box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
-        cursor: default;
+        cursor: pointer;
     }
 
     .admin-results__stats-link:hover,
@@ -204,7 +204,7 @@
                 заданий и количество завершенных прохождений.
             </p>
         </div>
-        <a href="#" class="admin-results__stats-link" onclick="return false;">Статистика</a>
+        <a href="{{ statistics_url }}" class="admin-results__stats-link">Статистика</a>
     </div>
 
     {% if test_cards %}
