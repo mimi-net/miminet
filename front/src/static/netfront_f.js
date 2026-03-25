@@ -944,17 +944,12 @@ const prepareStylesheet = function() {
 
         .selector('edge.link-down')
         .css({
-            'line-style': 'dashed',
-            'line-color': '#E74C3C',
-            'line-dash-pattern': [6, 3],
-            'opacity': 0.7,
+            'line-color': '#E8A838',
         })
 
         .selector('edge.link-down-active')
         .css({
-            'line-style': 'dashed',
             'line-color': '#999',
-            'line-dash-pattern': [6, 3],
             'opacity': 0.5,
             'width': 1,
         });
