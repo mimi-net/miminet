@@ -214,7 +214,16 @@
                         <tr>
                             <td>{{ row.position }}</td>
                             <td class="admin-stats__user">
-                                <span>{{ row.user_name }}</span>
+                                {% if row.can_open_profile %}
+                                    <a
+                                        href="{{ url_for('user_profile_view', user_id=row.user_id) }}"
+                                        class="admin-stats__user-link"
+                                    >
+                                        {{ row.user_name }}
+                                    </a>
+                                {% else %}
+                                    <span>{{ row.user_name }}</span>
+                                {% endif %}
                             </td>
                             <td>{{ row.total_score }}</td>
                             {% for cell in row.cells %}

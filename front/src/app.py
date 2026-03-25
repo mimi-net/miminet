@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 from datetime import datetime
 from dotenv import load_dotenv
@@ -28,6 +28,7 @@ from miminet_auth import (
     logout,
     remove_test_user,
     user_profile,
+    user_profile_view,
     vk_callback,
     vk_login,
     yandex_login,
@@ -184,6 +185,7 @@ app.add_url_rule("/auth/yandex_callback", methods=["GET"], view_func=yandex_call
 app.add_url_rule("/auth/tg_callback", methods=["GET"], view_func=tg_callback)
 app.add_url_rule("/user/profile.html", methods=["GET", "POST"], view_func=user_profile)
 app.add_url_rule("/profile", methods=["GET", "POST"], view_func=user_profile)
+app.add_url_rule("/profile/<int:user_id>", methods=["GET"], view_func=user_profile_view)
 app.add_url_rule("/auth/logout", methods=["GET"], view_func=logout)
 
 # Network
