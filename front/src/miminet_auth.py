@@ -26,6 +26,7 @@ from miminet_config import make_example_net_switch_and_hub
 from pip._vendor import cachecontrol
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.utils import secure_filename
 
 DEFAULT_USER_CONFIG = {
     "hideARP": False,
@@ -34,15 +35,34 @@ DEFAULT_USER_CONFIG = {
 }
 
 # Global variables
-UPLOAD_FOLDER = "static/avatar/"
-UPLOAD_TMP_FOLDER = "static/tmp/avatar/"
+AVATAR_UPLOAD_FOLDER = "/app/static/avatar"
 ALLOWED_EXTENSIONS = {"bmp", "png", "jpg", "jpeg"}
+MAX_AVATAR_SIZE = 1 * 1024 * 1024
 
 login_manager = LoginManager()
 login_manager.login_view = "login_index"
 
 # create an alias of login_required decorator
 login_required = login_required
+
+
+def generate_avatar_uri(extension=".jpg"):
+    avatar_hash = os.urandom(16).hex()
+    return os.path.join(avatar_hash[0], avatar_hash[1], avatar_hash + extension)
+
+
+def get_avatar_path(avatar_uri):
+    return os.path.join(AVATAR_UPLOAD_FOLDER, avatar_uri)
+
+
+def save_avatar_blob(avatar_uri, blob):
+    avatar_path = get_avatar_path(avatar_uri)
+    os.makedirs(os.path.dirname(avatar_path), exist_ok=True)
+    with open(avatar_path, "wb") as avatar_file:
+        avatar_file.write(blob)
+
+    return avatar_path
+
 
 # Google auth (https://github.com/code-specialist/flask_google_login/blob/main/app.py)
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
@@ -144,21 +164,119 @@ def login_index():
 @login_required
 def user_profile():
     user = User.query.filter_by(id=current_user.id).first()
+    nick_parts = (user.nick or "").strip().split(maxsplit=1)
+    first_name = nick_parts[0] if nick_parts else ""
+    last_name = nick_parts[1] if len(nick_parts) > 1 else ""
 
     if request.method == "POST":
-        last_name = request.form.get("last_name").strip()
-        first_name = request.form.get("first_name").strip()
-        middle_name = request.form.get("middle_name").strip()
-        how_to_contact = request.form.get("how_to_contact").strip()
+        submitted_first_name = request.form.get("first_name")
+        submitted_last_name = request.form.get("last_name")
+        first_name = (
+            submitted_first_name.strip()
+            if submitted_first_name is not None
+            else first_name
+        )
+        last_name = (
+            submitted_last_name.strip()
+            if submitted_last_name is not None
+            else last_name
+        )
+        avatar = request.files.get("avatar")
+        has_updates = False
 
-        if first_name:
-            user.first_name = first_name
-            user.middle_name = middle_name
-            user.last_name = last_name
-            user.how_to_contact = how_to_contact
+        if len(first_name) < 1 or len(first_name) > 50:
+            flash("Имя должно быть от 1 до 50 символов.", category="error")
+            return render_template(
+                "auth/profile.html",
+                user=user,
+                first_name=first_name,
+                last_name=last_name,
+            )
+        if not all(c.isalpha() or c in " -'" for c in first_name):
+            flash(
+                "Имя содержит недопустимые символы (только буквы, пробелы, дефисы и апострофы).",
+                category="error",
+            )
+            return render_template(
+                "auth/profile.html",
+                user=user,
+                first_name=first_name,
+                last_name=last_name,
+            )
+
+        if len(last_name) > 50:
+            flash("Фамилия должна быть до 50 символов.", category="error")
+            return render_template(
+                "auth/profile.html",
+                user=user,
+                first_name=first_name,
+                last_name=last_name,
+            )
+        if last_name and not all(c.isalpha() or c in " -'" for c in last_name):
+            flash(
+                "Фамилия содержит недопустимые символы (только буквы, пробелы, дефисы и апострофы).",
+                category="error",
+            )
+            return render_template(
+                "auth/profile.html",
+                user=user,
+                first_name=first_name,
+                last_name=last_name,
+            )
+
+        if avatar and avatar.filename:
+            avatar.seek(0, os.SEEK_END)
+            file_size = avatar.tell()
+            avatar.seek(0)
+
+            if file_size > MAX_AVATAR_SIZE:
+                flash("Размер файла не должен превышать 1 МБ", category="error")
+                return redirect(url_for("user_profile"))
+
+            if not allowed_file(avatar.filename):
+                flash("Допустимые форматы: bmp, png, jpg, jpeg", category="error")
+                return render_template(
+                    "auth/profile.html",
+                    user=user,
+                    first_name=first_name,
+                    last_name=last_name,
+                )
+
+            ext = (
+                os.path.splitext(secure_filename(avatar.filename))[1].lower() or ".jpg"
+            )
+            avatar_uri = generate_avatar_uri(ext)
+
+            try:
+                logger.info(
+                    f"Attempting to save avatar: filename={avatar.filename}, size={file_size}, uri={avatar_uri}"
+                )
+                save_avatar_blob(avatar_uri, avatar.read())
+                user.avatar_uri = avatar_uri
+                has_updates = True
+                logger.info(f"Avatar uploaded for user {current_user.id}")
+            except Exception as e:
+                logger.error(f"Failed to save avatar: {e}", exc_info=True)
+                flash("Ошибка загрузки аватара", category="error")
+                return render_template(
+                    "auth/profile.html",
+                    user=user,
+                    first_name=first_name,
+                    last_name=last_name,
+                )
+
+        new_nick = f"{first_name} {last_name}".strip()
+        if new_nick != user.nick:
+            user.nick = new_nick
+            has_updates = True
+
+        if has_updates:
             db.session.commit()
+            return redirect(url_for("user_profile"))
 
-    return render_template("auth/profile.html", user=user)
+    return render_template(
+        "auth/profile.html", user=user, first_name=first_name, last_name=last_name
+    )
 
 
 def _load_user_config(user: User) -> dict:
@@ -271,12 +389,26 @@ def google_callback():
     if user is None:
         # Yes
         try:
-            avatar_uri = os.urandom(16).hex()
-            avatar_uri = avatar_uri + ".jpg"
+            avatar_uri = "empty.jpg"
 
-            if "picture" in id_info:
-                r = requests.get(id_info.get("picture"), allow_redirects=True)
-                open("static/avatar/" + avatar_uri, "wb").write(r.content)
+            photo_uri = id_info.get("picture")
+            if photo_uri:
+                generated_avatar_uri = generate_avatar_uri()
+                try:
+                    r = requests.get(photo_uri, allow_redirects=True, timeout=10)
+                    r.raise_for_status()  # Проверяет HTTP-ошибки (например, 404)
+                    save_avatar_blob(generated_avatar_uri, r.content)
+                    avatar_uri = generated_avatar_uri
+                except requests.RequestException as e:
+                    logger.error(
+                        f"Failed to download avatar from Google for user {id_info.get('sub')}: {e}"
+                    )
+                    avatar_uri = "empty.jpg"  # Дефолтный аватар при ошибке
+                except (IOError, PermissionError) as e:
+                    logger.error(
+                        f"Failed to save avatar file for user {id_info.get('sub')}: {e}"
+                    )
+                    avatar_uri = "empty.jpg"
 
             f = id_info.get("family_name", "")
             n = id_info.get("given_name", "")
@@ -327,27 +459,40 @@ def vk_callback():
 
     # Get access token
     response = requests.get(
-        f"https://oauth.vk.com/access_token?client_id={VK_CLIENT_ID}&client_secret={VK_CLIENT_SECRET}&redirect_uri={VK_REDIRECT_URI}&code="
-        + user_code
+        "https://oauth.vk.com/access_token",
+        params={
+            "client_id": VK_CLIENT_ID,
+            "client_secret": VK_CLIENT_SECRET,
+            "redirect_uri": VK_REDIRECT_URI,
+            "code": user_code,
+        },
+        timeout=10,
     )
-    access_token_json = json.loads(response.text)
+    access_token_json = response.json()
 
     if "error" in access_token_json:
         return redirect(url_for("login_index"))
 
-    vk_id = str(access_token_json.get("user_id"))
     access_token = access_token_json.get("access_token")
     vk_email = access_token_json.get("email")
 
+    try:
+        vk_id = str(int(access_token_json["user_id"]))
+    except (KeyError, ValueError, TypeError):
+        return redirect(url_for("login_index"))
+
     # Get user name
     response = requests.get(
-        "https://api.vk.com/method/users.get?user_ids="
-        + vk_id
-        + "&fields=photo_100&access_token="
-        + str(access_token)
-        + "&v=5.130"
+        "https://api.vk.com/method/users.get",
+        params={
+            "user_ids": vk_id,
+            "fields": "photo_100",
+            "access_token": str(access_token),
+            "v": "5.130",
+        },
+        timeout=10,
     )
-    vk_user = json.loads(response.text)
+    vk_user = response.json()
 
     if vk_email:
         user = User.query.filter_by(email=vk_email).first()
@@ -362,14 +507,24 @@ def vk_callback():
     if user is None:
         # Yes
         try:
-            avatar_uri = os.urandom(16).hex()
-            avatar_uri = avatar_uri + ".jpg"
+            avatar_uri = "empty.jpg"
 
-            if "photo_100" in vk_user["response"][0]:
-                r = requests.get(
-                    vk_user["response"][0]["photo_100"], allow_redirects=True
-                )
-            open("static/avatar/" + avatar_uri, "wb").write(r.content)
+            photo_uri = vk_user.get("response", [{}])[0].get("photo_100")
+            if photo_uri:
+                generated_avatar_uri = generate_avatar_uri()
+                try:
+                    r = requests.get(photo_uri, allow_redirects=True, timeout=10)
+                    r.raise_for_status()
+                    save_avatar_blob(generated_avatar_uri, r.content)
+                    avatar_uri = generated_avatar_uri
+                except requests.RequestException as e:
+                    logger.error(
+                        f"Failed to download avatar from VK for user {vk_id}: {e}"
+                    )
+                    avatar_uri = "empty.jpg"
+                except (IOError, PermissionError) as e:
+                    logger.error(f"Failed to save avatar file for user {vk_id}: {e}")
+                    avatar_uri = "empty.jpg"
 
             new_user = User(
                 nick=vk_user["response"][0]["first_name"]
