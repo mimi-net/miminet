@@ -9,7 +9,16 @@ import hashlib
 
 import google.auth.transport.requests
 import requests
-from flask import flash, redirect, render_template, request, session, url_for, jsonify, abort
+from flask import (
+    flash,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+    jsonify,
+    abort,
+)
 from flask_login import (
     LoginManager,
     current_user,
@@ -282,7 +291,10 @@ def user_profile():
 
 @login_required
 def user_profile_view(user_id: int):
-    if current_user.id != user_id and (current_user.role or 0) < PROFILE_VIEWER_MIN_ROLE:
+    if (
+        current_user.id != user_id
+        and (current_user.role or 0) < PROFILE_VIEWER_MIN_ROLE
+    ):
         abort(403)
 
     user = User.query.filter_by(id=user_id).first()
@@ -299,6 +311,7 @@ def user_profile_view(user_id: int):
         first_name=first_name,
         last_name=last_name,
     )
+
 
 def _load_user_config(user: User) -> dict:
     try:

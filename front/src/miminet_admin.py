@@ -75,26 +75,24 @@ def _build_test_cards(tests):
             {
                 "name": test.name,
                 "description": test.description,
-                "status_label": (
-                    "Опубликован" if test.is_ready else "Черновик"
-                ),
+                "status_label": ("Опубликован" if test.is_ready else "Черновик"),
                 "retakeable_label": (
                     "Можно перепроходить"
                     if test.is_retakeable
                     else "Одна попытка на раздел"
                 ),
                 "section_label": _format_count(
-                    len(sections), ('раздел', 'раздела', 'разделов')
+                    len(sections), ("раздел", "раздела", "разделов")
                 ),
                 "question_label": _format_count(
-                    question_count, ('задание', 'задания', 'заданий')
+                    question_count, ("задание", "задания", "заданий")
                 ),
                 "attempts_label": _format_count(
                     finished_sessions,
                     (
-                        'завершенное прохождение',
-                        'завершенных прохождения',
-                        'завершенных прохождений',
+                        "завершенное прохождение",
+                        "завершенных прохождения",
+                        "завершенных прохождений",
                     ),
                 ),
                 "section_names": [section.name for section in preview_sections],
@@ -784,4 +782,3 @@ class CreateCheckTaskView(MiminetAdminModelView):
                 flash(f"Ошибка: {str(e)}", "error")
 
         return self.render("admin/create_check_task.html", form=form)
-

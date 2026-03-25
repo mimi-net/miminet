@@ -134,6 +134,7 @@ def test_user_profile_post_without_updates_renders_page(mocker):
         "auth/profile.html", user=user, first_name="", last_name=""
     )
 
+
 def test_user_profile_view_forbidden_without_permission(mocker):
     app = _build_test_app()
 
@@ -182,4 +183,3 @@ def test_google_callback_new_user_without_picture_uses_empty_avatar(mocker):
     assert result == "redirected"
     assert user_ctor.call_args.kwargs["avatar_uri"] == "empty.jpg"
     redirect_next_mock.assert_called_once()
-
