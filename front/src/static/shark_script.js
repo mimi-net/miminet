@@ -1,5 +1,4 @@
-let newdata = data.replace(/&#39;/g, '"'); 
-let pcap_data = JSON.parse(newdata);
+let pcap_data = data;
 let tds = document.querySelectorAll('tbody tr');
 let input = document.querySelector('#bytes');
 let rows = document.querySelector('#rows');
