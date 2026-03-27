@@ -1438,15 +1438,15 @@ const DrawSharedGraph = function(nodes, edges) {
         selected_edge_id = 0;
 
         if (n.config.type === 'host'){
-            ShowHostConfig(n, shared=1);
+            ShowHostConfig(n, 1);
         } else if (n.config.type === 'l1_hub'){
-            ShowHubConfig(n, shared=1);
+            ShowHubConfig(n, 1);
         } else if (n.config.type === 'l2_switch'){
-            ShowSwitchConfig(n, shared=1);
+            ShowSwitchConfig(n, 1);
         } else if (n.config.type === 'router'){
-            ShowRouterConfig(n, shared=1);
+            ShowRouterConfig(n, 1);
         } else if (n.config.type === 'server'){
-            ShowServerConfig(n, shared=1);
+            ShowServerConfig(n, 1);
         }
     });
     
