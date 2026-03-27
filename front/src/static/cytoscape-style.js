@@ -1,13 +1,8 @@
 const prepareStylesheet = function() {
     const getColor = function(ele) {
         if (ele.group() === "edges") {
-            const loss = ele.data('loss_percentage');
             const dup = ele.data('duplicate_percentage');
-            if (loss > 0 && dup > 0) {
-                return '#000000';
-            } else if (loss > 0) {
-                return '#FF8C00';
-            } else if (dup > 0) {
+            if (dup > 0) {
                 return '#26AE31';
             }
         }
@@ -17,7 +12,23 @@ const prepareStylesheet = function() {
       return ele.data('label') || '';
     };
     const getLineStyle = function(ele) {
+      if (ele.group() === "edges") {
+        const loss = ele.data('loss_percentage');
+        if (loss > 0) {
+          return 'dashed';
+        }
+      }
       return ele.data('line') || 'solid';
+    };
+    const getLineDashPattern = function(ele) {
+      if (ele.group() === "edges") {
+        const loss = ele.data('loss_percentage');
+        if (loss > 0) {
+          const gap = 2 + Math.round((loss / 100) * 18);
+          return [6, gap];
+        }
+      }
+      return [6, 0];
     };
     const getCurveStyle = function(ele) {
       return ele.data('style') || 'bezier';
@@ -123,6 +134,7 @@ const prepareStylesheet = function() {
           'curve-style': getCurveStyle,
           'label': getEdgeLabel,
           'line-style': getLineStyle,
+          'line-dash-pattern': getLineDashPattern,
           'color': '#000',
           'text-outline-color': '#FFF',
           'text-outline-width': 1,
@@ -197,6 +209,18 @@ const prepareStylesheet = function() {
         .selector('.eh-ghost-edge.eh-preview-active')
         .css({
             'opacity': 0
+        })
+
+        .selector('edge.link-down')
+        .css({
+            'line-color': '#E8A838',
+        })
+
+        .selector('edge.link-down-active')
+        .css({
+            'line-color': '#999',
+            'opacity': 0.5,
+            'width': 1,
         })
 
         .selector('node:selected')
