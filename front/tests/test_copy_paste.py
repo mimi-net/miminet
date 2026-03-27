@@ -45,17 +45,23 @@ class TestCopyPaste:
         canvas = selenium.find_element(By.ID, "network_scheme")
         canvas.click()
         time.sleep(0.3)
-        ActionChains(selenium).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).perform()
+        ActionChains(selenium).key_down(Keys.CONTROL).send_keys("a").key_up(
+            Keys.CONTROL
+        ).perform()
         time.sleep(0.3)
 
     def _copy(self, selenium: MiminetTester):
         """Copy selected elements via Ctrl+C."""
-        ActionChains(selenium).key_down(Keys.CONTROL).send_keys("c").key_up(Keys.CONTROL).perform()
+        ActionChains(selenium).key_down(Keys.CONTROL).send_keys("c").key_up(
+            Keys.CONTROL
+        ).perform()
         time.sleep(0.3)
 
     def _paste(self, selenium: MiminetTester):
         """Paste from clipboard via Ctrl+V."""
-        ActionChains(selenium).key_down(Keys.CONTROL).send_keys("v").key_up(Keys.CONTROL).perform()
+        ActionChains(selenium).key_down(Keys.CONTROL).send_keys("v").key_up(
+            Keys.CONTROL
+        ).perform()
         time.sleep(0.5)
 
     def _deselect_all(self, selenium: MiminetTester):
@@ -78,11 +84,13 @@ class TestCopyPaste:
         total_edges = len(network.edges)
         selected = self._get_selected_count(selenium)
 
-        assert selected == total_nodes + total_edges, (
-            f"Expected {total_nodes + total_edges} selected, got {selected}"
-        )
+        assert (
+            selected == total_nodes + total_edges
+        ), f"Expected {total_nodes + total_edges} selected, got {selected}"
 
-    def test_deselect_escape(self, selenium: MiminetTester, network: MiminetTestNetwork):
+    def test_deselect_escape(
+        self, selenium: MiminetTester, network: MiminetTestNetwork
+    ):
         """Escape should deselect all elements."""
         selenium.get(network.url)
         time.sleep(1)
@@ -112,16 +120,14 @@ class TestCopyPaste:
         nodes_after = len(network.nodes)
         edges_after = len(network.edges)
 
-        assert nodes_after == nodes_before * 2, (
-            f"Expected {nodes_before * 2} nodes after paste, got {nodes_after}"
-        )
-        assert edges_after == edges_before * 2, (
-            f"Expected {edges_before * 2} edges after paste, got {edges_after}"
-        )
+        assert (
+            nodes_after == nodes_before * 2
+        ), f"Expected {nodes_before * 2} nodes after paste, got {nodes_after}"
+        assert (
+            edges_after == edges_before * 2
+        ), f"Expected {edges_before * 2} edges after paste, got {edges_after}"
 
-    def test_pasted_nodes_have_unique_ids(
-        self, selenium: MiminetTester
-    ):
+    def test_pasted_nodes_have_unique_ids(self, selenium: MiminetTester):
         """Pasted nodes should have new unique IDs (uses fresh network)."""
         net = MiminetTestNetwork(selenium)
         h1 = net.add_node(NodeType.Host)
@@ -139,14 +145,14 @@ class TestCopyPaste:
         all_ids = [n["data"]["id"] for n in net.nodes]
 
         # Total nodes should double
-        assert len(all_ids) == original_count * 2, (
-            f"Expected {original_count * 2} total nodes, got {len(all_ids)}"
-        )
+        assert (
+            len(all_ids) == original_count * 2
+        ), f"Expected {original_count * 2} total nodes, got {len(all_ids)}"
 
         # All IDs should be unique (no collisions between original and pasted)
-        assert len(set(all_ids)) == len(all_ids), (
-            f"Duplicate IDs found: {[x for x in all_ids if all_ids.count(x) > 1]}"
-        )
+        assert len(set(all_ids)) == len(
+            all_ids
+        ), f"Duplicate IDs found: {[x for x in all_ids if all_ids.count(x) > 1]}"
 
         net.delete()
 
@@ -169,12 +175,12 @@ class TestCopyPaste:
         new_edges = all_edges[original_edge_count:]
 
         for edge in new_edges:
-            assert edge["data"]["source"] not in original_node_ids, (
-                f"Pasted edge source {edge['data']['source']} references original node"
-            )
-            assert edge["data"]["target"] not in original_node_ids, (
-                f"Pasted edge target {edge['data']['target']} references original node"
-            )
+            assert (
+                edge["data"]["source"] not in original_node_ids
+            ), f"Pasted edge source {edge['data']['source']} references original node"
+            assert (
+                edge["data"]["target"] not in original_node_ids
+            ), f"Pasted edge target {edge['data']['target']} references original node"
 
     def test_pasted_jobs_copied(
         self, selenium: MiminetTester, network: MiminetTestNetwork
@@ -192,9 +198,9 @@ class TestCopyPaste:
 
         jobs_after = len(network.jobs)
 
-        assert jobs_after == jobs_before * 2, (
-            f"Expected {jobs_before * 2} jobs after paste, got {jobs_after}"
-        )
+        assert (
+            jobs_after == jobs_before * 2
+        ), f"Expected {jobs_before * 2} jobs after paste, got {jobs_after}"
 
     def test_paste_preserves_node_types(
         self, selenium: MiminetTester, network: MiminetTestNetwork
@@ -211,12 +217,12 @@ class TestCopyPaste:
         time.sleep(0.5)
 
         all_nodes = network.nodes
-        new_nodes = all_nodes[len(original_types):]
+        new_nodes = all_nodes[len(original_types) :]
         new_types = sorted([n["config"]["type"] for n in new_nodes])
 
-        assert new_types == original_types, (
-            f"Pasted node types {new_types} don't match original {original_types}"
-        )
+        assert (
+            new_types == original_types
+        ), f"Pasted node types {new_types} don't match original {original_types}"
 
     def test_paste_multiple_times(
         self, selenium: MiminetTester, network: MiminetTestNetwork
@@ -240,9 +246,9 @@ class TestCopyPaste:
 
         nodes_after = len(network.nodes)
 
-        assert nodes_after == nodes_before * 4, (
-            f"Expected {nodes_before * 4} nodes after 3 pastes, got {nodes_after}"
-        )
+        assert (
+            nodes_after == nodes_before * 4
+        ), f"Expected {nodes_before * 4} nodes after 3 pastes, got {nodes_after}"
 
     def test_copy_without_selection_does_nothing(
         self, selenium: MiminetTester, network: MiminetTestNetwork
@@ -273,11 +279,15 @@ class TestCopyPaste:
             pytest.skip("Need at least 2 nodes")
 
         # Select first two nodes via JS
-        selenium.execute_script("""
+        selenium.execute_script(
+            """
             global_cy.elements().unselect();
             global_cy.getElementById(arguments[0]).select();
             global_cy.getElementById(arguments[1]).select();
-        """, nodes[0]["data"]["id"], nodes[1]["data"]["id"])
+        """,
+            nodes[0]["data"]["id"],
+            nodes[1]["data"]["id"],
+        )
         time.sleep(0.3)
 
         selected = self._get_selected_count(selenium)
@@ -290,6 +300,6 @@ class TestCopyPaste:
         time.sleep(0.5)
 
         nodes_after = len(network.nodes)
-        assert nodes_after == nodes_before + 2, (
-            f"Expected {nodes_before + 2} nodes after partial paste, got {nodes_after}"
-        )
+        assert (
+            nodes_after == nodes_before + 2
+        ), f"Expected {nodes_before + 2} nodes after partial paste, got {nodes_after}"
