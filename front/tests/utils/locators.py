@@ -30,10 +30,6 @@ class Location:
 
         # "Мои сети"
         MY_NETWORKS_BUTTON = Locator('a.nav-link[data-i18n="myNetworksLink"]')
-        # Переключение языка (dropdown с иконкой глобуса)
-        LANGUAGE_DROPDOWN = Locator(
-            "a.nav-link.dropdown-toggle[data-bs-toggle='dropdown']"
-        )
         # "Примеры сетей"
         NETWORK_EXAMPLES_BUTTON = Locator("#examples-nav-item")
         # "Тестирование"
@@ -70,10 +66,8 @@ class Location:
         CONFIG_PANEL = Locator("#config_content")
         # Modal dialog for user warnings
         MODAL_DIALOG = Locator(xpath="/html/body/div[5]/div")
-        # "Эмулировать" (ИЗМЕНЕНО: удален text, добавлен data-i18n)
-        EMULATE_BUTTON = Locator(
-            "#NetworkEmulateButton", attrs={"data-i18n": "emulateBtn"}
-        )
+        # "Эмулировать" 
+        EMULATE_BUTTON = Locator("#NetworkEmulateButton", attrs={"data-i18n": "emulateBtn"})
         # Pause animation button
         EMULATE_PLAYER_PAUSE_BUTTON = Locator("#NetworkPlayPauseButton")
         # Network title
