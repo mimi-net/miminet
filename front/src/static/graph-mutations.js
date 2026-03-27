@@ -53,17 +53,8 @@ const AddEdge = function(source_id, target_id) {
 }
 
 const DeleteJob = function(node_id) {
-    let jobs_to_delete = [];
-
-    $.each(jobs, function(idx, job) {
-        if (job && job.host_id === node_id) {
-            jobs_to_delete.push(idx);
-        }
-    });
-
-    jobs_to_delete.reverse();
-    $.each(jobs_to_delete, function(idx, val) {
-        jobs.splice(val, 1);
+    jobs = jobs.filter(function(job) {
+        return !job || job.host_id !== node_id;
     });
 }
 
@@ -77,12 +68,12 @@ const DeleteNode = function(node_id) {
     let n = nodes.find(n => n.data.id === node_id);
     if (!n) return;
 
-    let edges_to_delete = [];
+    // Remove interfaces from connected nodes and collect edge IDs to delete
+    const edgeIdsToDelete = new Set();
 
-    $.each(edges, function(idx, edge) {
+    edges.forEach(function(edge) {
         if (!edge) return;
 
-        // Check if this edge connects to the deleted node
         let other_node_id = null;
         if (edge.data.source === node_id) other_node_id = edge.data.target;
         else if (edge.data.target === node_id) other_node_id = edge.data.source;
@@ -95,15 +86,16 @@ const DeleteNode = function(node_id) {
         }
 
         removeInterfacesForEdge(other, edge.data.id);
-        edges_to_delete.unshift(idx);
+        edgeIdsToDelete.add(edge.data.id);
     });
 
-    $.each(edges_to_delete, function(idx, val) {
-        edges.splice(val, 1);
+    edges = edges.filter(function(edge) {
+        return edge && !edgeIdsToDelete.has(edge.data.id);
     });
 
-    let node_index = nodes.findIndex(prop => prop.data.id === node_id);
-    nodes.splice(node_index, 1);
+    nodes = nodes.filter(function(node) {
+        return node.data.id !== node_id;
+    });
 }
 
 const DeleteEdge = function(edge_id) {

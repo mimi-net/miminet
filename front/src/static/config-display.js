@@ -37,173 +37,83 @@ const ActionWithInterface = function (n, i, fun) {
         connected_to_host_label = connected_to_host.data.label;
     }
 
-    ip_addr = n.interface[i].ip;
-
-    if (!ip_addr){
-        ip_addr = '';
-    }
-
-    netmask = n.interface[i].netmask;
-
-    if (!netmask){
-        netmask = '';
-    }
+    let ip_addr = n.interface[i].ip || '';
+    let netmask = n.interface[i].netmask || '';
 
     fun(iface_id, ip_addr, netmask, connected_to_host_label);
 
 }
 
-const ShowHostConfig = function(n, shared = 0){
-
-    // Exit edit mode when switching to different device
+// Common setup for device configs with jobs, interfaces, and gateway.
+// opts: { formFn, sharedFormFn, nameFn, jobFn, interfaceFn, gatewayFn, afterFn(n, shared) }
+const showDeviceConfig = function(n, shared, opts) {
     if (editingJobId && editingDeviceType) {
         ExitEditMode(editingDeviceType);
     }
 
-    let hostname = n.config.label;
-    hostname = hostname || n.data.id;
+    let hostname = n.config.label || n.data.id;
 
-    // Create form
-    if (shared){
-        SharedConfigHostForm(n.data.id);
+    if (shared) {
+        opts.sharedFormFn(n.data.id);
     } else {
-        ConfigHostForm(n.data.id);
+        opts.formFn(n.data.id);
     }
 
-    // Add hostname
-    ConfigHostName(hostname);
+    opts.nameFn(hostname);
 
-    // Add jobs
-    let host_jobs = [];
+    let deviceJobs = jobs ? jobs.filter(j => j.host_id === n.data.id) : [];
+    opts.jobFn(deviceJobs, shared);
 
-    if (jobs){
-        host_jobs = jobs.filter(j => j.host_id === n.data.id);
-    }
-
-    ConfigHostJob(host_jobs, shared);
-
-    // Add interfaces
     $.each(n.interface, function(i) {
-        ActionWithInterface(n, i, ConfigHostInterface)
+        ActionWithInterface(n, i, opts.interfaceFn);
     });
 
-    if(n.interface.length)
-    {
-        let default_gw = '';
-
-        if ("default_gw" in n.config){
-            default_gw = n.config.default_gw;
-        }
-
-        ConfigHostGateway(default_gw);
+    if (n.interface.length && opts.gatewayFn) {
+        opts.gatewayFn(n.config.default_gw || '');
     }
 
-    if (shared){
+    if (opts.afterFn) opts.afterFn(n, shared);
+
+    if (shared) {
         DisableFormInputs();
     }
 }
 
-const ShowRouterConfig = function(n, shared = 0){
-
-    // Exit edit mode when switching to different device
-    if (editingJobId && editingDeviceType) {
-        ExitEditMode(editingDeviceType);
-    }
-
-    let hostname = n.config.label;
-    hostname = hostname || n.data.id;
-
-    // Create form
-    if (shared){
-        SharedConfigRouterForm(n.data.id)
-    } else {
-        ConfigRouterForm(n.data.id);
-    }
-
-    // Add hostname
-    ConfigRouterName(hostname);
-
-    // Add jobs
-    let router_jobs = [];
-
-    if (jobs){
-        router_jobs = jobs.filter(j => j.host_id === n.data.id);
-    }
-
-    ConfigRouterJob(router_jobs, shared);
-
-    // Add interfaces
-    $.each(n.interface, function (i) {
-        ActionWithInterface(n, i, ConfigRouterInterface)
+const ShowHostConfig = function(n, shared = 0) {
+    showDeviceConfig(n, shared, {
+        formFn: ConfigHostForm,
+        sharedFormFn: SharedConfigHostForm,
+        nameFn: ConfigHostName,
+        jobFn: ConfigHostJob,
+        interfaceFn: ConfigHostInterface,
+        gatewayFn: ConfigHostGateway,
     });
-
-    if(n.interface.length)
-    {
-        let default_gw = '';
-
-        if ("default_gw" in n.config){
-            default_gw = n.config.default_gw;
-        }
-
-        ConfigRouterGateway(default_gw);
-    }
-
-    ConfigVxlan(n);
-
-    if (shared){
-        DisableFormInputs();
-        DisableVXLANInputs(n);
-    }
 }
 
-const ShowServerConfig = function(n, shared = 0){
-
-    // Exit edit mode when switching to different device
-    if (editingJobId && editingDeviceType) {
-        ExitEditMode(editingDeviceType);
-    }
-
-    let hostname = n.config.label;
-    hostname = hostname || n.data.id;
-
-    // Create form
-    if (shared){
-        SharedConfigServerForm(n.data.id);
-    } else {
-        ConfigServerForm(n.data.id);
-    }
-
-    // Add hostname
-    ConfigServerName(hostname);
-
-    // Add jobs
-    let host_jobs = [];
-
-    if (jobs){
-        host_jobs = jobs.filter(j => j.host_id === n.data.id);
-    }
-
-    ConfigServerJob(host_jobs, shared);
-
-    // Add interfaces
-    $.each(n.interface, function (i) {
-        ActionWithInterface(n, i, ConfigServerInterface)
+const ShowRouterConfig = function(n, shared = 0) {
+    showDeviceConfig(n, shared, {
+        formFn: ConfigRouterForm,
+        sharedFormFn: SharedConfigRouterForm,
+        nameFn: ConfigRouterName,
+        jobFn: ConfigRouterJob,
+        interfaceFn: ConfigRouterInterface,
+        gatewayFn: ConfigRouterGateway,
+        afterFn: function(n, shared) {
+            ConfigVxlan(n);
+            if (shared) DisableVXLANInputs(n);
+        },
     });
+}
 
-    if(n.interface.length)
-    {
-        let default_gw = '';
-
-        if ("default_gw" in n.config){
-            default_gw = n.config.default_gw;
-        }
-
-        ConfigServerGateway(default_gw);
-    }
-
-    if (shared){
-        DisableFormInputs();
-    }
+const ShowServerConfig = function(n, shared = 0) {
+    showDeviceConfig(n, shared, {
+        formFn: ConfigServerForm,
+        sharedFormFn: SharedConfigServerForm,
+        nameFn: ConfigServerName,
+        jobFn: ConfigServerJob,
+        interfaceFn: ConfigServerInterface,
+        gatewayFn: ConfigServerGateway,
+    });
 }
 
 const ShowHubConfig = function(n, shared = 0){

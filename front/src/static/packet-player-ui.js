@@ -213,6 +213,81 @@ const SetPacketFilter = function (shared = 0) {
     }
 };
 
+// Shared player setup: initializes buttons, slider, play/pause/stop handlers.
+// stopDrawFn determines what to draw on stop (DrawGraph vs DrawSharedGraph).
+const initPlayerUI = function(stopDrawFn) {
+    $('#NetworkPlayer').empty();
+    $('#NetworkPlayer').append('<button type="button" class="btn btn-danger me-2" id="NetworkStopButton"><i class="bx bx-stop fs-xl"></i></button>');
+    $('#NetworkPlayer').append('<button type="button" class="btn btn-success" id="NetworkPlayPauseButton" onclick="if (typeof window.ym != \'undefined\'){ym(92293993,\'reachGoal\',\'PlayPauseButton\');}"><i class="bx bx-play fs-xl"></i></button>');
+
+    PacketPlayer.getInstance().InitPlayer(packets);
+
+    // Configure the slider
+    const slider = $('#PacketSliderInput')[0];
+    if (!slider || !slider.noUiSlider) return false;
+
+    slider.noUiSlider.updateOptions({
+        start: [1],
+        range: { 'min': 1, 'max': packets.length },
+        format: {
+            to: function(val) { return '' + val },
+            from: function(val) { return '' + val },
+        },
+        tooltips: false,
+    });
+
+    $('#PacketSliderInput').show();
+
+    const pkt_count = packets.reduce((currentCount, row) => currentCount + row.length, 0);
+    $('#NetworkPlayerLabel').text(packets.length + ' ' + NumWord(packets.length, ['шаг', 'шага', 'шагов']) + ' / ' + pkt_count + ' ' + NumWord(pkt_count, ['пакет', 'пакета', 'пакетов']));
+
+    slider.noUiSlider.on('slide', function(e) {
+        if (!e) return;
+        PacketPlayer.getInstance().setAnimationTrafficStep(Math.round(e[0]) - 1);
+    });
+
+    slider.noUiSlider.on('update', function(e) {
+        if (!e) return;
+        let x = Math.round(e[0]);
+        if (packets.length === 0) {
+            $('#NetworkPlayerLabel').text('0 пакетов');
+            return;
+        }
+        $('#NetworkPlayerLabel').text('Шаг: ' + x + '/' + packets.length + ' (' + packets[x - 1].length + ' ' + NumWord(packets[x - 1].length, ['пакет', 'пакета', 'пакетов']) + ')');
+    });
+
+    $('#NetworkPlayPauseButton').click(function() {
+        if ($(this).hasClass("btn-success")) {
+            $(this).removeClass('btn-success').addClass('btn-warning').empty().append('<i class="bx bx-pause fs-xl"></i>');
+
+            if (!PacketPlayer.getInstance().getPlayerPause()) {
+                DrawGraphStatic(nodes, edges);
+            }
+
+            PacketPlayer.getInstance().setAnimationTrafficStepCallback(function() {
+                slider.noUiSlider.set(PacketPlayer.getInstance().getAnimationTrafficStep());
+            });
+
+            PacketPlayer.getInstance().StartPlayer(global_cy);
+        } else {
+            $(this).removeClass('btn-warning').addClass('btn-success').empty().append('<i class="bx bx-play fs-xl"></i>');
+            PacketPlayer.getInstance().PausePlayer();
+        }
+    });
+
+    $('#NetworkStopButton').click(function() {
+        PacketPlayer.getInstance().resetAnimationTrafficStepCallback();
+        PacketPlayer.getInstance().StopPlayer();
+        slider.noUiSlider.set(0);
+
+        stopDrawFn(nodes, edges);
+
+        $('#NetworkPlayPauseButton').removeClass('btn-success btn-warning').empty().addClass('btn-success').append('<i class="bx bx-play fs-xl"></i>');
+    });
+
+    return true;
+}
+
 // 2 states:
 // Do we need emulation
 // We have a packets and ready to play packets
@@ -228,108 +303,8 @@ const SetNetworkPlayerState = function (simulation_id) {
     }
 
     // If we have packets, then we're ready to run
-    if (packets)
-    {
-        $('#NetworkPlayer').empty();
-        $('#NetworkPlayer').append('<button type="button" class="btn btn-danger me-2" id="NetworkStopButton"><i class="bx bx-stop fs-xl"></i></button>');
-        $('#NetworkPlayer').append('<button type="button" class="btn btn-success" id="NetworkPlayPauseButton" onclick="if (typeof window.ym != \'undefined\'){ym(92293993,\'reachGoal\',\'PlayPauseButton\');}"><i class="bx bx-play fs-xl"></i></button>');
-
-        // Init player
-        PacketPlayer.getInstance().InitPlayer(packets);
-
-        // Configure the slider
-        if (!$('#PacketSliderInput')[0] || !$('#PacketSliderInput')[0].noUiSlider) {
-            return;
-        }
-
-        $('#PacketSliderInput')[0].noUiSlider.updateOptions({
-            start: [1],
-            range: {
-                'min': 1,
-                'max': packets.length,
-            },
-            format: {
-                to: function (val){return '' + val},
-                from: function (val){return '' + val},
-            },
-            tooltips: false,
-        });
-
-        // Show Slider on
-        $('#PacketSliderInput').show();
-
-        const pkt_count = packets.reduce((currentCount, row) => currentCount + row.length, 0);
-        $('#NetworkPlayerLabel').text(packets.length + ' ' + NumWord(packets.length, ['шаг', 'шага', 'шагов']) + ' / ' + pkt_count + ' ' + NumWord(pkt_count, ['пакет', 'пакета', 'пакетов']));
-
-        $('#PacketSliderInput')[0].noUiSlider.on('slide', function (e) {
-            if (!e) return;
-            let x =  Math.round(e[0]);
-            PacketPlayer.getInstance().setAnimationTrafficStep(x-1);
-        });
-
-        $('#PacketSliderInput')[0].noUiSlider.on('update', function (e) {
-            if (!e) return;
-            let x =  Math.round(e[0]);
-            if (packets.length === 0){
-                $('#NetworkPlayerLabel').text('0 пакетов');
-                return;
-            }
-            $('#NetworkPlayerLabel').text('Шаг: ' + x + '/' + packets.length + ' (' +  packets[x-1].length + ' ' + NumWord(packets[x-1].length, ['пакет', 'пакета', 'пакетов']) + ')');
-        });
-
-        // Set click handlers
-        $('#NetworkPlayPauseButton').click(function() {
-
-            // If btn-success then start to play
-            if ($(this).hasClass("btn-success")){
-                $(this).removeClass('btn-success');
-                $(this).addClass('btn-warning');
-
-                $(this).empty();
-                $(this).append('<i class="bx bx-pause fs-xl"></i>');
-
-                // If not in pause. Draw a new layout and go.
-                if (!PacketPlayer.getInstance().getPlayerPause())
-                {
-                    DrawGraphStatic(nodes, edges);
-                }
-
-                PacketPlayer.getInstance().setAnimationTrafficStepCallback(function() {
-                    $('#PacketSliderInput')[0].noUiSlider.set(PacketPlayer.getInstance().getAnimationTrafficStep());
-                });
-
-                PacketPlayer.getInstance().StartPlayer(global_cy);
-                return;
-            } else {
-
-                $(this).removeClass('btn-warning');
-                $(this).addClass('btn-success');
-                $(this).empty();
-                $(this).append('<i class="bx bx-play fs-xl"></i>');
-
-                PacketPlayer.getInstance().PausePlayer();
-                return;
-            }
-        });
-
-        $('#NetworkStopButton').click(function() {
-
-            PacketPlayer.getInstance().resetAnimationTrafficStepCallback();
-            PacketPlayer.getInstance().StopPlayer();
-
-            // Reset slider.
-            $('#PacketSliderInput')[0].noUiSlider.set(0);
-
-            DrawGraph(nodes, edges);
-
-            $('#NetworkPlayPauseButton').removeClass('btn-success');
-            $('#NetworkPlayPauseButton').removeClass('btn-warning');
-            $('#NetworkPlayPauseButton').empty();
-            $('#NetworkPlayPauseButton').addClass('btn-success');
-            $('#NetworkPlayPauseButton').append('<i class="bx bx-play fs-xl"></i>');
-            return;
-        });
-
+    if (packets) {
+        initPlayerUI(DrawGraph);
         return;
     }
 
@@ -353,21 +328,17 @@ const SetNetworkPlayerState = function (simulation_id) {
 
     $('#NetworkEmulateButton').click(function() {
 
-        // Check for job. If no job - show modal and exit.
-        if (!jobs.length)
-        {
+        if (!jobs.length) {
             $('#noJobsModal').modal('toggle');
             return;
         }
 
-        if (nodes.length > 80)
-        {
+        if (nodes.length > 80) {
             $('#tooManyHostModal').modal('toggle');
             return;
         }
 
-        if (typeof window.ym != 'undefined')
-        {
+        if (typeof window.ym != 'undefined') {
             ym(92293993,'reachGoal','NetworkEmulate');
         }
 
@@ -376,124 +347,20 @@ const SetNetworkPlayerState = function (simulation_id) {
         $('#NetworkPlayer').empty();
         $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" disabled>Эмулируется...</button>');
         InsertWaitingTime();
-        return;
     });
-
-    return;
-
 }
 
-// 2 states:
-// No packets - disable button.
-// We have a packets and ready to play packets
-const SetSharedNetworkPlayerState = function()
-{
+// Shared (read-only) network player
+const SetSharedNetworkPlayerState = function() {
 
-    // If we have packets, then we're ready to run
-    if (packets)
-    {
-        $('#NetworkPlayer').empty();
-        $('#NetworkPlayer').append('<button type="button" class="btn btn-danger me-2" id="NetworkStopButton"><i class="bx bx-stop fs-xl"></i></button>');
-        $('#NetworkPlayer').append('<button type="button" class="btn btn-success" id="NetworkPlayPauseButton" onclick="if (typeof window.ym != \'undefined\'){ym(92293993,\'reachGoal\',\'PlayPauseButton\');}"><i class="bx bx-play fs-xl"></i></button>');
-
-        // Init player
-        PacketPlayer.getInstance().InitPlayer(packets);
-
-        // Configure the slider
-        $('#PacketSliderInput')[0].noUiSlider.updateOptions({
-            start: [1],
-            range: {
-                'min': 1,
-                'max': packets.length,
-            },
-            format: {
-                to: function (val){return '' + val},
-                from: function (val){return '' + val},
-            },
-            tooltips: false,
-        });
-
-        // Show Slider on
-        $('#PacketSliderInput').show();
-
-        const pkt_count = packets.reduce((currentCount, row) => currentCount + row.length, 0);
-        $('#NetworkPlayerLabel').text(packets.length + ' ' + NumWord(packets.length, ['шаг', 'шага', 'шагов']) + ' / ' + pkt_count + ' ' + NumWord(pkt_count, ['пакет', 'пакета', 'пакетов']));
-
-        $('#PacketSliderInput')[0].noUiSlider.on('slide', function (e) {
-            if (!e) return;
-            let x =  Math.round(e[0]);
-            PacketPlayer.getInstance().setAnimationTrafficStep(x-1);
-        });
-
-        $('#PacketSliderInput')[0].noUiSlider.on('update', function (e) {
-            if (!e) return;
-            let x =  Math.round(e[0]);
-            if (packets.length === 0){
-                $('#NetworkPlayerLabel').text('0 пакетов');
-                return;
-            }
-            $('#NetworkPlayerLabel').text('Шаг: ' + x + '/' + packets.length + ' (' +  packets[x-1].length + ' ' + NumWord(packets[x-1].length, ['пакет', 'пакета', 'пакетов']) + ')');
-        });
-
-        // Set click handlers
-        $('#NetworkPlayPauseButton').click(function() {
-
-            // If btn-success then start to play
-            if ($(this).hasClass("btn-success")){
-                $(this).removeClass('btn-success');
-                $(this).addClass('btn-warning');
-
-                $(this).empty();
-                $(this).append('<i class="bx bx-pause fs-xl"></i>');
-
-                // If not in pause. Draw a new layout and go.
-                if (!PacketPlayer.getInstance().getPlayerPause())
-                {
-                    DrawGraphStatic(nodes, edges);
-                }
-
-                PacketPlayer.getInstance().setAnimationTrafficStepCallback(function() {
-                    $('#PacketSliderInput')[0].noUiSlider.set(PacketPlayer.getInstance().getAnimationTrafficStep());
-                });
-
-                PacketPlayer.getInstance().StartPlayer(global_cy);
-            } else {
-                $(this).removeClass('btn-warning');
-                $(this).addClass('btn-success');
-                $(this).empty();
-                $(this).append('<i class="bx bx-play fs-xl"></i>');
-
-                PacketPlayer.getInstance().PausePlayer();
-                return;
-            }
-        });
-
-        $('#NetworkStopButton').click(function() {
-
-            PacketPlayer.getInstance().resetAnimationTrafficStepCallback();
-            PacketPlayer.getInstance().StopPlayer();
-
-            // Reset slider.
-            $('#PacketSliderInput')[0].noUiSlider.set(0);
-
-            DrawSharedGraph(nodes, edges);
-
-            $('#NetworkPlayPauseButton').removeClass('btn-success');
-            $('#NetworkPlayPauseButton').removeClass('btn-warning');
-            $('#NetworkPlayPauseButton').empty();
-            $('#NetworkPlayPauseButton').addClass('btn-success');
-            $('#NetworkPlayPauseButton').append('<i class="bx bx-play fs-xl"></i>');
-            return;
-        });
-
+    if (packets) {
+        initPlayerUI(DrawSharedGraph);
         return;
     }
 
     // No packets
-    // Add info button
     $('#NetworkPlayer').empty();
     $('#PacketSliderInput').hide();
     $('#NetworkPlayerLabel').empty();
     $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" disabled>Нет эмуляции</button>');
-    return;
 }

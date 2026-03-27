@@ -148,21 +148,17 @@ const drawGrid = function() {
     const gridOriginY = panY % gridSize;
 
     // Vertical lines across entire viewport
-    let verticalCount = 0;
     const startX = Math.floor(-gridOriginX / gridSize) * gridSize + gridOriginX;
     for (let x = startX; x <= screenWidth; x += gridSize) {
         ctx.moveTo(x, 0);
         ctx.lineTo(x, screenHeight);
-        verticalCount++;
     }
 
     // Horizontal lines across entire viewport
-    let horizontalCount = 0;
     const startY = Math.floor(-gridOriginY / gridSize) * gridSize + gridOriginY;
     for (let y = startY; y <= screenHeight; y += gridSize) {
         ctx.moveTo(0, y);
         ctx.lineTo(screenWidth, y);
-        horizontalCount++;
     }
 
     ctx.stroke();

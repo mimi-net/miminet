@@ -27,11 +27,7 @@ const TakeGraphPictureAndUpdate = function()
 const CalculateDropOffset = function(elem_x, elem_y)
 {
     const network_scheme = document.getElementById("network_scheme");
-    let offset_left = 0;
-    let offset_top = 0;
     let ret = {'x' : 0, 'y' : 0};
-
-    console.log(elem_x + ", " + elem_y);
 
     if (network_scheme){
         ret.x += network_scheme.offsetLeft - 25;

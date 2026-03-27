@@ -86,204 +86,120 @@ const handleConfigError = function(xhr, deviceType, errorPrefix) {
     }
 }
 
-// Update host configuration
-const UpdateHostConfiguration = function (data, host_id)
-{
-    SetNetworkPlayerState(-1);
+// Generic device configuration update handler
+// opts: { url, deviceId, deviceType, expectedType, showConfigFn, warningFn, counterSelector, errorPrefix, resetPlayer, skipDrawOnWarning }
+const UpdateDeviceConfiguration = function(data, opts) {
+    if (opts.resetPlayer !== false) {
+        SetNetworkPlayerState(-1);
+    }
 
     $.ajax({
         type: 'POST',
-        url: '/host/save_config',
+        url: opts.url,
         data: data,
         success: function(data, textStatus, xhr) {
-
-            if (xhr.status === 200)
-            {
-                if (editingJobId && editingDeviceType === 'host') {
-                    ExitEditMode('host');
-                }
-                if (!data.warning){
-                    nodes = data.nodes;
-                    jobs = data.jobs;
-                    DrawGraph();
+            if (xhr.status === 200) {
+                if (editingJobId && editingDeviceType === opts.deviceType) {
+                    ExitEditMode(opts.deviceType);
                 }
 
-                let n = nodes.find(n => n.data.id === host_id);
-                if (!n) { ClearConfigForm('Нет такого хоста'); return; }
-
-                if (n.config.type === 'host'){
-                    ShowHostConfig(n);
-                } else {
-                    ClearConfigForm('Узел есть, но это не хост');
-                    return;
-                }
-
-                if (data.warning) HostWarningMsg(data.warning);
-                UpdateJobCounter('config_host_job_counter', host_id);
-            }
-        },
-        error: function(xhr) {
-            handleConfigError(xhr, 'host', 'Ошибка при сохранении конфигурации');
-        },
-        dataType: 'json'
-    });
-}
-
-// Update router configuration
-const UpdateRouterConfiguration = function (data, router_id)
-{
-    SetNetworkPlayerState(-1);
-
-    $.ajax({
-        type: 'POST',
-        url: '/host/router_save_config',
-        data: data,
-        success: function(data, textStatus, xhr) {
-
-            if (xhr.status === 200)
-            {
-                if (editingJobId && editingDeviceType === 'router') {
-                    ExitEditMode('router');
-                }
-
-                if (data.nodes) nodes = data.nodes;
-                if (data.jobs) jobs = data.jobs;
-                DrawGraph();
-
-                let n = nodes.find(n => n.data.id === router_id);
-                if (!n) { ClearConfigForm('Нет такого раутера'); return; }
-
-                if (n.config.type === 'router'){
-                    ShowRouterConfig(n);
-                } else {
-                    ClearConfigForm('Узел есть, но это не раутер');
-                    return;
-                }
-
-                if (data.warning) HostWarningMsg(data.warning);
-                UpdateJobCounter('config_router_job_counter', router_id);
-            }
-        },
-        error: function(xhr) {
-            handleConfigError(xhr, 'router', 'Ошибка при сохранении конфигурации роутера');
-        },
-        dataType: 'json'
-    });
-}
-
-// Update server configuration
-const UpdateServerConfiguration = function (data, router_id)
-{
-    SetNetworkPlayerState(-1);
-
-    $.ajax({
-        type: 'POST',
-        url: '/host/server_save_config',
-        data: data,
-        success: function(data, textStatus, xhr) {
-
-            if (xhr.status === 200)
-            {
-                if (editingJobId && editingDeviceType === 'server') {
-                    ExitEditMode('server');
-                }
-
-                if (!data.warning){
+                const shouldDraw = opts.skipDrawOnWarning ? !data.warning : true;
+                if (shouldDraw) {
                     if (data.nodes) nodes = data.nodes;
                     if (data.jobs) jobs = data.jobs;
                     DrawGraph();
                 }
 
-                let n = nodes.find(n => n.data.id === router_id);
-                if (!n) { ClearConfigForm('Нет такого сервера'); return; }
+                let n = nodes.find(n => n.data.id === opts.deviceId);
+                if (!n) { ClearConfigForm('Нет такого устройства'); return; }
 
-                if (n.config.type === 'server'){
-                    ShowServerConfig(n);
+                if (n.config.type === opts.expectedType) {
+                    opts.showConfigFn(n);
                 } else {
-                    ClearConfigForm('Узел есть, но это не сервер');
+                    ClearConfigForm('Тип устройства не совпадает');
                     return;
                 }
 
-                if (data.warning) ServerWarningMsg(data.warning);
-                UpdateJobCounter('config_server_job_counter', router_id);
+                if (data.warning && opts.warningFn) opts.warningFn(data.warning);
+                if (opts.counterSelector) {
+                    UpdateJobCounter(opts.counterSelector, opts.deviceId);
+                }
             }
         },
         error: function(xhr) {
-            handleConfigError(xhr, 'server', 'Ошибка при сохранении конфигурации сервера');
+            if (opts.errorPrefix) {
+                handleConfigError(xhr, opts.deviceType, opts.errorPrefix);
+            } else {
+                console.log('Cannot update ' + opts.deviceType + ' config');
+                console.log(xhr);
+            }
         },
         dataType: 'json'
     });
 }
 
-// Update hub configuration
-const UpdateHubConfiguration = function (data, hub_id)
-{
-    $.ajax({
-        type: 'POST',
+const UpdateHostConfiguration = function(data, host_id) {
+    UpdateDeviceConfiguration(data, {
+        url: '/host/save_config',
+        deviceId: host_id,
+        deviceType: 'host',
+        expectedType: 'host',
+        showConfigFn: ShowHostConfig,
+        warningFn: HostWarningMsg,
+        counterSelector: 'config_host_job_counter',
+        errorPrefix: 'Ошибка при сохранении конфигурации',
+        skipDrawOnWarning: true,
+    });
+}
+
+const UpdateRouterConfiguration = function(data, router_id) {
+    UpdateDeviceConfiguration(data, {
+        url: '/host/router_save_config',
+        deviceId: router_id,
+        deviceType: 'router',
+        expectedType: 'router',
+        showConfigFn: ShowRouterConfig,
+        warningFn: HostWarningMsg,
+        counterSelector: 'config_router_job_counter',
+        errorPrefix: 'Ошибка при сохранении конфигурации роутера',
+    });
+}
+
+const UpdateServerConfiguration = function(data, server_id) {
+    UpdateDeviceConfiguration(data, {
+        url: '/host/server_save_config',
+        deviceId: server_id,
+        deviceType: 'server',
+        expectedType: 'server',
+        showConfigFn: ShowServerConfig,
+        warningFn: ServerWarningMsg,
+        counterSelector: 'config_server_job_counter',
+        errorPrefix: 'Ошибка при сохранении конфигурации сервера',
+        skipDrawOnWarning: true,
+    });
+}
+
+const UpdateHubConfiguration = function(data, hub_id) {
+    UpdateDeviceConfiguration(data, {
         url: '/host/hub_save_config',
-        data: data,
-        success: function(data, textStatus, xhr) {
-
-            if (xhr.status === 200)
-            {
-                nodes = data.nodes;
-                DrawGraph();
-
-                let n = nodes.find(n => n.data.id === hub_id);
-                if (!n) { ClearConfigForm('Нет такого узла'); return; }
-
-                if (n.config.type === 'l1_hub'){
-                    ShowHubConfig(n);
-                } else {
-                    ClearConfigForm('Нет такого хаба');
-                }
-            }
-        },
-        error: function(xhr) {
-            console.log('Cannot update hub config');
-            console.log(xhr);
-        },
-        dataType: 'json'
+        deviceId: hub_id,
+        deviceType: 'l1_hub',
+        expectedType: 'l1_hub',
+        showConfigFn: ShowHubConfig,
+        resetPlayer: false,
     });
 }
 
-// Update Switch configuration
-const UpdateSwitchConfiguration = function (data, switch_id)
-{
-    SetNetworkPlayerState(-1);
-
-    $.ajax({
-        type: 'POST',
+const UpdateSwitchConfiguration = function(data, switch_id) {
+    UpdateDeviceConfiguration(data, {
         url: '/host/switch_save_config',
-        data: data,
-        success: function(data, textStatus, xhr) {
-
-            if (xhr.status === 200)
-            {
-                if (editingJobId && editingDeviceType === 'switch') {
-                    ExitEditMode('switch');
-                }
-                if (!data.warning){
-                    nodes = data.nodes;
-                    jobs = data.jobs;
-                    DrawGraph();
-                }
-
-                let n = nodes.find(n => n.data.id === switch_id);
-                if (!n) { ClearConfigForm('Нет такого узла'); return; }
-
-                if (n.config.type === 'l2_switch'){
-                    ShowSwitchConfig(n);
-                } else {
-                    ClearConfigForm('Нет такого свитча');
-                }
-                if (data.warning) SwitchWarningMsg(data.warning);
-                UpdateJobCounter('config_switch_job_counter', switch_id);
-            }
-        },
-        error: function(xhr) {
-            handleConfigError(xhr, 'switch', 'Ошибка при сохранении конфигурации свитча');
-        },
-        dataType: 'json'
+        deviceId: switch_id,
+        deviceType: 'switch',
+        expectedType: 'l2_switch',
+        showConfigFn: ShowSwitchConfig,
+        warningFn: SwitchWarningMsg,
+        counterSelector: 'config_switch_job_counter',
+        errorPrefix: 'Ошибка при сохранении конфигурации свитча',
+        skipDrawOnWarning: true,
     });
 }
