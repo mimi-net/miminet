@@ -36,7 +36,7 @@ class Location:
         TRAINER_BUTTON = Locator("#trainer-nav-item")
         # "Учебные курсы"
         TRAINING_COURSES_BUTTON = Locator("#courses-nav-item")
-
+        LANGUAGE_DROPDOWN = Locator('a.nav-link.dropdown-toggle[data-bs-toggle="dropdown"]')
     class MainPage:
         """Main (landing) page."""
 
