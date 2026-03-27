@@ -275,5 +275,10 @@
   "queuePosition": "Место в очереди",
   "langSelectorAria": "Выбор языка",
   "loadingError": "Ошибка загрузки данных",
-  "translationMissing": "Перевод отсутствует"
+  "translationMissing": "Перевод отсутствует",
+  "savingBtn": "Сохранение...",
+  "selectLink": "Выберите линк",
+  "startInterface": "Интерфейс начальной точки",
+  "notEnoughInterfaces": "Мало интерфейсов",
+  "profileTitle": "Профиль"
 }

@@ -17,18 +17,19 @@ const config_edge_main_form_id = "#config_edge_main_form";
 const config_content_save_tag = "#config_content_save";
 const config_content_save_id = "config_content_save";
 
-const ClearConfigForm = function (text) {
-
-    let txt = ''
-
-    if (!text) {
-        const defaultTextKey = 'settingsPlaceholder';
-        txt = (window.translations && window.translations[currentLanguage] && window.translations[currentLanguage][defaultTextKey]) 
-              ? window.translations[currentLanguage][defaultTextKey] 
-              : 'Тут будут настройки устройств. Выделите любое на схеме.';
-    } else {
-        txt = text;
+// Хелпер для безопасного получения перевода на лету
+const t = function(key, fallback) {
+    if (typeof window !== 'undefined' && typeof window.getTranslation === 'function') {
+        const translated = window.getTranslation(key);
+        if (translated && translated !== key) {
+            return translated;
+        }
     }
+    return fallback;
+};
+
+const ClearConfigForm = function (text) {
+    let txt = text || t('settingsPlaceholder', 'Тут будут настройки устройств. Выделите любое на схеме.');
 
     // Clear all child
     $(config_content_id).empty();
@@ -43,14 +44,12 @@ const ClearConfigForm = function (text) {
 }
 
 const HostWarningMsg = function (msg) {
-
     let warning_msg = '<div class="alert alert-info alert-dismissible fade show" role="alert">' +
         msg + '<button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button></div>';
 
     $(config_content_id).prepend(warning_msg);
 }
 const SwitchWarningMsg = function (msg) {
-
     let warning_msg = '<div class="alert alert-info alert-dismissible fade show" role="alert">' +
         msg + '<button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button></div>';
 
@@ -58,7 +57,6 @@ const SwitchWarningMsg = function (msg) {
 }
 
 const ServerWarningMsg = function (msg) {
-
     let warning_msg = '<div class="alert alert-info alert-dismissible fade show" role="alert">' +
         msg + '<button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button></div>';
 
@@ -66,7 +64,6 @@ const ServerWarningMsg = function (msg) {
 }
 
 const HostErrorMsg = function (msg) {
-
     $(config_content_id).find('.alert-info, .alert-danger').remove();
 
     let error_msg = '<div class="alert alert-info alert-dismissible fade show" role="alert">' +
@@ -79,10 +76,10 @@ const HostErrorMsg = function (msg) {
     $("#config_server_main_form :input").prop("disabled", false);
     $("config_switch_main_form :input").prop("disabled", false)
 
-    $('#config_host_main_form_submit_button').text('Сохранить').removeClass('disabled');
-    $('#config_router_main_form_submit_button').text('Сохранить').removeClass('disabled');
-    $('#config_server_main_form_submit_button').text('Сохранить').removeClass('disabled');
-    $('#config_switch_main_form_submit_button').text('Сохранить').removeClass('disabled');
+    $('#config_host_main_form_submit_button').text(t('saveBtn', 'Сохранить')).removeClass('disabled');
+    $('#config_router_main_form_submit_button').text(t('saveBtn', 'Сохранить')).removeClass('disabled');
+    $('#config_server_main_form_submit_button').text(t('saveBtn', 'Сохранить')).removeClass('disabled');
+    $('#config_switch_main_form_submit_button').text(t('saveBtn', 'Сохранить')).removeClass('disabled');
 }
 
 const UpdateJobCounter = function (counterId, deviceId = null) {
@@ -90,7 +87,6 @@ const UpdateJobCounter = function (counterId, deviceId = null) {
     if (!counter) {
         return;
     }
-
     counter.style.display = 'none';
 }
 
@@ -102,7 +98,7 @@ const UpdateHostConfigurationForm = function(host_id) {
 
     // Set loading spinner
     $('#config_host_main_form_submit_button').text('');
-    $('#config_host_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>'); // TODO: Localize "Сохранение..."
+    $('#config_host_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">' + t('savingBtn', 'Сохранение...') + '</span>');
 
     // Use unified delete and save function
     DeleteAndSaveJob('host', UpdateHostConfiguration, data, host_id);
@@ -184,7 +180,7 @@ const ConfigRouterForm = function (router_id) {
 
         // Set loading spinner
         $('#config_router_main_form_submit_button').text('');
-        $('#config_router_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>'); // TODO: Localize
+        $('#config_router_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">' + t('savingBtn', 'Сохранение...') + '</span>');
 
         // Use unified delete and save function
         DeleteAndSaveJob('router', UpdateRouterConfiguration, data, router_id);
@@ -192,7 +188,6 @@ const ConfigRouterForm = function (router_id) {
 
     $('#config_router_main_form_submit_button, #config_router_end_form').on('click', handleRouterClick);
 
-    // Update grid to exclude config panel area
     if (typeof updateGridForConfigPanel === 'function') {
         updateGridForConfigPanel();
     }
@@ -203,13 +198,11 @@ const ConfigServerForm = function (server_id) {
     var button = document.getElementById('config_server_save_script').innerHTML;
     var banner = document.getElementById('config_server_edit_banner_script').innerHTML;
 
-    // Clear all child
     $(config_content_id).empty();
     $(config_content_save_tag).empty();
 
     document.getElementById(config_content_save_id).style.display='block';
 
-    // Add new form
     $(config_content_id).append(form);
     $(config_content_id).append(banner);
     $(config_content_save_tag).append(button);
@@ -221,7 +214,6 @@ const ConfigServerForm = function (server_id) {
 
     addIpFieldHandlers();
 
-    // Set host_id
     $('#server_id').val(server_id);
     $('#net_guid').val(network_guid);
 
@@ -229,20 +221,16 @@ const ConfigServerForm = function (server_id) {
         event.preventDefault();
         let data = $('#config_main_form').serialize();
 
-        // Disable all input fields
         $("#config_main_form :input").prop("disabled", true);
 
-        // Set loading spinner
         $('#config_server_main_form_submit_button').text('');
-        $('#config_server_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>'); // TODO: Localize
+        $('#config_server_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">' + t('savingBtn', 'Сохранение...') + '</span>');
 
-        // Use unified delete and save function
         DeleteAndSaveJob('server', UpdateServerConfiguration, data, server_id);
     }
 
     $('#config_server_main_form_submit_button, #config_server_end_form').on('click', handleServerClick);
 
-    // Update grid to exclude config panel area
     if (typeof updateGridForConfigPanel === 'function') {
         updateGridForConfigPanel();
     }
@@ -252,13 +240,11 @@ const ConfigHubForm = function (hub_id) {
     var form = document.getElementById('config_hub_main_form_script').innerHTML;
     var button = document.getElementById('config_hub_save_script').innerHTML;
 
-    // Clear all child
     $(config_content_id).empty();
     $(config_content_save_tag).empty();
 
     document.getElementById(config_content_save_id).style.display='block';
 
-    // Add new form
     $(config_content_id).append(form);
     $(config_content_save_tag).append(button);
 
@@ -269,7 +255,6 @@ const ConfigHubForm = function (hub_id) {
 
     addIpFieldHandlers();
 
-    // Set host_id
     $('#hub_id').val(hub_id);
     $('#net_guid').val(network_guid);
 
@@ -277,19 +262,16 @@ const ConfigHubForm = function (hub_id) {
         event.preventDefault();
         let data = $('#config_hub_main_form').serialize();
 
-        // Disable all input fields
         $("#config_hub_main_form :input").prop("disabled", true);
 
-        // Set loading spinner
         $('#config_hub_main_form_submit_button').text('');
-        $('#config_hub_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>'); // TODO: Localize
+        $('#config_hub_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">' + t('savingBtn', 'Сохранение...') + '</span>');
 
         UpdateHubConfiguration(data, hub_id);
     }
 
     $('#config_hub_main_form_submit_button, #config_hub_end_form').on('click', handleHubClick);
 
-    // Update grid to exclude config panel area
     if (typeof updateGridForConfigPanel === 'function') {
         updateGridForConfigPanel();
     }
@@ -299,13 +281,11 @@ const ConfigSwitchForm = function (switch_id) {
     var form = document.getElementById('config_switch_main_form_script').innerHTML;
     var button = document.getElementById('config_switch_save_script').innerHTML;
 
-    // Clear all child
     $(config_content_id).empty();
     $(config_content_save_tag).empty();
 
     document.getElementById(config_content_save_id).style.display='block';
 
-    // Add new form
     $(config_content_id).append(form);
     $(config_content_save_tag).append(button);
 
@@ -316,11 +296,6 @@ const ConfigSwitchForm = function (switch_id) {
 
     addIpFieldHandlers();
 
-    // Add href for mimishark
-    // var url = "/MimiShark?guid="+network_guid
-    // $(needhref).attr('href',url)
-
-    // Set host_id
     $('#switch_id').val(switch_id);
     $('#net_guid').val(network_guid);
 
@@ -329,19 +304,16 @@ const ConfigSwitchForm = function (switch_id) {
         event.preventDefault();
         let data = $('#config_switch_main_form').serialize();
 
-        // Disable all input fields
         $("#config_switch_main_form :input").prop("disabled", true);
 
-        // Set loading spinner
         $('#config_switch_main_form_submit_button').text('');
-        $('#config_switch_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>'); // TODO: Localize
+        $('#config_switch_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">' + t('savingBtn', 'Сохранение...') + '</span>');
 
         DeleteAndSaveJob('switch', UpdateSwitchConfiguration, data, switch_id);
     }
 
     $('#config_switch_main_form_submit_button, #config_switch_end_form').on('click', handleSwitchClick);
 
-    // Update grid to exclude config panel area
     if (typeof updateGridForConfigPanel === 'function') {
         updateGridForConfigPanel();
     }
@@ -352,14 +324,11 @@ const ConfigEdgeForm = function (edge_id) {
     var form = document.getElementById('config_edge_main_form_script').innerHTML;
     var button = document.getElementById('config_edge_save_script').innerHTML;
 
-
-    // Clear all child
     $(config_content_id).empty();
     $(config_content_save_tag).empty();
 
     document.getElementById(config_content_save_id).style.display='block';
 
-    // Add new form
     $(config_content_id).append(form);
     $(config_content_save_tag).append(button);
 
@@ -368,7 +337,6 @@ const ConfigEdgeForm = function (edge_id) {
         translateDynamicContent(document.getElementById('config_content_save'));
     }
 
-    // Set host_id
     $('#edge_id').val(edge_id);
     $('#net_guid').val(network_guid);
 
@@ -381,7 +349,6 @@ const ConfigEdgeForm = function (edge_id) {
 
         let data = $('#config_edge_main_form').serialize();
         const edge = edges.find(e => e.data.id === edge_id);
-        console.log(edge);
         const lossValue = $("#edge_loss").val();
         const duplicateValue = $("#edge_duplicate").val();
 
@@ -393,7 +360,7 @@ const ConfigEdgeForm = function (edge_id) {
         inputsToDisable.prop("disabled", true);
 
         $('#config_edge_main_form_submit_button').html(
-            '<span class="spinner-border spinner-border-sm" role="status"></span> Сохранение...' // TODO: Localize
+            '<span class="spinner-border spinner-border-sm" role="status"></span> ' + t('savingBtn', 'Сохранение...')
         );
 
         edgeSaveXHR = UpdateEdgeConfiguration(data);
@@ -402,7 +369,6 @@ const ConfigEdgeForm = function (edge_id) {
 
     $('#config_edge_main_form_submit_button, #config_edge_end_form').off('click').on('click', handleEdgeClick);
 
-    // Update grid to exclude config panel area
     if (typeof updateGridForConfigPanel === 'function') {
         updateGridForConfigPanel();
     }
@@ -426,14 +392,12 @@ const ConfigHubName = function (hostname) {
     $('#config_hub_name').val(hostname);
 }
 
-<<<<<<< HEAD
-const ConfigEdgePercentage = function (edge_loss) {
-    appendAndTranslate(config_edge_main_form_id, 'config_edge_save_loss_script');
-=======
 const ConfigEdgeNetworkIssues = function (edge_loss, edge_duplicate) {
     var text = document.getElementById('config_edge_set_network_issues_script').innerHTML;
     $(config_edge_main_form_id).prepend(text);
->>>>>>> origin/main
+    if (typeof translateDynamicContent === 'function') {
+        translateDynamicContent(document.querySelector(config_edge_main_form_id));
+    }
     $('#edge_loss').val(edge_loss);
     $('#edge_duplicate').val(edge_duplicate);
 };
@@ -494,19 +458,16 @@ const ConfigSwtichRSTP = function (rstp) {
 const SharedConfigHostForm = function(host_id){
     var form = document.getElementById('config_host_main_form_script').innerHTML;
 
-    // Clear all child
     $(config_content_id).empty();
     $(config_content_save_tag).empty();
     document.getElementById(config_content_save_id).style.display='none';
 
-    // Add new form
     $(config_content_id).append(form);
     
     if (typeof translateDynamicContent === 'function') {
         translateDynamicContent(document.getElementById('config_content'));
     }
 
-    // Set host_id
     $('#host_id').val( host_id );
     $('#net_guid').val( network_guid );
     $('#config_host_main_form_submit_button').prop('disabled', true);
@@ -515,56 +476,46 @@ const SharedConfigHostForm = function(host_id){
 const SharedConfigRouterForm = function (router_id) {
     var form = document.getElementById('config_router_main_form_script').innerHTML;
 
-    // Clear all child
     $(config_content_id).empty();
     $(config_content_save_tag).empty();
     document.getElementById(config_content_save_id).style.display='none';
 
-    // Add new form
     $(config_content_id).append(form);
 
     if (typeof translateDynamicContent === 'function') {
         translateDynamicContent(document.getElementById('config_content'));
     }
 
-    // Set host_id
     $('#router_id').val(router_id);
     $('#net_guid').val(network_guid);
-
     $('#config_router_main_form_submit_button').prop('disabled', true);
 }
 
 const SharedConfigServerForm = function (router_id) {
     var form = document.getElementById('config_server_main_form_script').innerHTML;
 
-    // Clear all child
     $(config_content_id).empty();
     $(config_content_save_tag).empty();
     document.getElementById(config_content_save_id).style.display='none';
 
-    // Add new form
     $(config_content_id).append(form);
 
     if (typeof translateDynamicContent === 'function') {
         translateDynamicContent(document.getElementById('config_content'));
     }
 
-    // Set host_id
     $('#router_id').val(router_id);
     $('#net_guid').val(network_guid);
-
     $('#config_server_main_form_submit_button').prop('disabled', true);
 }
 
 const SharedConfigHubForm = function (hub_id) {
     var form = document.getElementById('config_hub_main_form_script').innerHTML;
 
-    // Clear all child
     $(config_content_id).empty();
     $(config_content_save_tag).empty();
     document.getElementById(config_content_save_id).style.display='none';
 
-    // Add new form
     $(config_content_id).append(form);
 
     if (typeof translateDynamicContent === 'function') {
@@ -577,12 +528,10 @@ const SharedConfigHubForm = function (hub_id) {
 const SharedConfigSwitchForm = function (switch_id) {
     var form = document.getElementById('config_switch_main_form_script').innerHTML;
 
-    // Clear all child
     $(config_content_id).empty();
     $(config_content_save_tag).empty();
     document.getElementById(config_content_save_id).style.display='none';
 
-    // Add new form
     $(config_content_id).append(form);
 
     if (typeof translateDynamicContent === 'function') {
@@ -595,12 +544,10 @@ const SharedConfigSwitchForm = function (switch_id) {
 const SharedConfigEdgeForm = function (edge_id) {
     var form = document.getElementById('config_edge_main_form_script').innerHTML;
 
-    // Clear all child
     $(config_content_id).empty();
     $(config_content_save_tag).empty();
     document.getElementById(config_content_save_id).style.display='block';
 
-    // Add new form
     $(config_content_id).append(form);
 
     if (typeof translateDynamicContent === 'function') {
@@ -635,7 +582,7 @@ const ConfigItemInterface = function (name, ip, netmask, connected_to, item) {
         return;
     }
 
-    let ids = ["_iface_name_label_", "_iface_name_", "_ip_", "_mask_"];
+    let ids =["_iface_name_label_", "_iface_name_", "_ip_", "_mask_"];
     ids.forEach(function (id) {
         eth.innerHTML = eth.innerHTML.replace(RegExp(conf_item + id + 'example', "g"), conf_item + id + name);
     });
@@ -657,7 +604,7 @@ const ConfigItemInterface = function (name, ip, netmask, connected_to, item) {
     $(tag + ids[3] + name).val(netmask);
 
     if (Array.isArray(pcaps) && pcaps.includes(name)) {
-        const linkLabel = getTranslation('linkTo');
+        const linkLabel = t('linkTo', 'Линк к');
         $(tag + '_iface_name_label_' + name).html(
             '<span data-i18n="linkTo">' + linkLabel + '</span> (<a href="/' + item + '/mimishark?guid=' + network_guid + '&iface=' + name + '" target="_blank">pcap</a>)'
         );
@@ -775,7 +722,7 @@ const ConfigHostJobOnChange = function (evnt) {
         
         case '108':
             UpdateHostForm('config_host_add_dhclient');
-            FillDeviceSelectIntf('#config_host_add_dhclient_interface_select_iface_field', '#host_id', "Выберите линк", false)
+            FillDeviceSelectIntf('#config_host_add_dhclient_interface_select_iface_field', '#host_id', t('selectLink', "Выберите линк"), false)
             break;
 
         case '0':
@@ -845,7 +792,6 @@ const ConfigHostJob = function (host_jobs, shared = 0) {
         job_elem.innerHTML = job_elem.innerHTML.replace(/justify-content-between align-items-center\">/, 'justify-content-between align-items-center\"><small>' + host_jobs[i].print_cmd + '</small>');
 
         let text = job_elem.innerHTML;
-        //$(text).insertBefore(host_id);
         $('#config_host_job_list').append(text);
 
         $('#config_host_job_delete_' + jid).click(function (event) {
@@ -899,12 +845,13 @@ const ConfigSwitchJobOnChange = function(evnt) {
             break;
         case '6':
              UpdateSwitchForm('config_switch_link_down_script');
-             FillDeviceSelectIntf("#config_switch_link_down_iface_select_field", '#switch_id', "Выберите линк", false);
+             FillDeviceSelectIntf("#config_switch_link_down_iface_select_field", '#switch_id', t('selectLink', "Выберите линк"), false);
             break;
         case '7':
             UpdateSwitchForm('config_switch_sleep_script');
     }
 }
+
 const ConfigSwitchJob = function (switch_jobs, shared = 0) {
 
     let elem = document.getElementById('config_switch_job_script').innerHTML;
@@ -938,7 +885,10 @@ const ConfigSwitchJob = function (switch_jobs, shared = 0) {
         let jid = switch_jobs[i].id;
 
         if (i == 0) {
-            $('#config_switch_job_list').append('<label class="text-sm">Команды</label>');
+            $('#config_switch_job_list').append('<label class="text-sm" data-i18n="commandsLabel">Команды</label>');
+            if (typeof translateDynamicContent === 'function') {
+                translateDynamicContent(document.getElementById('config_switch_job_list'));
+            }
         }
 
         elem = document.getElementById('config_switch_job_list_elem_script');
@@ -953,7 +903,6 @@ const ConfigSwitchJob = function (switch_jobs, shared = 0) {
         job_elem.innerHTML = job_elem.innerHTML.replace(/justify-content-between align-items-center\">/, 'justify-content-between align-items-center\"><small>' + switch_jobs[i].print_cmd + '</small>');
 
         let text = job_elem.innerHTML;
-        //$(text).insertBefore(host_id);
         $('#config_switch_job_list').append(text);
 
         $('#config_switch_job_delete_' + jid).click(function (event) {
@@ -985,12 +934,12 @@ const ConfigRouterJobOnChange = function(evnt) {
             break;
         case '100':
             UpdateRouterForm('config_router_add_ip_mask_script');
-            FillDeviceSelectIntf("#config_router_add_ip_mask_iface_select_field", '#router_id', "Выберите линк", false);
+            FillDeviceSelectIntf("#config_router_add_ip_mask_iface_select_field", '#router_id', t('selectLink', "Выберите линк"), false);
         
             break;
         case '101':
             UpdateRouterForm('config_router_add_nat_masquerade_script');
-            FillDeviceSelectIntf("#config_router_add_nat_masquerade_iface_select_field", '#router_id', "Выберите линк", false);
+            FillDeviceSelectIntf("#config_router_add_nat_masquerade_iface_select_field", '#router_id', t('selectLink', "Выберите линк"), false);
 
             break;
         case '102':
@@ -999,7 +948,7 @@ const ConfigRouterJobOnChange = function(evnt) {
             break;
         case '104':
             UpdateRouterForm('config_router_add_subinterface_script');
-            FillDeviceSelectIntf("#config_router_add_subinterface_iface_select_field", '#router_id', "Выберите линк" ,false);
+            FillDeviceSelectIntf("#config_router_add_subinterface_iface_select_field", '#router_id', t('selectLink', "Выберите линк") ,false);
 
             break;
         case '105':
@@ -1014,14 +963,15 @@ const ConfigRouterJobOnChange = function(evnt) {
             break;
         case '107':
             UpdateRouterForm('config_router_add_arp_proxy_script');
-            FillDeviceSelectIntf("#config_router_add_arp_proxy_iface_select_field", '#router_id', "Выберите линк", false);
+            FillDeviceSelectIntf("#config_router_add_arp_proxy_iface_select_field", '#router_id', t('selectLink', "Выберите линк"), false);
+            break;
         case '109':
             UpdateRouterForm('config_router_add_port_forwarding_tcp_script');
-            FillDeviceSelectIntf("#config_router_add_port_forwarding_tcp_iface_select_field", "#router_id", "Выберите линк", false)
+            FillDeviceSelectIntf("#config_router_add_port_forwarding_tcp_iface_select_field", "#router_id", t('selectLink', "Выберите линк"), false)
             break;
         case '110':
             UpdateRouterForm('config_router_add_port_forwarding_udp_script');
-            FillDeviceSelectIntf("#config_router_add_port_forwarding_udp_iface_select_field", "#router_id", "Выберите линк", false)
+            FillDeviceSelectIntf("#config_router_add_port_forwarding_udp_iface_select_field", "#router_id", t('selectLink', "Выберите линк"), false)
             break;
         default:
             console.log("Unknown target.value");
@@ -1228,7 +1178,7 @@ const ConfigServerJobOnChange = function (evnt) {
         
         case '203':
             UpdateServerForm('config_server_add_dhcp_server_script');
-            FillDeviceSelectIntf('#config_server_add_dhcp_interface_select_iface_field', '#server_id', "Выберите линк", false)
+            FillDeviceSelectIntf('#config_server_add_dhcp_interface_select_iface_field', '#server_id', t('selectLink', "Выберите линк"), false)
             break;
 
         default:
@@ -1252,39 +1202,11 @@ const DisableVLANInputs = function (n) {
     });
 };
 
-const UpdateRouterForm = function(name) {
-    /**
-     * Replace old form with new one
-     */
-    elem = document.getElementById(name).innerHTML;
-    router_job_list = document.getElementById('config_router_job_list');
-
-    if (!elem || !router_job_list){
-        return;
+const FillDeviceSelectIntf = function(select_id, device, field_msg = null, return_ip = true) { 
+    // Устанавливаем переведенное значение по умолчанию, если не передано другое
+    if (!field_msg) {
+        field_msg = t('startInterface', 'Интерфейс начальной точки');
     }
-
-    $('div[name="config_router_select_input"]').remove();
-    $(elem).insertBefore(router_job_list);
-
-    if (typeof translateDynamicContent === 'function') {
-        const parentForm = $(router_job_list).closest('form').get(0);
-        if (parentForm) {
-            translateDynamicContent(parentForm);
-        }
-    }
-}
-
-<<<<<<< HEAD
-const FillRouterSelect = function(select_id, field_msg = 'Интерфейс начальной точки', return_ip = true) { // TODO: Localize
-=======
-const FillDeviceSelectIntf = function(select_id, device, field_msg = 'Интерфейс начальной точки', return_ip = true) {
->>>>>>> origin/main
-    /**
-    * Fill select element with network hosts.
-    * @param  {String} select_id ID(name) of the element to which you need to add data.
-    * @param  {String} field_msg Message that will be displayed in the select list by default.
-    * @param  {Boolean} return_ip True if replace user's input with ip and False if replace it with element's id.
-   */
 
     // configured router id
     device_id = $(device)[0].value;
@@ -1303,7 +1225,7 @@ const FillDeviceSelectIntf = function(select_id, device, field_msg = 'Интер
     }
 
     if (!device_node.interface.length) {
-        $(select_id).append('<option selected value="0">Мало интерфейсов</option>');
+        $(select_id).append('<option selected value="0">' + t('notEnoughInterfaces', 'Мало интерфейсов') + '</option>'); 
         return;
     } else {
         $(select_id).append(`<option selected value="0">${field_msg}</option>`);
@@ -1360,7 +1282,6 @@ const FillDeviceSelectIntf = function(select_id, device, field_msg = 'Интер
 const DisableVXLANInputs = function (n) {
     var modalId = 'VxlanConfigModal' + n.data.id;
 
-
     $(document).ready(function () {
         $('#config_button_vxlan').prop('disabled', false);
         $('#' + modalId + ' :input').not('.btn-close').prop('disabled', true);
@@ -1377,8 +1298,6 @@ const DisableVXLANInputs = function (n) {
 
         $('#' + modalId).off('hidden.bs.modal.myNamespace');
     });
-<<<<<<< HEAD
-=======
 };
 
 // ========== DEVICE-SPECIFIC COMMAND EDITING ==========
@@ -1473,14 +1392,14 @@ const EditJobInRouter = function(router_id, job_id, network_guid) {
                 break;
             case '100': // Добавить IP адрес
                 UpdateRouterForm('config_router_add_ip_mask_script');
-                FillDeviceSelectIntf("#config_router_add_ip_mask_iface_select_field", '#router_id', "Выберите линк", false);
+                FillDeviceSelectIntf("#config_router_add_ip_mask_iface_select_field", '#router_id', t('selectLink', "Выберите линк"), false);
                 $('#config_router_add_ip_mask_iface_select_field').val(job.arg_1 || '');
                 $('#config_router_add_ip_mask_ip_input_field').val(job.arg_2 || '');
                 $('#config_router_add_ip_mask_mask_input_field').val(job.arg_3 || '0');
                 break;
             case '101': // Включить NAT на интерфейсе
                 UpdateRouterForm('config_router_add_nat_masquerade_script');
-                FillDeviceSelectIntf("#config_router_add_nat_masquerade_iface_select_field", '#router_id', "Выберите линк", false);
+                FillDeviceSelectIntf("#config_router_add_nat_masquerade_iface_select_field", '#router_id', t('selectLink', "Выберите линк"), false);
                 $('#config_router_add_nat_masquerade_iface_select_field').val(job.arg_1 || '');
                 break;
             case '102': // Добавить маршрут
@@ -1491,7 +1410,7 @@ const EditJobInRouter = function(router_id, job_id, network_guid) {
                 break;
             case '104': // Добавить сабинтерфейс с VLAN
                 UpdateRouterForm('config_router_add_subinterface_script');
-                FillDeviceSelectIntf("#config_router_add_subinterface_iface_select_field", '#router_id', "Выберите линк", false);
+                FillDeviceSelectIntf("#config_router_add_subinterface_iface_select_field", '#router_id', t('selectLink', "Выберите линк"), false);
                 $('#config_router_add_subinterface_iface_select_field').val(job.arg_1 || '');
                 $('#config_router_add_subinterface_ip_input_field').val(job.arg_2 || '');
                 $('#config_router_add_subinterface_mask_input_field').val(job.arg_3 || '0');
@@ -1515,12 +1434,12 @@ const EditJobInRouter = function(router_id, job_id, network_guid) {
                 break;
             case '107': // Включить ARP Proxy на интерфейсе
                 UpdateRouterForm('config_router_add_arp_proxy_script');
-                FillDeviceSelectIntf("#config_router_add_arp_proxy_iface_select_field", '#router_id', "Выберите линк", false);
+                FillDeviceSelectIntf("#config_router_add_arp_proxy_iface_select_field", '#router_id', t('selectLink', "Выберите линк"), false);
                 $('#config_router_add_arp_proxy_iface_select_field').val(job.arg_1 || '');
                 break;
             case '109': // Добавить Port Forwarding для TCP
                 UpdateRouterForm('config_router_add_port_forwarding_tcp_script');
-                FillDeviceSelectIntf("#config_router_add_port_forwarding_tcp_iface_select_field", "#router_id", "Выберите линк", false);
+                FillDeviceSelectIntf("#config_router_add_port_forwarding_tcp_iface_select_field", "#router_id", t('selectLink', "Выберите линк"), false);
                 $('#config_router_add_port_forwarding_tcp_iface_select_field').val(job.arg_1 || '');
                 $('#config_router_add_port_forwarding_tcp_port_input_field').val(job.arg_2 || '')
                 $('#config_router_add_port_forwarding_tcp_dest_ip_input_field').val(job.arg_3 || '')
@@ -1528,7 +1447,7 @@ const EditJobInRouter = function(router_id, job_id, network_guid) {
                 break;
             case '110': // Добавить Port Forwarding для UDP
                 UpdateRouterForm('config_router_add_port_forwarding_udp_script');
-                FillDeviceSelectIntf("#config_router_add_port_forwarding_udp_iface_select_field", "#router_id", "Выберите линк", false);
+                FillDeviceSelectIntf("#config_router_add_port_forwarding_udp_iface_select_field", "#router_id", t('selectLink', "Выберите линк"), false);
                 $('#config_router_add_port_forwarding_udp_iface_select_field').val(job.arg_1 || '');
                 $('#config_router_add_port_forwarding_udp_port_input_field').val(job.arg_2 || '')
                 $('#config_router_add_port_forwarding_udp_dest_ip_input_field').val(job.arg_3 || '')
@@ -1591,7 +1510,7 @@ const EditJobInServer = function(server_id, job_id, network_guid) {
                 break;
             case '203': // Запустить DHCP сервер
                 UpdateServerForm('config_server_add_dhcp_server_script');
-                FillDeviceSelectIntf('#config_server_add_dhcp_interface_select_iface_field', '#server_id', "Выберите линк", false);
+                FillDeviceSelectIntf('#config_server_add_dhcp_interface_select_iface_field', '#server_id', t('selectLink', "Выберите линк"), false);
                 $('#config_server_add_dhcp_ip_range_1_input_field').val(job.arg_1 || '');
                 $('#config_server_add_dhcp_ip_range_2_input_field').val(job.arg_2 || '');
                 $('#config_server_add_dhcp_mask_input_field').val(job.arg_3 || '0');
@@ -1611,6 +1530,7 @@ const EditJobInServer = function(server_id, job_id, network_guid) {
         }, 200)
     }
 };
+
 const EditJobInSwitch = function(switch_id, job_id, network_guid) {
     const job = jobs.find(j => j.id === job_id);
 
@@ -1635,7 +1555,7 @@ const EditJobInSwitch = function(switch_id, job_id, network_guid) {
             switch(job.job_id.toString()) {
             case '6': 
                 UpdateSwitchForm('config_switch_link_down_script');
-                FillDeviceSelectIntf('#config_switch_link_down_iface_select_field','#switch_id' , "Выберете линк", false)
+                FillDeviceSelectIntf('#config_switch_link_down_iface_select_field','#switch_id' , t('selectLink', "Выберите линк"), false)
                 $('#config_switch_link_down_iface_select_field').val(job.arg_1 || '');
                 break;
             case '7': 
@@ -1655,5 +1575,4 @@ const EditJobInSwitch = function(switch_id, job_id, network_guid) {
         }, 100);
         }, 200)
     }
->>>>>>> origin/main
 };

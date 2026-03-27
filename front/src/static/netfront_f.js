@@ -1513,13 +1513,9 @@ const InsertWaitingTimeHelper = function(time_filter) {
         data: '',
         success: function(data) {
             const queue_size = parseInt(data.size);
-<<<<<<< HEAD
 
-            if ($('#NetworkPlayerLabel').text().startsWith("Шаг:") || $('#NetworkPlayerLabel').text().startsWith("Step:")) {
-=======
             if (!$('#NetworkPlayer button:first').prop('disabled')) {
                 console.log($('#NetworkPlayer button:first').prop('disabled'))
->>>>>>> origin/main
                 return;
             } else if (queue_size <= 1) {
                 $('#NetworkPlayerLabel').html('<span data-i18n="emulationWaitLabel">Ожидание 10-30 сек.</span>');

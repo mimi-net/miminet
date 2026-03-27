@@ -275,5 +275,10 @@
   "queuePosition": "Queue position",
   "langSelectorAria": "Language selector",
   "loadingError": "Data loading error",
-  "translationMissing": "Translation missing"
+  "translationMissing": "Translation missing",
+  "savingBtn": "Saving...",
+  "selectLink": "Select link",
+  "startInterface": "Start interface",
+  "notEnoughInterfaces": "Not enough interfaces",
+  "profileTitle": "Profile"
 }

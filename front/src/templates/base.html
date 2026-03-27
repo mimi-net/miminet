@@ -43,31 +43,48 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         {% set show_profile_link = current_user.is_authenticated and not request.path.startswith('/auth') %}
 
         {% if network %}
-            <div class="mx-auto">
-                <div class="navbar-nav">
-                    {% if current_user.is_authenticated and request.path != url_for('web_network_shared') %}
-                    <a class="d-inline nav-link" href="{{ url_for('home') }}" data-i18n="myNetworksLink">Мои сети</a>
-                    <a class="d-inline nav-link px-1" href="#">/</a>
-                    {% endif %}
-                    <a class="d-inline nav-link" id="network_title_head" href="{{ url_for('web_network', guid=network.guid) }}">{{ network.title }}</a>
+            {% if current_user.is_authenticated %}
+                <div class="mx-auto">
+                    <div class="navbar-nav">
+                        {% if request.path != url_for('web_network_shared') %}
+                        <a class="d-inline nav-link" href="{{ url_for('home') }}" data-i18n="myNetworksLink">Мои сети</a>
+                        <a class="d-inline nav-link px-1" href="#">/</a>
+                        {% endif %}
+                        <a class="d-inline nav-link" id="network_title_head" href="{{ url_for('web_network', guid=network.guid) }}">{{ network.title }}</a>
+                    </div>
                 </div>
-<<<<<<< HEAD
-            </div>
-=======
 
-                <div class="form-check pe-lg-1 d-flex align-items-center">
-                    <a class="btn btn-success btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" id="share-network" title="Сеть доступна по URL" onclick="urlCopyButton()">
-                        <i class='bx bx-share-alt fs-4 mx-1' ></i>
-                    </a>
-                    <a class="btn btn-outline-primary btn-icon me-4" data-target="#ModalCopy" id="copy-network" data-toggle="tooltip" data-bs-placement="bottom" title="Сохранить копию" onclick="CopyNetwork()">
-                        <i class='bx bx-copy fs-4 mx-1'></i>
-                    </a>
-                    <a class="btn btn-outline-primary btn-icon" href="#netConfigModal" id="net-settings" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети"><i class='bx bx-cog fs-4 mx-1'></i></a>
+                <div class="ms-auto d-flex align-items-center">
+                    <!-- Переключатель языка -->
+                    <ul class="navbar-nav me-3">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Выбор языка" data-i18n-attr="aria-label:langSelectorAria">
+                                <i class="bx bx-globe fs-4"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" style="min-width: auto;">
+                                <li><a class="dropdown-item" href="#" onclick="setLanguage('ru'); return false;">Русский</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="setLanguage('en'); return false;">English</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <!-- Кнопки действий -->
+                    <div class="form-check pe-lg-1 d-flex align-items-center mb-0 ps-0">
+                        <a class="btn btn-success btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" id="share-network" title="Сеть доступна по URL" data-i18n-attr="aria-label:tooltipUrlAvailable" onclick="urlCopyButton()">
+                            <i class='bx bx-share-alt fs-4 mx-1' ></i>
+                        </a>
+                        <a class="btn btn-outline-primary btn-icon me-4" data-target="#ModalCopy" id="copy-network" data-toggle="tooltip" data-bs-placement="bottom" title="Сохранить копию" data-i18n-attr="aria-label:tooltipSaveChanges" onclick="CopyNetwork()">
+                            <i class='bx bx-copy fs-4 mx-1'></i>
+                        </a>
+                        <a {% if request.path != url_for('web_network_shared') %} class="btn btn-outline-primary btn-icon" {% else %} class="btn btn-outline-primary btn-icon disabled" {% endif %} href="#netConfigModal" id="net-settings" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети" data-i18n-attr="aria-label:tooltipNetSettings"><i class='bx bx-cog fs-4 mx-1'></i></a>
+                    </div>
+                    
+                    <!-- Профиль пользователя -->
                     {% if show_profile_link %}
-                    <a href="{{ url_for('user_profile') }}" class="ms-3 profile-avatar-link" title="Профиль">
+                    <a href="{{ url_for('user_profile') }}" class="ms-3 profile-avatar-link" title="Профиль" data-i18n-attr="title:profileTitle;aria-label:profileTitle">
                         {% if current_user.avatar_uri %}
                         <img src="{{ url_for('static', filename='avatar/' + current_user.avatar_uri) }}"
-                             alt="Профиль" class="profile-avatar-img" loading="lazy">
+                             alt="Профиль" class="profile-avatar-img" loading="lazy" data-i18n-attr="alt:profileTitle">
                         {% else %}
                         <span class="profile-avatar-placeholder" aria-hidden="true"></span>
                         {% endif %}
@@ -78,107 +95,88 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <div class="mx-auto navbar-nav">
                     <a class="d-inline nav-link" id="network_title_head" href="#">{{ network.title }}</a>
                 </div>
-                <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary">
-                    <i class="bx fs-5 lh-1 me-1"></i>Вход
-                </a>
+                
+                <div class="ms-auto d-flex align-items-center">
+                    <!-- Переключатель языка -->
+                    <ul class="navbar-nav me-3">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Выбор языка" data-i18n-attr="aria-label:langSelectorAria">
+                                <i class="bx bx-globe fs-4"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" style="min-width: auto;">
+                                <li><a class="dropdown-item" href="#" onclick="setLanguage('ru'); return false;">Русский</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="setLanguage('en'); return false;">English</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary" data-i18n="loginButton">
+                        <i class="bx fs-5 lh-1 me-1"></i>Вход
+                    </a>
+                </div>
             {% endif %}
         {% else %}
-            {% if current_user.is_authenticated %}
+            <div class="ms-auto d-flex align-items-center">
                 <div class="navbar-nav">
-		            <li id="courses-nav-item" class="nav-item">
-                         <a class="nav-link" href="{{ url_for('course') }}">Учебные курсы</a>
-                    </li>
-                    <li id="trainer-nav-item" class="nav-item">
-                        <a class="nav-link" href="{{ url_for('get_all_tests_endpoint') }}">Тестирование</a>
-                    </li>
-                    <li id="examples-nav-item" class="nav-item">
-                        <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
-                    </li>
-                    <li id="my-networks-nav-item" class="nav-item">
-                        <a class="nav-link" href="{{ url_for('home') }}">Мои сети</a>
-                    </li>
-                    {% if show_profile_link %}
-                    <a href="{{ url_for('user_profile') }}" class="ms-3 profile-avatar-link" title="Профиль">
-                        {% if current_user.avatar_uri %}
-                        <img src="{{ url_for('static', filename='avatar/' + current_user.avatar_uri) }}"
-                             alt="Профиль" class="profile-avatar-img" loading="lazy">
-                        {% else %}
-                        <span class="profile-avatar-placeholder" aria-hidden="true"></span>
-                        {% endif %}
-                    </a>
-                    {% endif %}
-                </div>
-            {% else %}
-                {% if request.path != url_for('login_index') %}
-                    <div class="navbar-nav">
+                    {% if current_user.is_authenticated %}
                         <li id="courses-nav-item" class="nav-item">
-                            <a class="nav-link" href="{{ url_for('course') }}">Учебные курсы</a>
+                             <a class="nav-link" href="{{ url_for('course') }}" data-i18n="navCourses">Учебные курсы</a>
                         </li>
-                        <li id="trainer-nav-item" id="trainer-nav-item" class="nav-item">
-                            <a class="nav-link" href="{{ url_for('login_index') }}">Тестирование</a>
+                        <li id="trainer-nav-item" class="nav-item">
+                            <a class="nav-link" href="{{ url_for('get_all_tests_endpoint') }}" data-i18n="navTesting">Тестирование</a>
                         </li>
                         <li id="examples-nav-item" class="nav-item">
-                            <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
+                            <a class="nav-link" href="{{ url_for('examples') }}" data-i18n="navExamples">Примеры сетей</a>
                         </li>
-                        <li id="auth-nav-item" class="nav-item">
-                            <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary">
-                                <i class="bx fs-5 lh-1 me-1"></i>Вход
-                            </a>
+                        <li id="my-networks-nav-item" class="nav-item">
+                            <a class="nav-link" href="{{ url_for('home') }}" data-i18n="myNetworksLink">Мои сети</a>
                         </li>
-                    </div>
-                {% endif %}
-            {% endif %}
->>>>>>> origin/main
-        {% endif %}
-
-        <div class="navbar-nav ms-auto">
-            {% if not network %}
-                <!-- Ссылки для главных страниц -->
-                {% if current_user.is_authenticated %}
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('course') }}" data-i18n="navCourses">Учебные курсы</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('get_all_tests_endpoint') }}" data-i18n="navTesting">Тестирование</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('examples') }}" data-i18n="navExamples">Примеры сетей</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}" data-i18n="myNetworksLink">Мои сети</a></li>
-                {% else %}
-                    {% if request.path != url_for('login_index') %}
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('course') }}" data-i18n="navCourses">Учебные курсы</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('login_index') }}" data-i18n="navTesting">Тестирование</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('examples') }}" data-i18n="navExamples">Примеры сетей</a></li>
-                    {% endif %}
-                {% endif %}
-            {% endif %}
-
-            <!-- Переключатель языка -->
-            <li class="nav-item dropdown">
-                <!-- ИЗМЕНЕНО: Добавлен aria-label и data-i18n-attr для доступности (a11y) -->
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Выбор языка" data-i18n-attr="aria-label:langSelectorAria">
-                    <i class="bx bx-globe fs-4"></i>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end" style="min-width: auto;">
-                    <li><a class="dropdown-item" href="#" onclick="setLanguage('ru'); return false;">Русский</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="setLanguage('en'); return false;">English</a></li>
-                </ul>
-            </li>
-
-            <!-- Кнопки действий -->
-            <li class="nav-item ps-3">
-                {% if network %}
-                    {% if current_user.is_authenticated %}
-                        <div class="d-flex align-items-center">
-                            <a class="btn btn-success btn-icon" id="share-network" data-i18n-attr="aria-label:tooltipUrlAvailable" onclick="urlCopyButton()"><i class='bx bx-share-alt fs-4 mx-1'></i></a>
-                            <a class="btn btn-outline-primary btn-icon ms-2" data-target="#ModalCopy" id="copy-network" data-i18n-attr="aria-label:tooltipSaveChanges" onclick="CopyNetwork()"><i class='bx bx-copy fs-4 mx-1'></i></a>
-                            <a {% if request.path != url_for('web_network_shared') %} class="btn btn-outline-primary btn-icon ms-2" {% else %} class="btn btn-outline-primary btn-icon disabled ms-2" {% endif %} href="#netConfigModal" id="net-settings" data-bs-toggle="modal" data-target="#netConfigModal" data-i18n-attr="aria-label:tooltipNetSettings"><i class='bx bx-cog fs-4 mx-1'></i></a>
-                        </div>
                     {% else %}
-                        <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary" data-i18n="loginButton"><i class="bx fs-5 lh-1 me-1"></i>Вход</a>
+                        {% if request.path != url_for('login_index') %}
+                            <li id="courses-nav-item" class="nav-item">
+                                <a class="nav-link" href="{{ url_for('course') }}" data-i18n="navCourses">Учебные курсы</a>
+                            </li>
+                            <li id="trainer-nav-item" class="nav-item">
+                                <a class="nav-link" href="{{ url_for('login_index') }}" data-i18n="navTesting">Тестирование</a>
+                            </li>
+                            <li id="examples-nav-item" class="nav-item">
+                                <a class="nav-link" href="{{ url_for('examples') }}" data-i18n="navExamples">Примеры сетей</a>
+                            </li>
+                            <li id="auth-nav-item" class="nav-item ms-lg-3">
+                                <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary" data-i18n="loginButton">
+                                    <i class="bx fs-5 lh-1 me-1"></i>Вход
+                                </a>
+                            </li>
+                        {% endif %}
                     {% endif %}
-                {% else %}
-                    {% if not current_user.is_authenticated and request.path != url_for('login_index') %}
-                         <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary" data-i18n="loginButton"><i class="bx fs-5 lh-1 me-1"></i>Вход</a>
+                </div>
+
+                <!-- Переключатель языка -->
+                <ul class="navbar-nav ms-3">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Выбор языка" data-i18n-attr="aria-label:langSelectorAria">
+                            <i class="bx bx-globe fs-4"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" style="min-width: auto;">
+                            <li><a class="dropdown-item" href="#" onclick="setLanguage('ru'); return false;">Русский</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="setLanguage('en'); return false;">English</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <!-- Профиль пользователя -->
+                {% if current_user.is_authenticated and show_profile_link %}
+                <a href="{{ url_for('user_profile') }}" class="ms-3 profile-avatar-link" title="Профиль" data-i18n-attr="title:profileTitle;aria-label:profileTitle">
+                    {% if current_user.avatar_uri %}
+                    <img src="{{ url_for('static', filename='avatar/' + current_user.avatar_uri) }}"
+                         alt="Профиль" class="profile-avatar-img" loading="lazy" data-i18n-attr="alt:profileTitle">
+                    {% else %}
+                    <span class="profile-avatar-placeholder" aria-hidden="true"></span>
                     {% endif %}
+                </a>
                 {% endif %}
-            </li>
-        </div>
+            </div>
+        {% endif %}
     </div>
 </nav>
 {% endif %}
@@ -189,68 +187,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-<<<<<<< HEAD
                     <h5 class="modal-title" id="netConfigModalLabel" data-i18n="modalNetSettingsTitle">Настройки сети</h5>
                     <button id="networkConfigurationCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть" data-i18n-attr="aria-label:closeBtn">
-=======
-                    <h5 class="modal-title" id="netConfigModalLabel">Настройки</h5>
-                    <button id="networkConfigurationCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть">
->>>>>>> origin/main
                     </button>
                 </div>
                 <div class="modal-body">
                     <form id="networkConfigurationForm" method="POST" action="">
                         <div class="form-group">
-<<<<<<< HEAD
                             <label for="network_title" class="text-sm" data-i18n="modalNetNameLabel">Название сети</label>
                             <input type="text" class="form-control form-control-sm" id="network_title" name="network_title" value='{{ network.title }}'>
 
                             <label for="network_description" class="text-sm pt-2" data-i18n="modalNetDescLabel">Описание сети</label>
                             <textarea rows="3" class="form-control form-control-sm" id="network_description" name="network_description">{{ network.description }}</textarea>
-=======
-                            <h6>Сеть</h6>
-                            <label for="network_title" class="text-sm">Название сети</label>
-                            <input type="text" class="form-control form-control-sm" id="network_title" name="network_title" value='{{ network.title }}' {{ 'disabled' if request.path == url_for('web_network_shared') else '' }}>
-
-                            <label for="network_description" class="text-sm pt-2">Описание сети</label>
-                            <textarea rows="3" class="form-control form-control-sm" id="network_description" name="network_description" {{ 'disabled' if request.path == url_for('web_network_shared') else '' }}>{{ network.description }}</textarea>
-                        </div>
-                        <div>
-                            <hr class="my-3">
-                            <h6>Анимация</h6>
-                            <label for="animation_settings">Эти настройки применяются для всех сетей.</label>
-                        </div>
-                        <div name="animation_settings">
-                            <div>
-                                <input class="form-check-input" role="switch" type="checkbox" id="ARPFilterCheckbox" name="ARPFilterCheckbox">
-                                <label for="ARPFilterCheckbox">Не анимировать ARP пакеты </label>
-                            </div>
-                            <div>
-                                <input class="form-check-input" role="switch" type="checkbox" id="STPFilterCheckbox" name="STPFilterCheckbox">
-                                <label for="STPFilterCheckbox">Не анимировать STP/RSTP пакеты </label>
-                            </div>
-                            <div>
-                                <input class="form-check-input" role="switch" type="checkbox" id="SYNFilterCheckbox" name="SYNFilterCheckbox">
-                                <label for="SYNFilterCheckbox">Не анимировать SYN/SYN+ACK/FIN пакеты (TCP)</label>
-                            </div>
->>>>>>> origin/main
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-<<<<<<< HEAD
                     <button id="networkDeleteButton" type="button" data-toggle="modal" class="btn btn-danger" href="#deleteNetConfirmModal" data-i18n="deleteNetworkBtn">Удалить сеть</button>
                     <button id="networkConfigurationCancel" type="button" class="btn btn-secondary" data-dismiss="modal" data-i18n="closeBtn">Закрыть</button>
                     <button id="networkConfigurationSubmit" type="button" class="btn btn-primary" data-i18n="saveBtn">Сохранить</button>
-=======
-                    <button id="networkDeleteButton" type="button" data-toggle="modal"
-                        class="btn btn-danger" {{'disabled' if request.path == url_for('web_network_shared') else ''}}
-                        href="#deleteNetConfirmModal">
-                        Удалить сеть
-                    </button>
-                    <button id="networkConfigurationCancel" type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
-                    <button id="networkConfigurationSubmit" type="button" class="btn btn-primary">Сохранить</button>
->>>>>>> origin/main
                 </div>
             </div>
         </div>
@@ -357,10 +312,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const shared = window.isSharedNetwork ? 1 : 0
 
     $(document).ready(function() {
-<<<<<<< HEAD
-        $("#networkConfigurationCancel").click(function(){ $('#netConfigModal').modal('hide'); });
-        $("#networkConfigurationCancelIcon").click(function(){ $('#netConfigModal').modal('hide'); });
-=======
         const rawUserConfig = {{ (current_user.config or "null") | tojson }};
         const parsedUserConfig = (() => {
             try {
@@ -428,7 +379,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             $('#netConfigModal').modal('hide');
         });
 
->>>>>>> origin/main
         $("#networkConfigurationSubmit").click(function(){
             network_title = $("#network_title").val();
             network_description = $("#network_description").val();
