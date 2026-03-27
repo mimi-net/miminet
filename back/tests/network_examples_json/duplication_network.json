@@ -1,0 +1,44 @@
+{
+  "jobs": [
+    {
+      "arg_1": "192.168.1.2",
+      "host_id": "host_1",
+      "id": "job_ping",
+      "job_id": 1,
+      "level": 0,
+      "print_cmd": "ping -c 1 192.168.1.2"
+    }
+  ],
+  "nodes": [
+    {
+      "classes": ["host"],
+      "config": {"default_gw": "192.168.1.1", "label": "host_1", "type": "host"},
+      "data": {"id": "host_1", "label": "host_1"},
+      "interface": [{"connect": "edge_1", "id": "iface_1", "ip": "192.168.1.1", "name": "iface_1", "netmask": 24}],
+      "position": {"x": 50, "y": 50}
+    },
+    {
+      "classes": ["l1_hub"],
+      "config": {"label": "hub_1", "type": "l1_hub"},
+      "data": {"id": "hub_1", "label": "hub_1"},
+      "interface": [
+        {"connect": "edge_1", "id": "hub_1_1", "name": "hub_1-eth0"},
+        {"connect": "edge_2", "id": "hub_1_2", "name": "hub_1-eth1"}
+      ],
+      "position": {"x": 100, "y": 50}
+    },
+    {
+      "classes": ["host"],
+      "config": {"default_gw": "192.168.1.1", "label": "host_2", "type": "host"},
+      "data": {"id": "host_2", "label": "host_2"},
+      "interface": [{"connect": "edge_2", "id": "iface_2", "ip": "192.168.1.2", "name": "iface_2", "netmask": 24}],
+      "position": {"x": 150, "y": 50}
+    }
+  ],
+  "edges": [
+    {"data": {"id": "edge_1", "source": "host_1", "target": "hub_1", "loss_percentage": 0, "duplicate_percentage": 100}},
+    {"data": {"id": "edge_2", "source": "hub_1", "target": "host_2", "loss_percentage": 0, "duplicate_percentage": 100}}
+  ],
+  "config": {"zoom": 1, "pan_x": 0, "pan_y": 0},
+  "pcap": []
+}

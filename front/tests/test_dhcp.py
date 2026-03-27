@@ -23,11 +23,13 @@ class TestDHCP:
         network.add_edge(3, 2)  # server 1 -> switch 1
 
         # configure hosts
+        host1_iface = network.nodes[0]["interface"][0]["id"]
+
         host1_config = network.open_node_config(0)
         host1_config.fill_link("192.168.0.1", 24)
         host1_config.add_jobs(
             108,
-            {},
+            {Location.Network.ConfigPanel.Host.Job.DHCLIENT_INTF.selector: host1_iface},
         )
         host1_config.submit()
 
@@ -42,15 +44,18 @@ class TestDHCP:
         host2_config.submit()
 
         # config server
+        server_iface = network.nodes[3]["interface"][0]["id"]
+
         server_config = network.open_node_config(3)
         server_config.fill_link("192.168.0.2", 24)
         server_config.add_jobs(
             203,
             {
-                Location.Network.ConfigPanel.Server.Job.DCHP_IP_RANGE_START_FIELD.selector: "192.168.0.100",
-                Location.Network.ConfigPanel.Server.Job.DCHP_IP_RANGE_END_FIELD.selector: "192.168.0.100",
-                Location.Network.ConfigPanel.Server.Job.DCHP_MASK_FIELD.selector: "24",
-                Location.Network.ConfigPanel.Server.Job.DCHP_IP_GW_FIELD.selector: "192.168.0.3",
+                Location.Network.ConfigPanel.Server.Job.DHCP_IP_RANGE_START_FIELD.selector: "192.168.0.100",
+                Location.Network.ConfigPanel.Server.Job.DHCP_IP_RANGE_END_FIELD.selector: "192.168.0.100",
+                Location.Network.ConfigPanel.Server.Job.DHCP_MASK_FIELD.selector: "24",
+                Location.Network.ConfigPanel.Server.Job.DHCP_IP_GW_FIELD.selector: "192.168.0.3",
+                Location.Network.ConfigPanel.Server.Job.DHCP_INTF.selector: server_iface,
             },
         )
         server_config.submit()
@@ -172,7 +177,7 @@ class TestDHCP:
             "id": "7538381fb4804436bccd50c4ff3416ec",
             "job_id": 108,
             "print_cmd": "dhcp client",
-            "arg_1": "1",
+            "arg_1": "iface_",
             "level": 0,
             "host_id": "host_1",
         },
@@ -192,6 +197,7 @@ class TestDHCP:
             "arg_2": "192.168.0.100",
             "arg_3": "24",
             "arg_4": "192.168.0.3",
+            "arg_5": "iface_",
             "level": 2,
             "host_id": "server_1",
         },

@@ -58,6 +58,7 @@
                     <div class="col-auto mx-1"><p class="mb-0" style="font-weight: normal" id="section_name"></p></div>
                 </div>
 
+<<<<<<< HEAD
                 <div class="navbar-nav ms-auto d-flex flex-row align-items-center">
                     {% if current_user.is_authenticated %}
                         <a class="nav-link" href="{{ url_for('get_all_tests_endpoint') }}" data-i18n="navTesting">Тестирование</a>
@@ -71,6 +72,45 @@
                                 <i class="bx fs-5 lh-1 me-1"></i>Вход
                             </a>
                         {% endif %}
+=======
+                {% if current_user.is_authenticated %}
+                    <div class="navbar-nav d-flex align-items-center">
+                        <li id="trainer-nav-item" class="nav-item">
+                            <a class="nav-link" href="{{ url_for('get_all_tests_endpoint') }}">Тестирование</a>
+                        </li>
+                        <li id="examples-nav-item" class="nav-item">
+                            <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
+                        </li>
+                        <li id="my-networks-nav-item" class="nav-item">
+                            <a class="nav-link" href="{{ url_for('home') }}">Мои сети</a>
+                        </li>
+                        {% if not request.path.startswith('/auth') %}
+                        <a href="{{ url_for('user_profile') }}" class="ms-3 profile-avatar-link" title="Профиль">
+                            {% if current_user.avatar_uri %}
+                            <img src="{{ url_for('static', filename='avatar/' + current_user.avatar_uri) }}"
+                                 alt="Профиль" class="profile-avatar-img" loading="lazy">
+                            {% else %}
+                            <span class="profile-avatar-placeholder" aria-hidden="true"></span>
+                            {% endif %}
+                        </a>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    {% if request.path != url_for('login_index') %}
+                        <div class="navbar-nav">
+                            <li id="trainer-nav-item" class="nav-item">
+                                <a class="nav-link" href="{{ url_for('login_index') }}">Тестирование</a>
+                            </li>
+                            <li id="examples-nav-item" class="nav-item">
+                                <a class="nav-link" href="{{ url_for('examples') }}">Примеры сетей</a>
+                            </li>
+                            <li id="auth-nav-item" class="nav-item">
+                                <a href="{{ url_for('login_index') }}" class="btn btn-outline-primary">
+                                    <i class="bx fs-5 lh-1 me-1"></i>Вход
+                                </a>
+                            </li>
+                        </div>
+>>>>>>> origin/main
                     {% endif %}
                     <div class="nav-item dropdown ms-3">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
