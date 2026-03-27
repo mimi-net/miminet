@@ -160,6 +160,7 @@ class MiminetTestNetwork:
 
         local_x, local_y = self.__calc_panel_offset(panel, x, y)
 
+        self.__selenium.wait_until_appear(*node_type)
         device_button = self.__selenium.find_element(*node_type)
         self.__selenium.drag_and_drop(device_button, panel, local_x, local_y)
         self.__selenium.wait_for(lambda _: old_nodes_len < len(self.nodes), timeout=5)
@@ -313,6 +314,11 @@ class NodeConfig:
         )
 
         with self.__selenium.run_in_modal_context(*modal_el) as dialog:
+            self.__selenium.wait_until_appear(
+                By.CSS_SELECTOR,
+                Location.Network.ConfigPanel.Switch.StpPanel.STP_BUTTON.selector,
+            )
+
             dialog.find_element(
                 By.CSS_SELECTOR,
                 Location.Network.ConfigPanel.Switch.StpPanel.STP_BUTTON.selector,
@@ -522,27 +528,26 @@ class NodeConfig:
 
     def __open_config(self, node: dict):
         device_class = node["classes"][0]
-
-        node_json = json_dumps(node)
+        node_json_str = json_dumps(node)
 
         if device_class == Location.Network.DevicePanel.HOST.device_class:
-            self.__selenium.execute_script(f"ShowHostConfig({node})")
+            self.__selenium.execute_script(f"ShowHostConfig({node_json_str})")
             self.__config_locator = Location.Network.ConfigPanel.Host
 
         elif device_class == Location.Network.DevicePanel.SWITCH.device_class:
-            self.__selenium.execute_script(f"ShowSwitchConfig({node_json})")
+            self.__selenium.execute_script(f"ShowSwitchConfig({node_json_str})")
             self.__config_locator = Location.Network.ConfigPanel.Switch
 
         elif device_class == Location.Network.DevicePanel.HUB.device_class:
-            self.__selenium.execute_script(f"ShowHubConfig({node})")
+            self.__selenium.execute_script(f"ShowHubConfig({node_json_str})")
             self.__config_locator = Location.Network.ConfigPanel.Hub
 
         elif device_class == Location.Network.DevicePanel.ROUTER.device_class:
-            self.__selenium.execute_script(f"ShowRouterConfig({node})")
+            self.__selenium.execute_script(f"ShowRouterConfig({node_json_str})")
             self.__config_locator = Location.Network.ConfigPanel.Router
 
         elif device_class == Location.Network.DevicePanel.SERVER.device_class:
-            self.__selenium.execute_script(f"ShowServerConfig({node})")
+            self.__selenium.execute_script(f"ShowServerConfig({node_json_str})")
             self.__config_locator = Location.Network.ConfigPanel.Server
 
         else:

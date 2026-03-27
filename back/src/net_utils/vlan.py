@@ -2,7 +2,7 @@ from ipmininet.ipnet import IPNet
 from ipmininet.ipswitch import IPSwitch
 from ipmininet.ipovs_switch import IPOVSSwitch
 
-from network_schema import Node, NodeInterface
+from src.network_schema import Node, NodeInterface
 
 
 def setup_vlans(net: IPNet, nodes: list[Node]) -> None:
@@ -23,9 +23,9 @@ def setup_vlans(net: IPNet, nodes: list[Node]) -> None:
                 vlan = iface.vlan
                 type_connection = iface.type_connection
                 if vlan is not None:
-                    if type_connection == 0:  # Access link
+                    if type_connection == 0 and isinstance(vlan, int):  # Access link
                         configure_access(switch, iface.name, vlan)
-                    elif type_connection == 1:  # Trunk link
+                    elif type_connection == 1 and isinstance(vlan, list):  # Trunk link
                         configure_trunk(switch, iface.name, sorted(vlan))
 
 

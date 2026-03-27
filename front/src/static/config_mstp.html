@@ -1,0 +1,73 @@
+<script id="config_button_mstp_script" type="text/plain">
+<button id="config_button_mstp" name="config_button_mstp" class="btn btn-outline-secondary btn-sm mt-2" type="button" data-bs-toggle="modal" data-bs-target="#MstpModal" data-toggle="tooltip" data-bs-placement="bottom" style="display: none;">
+    <i class='bx bx-sitemap fs-lg me-1'></i>
+    <span class="btn-text" id="config_button_mstp_text">MST</span>
+</button>
+</script>
+
+<script id="config_modal_mstp_script" type="text/plain">
+    <div class="modal" id="MstpModal" tabindex="-1" role="dialog" aria-hidden="true" data-focus-on="input:first">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mstpConfigModalLabel">Конфигурация MSTP</h5>
+                    <button id="mstpConfigurationCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info small">
+                        <i class='bx bx-info-circle me-1'></i>
+                        MSTP позволяет создавать разные spanning tree instances для разных групп VLAN.
+                        Instance 0 (CIST) - общий для всех VLAN, не привязанных к другим instances.
+                    </div>
+                    
+                    <form id="form_config_mstp">
+                        <!-- MST Region Configuration -->
+                        <div class="card mb-3">
+                            <div class="card-header py-2">
+                                <h6 class="mb-0">MST Region</h6>
+                            </div>
+                            <div class="card-body py-2">
+                                <div class="row g-2">
+                                    <div class="col-8">
+                                        <label for="mst_region_name" class="form-label small">Имя региона</label>
+                                        <input type="text" class="form-control form-control-sm" id="mst_region_name" 
+                                               name="mst_region_name" placeholder="MST_Region_1" maxlength="32">
+                                    </div>
+                                    <div class="col-4">
+                                        <label for="mst_revision" class="form-label small">Revision</label>
+                                        <input type="number" class="form-control form-control-sm" id="mst_revision" 
+                                               name="mst_revision" value="0" min="0" max="65535">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- MST Instances -->
+                        <div class="card">
+                            <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">MST Instances</h6>
+                                <button type="button" class="btn btn-outline-primary btn-sm" id="addMstInstance">
+                                    <i class='bx bx-plus'></i> Добавить Instance
+                                </button>
+                            </div>
+                            <div class="card-body py-2" id="mst_instances_container">
+                                <!-- MST instance rows will be added here dynamically -->
+                            </div>
+                        </div>
+
+                        <div class="mt-3 small text-muted">
+                            <strong>Формат VLANs:</strong> Можно указывать отдельные VLAN (1, 10, 20) или диапазоны (10-20).
+                            <br>
+                            <strong>Priority:</strong> Значение от 0 до 61440, кратное 4096. Меньшее значение = выше приоритет.
+                        </div>
+                    </form>
+                </div>
+                <div id="modal_footer_mstp" class="modal-footer">
+                    <button id="mstpConfigurationCancel" type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    <button id="mstpConfigurationSubmit" type="button" class="btn btn-primary">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>

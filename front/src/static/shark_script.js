@@ -153,6 +153,7 @@ function decode_llc_header (llc_hdr) {
 function decode_stp_header (stp_hdr) {
 
 	let protocol_id = stp_hdr.slice(0,2).join("");
+	let version = parseInt(stp_hdr.slice(2,3).join(""), 16);
 	let bpdu_type = stp_hdr.slice(3,4).join("");
 	let bpdu_flags = stp_hdr.slice(4,5).join("");
 	let protocol_id_string = "";
@@ -165,8 +166,26 @@ function decode_stp_header (stp_hdr) {
 		protocol_id_string = "Spanning Tree Protocol (0x000)";
 	}
 
+	// Handle different protocol versions
+	let version_string = "";
+	if (version === 0) {
+		version_string = "Spanning Tree (0)";
+	} else if (version === 2) {
+		version_string = "Rapid Spanning Tree (2)";
+	} else if (version === 3) {
+		version_string = "Multiple Spanning Tree (3)";
+	} else {
+		version_string = "Spanning Tree (" + version.toString() + ")";
+	}
+
 	if (bpdu_type === "00") {
 		bpdu_type_string = "Configuration (0x00)";
+	} else if (bpdu_type === "02") {
+		if (version === 3) {
+			bpdu_type_string = "MST BPDU (0x02)";
+		} else {
+			bpdu_type_string = "RST BPDU (0x02)";
+		}
 	}
 
 	if (bpdu_flags === "00") {
@@ -183,20 +202,30 @@ function decode_stp_header (stp_hdr) {
 	bridge_identifier_string = bridge_identifier_string + " / " + parseInt(stp_hdr.slice(18,19).join(""), 16).toString();
 	bridge_identifier_string = bridge_identifier_string + " / " + stp_hdr.slice(19,25).join(":");
 
-    return {
-        'Protocol Identifier:': { value: protocol_id_string, offset: 0, length: 2 },
-        'Protocol Version Identifier:': { value: `Spanning Tree (${parseInt(stp_hdr.slice(2, 3).join(''), 16).toString()})`, offset: 2, length: 1 },
-        'BPDU Type:': { value: bpdu_type_string, offset: 3, length: 1 },
-        'BPDU flags:': { value: bpdu_flags_string, offset: 4, length: 1 },
-        'Root Identifier:': { value: root_identifier_string, offset: 5, length: 8 },
-        'Root Path Cost:': { value: parseInt(stp_hdr.slice(13, 17).join(''), 16).toString(), offset: 13, length: 4 },
-        'Bridge Identifier:': { value: bridge_identifier_string, offset: 17, length: 8 },
-        'Port identifier:': { value: `0x${stp_hdr.slice(25, 27).join('')}`, offset: 25, length: 2 },
-        'Message Age:': { value: (parseInt(stp_hdr.slice(27, 29).join(''), 16) / 256).toString(), offset: 27, length: 2 },
-        'Max Age:': { value: (parseInt(stp_hdr.slice(29, 31).join(''), 16) / 256).toString(), offset: 29, length: 2 },
-        'Hello Time:': { value: (parseInt(stp_hdr.slice(31, 33).join(''), 16) / 256).toString(), offset: 31, length: 2 },
-        'Forward Delay:': { value: (parseInt(stp_hdr.slice(33, 35).join(''), 16) / 256).toString(), offset: 33, length: 2 },
-    };
+const result = {
+    'Protocol Identifier:': { value: protocol_id_string, offset: 0, length: 2 },
+    'Protocol Version Identifier:': { value: version === 3 ? 'Multiple Spanning Tree Protocol (3)' : version === 2 ? 'Rapid Spanning Tree Protocol (2)' : `Spanning Tree (${version})`, offset: 2, length: 1 },
+    'BPDU Type:': { value: bpdu_type_string, offset: 3, length: 1 },
+    'BPDU flags:': { value: bpdu_flags_string, offset: 4, length: 1 },
+    'Root Identifier:': { value: root_identifier_string, offset: 5, length: 8 },
+    'Root Path Cost:': { value: parseInt(stp_hdr.slice(13, 17).join(''), 16).toString(), offset: 13, length: 4 },
+    'Bridge Identifier:': { value: bridge_identifier_string, offset: 17, length: 8 },
+    'Port identifier:': { value: `0x${stp_hdr.slice(25, 27).join('')}`, offset: 25, length: 2 },
+    'Message Age:': { value: (parseInt(stp_hdr.slice(27, 29).join(''), 16) / 256).toString(), offset: 27, length: 2 },
+    'Max Age:': { value: (parseInt(stp_hdr.slice(29, 31).join(''), 16) / 256).toString(), offset: 29, length: 2 },
+    'Hello Time:': { value: (parseInt(stp_hdr.slice(31, 33).join(''), 16) / 256).toString(), offset: 31, length: 2 },
+    'Forward Delay:': { value: (parseInt(stp_hdr.slice(33, 35).join(''), 16) / 256).toString(), offset: 33, length: 2 },
+};
+
+if (version === 3 && stp_hdr.length > 35) {
+    result['Version 1 Length:'] = { value: parseInt(stp_hdr.slice(35, 36).join(''), 16).toString(), offset: 35, length: 1 };
+    if (stp_hdr.length > 37) {
+        result['Version 3 Length:'] = { value: parseInt(stp_hdr.slice(36, 38).join(''), 16).toString(), offset: 36, length: 2 };
+    }
+}
+
+return result;
+
 }
 
 function decode_arp_header (arp_hdr) {
@@ -443,7 +472,7 @@ function decode_gre_header (gre_hdr) {
 		return {};
 	}
 
-	let flags_and_version = gre_hdr.slice(0,2);
+	let flags_and_version = (parseInt(gre_hdr[0],16)<<8)|parseInt(gre_hdr[1],16);
 	const C = flags_and_version & 32768;
 	const R = flags_and_version & 16384;
 	const K = flags_and_version & 8192;
@@ -570,15 +599,15 @@ function add_vlan_header(pkt, header_number, offset) {
     };
 }
 
-function add_llc_header (pkt, header_number, offset = 0) {
+function add_llc_header(pkt, header_number, offset = 0) {
 
-	make_pa("Logical-Link Control", header_number);
+    make_pa("Logical-Link Control", header_number);
     const decode_div = make_div(header_number);
 
-	pkt_decode = decode_llc_header(pkt);
+    pkt_decode = decode_llc_header(pkt);
     const fields = [];
 
-	for (const k in pkt_decode) {
+    for (const k in pkt_decode) {
         const field = pkt_decode[k];
 
         const decode_p = document.createElement("p");
@@ -595,13 +624,13 @@ function add_llc_header (pkt, header_number, offset = 0) {
         });
     }
 
-	decode.appendChild(decode_div);
+    decode.appendChild(decode_div);
 
     return {
         className: "Logical-Link Control",
         startByte: offset,
         byteCount: 3,
-        fields, 
+        fields,
         header_number,
     };
 }
@@ -611,7 +640,7 @@ function add_stp_header(pkt, header_number, offset = 0) {
     make_pa("Spanning Tree Protocol", header_number);
     const decode_div = make_div(header_number);
 
-    pkt_decode = decode_stp_header(pkt);
+    const pkt_decode = decode_stp_header(pkt);
     const fields = [];
 
     for (const k in pkt_decode) {
@@ -637,7 +666,7 @@ function add_stp_header(pkt, header_number, offset = 0) {
         className: "Spanning Tree Protocol",
         startByte: offset,
         byteCount: pkt.length,
-        fields, 
+        fields,
         header_number,
     };
 }
@@ -835,27 +864,29 @@ function add_gre_header(pkt, header_number, offset = 0) {
     const pkt_decode = decode_gre_header(pkt);
     const fields = [];
 
-    let gre_hdr_len = 8;
+    let gre_hdr_len = 4;
 
     for (const k in pkt_decode) {
 
         if (k === "GRE_header_length") {
-            gre_hdr_len = pkt_decode[k];
+            gre_hdr_len = pkt_decode[k].value;
             continue;
         }
 
-        const decode_p = document.createElement("p");
-        decode_p.innerHTML = `${k} ${pkt_decode[k]}`;
-        decode_div.appendChild(decode_p);
+		const field = pkt_decode[k];
 
-        fields.push({
-            label: k,
-            value: pkt_decode[k],
-            offset: 0,
-            len: 0,
-            className: toHoverKey(k),
-            startByte: offset
-        });
+		const decode_p = document.createElement("p");
+		decode_p.innerHTML = `${k} ${field.value}`;
+		decode_div.appendChild(decode_p);
+
+		fields.push({
+			label: k,
+			value: field.value,
+			offset: field.offset,
+			len: field.length,
+			className: toHoverKey(k),
+			startByte: offset + field.offset
+		});
     }
 
     add_payload_info(pkt, gre_hdr_len, decode_div, fields, offset);
@@ -1003,7 +1034,7 @@ function decode_packet(pkt) {
 
 				// Who is next?
 				eth_type = pkt.slice(2,4).join("");
-				pkt = pkt.slice(h_len);
+				pkt = pkt.slice(gre.byteCount);
 				continue;
 
 			// Unknown protocol

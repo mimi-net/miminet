@@ -3,8 +3,8 @@ import shlex
 import ipaddress
 import time
 from netaddr import EUI, AddrFormatError
-from typing import Any, Callable, List, Dict
-from network_schema import Job
+from typing import Any, Callable, List, Dict, Tuple
+from src.network_schema import Job
 from mininet.log import info
 from ipmininet.host.config.dnsmasq import Dnsmasq
 
@@ -59,7 +59,7 @@ def traceroute_options_filter(arg: str) -> str:
     return filter_arg_for_options(arg, flags_without_args, flags_with_args)
 
 
-def udp_tcp_args_checker(ip, size, port) -> bool:
+def udp_tcp_args_checker(ip: str, size: str, port: str) -> bool:
     """Check all args in tcp and udp data handler on correct"""
     if not valid_ip(ip):
         return False
@@ -227,7 +227,7 @@ def sleep_handler(job: Job, job_host: Any) -> None:
     arg_time = job.arg_1
     if not valid_sleep(arg_time):
         return
-    time.sleep(int(arg_time))
+    time.sleep(int(arg_time or 0))
 
 
 def ping_handler(job: Job, job_host: Any) -> None:
@@ -243,7 +243,7 @@ def ping_handler(job: Job, job_host: Any) -> None:
 def ping_with_options_handler(job: Job, job_host: Any) -> None:
     """Execute ping with options"""
 
-    arg_opt = job.arg_1
+    arg_opt = job.arg_1 or ""
     arg_ip = job.arg_2
 
     if not valid_ip(arg_ip):
@@ -255,14 +255,16 @@ def ping_with_options_handler(job: Job, job_host: Any) -> None:
     job_host.cmd(f"ping -c 1 {arg_opt} {arg_ip}")
 
 
-def get_sending_data_argument(job: Job) -> tuple[str | int, str | int, str | int]:
+def get_sending_data_argument(
+    job: Job,
+) -> Tuple[str, str, str]:
     """Method for get arguments for sending udp and tcp data"""
 
     arg_size = job.arg_1
     arg_ip = job.arg_2
     arg_port = job.arg_3
 
-    return arg_size, arg_ip, arg_port
+    return str(arg_size or ""), str(arg_ip or ""), str(arg_port or "")
 
 
 def sending_udp_data_handler(job: Job, job_host: Any) -> None:
@@ -294,7 +296,7 @@ def sending_tcp_data_handler(job: Job, job_host: Any) -> None:
 def traceroute_handler(job: Job, job_host: Any) -> None:
     """Method for executing traceroute"""
 
-    arg_opt = job.arg_1
+    arg_opt = job.arg_1 or ""
     arg_ip = job.arg_2
 
     if not valid_ip(arg_ip):
@@ -424,7 +426,7 @@ def arp_handler(job: Job, job_host: Any) -> None:
 
 def subinterface_with_vlan(job: Job, job_host: Any) -> None:
     """Method for adding subinterface with vlan"""
-    arg_intf = job.arg_1
+    arg_intf = job.arg_1 or ""
     arg_ip = job.arg_2
     arg_mask = job.arg_3
     arg_vlan = job.arg_4

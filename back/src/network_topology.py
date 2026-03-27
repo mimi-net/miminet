@@ -1,17 +1,20 @@
-from typing import List
+from __future__ import annotations
 from ipmininet.ipnet import IPNet
 from ipmininet.ipswitch import IPSwitch
 from ipmininet.ipovs_switch import IPOVSSwitch
 from ipmininet.iptopo import IPTopo
 from ipmininet.router.config import RouterConfig
-from network_schema import Network, Node, NodeConfig, NodeInterface
-from pkt_parser import is_ipv4_address
+from typing import List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.network_schema import Network, Node, NodeConfig, NodeInterface
+from src.pkt_parser import is_ipv4_address
 
 
 class MiminetTopology(IPTopo):
     """Class representing topology for miminet networks."""
 
-    def __init__(self, network: Network):
+    def __init__(self, network: "Network"):
         # List with useful information about every interface
         self.__iface_pairs: list = []
         # Used to generate unique names
@@ -56,21 +59,27 @@ class MiminetTopology(IPTopo):
             self.__handle_router(node_id, config)
 
     def __handle_l2_switch(self, node_id: str, config: NodeConfig):
-        assert config.stp in (0, 1, 2), "Incorrect STP mode"
+        assert config.stp in (0, 1, 2, 3), "Incorrect STP mode"
         is_stp_enabled = config.stp == 1  # Check switch mode
         is_rstp_enabled = config.stp == 2
+        is_mstp_enabled = config.stp == 3
 
+        # MSTP in OVS uses RSTP as base protocol
+        # OVS doesn't have native MSTP support, so we use RSTP mode
+        # which provides similar fast convergence behavior
         self.__nodes[node_id] = self.addSwitch(
             node_id,
             cls=IPOVSSwitch,
             stp=is_stp_enabled,
-            rstp=is_rstp_enabled,
+            rstp=is_rstp_enabled or is_mstp_enabled,  # MSTP uses RSTP mode in OVS
             cwd="/tmp",
             priority=config.priority,
         )
 
         # Set emulation delay based on STP mode
-        if is_rstp_enabled:
+        if is_mstp_enabled:
+            self.__set_network_configuration_time(10)  # MSTP converges similar to RSTP
+        elif is_rstp_enabled:
             self.__set_network_configuration_time(7)
         elif is_stp_enabled:
             self.__set_network_configuration_time(33)
@@ -294,3 +303,6 @@ class MiminetTopology(IPTopo):
             sw.cmd("sysctl -w net.ipv6.conf.lo.disable_ipv6=1")
 
         super().post_build(net)
+
+
+MininetTopology = MiminetTopology

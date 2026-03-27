@@ -1,7 +1,8 @@
 """Classes for deserializing a Miminet network"""
 
 from dataclasses import dataclass
-from typing import Union, Optional
+from typing import Union, List, Optional
+from src.net_utils.mstp_schema import MstInstance
 
 
 @dataclass
@@ -26,8 +27,11 @@ class NodeConfig:
     Attributes:
         label (str): Label for the node (e.g., "l2sw1").
         type (str): Node type (e.g., "l2_switch").
-        stp (int): 1 if spanning tree protocol (STP) is enabled; 2 if rapid spanning tree protocol (RSTP) is enabled; 0 otherwise.
-        priority (Optional[int]): stp or rstp priority
+        stp (int): 1 if spanning tree protocol (STP) is enabled; 2 if rapid spanning tree protocol (RSTP) is enabled; 3 if multiple spanning tree protocol (MSTP) is enabled; 0 otherwise.
+        priority (Optional[int]): stp, rstp or mstp priority (for CIST in MSTP).
+        mst_region (Optional[str]): MST region name (required for MSTP).
+        mst_revision (Optional[int]): MST region revision number.
+        mst_instances (Optional[list[MstInstance]]): List of MST instances with VLAN mappings.
         default_gw (str): Default gateway for the node.
     """
 
@@ -35,6 +39,9 @@ class NodeConfig:
     type: str = ""
     stp: int = 0
     priority: Optional[int] = None
+    mst_region: Optional[str] = None
+    mst_revision: Optional[int] = None
+    mst_instances: Optional[list[MstInstance]] = None
     default_gw: str = ""
 
 
@@ -59,7 +66,7 @@ class NodeInterface:
     name: str = ""
     ip: str = ""
     netmask: int = 0
-    vlan: Union[int, list[int], None] = None
+    vlan: Optional[Union[int, List[int]]] = None
     type_connection: Optional[int] = None
     vxlan_vni: Optional[int] = None
     vxlan_connection_type: Optional[int] = None
@@ -152,11 +159,12 @@ class Job:
     job_id: int
     host_id: str
     print_cmd: str
-    arg_1: str | int = ""
-    arg_2: str | int = ""
-    arg_3: str | int = ""
-    arg_4: str | int = ""
-    arg_5: str | int = ""
+
+    arg_1: Optional[str] = None
+    arg_2: Optional[str] = None
+    arg_3: Optional[str] = None
+    arg_4: Optional[str] = None
+    arg_5: Optional[str] = None
 
 
 @dataclass
@@ -195,5 +203,5 @@ class Network:
     edges: list[Edge]
     jobs: list[Job]
     config: NetworkConfig
-    pcap: list[str] | None
+    pcap: Optional[List[str]] = None
     packets: str = ""

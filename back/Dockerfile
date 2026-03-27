@@ -26,13 +26,26 @@ RUN apt-get update \
     libpcap-dev \
     libbsd-dev \
     openvswitch-switch \
+    autoconf \
+    automake \
+    libtool \
  && pip3 install --upgrade pip \
  && rm -rf /var/lib/apt/lists/* \
  && touch /etc/network/interfaces \
  && mkdir /opt/mininet_dependencies
 
+# Install mimidump
 RUN git clone https://github.com/mimi-net/mimidump.git \
     && cd mimidump && git checkout 32e6e5e && make prefix=/usr install && cd .. && rm -rf mimidump
+
+# Install mstpd for MSTP support
+RUN git clone https://github.com/mstpd/mstpd.git /tmp/mstpd \
+    && cd /tmp/mstpd \
+    && ./autogen.sh \
+    && ./configure \
+    && make \
+    && make install \
+    && rm -rf /tmp/mstpd
 
 WORKDIR /app
 ADD ./requirements.txt /app/requirements.txt

@@ -5,6 +5,7 @@ import string
 import dpkt
 from dpkt.pcap import Reader
 from dpkt.utils import inet_to_str, mac_to_str
+from typing import Optional
 
 
 def packet_uuid(
@@ -19,7 +20,7 @@ def is_ipv4_address(dotquad: str) -> bool:
     return len(octets) == 4 and all(o.isdigit() and 0 <= int(o) < 256 for o in octets)
 
 
-def int_to_ip(ip_int: int | None) -> str:
+def int_to_ip(ip_int: Optional[int]) -> str:
     if ip_int is not None:
         octet1 = (ip_int >> 24) & 0xFF
         octet2 = (ip_int >> 16) & 0xFF
@@ -228,7 +229,17 @@ def packet_parser(
             if llc.dsap == 0x42:
                 data = bytes(llc.data)
                 version = data[2]
-                if version == 0x02:
+                bpdu_type = data[3] if len(data) > 3 else 0
+
+                if version == 0x03:  # MSTP version
+                    llc_label = "MSTP"
+
+                    match bpdu_type:
+                        case 0x02:
+                            llc_label = "MSTP (MST BPDU)"
+                        case _:
+                            llc_label = "MSTP"
+                elif version == 0x02:
                     llc_label = "RSTP"
 
                     match llc.data.flags & 0x03:
