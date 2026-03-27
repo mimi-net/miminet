@@ -19,6 +19,64 @@ let selectionUpdateTimeout;
 let internalClipboard = null;
 let lastMousePosition = { x: 0, y: 0 };
 
+// ========== CANVAS PANNING & ZOOM (draw.io style) ==========
+
+const setupCanvasPanning = function(cy) {
+    const container = cy.container();
+    let isPanning = false;
+    let panStartX = 0;
+    let panStartY = 0;
+
+    // Middle mouse button panning
+    container.addEventListener('mousedown', function(e) {
+        if (e.button === 1) {
+            isPanning = true;
+            panStartX = e.clientX;
+            panStartY = e.clientY;
+            e.preventDefault();
+            container.style.cursor = 'grabbing';
+        }
+    });
+
+    document.addEventListener('mousemove', function(e) {
+        if (!isPanning) return;
+        const dx = e.clientX - panStartX;
+        const dy = e.clientY - panStartY;
+        cy.panBy({ x: dx, y: dy });
+        panStartX = e.clientX;
+        panStartY = e.clientY;
+    });
+
+    document.addEventListener('mouseup', function(e) {
+        if (isPanning) {
+            isPanning = false;
+            container.style.cursor = '';
+        }
+    });
+
+    container.addEventListener('auxclick', function(e) {
+        if (e.button === 1) e.preventDefault();
+    });
+
+    // Scroll = pan, Ctrl+Scroll / pinch = zoom
+    container.addEventListener('wheel', function(e) {
+        e.preventDefault();
+
+        if (e.ctrlKey) {
+            // Ctrl+scroll or trackpad pinch — zoom towards cursor
+            const zoomFactor = Math.pow(0.99, e.deltaY);
+            const newZoom = Math.min(cy.maxZoom(), Math.max(cy.minZoom(), cy.zoom() * zoomFactor));
+            cy.zoom({
+                level: newZoom,
+                renderedPosition: { x: e.offsetX, y: e.offsetY },
+            });
+        } else {
+            // Scroll / two-finger swipe — pan
+            cy.panBy({ x: -e.deltaX, y: -e.deltaY });
+        }
+    }, { passive: false });
+};
+
 // ========== COMMON HELPERS ==========
 
 const clearSelection = function() {
@@ -366,6 +424,11 @@ const DrawGraph = function() {
     cy = createCytoscapeInstance("network_scheme", {});
 
     global_cy = cy;
+
+    // draw.io style: scroll=pan, Ctrl+scroll=zoom, left drag=select
+    cy.userPanningEnabled(false);
+    cy.userZoomingEnabled(false);
+    setupCanvasPanning(cy);
 
     // the default values of each option are outlined below:
     let defaults = {
