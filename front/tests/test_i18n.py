@@ -2,7 +2,7 @@ import pytest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from conftest import MiminetTester, HOME_PAGE, MAIN_PAGE
+from conftest import MiminetTester, MAIN_PAGE
 from utils.networks import MiminetTestNetwork
 from utils.locators import Location
 
@@ -40,9 +40,8 @@ class TestI18n:
 
         # Ждём, пока переводы применятся через проверку lang у <html>
         WebDriverWait(selenium, 5).until(
-            lambda driver: driver.execute_script(
-                "return document.documentElement.lang"
-            ) == lang
+            lambda driver: driver.execute_script("return document.documentElement.lang")
+            == lang
         )
 
     def test_language_switcher_exists(self, selenium: MiminetTester):
@@ -71,10 +70,12 @@ class TestI18n:
         )
         assert "Create a network" in create_button.text
 
-    def test_network_page_translation(self, selenium: MiminetTester, empty_network: str):
+    def test_network_page_translation(
+        self, selenium: MiminetTester, empty_network: str
+    ):
         """Проверяет перевод текстов на странице сети"""
         selenium.get(empty_network)
-        
+
         self._switch_language(selenium, "ru")
 
         # Проверяем русский язык
@@ -108,10 +109,12 @@ class TestI18n:
         assert copy_button.is_displayed()
         assert settings_button.is_displayed()
 
-    def test_network_player_label_translation(self, selenium: MiminetTester, empty_network: str):
+    def test_network_player_label_translation(
+        self, selenium: MiminetTester, empty_network: str
+    ):
         """Проверяет перевод меток плеера сети"""
         selenium.get(empty_network)
-        
+
         self._switch_language(selenium, "ru")
 
         # Проверяем начальную метку ожидания на русском
@@ -129,7 +132,9 @@ class TestI18n:
         )
         assert "Waiting" in wait_label.text
 
-    def test_ask_question_button_with_icon(self, selenium: MiminetTester, empty_network: str):
+    def test_ask_question_button_with_icon(
+        self, selenium: MiminetTester, empty_network: str
+    ):
         """Проверяет, что кнопка 'Задать вопрос' содержит иконку Telegram на обоих языках"""
         selenium.get(empty_network)
         self._switch_language(selenium, "ru")
@@ -138,7 +143,7 @@ class TestI18n:
         ask_button = selenium.find_element(
             By.CSS_SELECTOR, Location.Network.ASK_QUESTION_BUTTON.selector
         )
-        
+
         # Проверяем, что есть иконка
         icon = ask_button.find_element(By.TAG_NAME, "img")
         assert icon.get_attribute("src") is not None
@@ -173,9 +178,8 @@ class TestI18n:
 
         # Проверяем, что язык сохранился в DOM
         WebDriverWait(selenium, 5).until(
-            lambda driver: driver.execute_script(
-                "return document.documentElement.lang"
-            ) == "en"
+            lambda driver: driver.execute_script("return document.documentElement.lang")
+            == "en"
         )
 
         # Проверяем, что текст переведён
@@ -184,7 +188,9 @@ class TestI18n:
         )
         assert "Create a network" in create_button.text
 
-    def test_multiple_language_switches(self, selenium: MiminetTester, empty_network: str):
+    def test_multiple_language_switches(
+        self, selenium: MiminetTester, empty_network: str
+    ):
         """Проверяет множественные переключения языка туда-сюда"""
         selenium.get(empty_network)
 

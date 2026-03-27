@@ -31,7 +31,9 @@ class Location:
         # "Мои сети"
         MY_NETWORKS_BUTTON = Locator('a.nav-link[data-i18n="myNetworksLink"]')
         # Переключение языка (dropdown с иконкой глобуса)
-        LANGUAGE_DROPDOWN = Locator("a.nav-link.dropdown-toggle[data-bs-toggle='dropdown']")
+        LANGUAGE_DROPDOWN = Locator(
+            "a.nav-link.dropdown-toggle[data-bs-toggle='dropdown']"
+        )
         # "Примеры сетей"
         NETWORK_EXAMPLES_BUTTON = Locator("#examples-nav-item")
         # "Тестирование"
@@ -57,7 +59,7 @@ class Location:
             Args:
                 id (int): Position of network in networks list. Starts from 0."""
             assert id >= 0, "Network button can't have index less than 0."
-            return f"/html/body/section/div/div/div[{id + 2}]"
+            return f"/html/body/section/div/div/div[{id+2}]"
 
     class Network:
         """Specific network page."""
@@ -68,8 +70,10 @@ class Location:
         CONFIG_PANEL = Locator("#config_content")
         # Modal dialog for user warnings
         MODAL_DIALOG = Locator(xpath="/html/body/div[5]/div")
-        # "Эмулировать"
-        EMULATE_BUTTON = Locator("#NetworkEmulateButton", attrs={"data-i18n": "emulateBtn"})
+        # "Эмулировать" (ИЗМЕНЕНО: удален text, добавлен data-i18n)
+        EMULATE_BUTTON = Locator(
+            "#NetworkEmulateButton", attrs={"data-i18n": "emulateBtn"}
+        )
         # Pause animation button
         EMULATE_PLAYER_PAUSE_BUTTON = Locator("#NetworkPlayPauseButton")
         # Network title
@@ -83,11 +87,11 @@ class Location:
             """Data for identifying and locating top buttons of network interacting page."""
 
             # Network settings
-            OPTIONS = Locator("#net-settings")
+            OPTIONS = Locator(".ws-settings-button")
             # Copy network
-            COPY = Locator("#copy-network")
+            COPY = Locator(".ws-copy-button")
             # Share network
-            SHARE = Locator("#share-network")
+            SHARE = Locator(".ws-share-button")
 
         class ModalButton:
             # Copy
@@ -97,20 +101,6 @@ class Location:
             # Delete
             DELETE_MODAL_BUTTON = Locator("#networkDeleteButton")
             DELETE_SUBMIT_BUTTON = Locator("#networkDeleteSubmitButton")
-
-        class Options:
-            NETWORK_TITLE = Locator("#network_title")
-            NETWORK_DESCRIPTION = Locator("#network_desctiption")
-
-            # Animation filters
-            ARP_FILTER = Locator("#ARPFilterCheckbox")
-            STP_FILTER = Locator("#STPFilterCheckbox")
-            SYN_FILTER = Locator("#SYNFilterCheckbox")
-
-            # Buttons
-            SUBMIT_BUTTON = Locator("#networkConfigurationSubmit")
-            CANCEL_BUTTON = Locator("#networkConfigurationCancel")
-            DELETE_BUTTON = Locator("#networkDeleteButton")
 
         class DevicePanel:
             """Panel with network devices."""
@@ -139,17 +129,12 @@ class Location:
                 MAIN_FORM = Locator("#config_switch_main_form")
                 NAME_FIELD = Locator("#switch_name")
                 SUBMIT_BUTTON = Locator(
-                    "#config_switch_main_form_submit_button", attrs={"data-i18n": "saveBtn"}
+                    "#config_switch_main_form_submit_button",
+                    attrs={"data-i18n": "saveBtn"},
                 )
                 RSTP_BUTTON = Locator("#config_button_rstp")
                 VLAN_BUTTON = Locator("#config_button_vlan")
                 JOB_SELECT = Locator("#config_switch_job_select_field")
-
-                class Job:
-                    SLEEP_FIELD = Locator("#config_switch_sleep")
-                    LINK_DOWN_OPTION_FIELD = Locator(
-                        "#config_switch_link_down_iface_select_field"
-                    )
 
                 @staticmethod
                 def get_modal_dialog_selector(switch_name: str):
@@ -177,14 +162,15 @@ class Location:
                         Args:
                             id (int): Position of row in VLAN table. Starts from 0."""
                         assert id >= 0, "Row can't have index less than 0."
-                        return f'//*[@id="config_table_vlan_{switch_name}"]/table/tbody/tr[{id + 1}]'
+                        return f'//*[@id="config_table_vlan_{switch_name}"]/table/tbody/tr[{id+1}]'
 
             class Host(CommonDevice):
                 MAIN_FORM = Locator("#config_main_form")
                 NAME_FIELD = Locator("#config_host_name")
                 DEFAULT_GATEWAY_FIELD = Locator("#config_host_default_gw")
                 SUBMIT_BUTTON = Locator(
-                    "#config_host_main_form_submit_button", attrs={"data-i18n": "saveBtn"}
+                    "#config_host_main_form_submit_button",
+                    attrs={"data-i18n": "saveBtn"},
                 )
                 JOB_SELECT = Locator("#config_host_job_select_field")
 
@@ -216,9 +202,6 @@ class Location:
                     UDP_PORT_FIELD = Locator(
                         "#config_host_send_udp_data_port_input_field"
                     )
-                    DHCLIENT_INTF = Locator(
-                        "#config_host_add_dhclient_interface_select_iface_field"
-                    )
 
             class Hub(CommonDevice):
                 MAIN_FORM = Locator("#config_hub_main_form")
@@ -233,12 +216,12 @@ class Location:
                 NAME_FIELD = Locator("#config_router_name")
                 DEFAULT_GATEWAY_FIELD = Locator("#config_router_default_gw")
                 SUBMIT_BUTTON = Locator(
-                    "#config_router_main_form_submit_button", attrs={"data-i18n": "saveBtn"}
+                    "#config_router_main_form_submit_button",
+                    attrs={"data-i18n": "saveBtn"},
                 )
                 JOB_SELECT = Locator("#config_router_job_select_field")
 
                 class Job:
-                    PING_FIELD = Locator("#config_router_ping_c_1_ip")
                     NAT_LINK_SELECT = Locator(
                         "#config_router_add_nat_masquerade_iface_select_field"
                     )
@@ -275,30 +258,6 @@ class Location:
                     GRE_NAME_IFACE_FIELD = Locator(
                         "#config_router_add_gre_interface_name_field"
                     )
-                    PORT_FORWARDING_TCP_LINK_SELECT = Locator(
-                        "#config_router_add_port_forwarding_tcp_iface_select_field"
-                    )
-                    PORT_FORWARDING_TCP_PORT_FIELD = Locator(
-                        "#config_router_add_port_forwarding_tcp_port_input_field"
-                    )
-                    PORT_FORWARDING_TCP_DEST_IP_FIELD = Locator(
-                        "#config_router_add_port_forwarding_tcp_dest_ip_input_field"
-                    )
-                    PORT_FORWARDING_TCP_DEST_PORT_FIELD = Locator(
-                        "#config_router_add_port_forwarding_tcp_dest_port_input_field"
-                    )
-                    PORT_FORWARDING_UDP_LINK_SELECT = Locator(
-                        "#config_router_add_port_forwarding_udp_iface_select_field"
-                    )
-                    PORT_FORWARDING_UDP_PORT_FIELD = Locator(
-                        "#config_router_add_port_forwarding_udp_port_input_field"
-                    )
-                    PORT_FORWARDING_UDP_DEST_IP_FIELD = Locator(
-                        "#config_router_add_port_forwarding_udp_dest_ip_input_field"
-                    )
-                    PORT_FORWARDING_UDP_DEST_PORT_FIELD = Locator(
-                        "#config_router_add_port_forwarding_udp_dest_port_input_field"
-                    )
 
             class Server(CommonDevice):
                 MAIN_FORM = Locator("#config_main_form")
@@ -323,28 +282,18 @@ class Location:
                     UDP_PORT_FIELD = Locator(
                         "#config_server_start_udp_server_port_input_field"
                     )
-                    DHCP_IP_RANGE_START_FIELD = Locator(
+                    DCHP_IP_RANGE_START_FIELD = Locator(
                         "#config_server_add_dhcp_ip_range_1_input_field"
                     )
-                    DHCP_IP_RANGE_END_FIELD = Locator(
+                    DCHP_IP_RANGE_END_FIELD = Locator(
                         "#config_server_add_dhcp_ip_range_2_input_field"
                     )
-                    DHCP_MASK_FIELD = Locator(
+                    DCHP_MASK_FIELD = Locator(
                         "#config_server_add_dhcp_mask_input_field"
                     )
-                    DHCP_IP_GW_FIELD = Locator(
+                    DCHP_IP_GW_FIELD = Locator(
                         "#config_server_add_dhcp_gateway_input_field"
                     )
-                    DHCP_INTF = Locator(
-                        "#config_server_add_dhcp_interface_select_iface_field"
-                    )
-
-            class Edge(CommonDevice):
-                # New edge config structure: separate form and fields in config_edge.html
-                MAIN_FORM = Locator("#config_edge_main_form")
-                SUBMIT_BUTTON = Locator("#config_edge_main_form_submit_button")
-                END_FORM_BUTTON = Locator("#config_edge_end_form")
-                DUPLICATE_FIELD = Locator("#edge_duplicate")
 
             # The only stable way for finding ip/subnet mask on page is using XPATHs
 
@@ -354,7 +303,7 @@ class Location:
                 Args:
                     id (int): Position of link in links list. Starts from 0."""
                 assert id >= 0, "IP field can't have index less than 0."
-                return f"/html/body//form[@id='config_main_form']/div[{4 + id * 2}]/input[1]"
+                return f"/html/body/main/section/div[2]/div[2]/div[2]/form/div[{4 + id * 2}]/input[1]"
 
             @staticmethod
             def get_mask_field_xpath(id: int = 0):
@@ -362,7 +311,7 @@ class Location:
                 Args:
                     id (int): Position of link in links list. Starts from 0."""
                 assert id >= 0, "Subnet mask field can't have index less than 0."
-                return f"/html/body//form[@id='config_main_form']/div[{4 + id * 2}]/input[2]"
+                return f"/html/body/main/section/div[2]/div[2]/div[2]/form/div[{4 + id * 2}]/input[2]"
 
             MODAL_ERROR_DIALOG = Locator(
                 "#config_content > .alert-danger, #config_content > .alert-info:not(.edit-banner)"
