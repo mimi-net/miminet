@@ -57,6 +57,24 @@ const HostUid = function(){
     return "host_" + uid();
 }
 
+const HackerUid = function(){
+
+    let host_name = "hacker_";
+
+    for (let host_number = 1; host_number < 100; host_number++) {
+        host = host_name + host_number;
+
+        let t = nodes.find(t => t.data.id === host);
+
+        if (!t)
+        {
+            return host;
+        }
+    }
+
+    return "hacker_" + uid();
+}
+
 const RouterUid = function(){
 
     let host_name = "router_";
@@ -165,6 +183,10 @@ const ShowTextboxConfig = function(n, shared = 0) {
     ConfigTextboxFontColor(textbox_font_color)
     ConfigTextboxFontControls(textbox_fontsize, textbox_font_style, textbox_font_weight);
     ConfigTextboxContent(textbox_name);
+}
+
+const IsHostLikeNode = function(nodeType) {
+    return nodeType === 'host' || nodeType === 'hacker';
 }
 
 const ShowHostConfig = function(n, shared = 0){
@@ -556,7 +578,7 @@ const AddEdge = function(source_id, target_id){
         });
 
         // Add interface If edge connects to host or to router or to server
-        if (source_node.config.type === 'host' || source_node.config.type === 'router' || source_node.config.type === 'server'){
+        if (IsHostLikeNode(source_node.config.type) || source_node.config.type === 'router' || source_node.config.type === 'server'){
             let iface_id = InterfaceUid();
             source_node.interface.push({
                 id: iface_id,
@@ -565,7 +587,7 @@ const AddEdge = function(source_id, target_id){
             });
         }
 
-        if (target_node.config.type === 'host' || target_node.config.type === 'router' || target_node.config.type === 'server'){
+        if (IsHostLikeNode(target_node.config.type) || target_node.config.type === 'router' || target_node.config.type === 'server'){
             let iface_id = InterfaceUid();
             target_node.interface.push({
                 id: iface_id,
@@ -1308,7 +1330,7 @@ const DrawGraph = function() {
     }
 
     let customDefaults = {
-        handleNodes: '.host, .l2_switch, .l1_hub, .l3_router, .server',
+        handleNodes: '.host, .hacker, .l2_switch, .l1_hub, .l3_router, .server',
         canConnect: (src, tgt) => allowEdges(src, tgt),
 
         edgeParams: (src, tgt) => allowEdges(src, tgt) ? {} : null,
@@ -1435,7 +1457,7 @@ const DrawGraph = function() {
         selecteed_node_id = n.data.id;
         selected_edge_id = 0;
 
-        if (n.config.type === 'host'){
+        if (IsHostLikeNode(n.config.type)){
             ShowHostConfig(n);
         } else if (n.config.type === 'l1_hub'){
             ShowHubConfig(n);
@@ -1687,8 +1709,8 @@ const DrawSharedGraph = function(nodes, edges) {
         selecteed_node_id = n.data.id;
         selected_edge_id = 0;
 
-        if (n.config.type === 'host'){
-            ShowHostConfig(n, 1);
+        if (IsHostLikeNode(n.config.type)){
+            ShowHostConfig(n, shared=1);
         } else if (n.config.type === 'l1_hub'){
             ShowHubConfig(n, 1);
         } else if (n.config.type === 'l2_switch'){
@@ -1877,7 +1899,7 @@ const UpdateHostConfiguration = function (data, host_id)
                     return;
                 }
 
-                if (n.config.type === 'host'){
+                if (IsHostLikeNode(n.config.type)){
                     ShowHostConfig(n);
                 } else {
                     ClearConfigForm('Узел есть, но это не хост');
@@ -1946,7 +1968,7 @@ const DeleteJobFromHost = function (host_id, job_id, network_guid)
                     return;
                 }
 
-                if (n.config.type === 'host'){
+                if (IsHostLikeNode(n.config.type)){
                     ShowHostConfig(n);
                 } else {
                     ClearConfigForm('Узел есть, но это не хост');
