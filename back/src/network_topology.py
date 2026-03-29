@@ -23,6 +23,9 @@ class MiminetTopology(IPTopo):
         self.__iface_pairs: list = []
         # Used to generate unique names
         self.__switch_count = 0
+        # Minimum suitable time for which the network is configured
+        self.__network_configuration_time = 3
+        self.__hacker_hosts: set[str] = set()
 
         self.__network: Network = network
         self.__nodes: dict = {}
@@ -37,6 +40,15 @@ class MiminetTopology(IPTopo):
         Return: List with useful information about every interface."""
         return self.__iface_pairs.copy()
 
+    @property
+    def network_configuration_time(self) -> int:
+        """Get amount of time it takes to properly configure the network (in seconds)."""
+        return self.__network_configuration_time
+
+    def __set_network_configuration_time(self, value: int):
+        """Set amount of time it takes to properly configure the network (in seconds)."""
+        self.__network_configuration_time = value
+
     def __handle_node(self, node: Node):
         config: NodeConfig = node.config
         node_type: str = config.type  # network device type
@@ -50,6 +62,8 @@ class MiminetTopology(IPTopo):
             self.__handle_l1_hub(node_id)
         elif node_type == NodeType.ROUTER:
             self.__handle_router(node_id, config)
+        elif node_type == NodeType.HACKER:
+            self.__handle_host_hacker(node_id, config)
         else:
             print(f"Unknown node type: {node_type}")
             return
@@ -68,10 +82,26 @@ class MiminetTopology(IPTopo):
             priority=config.priority,
         )
 
+        # Set emulation delay based on STP mode
+        if is_rstp_enabled:
+            self.__set_network_configuration_time(7)
+        elif is_stp_enabled:
+            self.__set_network_configuration_time(33)
+
     def __handle_host_or_server(self, node_id: str, config: NodeConfig):
         default_gw = config.default_gw
         route = f"via {default_gw}" if default_gw else ""
-        self.__nodes[node_id] = self.addHost(node_id, defaultRoute=route, use_v6=False)
+        self.__nodes[node_id] = self.addHost(
+            node_id, defaultRoute=route, use_v6=False, cwd="/tmp"
+        )
+
+    def __handle_host_hacker(self, node_id: str, config: NodeConfig):
+        default_gw = config.default_gw
+        route = f"via {default_gw}" if default_gw else ""
+        self.__nodes[node_id] = self.addHost(
+            node_id, defaultRoute=route, use_v6=False, cwd="/tmp"
+        )
+        self.__hacker_hosts.add(node_id)
 
     def __handle_l1_hub(self, node_id: str):
         self.__nodes[node_id] = self.addSwitch(
