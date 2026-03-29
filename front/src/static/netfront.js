@@ -41,6 +41,20 @@ $('#network_scheme').droppable({
                 interface: [],
             });
         }
+        else if (type === 'hacker'){
+            let node_id = HackerUid();
+            nodes.push(
+            {
+                data: {id: node_id, label: node_id},
+                position: {x: CalculateDropOffset(ui.position.left, ui.position.top).x, y: CalculateDropOffset(ui.position.left, ui.position.top).y},
+                classes: ['hacker'],
+                config: {
+                    type: 'hacker',
+                    label: node_id,
+                },
+                interface: [],
+            });
+        }
         else if (type === 'l2_switch'){
             let node_id = l2SwitchUid();
             nodes.push(
