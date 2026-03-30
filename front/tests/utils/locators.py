@@ -4,11 +4,12 @@ from typing import Optional
 class Locator:
     """Holds different types of locators for UI elements."""
 
-    def __init__(self, selector=None, xpath=None, text=None, attrs=None, **kwargs):
+    def __init__(self, selector=None, xpath=None, text=None, attrs=None, parent_selector=None, **kwargs):
         self.xpath = xpath
         self.selector = selector
         self.text = text
         self.attrs = attrs or {}
+        self.parent_selector = parent_selector  
 
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -36,7 +37,14 @@ class Location:
         TRAINER_BUTTON = Locator("#trainer-nav-item")
         # "Учебные курсы"
         TRAINING_COURSES_BUTTON = Locator("#courses-nav-item")
-        LANGUAGE_DROPDOWN = Locator('a.nav-link.dropdown-toggle[data-bs-toggle="dropdown"]')
+        
+        # Языковой дропдаун — уточнённый селектор с поддержкой fallback
+        LANGUAGE_DROPDOWN = Locator(
+            selector='a.nav-link.dropdown-toggle[data-bs-toggle="dropdown"]',
+            # Альтернативный селектор, если основной не сработает
+            alt_selector='a.nav-link.dropdown-toggle i.bx-globe'
+        )
+
     class MainPage:
         """Main (landing) page."""
 
@@ -318,14 +326,14 @@ class Location:
             )
 
 
-DEVICE_BUTTON_SELECTORS =[
+DEVICE_BUTTON_SELECTORS = [
     Location.Network.DevicePanel.SWITCH.selector,
     Location.Network.DevicePanel.HOST.selector,
     Location.Network.DevicePanel.HUB.selector,
     Location.Network.DevicePanel.ROUTER.selector,
     Location.Network.DevicePanel.SERVER.selector,
 ]
-DEVICE_BUTTON_CLASSES =[
+DEVICE_BUTTON_CLASSES = [
     Location.Network.DevicePanel.SWITCH.device_class,
     Location.Network.DevicePanel.HOST.device_class,
     Location.Network.DevicePanel.HUB.device_class,
