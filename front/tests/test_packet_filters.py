@@ -282,7 +282,6 @@ class TestPacketFilters:
             ],
         )
 
-        # Enable all filters and apply
         self._open_settings_modal(selenium)
         arp_checkbox = self._find_filter(selenium, self.Filter.ARP)
         stp_checkbox = self._find_filter(selenium, self.Filter.STP)

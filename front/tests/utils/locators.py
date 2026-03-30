@@ -77,6 +77,12 @@ class Location:
         # Кнопка "Задать вопрос" / "Ask a question"
         ASK_QUESTION_BUTTON = Locator("#NetworkRunButtonHelpLabel")
 
+        class Options:
+            ARP_FILTER = Locator("#ARPFilterCheckbox")
+            STP_FILTER = Locator("#STPFilterCheckbox")
+            SYN_FILTER = Locator("#SYNFilterCheckbox")
+            SUBMIT_BUTTON = Locator("#networkConfigurationSubmit")
+
         class TopButton:
             """Data for identifying and locating top buttons of network interacting page."""
 
