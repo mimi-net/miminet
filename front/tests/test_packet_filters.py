@@ -1,10 +1,12 @@
 import pytest
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import ElementClickInterceptedException
 
 from conftest import MiminetTester
-from utils.locators import Location
 from utils.networks import MiminetTestNetwork
+from utils.locators import Location
 from enum import Enum
 
 
@@ -15,7 +17,7 @@ class TestPacketFilters:
         SYN = Location.Network.Options.SYN_FILTER
 
     @pytest.fixture(scope="class")
-    def network(self, selenium: MiminetTester):
+    def test_network(self, selenium: MiminetTester):
         test_network = MiminetTestNetwork(selenium)
         yield test_network
         try:
@@ -26,7 +28,6 @@ class TestPacketFilters:
         try:
             test_network.delete()
         except ElementClickInterceptedException:
-            # Fallback: close overlays and click via JS to ensure deletion
             try:
                 selenium.execute_script("$('.modal.show').modal('hide');")
                 selenium.find_element(
@@ -97,13 +98,13 @@ class TestPacketFilters:
             )
         )
 
-    def _checkbox_state(self, selenium: MiminetTester, checkbox_id_or_selector: str):
+    def _checkbox_state(self, selenium, checkbox_id_or_selector: str):
         return selenium.execute_script(
             f"var el = document.getElementById('{checkbox_id_or_selector}');"
             "return el ? el.checked : null;"
         )
 
-    def _prepare_packets(self, selenium: MiminetTester, labels: list[str]):
+    def _prepare_packets(self, selenium, labels: list):
         selenium.execute_script(
             """
             packetFilterState.hideARP = false;
@@ -116,14 +117,14 @@ class TestPacketFilters:
             labels,
         )
 
-    def _find_filter(self, selenium, filter: Filter):
+    def _find_filter(self, selenium, filter):
         selenium.wait_until_appear(By.CSS_SELECTOR, filter.value.selector)
         return selenium.find_element(By.CSS_SELECTOR, filter.value.selector)
 
     def test_enable_arp_filter_filters_packets(
-        self, selenium: MiminetTester, network: MiminetTestNetwork
+        self, selenium: MiminetTester, test_network: MiminetTestNetwork
     ):
-        selenium.get(network.url)
+        selenium.get(test_network.url)
         self._wait_filter_state_ready(selenium)
 
         self._prepare_packets(selenium, ["ARP packet", "ICMP packet"])
@@ -154,9 +155,9 @@ class TestPacketFilters:
         self._close_options_modal(selenium)
 
     def test_cancel_does_not_change_filter_state(
-        self, selenium: MiminetTester, network: MiminetTestNetwork
+        self, selenium: MiminetTester, test_network: MiminetTestNetwork
     ):
-        selenium.get(network.url)
+        selenium.get(test_network.url)
         self._wait_filter_state_ready(selenium)
 
         initial_state = selenium.execute_script(
@@ -165,8 +166,8 @@ class TestPacketFilters:
 
         self._open_settings_modal(selenium)
         arp_checkbox = self._find_filter(selenium, self.Filter.ARP)
-        arp_checkbox.click()  # toggle current state
-        self._close_options_modal(selenium)  # close without saving
+        arp_checkbox.click()
+        self._close_options_modal(selenium)
 
         current_state = selenium.execute_script(
             "return packetFilterState.hideARP === true;"
@@ -182,9 +183,9 @@ class TestPacketFilters:
         self._close_options_modal(selenium)
 
     def test_enable_stp_filter_filters_packets(
-        self, selenium: MiminetTester, network: MiminetTestNetwork
+        self, selenium: MiminetTester, test_network: MiminetTestNetwork
     ):
-        selenium.get(network.url)
+        selenium.get(test_network.url)
         self._wait_filter_state_ready(selenium)
 
         self._prepare_packets(
@@ -224,9 +225,9 @@ class TestPacketFilters:
         self._close_options_modal(selenium)
 
     def test_enable_syn_filter_filters_packets(
-        self, selenium: MiminetTester, network: MiminetTestNetwork
+        self, selenium: MiminetTester, test_network: MiminetTestNetwork
     ):
-        selenium.get(network.url)
+        selenium.get(test_network.url)
         self._wait_filter_state_ready(selenium)
         self._prepare_packets(
             selenium,
@@ -268,9 +269,9 @@ class TestPacketFilters:
         self._close_options_modal(selenium)
 
     def test_disabling_filters_restores_packets(
-        self, selenium: MiminetTester, network: MiminetTestNetwork
+        self, selenium: MiminetTester, test_network: MiminetTestNetwork
     ):
-        selenium.get(network.url)
+        selenium.get(test_network.url)
         self._wait_filter_state_ready(selenium)
 
         self._prepare_packets(
@@ -305,7 +306,6 @@ class TestPacketFilters:
             )
         )
 
-        # Disable filters and ensure packets come back
         self._open_settings_modal(selenium)
         arp_checkbox = self._find_filter(selenium, self.Filter.ARP)
         stp_checkbox = self._find_filter(selenium, self.Filter.STP)
