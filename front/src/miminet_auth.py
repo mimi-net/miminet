@@ -140,7 +140,13 @@ def login_index():
         if user:
             if check_password_hash(user.password_hash, password):
                 login_user(user, remember=True)
-                return redirect_next_url(fallback=url_for("user_profile"))
+                access_token = create_access_token(identity=str(user.id))
+                refresh_token = create_refresh_token(identity=str(user.id))
+
+                response = redirect_next_url(fallback=url_for("user_profile"))
+                set_access_cookies(response, access_token)
+                set_refresh_cookies(response, refresh_token)
+                return response
             else:
                 flash("Пара логин и пароль указаны неверно", category="error")
                 return render_template("auth/login.html", user=current_user)
@@ -313,6 +319,12 @@ def google_callback():
         user = User.query.filter_by(google_id=id_info.get("sub")).first()
 
     login_user(user, remember=True)
+    access_token = create_access_token(identity=str(user.id))
+    refresh_token = create_refresh_token(identity=str(user.id))
+
+    response = redirect_next_url(fallback=url_for("home"))
+    set_access_cookies(response, access_token)
+    set_refresh_cookies(response, refresh_token)
 
     if user_is_new:
         u = uuid.uuid4()
@@ -326,7 +338,7 @@ def google_callback():
         db.session.add(n)
         db.session.commit()
 
-    return redirect_next_url(fallback=url_for("home"))
+    return response
 
 
 # https://vk.com/dev/authcode_flow_user
@@ -489,7 +501,13 @@ def yandex_callback(yandex_json=yandex_json):
             user = User.query.filter_by(yandex_id=id_info.get("id")).first()
 
         login_user(user, remember=True)
-        return redirect_next_url(fallback=url_for("home"))
+        access_token = create_access_token(identity=str(user.id))
+        refresh_token = create_refresh_token(identity=str(user.id))
+
+        response = redirect_next_url(fallback=url_for("home"))
+        set_access_cookies(response, access_token)
+        set_refresh_cookies(response, refresh_token)
+        return response
 
     except TokenExpiredError as e:
         logger.error("Token expired: %s", e)
@@ -564,7 +582,13 @@ def tg_callback():
         ).first()
 
     login_user(user, remember=True)
-    return redirect_next_url(fallback=url_for("home"))
+    access_token = create_access_token(identity=str(user.id))
+    refresh_token = create_refresh_token(identity=str(user.id))
+
+    response = redirect_next_url(fallback=url_for("home"))
+    set_access_cookies(response, access_token)
+    set_refresh_cookies(response, refresh_token)
+    return response
 
 
 class TestUserData:

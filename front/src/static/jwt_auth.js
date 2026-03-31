@@ -80,3 +80,57 @@ function ajaxWithAuth(options) {
     });
 }
 
+function fetchWithAuth(url, options = {}) {
+    return new Promise((resolve, reject) => {
+        fetch(url, {
+            ...options,
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                ...(options.headers || {})
+            }
+        })
+        .then(response => {
+            if (response.status !== 401) {
+                return response;
+            }
+
+            if (isRefreshing) {
+                return new Promise((res, rej) => {
+                    failedQueue.push({ resolve: res, reject: rej });
+                })
+                .then(() => fetch(url, options))
+                .then(resolve)
+                .catch(reject);
+            }
+
+            isRefreshing = true;
+
+            return refreshTokens()
+                .then(() => {
+                    processQueue(null);
+                    return fetch(url, {
+                       ...options,
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            ...(options.headers || {})
+                        }
+                    });
+                })
+                .then(resolve)
+                .catch(err => {
+                    processQueue(err);
+                    window.location.href = '/login';
+                    throw err;
+                })
+                .finally(() => {
+                    isRefreshing = false;
+                });
+        })
+        .then(resolve)
+        .catch(reject);
+    });
+}

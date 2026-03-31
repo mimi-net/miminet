@@ -107,18 +107,24 @@ app = Flask(
 app.config.update(
     JWT_SECRET_KEY=os.environ.get('JWT_SECRET_KEY', "secret-key"),
     JWT_TOKEN_LOCATION = ['cookies'],
-    JWT_COOKIE_DOMAIN = '.local.tst',
+    JWT_COOKIE_DOMAIN = f".{os.environ.get('BASE_DOMAIN', 'local.tst')}",
     JWT_COOKIE_SECURE = False,#True,
     JWT_COOKIE_CSRF_PROTECT = False,
-    JWT_COOKIE_SAMESITE = None,
+    JWT_COOKIE_SAMESITE = 'Lax',
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=3),
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(minutes=30)
 )
 
+allowed_hosts = os.environ.get('ALLOWED_HOSTS', '')
+if allowed_hosts:
+    allowed_hosts = [item.strip() for item in allowed_hosts.split(',')]
+else:
+    allowed_hosts = []
+print(f"Allowed Origins: {allowed_hosts}")
 CORS(app,
      resources={
          r"/*": {
-             "origins": ["http://quiz.local.tst", "http://local.tst"],
+             "origins": allowed_hosts,
              "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
              "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"],
              "supports_credentials": True,
@@ -127,6 +133,18 @@ CORS(app,
      },
      intercept_exceptions=False
 )
+
+@app.after_request
+def add_cors_headers(response):
+    origin = request.headers.get('Origin')
+
+    if origin and origin in allowed_hosts:
+        response.headers.add('Access-Control-Allow-Origin', origin)
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+
+    return response
 
 # SQLAlchimy config
 load_dotenv()
@@ -356,7 +374,14 @@ admin = Admin(
 
 admin.add_view(TestView(Test, db.session))
 admin.add_view(SectionView(Section, db.session))
-admin.add_view(QuestionView(Question, db.session))
+admin.add_view(
+    QuestionView(
+        Question,
+        db.session,
+        name="Создать вопрос",
+        endpoint="question"
+    )
+)
 admin.add_view(AnswerView(Answer, db.session))
 admin.add_view(QuestionCategoryView(QuestionCategory, db.session))
 admin.add_view(SessionQuestionView(SessionQuestion, db.session))
@@ -398,16 +423,6 @@ def missing_token_callback(error):
         return jsonify({"msg": "Missing token"}), 401
     else:
         return redirect(url_for("login_index", next=request.url))
-
-# @app.context_processor
-# def inject_user():
-#     try:
-#         verify_jwt_in_request()
-#         current_user_id = get_jwt_identity()
-#         user = User.query.filter(User.id == current_user_id).first()
-#         return dict(current_user_id=current_user_id, is_authenticated=True, user=user)
-#     except:
-#         return dict(current_user_id=None, is_authenticated=False, user=None)
 
 @app.route("/config.js")
 def confing_js():

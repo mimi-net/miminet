@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name quiz.local.tst;
+    server_name ${QUIZ_DOMAIN};
 
     location / {
         include uwsgi_params;
@@ -10,7 +10,7 @@ server {
 
 server {
     listen 80;
-    server_name local.tst;
+    server_name ${BASE_DOMAIN};
 
     location / {
         include uwsgi_params;
