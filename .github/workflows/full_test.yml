@@ -17,7 +17,7 @@ jobs:
         run: |
           cd front/
           sed -i 's/MODE=prod/MODE=dev/' .env
-          sed -i '/BASE_DOMAIN=local.tst/BASE_DOMAIN=localhost' .env
+          sed -i 's/BASE_DOMAIN=local.tst/BASE_DOMAIN=localhost' .env
           docker compose up -d
 
       - name: Start selenium
