@@ -1,4 +1,17 @@
 {% extends "base.html" %}
+{% macro section_word(count) -%}
+    {%- set mod100 = count % 100 -%}
+    {%- set mod10 = count % 10 -%}
+    {%- if 11 <= mod100 <= 14 -%}
+        разделов
+    {%- elif mod10 == 1 -%}
+        раздел
+    {%- elif mod10 in [2, 3, 4] -%}
+        раздела
+    {%- else -%}
+        разделов
+    {%- endif -%}
+{%- endmacro %}
 {% block title %} Тестирование {% endblock %}
 {% block description %}Сетевой тренажер для обучения компьютерным сетям{% endblock %}
 
@@ -19,6 +32,13 @@
             line-height: 1.25;
         }
 
+        .quiz-card__header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
         .quiz-card__title a {
             color: var(--si-heading-color);
             text-decoration: none;
@@ -30,6 +50,15 @@
 
         .quiz-card__description {
             margin: 0;
+        }
+
+        .quiz-card__meta {
+            margin: 4px 0 0;
+            flex-shrink: 0;
+            color: var(--si-body-color);
+            font-size: 14px;
+            line-height: 1.4;
+            white-space: nowrap;
         }
 
         .quiz-card__progress {
@@ -90,11 +119,21 @@
                 font-size: 1.35rem;
             }
 
+            .quiz-card__header {
+                flex-direction: column;
+                gap: 4px;
+            }
+
             .quiz-card__progress-badge {
                 min-width: 48px;
                 height: 30px;
                 padding: 0 12px;
                 font-size: 12px;
+            }
+
+            .quiz-card__meta {
+                margin-top: 0;
+                white-space: normal;
             }
         }
     </style>
@@ -126,9 +165,12 @@
                 </div>
 
                 <div class="card-body quiz-card__body">
-                    <h4 class="h4 quiz-card__title">
-                        <a href="{{ url_for('get_sections_by_test_endpoint', test_id=quiz.test_id) }}">{{ quiz.test_name }}</a>
-                    </h4>
+                    <div class="quiz-card__header">
+                        <h4 class="h4 quiz-card__title">
+                            <a href="{{ url_for('get_sections_by_test_endpoint', test_id=quiz.test_id) }}">{{ quiz.test_name }}</a>
+                        </h4>
+                        <p class="quiz-card__meta">{{ quiz.section_count }} {{ section_word(quiz.section_count) }}</p>
+                    </div>
                     {% if quiz.description %}
                         <p class="quiz-card__description">{{ quiz.description }}</p>
                     {% else %}
