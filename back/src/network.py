@@ -32,14 +32,20 @@ class MiminetNetwork(IPNet):
         self.__check_files()
 
     def stop(self):
+        info("[network.stop] called, sleeping 2s before teardown\n")
         # Wait before stop
         time.sleep(2)
 
         clean_bridges(self)
         teardown_vtep_bridges(self, self.__network_schema.nodes)
 
+        info("[network.stop] calling __clean_services\n")
         self.__clean_services()
+        info(
+            "[network.stop] calling super().stop() — this will send SIGINT to mimidump\n"
+        )
         super().stop()
+        info("[network.stop] done\n")
 
     def __check_files(self):
         """Checking for the existence of pcap files."""
