@@ -42,7 +42,8 @@ function ajaxWithAuth(options) {
             }
 
             if (options.url === '/refresh_access') {
-                window.location.href = '/login';
+                var next_url = document.URL;
+                window.location.href = '/auth/login.html?next=' + next_url;
                 reject(xhr);
                 return;
             }
@@ -69,8 +70,9 @@ function ajaxWithAuth(options) {
                         .fail(reject);
                 })
                 .catch(err => {
+                    var next_url = document.URL;
                     processQueue(err);
-                    window.location.href = '/login';
+                    window.location.href = '/auth/login.html?next=' + next_url;
                     reject(err);
                 })
                 .finally(() => {
@@ -123,7 +125,8 @@ function fetchWithAuth(url, options = {}) {
                 .then(resolve)
                 .catch(err => {
                     processQueue(err);
-                    window.location.href = '/login';
+                    var next_url = document.URL;
+                    window.location.href = '/auth/login.html?next=' + next_url;
                     throw err;
                 })
                 .finally(() => {
