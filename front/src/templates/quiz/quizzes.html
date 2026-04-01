@@ -87,14 +87,15 @@
 
         .quiz-card__progress {
             position: absolute;
-            top: 24px;
-            bottom: 24px;
+            top: 50%;
             left: 24px;
             width: 40px;
+            height: 118px;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 8px;
+            transform: translateY(-50%);
         }
 
         .quiz-card__progress-badge {
@@ -137,6 +138,7 @@
             .quiz-card__progress {
                 left: 20px;
                 width: 36px;
+                height: 108px;
             }
 
             .quiz-card__title {
