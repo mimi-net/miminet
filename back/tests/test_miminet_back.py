@@ -1,4 +1,6 @@
 import dataclasses
+import glob
+import os
 import re
 import json
 from pathlib import Path
@@ -123,12 +125,21 @@ class Case:
 # Generate test cases
 TEST_FILES = load_test_files(TEST_JSON_DIR)
 TEST_CASES = [Case(*read_files(n, a)) for n, a in TEST_FILES]
+TEST_IDS = [n.replace(NETWORK_FILE_SUFFIX, "") for n, _ in TEST_FILES]
 
 
-@pytest.mark.parametrize("test", TEST_CASES)
+def cleanup_pcap_files():
+    """Remove stale pcap files from /tmp to prevent interference between tests."""
+    for f in glob.glob("/tmp/capture_*.pcapng"):
+        os.remove(f)
+
+
+@pytest.mark.parametrize("test", TEST_CASES, ids=TEST_IDS)
 def test_miminet_work(test: Case, request) -> None:
     """Test network emulation using Mininet."""
     info(f"Running test: {request.node.name}.")
+
+    cleanup_pcap_files()
 
     # Emulate network behavior based on the test case
     animation, _ = run_miminet(test.json_network)
