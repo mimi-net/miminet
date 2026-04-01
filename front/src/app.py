@@ -1,6 +1,8 @@
 ﻿import sys
 import os
 from datetime import datetime, timedelta
+from urllib.parse import urlencode, urljoin, urlparse, urlunparse
+
 from dotenv import load_dotenv
 
 from flask import Flask, make_response, render_template, Response, jsonify, render_template_string, request, url_for, \
@@ -96,7 +98,7 @@ from quiz.entity.entity import (
     Question,
     Answer,
     QuestionCategory,
-    SessionQuestion,
+    SessionQuestion, Organization,
 )
 
 from quiz.controller.image_controller import image_routes
@@ -396,6 +398,41 @@ admin.add_view(
         endpoint="create_check_task",
     )
 )
+
+def organization_url_for(endpoint, org_id, **kwargs):
+    org = Organization.query.filter_by(id=org_id).first()
+    base = ""
+    if org:
+        if MODE == "dev":
+            base = f"http://{org.domain}"
+        else:
+            base = f"https://{org.domain}"
+
+    endpoint = endpoint.strip("/")
+
+    path = endpoint.lstrip("/")
+    query_string = urlencode(kwargs) if kwargs else ""
+
+    full_url = urljoin(base + "/", path)
+    if query_string:
+        parsed = urlparse(full_url)
+        full_url = urlunparse(
+            (
+                parsed.scheme,
+                parsed.netloc,
+                parsed.path,
+                parsed.params,
+                query_string,
+                parsed.fragment,
+            )
+        )
+
+    return full_url
+
+@app.context_processor
+def utility_processor():
+    return dict(organization_url_for=organization_url_for)
+
 
 def is_api_request():
     if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:

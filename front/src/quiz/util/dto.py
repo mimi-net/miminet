@@ -104,6 +104,7 @@ def to_test_dto_list(tests: List[Test]):
                 solved_question_count=solved_question_count,
                 total_question_count=total_question_count,
                 progress_percent=progress_percent,
+                organization_id=our_test.organization_id
             )
         )
 
@@ -449,6 +450,7 @@ class TestDto:
         solved_question_count: int,
         total_question_count: int,
         progress_percent: int,
+        organization_id: int,
     ):
         self.test_id = test_id
         self.test_name = test_name
@@ -460,6 +462,7 @@ class TestDto:
         self.solved_question_count = solved_question_count
         self.total_question_count = total_question_count
         self.progress_percent = progress_percent
+        self.organization_id = organization_id
 
 
 class QuestionForEditorDto:
