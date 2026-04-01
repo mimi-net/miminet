@@ -522,15 +522,9 @@ def dhcp_server(job: Job, job_host):
     )
     job_host.build_daemon(daemon)
 
-    # Disable "ping before offer": dnsmasq by default sends ICMP probes to check
-    # if an address is free before offering it. This makes DHCP behavior
-    # non-deterministic in emulation (probe may timeout at different speeds),
-    # so we disable it for stable, reproducible test results.
-    cfg_file = daemon.cfg_filenames[0]
-    job_host.cmd(f"echo 'no-ping' >> {cfg_file}")
-
     # Log the generated dnsmasq config so we can inspect it in CI
     try:
+        cfg_file = daemon.cfg_filenames[0]
         cfg_content = job_host.cmd(f"cat {cfg_file}")
         info(f"[dhcp_server] dnsmasq config ({cfg_file}):\n{cfg_content}")
     except Exception as e:
