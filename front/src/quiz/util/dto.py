@@ -1,7 +1,9 @@
 import random
 import uuid
-from typing import Dict, List
 import json
+from functools import lru_cache
+from pathlib import Path
+from typing import Dict, List, Optional
 
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -15,6 +17,7 @@ from miminet_model import Network, db
 from quiz.entity.entity import (
     Section,
     Test,
+    Organization,
     Question,
     Answer,
     QuizSession,
@@ -33,6 +36,9 @@ def calculate_question_count(section: Section) -> int:
 
 
 MOSCOW_TZ = ZoneInfo("Europe/Moscow")
+ORGANIZATION_LOGOS_DIR = (
+    Path(__file__).resolve().parents[2] / "static" / "images" / "logo_organizations"
+)
 
 
 def is_answer_available(section):
@@ -48,6 +54,47 @@ def is_answer_available(section):
         available_answer = results_time <= now_moscow
 
     return available_answer
+
+
+def normalize_organization_domain(domain: Optional[str]) -> Optional[str]:
+    if domain is None:
+        return None
+
+    normalized_domain = domain.strip()
+    if not normalized_domain:
+        return None
+
+    if "://" in normalized_domain:
+        return normalized_domain
+
+    return f"https://{normalized_domain.lstrip('/')}"
+
+
+@lru_cache(maxsize=128)
+def resolve_organization_logo_filename(logo_uri: Optional[str]) -> Optional[str]:
+    if logo_uri is None:
+        return None
+
+    logo_filename = Path(logo_uri.strip()).name
+    if not logo_filename:
+        return None
+
+    if not (ORGANIZATION_LOGOS_DIR / logo_filename).is_file():
+        return None
+
+    return logo_filename
+
+
+def get_organizations_by_id(organization_ids) -> Dict[int, Organization]:
+    if not organization_ids:
+        return {}
+
+    return {
+        organization.id: organization
+        for organization in Organization.query.filter(
+            Organization.id.in_(organization_ids)
+        ).all()
+    }
 
 
 def to_section_dto_list(sections: List[Section]):
@@ -71,6 +118,12 @@ def to_section_dto_list(sections: List[Section]):
 
 def to_test_dto_list(tests: List[Test]):
     user_id = get_current_user_id()
+    organization_ids = {
+        our_test.organization_id
+        for our_test in tests
+        if getattr(our_test, "organization_id", None) is not None
+    }
+    organizations_by_id = get_organizations_by_id(organization_ids)
     active_sections_by_test: Dict[int, List[Section]] = {
         our_test.id: get_active_sections(our_test) for our_test in tests
     }
@@ -86,6 +139,8 @@ def to_test_dto_list(tests: List[Test]):
     dto_list: List[TestDto] = []
     for our_test in tests:
         active_sections = active_sections_by_test.get(our_test.id, [])
+        organization_id = getattr(our_test, "organization_id", None)
+        organization = organizations_by_id.get(organization_id)
         (
             solved_question_count,
             total_question_count,
@@ -104,6 +159,14 @@ def to_test_dto_list(tests: List[Test]):
                 solved_question_count=solved_question_count,
                 total_question_count=total_question_count,
                 progress_percent=progress_percent,
+                organization_id=organization_id,
+                organization_name=getattr(organization, "name", None),
+                organization_logo_uri=resolve_organization_logo_filename(
+                    getattr(organization, "logo_uri", None)
+                ),
+                organization_domain=normalize_organization_domain(
+                    getattr(organization, "domain", None)
+                ),
             )
         )
 
@@ -449,6 +512,10 @@ class TestDto:
         solved_question_count: int,
         total_question_count: int,
         progress_percent: int,
+        organization_id: Optional[int] = None,
+        organization_name: Optional[str] = None,
+        organization_logo_uri: Optional[str] = None,
+        organization_domain: Optional[str] = None,
     ):
         self.test_id = test_id
         self.test_name = test_name
@@ -460,6 +527,10 @@ class TestDto:
         self.solved_question_count = solved_question_count
         self.total_question_count = total_question_count
         self.progress_percent = progress_percent
+        self.organization_id = organization_id
+        self.organization_name = organization_name
+        self.organization_logo_uri = organization_logo_uri
+        self.organization_domain = organization_domain
 
 
 class QuestionForEditorDto:

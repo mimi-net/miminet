@@ -92,6 +92,22 @@ class CreatedByMixin(object):
         return db.relationship("User")
 
 
+class Organization(db.Model):  # type:ignore[name-defined]
+    __tablename__ = "organization"
+
+    id = db.Column(BigInteger, primary_key=True)
+    name = db.Column(Text, nullable=False)
+    domain = db.Column(Text)
+    logo_uri = db.Column(Text, default="empty.jpg", nullable=False)
+    admin_role = db.Column(BigInteger, default=1, nullable=True)
+
+    def __str__(self):
+        return self.name
+
+    def get_id(self):
+        return self.id
+
+
 class Test(
     IdMixin,
     SoftDeleteMixin,
@@ -105,6 +121,7 @@ class Test(
     description = db.Column(Text, default="")
     is_ready = db.Column(Boolean, default=False)
     is_retakeable = db.Column(Boolean, default=False)
+    organization_id = db.Column(BigInteger, ForeignKey("organization.id"))
 
     sections = db.relationship("Section", back_populates="test")
 
