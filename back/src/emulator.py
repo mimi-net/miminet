@@ -57,7 +57,7 @@ def emulate(
             network.jobs, key=lambda job: job.job_id // 100, reverse=True
         )
 
-        info(
+        error(
             "[emulator] Job execution order (%d jobs): %s\n"
             % (
                 len(ordered_jobs),
@@ -107,7 +107,7 @@ def emulate(
                     if os.path.exists(expected_path)
                     else -1
                 )
-                info(
+                error(
                     "[emulator] pcap before stop: node=%s iface=%s "
                     "node_cwd=%r actual_path=%s(%d bytes) expected_path=%s(%d bytes)\n"
                     % (
@@ -121,7 +121,7 @@ def emulate(
                     )
                 )
 
-        info("[emulator] calling net.stop()\n")
+        error("[emulator] calling net.stop()\n")
         net.stop()
 
     except Exception as e:
@@ -138,10 +138,10 @@ def emulate(
             f"/tmp/capture_{link2}_out.pcapng",
         ]:
             size = os.path.getsize(fname) if os.path.exists(fname) else -1
-            info("[emulator] pcap size after stop: %s = %d bytes\n" % (fname, size))
-    info("[emulator] Animation groups before grouping: %d\n" % len(animation))
+            error("[emulator] pcap size after stop: %s = %d bytes\n" % (fname, size))
+    error("[emulator] Animation groups before grouping: %d\n" % len(animation))
     animation = group_packets_by_time(animation)
-    info("[emulator] Animation groups after time-grouping: %d\n" % len(animation))
+    error("[emulator] Animation groups after time-grouping: %d\n" % len(animation))
 
     return animation, pcaps
 
@@ -190,7 +190,7 @@ def create_animation(
             (pcap_out_file2, link2, edge_target, "OUT"),
         ]:
             if not os.path.exists(fname):
-                info(
+                error(
                     "[create_animation] pcap: node=%s iface=%s direction=%s MISSING\n"
                     % (node_name, iface, direction)
                 )
@@ -207,7 +207,7 @@ def create_animation(
                     count_pcapng = sum(1 for _ in dpkt.pcapng.Reader(_f))
             except Exception:
                 pass
-            info(
+            error(
                 "[create_animation] pcap: node=%s iface=%s direction=%s "
                 "file=%s size=%d pcap_count=%d pcapng_count=%d\n"
                 % (node_name, iface, direction, fname, fsize, count_pcap, count_pcapng)
