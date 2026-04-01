@@ -39,6 +39,14 @@
             gap: 16px;
         }
 
+        .quiz-card__aside {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
         .quiz-card__title a {
             color: var(--si-heading-color);
             text-decoration: none;
@@ -54,11 +62,27 @@
 
         .quiz-card__meta {
             margin: 4px 0 0;
-            flex-shrink: 0;
             color: var(--si-body-color);
             font-size: 14px;
             line-height: 1.4;
             white-space: nowrap;
+            text-align: right;
+        }
+
+        .quiz-card__organization-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: flex-end;
+            max-width: 168px;
+        }
+
+        .quiz-card__organization-link img {
+            display: block;
+            max-width: 100%;
+            max-height: 56px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
         }
 
         .quiz-card__progress {
@@ -124,6 +148,11 @@
                 gap: 4px;
             }
 
+            .quiz-card__aside {
+                align-items: flex-start;
+                gap: 10px;
+            }
+
             .quiz-card__progress-badge {
                 min-width: 48px;
                 height: 30px;
@@ -134,6 +163,12 @@
             .quiz-card__meta {
                 margin-top: 0;
                 white-space: normal;
+                text-align: left;
+            }
+
+            .quiz-card__organization-link {
+                justify-content: flex-start;
+                max-width: 144px;
             }
         }
     </style>
@@ -169,7 +204,21 @@
                         <h4 class="h4 quiz-card__title">
                             <a href="{{ url_for('get_sections_by_test_endpoint', test_id=quiz.test_id) }}">{{ quiz.test_name }}</a>
                         </h4>
-                        <p class="quiz-card__meta">{{ quiz.section_count }} {{ section_word(quiz.section_count) }}</p>
+                        <div class="quiz-card__aside">
+                            <p class="quiz-card__meta">{{ quiz.section_count }} {{ section_word(quiz.section_count) }}</p>
+                            {% if quiz.organization_id and quiz.organization_logo_uri and quiz.organization_domain %}
+                                <a class="quiz-card__organization-link"
+                                    aria-label="{{ quiz.organization_name or quiz.test_name }}">
+                                    <img src="{{ url_for('static', filename='images/logo_organizations/' ~ quiz.organization_logo_uri) }}"
+                                         alt="{{ quiz.organization_name or quiz.test_name }}">
+                                </a>
+                            {% elif quiz.organization_id and quiz.organization_logo_uri %}
+                                <span class="quiz-card__organization-link">
+                                    <img src="{{ url_for('static', filename='images/logo_organizations/' ~ quiz.organization_logo_uri) }}"
+                                         alt="{{ quiz.organization_name or quiz.test_name }}">
+                                </span>
+                            {% endif %}
+                        </div>
                     </div>
                     {% if quiz.description %}
                         <p class="quiz-card__description">{{ quiz.description }}</p>
