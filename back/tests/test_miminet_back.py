@@ -70,19 +70,6 @@ def normalize_packet_data(packet_data: str) -> str:
     return packet_data.replace("\n", "\\n").strip()
 
 
-def remove_duplicate_packets(
-    packets: list[dict[str, str]],
-) -> list[dict[str, str]]:
-    res = []
-    seen = set()
-    for pck in packets:
-        fs = frozenset(pck.items())
-        if fs not in seen:
-            seen.add(fs)
-            res.append(pck)
-    return res
-
-
 def extract_important_fields(packets_json: str) -> list[dict[str, str]]:
     """Extracts relevant fields from emulation packets, excluding uninformative ones."""
 
@@ -109,8 +96,6 @@ def extract_important_fields(packets_json: str) -> list[dict[str, str]]:
             )
 
     important_packets.sort(key=lambda x: (x["path"], x["source"], x["label"]))
-
-    important_packets = remove_duplicate_packets(important_packets)
 
     info("Extracted important fields from packets.")
     return important_packets
