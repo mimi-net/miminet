@@ -1,4 +1,6 @@
 import dataclasses
+import glob
+import os
 import re
 import json
 from pathlib import Path
@@ -17,7 +19,7 @@ NETWORK_FILE_SUFFIX = "_network.json"
 ANSWER_FILE_SUFFIX = "_answer.json"
 
 # Packets that can be skipped (contain not very informative data)
-EXCLUDE_PATTERNS = [re.compile(r"^ARP"), re.compile(r"RSTP")]
+EXCLUDE_PATTERNS = [re.compile(r"^ARP"), re.compile(r"^R?STP")]
 
 # Dynamic regex patterns that should be replaced by static patterns
 # example: TCP dynamic port
@@ -68,6 +70,20 @@ def normalize_packet_data(packet_data: str) -> str:
     return packet_data.replace("\n", "\\n").strip()
 
 
+def remove_duplicate_packets(
+    packets: list[dict[str, str]],
+) -> list[dict[str, str]]:
+    """Remove duplicate packets preserving order."""
+    res = []
+    seen = set()
+    for pck in packets:
+        fs = frozenset(pck.items())
+        if fs not in seen:
+            seen.add(fs)
+            res.append(pck)
+    return res
+
+
 def extract_important_fields(packets_json: str) -> list[dict[str, str]]:
     """Extracts relevant fields from emulation packets, excluding uninformative ones."""
 
@@ -93,7 +109,9 @@ def extract_important_fields(packets_json: str) -> list[dict[str, str]]:
                 }
             )
 
-    important_packets.sort(key=lambda x: (x["path"], x["source"]))
+    important_packets.sort(key=lambda x: (x["path"], x["source"], x["label"]))
+
+    important_packets = remove_duplicate_packets(important_packets)
 
     info("Extracted important fields from packets.")
     return important_packets
@@ -108,12 +126,21 @@ class Case:
 # Generate test cases
 TEST_FILES = load_test_files(TEST_JSON_DIR)
 TEST_CASES = [Case(*read_files(n, a)) for n, a in TEST_FILES]
+TEST_IDS = [n.replace(NETWORK_FILE_SUFFIX, "") for n, _ in TEST_FILES]
 
 
-@pytest.mark.parametrize("test", TEST_CASES)
+def cleanup_pcap_files():
+    """Remove stale pcap files from /tmp to prevent interference between tests."""
+    for f in glob.glob("/tmp/capture_*.pcapng"):
+        os.remove(f)
+
+
+@pytest.mark.parametrize("test", TEST_CASES, ids=TEST_IDS)
 def test_miminet_work(test: Case, request) -> None:
     """Test network emulation using Mininet."""
     info(f"Running test: {request.node.name}.")
+
+    cleanup_pcap_files()
 
     # Emulate network behavior based on the test case
     animation, _ = run_miminet(test.json_network)
