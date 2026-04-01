@@ -30,6 +30,11 @@ const ClearConfigForm = function (text) {
     $(config_content_save_tag).empty();
     $(config_content_id).append('<span>' + txt + '</span>');
     document.getElementById(config_content_save_id).style.display='none';
+
+    // Update grid to reclaim full width
+    if (typeof updateGridForConfigPanel === 'function') {
+        updateGridForConfigPanel();
+    }
 }
 
 const HostWarningMsg = function (msg) {
@@ -126,6 +131,11 @@ const ConfigHostForm = function(host_id){
     }
 
     $('#config_host_main_form_submit_button, #config_host_end_form').on('click', handleHostClick);
+
+    // Update grid to exclude config panel area
+    if (typeof updateGridForConfigPanel === 'function') {
+        updateGridForConfigPanel();
+    }
 }
 
 const ConfigRouterForm = function (router_id) {
@@ -166,6 +176,11 @@ const ConfigRouterForm = function (router_id) {
     }
 
     $('#config_router_main_form_submit_button, #config_router_end_form').on('click', handleRouterClick);
+
+    // Update grid to exclude config panel area
+    if (typeof updateGridForConfigPanel === 'function') {
+        updateGridForConfigPanel();
+    }
 }
 
 const ConfigServerForm = function (server_id) {
@@ -206,6 +221,11 @@ const ConfigServerForm = function (server_id) {
     }
 
     $('#config_server_main_form_submit_button, #config_server_end_form').on('click', handleServerClick);
+
+    // Update grid to exclude config panel area
+    if (typeof updateGridForConfigPanel === 'function') {
+        updateGridForConfigPanel();
+    }
 }
 
 const ConfigHubForm = function (hub_id) {
@@ -243,6 +263,11 @@ const ConfigHubForm = function (hub_id) {
     }
 
     $('#config_hub_main_form_submit_button, #config_hub_end_form').on('click', handleHubClick);
+
+    // Update grid to exclude config panel area
+    if (typeof updateGridForConfigPanel === 'function') {
+        updateGridForConfigPanel();
+    }
 }
 
 const ConfigSwitchForm = function (switch_id) {
@@ -285,6 +310,11 @@ const ConfigSwitchForm = function (switch_id) {
     }
 
     $('#config_switch_main_form_submit_button, #config_switch_end_form').on('click', handleSwitchClick);
+
+    // Update grid to exclude config panel area
+    if (typeof updateGridForConfigPanel === 'function') {
+        updateGridForConfigPanel();
+    }
 }
 
 const ConfigEdgeForm = function (edge_id) {
@@ -336,6 +366,11 @@ const ConfigEdgeForm = function (edge_id) {
     }
 
     $('#config_edge_main_form_submit_button, #config_edge_end_form').off('click').on('click', handleEdgeClick);
+
+    // Update grid to exclude config panel area
+    if (typeof updateGridForConfigPanel === 'function') {
+        updateGridForConfigPanel();
+    }
 }
 
 const ConfigHubName = function (hostname) {
