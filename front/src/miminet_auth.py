@@ -9,7 +9,16 @@ import hashlib
 
 import google.auth.transport.requests
 import requests
-from flask import flash, redirect, render_template, request, session, url_for, jsonify
+from flask import (
+    flash,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+    jsonify,
+    abort,
+)
 from flask_login import (
     LoginManager,
     current_user,
@@ -27,6 +36,7 @@ from miminet_config import make_example_net_switch_and_hub
 from pip._vendor import cachecontrol
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.utils import secure_filename
 
 DEFAULT_USER_CONFIG = {
     "hideARP": False,
@@ -35,15 +45,38 @@ DEFAULT_USER_CONFIG = {
 }
 
 # Global variables
-UPLOAD_FOLDER = "static/avatar/"
-UPLOAD_TMP_FOLDER = "static/tmp/avatar/"
+AVATAR_UPLOAD_FOLDER = "/app/static/avatar"
 ALLOWED_EXTENSIONS = {"bmp", "png", "jpg", "jpeg"}
+MAX_AVATAR_SIZE = 1 * 1024 * 1024
+PROFILE_VIEWER_MIN_ROLE = 1
+SOCIAL_LINK_PROVIDER_SESSION_KEY = "social_link_provider"
+SOCIAL_LINK_USER_ID_SESSION_KEY = "social_link_user_id"
+SOCIAL_LINK_REDIRECT_SESSION_KEY = "social_link_redirect"
 
 login_manager = LoginManager()
 login_manager.login_view = "login_index"
 
 # create an alias of login_required decorator
 login_required = login_required
+
+
+def generate_avatar_uri(extension=".jpg"):
+    avatar_hash = os.urandom(16).hex()
+    return os.path.join(avatar_hash[0], avatar_hash[1], avatar_hash + extension)
+
+
+def get_avatar_path(avatar_uri):
+    return os.path.join(AVATAR_UPLOAD_FOLDER, avatar_uri)
+
+
+def save_avatar_blob(avatar_uri, blob):
+    avatar_path = get_avatar_path(avatar_uri)
+    os.makedirs(os.path.dirname(avatar_path), exist_ok=True)
+    with open(avatar_path, "wb") as avatar_file:
+        avatar_file.write(blob)
+
+    return avatar_path
+
 
 # Google auth (https://github.com/code-specialist/flask_google_login/blob/main/app.py)
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
@@ -113,17 +146,93 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def _start_social_link(provider_name, redirect_endpoint="user_profile"):
+    if not current_user.is_authenticated:
+        return
+
+    session[SOCIAL_LINK_PROVIDER_SESSION_KEY] = provider_name
+    session[SOCIAL_LINK_USER_ID_SESSION_KEY] = current_user.id
+    session[SOCIAL_LINK_REDIRECT_SESSION_KEY] = redirect_endpoint
+    session["next_url"] = redirect_endpoint
+
+
+def _clear_social_link(provider_name=None):
+    if (
+        provider_name is not None
+        and session.get(SOCIAL_LINK_PROVIDER_SESSION_KEY) != provider_name
+    ):
+        return
+
+    session.pop(SOCIAL_LINK_PROVIDER_SESSION_KEY, None)
+    session.pop(SOCIAL_LINK_USER_ID_SESSION_KEY, None)
+    session.pop(SOCIAL_LINK_REDIRECT_SESSION_KEY, None)
+
+
+def _redirect_after_social_link(default_endpoint="user_profile"):
+    redirect_endpoint = (
+        session.get(SOCIAL_LINK_REDIRECT_SESSION_KEY) or default_endpoint
+    )
+    _clear_social_link()
+    session.pop("next_url", None)
+    return redirect(url_for(redirect_endpoint))
+
+
+def _get_social_link_user(provider_name):
+    if session.get(SOCIAL_LINK_PROVIDER_SESSION_KEY) != provider_name:
+        return None
+
+    user_id = session.get(SOCIAL_LINK_USER_ID_SESSION_KEY)
+    if not user_id:
+        return None
+
+    try:
+        user_id = int(user_id)
+    except (TypeError, ValueError):
+        return None
+
+    if not current_user.is_authenticated or current_user.id != user_id:
+        return None
+
+    return User.query.get(user_id)
+
+
+def _bind_social_account(provider_name, field_name, field_value):
+    if (
+        session.get(SOCIAL_LINK_PROVIDER_SESSION_KEY) != provider_name
+        or not current_user.is_authenticated
+    ):
+        return None
+
+    link_user = _get_social_link_user(provider_name)
+    if not link_user:
+        flash("Не удалось найти профиль для привязки соцсети.", category="error")
+        return _redirect_after_social_link()
+
+    existing_user = User.query.filter_by(**{field_name: field_value}).first()
+    if existing_user and existing_user.id != link_user.id:
+        flash("Этот аккаунт соцсети уже привязан к другому профилю.", category="error")
+        return _redirect_after_social_link()
+
+    setattr(link_user, field_name, field_value)
+    db.session.commit()
+    return _redirect_after_social_link()
+
+
 def login_index():
     next_url = request.args.get("next")
+
+    link_provider = request.args.get("link_provider", type=str)
+    telegram_link_mode = current_user.is_authenticated and link_provider == "tg"
 
     if current_user.is_authenticated:
         access_token = create_access_token(identity=str(current_user.id))
         refresh_token = create_refresh_token(identity=str(current_user.id))
 
+    # if current_user.is_authenticated and not telegram_link_mode:
+    #     return redirect(url_for("user_profile"))
+        response = redirect_next_url(fallback=url_for('home'))
         if next_url:
             response = redirect_next_url(fallback=next_url)
-        else:
-            response = redirect_next_url(fallback=url_for('home'))
         set_access_cookies(response, access_token)
         set_refresh_cookies(response, refresh_token)
         return response
@@ -132,6 +241,10 @@ def login_index():
         session["next_url"] = next_url
     else:
         session.pop("next_url", None)
+
+    # if telegram_link_mode:
+    #     _start_social_link("tg", redirect_endpoint=next_url or "user_profile")
+    #     return render_template("auth/login.html", user=current_user)
 
     if request.method == "POST":
         email = request.form.get("email")
@@ -160,21 +273,143 @@ def login_index():
 @login_required
 def user_profile():
     user = User.query.filter_by(id=current_user.id).first()
+    nick_parts = (user.nick or "").strip().split(maxsplit=1)
+    first_name = nick_parts[0] if nick_parts else ""
+    last_name = nick_parts[1] if len(nick_parts) > 1 else ""
 
     if request.method == "POST":
-        last_name = request.form.get("last_name").strip()
-        first_name = request.form.get("first_name").strip()
-        middle_name = request.form.get("middle_name").strip()
-        how_to_contact = request.form.get("how_to_contact").strip()
+        submitted_first_name = request.form.get("first_name")
+        submitted_last_name = request.form.get("last_name")
+        first_name = (
+            submitted_first_name.strip()
+            if submitted_first_name is not None
+            else first_name
+        )
+        last_name = (
+            submitted_last_name.strip()
+            if submitted_last_name is not None
+            else last_name
+        )
+        avatar = request.files.get("avatar")
+        has_updates = False
 
-        if first_name:
-            user.first_name = first_name
-            user.middle_name = middle_name
-            user.last_name = last_name
-            user.how_to_contact = how_to_contact
+        if len(first_name) < 1 or len(first_name) > 50:
+            flash("Имя должно быть от 1 до 50 символов.", category="error")
+            return render_template(
+                "auth/profile.html",
+                user=user,
+                first_name=first_name,
+                last_name=last_name,
+            )
+        if not all(c.isalpha() or c in " -'" for c in first_name):
+            flash(
+                "Имя содержит недопустимые символы (только буквы, пробелы, дефисы и апострофы).",
+                category="error",
+            )
+            return render_template(
+                "auth/profile.html",
+                user=user,
+                first_name=first_name,
+                last_name=last_name,
+            )
+
+        if len(last_name) > 50:
+            flash("Фамилия должна быть до 50 символов.", category="error")
+            return render_template(
+                "auth/profile.html",
+                user=user,
+                first_name=first_name,
+                last_name=last_name,
+            )
+        if last_name and not all(c.isalpha() or c in " -'" for c in last_name):
+            flash(
+                "Фамилия содержит недопустимые символы (только буквы, пробелы, дефисы и апострофы).",
+                category="error",
+            )
+            return render_template(
+                "auth/profile.html",
+                user=user,
+                first_name=first_name,
+                last_name=last_name,
+            )
+
+        if avatar and avatar.filename:
+            avatar.seek(0, os.SEEK_END)
+            file_size = avatar.tell()
+            avatar.seek(0)
+
+            if file_size > MAX_AVATAR_SIZE:
+                flash("Размер файла не должен превышать 1 МБ", category="error")
+                return redirect(url_for("user_profile"))
+
+            if not allowed_file(avatar.filename):
+                flash("Допустимые форматы: bmp, png, jpg, jpeg", category="error")
+                return render_template(
+                    "auth/profile.html",
+                    user=user,
+                    first_name=first_name,
+                    last_name=last_name,
+                )
+
+            ext = (
+                os.path.splitext(secure_filename(avatar.filename))[1].lower() or ".jpg"
+            )
+            avatar_uri = generate_avatar_uri(ext)
+
+            try:
+                logger.info(
+                    f"Attempting to save avatar: filename={avatar.filename}, size={file_size}, uri={avatar_uri}"
+                )
+                save_avatar_blob(avatar_uri, avatar.read())
+                user.avatar_uri = avatar_uri
+                has_updates = True
+                logger.info(f"Avatar uploaded for user {current_user.id}")
+            except Exception as e:
+                logger.error(f"Failed to save avatar: {e}", exc_info=True)
+                flash("Ошибка загрузки аватара", category="error")
+                return render_template(
+                    "auth/profile.html",
+                    user=user,
+                    first_name=first_name,
+                    last_name=last_name,
+                )
+
+        new_nick = f"{first_name} {last_name}".strip()
+        if new_nick != user.nick:
+            user.nick = new_nick
+            has_updates = True
+
+        if has_updates:
             db.session.commit()
+            return redirect(url_for("user_profile"))
 
-    return render_template("auth/profile.html", user=user)
+    return render_template(
+        "auth/profile.html", user=user, first_name=first_name, last_name=last_name
+    )
+
+
+@login_required
+def user_profile_view(user_id: int):
+    if (
+        current_user.id != user_id
+        and (current_user.role or 0) < PROFILE_VIEWER_MIN_ROLE
+    ):
+        abort(403)
+
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        abort(404)
+
+    nick_parts = (user.nick or "").strip().split(maxsplit=1)
+    first_name = nick_parts[0] if nick_parts else ""
+    last_name = nick_parts[1] if len(nick_parts) > 1 else ""
+
+    return render_template(
+        "auth/profile_readonly.html",
+        user=user,
+        first_name=first_name,
+        last_name=last_name,
+    )
 
 
 def _load_user_config(user: User) -> dict:
@@ -221,6 +456,8 @@ def password_recovery():
 
 @login_required
 def logout():
+    _clear_social_link()
+    session.pop("next_url", None)
     logout_user()
     response = redirect(url_for("index"))
     unset_jwt_cookies(response)
@@ -228,6 +465,7 @@ def logout():
 
 
 def google_login():
+    _start_social_link("google")
     flow = Flow.from_client_secrets_file(
         client_secrets_file=client_secrets_file,
         scopes=[
@@ -246,6 +484,7 @@ def google_login():
 
 
 def vk_login():
+    _start_social_link("vk")
     authorization_link = "https://oauth.vk.com/authorize"
     authorization_url = f"{authorization_link}?client_id={VK_CLIENT_ID}&display=page&redirect_uri={VK_REDIRECT_URI}&scope=friends,email&response_type=code&v=5.130"
     return redirect(authorization_url)
@@ -283,18 +522,37 @@ def google_callback():
         clock_skew_in_seconds=60,
     )
 
-    user = User.query.filter_by(google_id=id_info.get("sub")).first()
+    google_id = id_info.get("sub")
+    social_link_response = _bind_social_account("google", "google_id", google_id)
+    if social_link_response is not None:
+        return social_link_response
+
+    user = User.query.filter_by(google_id=google_id).first()
 
     # New user?
     if user is None:
         # Yes
         try:
-            avatar_uri = os.urandom(16).hex()
-            avatar_uri = avatar_uri + ".jpg"
+            avatar_uri = "empty.jpg"
 
-            if "picture" in id_info:
-                r = requests.get(id_info.get("picture"), allow_redirects=True)
-                open("static/avatar/" + avatar_uri, "wb").write(r.content)
+            photo_uri = id_info.get("picture")
+            if photo_uri:
+                generated_avatar_uri = generate_avatar_uri()
+                try:
+                    r = requests.get(photo_uri, allow_redirects=True, timeout=10)
+                    r.raise_for_status()  # Проверяет HTTP-ошибки (например, 404)
+                    save_avatar_blob(generated_avatar_uri, r.content)
+                    avatar_uri = generated_avatar_uri
+                except requests.RequestException as e:
+                    logger.error(
+                        f"Failed to download avatar from Google for user {id_info.get('sub')}: {e}"
+                    )
+                    avatar_uri = "empty.jpg"  # Дефолтный аватар при ошибке
+                except (IOError, PermissionError) as e:
+                    logger.error(
+                        f"Failed to save avatar file for user {id_info.get('sub')}: {e}"
+                    )
+                    avatar_uri = "empty.jpg"
 
             f = id_info.get("family_name", "")
             n = id_info.get("given_name", "")
@@ -302,7 +560,7 @@ def google_callback():
             new_user = User(
                 nick=f + n,
                 avatar_uri=avatar_uri,
-                google_id=id_info.get("sub"),
+                google_id=google_id,
                 email=id_info.get("email"),
             )
             db.session.add(new_user)
@@ -316,7 +574,7 @@ def google_callback():
             flash(error, category="error")
             return redirect(url_for("login_index"))
 
-        user = User.query.filter_by(google_id=id_info.get("sub")).first()
+        user = User.query.filter_by(google_id=google_id).first()
 
     login_user(user, remember=True)
     access_token = create_access_token(identity=str(user.id))
@@ -351,27 +609,44 @@ def vk_callback():
 
     # Get access token
     response = requests.get(
-        f"https://oauth.vk.com/access_token?client_id={VK_CLIENT_ID}&client_secret={VK_CLIENT_SECRET}&redirect_uri={VK_REDIRECT_URI}&code="
-        + user_code
+        "https://oauth.vk.com/access_token",
+        params={
+            "client_id": VK_CLIENT_ID,
+            "client_secret": VK_CLIENT_SECRET,
+            "redirect_uri": VK_REDIRECT_URI,
+            "code": user_code,
+        },
+        timeout=10,
     )
-    access_token_json = json.loads(response.text)
+    access_token_json = response.json()
 
     if "error" in access_token_json:
         return redirect(url_for("login_index"))
 
-    vk_id = str(access_token_json.get("user_id"))
     access_token = access_token_json.get("access_token")
     vk_email = access_token_json.get("email")
 
+    try:
+        vk_id = str(int(access_token_json["user_id"]))
+    except (KeyError, ValueError, TypeError):
+        return redirect(url_for("login_index"))
+
+    social_link_response = _bind_social_account("vk", "vk_id", vk_id)
+    if social_link_response is not None:
+        return social_link_response
+
     # Get user name
     response = requests.get(
-        "https://api.vk.com/method/users.get?user_ids="
-        + vk_id
-        + "&fields=photo_100&access_token="
-        + str(access_token)
-        + "&v=5.130"
+        "https://api.vk.com/method/users.get",
+        params={
+            "user_ids": vk_id,
+            "fields": "photo_100",
+            "access_token": str(access_token),
+            "v": "5.130",
+        },
+        timeout=10,
     )
-    vk_user = json.loads(response.text)
+    vk_user = response.json()
 
     if vk_email:
         user = User.query.filter_by(email=vk_email).first()
@@ -386,14 +661,24 @@ def vk_callback():
     if user is None:
         # Yes
         try:
-            avatar_uri = os.urandom(16).hex()
-            avatar_uri = avatar_uri + ".jpg"
+            avatar_uri = "empty.jpg"
 
-            if "photo_100" in vk_user["response"][0]:
-                r = requests.get(
-                    vk_user["response"][0]["photo_100"], allow_redirects=True
-                )
-            open("static/avatar/" + avatar_uri, "wb").write(r.content)
+            photo_uri = vk_user.get("response", [{}])[0].get("photo_100")
+            if photo_uri:
+                generated_avatar_uri = generate_avatar_uri()
+                try:
+                    r = requests.get(photo_uri, allow_redirects=True, timeout=10)
+                    r.raise_for_status()
+                    save_avatar_blob(generated_avatar_uri, r.content)
+                    avatar_uri = generated_avatar_uri
+                except requests.RequestException as e:
+                    logger.error(
+                        f"Failed to download avatar from VK for user {vk_id}: {e}"
+                    )
+                    avatar_uri = "empty.jpg"
+                except (IOError, PermissionError) as e:
+                    logger.error(f"Failed to save avatar file for user {vk_id}: {e}")
+                    avatar_uri = "empty.jpg"
 
             new_user = User(
                 nick=vk_user["response"][0]["first_name"]
@@ -443,6 +728,7 @@ def vk_callback():
 
 
 def yandex_login(yandex_json=yandex_json):
+    _start_social_link("yandex")
     yandex_session = OAuth2Session(
         yandex_json["web"]["client_id"],
         redirect_uri=yandex_json["web"]["redirect_uris"][0],
@@ -479,13 +765,18 @@ def yandex_callback(yandex_json=yandex_json):
         user_info_response.raise_for_status()
         id_info = user_info_response.json()
 
-        user = User.query.filter_by(yandex_id=id_info.get("id")).first()
+        yandex_id = id_info.get("id")
+        social_link_response = _bind_social_account("yandex", "yandex_id", yandex_id)
+        if social_link_response is not None:
+            return social_link_response
+
+        user = User.query.filter_by(yandex_id=yandex_id).first()
 
         if user is None:
             try:
                 new_user = User(
                     nick=id_info.get("login", ""),
-                    yandex_id=id_info.get("id"),
+                    yandex_id=yandex_id,
                     email=id_info.get("default_email", ""),
                 )
                 db.session.add(new_user)
@@ -498,7 +789,7 @@ def yandex_callback(yandex_json=yandex_json):
                 flash(error, category="error")
                 return redirect(url_for("login_index"))
 
-            user = User.query.filter_by(yandex_id=id_info.get("id")).first()
+            user = User.query.filter_by(yandex_id=yandex_id).first()
 
         login_user(user, remember=True)
         access_token = create_access_token(identity=str(user.id))
@@ -554,8 +845,13 @@ def tg_callback():
         flash(str(e), category="error")
         return redirect(url_for("login_index"))
 
+    tg_id = str(user_data.get("id", ""))
+    social_link_response = _bind_social_account("tg", "tg_id", tg_id)
+    if social_link_response is not None:
+        return social_link_response
+
     user = User.query.filter(
-        (User.tg_id == str(user_data.get("id", "")))
+        (User.tg_id == tg_id)
         | (User.email == user_data.get("username", ""))
     ).first()
 
@@ -563,7 +859,7 @@ def tg_callback():
         try:
             new_user = User(
                 nick=user_data.get("first_name", ""),
-                tg_id=str(user_data.get("id", "")),
+                tg_id=tg_id,
                 email=user_data.get("username", ""),
             )
             db.session.add(new_user)
@@ -577,7 +873,7 @@ def tg_callback():
             return redirect(url_for("login_index"))
 
         user = User.query.filter(
-            (User.tg_id == str(user_data.get("id", "")))
+            (User.tg_id == tg_id)
             | (User.email == user_data.get("username", ""))
         ).first()
 

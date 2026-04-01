@@ -1,13 +1,15 @@
 import random
 import uuid
-from typing import List
+from typing import Dict, List
 import json
 
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from flask import has_request_context
 from flask_login import current_user
 from markupsafe import Markup
+from sqlalchemy.orm import joinedload
 
 from miminet_model import Network, db
 from quiz.entity.entity import (
@@ -68,22 +70,119 @@ def to_section_dto_list(sections: List[Section]):
 
 
 def to_test_dto_list(tests: List[Test]):
-    dto_list: List[TestDto] = list(
-        map(
-            lambda our_test: TestDto(
+    user_id = get_current_user_id()
+    active_sections_by_test: Dict[int, List[Section]] = {
+        our_test.id: get_active_sections(our_test) for our_test in tests
+    }
+    all_section_ids = [
+        section.id
+        for sections in active_sections_by_test.values()
+        for section in sections
+    ]
+    solved_question_counts_by_section = get_last_correct_question_count_by_section(
+        all_section_ids, user_id
+    )
+
+    dto_list: List[TestDto] = []
+    for our_test in tests:
+        active_sections = active_sections_by_test.get(our_test.id, [])
+        (
+            solved_question_count,
+            total_question_count,
+            progress_percent,
+        ) = calculate_test_progress(active_sections, solved_question_counts_by_section)
+
+        dto_list.append(
+            TestDto(
                 test_id=our_test.id,
                 test_name=our_test.name,
                 author_name=our_test.created_by_user.nick,
                 description=our_test.description,
                 is_retakeable=our_test.is_retakeable,
                 is_ready=our_test.is_ready,
-                section_count=len(our_test.sections),
-            ),
-            tests,
+                section_count=len(active_sections),
+                solved_question_count=solved_question_count,
+                total_question_count=total_question_count,
+                progress_percent=progress_percent,
+            )
         )
-    )
 
     return dto_list
+
+
+def get_current_user_id():
+    if not has_request_context():
+        return None
+
+    if not current_user.is_authenticated:
+        return None
+
+    return current_user.id
+
+
+def get_active_sections(test: Test) -> List[Section]:
+    return [section for section in test.sections if not section.is_deleted]
+
+
+def count_correct_answers_in_session(session: QuizSession) -> int:
+    return sum(1 for question in session.sessions if question.is_correct)
+
+
+def get_last_correct_question_count_by_section(
+    section_ids: List[int], user_id
+) -> Dict[int, int]:
+    if not section_ids or user_id is None:
+        return {}
+
+    sessions = (
+        QuizSession.query.options(joinedload(QuizSession.sessions))
+        .filter(QuizSession.section_id.in_(section_ids))
+        .filter(QuizSession.created_by_id == user_id)
+        .filter(QuizSession.is_deleted.is_(False))
+        .order_by(QuizSession.section_id.asc(), QuizSession.finished_at.desc())
+        .all()
+    )
+
+    section_progress: Dict[int, int] = {}
+    for session in sessions:
+        if session.section_id in section_progress:
+            continue
+        section_progress[int(session.section_id)] = count_correct_answers_in_session(
+            session
+        )
+
+    return section_progress
+
+
+def calculate_progress_percent(
+    solved_question_count: int, total_question_count: int
+) -> int:
+    if total_question_count <= 0:
+        return 0
+
+    normalized_solved_count = max(0, min(solved_question_count, total_question_count))
+    return round((normalized_solved_count / total_question_count) * 100)
+
+
+def calculate_test_progress(
+    sections: List[Section], solved_question_counts_by_section: Dict[int, int]
+):
+    solved_question_count = 0
+    total_question_count = 0
+
+    for section in sections:
+        question_count = calculate_question_count(section)
+        total_question_count += question_count
+        solved_question_count += min(
+            solved_question_counts_by_section.get(section.id, 0),
+            question_count,
+        )
+
+    progress_percent = calculate_progress_percent(
+        solved_question_count, total_question_count
+    )
+
+    return solved_question_count, total_question_count, progress_percent
 
 
 def to_question_for_editor_dto_list(questions: List[Question]):
@@ -308,9 +407,7 @@ class SectionDto:
 
         session = current_user_sessions.order_by(QuizSession.finished_at.desc()).first()
         if session:
-            self.last_correct_count = sum(
-                1 for question in session.sessions if question.is_correct
-            )
+            self.last_correct_count = count_correct_answers_in_session(session)
             if session.guid:
                 self.session_guid = session.guid
 
@@ -349,6 +446,9 @@ class TestDto:
         is_retakeable: bool,
         is_ready: bool,
         section_count: int,
+        solved_question_count: int,
+        total_question_count: int,
+        progress_percent: int,
     ):
         self.test_id = test_id
         self.test_name = test_name
@@ -357,6 +457,9 @@ class TestDto:
         self.is_retakeable = is_retakeable
         self.is_ready = is_ready
         self.section_count = section_count
+        self.solved_question_count = solved_question_count
+        self.total_question_count = total_question_count
+        self.progress_percent = progress_percent
 
 
 class QuestionForEditorDto:

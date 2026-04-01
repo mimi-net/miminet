@@ -44,6 +44,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <img src="{{ url_for('static', filename='/images/logo.png') }}" width="170" alt="Miminet">
         </a>
 
+        {% set show_profile_link = current_user.is_authenticated and not request.path.startswith('/auth') %}
+
         {% if network %}
             {% if current_user.is_authenticated %}
                 <div class="mx-auto navbar-nav">
@@ -54,7 +56,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <a class="d-inline nav-link" id="network_title_head" href="{{ url_for('web_network', guid=network.guid) }}">{{ network.title }}</a>
                 </div>
 
-                <div class="form-check pe-lg-1">
+                <div class="form-check pe-lg-1 d-flex align-items-center">
                     <a class="btn btn-success btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" id="share-network" title="Сеть доступна по URL" onclick="urlCopyButton()">
                         <i class='bx bx-share-alt fs-4 mx-1' ></i>
                     </a>
@@ -62,6 +64,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <i class='bx bx-copy fs-4 mx-1'></i>
                     </a>
                     <a class="btn btn-outline-primary btn-icon" href="#netConfigModal" id="net-settings" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети"><i class='bx bx-cog fs-4 mx-1'></i></a>
+                    {% if show_profile_link %}
+                    <a href="{{ url_for('user_profile') }}" class="ms-3 profile-avatar-link" title="Профиль">
+                        {% if current_user.avatar_uri %}
+                        <img src="{{ url_for('static', filename='avatar/' + current_user.avatar_uri) }}"
+                             alt="Профиль" class="profile-avatar-img" loading="lazy">
+                        {% else %}
+                        <span class="profile-avatar-placeholder" aria-hidden="true"></span>
+                        {% endif %}
+                    </a>
+                    {% endif %}
                 </div>
             {% else %}
                 <div class="mx-auto navbar-nav">
@@ -86,6 +98,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <li id="my-networks-nav-item" class="nav-item">
                         <a class="nav-link" href="{{ url_for('home') }}">Мои сети</a>
                     </li>
+                    {% if show_profile_link %}
+                    <a href="{{ url_for('user_profile') }}" class="ms-3 profile-avatar-link" title="Профиль">
+                        {% if current_user.avatar_uri %}
+                        <img src="{{ url_for('static', filename='avatar/' + current_user.avatar_uri) }}"
+                             alt="Профиль" class="profile-avatar-img" loading="lazy">
+                        {% else %}
+                        <span class="profile-avatar-placeholder" aria-hidden="true"></span>
+                        {% endif %}
+                    </a>
+                    {% endif %}
                 </div>
             {% else %}
                 {% if request.path != url_for('login_index') %}
@@ -282,6 +304,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="{{ url_for('static', filename='/js/jquery-3.6.0.min.js') }}"></script>
 <script src="{{ url_for('static', filename='/js/jquery-ui.min.js') }}"></script>
 <script src="{{ url_for('static', filename='/js/cytoscape.min.js') }}"></script>
+<script src="{{ url_for('static', filename='/js/cytoscape-canvas.js') }}"></script>
 <script src="{{ url_for('static', filename='/js/ace.js') }}"></script>
 <script src="{{ url_for('static', filename='/js/lodash.js') }}"></script>
 <script src="{{ url_for('static', filename='/js/cytoscape-edgehandles.min.js') }}"></script>

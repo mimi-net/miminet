@@ -71,7 +71,7 @@
                 </div>
 
                 {% if current_user.is_authenticated %}
-                    <div class="navbar-nav">
+                    <div class="navbar-nav d-flex align-items-center">
                         <li id="trainer-nav-item" class="nav-item">
                             <a class="nav-link" href="{{ url_for('get_all_tests_endpoint') }}">Тестирование</a>
                         </li>
@@ -81,6 +81,16 @@
                         <li id="my-networks-nav-item" class="nav-item">
                             <a class="nav-link" href="{{ url_for('home') }}">Мои сети</a>
                         </li>
+                        {% if not request.path.startswith('/auth') %}
+                        <a href="{{ url_for('user_profile') }}" class="ms-3 profile-avatar-link" title="Профиль">
+                            {% if current_user.avatar_uri %}
+                            <img src="{{ url_for('static', filename='avatar/' + current_user.avatar_uri) }}"
+                                 alt="Профиль" class="profile-avatar-img" loading="lazy">
+                            {% else %}
+                            <span class="profile-avatar-placeholder" aria-hidden="true"></span>
+                            {% endif %}
+                        </a>
+                        {% endif %}
                     </div>
                 {% else %}
                     {% if request.path != url_for('login_index') %}

@@ -114,6 +114,8 @@ def get_session_question_data(session_question_id: str):
 
 
 def check_theory_answer(session_question, question, answer):
+    session_question.user_answer = answer["answer"]
+
     # variable
     if question.question_type == 1:
         answers = answer["answer"]
