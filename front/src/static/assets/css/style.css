@@ -345,3 +345,33 @@ a.lastResult {
     background-color: #adb5bd;
     display: block;
 }
+
+.organization-logos-row {
+    align-items: stretch;
+}
+
+.organization-logo-card {
+    min-height: 11.5rem;
+}
+
+.organization-logo-image {
+    width: min(100%, 11rem);
+    max-height: 6.75rem;
+    object-fit: contain;
+}
+
+.organization-logo-image--baik {
+    width: min(100%, 12rem);
+    max-height: 7.25rem;
+}
+
+@media (max-width: 575.98px) {
+    .organization-logo-card {
+        min-height: 9.5rem;
+    }
+
+    .organization-logo-image,
+    .organization-logo-image--baik {
+        width: min(100%, 10rem);
+    }
+}
