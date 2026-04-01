@@ -812,8 +812,7 @@ def tg_callback():
         return social_link_response
 
     user = User.query.filter(
-        (User.tg_id == tg_id)
-        | (User.email == user_data.get("username", ""))
+        (User.tg_id == tg_id) | (User.email == user_data.get("username", ""))
     ).first()
 
     if user is None:
@@ -834,8 +833,7 @@ def tg_callback():
             return redirect(url_for("login_index"))
 
         user = User.query.filter(
-            (User.tg_id == tg_id)
-            | (User.email == user_data.get("username", ""))
+            (User.tg_id == tg_id) | (User.email == user_data.get("username", ""))
         ).first()
 
     login_user(user, remember=True)

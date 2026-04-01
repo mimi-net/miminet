@@ -22,7 +22,9 @@ def app():
 
         app.add_url_rule("/yandex_callback", methods=["GET"], view_func=yandex_callback)
         app.add_url_rule("/login_index", methods=["GET"], view_func=login_index)
-        app.add_url_rule("/profile", methods=["GET"], endpoint="user_profile", view_func=lambda: "ok")
+        app.add_url_rule(
+            "/profile", methods=["GET"], endpoint="user_profile", view_func=lambda: "ok"
+        )
 
         @app.route("/home")
         def home():

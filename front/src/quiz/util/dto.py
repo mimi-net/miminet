@@ -3,7 +3,7 @@ import uuid
 import json
 from functools import lru_cache
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -139,8 +139,14 @@ def to_test_dto_list(tests: List[Test]):
     dto_list: List[TestDto] = []
     for our_test in tests:
         active_sections = active_sections_by_test.get(our_test.id, [])
-        organization_id = getattr(our_test, "organization_id", None)
-        organization = organizations_by_id.get(organization_id)
+        organization_id = cast(
+            Optional[int], getattr(our_test, "organization_id", None)
+        )
+        organization = (
+            organizations_by_id.get(organization_id)
+            if organization_id is not None
+            else None
+        )
         (
             solved_question_count,
             total_question_count,
@@ -184,11 +190,19 @@ def get_current_user_id():
 
 
 def get_active_sections(test: Test) -> List[Section]:
-    return [section for section in test.sections if not section.is_deleted]
+    return [
+        section
+        for section in cast(List[Section], test.sections)
+        if not section.is_deleted
+    ]
 
 
 def count_correct_answers_in_session(session: QuizSession) -> int:
-    return sum(1 for question in session.sessions if question.is_correct)
+    return sum(
+        1
+        for question in cast(List[SessionQuestion], session.sessions)
+        if question.is_correct
+    )
 
 
 def get_last_correct_question_count_by_section(
@@ -198,7 +212,7 @@ def get_last_correct_question_count_by_section(
         return {}
 
     sessions = (
-        QuizSession.query.options(joinedload(QuizSession.sessions))
+        QuizSession.query.options(joinedload(cast(Any, QuizSession.sessions)))
         .filter(QuizSession.section_id.in_(section_ids))
         .filter(QuizSession.created_by_id == user_id)
         .filter(QuizSession.is_deleted.is_(False))

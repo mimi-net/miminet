@@ -1,9 +1,12 @@
+from typing import List, cast
+
 from sqlalchemy import func
 from markupsafe import Markup
 
 from miminet_model import User, db
 from quiz.service.session_question_service import is_answer_available
 from quiz.entity.entity import (
+    Answer,
     Question,
     QuizSession,
     SessionQuestion,
@@ -37,10 +40,11 @@ def _format_answer_items(question_type: str, answer_value):
 
     if question_type == "sorting":
         if isinstance(answer_value, dict):
+            ordered_items = list(answer_value.items())
             try:
-                ordered_items = sorted(answer_value.items(), key=lambda item: int(item[0]))
+                ordered_items.sort(key=lambda item: int(item[0]))
             except (TypeError, ValueError):
-                ordered_items = answer_value.items()
+                pass
 
             return [
                 f"{index + 1}. {_humanize_text(value)}"
@@ -79,7 +83,9 @@ def _format_answer_items(question_type: str, answer_value):
 def _get_correct_answer_items(question: Question):
     question_type = get_question_type(question.question_type)
     answers = [
-        answer for answer in question.answers if not getattr(answer, "is_deleted", False)
+        answer
+        for answer in cast(List[Answer], question.answers)
+        if not getattr(answer, "is_deleted", False)
     ]
 
     if question_type == "variable":
@@ -126,23 +132,32 @@ def _get_correct_answer_items(question: Question):
     return []
 
 
-def _build_answer_details(session_question: SessionQuestion, include_answer_details: bool):
-    question_type = get_question_type(session_question.question.question_type)
+def _build_answer_details(
+    session_question: SessionQuestion, include_answer_details: bool
+):
+    question = cast(Question, session_question.question)
+    question_type = get_question_type(question.question_type)
     if question_type == "practice" or not include_answer_details:
         return None
 
-    correct_answer_items = _get_correct_answer_items(session_question.question)
-    user_answer_items = _format_answer_items(question_type, session_question.user_answer)
+    correct_answer_items = _get_correct_answer_items(question)
+    user_answer_items = _format_answer_items(
+        question_type, session_question.user_answer
+    )
     has_saved_answer = session_question.user_answer is not None
     user_answer_title = "Ваше решение"
 
     if not user_answer_items and session_question.is_correct and correct_answer_items:
         user_answer_items = list(correct_answer_items)
         user_answer_title = "Ваше решение (восстановлено)"
-    elif not user_answer_items and (has_saved_answer or session_question.is_correct is False):
+    elif not user_answer_items and (
+        has_saved_answer or session_question.is_correct is False
+    ):
         user_answer_items = ["Ответ пользователя недоступен для этой попытки."]
 
-    show_reference_answer = session_question.is_correct is False and bool(correct_answer_items)
+    show_reference_answer = session_question.is_correct is False and bool(
+        correct_answer_items
+    )
     if not user_answer_items and not show_reference_answer:
         return None
 
@@ -159,7 +174,7 @@ def _build_answer_details(session_question: SessionQuestion, include_answer_deta
 def _serialize_session_question(
     session_question: SessionQuestion, include_answer_details: bool
 ):
-    question = session_question.question
+    question = cast(Question, session_question.question)
     question_type = get_question_type(question.question_type)
 
     return {
@@ -179,7 +194,9 @@ def _serialize_session_question(
 
 
 def _build_question_results(quiz_session: QuizSession, include_answer_details: bool):
-    results = sorted(quiz_session.sessions, key=lambda item: item.id)
+    results = sorted(
+        cast(List[SessionQuestion], quiz_session.sessions), key=lambda item: item.id
+    )
 
     return [
         _serialize_session_question(
@@ -234,7 +251,7 @@ def start_session(section_id: str, user: User):
 
     return (
         quiz_session.id,
-        [sq.id for sq in quiz_session.sessions],  # type:ignore[attr-defined]
+        [sq.id for sq in cast(List[SessionQuestion], quiz_session.sessions)],
         201,
     )
 
