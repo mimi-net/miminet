@@ -485,14 +485,22 @@ def arp_proxy_enable(job: Job, job_host: Any) -> None:
 
 
 def dhcp_client(job: Job, job_host):
-    job_host.cmd(f"ifconfig {job.arg_1} 0")
-    job_host.cmd("rm /var/lib/dhcp/dhclient.leases")
+    info(f"[dhcp_client] host={job_host.name} iface={job.arg_1}")
+    out_ifconfig = job_host.cmd(f"ifconfig {job.arg_1} 0")
+    info(f"[dhcp_client] ifconfig {job.arg_1} 0 -> {out_ifconfig!r}")
+    out_rm = job_host.cmd("rm -f /var/lib/dhcp/dhclient.leases")
+    info(f"[dhcp_client] rm leases -> {out_rm!r}")
     job_host.cmd("echo 'initial-interval 6;' > /tmp/dhclient.conf")
-    out = job_host.cmd(
+    dhclient_cmd = (
         f"timeout -k 1 5 dhclient -d -v -4 -cf /tmp/dhclient.conf {job.arg_1} && "
-        + "ip route show && rm -f /tmp/dhclient.conf"
+        "ip route show && rm -f /tmp/dhclient.conf"
     )
-    info(out)
+    info(f"[dhcp_client] running: {dhclient_cmd}")
+    out = job_host.cmd(dhclient_cmd)
+    info(f"[dhcp_client] dhclient output:\n{out}")
+    # Log resulting IP configuration
+    out_ip = job_host.cmd(f"ip addr show {job.arg_1}")
+    info(f"[dhcp_client] ip addr after dhclient:\n{out_ip}")
 
 
 def dhcp_server(job: Job, job_host):
@@ -501,6 +509,10 @@ def dhcp_server(job: Job, job_host):
     mask = job.arg_3
     gw = job.arg_4
     intfs = [job.arg_5]
+    info(
+        f"[dhcp_server] host={job_host.name} range={ip_range_start}-{ip_range_end} "
+        f"mask={mask} gw={gw} intfs={intfs}"
+    )
     daemon = Dnsmasq(
         node=job_host,
         ip_range=f"{ip_range_start},{ip_range_end}",
@@ -509,7 +521,17 @@ def dhcp_server(job: Job, job_host):
         intfs=intfs,
     )
     job_host.build_daemon(daemon)
+
+    # Log the generated dnsmasq config so we can inspect it in CI
+    try:
+        cfg_file = daemon.cfg_filenames[0]
+        cfg_content = job_host.cmd(f"cat {cfg_file}")
+        info(f"[dhcp_server] dnsmasq config ({cfg_file}):\n{cfg_content}")
+    except Exception as e:
+        info(f"[dhcp_server] could not read dnsmasq config: {e}")
+
     job_host.start_daemon(daemon)
+    info(f"[dhcp_server] dnsmasq started on host={job_host.name}")
 
 
 class Jobs:
