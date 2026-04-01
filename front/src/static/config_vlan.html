@@ -10,8 +10,8 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="netConfigModalLabel">Настройка VLAN</h5>
-                    <button id="vlanConfigurationCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть">
+                    <h5 class="modal-title" id="netConfigModalLabel" data-i18n="vlanSetup">Настройка VLAN</h5>
+                    <button id="vlanConfigurationCancelIcon" type="button" class="btn-close" data-dismiss="modal" aria-label="Закрыть" data-i18n-attr="aria-label:closeBtn">
                     </button>
                 </div>
                 <div class="modal-body">
@@ -21,8 +21,8 @@
                     </div>
                 </div>
                 <div id="modal_footer_vlan" class="modal-footer">
-                    <button id="vlanConfigurationCancel" type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
-                    <button id="vlanConfigurationSubmit" type="button" class="btn btn-primary">Сохранить</button>
+                    <button id="vlanConfigurationCancel" type="button" class="btn btn-secondary" data-dismiss="modal" data-i18n="closeBtn">Закрыть</button>
+                    <button id="vlanConfigurationSubmit" type="button" class="btn btn-primary" data-i18n="saveBtn">Сохранить</button>
                 </div>
             </div>
         </div>
@@ -34,12 +34,12 @@
         <table class="table table-hover table-bordered mb-0 mt-1">
             <thead>
             <tr>
-                <th class="text-center align-middle">Устройство</th>
+                <th class="text-center align-middle" data-i18n="device">Устройство</th>
                 <th class="text-center align-middle">
-                    <span data-bs-toggle="tooltip" title="Допустимые значения: от 1 до 4094.">VLAN ID</span>
+                    <span data-bs-toggle="tooltip" title="Допустимые значения: от 1 до 4094." data-i18n-attr="title:tooltipVlanId">VLAN ID</span>
                 </th>
                 <th class="text-center align-middle" style="white-space: nowrap;">
-                    <span data-bs-toggle="tooltip" title="Для Trunk подключения вводите значения через запятую или пробел. Например: &quot;10 20&quot;">Тип подключения</span>
+                    <span data-bs-toggle="tooltip" title="Для Trunk подключения вводите значения через запятую или пробел. Например: &quot;10 20&quot;" data-i18n-attr="title:tooltipTrunk" data-i18n="connectionType">Тип подключения</span>
                 </th>
             </tr>
             </thead>

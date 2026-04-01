@@ -23,9 +23,9 @@
 
             <div class="d-flex position-absolute end-0 top-0" style="margin: 17px;">
                 {# Timer and counter #}
-                <div class="col-auto d-flex align-items-center" 
+                <div class="col-auto d-flex align-items-center"
                     style="display: none; font-size: 24px; opacity: 85%; white-space: nowrap; align-self: center; gap: 16px; margin-right: 17px;">
-                    <p id="counter" style="margin: 0;">Вопрос <span id="currentQuestion">1</span> из <span id="totalQuestions">10</span></p>
+                    <p id="counter" style="margin: 0;"><span data-i18n="counterQuestion">Вопрос</span> <span id="currentQuestion">1</span> <span data-i18n="counterOf">из</span> <span id="totalQuestions">10</span></p>
                     {% if timer != 0 %}
                         <span id="timer" style="display: inline-block; width: 105px; text-align: right;">00:00:00</span>
                     {% endif %}
@@ -33,7 +33,7 @@
                 {# Finish button #}
                 <div class="col-auto" style="align-self: flex-start;">
                     <button name="finishQuiz" aria-label="Завершить тест" class="btn btn-outline-danger btn-icon"
-                            data-toggle="tooltip" data-bs-placement="right" title="Завершить тест">
+                            data-toggle="tooltip" data-bs-placement="right" title="Завершить тест" data-i18n-attr="title:finishTestBtn;aria-label:finishTestBtn">
                         <i class="bx bx-x fs-4 mx-1"></i>
                     </button>
                 </div>
@@ -41,14 +41,14 @@
         </nav>
 
         <div id="side_menu" class="position-absolute start-0 top-0" style="margin-left: 17px; margin-top: 100px;">
-            <div class="ws-menu-devices-name">Устройства</div>
+            <div class="ws-menu-devices-name" data-i18n="devicesHeader">Устройства</div>
             <div class="ws-menu-devices">
                 <div id="l2_switch_device" style="margin-top: 6px; margin-bottom: 6px;">
                     <img class="drag" id="l2_switch"
                          src="{{ url_for('static', filename='/images/l2_switch.png') }}"/>
                     <div class="icon-text">
                         <span data-bs-toggle="popover" data-bs-trigger="hover"
-                              data-bs-content="Свитч (коммутатор) работает на втором уровне модели OSI.">Свитч (L2)</span>
+                              data-bs-content="Свитч (коммутатор) работает на втором уровне модели OSI." data-i18n="deviceSwitch" data-i18n-attr="data-bs-content:deviceSwitchPopover">Свитч (L2)</span>
                     </div>
                     <div id="l2_switch_counter"></div>
                 </div>
@@ -56,7 +56,7 @@
                     <img class="drag" id="host" src="{{ url_for('static', filename='/images/host.png') }}"/>
                     <div class="icon-text pt-2">
                         <span data-bs-toggle="popover" data-bs-trigger="hover"
-                              data-bs-content="Хост - конечное сетевое устройство.">Хост</span>
+                              data-bs-content="Хост - конечное сетевое устройство." data-i18n="deviceHost" data-i18n-attr="data-bs-content:deviceHostPopover">Хост</span>
                     </div>
                     <div id="host_counter"></div>
                 </div>
@@ -64,7 +64,7 @@
                     <img class="drag" id="l1_hub" src="{{ url_for('static', filename='/images/hub.png') }}"/>
                     <div class="icon-text">
                         <span data-bs-toggle="popover" data-bs-trigger="hover"
-                              data-bs-content="Хаб (концентратор) &mdash; простейшее сетевое устойство.">Хаб (L1)</span>
+                              data-bs-content="Хаб (концентратор) &mdash; простейшее сетевое устойство." data-i18n="deviceHub" data-i18n-attr="data-bs-content:deviceHubPopover">Хаб (L1)</span>
                     </div>
                     <div id="l1_hub_counter"></div>
                 </div>
@@ -73,7 +73,7 @@
                          src="{{ url_for('static', filename='/images/l3_router.png') }}"/>
                     <div class="icon-text">
                         <span data-bs-toggle="popover" data-bs-trigger="hover"
-                              data-bs-content="Маршрутизатор (роутер, раутер) &mdash; работает на 3-м уровне модели OSI, позволяет объединять различные сети.">Роутер (L3)</span>
+                              data-bs-content="Маршрутизатор (роутер, раутер) &mdash; работает на 3-м уровне модели OSI, позволяет объединять различные сети." data-i18n="deviceRouter" data-i18n-attr="data-bs-content:deviceRouterPopover">Роутер (L3)</span>
                     </div>
                     <div id="l3_router_counter"></div>
                 </div>
@@ -81,7 +81,7 @@
                     <img class="drag" id="server" src="{{ url_for('static', filename='/images/server.png') }}"/>
                     <div class="icon-text">
                         <span data-bs-toggle="popover" data-bs-trigger="hover"
-                              data-bs-content="Сервер &mdash; обслуживает клиентские запросы.">Сервер</span>
+                              data-bs-content="Сервер &mdash; обслуживает клиентские запросы." data-i18n="deviceServer" data-i18n-attr="data-bs-content:deviceServerPopover">Сервер</span>
                     </div>
                     <div id="server_counter"></div>
                 </div>
@@ -89,16 +89,16 @@
         </div>
 
         <div class="position-absolute end-0 top-0" style="margin-right: 17px; margin-top: 100px; pointer-events: none;">
-            <div class="ws-menu-settings-name" style="pointer-events: all;">Настройки</div>
+            <div class="ws-menu-settings-name" style="pointer-events: all;" data-i18n="settingsHeader">Настройки</div>
             <div id="config_content" class="ws-menu-settings overflow-auto" style="pointer-events: all;">
-                <span>Тут будут настройки устройств. Выделите любое на схеме.</span>
+                <span data-i18n="settingsPlaceholder">Тут будут настройки устройств. Выделите любое на схеме.</span>
             </div>
             <div id="config_content_save" class="ws-menu-settings overflow-auto" style="margin-top: 8px; pointer-events: all; display: none;">
             </div>
         </div>
         <div class="position-absolute start-0 bottom-0" style="margin: 17px; font-weight: 500;" id="NetworkPlayerDiv">
             <div class="d-flex justify-content-center ws-shadow" id="NetworkPlayer">
-                <button type="button" class="btn btn-primary w-100" id="NetworkRunButton" disabled>
+                <button type="button" class="btn btn-primary w-100" id="NetworkRunButton" disabled data-i18n="emulateBtn">
                     Эмулировать
                 </button>
             </div>
@@ -107,7 +107,7 @@
                     <div class="range-slider-ui mt-0 mb-2" id="PacketSliderInput" style="display: none"></div>
                     <input class="form-control range-slider-value-min display: none" type="hidden">
                 </div>
-                <small id="NetworkPlayerLabel" class="d-flex justify-content-center text-muted text-center">Ожидание 10-30 сек.</small>
+                <small id="NetworkPlayerLabel" class="d-flex justify-content-center text-muted text-center" data-i18n="emulationWaitLabel">Ожидание 10-30 сек.</small>
             </div>
         </div>
 
@@ -115,13 +115,13 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Подсказки</h5>
+                        <h5 class="modal-title" data-i18n="hints">Подсказки</h5>
                     </div>
                     <div class="modal-body">
                         <p id="hintsContainer"></p>
                     </div>
                     <div class="modal-footer">
-                        <button id="networkConfigurationCancel" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button id="networkConfigurationCancel" type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="closeBtn">Закрыть</button>
                     </div>
                 </div>
             </div>
@@ -131,21 +131,21 @@
         <div class="card-body position-absolute end-0 bottom-0" style="margin: 17px; font-weight: 500;">
             <div class="d-flex justify-content-center">
                 {% if is_exam and not available_answer %}
-                    <button name="answerExamQuestion" class="btn btn-primary">Ответить</button>
+                    <button name="answerExamQuestion" class="btn btn-primary" data-i18n="answerBtn">Ответить</button>
                 {% else %}
-                    <button name="answerQuestion" class="btn btn-primary">Ответить</button>
+                    <button name="answerQuestion" class="btn btn-primary" data-i18n="answerBtn">Ответить</button>
                 {% endif %}
                 
-                <button name="nextQuestion" class="btn w-100 px-0" hidden>Следующий вопрос</button>
+                <button name="nextQuestion" class="btn w-100 px-0" hidden data-i18n="nextQuestionBtn">Следующий вопрос</button>
                 <button name="seeResults" class="btn w-100 px-0"
                         style="word-wrap: break-word; white-space: initial;" hidden></button>
             
-                <span id="answerSavedBanner" class="mt-2 text-success" style="display: none; font-weight: bold;">
+                <span id="answerSavedBanner" class="mt-2 text-success" style="display: none; font-weight: bold;" data-i18n="answerSaved">
                     ✔ Ответ сохранён
                 </span>
             </div>
             <div style="margin: 17px; font-weight: 500; display: none;" id="scoreDisplay" >
-                <p class="fs-5">Вы набрали <span id="score">0</span> баллов
+                <p class="fs-5"><span data-i18n="yourScore">Вы набрали</span> <span id="score">0</span> <span data-i18n="points">баллов</span>
                 {% if not is_exam %}
                     <i id="hintIcon" class="bx bx-help-circle text-muted" style="cursor: pointer;"></i>
                 {% endif %}

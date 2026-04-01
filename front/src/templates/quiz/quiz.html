@@ -1,6 +1,8 @@
 {% extends "base.html" %}
-{% block title %}{{ test_info['test_name'] }}{% endblock %}
-{% block description %}Сетевой тренажер для обучения компьютерным сетям{% endblock %}
+{% block title_tag %}
+    <title>{{ test_info['test_name'] }}</title>
+{% endblock %}
+{% block description %}<meta name="description" content="Сетевой тренажер для обучения компьютерным сетям">{% endblock %}
 
 
 {% block content %}
@@ -21,10 +23,10 @@
                     <div class="modal-content">
                         <div class="modal-body"
                              style="display: flex;flex-direction: row;justify-content: space-between;align-items: baseline;">
-                            <b>Данный раздел уже пройден вами</b>
+                            <b data-i18n="modalTestPassed">Данный раздел уже пройден вами</b>
                             <button id="alertModalCancelIcon{{ section.section_id }}" type="button"
                                     class="btn-close" data-dismiss="modal"
-                                    aria-label="Закрыть">
+                                    aria-label="Закрыть" data-i18n-attr="aria-label:closeBtn">
                             </button>
                         </div>
                     </div>
@@ -38,24 +40,24 @@
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">Тест можно пройти только один раз.</h5>
+                            <h5 class="modal-title" data-i18n="modalOneAttemptTitle">Тест можно пройти только один раз.</h5>
                             <button id="testWarningModalCancelIcon{{ section.section_id }}" type="button"
                                     class="btn-close" data-dismiss="modal"
-                                    aria-label="Закрыть"></button>
+                                    aria-label="Закрыть" data-i18n-attr="aria-label:closeBtn"></button>
                         </div>
 
                         <div class="modal-body">
                             {% if not section.is_answer_available and section.timer == 0 %}
-                                <p>Вы можете вернуться к прохождению теста в любое время, пока не отправили ответ и не начали выполнение другого теста.</p>
+                                <p data-i18n="modalOneAttemptP1">Вы можете вернуться к прохождению теста в любое время, пока не отправили ответ и не начали выполнение другого теста.</p>
                             {% else %}
-                                <b>Пройти тест можно только один раз.</b>
-                                <p>Время на решение ограничено. Вы готовы начать?</p>
+                                <b data-i18n="modalOneAttemptP2">Пройти тест можно только один раз.</b>
+                                <p data-i18n="modalOneAttemptP3">Время на решение ограничено. Вы готовы начать?</p>
                             {% endif %}
                         </div>
                         
                         <div class="modal-footer">
                             <button id="testWarningModalSubmit{{ section.section_id }}" type="button"
-                                    class="btn btn-primary">Начать
+                                    class="btn btn-primary" data-i18n="startBtn">Начать
                                 прохождение
                             </button>
                         </div>
@@ -82,9 +84,9 @@
                                 onmouseout="this.style.color='';" 
                                 id="startSession{{ section.section_id }}">
                                 {% if section.is_exam %}
-                                    <i class="bx bx-check-circle" style="vertical-align: middle;" title="Контрольное задание: этот раздел является экзаменом. Подсказки не предусмотрены."></i>
+                                    <i class="bx bx-check-circle" style="vertical-align: middle;" title="Контрольное задание: этот раздел является экзаменом. Подсказки не предусмотрены." data-i18n-attr="title:quizControlTask"></i>
                                 {% else %}
-                                    <i class="bx bx-book" style="vertical-align: middle;" title="Учебное задание: этот раздел предназначен для обучения. При неверном выполнении задания будут даны разъяснения."></i>
+                                    <i class="bx bx-book" style="vertical-align: middle;" title="Учебное задание: этот раздел предназначен для обучения. При неверном выполнении задания будут даны разъяснения." data-i18n-attr="title:quizTrainingTask"></i>
                                 {% endif %}
                                 {{ section.section_name }}
                             </h4>                                                                          
@@ -103,18 +105,19 @@
                                     <a class="btn btn-outline-primary lastResult" id="{{ section.section_id }}link"
                                        data-bs-toggle="tooltip" 
                                        title="{% if section.is_exam and not section.answer_available %}На страницу результатов{% else %}Посмотреть последний результат{% endif %}"
+                                       data-i18n-attr="title:{% if section.is_exam and not section.answer_available %}resultsPageLink{% else %}resultsLastResultLink{% endif %}"
                                        href="{{ url_for('get_result_by_session_guid_endpoint') }}?guid={{ section.session_guid }}"
                                        style="text-align: right;">
                                         {% if section.is_exam and not section.answer_available %}
-                                            Результаты
+                                            <span data-i18n="resultsLabel">Результаты</span>
                                         {% else %}
-                                            {{ section.last_correct_count }}/{{ section.question_count }} верно
+                                            {{ section.last_correct_count }}/{{ section.question_count }} <span data-i18n="correctLabel">верно</span>
                                         {% endif %}
                                     </a>
                                 </div>
                             {% elif section.last_correct_count is defined %}
                                 <p class="lastResult" id="{{ section.section_id }}text">
-                                    {{ section.last_correct_count }}/{{ section.question_count }} верно
+                                    {{ section.last_correct_count }}/{{ section.question_count }} <span data-i18n="correctLabel">верно</span>
                                 </p>
                             {% else %}
                                 <p id="{{ section.section_id }}question"
@@ -132,46 +135,61 @@
 
             <script src="/quiz/quiz_scripts.js"></script>
             <script>
-                if ('{{ test_info['is_retakeable'] }}' === "True") {
-                    document.getElementById('startSession{{ section.section_id }}').addEventListener('click', submitForm);
+                // Логика для склонения слов "вопрос/вопроса/вопросов" и "минута/минуты/минут"
+                function morph(n, titles) {
+                    return titles[(n % 10 === 1 && n % 100 !== 11) ? 0 : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? 1 : 2];
                 }
 
-                questions = '{{section.question_count}}';
-                paragraph = document.getElementById('{{ section.section_id }}question');
-                if (paragraph) {
-                    paragraph.innerHTML = questions + ' ' + morph(questions, ['вопрос', 'вопроса', 'вопросов']);
-                    paragraph.style.marginRight = '40px';
-                }
+                // Эта функция будет вызвана скриптом i18n.js после загрузки переводов
+                function localizeQuizPage() {
+                    const translations = window.translations[currentLanguage] || {};
+                    const questionsTitles = [translations.questionsCount_one || 'вопрос', translations.questionsCount_few || 'вопроса', translations.questionsCount_many || 'вопросов'];
+                    const minutesTitles = [translations.minutesCount_one || 'минута', translations.minutesCount_few || 'минуты', translations.minutesCount_many || 'минут'];
 
-
-                const timer{{ section.section_id }} = parseInt('{{ section.timer }}');
-                const isAnswerAvailable{{ section.section_id }} = '{{ section.is_answer_available }}' === 'True';
-                const timerParagraph{{ section.section_id }} = document.getElementById('{{ section.section_id }}timer');
-                const resultsAvailableFromRaw{{ section.section_id }} = '{{ section.results_available_from }}';
-
-                if (timerParagraph{{ section.section_id }}) {
-                    if (timer{{ section.section_id }} === 0 && !isAnswerAvailable{{ section.section_id }}) {
-                        if (resultsAvailableFromRaw{{ section.section_id }}) {
-                            const deadline = new Date(resultsAvailableFromRaw{{ section.section_id }});
-                            if (deadline < new Date()) {
-                                // вместо сокрытия — выводим «Тестирование завершено»
-                                timerParagraph{{ section.section_id }}.innerHTML = 'Тестирование завершено';
-                            } else {
-                                timerParagraph{{ section.section_id }}.innerHTML = 'До ' + deadline.toLocaleString('ru-RU');
-                            }
-                        } else {
-                            timerParagraph{{ section.section_id }}.innerHTML = 'Нет ограничения по времени';
-                        }
-                    } else if (timer{{ section.section_id }} > 0) {
-                        timerParagraph{{ section.section_id }}.innerHTML = timer{{ section.section_id }} + ' ' +
-                            morph(timer{{ section.section_id }}, ['минута', 'минуты', 'минут']);
-                    } else {
-                        // общий случай «уже прошло»
-                        timerParagraph{{ section.section_id }}.innerHTML = 'Тестирование завершено';
+                    if ('{{ test_info['is_retakeable'] }}' === "True") {
+                        document.getElementById('startSession{{ section.section_id }}').addEventListener('click', submitForm);
                     }
-                    // отступ для всех состояний
-                    timerParagraph{{ section.section_id }}.style.marginRight = '40px';
+
+                    const questions = parseInt('{{section.question_count}}');
+                    const paragraph = document.getElementById('{{ section.section_id }}question');
+                    if (paragraph) {
+                        paragraph.innerHTML = questions + ' ' + morph(questions, questionsTitles);
+                        paragraph.style.marginRight = '40px';
+                    }
+
+                    const timer{{ section.section_id }} = parseInt('{{ section.timer }}');
+                    const isAnswerAvailable{{ section.section_id }} = '{{ section.is_answer_available }}' === 'True';
+                    const timerParagraph{{ section.section_id }} = document.getElementById('{{ section.section_id }}timer');
+                    const resultsAvailableFromRaw{{ section.section_id }} = '{{ section.results_available_from }}';
+
+                    if (timerParagraph{{ section.section_id }}) {
+                        if (timer{{ section.section_id }} === 0 && !isAnswerAvailable{{ section.section_id }}) {
+                            if (resultsAvailableFromRaw{{ section.section_id }}) {
+                                const deadline = new Date(resultsAvailableFromRaw{{ section.section_id }});
+                                if (deadline < new Date()) {
+                                    timerParagraph{{ section.section_id }}.innerHTML = translations.resultsFinished || 'Тестирование завершено';
+                                } else {
+                                    timerParagraph{{ section.section_id }}.innerHTML = (translations.resultsDeadline || 'До') + ' ' + deadline.toLocaleString('ru-RU');
+                                }
+                            } else {
+                                timerParagraph{{ section.section_id }}.innerHTML = translations.resultsNoTimeLimit || 'Нет ограничения по времени';
+                            }
+                        } else if (timer{{ section.section_id }} > 0) {
+                            timerParagraph{{ section.section_id }}.innerHTML = timer{{ section.section_id }} + ' ' + morph(timer{{ section.section_id }}, minutesTitles);
+                        } else {
+                            timerParagraph{{ section.section_id }}.innerHTML = translations.resultsFinished || 'Тестирование завершено';
+                        }
+                        timerParagraph{{ section.section_id }}.style.marginRight = '40px';
+                    }
                 }
+
+                const originalApplyTranslations = applyTranslations;
+                applyTranslations = function(lang) {
+                    originalApplyTranslations(lang);
+                    localizeQuizPage();
+                }
+
+                document.addEventListener('DOMContentLoaded', localizeQuizPage);
             </script>
 
             <script>
@@ -179,7 +197,6 @@
                     $('#testWarningModalCancelIcon{{ section.section_id }}').click(function () {
                         $('#testWarningModal{{ section.section_id }}').modal('hide');
                     });
-
                     $('#testWarningModalSubmit{{ section.section_id }}').click(function () {
                         let startSessionElement = document.getElementById('startSession{{ section.section_id }}');
                         if (startSessionElement) {
@@ -188,7 +205,6 @@
                         }
                         $('#testWarningModal{{ section.section_id }}').modal('hide');
                     });
-
                     $('#alertModalCancelIcon{{ section.section_id }}').click(function () {
                         $('#alertModal{{ section.section_id }}').modal('hide');
                     });
@@ -198,15 +214,11 @@
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
                     const h4 = document.getElementById('startSession{{ section.section_id }}');
-
                     h4.addEventListener('click', function () {
                         const isRetakeable = '{{ test_info["is_retakeable"] }}' === 'True';
                         const sessionsCount = parseInt('{{ section.sessions_count }}');
                         const timer = parseInt('{{ section.timer }}');
                         const lastQuestion = '{{ section.last_question }}';
-                        const thereIsUnfinished = '{{ 'True' if section.there_is_unfinished else 'False' }}';
-
-
                         if (!isRetakeable && sessionsCount !== 0) {
                             if (timer === 0 && lastQuestion) {
                                 window.location.href = '{{ url_for("get_question_by_session_question_id_endpoint") }}?question_id=' + lastQuestion;

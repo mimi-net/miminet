@@ -1570,18 +1570,19 @@ const InsertWaitingTimeHelper = function(time_filter) {
         data: '',
         success: function(data) {
             const queue_size = parseInt(data.size);
+
             if (!$('#NetworkPlayer button:first').prop('disabled')) {
                 console.log($('#NetworkPlayer button:first').prop('disabled'))
                 return;
             } else if (queue_size <= 1) {
-                $('#NetworkPlayerLabel').text("Ожидание 10-15 сек.");
+                $('#NetworkPlayerLabel').html('<span data-i18n="emulationWaitLabel">Ожидание 10-30 сек.</span>');
             } else {
-                $('#NetworkPlayerLabel').text(`Место в очереди ${queue_size}`);
-
-                // Update waiting time
-                setTimeout(() => InsertWaitingTimeHelper(time_filter), 500);
+                $('#NetworkPlayerLabel').html('<span data-i18n="queuePosition">Место в очереди</span> ' + queue_size);
             }
 
+            if (typeof translateDynamicContent === 'function') {
+                translateDynamicContent(document.getElementById('NetworkPlayerLabel'));
+            }
         },
         error: function(err) {
             console.error("Failed to fetch queue size:", err);
@@ -2311,7 +2312,16 @@ const SetNetworkPlayerState = function (simulation_id) {
         $('#PacketSliderInput').show();
 
         const pkt_count = packets.reduce((currentCount, row) => currentCount + row.length, 0);
-        $('#NetworkPlayerLabel').text(packets.length + ' ' + NumWord(packets.length, ['шаг', 'шага', 'шагов']) + ' / ' + pkt_count + ' ' + NumWord(pkt_count, ['пакет', 'пакета', 'пакетов']));
+
+        const stepsWords = [getTranslation('step'), getTranslation('steps_few'), getTranslation('steps_many')];
+        const packetsWords = [getTranslation('packet'), getTranslation('packets_few'), getTranslation('packets_many')];
+
+        const stepsLabel = NumWord(packets.length, stepsWords);
+        const packetsLabel = NumWord(pkt_count, packetsWords);
+
+        $('#NetworkPlayerLabel').text(
+            packets.length + ' ' + stepsLabel + ' / ' + pkt_count + ' ' + packetsLabel
+        );
 
         $('#PacketSliderInput')[0].noUiSlider.on('slide', function (e) {
             if (!e) return;
@@ -2323,10 +2333,18 @@ const SetNetworkPlayerState = function (simulation_id) {
             if (!e) return;
             let x =  Math.round(e[0]);
             if (packets.length === 0){
-                $('#NetworkPlayerLabel').text('0 пакетов');
+                $('#NetworkPlayerLabel').text(getTranslation('packets_zero'));
                 return;
             }
-            $('#NetworkPlayerLabel').text('Шаг: ' + x + '/' + packets.length + ' (' +  packets[x-1].length + ' ' + NumWord(packets[x-1].length, ['пакет', 'пакета', 'пакетов']) + ')');
+            const stepsWordsUpdate = [getTranslation('step'), getTranslation('steps_few'), getTranslation('steps_many')];
+            const packetsWordsUpdate = [getTranslation('packet'), getTranslation('packets_few'), getTranslation('packets_many')];
+
+            const stepLabel = getTranslation('stepsLabel');
+            const packetWord = NumWord(packets[x-1].length, packetsWordsUpdate);
+
+            $('#NetworkPlayerLabel').text(
+                stepLabel + ' ' + x + '/' + packets.length + ' (' + packets[x-1].length + ' ' + packetWord + ')'
+            );
         });
 
         // Set click handlers
@@ -2400,8 +2418,17 @@ const SetNetworkPlayerState = function (simulation_id) {
     // Add emulation button.
     $('#NetworkPlayer').empty();
     $('#PacketSliderInput').hide();
-    $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton">Эмулировать</button>');
-    $('#NetworkPlayerLabel').empty();
+
+    $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" data-i18n="emulateBtn">Эмулировать</button>');
+
+    $('#NetworkPlayerLabel').html('<span data-i18n="emulationWaitLabel">Ожидание 10-30 сек.</span>');
+    if (typeof translateDynamicContent === 'function') {
+        translateDynamicContent(document.getElementById('NetworkPlayerLabel'));
+    }
+
+    if (typeof translateDynamicContent === 'function') {
+        translateDynamicContent(document.getElementById('NetworkPlayer'));
+    }
 
     $('#NetworkEmulateButton').click(function() {
 
@@ -2426,13 +2453,17 @@ const SetNetworkPlayerState = function (simulation_id) {
         RunSimulation(network_guid);
 
         $('#NetworkPlayer').empty();
-        $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" disabled>Эмулируется...</button>');
+        $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" disabled data-i18n="emulatingStatus">Эмулируется...</button>');
+        
+        if (typeof translateDynamicContent === 'function') {
+            translateDynamicContent(document.getElementById('NetworkPlayer'));
+        }
+
         InsertWaitingTime();
         return;
     });
 
     return;
-
 }
 
 // 2 states:
@@ -2469,7 +2500,16 @@ const SetSharedNetworkPlayerState = function()
         $('#PacketSliderInput').show();
 
         const pkt_count = packets.reduce((currentCount, row) => currentCount + row.length, 0);
-        $('#NetworkPlayerLabel').text(packets.length + ' ' + NumWord(packets.length, ['шаг', 'шага', 'шагов']) + ' / ' + pkt_count + ' ' + NumWord(pkt_count, ['пакет', 'пакета', 'пакетов']));
+
+        const stepsWords = [getTranslation('step'), getTranslation('steps_few'), getTranslation('steps_many')];
+        const packetsWords = [getTranslation('packet'), getTranslation('packets_few'), getTranslation('packets_many')];
+
+        const stepsLabel = NumWord(packets.length, stepsWords);
+        const packetsLabel = NumWord(pkt_count, packetsWords);
+
+        $('#NetworkPlayerLabel').text(
+            packets.length + ' ' + stepsLabel + ' / ' + pkt_count + ' ' + packetsLabel
+        );
 
         $('#PacketSliderInput')[0].noUiSlider.on('slide', function (e) {
             if (!e) return;
@@ -2481,10 +2521,18 @@ const SetSharedNetworkPlayerState = function()
             if (!e) return;
             let x =  Math.round(e[0]);
             if (packets.length === 0){
-                $('#NetworkPlayerLabel').text('0 пакетов');
+                $('#NetworkPlayerLabel').text(getTranslation('packets_zero'));
                 return;
             }
-            $('#NetworkPlayerLabel').text('Шаг: ' + x + '/' + packets.length + ' (' +  packets[x-1].length + ' ' + NumWord(packets[x-1].length, ['пакет', 'пакета', 'пакетов']) + ')');
+            const stepsWordsUpdate = [getTranslation('step'), getTranslation('steps_few'), getTranslation('steps_many')];
+            const packetsWordsUpdate = [getTranslation('packet'), getTranslation('packets_few'), getTranslation('packets_many')];
+
+            const stepLabel = getTranslation('stepsLabel');
+            const packetWord = NumWord(packets[x-1].length, packetsWordsUpdate);
+
+            $('#NetworkPlayerLabel').text(
+                stepLabel + ' ' + x + '/' + packets.length + ' (' + packets[x-1].length + ' ' + packetWord + ')'
+            );
         });
 
         // Set click handlers
@@ -2546,7 +2594,10 @@ const SetSharedNetworkPlayerState = function()
     $('#NetworkPlayer').empty();
     $('#PacketSliderInput').hide();
     $('#NetworkPlayerLabel').empty();
-    $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" disabled>Нет эмуляции</button>');
+    $('#NetworkPlayer').append('<button type="button" class="btn btn-primary w-100" id="NetworkEmulateButton" disabled data-i18n="noEmulation">Нет эмуляции</button>');
+    if (typeof translateDynamicContent === 'function') {
+        translateDynamicContent(document.getElementById('NetworkPlayer'));
+    }
     return;
 }
 

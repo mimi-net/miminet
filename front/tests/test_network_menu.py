@@ -31,7 +31,9 @@ class TestNetworkMenu:
             By.CSS_SELECTOR, Location.Network.TITLE_LABEL.selector
         ).text
 
-        assert network_name == "Новая сеть"
+        # Проверяем, что название сети существует (не зависит от языка)
+        # "Новая сеть" на русском или "New network" на английском
+        assert network_name in ["Новая сеть", "New network"]
 
     def test_new_network_open(self, selenium: MiminetTester, empty_network: str):
         """Checks is it possible to open new network via home menu"""

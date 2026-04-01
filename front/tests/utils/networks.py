@@ -1,11 +1,14 @@
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from utils.locators import Location
 from conftest import HOME_PAGE, MiminetTester
 import random
-from typing import Optional, Type, Tuple
-from selenium.common.exceptions import NoSuchElementException
+from typing import Optional, Type, Tuple, Union
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from json import dumps as json_dumps
 from selenium.webdriver.support.ui import Select
+import time
 
 
 class NodeType:
@@ -95,17 +98,29 @@ class MiminetTestNetwork:
         (str) : Network URL
         """
         self.__selenium.get(HOME_PAGE)
-        self.__selenium.find_element(
-            By.CSS_SELECTOR, Location.MyNetworks.NEW_NETWORK_BUTTON.selector
-        ).click()
+        
+        # Ждём появления кнопки создания сети
+        new_network_btn = WebDriverWait(self.__selenium, 10).until(
+            EC.element_to_be_clickable(
+                (By.CSS_SELECTOR, Location.MyNetworks.NEW_NETWORK_BUTTON.selector)
+            )
+        )
+        new_network_btn.click()
 
+        # Ждём загрузки страницы сети
+        WebDriverWait(self.__selenium, 10).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, Location.Network.MAIN_PANEL.selector)
+            )
+        )
+        
         self.__url = self.__selenium.current_url
 
-    def open_node_config(self, device_node: dict | int):
+    def open_node_config(self, device_node: Union[dict, int]):
         """Opens the configuration menu for a specific node.
 
         Args:
-            device_node (dict | int): Device node for which to open the configuration.
+            device_node (dict или int): Device node for which to open the configuration.
 
         Returns:
             NodeConfig: An instance of the NodeConfig class, providing access to the configuration menu.
@@ -128,8 +143,10 @@ class MiminetTestNetwork:
         edge_id = edge["data"]["id"]
         self.__selenium.execute_script(f"ShowEdgeConfig('{edge_id}')")
 
-        self.__selenium.wait_until_appear(
-            By.CSS_SELECTOR, Location.Network.CONFIG_PANEL.selector
+        WebDriverWait(self.__selenium, 10).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, Location.Network.CONFIG_PANEL.selector)
+            )
         )
 
     def add_node(
@@ -150,9 +167,12 @@ class MiminetTestNetwork:
         """
         self.__check_page()
         old_nodes_len = len(self.nodes)
+        old_nodes_ids = set(node["data"]["id"] for node in self.nodes)
 
-        panel = self.__selenium.find_element(
-            By.CSS_SELECTOR, Location.Network.MAIN_PANEL.selector
+        panel = WebDriverWait(self.__selenium, 10).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, Location.Network.MAIN_PANEL.selector)
+            )
         )
 
         x = x if x is not None else random.uniform(0, 100)
@@ -160,9 +180,28 @@ class MiminetTestNetwork:
 
         local_x, local_y = self.__calc_panel_offset(panel, x, y)
 
-        device_button = self.__selenium.find_element(*node_type)
+        device_button = WebDriverWait(self.__selenium, 10).until(
+            EC.element_to_be_clickable(node_type)
+        )
+        
+        # Прокручиваем элемент в видимую область
+        self.__selenium.execute_script("arguments[0].scrollIntoView({behavior: 'auto', block: 'center'});", device_button)
+        
         self.__selenium.drag_and_drop(device_button, panel, local_x, local_y)
-        self.__selenium.wait_for(lambda _: old_nodes_len < len(self.nodes), timeout=5)
+        
+        # Ждём появления нового узла по изменению количества или появлению нового ID
+        def node_added(_):
+            current_nodes = self.__selenium.execute_script("return nodes")
+            if len(current_nodes) > old_nodes_len:
+                return True
+            # Альтернативная проверка: появился ли новый ID
+            current_ids = set(n["data"]["id"] for n in current_nodes)
+            return bool(current_ids - old_nodes_ids)
+        
+        WebDriverWait(self.__selenium, timeout=10, poll_frequency=0.5).until(node_added)
+        
+        # Небольшая задержка для стабилизации состояния
+        time.sleep(0.5)
         return len(self.nodes) - 1
 
     def add_edge(self, source_id: int, target_id: int) -> int:
@@ -183,7 +222,9 @@ class MiminetTestNetwork:
         self.__selenium.execute_script("DrawGraph()")
         self.__selenium.execute_script("PostNodesEdges()")
 
-        self.__selenium.wait_for(lambda d: old_edges_len < len(self.edges))
+        WebDriverWait(self.__selenium, timeout=10, poll_frequency=0.5).until(
+            lambda d: len(self.edges) > old_edges_len
+        )
         return len(self.edges) - 1
 
     def get_nodes_by_class(self, device_class: str) -> list[dict]:
@@ -203,13 +244,18 @@ class MiminetTestNetwork:
 
         :Return: Emulation packets."""
         self.__check_page()
-        self.__selenium.find_element(
-            By.CSS_SELECTOR, Location.Network.EMULATE_BUTTON.selector
-        ).click()
-        self.__selenium.wait_until_appear(
-            By.CSS_SELECTOR,
-            Location.Network.EMULATE_PLAYER_PAUSE_BUTTON.selector,
-            60,
+        
+        emulate_btn = WebDriverWait(self.__selenium, 10).until(
+            EC.element_to_be_clickable(
+                (By.CSS_SELECTOR, Location.Network.EMULATE_BUTTON.selector)
+            )
+        )
+        emulate_btn.click()
+        
+        WebDriverWait(self.__selenium, 60).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, Location.Network.EMULATE_PLAYER_PAUSE_BUTTON.selector)
+            )
         )
 
         packets = self.__selenium.execute_script("return packets")
@@ -220,18 +266,24 @@ class MiminetTestNetwork:
         """Delete current network."""
         self.__check_page()
 
-        self.__selenium.find_element(
-            By.CSS_SELECTOR, Location.Network.TopButton.OPTIONS.selector
-        ).click()
+        options_btn = WebDriverWait(self.__selenium, 10).until(
+            EC.element_to_be_clickable(
+                (By.CSS_SELECTOR, Location.Network.TopButton.OPTIONS.selector)
+            )
+        )
+        options_btn.click()
 
-        self.__selenium.wait_and_click(
-            By.CSS_SELECTOR,
-            Location.Network.ModalButton.DELETE_MODAL_BUTTON.selector,
-        )
-        self.__selenium.wait_and_click(
-            By.CSS_SELECTOR,
-            Location.Network.ModalButton.DELETE_SUBMIT_BUTTON.selector,
-        )
+        WebDriverWait(self.__selenium, 10).until(
+            EC.element_to_be_clickable(
+                (By.CSS_SELECTOR, Location.Network.ModalButton.DELETE_MODAL_BUTTON.selector)
+            )
+        ).click()
+        
+        WebDriverWait(self.__selenium, 10).until(
+            EC.element_to_be_clickable(
+                (By.CSS_SELECTOR, Location.Network.ModalButton.DELETE_SUBMIT_BUTTON.selector)
+            )
+        ).click()
 
 
 class NodeConfig:
@@ -252,20 +304,22 @@ class NodeConfig:
     @property
     def name(self):
         """Current name of the network device displayed in the configuration."""
-        name = self.__selenium.find_element(
-            By.CSS_SELECTOR, self.__config_locator.NAME_FIELD.selector
-        ).get_attribute("value")
-
-        return name
+        name_field = WebDriverWait(self.__selenium, 10).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, self.__config_locator.NAME_FIELD.selector)
+            )
+        )
+        return name_field.get_attribute("value")
 
     @property
     def default_gw(self):
         """Current default gateway of the network device displayed in the configuration."""
-        gw = self.__selenium.find_element(
-            By.CSS_SELECTOR, self.__config_locator.DEFAULT_GATEWAY_FIELD.selector
-        ).get_attribute("value")
-
-        return gw
+        gw_field = WebDriverWait(self.__selenium, 10).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, self.__config_locator.DEFAULT_GATEWAY_FIELD.selector)
+            )
+        )
+        return gw_field.get_attribute("value")
 
     def fill_link(self, ip: str, mask: int, link_id: int = 0):
         """Fill link (in config panel) with ip address and mask.
@@ -275,12 +329,21 @@ class NodeConfig:
         self.__check_config_open()
 
         try:
-            self.__selenium.find_element(
-                By.XPATH, Location.Network.ConfigPanel.get_ip_field_xpath(link_id)
-            ).send_keys(ip)
-            self.__selenium.find_element(
-                By.XPATH, Location.Network.ConfigPanel.get_mask_field_xpath(link_id)
-            ).send_keys(str(mask))
+            ip_field = WebDriverWait(self.__selenium, 10).until(
+                EC.presence_of_element_located(
+                    (By.XPATH, Location.Network.ConfigPanel.get_ip_field_xpath(link_id))
+                )
+            )
+            ip_field.clear()
+            ip_field.send_keys(ip)
+            
+            mask_field = WebDriverWait(self.__selenium, 10).until(
+                EC.presence_of_element_located(
+                    (By.XPATH, Location.Network.ConfigPanel.get_mask_field_xpath(link_id))
+                )
+            )
+            mask_field.clear()
+            mask_field.send_keys(str(mask))
         except Exception:
             raise Exception("Unable to find link. Maybe you forgot to add edges.")
 
@@ -300,10 +363,12 @@ class NodeConfig:
         """Switch the FTP configuration toggle."""
         self.__check_config_open()
 
-        self.__selenium.find_element(
-            By.CSS_SELECTOR,
-            Location.Network.ConfigPanel.Switch.RSTP_BUTTON.selector,
-        ).click()
+        rstp_btn = WebDriverWait(self.__selenium, 10).until(
+            EC.element_to_be_clickable(
+                (By.CSS_SELECTOR, Location.Network.ConfigPanel.Switch.RSTP_BUTTON.selector)
+            )
+        )
+        rstp_btn.click()
 
         modal_el = (
             By.CSS_SELECTOR,
@@ -313,31 +378,38 @@ class NodeConfig:
         )
 
         with self.__selenium.run_in_modal_context(*modal_el) as dialog:
-            dialog.find_element(
-                By.CSS_SELECTOR,
-                Location.Network.ConfigPanel.Switch.StpPanel.STP_BUTTON.selector,
-            ).click()
+            stp_btn = WebDriverWait(dialog, 10).until(
+                EC.element_to_be_clickable(
+                    (By.CSS_SELECTOR, Location.Network.ConfigPanel.Switch.StpPanel.STP_BUTTON.selector)
+                )
+            )
+            stp_btn.click()
 
-            priority_field = dialog.find_element(
-                By.CSS_SELECTOR,
-                Location.Network.ConfigPanel.Switch.StpPanel.PRIORITY_FIELD.selector,
+            priority_field = WebDriverWait(dialog, 10).until(
+                EC.presence_of_element_located(
+                    (By.CSS_SELECTOR, Location.Network.ConfigPanel.Switch.StpPanel.PRIORITY_FIELD.selector)
+                )
             )
             priority_field.clear()
             priority_field.send_keys(str(priority))
 
-            dialog.find_element(
-                By.CSS_SELECTOR,
-                Location.Network.ConfigPanel.Switch.StpPanel.SUBMIT_BUTTON.selector,
-            ).click()
+            submit_btn = WebDriverWait(dialog, 10).until(
+                EC.element_to_be_clickable(
+                    (By.CSS_SELECTOR, Location.Network.ConfigPanel.Switch.StpPanel.SUBMIT_BUTTON.selector)
+                )
+            )
+            submit_btn.click()
 
     def disable_stp(self):
         """Switch the FTP configuration toggle."""
         self.__check_config_open()
 
-        self.__selenium.find_element(
-            By.CSS_SELECTOR,
-            Location.Network.ConfigPanel.Switch.RSTP_BUTTON.selector,
-        ).click()
+        rstp_btn = WebDriverWait(self.__selenium, 10).until(
+            EC.element_to_be_clickable(
+                (By.CSS_SELECTOR, Location.Network.ConfigPanel.Switch.RSTP_BUTTON.selector)
+            )
+        )
+        rstp_btn.click()
 
         modal_el = (
             By.CSS_SELECTOR,
@@ -347,15 +419,19 @@ class NodeConfig:
         )
 
         with self.__selenium.run_in_modal_context(*modal_el) as dialog:
-            dialog.find_element(
-                By.CSS_SELECTOR,
-                Location.Network.ConfigPanel.Switch.StpPanel.OFF_STP_BUTTON.selector,
-            ).click()
+            off_stp_btn = WebDriverWait(dialog, 10).until(
+                EC.element_to_be_clickable(
+                    (By.CSS_SELECTOR, Location.Network.ConfigPanel.Switch.StpPanel.OFF_STP_BUTTON.selector)
+                )
+            )
+            off_stp_btn.click()
 
-            dialog.find_element(
-                By.CSS_SELECTOR,
-                Location.Network.ConfigPanel.Switch.StpPanel.SUBMIT_BUTTON.selector,
-            ).click()
+            submit_btn = WebDriverWait(dialog, 10).until(
+                EC.element_to_be_clickable(
+                    (By.CSS_SELECTOR, Location.Network.ConfigPanel.Switch.StpPanel.SUBMIT_BUTTON.selector)
+                )
+            )
+            submit_btn.click()
 
     def add_jobs(self, job_id: int, args: dict[str, str], by=By.CSS_SELECTOR):
         """Adds a job to the system using Selenium.
@@ -372,7 +448,9 @@ class NodeConfig:
 
         for job_field, job_value in args.items():
             try:
-                field_element = self.__selenium.find_element(by, job_field)
+                field_element = WebDriverWait(self.__selenium, 10).until(
+                    EC.presence_of_element_located((by, job_field))
+                )
 
                 if field_element.tag_name == "input":
                     field_element.clear()
@@ -400,8 +478,10 @@ class NodeConfig:
             self.__config_locator.DEFAULT_GATEWAY_FIELD
         ), f'Unable to change default gateway for this element: "{self.__config_locator}".'
 
-        gw_field = self.__selenium.find_element(
-            By.CSS_SELECTOR, self.__config_locator.DEFAULT_GATEWAY_FIELD.selector
+        gw_field = WebDriverWait(self.__selenium, 10).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, self.__config_locator.DEFAULT_GATEWAY_FIELD.selector)
+            )
         )
         gw_field.clear()
         gw_field.send_keys(ip)
@@ -414,8 +494,10 @@ class NodeConfig:
             self.__config_locator.NAME_FIELD
         ), f'Unable to change name for this element: "{self.__config_locator}".'
 
-        name_field = self.__selenium.find_element(
-            By.CSS_SELECTOR, self.__config_locator.NAME_FIELD.selector
+        name_field = WebDriverWait(self.__selenium, 10).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, self.__config_locator.NAME_FIELD.selector)
+            )
         )
         name_field.clear()
         name_field.send_keys(name)
@@ -428,8 +510,10 @@ class NodeConfig:
         """
         switch_name = self.name
 
-        vlan_config_button = self.__selenium.find_element(
-            By.CSS_SELECTOR, Location.Network.ConfigPanel.Switch.VLAN_BUTTON.selector
+        vlan_config_button = WebDriverWait(self.__selenium, 10).until(
+            EC.element_to_be_clickable(
+                (By.CSS_SELECTOR, Location.Network.ConfigPanel.Switch.VLAN_BUTTON.selector)
+            )
         )
         vlan_config_button.click()
 
@@ -441,11 +525,11 @@ class NodeConfig:
         )
 
         with self.__selenium.run_in_modal_context(*modal) as dialog:
-            switch_button = dialog.find_element(
-                By.CSS_SELECTOR,
-                Location.Network.ConfigPanel.Switch.VlanPanel.SWITCH_BUTTON.selector,
+            switch_button = WebDriverWait(dialog, 10).until(
+                EC.element_to_be_clickable(
+                    (By.CSS_SELECTOR, Location.Network.ConfigPanel.Switch.VlanPanel.SWITCH_BUTTON.selector)
+                )
             )
-
             switch_button.click()
 
             # Go through each row
@@ -484,9 +568,10 @@ class NodeConfig:
                 row_id += 1
 
             # Save new table
-            submit_button = dialog.find_element(
-                By.CSS_SELECTOR,
-                Location.Network.ConfigPanel.Switch.VlanPanel.SUBMIT_BUTTON.selector,
+            submit_button = WebDriverWait(dialog, 10).until(
+                EC.element_to_be_clickable(
+                    (By.CSS_SELECTOR, Location.Network.ConfigPanel.Switch.VlanPanel.SUBMIT_BUTTON.selector)
+                )
             )
             submit_button.click()
 
@@ -494,15 +579,17 @@ class NodeConfig:
         """Submit configuration."""
         self.__check_config_open()
 
-        self.__selenium.find_element(
-            By.CSS_SELECTOR, self.__config_locator.SUBMIT_BUTTON.selector
-        ).click()
+        submit_btn = WebDriverWait(self.__selenium, 10).until(
+            EC.element_to_be_clickable(
+                (By.CSS_SELECTOR, self.__config_locator.SUBMIT_BUTTON.selector)
+            )
+        )
+        submit_btn.click()
 
-        self.__selenium.wait_until_text(
-            By.CSS_SELECTOR,
-            self.__config_locator.SUBMIT_BUTTON.selector,
-            self.__config_locator.SUBMIT_BUTTON.text,
-            timeout=5,
+        WebDriverWait(self.__selenium, 10).until(
+            lambda driver: driver.find_element(
+                By.CSS_SELECTOR, self.__config_locator.SUBMIT_BUTTON.selector
+            ).text == self.__config_locator.SUBMIT_BUTTON.text
         )
 
     def __select_job(self, job_id, by):
@@ -552,15 +639,19 @@ class NodeConfig:
             self.__config_locator.MAIN_FORM
         ), f'Unable to open node config form for this element: "{self.__config_locator}".'
 
-        self.__selenium.wait_until_appear(
-            By.CSS_SELECTOR, self.__config_locator.MAIN_FORM.selector
+        WebDriverWait(self.__selenium, 10).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, self.__config_locator.MAIN_FORM.selector)
+            )
         )
 
     def __check_config_open(self):
         """Check that the config is open and handle any errors."""
         try:
-            self.__selenium.find_element(
-                By.CSS_SELECTOR, self.__config_locator.MAIN_FORM.selector
+            WebDriverWait(self.__selenium, 10).until(
+                EC.presence_of_element_located(
+                    (By.CSS_SELECTOR, self.__config_locator.MAIN_FORM.selector)
+                )
             )
         except NoSuchElementException:
             raise Exception("Config panel isn't open during some operation.")

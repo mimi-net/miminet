@@ -12,8 +12,7 @@ class TestAvailability:
     def test_auth(self, selenium: MiminetTester):
         """Checks if it possible to open home page (are we authorized or not)"""
         selenium.get(HOME_PAGE)
-
-        assert selenium.title == "Веб-эмулятор"
+        assert selenium.title in ["Веб-эмулятор", "Web-Emulator"]
 
     @pytest.mark.parametrize(
         "endpoint",

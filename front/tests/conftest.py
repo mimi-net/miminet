@@ -2,11 +2,11 @@ import pytest
 import requests
 import os
 import sys
-from typing import Generator
+from typing import Generator, Optional, List
 from requests import Session
 from contextlib import contextmanager
 from unittest.mock import MagicMock
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.options import Options
@@ -14,6 +14,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
 
 
 class testing_setting:
@@ -78,7 +79,6 @@ class MiminetTester(WebDriver):
             by (str): The locator strategy (e.g., By.ID, By.XPATH).
             element (str): The element locator (e.g., "myElementId", "//button[text()='Click Me']").
         """
-
         return len(self.find_elements(by, element)) > 0
 
     def wait_until_appear(self, by: str, element: str, timeout=20):
@@ -166,8 +166,8 @@ class MiminetTester(WebDriver):
 
         Args:
             logs_filter (function, optional): A function that takes a log entry as input
-                                            and returns True if the entry should be included.
-                                            Defaults to None, meaning all logs are returned.
+                and returns True if the entry should be included.
+                Defaults to None, meaning all logs are returned.
         Returns:
             list: list with the filtered log entries.
         """
@@ -186,6 +186,143 @@ class MiminetTester(WebDriver):
                 lambda log: log["source"] == "console-api" and log["level"] == "INFO"
             ),
         )
+
+    def find_language_dropdown(self, timeout: int = 10) -> Optional[WebElement]:
+        """
+        Finds the language dropdown element using multiple fallback strategies.
+        
+        This method tries several selectors to locate the language switcher,
+        which helps handle potential UI changes or timing issues.
+        
+        Args:
+            timeout (int): Maximum time in seconds to wait for the element.
+            
+        Returns:
+            WebElement: The language dropdown element if found, None otherwise.
+        """
+        # List of selectors to try, in order of preference
+        selectors: List[tuple] = [
+            # Primary selector (original)
+            (By.CSS_SELECTOR, 'a.nav-link.dropdown-toggle[data-bs-toggle="dropdown"]'),
+            # Alternative: by aria-label or title containing language text
+            (By.CSS_SELECTOR, 'a[aria-label*="Language"], a[title*="Language"], a[aria-label*="Язык"], a[title*="Язык"]'),
+            # Alternative: by data attribute
+            (By.CSS_SELECTOR, '[data-language-toggle], [data-bs-language], .language-selector'),
+            # Alternative: by common language icon classes
+            (By.CSS_SELECTOR, 'a[href*="lang"], a[href*="language"], .lang-switch, .language-switch'),
+            # Fallback: any element with language-related text
+            (By.XPATH, '//a[contains(text(), "EN") or contains(text(), "RU") or contains(text(), "Language") or contains(text(), "Язык")]'),
+        ]
+        
+        for by, selector in selectors:
+            try:
+                element = WebDriverWait(self, timeout).until(
+                    EC.element_to_be_clickable((by, selector))
+                )
+                if element.is_displayed() and element.size['width'] > 0:
+                    return element
+            except (TimeoutException, NoSuchElementException):
+                continue
+        
+        # If all selectors failed, try to find any clickable element in navbar that might be the dropdown
+        try:
+            navbar = self.find_element(By.CSS_SELECTOR, 'nav.navbar, .navbar-nav')
+            dropdowns = navbar.find_elements(By.CSS_SELECTOR, 'a.dropdown-toggle, [data-bs-toggle="dropdown"]')
+            for dropdown in dropdowns:
+                if dropdown.is_displayed() and dropdown.size['width'] > 0:
+                    # Check if it contains language-related content
+                    if any(keyword in dropdown.text.lower() or keyword in dropdown.get_attribute('class', '').lower() 
+                          for keyword in ['lang', 'язык', 'language', 'en', 'ru']):
+                        return dropdown
+        except (TimeoutException, NoSuchElementException):
+            pass
+            
+        return None
+
+    def switch_language(self, language_code: str, timeout: int = 10) -> bool:
+        """
+        Switches the interface language by clicking the language dropdown and selecting the desired language.
+        
+        Args:
+            language_code (str): Language code to switch to (e.g., 'en', 'ru', 'en-US', 'ru-RU').
+            timeout (int): Maximum time in seconds to wait for elements.
+            
+        Returns:
+            bool: True if language was successfully switched, False otherwise.
+        """
+        # Find the language dropdown
+        dropdown = self.find_language_dropdown(timeout)
+        if not dropdown:
+            return False
+        
+        # Click to open the dropdown
+        try:
+            dropdown.click()
+        except Exception:
+            # Try JavaScript click as fallback
+            self.execute_script("arguments[0].click();", dropdown)
+        
+        # Wait for dropdown menu to appear
+        try:
+            WebDriverWait(self, timeout).until(
+                EC.visibility_of_element_located((By.CSS_SELECTOR, '.dropdown-menu.show, .dropdown-menu[style*="display: block"]'))
+            )
+        except TimeoutException:
+            # Small delay for CSS transitions
+            import time
+            time.sleep(0.5)
+        
+        # Try to find and click the language option
+        language_selectors = [
+            (By.CSS_SELECTOR, f'.dropdown-item[data-lang="{language_code}"], .dropdown-item[data-language="{language_code}"]'),
+            (By.CSS_SELECTOR, f'a[href*="lang={language_code}"], a[href*="language={language_code}"]'),
+            (By.LINK_TEXT, language_code.upper()),
+            (By.XPATH, f'//a[contains(@class, "dropdown-item") and (contains(text(), "{language_code.upper()}") or contains(@href, "{language_code}"))]'),
+        ]
+        
+        for by, selector in language_selectors:
+            try:
+                lang_option = WebDriverWait(self, timeout).until(
+                    EC.element_to_be_clickable((by, selector))
+                )
+                lang_option.click()
+                return True
+            except (TimeoutException, NoSuchElementException):
+                continue
+        
+        return False
+
+    def get_current_language(self, timeout: int = 5) -> Optional[str]:
+        """
+        Detects the current interface language from the page.
+        
+        Args:
+            timeout (int): Maximum time in seconds to wait for the element.
+            
+        Returns:
+            str: Detected language code (e.g., 'en', 'ru') or None if not detected.
+        """
+        try:
+            # Try to get language from html lang attribute
+            html_lang = self.find_element(By.TAG_NAME, 'html').get_attribute('lang')
+            if html_lang:
+                return html_lang.split('-')[0].lower()
+        except:
+            pass
+        
+        try:
+            # Try to detect from language dropdown text
+            dropdown = self.find_language_dropdown(timeout)
+            if dropdown:
+                text = dropdown.text.strip().upper()
+                if 'RU' in text or 'РУС' in text:
+                    return 'ru'
+                elif 'EN' in text or 'ENG' in text:
+                    return 'en'
+        except:
+            pass
+        
+        return None
 
 
 @pytest.fixture(scope="session")
@@ -262,7 +399,6 @@ def selenium(chrome_driver: MiminetTester, requester: Session):
 
     # return configured chrome driver
     return chrome_driver
-
 
 # --- Unit Test Fixtures ---
 
