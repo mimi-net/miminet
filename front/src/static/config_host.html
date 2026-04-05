@@ -36,6 +36,7 @@
                 <option value="102">Добавить маршрут</option>
                 <option value="103">Добавить запись в ARP-cache</option>
                 <option value="108">Запросить IP адрес автоматически</option>
+                <option value="204">ARP spoofing / ARP cache poisoning</option>
             </select>
     </div>
 </script>
@@ -103,6 +104,28 @@
 <script id="config_host_add_dhclient" type="text/plain">
     <div class="form-group pt-1" name="config_host_select_input">
         <select id="config_host_add_dhclient_interface_select_iface_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_host_add_dhclient_interface_select_iface_field">
+        </select>
+    </div>
+</script>
+
+<script id="config_host_add_arp_spoof_script" type="text/plain">
+    <div class="form-group pt-1" name="config_host_select_input">
+        <div class="alert alert-warning py-3 px-3 mb-3 text-sm lh-sm">
+            <div class="mb-2"><strong>Целевой хост</strong>: узел, ARP-запросы которого будут перехватываться.</div>
+            <div class="mb-2"><strong>Узел для ответа</strong>: узел, от лица которого будет отправляться ARP-ответ.</div>
+            <div class="mb-0"><strong>Режим MITM</strong> пересылает трафик через этот узел. <strong>Режим только ответа</strong> отправляет поддельный ARP-ответ без дальнейшей пересылки трафика.</div>
+        </div>
+        <label for="config_host_add_arp_spoof_interface_select_field" class="text-sm">Интерфейс</label>
+        <select id="config_host_add_arp_spoof_interface_select_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_host_add_arp_spoof_interface_select_field">
+        </select>
+        <label for="config_host_add_arp_spoof_victim_ip_input_field" class="text-sm">Целевой хост</label>
+        <input type="text" class="form-control form-control-sm" id="config_host_add_arp_spoof_victim_ip_input_field" name="config_host_add_arp_spoof_victim_ip_input_field" value='' placeholder='IP целевого хоста'>
+        <label for="config_host_add_arp_spoof_target_ip_input_field" class="text-sm">Узел, от лица которого будет отправляться ответ</label>
+        <input type="text" class="form-control form-control-sm" id="config_host_add_arp_spoof_target_ip_input_field" name="config_host_add_arp_spoof_target_ip_input_field" value='' placeholder='IP узла'>
+        <label for="config_host_add_arp_spoof_mode_select_field" class="text-sm">Режим</label>
+        <select id="config_host_add_arp_spoof_mode_select_field" class="form-select form-select-sm" aria-label=".form-select-sm example" name="config_host_add_arp_spoof_mode_select_field">
+            <option value="mitm" selected>MITM с пересылкой трафика</option>
+            <option value="reply_only">Только поддельный ответ</option>
         </select>
     </div>
 </script>
