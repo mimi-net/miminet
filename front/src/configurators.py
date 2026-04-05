@@ -8,6 +8,8 @@ from typing import Callable, Optional
 import uuid
 import ipaddress
 
+ARP_SPOOF_JOB_ID = 204
+
 
 def get_data(arg: str):
     """Get data from user's request"""
@@ -144,11 +146,21 @@ class JobConfigurator:
 
         # insert arguments into label string
         command_label: str = self.__print_cmd
+        label_args = configured_args.copy()
+
+        if self.__job_id == ARP_SPOOF_JOB_ID and len(label_args) > 3:
+            if label_args[3] == "mitm":
+                label_args[3] = "ARP Spoofing MITM"
+            elif label_args[3] == "reply_only":
+                label_args[3] = "ARP Spoofing"
 
         for i, conf_arg in enumerate(configured_args):
             if conf_arg is None:  # check whether the arguments passed the checks
                 raise ArgCheckError(self.__args[i].error_msg)
-            command_label = command_label.replace(f"[{i}]", conf_arg)
+            label_arg = label_args[i]
+            if label_arg is None:
+                raise ArgCheckError(self.__args[i].error_msg)
+            command_label = command_label.replace(f"[{i}]", label_arg)
 
         response = {
             "id": random_id,
@@ -276,6 +288,14 @@ class AbstractDeviceConfigurator:
         job_id = int(job_id_str)
         if job_id not in self.__jobs.keys():
             return  # if user didn't select job
+
+        if (
+            job_id == ARP_SPOOF_JOB_ID
+            and self._device_node["config"].get("type") != "hacker"
+        ):
+            raise ConfigurationError(
+                'Команда "ARP spoofing / ARP cache poisoning" доступна только хосту-хакеру'
+            )
 
         editing_job_id = get_data("editing_job_id")
 

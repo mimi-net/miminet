@@ -8,6 +8,7 @@ from flask import jsonify, make_response, request, Response
 from flask_login import current_user, login_required
 from miminet_model import Network, Simulate, db
 from configurators import (
+    ARP_SPOOF_JOB_ID,
     HostConfigurator,
     SwitchConfigurator,
     HubConfigurator,
@@ -273,6 +274,27 @@ host_dhclient_job.add_param(
 ).add_check(emptiness_check).set_error_msg(
     'Не указан интерфейс для команды "Запросить IP адрес автоматически"'
 )
+
+# ARP spoofing / cache poisoning (for hacker host)
+host_arp_spoof_job = host.create_job(ARP_SPOOF_JOB_ID, "[3] -> [1]")
+host_arp_spoof_job.add_param(
+    "config_host_add_arp_spoof_interface_select_field"
+).add_check(emptiness_check).set_error_msg(
+    'Не указан интерфейс для команды "ARP spoofing / ARP cache poisoning"'
+)
+host_arp_spoof_job.add_param(
+    "config_host_add_arp_spoof_victim_ip_input_field"
+).add_check(IPv4_check).set_error_msg(
+    'Неверно указан IP целевого хоста для команды "ARP spoofing / ARP cache poisoning"'
+)
+host_arp_spoof_job.add_param(
+    "config_host_add_arp_spoof_target_ip_input_field"
+).add_check(IPv4_check).set_error_msg(
+    'Неверно указан IP узла, от лица которого отвечает хакер, для команды "ARP spoofing / ARP cache poisoning"'
+)
+host_arp_spoof_job.add_param("config_host_add_arp_spoof_mode_select_field").add_check(
+    emptiness_check
+).set_error_msg('Не выбран режим для команды "ARP spoofing / ARP cache poisoning"')
 
 # ~ ~ ~ ROUTER JOBS ~ ~ ~
 

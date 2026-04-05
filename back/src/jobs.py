@@ -1,12 +1,21 @@
 import re
 import shlex
 import ipaddress
+import sys
 import time
+from pathlib import Path
 from netaddr import EUI, AddrFormatError
 from typing import Any, Callable, List, Dict
 from network_schema import Job
 from mininet.log import info
 from ipmininet.host.config.dnsmasq import Dnsmasq
+
+
+ARP_SPOOFER_SCRIPT = shlex.quote(
+    str(Path(__file__).resolve().with_name("arp_spoofer.py"))
+)
+ARP_SPOOFER_PYTHON = shlex.quote(sys.executable)
+ARP_SPOOF_JOB_ID = 204
 
 
 def filter_arg_for_options(
@@ -216,6 +225,20 @@ def valid_sleep(time) -> bool:
     return True
 
 
+def arp_spoof_checker(interface: str, victim_ip: str, spoofed_ip: str) -> bool:
+    """Validate minimal ARP spoofing arguments."""
+    return (
+        valid_iface(interface)
+        and valid_ip(victim_ip)
+        and valid_ip(spoofed_ip)
+        and victim_ip != spoofed_ip
+    )
+
+
+def arp_spoof_mode_checker(mode: str) -> bool:
+    return mode in ("mitm", "reply_only", "")
+
+
 def link_down_handler(job: Job, job_host: Any) -> None:
     arg_interface = job.arg_1
     if not net_dev_checker(arg_interface):
@@ -422,6 +445,43 @@ def arp_handler(job: Job, job_host: Any) -> None:
     job_host.cmd(f"arp -s {arg_ip} {arg_mac}")
 
 
+def arp_spoof_handler(job: Job, job_host: Any) -> None:
+    """Start an ARP responder that sends forged replies to matching ARP requests."""
+    arg_hacker_iface = job.arg_1
+    arg_victim_ip = job.arg_2
+    arg_spoofed_ip = job.arg_3
+    arg_mode = job.arg_4 if isinstance(job.arg_4, str) and job.arg_4 else "mitm"
+
+    if not arp_spoof_checker(arg_hacker_iface, arg_victim_ip, arg_spoofed_ip):
+        return
+    if not arp_spoof_mode_checker(arg_mode):
+        return
+
+    if arg_mode == "mitm":
+        job_host.cmd("sysctl -w net.ipv4.ip_forward=1")
+        job_host.cmd("sysctl -w net.ipv4.conf.all.send_redirects=0")
+        job_host.cmd("sysctl -w net.ipv4.conf.default.send_redirects=0")
+        job_host.cmd(f"sysctl -w net.ipv4.conf.{arg_hacker_iface}.send_redirects=0")
+        job_host.cmd("sysctl -w net.ipv4.conf.all.rp_filter=0")
+        job_host.cmd(f"sysctl -w net.ipv4.conf.{arg_hacker_iface}.rp_filter=0")
+        job_host.cmd(
+            f"iptables -t nat -A POSTROUTING -o {arg_hacker_iface} -j MASQUERADE"
+        )
+        job_host.cmd("iptables -P FORWARD ACCEPT")
+    else:
+        job_host.cmd("sysctl -w net.ipv4.ip_forward=0")
+
+    job_host.cmd(
+        f"nohup {ARP_SPOOFER_PYTHON} -u {ARP_SPOOFER_SCRIPT} "
+        f"--iface {arg_hacker_iface} "
+        f"--victim-ip {arg_victim_ip} "
+        f"--spoofed-ip {arg_spoofed_ip} "
+        f"--mode {arg_mode} "
+        "> /dev/null 2>&1 < /dev/null &"
+    )
+    time.sleep(1.0)
+
+
 def subinterface_with_vlan(job: Job, job_host: Any) -> None:
     """Method for adding subinterface with vlan"""
     arg_intf = job.arg_1
@@ -557,6 +617,7 @@ class Jobs:
             101: iptables_handler,
             102: ip_route_add_handler,
             103: arp_handler,
+            ARP_SPOOF_JOB_ID: arp_spoof_handler,
             104: subinterface_with_vlan,
             105: add_ipip_interface,
             106: add_gre,

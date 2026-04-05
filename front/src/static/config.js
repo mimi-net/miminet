@@ -690,6 +690,11 @@ const ConfigHostJobOnChange = function (evnt) {
             FillDeviceSelectIntf('#config_host_add_dhclient_interface_select_iface_field', '#host_id', "Выберите линк", false)
             break;
 
+        case '204':
+            UpdateHostForm('config_host_add_arp_spoof_script');
+            FillDeviceSelectIntf('#config_host_add_arp_spoof_interface_select_field', '#host_id', "Выберите линк", false)
+            break;
+
         case '0':
             $('div[name="config_host_select_input"]').remove();
             break;
@@ -710,6 +715,15 @@ const ConfigHostJob = function (host_jobs, shared = 0) {
     }
 
     $(elem).insertBefore(host_id);
+
+    const hostNode = nodes.find(n => n.data.id === host_id.value);
+    if (!hostNode || hostNode.config.type !== 'hacker') {
+        $('#config_host_job_select_field option[value="204"]').remove();
+    } else {
+        $('#config_host_job_select_field option[value="2"]').remove();
+        $('#config_host_job_select_field option[value="3"]').remove();
+        $('#config_host_job_select_field option[value="4"]').remove();
+    }
 
     // Set onchange
     document.getElementById('config_host_job_select_field').addEventListener('change', ConfigHostJobOnChange);
@@ -1316,6 +1330,13 @@ const EditJobInHost = function(host_id, job_id, network_guid) {
                     break;
                 case '108': // Запросить IP адрес автоматически
                     // No parameters needed - DHCP client request
+                    break;
+                case '204': // ARP spoofing / ARP cache poisoning
+                    FillDeviceSelectIntf('#config_host_add_arp_spoof_interface_select_field', '#host_id', "Выберите линк", false);
+                    $('#config_host_add_arp_spoof_interface_select_field').val(job.arg_1 || '');
+                    $('#config_host_add_arp_spoof_victim_ip_input_field').val(job.arg_2 || '');
+                    $('#config_host_add_arp_spoof_target_ip_input_field').val(job.arg_3 || '');
+                    $('#config_host_add_arp_spoof_mode_select_field').val(job.arg_4 || 'mitm');
                     break;
             }
         }, 200);
