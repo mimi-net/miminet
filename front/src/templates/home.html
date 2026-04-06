@@ -15,6 +15,15 @@
                 </div>
             </div>
 
+            <div class="card mb-3 px-1" style="max-width: 18rem; height: 18rem; border: 2px dashed #6c757d; background: #f8f9fa; cursor: pointer;"
+                 data-bs-toggle="modal" data-bs-target="#aiGenerateModal">
+                <div class="card-body d-flex flex-column justify-content-center align-items-center gap-2">
+                    <span style="font-size: 1.6rem;">✨</span>
+                    <h6 class="text-secondary mb-0 text-center">Задача от ИИ</h6>
+                    <small class="text-muted text-center">выбрать устройства</small>
+                </div>
+            </div>
+
             {% for net in networks %}
             <div class="card mb-3 px-1 hover-overlay ripple shadow-1-strong rounded" style="max-width: 18rem; height: 18rem; border: none;">
                 <img src="{{ url_for('static', filename='/images/preview/' + net.preview_uri) }}" class="card-img-top" alt="{{ net.title }}">
@@ -28,5 +37,83 @@
         </div>
     </div>
 </section>
+
+<!-- Modal -->
+<div class="modal fade" id="aiGenerateModal" tabindex="-1" aria-labelledby="aiGenerateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="aiGenerateModalLabel">✨ Генерация задачи</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small mb-3">Выберите технологии — ИИ сам подберёт устройства и сгенерирует условие.</p>
+
+                <label class="form-label fw-semibold">Технологии</label>
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    <input type="checkbox" class="btn-check" id="tech-routing" value="routing" checked>
+                    <label class="btn btn-sm btn-outline-primary" for="tech-routing">Статическая маршрутизация</label>
+
+                    <input type="checkbox" class="btn-check" id="tech-vlan" value="vlan">
+                    <label class="btn btn-sm btn-outline-primary" for="tech-vlan">VLAN</label>
+
+                    <input type="checkbox" class="btn-check" id="tech-dhcp" value="dhcp">
+                    <label class="btn btn-sm btn-outline-primary" for="tech-dhcp">DHCP</label>
+
+                    <input type="checkbox" class="btn-check" id="tech-stp" value="stp">
+                    <label class="btn btn-sm btn-outline-primary" for="tech-stp">STP/RSTP</label>
+
+                    <input type="checkbox" class="btn-check" id="tech-nat" value="nat">
+                    <label class="btn btn-sm btn-outline-primary" for="tech-nat">NAT</label>
+                </div>
+
+                <label class="form-label fw-semibold">Сложность</label>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="text-muted small">Легко</span>
+                    <input type="range" class="form-range flex-grow-1" id="difficulty-range" min="1" max="3" value="1" step="1">
+                    <span class="text-muted small">Сложно</span>
+                    <span class="badge bg-primary ms-1" id="difficulty-badge">1</span>
+                </div>
+                <small class="text-muted" id="difficulty-hint">Минимальная топология для выбранных технологий</small>
+            </div>
+            <div class="modal-footer">
+                <small class="text-danger me-auto" id="ai-modal-status"></small>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="ai-generate-btn" onclick="generateAiTask()">Сгенерировать</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const difficultyHints = {
+    1: "Минимальная топология для выбранных технологий",
+    2: "Средняя: больше устройств, несколько подсетей",
+    3: "Сложная: цепочки роутеров, максимум устройств"
+};
+
+document.getElementById("difficulty-range").addEventListener("input", function() {
+    const v = this.value;
+    document.getElementById("difficulty-badge").textContent = v;
+    document.getElementById("difficulty-hint").textContent = difficultyHints[v];
+});
+
+function generateAiTask() {
+    const techs = [...document.querySelectorAll(".btn-check:checked")].map(el => el.value);
+    if (techs.length === 0) {
+        document.getElementById("ai-modal-status").textContent = "Выберите хотя бы одну технологию";
+        return;
+    }
+
+    const difficulty = document.getElementById("difficulty-range").value;
+    const btn = document.getElementById("ai-generate-btn");
+    btn.disabled = true;
+    document.getElementById("ai-modal-status").textContent = "";
+
+    const params = new URLSearchParams({ difficulty });
+    techs.forEach(t => params.append("tech", t));
+    window.location.href = "/ai/generate-task?" + params.toString();
+}
+</script>
 
 {% endblock %}

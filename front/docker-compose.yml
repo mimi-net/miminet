@@ -98,6 +98,8 @@ networks:
   miminet_network:
     name: miminet_network
     driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: "1450"
     ipam:
       config:
         - subnet: 172.18.0.0/16

@@ -144,6 +144,14 @@
             <small id="NetworkPlayerLabel" class="d-flex justify-content-center text-muted text-center">Ожидание 10-30 сек.</small>
         </div>
 
+        {% if network.description %}
+        <div class="ws-name-case position-absolute bottom-0 start-50 translate-middle-x" style="margin-bottom: 17px; z-index: 10;">
+            <div class="practice-question-text" style="max-height: 125px; overflow-y: auto; padding: 8px 12px; border-radius: 6px; background: rgba(255,255,255,0.9); max-width: 600px; text-align: center;">
+                <div class="text-black m-0" style="font-size: 16px;">{{ network.description }}</div>
+            </div>
+        </div>
+        {% endif %}
+
         <a href="https://t.me/MimiNetCommunity" target="_blank" class="position-absolute bottom-0 end-0 ws-ask-link" style="z-index: 10;">
             <div id="NetworkRunButtonHelpLabel" class="ws-ask-button">
                 <img src="{{ url_for('static', filename='/images/tg_logo.png') }}" width="24" style="margin-right: 8px;"/>Задать вопрос
