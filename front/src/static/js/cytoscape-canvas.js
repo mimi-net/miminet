@@ -46,7 +46,7 @@
 
 			canvas.setAttribute(
 				"style",
-				`position:absolute; top:0; left:0; z-index:${options.zIndex};`,
+				`position:absolute; top:0; left:0; z-index:${options.zIndex}; pointer-events:none;`,
 			);
 
 			resize();

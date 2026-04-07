@@ -79,7 +79,7 @@
     </div>
   </div>
   <script>
-    var data = '{{pcap_data}}';
+    var data = {{pcap_data | tojson}};
   </script>
   <script src="{{url_for('static',filename='shark_script.js')}}"></script>
 

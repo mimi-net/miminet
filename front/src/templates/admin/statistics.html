@@ -1,0 +1,258 @@
+{% extends 'admin/master.html' %}
+
+{% block body %}
+<style>
+    .admin-stats {
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 30px 18px 48px;
+        color: #202733;
+    }
+
+    .admin-stats__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 22px;
+    }
+
+    .admin-stats__title {
+        margin: 0;
+        font-size: 34px;
+        font-weight: 700;
+        line-height: 1.15;
+        color: #18202c;
+    }
+
+    .admin-stats__subtitle {
+        margin: 10px 0 0;
+        color: #6b7280;
+        font-size: 14px;
+        line-height: 1.55;
+        max-width: 860px;
+    }
+
+
+    .admin-stats__table-wrap {
+        border: 1px solid #d9e2ed;
+        border-radius: 14px;
+        background: #ffffff;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+        overflow-x: auto;
+    }
+
+    .admin-stats__table {
+        width: 100%;
+        min-width: 1080px;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .admin-stats__table thead th,
+    .admin-stats__table tbody td {
+        border-right: 1px solid #dfe6f0;
+    }
+
+    .admin-stats__table thead th:last-child,
+    .admin-stats__table tbody td:last-child {
+        border-right: none;
+    }
+
+    .admin-stats__table thead th {
+        background: #f7fafc;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 700;
+        text-align: center;
+        padding: 10px 8px;
+    }
+
+    .admin-stats__table thead tr:first-child th {
+        border-bottom: 1px solid #dfe6f0;
+        vertical-align: middle;
+        min-height: 54px;
+    }
+
+    .admin-stats__table thead tr:last-child th {
+        border-bottom: 1px solid #dfe6f0;
+        background: #fbfdff;
+        color: #3f4f66;
+        font-size: 12px;
+        font-weight: 700;
+        min-height: 44px;
+    }
+
+    .admin-stats__table tbody td {
+        border-bottom: 1px solid #edf1f6;
+        color: #1f2937;
+        font-size: 14px;
+        text-align: center;
+        padding: 10px 8px;
+    }
+
+    .admin-stats__table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .admin-stats__table th:first-child,
+    .admin-stats__table td:first-child {
+        width: 52px;
+    }
+
+    .admin-stats__table th:nth-child(2),
+    .admin-stats__table td:nth-child(2) {
+        width: 220px;
+        text-align: left;
+    }
+
+    .admin-stats__table th:nth-child(3),
+    .admin-stats__table td:nth-child(3) {
+        width: 90px;
+    }
+
+    .admin-stats__test-head {
+        color: #2f5ecf;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.25;
+        word-break: break-word;
+    }
+
+    .admin-stats__section-head {
+        color: #42618c;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.2;
+        word-break: break-word;
+    }
+
+    .admin-stats__user {
+        color: #111827;
+        font-weight: 600;
+    }
+
+    .admin-stats__user-link {
+        color: #3558d5;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .admin-stats__user-link:hover,
+    .admin-stats__user-link:focus {
+        color: #2447c8;
+        text-decoration: underline;
+    }
+
+    .admin-stats__score-link {
+        color: #3558d5;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .admin-stats__score-link:hover,
+    .admin-stats__score-link:focus {
+        color: #2447c8;
+        text-decoration: underline;
+    }
+
+    .admin-stats__empty-cell {
+        color: #9aa3b2;
+    }
+
+    .admin-stats__empty {
+        padding: 32px 24px;
+        border-radius: 14px;
+        border: 1px dashed #d9e1ea;
+        background: #fbfcfe;
+        color: #667085;
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 900px) {
+        .admin-stats__header {
+            flex-direction: column;
+        }
+
+    }
+</style>
+
+<div class="admin-stats">
+    <div class="admin-stats__header">
+        <div>
+            <h1 class="admin-stats__title">Статистика по разделам</h1>
+            <p class="admin-stats__subtitle">
+                Сверху указаны тесты, ниже их разделы. Нажмите на результат,
+                чтобы открыть попытку.
+            </p>
+        </div>
+    </div>
+
+    {% if section_columns and user_rows %}
+        <div class="admin-stats__table-wrap">
+            <table class="admin-stats__table">
+                <thead>
+                    <tr>
+                        <th rowspan="2">№</th>
+                        <th rowspan="2">Пользователь</th>
+                        <th rowspan="2">Итог</th>
+                        {% for group in test_groups %}
+                            <th colspan="{{ group.colspan }}" class="admin-stats__test-head">
+                                {{ group.test_name }}
+                            </th>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        {% for section in section_columns %}
+                            <th class="admin-stats__section-head">{{ section.section_name }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in user_rows %}
+                        <tr>
+                            <td>{{ row.position }}</td>
+                            <td class="admin-stats__user">
+                                {% if row.can_open_profile %}
+                                    <a
+                                        href="{{ url_for('user_profile_view', user_id=row.user_id) }}"
+                                        class="admin-stats__user-link"
+                                    >
+                                        {{ row.user_name }}
+                                    </a>
+                                {% else %}
+                                    <span>{{ row.user_name }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ row.total_score }}</td>
+                            {% for cell in row.cells %}
+                                <td>
+                                    {% if cell.has_result %}
+                                        <a
+                                            href="{{ url_for('get_result_by_session_guid_endpoint', guid=cell.guid) }}"
+                                            class="admin-stats__score-link"
+                                        >
+                                            {{ cell.score }}/{{ cell.max_score }}
+                                        </a>
+                                    {% else %}
+                                        <span class="admin-stats__empty-cell">—</span>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% elif section_columns %}
+        <div class="admin-stats__empty">
+            По вашим разделам пока нет завершенных прохождений.
+        </div>
+    {% else %}
+        <div class="admin-stats__empty">
+            Пока нет разделов для отображения статистики.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -21,16 +21,16 @@
         <nav class="navbar">
             {% if current_user.is_authenticated %}
                 <a href="/">
-                    <img src="{{ url_for('static', filename='/images/logo.png') }}" class="position-absolute start-0 top-0" width="170" style="margin: 17px;" alt="Miminet">
+                    <img src="{{ url_for('static', filename='/images/logo.png') }}" class="position-absolute start-0 top-0" width="170" style="margin: 17px; z-index: 10;" alt="Miminet">
                 </a>
-                <div class="ws-name-case position-absolute top-0 start-50 translate-middle-x" style="margin-top: 17px;">
+                <div class="ws-name-case position-absolute top-0 start-50 translate-middle-x" style="margin-top: 17px; z-index: 10;">
                      {% if request.path != url_for('web_network_shared') %}
                         <a class="d-inline nav-link" href="{{ url_for('home') }}">Мои сети</a>
                         <a class="d-inline nav-link" href="#"> / </a>
                      {% endif %}
                         <a class="d-inline nav-link" id="network_title_head" href="{{ url_for('web_network', guid=network.guid) }}">{{ network.title }}</a>
                 </div>
-                <div class="d-flex position-absolute end-0 top-0" style="margin: 17px;">
+                <div class="d-flex position-absolute end-0 top-0" style="margin: 17px; z-index: 10;">
                      <a class="ws-settings-button"
                         href="#netConfigModal"
                         data-bs-toggle="modal"
@@ -54,7 +54,7 @@
                         style="margin-left: 16px; cursor: pointer;">
                      </a>
                 </div>
-                <div class="form-check pe-lg-1 position-absolute end-0 top-0" style="margin: 17px;">
+                 <div class="form-check pe-lg-1 position-absolute end-0 top-0" style="margin: 17px; z-index: 10;">
                     <a class="btn btn-success btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" id="share-network" title="Сеть доступна по URL" onclick="urlCopyButton()">
                         <i class='bx bx-share-alt fs-4 mx-1' ></i>
                     </a>
@@ -65,20 +65,20 @@
                 </div>
             {% else %}
                  <a href="/">
-                    <img src="{{ url_for('static', filename='/images/logo.png') }}" class="position-absolute start-0 top-0" width="170" style="margin: 17px;" alt="Miminet">
+                    <img src="{{ url_for('static', filename='/images/logo.png') }}" class="position-absolute start-0 top-0" width="170" style="margin: 17px; z-index: 10;" alt="Miminet">
                 </a>
-                <div class="ws-name-case position-absolute top-0 start-50 translate-middle-x" style="margin-top: 17px;">
+                <div class="ws-name-case position-absolute top-0 start-50 translate-middle-x" style="margin-top: 17px; z-index: 10;">
                      <a class="nav-link" id="network_title_head" href="#">
                         {{ network.title }}
                      </a>
                 </div>
-                <a href="{{ url_for('login_index') }}" class="position-absolute end-0 top-0 btn btn-outline-primary ws-shadow" style="margin: 17px;">
+                <a href="{{ url_for('login_index') }}" class="position-absolute end-0 top-0 btn btn-outline-primary ws-shadow" style="margin: 17px; z-index: 10;">
                     <i class="bx fs-5 lh-1 me-1"></i>Вход
                 </a>
             {% endif %}
         </nav>
 
-        <div id="side_menu" class="position-absolute start-0 top-0" style="margin-left: 17px; margin-top: 100px;">
+        <div id="side_menu" class="position-absolute start-0 top-0" style="margin-left: 17px; margin-top: 100px; z-index: 10;">
             <div class="ws-menu-devices-name">Устройства</div>
             <div class="ws-menu-devices">
                 <div id="l2_switch_device" style="margin-top: 6px; margin-bottom: 6px;">
@@ -121,7 +121,7 @@
             </div>
         </div>
 
-        <div class="position-absolute end-0 top-0" style="margin-right: 17px; margin-top: 100px; pointer-events: none;">
+        <div class="position-absolute end-0 top-0" style="margin-right: 17px; margin-top: 100px; pointer-events: none; z-index: 10;">
             <div class="ws-menu-settings-name" style="pointer-events: all;">Настройки</div>
             <div id="config_content" class="ws-menu-settings overflow-auto" style="pointer-events: all;">
                 <span>Тут будут настройки устройств. Выделите любое на схеме.</span>
@@ -130,7 +130,7 @@
             </div>
         </div>
 
-        <div class="position-absolute start-0 bottom-0" style="margin: 17px; font-weight: 500;">
+        <div class="position-absolute start-0 bottom-0" style="margin: 17px; font-weight: 500; z-index: 10;">
             <div class="d-flex justify-content-center ws-shadow" id="NetworkPlayer">
                 <button type="button" class="btn btn-primary w-100" id="NetworkRunButton" disabled>Проверка эмуляции</button>
             </div>
@@ -143,7 +143,7 @@
             <small id="NetworkPlayerLabel" class="d-flex justify-content-center text-muted text-center">Ожидание 10-30 сек.</small>
         </div>
 
-        <a href="https://t.me/MimiNetCommunity" target="_blank" class="position-absolute bottom-0 end-0 ws-ask-link">
+        <a href="https://t.me/MimiNetCommunity" target="_blank" class="position-absolute bottom-0 end-0 ws-ask-link" style="z-index: 10;">
             <div id="NetworkRunButtonHelpLabel" class="ws-ask-button">
                 <img src="{{ url_for('static', filename='/images/tg_logo.png') }}" width="24" style="margin-right: 8px;"/>Задать вопрос
             </div>
