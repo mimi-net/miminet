@@ -5,7 +5,7 @@ import os
 
 from flask import session
 
-import lti.lti_provider as lti
+import lti_provider.controller as lti
 from quiz.facade.json_schema_validation import validate_requirements
 
 from miminet_model import db, User, Network
@@ -103,6 +103,9 @@ def create_single_question(section_id: str, question_dict, user: User):
         question_network.pop("pcap", None)
 
         net.network = json.dumps(question_network)
+        net.author_id = 0
+        net.title = question_dict["text"]
+        net.description = question_dict["description"]
 
         db.session.add(net)
         db.session.commit()
@@ -164,6 +167,7 @@ def create_question(section_id: str, question_data, user: User):
             return None, None, 403
     else:
         section = Section()
+        section.timer = question_data["timer"]
         section.name = question_data["text"]
         section.description = question_data["description"]
         section.max_score = question_data["max_score"]

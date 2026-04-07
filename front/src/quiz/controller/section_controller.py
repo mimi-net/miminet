@@ -36,7 +36,6 @@ def create_section_endpoint():
 
 @login_required
 def get_section_endpoint(section):
-    finish_old_sessions(current_user)
     session = start_session(section, current_user)
     return redirect(url_for('get_question_by_session_question_id_endpoint', question_id=session[1][-1]))
 

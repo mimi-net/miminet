@@ -11,4 +11,4 @@ back/rabbitmq/rabbitmq/
 *.log
 *.ini
 front/rabbitmq/rabbitmq
-front/src/lti/config/
+front/src/lti/config/keys

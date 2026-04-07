@@ -47,7 +47,7 @@ class BaseActionHandler(ABC):
             db.session.add(platform_user)
             db.session.commit()
         
-        login_user(platform_user)
+        login_user(platform_user, remember=True)
         return platform_user
     
     @abstractmethod

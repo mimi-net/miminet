@@ -316,7 +316,7 @@ async function answerQuestion() {
         
         setTimeout(() => {
             window.location.href = returnToLtiPlatformUrl;
-        }, 500);
+        }, 1000);
         
         return;
     }
@@ -386,10 +386,6 @@ function handleUnload(e) {
     finishQuiz();
 }
 
-setTimeout(() => {
-    window.addEventListener('beforeunload', handleUnload);
-}, 1000);
-
 // Markdown convert
 let questionText = document.querySelector('div[id="question_text"]')?.innerHTML;
 const converter = new showdown.Converter();
@@ -444,6 +440,7 @@ const questionIndex = parseInt(sessionStorage.getItem('question_index'));
 const isLastQuestion = questionIndex + 1 >= questionsCount;
 const returnToLtiPlatformUrl = sessionStorage.getItem('returnToLtiPlatformUrl');
 
+
 if (timer !== null && parseInt(timer) !== 0) {
     setInterval(updateTimer, 1000);
 
@@ -453,6 +450,10 @@ if (timer !== null && parseInt(timer) !== 0) {
     if (questionIndex === 0 && sessionStorage.getItem('quizStartTime') == null) {
         sessionStorage.setItem('quizStartTime', new Date().getTime().toString());
     }
+
+    setTimeout(() => {
+        window.addEventListener('beforeunload', handleUnload);
+    }, 1000);
 }
 
 // Add event listener for finishQuiz and nextQuestion buttons

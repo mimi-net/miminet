@@ -1,0 +1,22 @@
+{
+    "https://lti-ri.imsglobal.org": [{
+        "default": true,
+        "client_id": "343411",
+        "auth_login_url": "https://lti-ri.imsglobal.org/platforms/4477/authorizations/new",
+        "auth_token_url": "https://lti-ri.imsglobal.org/platforms/4477/access_tokens",
+        "key_set_url": "https://lti-ri.imsglobal.org/platforms/4477/platform_keys/4105.json",
+        "private_key_file": "./keys/private.key",
+        "public_key_file": "./keys/public.key",
+        "deployment_ids": ["1"]
+    }],
+    "http://localhost:3000": [{
+        "default": true,
+        "client_id": "8ccb3be8-31a5-11f1-9c0e-8f710097e716",
+        "auth_login_url": "http://localhost:3000/lti/authorize",
+        "auth_token_url": "http://host.docker.internal:8086/api/v1/lti/access-token",
+        "key_set_url": "http://host.docker.internal:8086/api/v1/lti/jwks",
+        "private_key_file": "./keys/private.key",
+        "public_key_file": "./keys/public.key",
+        "deployment_ids": ["1"]
+    }]
+}

@@ -18,7 +18,7 @@ from quiz.util.dto import (
     calculate_max_score,
 )
 
-import lti.lti_provider as lti
+import lti_provider.controller as lti
 from flask import session
 from quiz.service.network_upload_service import prepare_task
 

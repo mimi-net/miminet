@@ -464,6 +464,7 @@ $(document).ready(function() {
         const sectionId = $('#section_id').val();
         
         const questionData = {
+            timer: 0,
             text: $('#question_title').val(),
             question_type: "practice",
             description: $('#question_description').val(),
@@ -492,10 +493,14 @@ $(document).ready(function() {
             },
             success: function(response) {
                 if (is_lti) {
-                    // Полностью заменяем содержимое текущего окна
-                    document.open();
-                    document.write(response);
-                    document.close();
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = response;
+                    document.body.appendChild(tempDiv);
+                    
+                    const form = tempDiv.querySelector('form');
+                    if (form) {
+                        form.submit();
+                    }
                 } else {
                     if (response.section_id) {
                         window.location.href = '/quiz/sections/' + response.section_id;

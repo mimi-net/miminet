@@ -36,7 +36,7 @@ from miminet_auth import (
     lti_login,
     lti_callback
 )
-import lti.lti_provider as lti
+import lti_provider.controller as lti
 from miminet_config import SECRET_KEY
 from miminet_host import (
     delete_job,
@@ -99,7 +99,7 @@ from quiz.entity.entity import (
     SessionQuestion,
 )
 
-from lti.lti_provider import get_jwks, cache
+from lti_provider.controller import get_jwks, cache
 
 from quiz.controller.image_controller import image_routes
 

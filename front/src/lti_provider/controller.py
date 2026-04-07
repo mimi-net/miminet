@@ -5,11 +5,11 @@ from flask import jsonify, session
 from flask_caching import Cache
 from pylti1p3.contrib.flask import FlaskOIDCLogin, FlaskRequest, FlaskCacheDataStorage
 from pylti1p3.tool_config import ToolConfJsonFile
-from lti.lti_actions.base import ExtendedFlaskMessageLaunch
+from lti_provider.lti_actions.base import ExtendedFlaskMessageLaunch
 
-from lti.lti_actions.factory import ActionHandlerFactory, ActionResultSenderFactory
+from lti_provider.lti_actions.factory import ActionHandlerFactory, ActionResultSenderFactory
 
-cache = Cache() 
+cache = Cache()
 
 def login():
     tool_conf = ToolConfJsonFile(get_lti_config_path())
