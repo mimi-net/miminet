@@ -28,7 +28,7 @@
                                     <i class="bx bx-star text-warning"></i>
                                 {% endif %}
                             {% endif %}
-                            <span class="markdown-content">{{ q.question_text }}</span>
+                            <span class="markdown-content" data-markdown="{{ q.question_text | e }}"></span>
                         </h5>
 
                         {% if q.question_type == 'practice' %}
