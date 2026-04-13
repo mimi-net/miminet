@@ -12,6 +12,8 @@ let packetFilterState = {
     hideSYN: false,
 };
 
+const LINK_DOWN_JOB_ID = 6;
+
 let gridCanvasLayer = undefined;
 let gridEnabled = true;
 let currentGridZoom = 1.0;
@@ -742,13 +744,8 @@ const MoveNodes = function(){
 const prepareStylesheet = function() {
     const getColor = function(ele) {
         if (ele.group() === "edges") {
-            const loss = ele.data('loss_percentage');
             const dup = ele.data('duplicate_percentage');
-            if (loss > 0 && dup > 0) {
-                return '#000000';
-            } else if (loss > 0) {
-                return '#FF8C00';
-            } else if (dup > 0) {
+            if (dup > 0) {
                 return '#26AE31';
             }
         }
@@ -758,7 +755,23 @@ const prepareStylesheet = function() {
       return ele.data('label') || '';
     };
     const getLineStyle = function(ele) {
+      if (ele.group() === "edges") {
+        const loss = ele.data('loss_percentage');
+        if (loss > 0) {
+          return 'dashed';
+        }
+      }
       return ele.data('line') || 'solid';
+    };
+    const getLineDashPattern = function(ele) {
+      if (ele.group() === "edges") {
+        const loss = ele.data('loss_percentage');
+        if (loss > 0) {
+          const gap = 2 + Math.round((loss / 100) * 18);
+          return [6, gap];
+        }
+      }
+      return [6, 0];
     };
     const getCurveStyle = function(ele) {
       return ele.data('style') || 'bezier';
@@ -864,6 +877,7 @@ const prepareStylesheet = function() {
           'curve-style': getCurveStyle,
           'label': getEdgeLabel,
           'line-style': getLineStyle,
+          'line-dash-pattern': getLineDashPattern,
           'color': '#000',
           'text-outline-color': '#FFF',
           'text-outline-width': 1,
@@ -938,6 +952,18 @@ const prepareStylesheet = function() {
         .selector('.eh-ghost-edge.eh-preview-active')
         .css({
             'opacity': 0
+        })
+
+        .selector('edge.link-down')
+        .css({
+            'line-color': '#E8A838',
+        })
+
+        .selector('edge.link-down-active')
+        .css({
+            'line-color': '#999',
+            'opacity': 0.5,
+            'width': 1,
         });
 
     const appendIconClass = function(stylesheet, cssClass) {
@@ -998,6 +1024,31 @@ const SnapNodesToGrid = function(cy_instance) {
     }
 }
 
+const FindEdgeIdByJob = function(job) {
+    const node = nodes.find(n => n.data.id === job.host_id);
+    if (!node || !Array.isArray(node.interface)) return null;
+    const iface = node.interface.find(i => i.id === job.arg_1);
+    return iface?.connect || null;
+};
+
+const MarkLinkDownEdges = function(cy_instance) {
+    if (!cy_instance) return;
+
+    cy_instance.edges('.link-down, .link-down-active')
+        .removeClass('link-down')
+        .removeClass('link-down-active')
+        .removeStyle();
+
+    jobs.forEach(function(j) {
+        if (j.job_id == LINK_DOWN_JOB_ID) {
+            const edgeId = FindEdgeIdByJob(j);
+            if (edgeId) {
+                cy_instance.edges('[id="' + edgeId + '"]').addClass('link-down');
+            }
+        }
+    });
+};
+
 const DrawGraph = function() {
 
     // Do we already have one?
@@ -1012,6 +1063,7 @@ const DrawGraph = function() {
         cy.autounselectify(true);
         cy.add(nodes);
         cy.add(edges);
+        MarkLinkDownEdges(cy);
         cy.nodes().grabify();
         global_eh.enable();
         return;
@@ -1061,6 +1113,9 @@ const DrawGraph = function() {
 
     cy.add(nodes);
     cy.add(edges);
+
+    // Mark edges that have a link-down job configured
+    MarkLinkDownEdges(cy);
 
     // Auto-snap existing network nodes on load
     SnapNodesToGrid(cy);
@@ -1310,11 +1365,12 @@ const DrawGraphStatic = function(nodes, edges, shared=0) {
     cy.autounselectify(false);
     cy.add(nodes);
     cy.add(edges);
+    MarkLinkDownEdges(cy);
     cy.nodes().ungrabify();
-    
+
     // Initialize grid
     initGrid(cy);
-    
+
     return;
 }
 
@@ -1350,6 +1406,7 @@ const DrawSharedGraph = function(nodes, edges) {
 
     cy.add(nodes);
     cy.add(edges);
+    MarkLinkDownEdges(cy);
 
     // Click on object
     cy.on('click', function (evt) {
@@ -1381,15 +1438,15 @@ const DrawSharedGraph = function(nodes, edges) {
         selected_edge_id = 0;
 
         if (n.config.type === 'host'){
-            ShowHostConfig(n, shared=1);
+            ShowHostConfig(n, 1);
         } else if (n.config.type === 'l1_hub'){
-            ShowHubConfig(n, shared=1);
+            ShowHubConfig(n, 1);
         } else if (n.config.type === 'l2_switch'){
-            ShowSwitchConfig(n, shared=1);
+            ShowSwitchConfig(n, 1);
         } else if (n.config.type === 'router'){
-            ShowRouterConfig(n, shared=1);
+            ShowRouterConfig(n, 1);
         } else if (n.config.type === 'server'){
-            ShowServerConfig(n, shared=1);
+            ShowServerConfig(n, 1);
         }
     });
     
