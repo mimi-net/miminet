@@ -7,6 +7,7 @@ from typing import Any, Callable, List, Dict
 from network_schema import Job
 from mininet.log import info
 from ipmininet.host.config.dnsmasq import Dnsmasq
+from ipmininet.router.config.dhcphelper import DHCPHelper
 
 
 def filter_arg_for_options(
@@ -512,6 +513,21 @@ def dhcp_server(job: Job, job_host):
     job_host.start_daemon(daemon)
 
 
+def dhcp_relay(job: Job, job_host):
+    dhcp_server_ip = job.arg_1
+    dhcp_server_mask = job.arg_2
+    intf = job.arg_3
+    daemon = DHCPHelper(
+        node=job_host,
+        dhcp_server_ip=dhcp_server_ip,
+        dhcp_server_mask=dhcp_server_mask,
+        intf=intf,
+    )
+    job_host.build_daemon(daemon)
+    job_host.start_daemon(daemon)
+    info(f"dhcp-helper -s {dhcp_server_ip} -i {intf}")
+
+
 class Jobs:
     """Class for representing various commands for working with miminet network"""
 
@@ -542,6 +558,7 @@ class Jobs:
             108: dhcp_client,
             109: port_forwarding_tcp_handler,
             110: port_forwarding_udp_handler,
+            111: dhcp_relay,
             200: open_udp_server_handler,
             201: open_tcp_server_handler,
             202: block_tcp_udp_port,

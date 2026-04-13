@@ -20,6 +20,7 @@ RUN apt-get update \
     python3-pip \
     dnsmasq \
     isc-dhcp-client \
+    dhcp-helper \
     python3-setuptools \
     gcc \
     make \
