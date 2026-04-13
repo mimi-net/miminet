@@ -935,7 +935,7 @@ const ConfigRouterJobOnChange = function(evnt) {
             UpdateRouterForm('config_router_add_port_forwarding_udp_script');
             FillDeviceSelectIntf("#config_router_add_port_forwarding_udp_iface_select_field", "#router_id", "Выберите линк", false)
             break;
-        case '111':
+        case '204':
             UpdateRouterForm('config_router_dhcp_relay_script');
             FillDeviceSelectIntf("#config_router_dhcp_relay_select_iface_field", "#router_id", "Выберите линк", false)
             break;
@@ -1416,7 +1416,7 @@ const EditJobInRouter = function(router_id, job_id, network_guid) {
                 $('#config_router_add_port_forwarding_udp_dest_ip_input_field').val(job.arg_3 || '')
                 $('#config_router_add_port_forwarding_udp_dest_port_input_field').val(job.arg_4 || '')
                 break;
-            case '111': // Добавить DHCP Relay
+            case '204': // Добавить DHCP Relay
                 UpdateRouterForm('config_router_dhcp_relay_script');
                 FillDeviceSelectIntf("#config_router_dhcp_relay_select_iface_field", "#router_id", "Выберите линк", false);
                 $('#config_router_dhcp_relay_ip_input_field').val(job.arg_1 || '');

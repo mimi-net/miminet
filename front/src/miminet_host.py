@@ -427,7 +427,7 @@ arp_proxy_job.add_param("router_connection_host_label_hidden").add_check(
 ).set_error_msg('Не указан интерфейс для команды "Добавить ARP Proxy-интерфейс"')
 
 # Add DHCP Relay
-dhcp_relay_job = router.create_job(111, "dhcp relay to [0]/[1]")
+dhcp_relay_job = router.create_job(204, "dhcp-helper -s [0] -i [2]")
 dhcp_relay_job.add_param("config_router_dhcp_relay_ip_input_field").add_check(
     IPv4_check
 ).set_error_msg('Неверно указан IP адрес диапазона для команды "Включить DHCP Relay"')

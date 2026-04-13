@@ -580,11 +580,11 @@ class Jobs:
             108: dhcp_client,
             109: port_forwarding_tcp_handler,
             110: port_forwarding_udp_handler,
-            111: dhcp_relay,
             200: open_udp_server_handler,
             201: open_tcp_server_handler,
             202: block_tcp_udp_port,
             203: dhcp_server,
+            204: dhcp_relay,
         }
         self._job: Job = job
         self._job_host = job_host
