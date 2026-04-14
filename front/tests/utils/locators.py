@@ -286,6 +286,15 @@ class Location:
                     PORT_FORWARDING_UDP_DEST_PORT_FIELD = Locator(
                         "#config_router_add_port_forwarding_udp_dest_port_input_field"
                     )
+                    DHCP_RELAY_IP_INPUT_FIELD = Locator(
+                        "#config_router_dhcp_relay_ip_input_field"
+                    )
+                    DHCP_RELAY_MASK_INPUT_FIELD = Locator(
+                        "#config_router_dhcp_relay_mask_input_field"
+                    )
+                    DHCP_RELAY_SELECT_IFACE_FIELD = Locator(
+                        "#config_router_dhcp_relay_select_iface_field"
+                    )
 
             class Server(CommonDevice):
                 MAIN_FORM = Locator("#config_main_form")

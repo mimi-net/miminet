@@ -40,6 +40,7 @@ jobs:
           libbsd-dev \
           dnsmasq \
           isc-dhcp-client \
+          dhcp-helper \
           openvswitch-switch \
           git
           sudo touch /etc/network/interfaces
