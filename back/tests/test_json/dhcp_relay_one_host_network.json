@@ -73,7 +73,7 @@
                 "server"
             ],
             "config":{
-                "default_gw":"",
+                "default_gw":"192.168.10.3",
                 "label":"server_1",
                 "type":"server"
             },
@@ -195,40 +195,38 @@
     ],
     "jobs": [
         {
+            "id":"2fb202bfe7bd48d390734b68f0e2a61d",
+            "job_id":203,
+            "print_cmd":"dhcp ip range: 172.16.10.10,172.16.10.100/24 gw:172.16.10.3",
             "arg_1":"172.16.10.10",
             "arg_2":"172.16.10.100",
             "arg_3":"24",
             "arg_4":"172.16.10.3",
             "arg_5":"iface_16417632",
-            "host_id":"server_1",
-            "id":"c124a6208e0441478f7548a14003b8b5",
-            "job_id":203,
-            "level":3,
-            "print_cmd":"dhcp ip range: 172.16.10.10,172.16.10.100/24 gw:172.16.10.3"
+            "level":1,
+            "host_id":"server_1"
         },
         {
-            "arg_1":"iface_46653148",
-            "host_id":"host_1",
-            "id":"64ef46e73ec84b15b2f661a8aada7b8a",
+            "id":"773ccad1dc9244ca84603adfc4996b13",
             "job_id":108,
+            "print_cmd":"dhcp client",
+            "arg_1":"iface_46653148",
             "level":2,
-            "print_cmd":"dhcp client"
+            "host_id":"host_1"
         },
         {
-            "id":"053d51a340b843a697a213cdda070b0c",
+            "id":"b9a5d85ff6824c77ac6b79916868dde9",
             "job_id":204,
-            "print_cmd":"dhcp-helper -s 192.168.10.2 -i iface_02514152",
-            "arg_1":"192.168.10.2",
-            "arg_2":"24",
-            "arg_3":"iface_02514152",
+            "print_cmd":"dnsmasq --dhcp-relay=172.16.10.3,192.168.10.2", "arg_1":"192.168.10.2",
+            "arg_2":"172.16.10.3",
             "level":2,
             "host_id":"router_2"
         }
     ],
     "config": {
         "zoom": 2,
-        "pan_x": 295,
-        "pan_y": 25
+        "pan_x": 226,
+        "pan_y": 32
     },
     "pcap": [],
     "packets": "[]"

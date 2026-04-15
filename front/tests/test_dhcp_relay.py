@@ -32,16 +32,14 @@ class TestDHCPRelay:
         host_config.submit()
 
         # configure router
-        router_iface = network.nodes[2]["interface"][0]["id"]
         router_config = network.open_node_config(2)
         router_config.fill_link("172.16.10.3", 24)
         router_config.fill_link("192.168.10.3", 24, 1)
         router_config.add_jobs(
             204,
             {
-                Location.Network.ConfigPanel.Router.Job.DHCP_RELAY_IP_INPUT_FIELD.selector: "192.168.10.2",
-                Location.Network.ConfigPanel.Router.Job.ADD_ROUTE_MASK_FIELD.selector: "24",
-                Location.Network.ConfigPanel.Router.Job.DHCP_RELAY_SELECT_IFACE_FIELD: router_iface,
+                Location.Network.ConfigPanel.Router.Job.DHCP_RELAY_SERVER_IP_INPUT_FIELD.selector: "192.168.10.2",
+                Location.Network.ConfigPanel.Router.Job.DHCP_RELAY_LISTENING_IP_INPUT_FIELD.selector: "172.16.10.3",
             },
         )
         router_config.submit()
@@ -50,6 +48,7 @@ class TestDHCPRelay:
         server_iface = network.nodes[4]["interface"][0]["id"]
         server_config = network.open_node_config(4)
         server_config.fill_link("192.168.10.2", 24)
+        server_config.fill_default_gw("192.168.10.3")
         server_config.add_jobs(
             203,
             {
@@ -91,9 +90,9 @@ class TestDHCPRelay:
             },
             "interface":[
                 {
-                "id":"iface_61426530",
-                "name":"iface_61426530",
-                "connect":"edge_mnysboa63sl7masz29i"
+                    "id":"iface_61426530",
+                    "name":"iface_61426530",
+                    "connect":"edge_mnysboa63sl7masz29i"
                 }
             ]
         },
@@ -116,18 +115,18 @@ class TestDHCPRelay:
             },
             "interface":[
                 {
-                "id":"l2sw1_1",
-                "name":"l2sw1_1",
-                "connect":"edge_mnysboa63sl7masz29i",
-                "vlan":None,
-                "type_connection":None
+                    "id":"l2sw1_1",
+                    "name":"l2sw1_1",
+                    "connect":"edge_mnysboa63sl7masz29i",
+                    "vlan":None,
+                    "type_connection":None
                 },
                 {
-                "id":"l2sw1_2",
-                "name":"l2sw1_2",
-                "connect":"edge_mnysbpcfq1uwnl5unw",
-                "vlan":None,
-                "type_connection":None
+                    "id":"l2sw1_2",
+                    "name":"l2sw1_2",
+                    "connect":"edge_mnysbpcfq1uwnl5unw",
+                    "vlan":None,
+                    "type_connection":None
                 }
             ]
         },
@@ -150,18 +149,18 @@ class TestDHCPRelay:
             },
             "interface":[
                 {
-                "id":"iface_73510361",
-                "name":"iface_73510361",
-                "connect":"edge_mnysbpcfq1uwnl5unw",
-                "ip":"172.16.10.3",
-                "netmask":24
+                    "id":"iface_73510361",
+                    "name":"iface_73510361",
+                    "connect":"edge_mnysbpcfq1uwnl5unw",
+                    "ip":"172.16.10.3",
+                    "netmask":24
                 },
                 {
-                "id":"iface_37513030",
-                "name":"iface_37513030",
-                "connect":"edge_mnysbqjka0cbjig1jb7",
-                "ip":"192.168.10.3",
-                "netmask":24
+                    "id":"iface_37513030",
+                    "name":"iface_37513030",
+                    "connect":"edge_mnysbqjka0cbjig1jb7",
+                    "ip":"192.168.10.3",
+                    "netmask":24
                 }
             ]
         },
@@ -184,18 +183,18 @@ class TestDHCPRelay:
             },
             "interface":[
                 {
-                "id":"l2sw2_1",
-                "name":"l2sw2_1",
-                "connect":"edge_mnysbqjka0cbjig1jb7",
-                "vlan":None,
-                "type_connection":None
+                    "id":"l2sw2_1",
+                    "name":"l2sw2_1",
+                    "connect":"edge_mnysbqjka0cbjig1jb7",
+                    "vlan":None,
+                    "type_connection":None
                 },
                 {
-                "id":"l2sw2_2",
-                "name":"l2sw2_2",
-                "connect":"edge_mnysbrok5nl01pdvoe3",
-                "vlan":None,
-                "type_connection":None
+                    "id":"l2sw2_2",
+                    "name":"l2sw2_2",
+                    "connect":"edge_mnysbrok5nl01pdvoe3",
+                    "vlan":None,
+                    "type_connection":None
                 }
             ]
         },
@@ -214,15 +213,15 @@ class TestDHCPRelay:
             "config":{
                 "type":"server",
                 "label":"server_1",
-                "default_gw":""
+                "default_gw":"192.168.10.3"
             },
             "interface":[
                 {
-                "id":"iface_84271537",
-                "name":"iface_84271537",
-                "connect":"edge_mnysbrok5nl01pdvoe3",
-                "ip":"192.168.10.2",
-                "netmask":24
+                    "id":"iface_84271537",
+                    "name":"iface_84271537",
+                    "connect":"edge_mnysbrok5nl01pdvoe3",
+                    "ip":"192.168.10.2",
+                    "netmask":24
                 }
             ]
         }
@@ -265,35 +264,33 @@ class TestDHCPRelay:
             }
         }
     ]
-    JSON_JOBS = [  
+    JSON_JOBS = [
         {
-            "id":"6a39abbd1e7246cdb17f73544745c73f",
-            "job_id":108,
-            "print_cmd":"dhcp client",
-            "arg_1":"iface_61426530",
-            "level":0,
-            "host_id":"host_1"
+            'id':'90f1af9818c24105b9418c1a503eb04d',
+            'job_id':108,
+            'print_cmd':'dhcp client',
+            'arg_1':'iface_61426530',
+            'level':0,
+            'host_id':'host_1'
         },
         {
-            "id":"e796339025e747ccb06421d7c42d897e",
-            "job_id":204,
-            "print_cmd":"dhcp-helper -s 192.168.10.2 -i iface_73510361",
-            "arg_1":"192.168.10.2",
-            "arg_2":"24",
-            "arg_3":"iface_73510361",
-            "level":1,
-            "host_id":"router_1"
+            'id':'60b97a16a1cd4ae2aaa921b77f7ec2fd',
+            'job_id':204,
+            'print_cmd':'dnsmasq --dhcp-relay=172.16.10.3,192.168.10.2', 'arg_1':'192.168.10.2',
+            'arg_2':'172.16.10.3',
+            'level':1,
+            'host_id':'router_1'
         },
         {
-            "id":"64ef30fbc1ea4322a6c85b52739322d8",
-            "job_id":203,
-            "print_cmd":"dhcp ip range: 172.16.10.10,172.16.10.100/24 gw:172.16.10.3",
-            "arg_1":"172.16.10.10",
-            "arg_2":"172.16.10.100",
-            "arg_3":"24",
-            "arg_4":"172.16.10.3",
-            "arg_5":"iface_84271537",
-            "level":2,
-            "host_id":"server_1"
+            'id':'1ed7256caf6f4f75ae50eddb5607920c',
+            'job_id':203,
+            'print_cmd':'dhcp ip range: 172.16.10.10,172.16.10.100/24 gw:172.16.10.3',
+            'arg_1':'172.16.10.10',
+            'arg_2':'172.16.10.100',
+            'arg_3':'24',
+            'arg_4':'172.16.10.3',
+            'arg_5':'iface_84271537',
+            'level':2,
+            'host_id':'server_1'
         }
     ]
