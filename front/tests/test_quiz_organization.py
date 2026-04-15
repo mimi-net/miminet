@@ -1,10 +1,8 @@
 from types import SimpleNamespace
 
-from quiz.util.dto import (
-    to_test_dto_list,
-    normalize_organization_domain,
-    resolve_organization_logo_filename,
-)
+from quiz.util.dto import (normalize_organization_domain,
+                           resolve_organization_logo_filename,
+                           to_test_dto_list)
 
 
 def test_normalize_organization_domain_adds_https_without_scheme():

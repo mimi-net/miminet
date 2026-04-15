@@ -1,15 +1,9 @@
 import os
 import uuid
 
-from flask_jwt_extended import jwt_required, get_jwt_identity
-
-from celery_app import (
-    SEND_NETWORK_EXCHANGE,
-    EXCHANGE_TYPE,
-    app,
-)
+from celery_app import EXCHANGE_TYPE, SEND_NETWORK_EXCHANGE, app
 from flask import jsonify, make_response, redirect, request, url_for
-from flask_login import current_user, login_required
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from miminet_model import Network, Simulate, SimulateLog, db
 from werkzeug.wrappers import Response
 

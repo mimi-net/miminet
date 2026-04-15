@@ -1,18 +1,13 @@
 import json
 from datetime import datetime
 
-from flask import request, make_response, jsonify, abort, render_template
-from flask_login import login_required, current_user
-
-from quiz.service.section_service import (
-    create_section,
-    get_sections_by_test,
-    get_deleted_sections_by_test,
-    delete_section,
-    edit_section,
-    get_section,
-    publish_or_unpublish_test_by_section,
-)
+from flask import abort, jsonify, make_response, render_template, request
+from flask_login import current_user, login_required
+from quiz.service.section_service import (create_section, delete_section,
+                                          edit_section,
+                                          get_deleted_sections_by_test,
+                                          get_section, get_sections_by_test,
+                                          publish_or_unpublish_test_by_section)
 from quiz.service.test_service import get_test
 from quiz.util.encoder import UUIDEncoder
 

@@ -1,30 +1,25 @@
+import datetime
 import json
 import os
-import uuid
 import shutil
+import uuid
 
-from flask import (
-    flash,
-    jsonify,
-    make_response,
-    redirect,
-    render_template,
-    request,
-    url_for,
-)
+from flask import (flash, jsonify, make_response, redirect, render_template,
+                   request, url_for)
+from flask_jwt_extended import (get_jwt_identity,
+                                jwt_required)
 from flask_login import current_user, login_required
 from miminet_config import check_image_with_pil
-from miminet_model import Network, Simulate, db, SimulateLog
-from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token, create_refresh_token, set_access_cookies, set_refresh_cookies, verify_jwt_in_request
-import datetime
+from miminet_model import Network, Simulate, SimulateLog, db
 from sqlalchemy import not_
 
 PREVIEW_IMAGES_ROOT = "static/images/preview"
 
 
 def CORS_header(response):
-    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    response.headers.add("Access-Control-Allow-Credentials", "true")
     return response
+
 
 @login_required
 def create_network():

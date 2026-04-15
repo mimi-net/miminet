@@ -1,39 +1,28 @@
+import hashlib
+import hmac
 import json
 import logging
 import os
 import pathlib
-import uuid
 import time
-import hmac
-import hashlib
+import uuid
 
 import google.auth.transport.requests
 import requests
-from flask import (
-    flash,
-    redirect,
-    render_template,
-    request,
-    session,
-    url_for,
-    jsonify,
-    abort,
-)
-from flask_login import (
-    LoginManager,
-    current_user,
-    login_required,
-    login_user,
-    logout_user,
-)
-from flask_jwt_extended import create_access_token, create_refresh_token, set_access_cookies, set_refresh_cookies, unset_jwt_cookies
+from flask import (abort, flash, jsonify, redirect, render_template, request,
+                   session, url_for)
+from flask_jwt_extended import (create_access_token, create_refresh_token,
+                                set_access_cookies, set_refresh_cookies,
+                                unset_jwt_cookies)
+from flask_login import (LoginManager, current_user, login_required,
+                         login_user, logout_user)
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
-from requests_oauthlib import OAuth2Session
-from oauthlib.oauth2 import TokenExpiredError
-from miminet_model import Network, User, db
 from miminet_config import make_example_net_switch_and_hub
+from miminet_model import Network, User, db
+from oauthlib.oauth2 import TokenExpiredError
 from pip._vendor import cachecontrol
+from requests_oauthlib import OAuth2Session
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
@@ -228,9 +217,9 @@ def login_index():
         access_token = create_access_token(identity=str(current_user.id))
         refresh_token = create_refresh_token(identity=str(current_user.id))
 
-    # if current_user.is_authenticated and not telegram_link_mode:
-    #     return redirect(url_for("user_profile"))
-        response = redirect_next_url(fallback=url_for('home'))
+        # if current_user.is_authenticated and not telegram_link_mode:
+        #     return redirect(url_for("user_profile"))
+        response = redirect_next_url(fallback=url_for("home"))
         if next_url:
             response = redirect_next_url(fallback=next_url)
         set_access_cookies(response, access_token)
@@ -242,9 +231,9 @@ def login_index():
     else:
         session.pop("next_url", None)
 
-    # if telegram_link_mode:
-    #     _start_social_link("tg", redirect_endpoint=next_url or "user_profile")
-    #     return render_template("auth/login.html", user=current_user)
+    if telegram_link_mode:
+         _start_social_link("tg", redirect_endpoint=next_url or "user_profile")
+         return render_template("auth/login.html", user=current_user)
 
     if request.method == "POST":
         email = request.form.get("email")
@@ -851,8 +840,7 @@ def tg_callback():
         return social_link_response
 
     user = User.query.filter(
-        (User.tg_id == tg_id)
-        | (User.email == user_data.get("username", ""))
+        (User.tg_id == tg_id) | (User.email == user_data.get("username", ""))
     ).first()
 
     if user is None:
@@ -873,8 +861,7 @@ def tg_callback():
             return redirect(url_for("login_index"))
 
         user = User.query.filter(
-            (User.tg_id == tg_id)
-            | (User.email == user_data.get("username", ""))
+            (User.tg_id == tg_id) | (User.email == user_data.get("username", ""))
         ).first()
 
     login_user(user, remember=True)

@@ -2,7 +2,6 @@ import ipaddress
 import logging
 
 import quiz.service.check_host_service as chs
-
 from quiz.service.check_network_service import check_network_configuration
 
 

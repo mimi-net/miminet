@@ -1,7 +1,8 @@
+import random
+
 import pytest
 from conftest import MiminetTester
 from utils.networks import MiminetTestNetwork, NodeType
-import random
 
 
 class TestDeviceConnecting:

@@ -1,12 +1,12 @@
-import os
 import json
+import os
 from types import SimpleNamespace
 
 import pytest
 from flask import Flask, session, url_for
-from miminet_auth import yandex_login, yandex_callback, login_index, db
-from sqlalchemy.exc import SQLAlchemyError
+from miminet_auth import db, login_index, yandex_callback, yandex_login
 from oauthlib.oauth2 import TokenExpiredError
+from sqlalchemy.exc import SQLAlchemyError
 
 
 @pytest.fixture
@@ -22,7 +22,9 @@ def app():
 
         app.add_url_rule("/yandex_callback", methods=["GET"], view_func=yandex_callback)
         app.add_url_rule("/login_index", methods=["GET"], view_func=login_index)
-        app.add_url_rule("/profile", methods=["GET"], endpoint="user_profile", view_func=lambda: "ok")
+        app.add_url_rule(
+            "/profile", methods=["GET"], endpoint="user_profile", view_func=lambda: "ok"
+        )
 
         @app.route("/home")
         def home():

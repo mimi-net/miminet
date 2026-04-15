@@ -1,18 +1,13 @@
-from sqlalchemy import func
-from markupsafe import Markup
-
-from miminet_model import User, db
-from quiz.service.session_question_service import is_answer_available
-from quiz.entity.entity import (
-    Question,
-    QuizSession,
-    SessionQuestion,
-    Section,
-    QuestionCategory,
-)
-from quiz.util.dto import SessionResultDto, get_question_type
 import json
 import random
+
+from markupsafe import Markup
+from miminet_model import User, db
+from quiz.entity.entity import (Question, QuestionCategory, QuizSession,
+                                Section, SessionQuestion)
+from quiz.service.session_question_service import is_answer_available
+from quiz.util.dto import SessionResultDto, get_question_type
+from sqlalchemy import func
 
 
 def _humanize_text(value):
@@ -38,7 +33,9 @@ def _format_answer_items(question_type: str, answer_value):
     if question_type == "sorting":
         if isinstance(answer_value, dict):
             try:
-                ordered_items = sorted(answer_value.items(), key=lambda item: int(item[0]))
+                ordered_items = sorted(
+                    answer_value.items(), key=lambda item: int(item[0])
+                )
             except (TypeError, ValueError):
                 ordered_items = answer_value.items()
 
@@ -79,7 +76,9 @@ def _format_answer_items(question_type: str, answer_value):
 def _get_correct_answer_items(question: Question):
     question_type = get_question_type(question.question_type)
     answers = [
-        answer for answer in question.answers if not getattr(answer, "is_deleted", False)
+        answer
+        for answer in question.answers
+        if not getattr(answer, "is_deleted", False)
     ]
 
     if question_type == "variable":
@@ -126,23 +125,31 @@ def _get_correct_answer_items(question: Question):
     return []
 
 
-def _build_answer_details(session_question: SessionQuestion, include_answer_details: bool):
+def _build_answer_details(
+    session_question: SessionQuestion, include_answer_details: bool
+):
     question_type = get_question_type(session_question.question.question_type)
     if question_type == "practice" or not include_answer_details:
         return None
 
     correct_answer_items = _get_correct_answer_items(session_question.question)
-    user_answer_items = _format_answer_items(question_type, session_question.user_answer)
+    user_answer_items = _format_answer_items(
+        question_type, session_question.user_answer
+    )
     has_saved_answer = session_question.user_answer is not None
     user_answer_title = "Ваше решение"
 
     if not user_answer_items and session_question.is_correct and correct_answer_items:
         user_answer_items = list(correct_answer_items)
         user_answer_title = "Ваше решение (восстановлено)"
-    elif not user_answer_items and (has_saved_answer or session_question.is_correct is False):
+    elif not user_answer_items and (
+        has_saved_answer or session_question.is_correct is False
+    ):
         user_answer_items = ["Ответ пользователя недоступен для этой попытки."]
 
-    show_reference_answer = session_question.is_correct is False and bool(correct_answer_items)
+    show_reference_answer = session_question.is_correct is False and bool(
+        correct_answer_items
+    )
     if not user_answer_items and not show_reference_answer:
         return None
 

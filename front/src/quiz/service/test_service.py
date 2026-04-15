@@ -1,4 +1,4 @@
-from miminet_model import db, User
+from miminet_model import User, db
 from quiz.entity.entity import Test
 from quiz.util.dto import to_test_dto_list
 from sqlalchemy.orm import joinedload, selectinload

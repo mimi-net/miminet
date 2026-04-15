@@ -1,11 +1,10 @@
 import io
 from types import SimpleNamespace
 
+import miminet_auth
 import pytest
 from flask import Flask, session
 from werkzeug.exceptions import Forbidden
-
-import miminet_auth
 
 
 def _build_test_app():

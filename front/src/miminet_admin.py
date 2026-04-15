@@ -1,41 +1,25 @@
 import json
-
 from datetime import date
 
-from flask import request, flash, redirect, url_for
+from flask import flash, redirect, request, url_for
 from flask_admin import AdminIndexView, expose
+from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.fields import QuerySelectField
-from flask_admin.form import Select2Widget, DateTimePickerWidget
+from flask_admin.form import DateTimePickerWidget, Select2Widget
 from flask_admin.model import typefmt
-from flask_admin.actions import action
 from flask_login import current_user
 from markupsafe import Markup
+from miminet_model import Network, User, db
+from quiz.entity.entity import (Question, QuestionCategory, QuizSession,
+                                Section, SessionQuestion, Test)
+from quiz.service.network_upload_service import (create_check_task,
+                                                 create_check_task_json)
+from quiz.util.dto import calculate_question_count
 from sqlalchemy import func
 from sqlalchemy.orm import selectinload
-from wtforms import (
-    SelectField,
-    TextAreaField,
-    BooleanField,
-    DateTimeField,
-    Form,
-    SubmitField,
-)
-
-from quiz.service.network_upload_service import (
-    create_check_task,
-    create_check_task_json,
-)
-from miminet_model import db, User, Network
-from quiz.entity.entity import (
-    Test,
-    Section,
-    Question,
-    QuestionCategory,
-    QuizSession,
-    SessionQuestion,
-)
-from quiz.util.dto import calculate_question_count
+from wtforms import (DateTimeField, Form, SelectField,
+                     SubmitField, TextAreaField)
 
 ADMIN_ROLE_LEVEL = 1
 
@@ -422,10 +406,10 @@ class SectionView(MiminetAdminModelView):
     }
 
     form_excluded_columns = [
-        'created_by_id',
-        'created_by_user',
-        'created_on',
-        'updated_on'
+        "created_by_id",
+        "created_by_user",
+        "created_on",
+        "updated_on",
     ]
 
     # form_extra_fields = {
@@ -452,16 +436,14 @@ class SectionView(MiminetAdminModelView):
     #     ),
     # }
 
-    form_overrides = {
-        'results_available_from': DateTimeField
-    }
+    form_overrides = {"results_available_from": DateTimeField}
 
     form_args = {
-        'results_available_from': {
-            'widget': DateTimePickerWidget(),
+        "results_available_from": {
+            "widget": DateTimePickerWidget(),
             # 'format': '%d-%m-%Y %H:%M:%S',
-            'label': 'Дата открытия результатов',
-            'description': 'Формат: d-m-Y H:M:S. Время в мск. Обратите внимание, что без is_exam ответы будут доступны в любом случае.'
+            "label": "Дата открытия результатов",
+            "description": "Формат: d-m-Y H:M:S. Время в мск. Обратите внимание, что без is_exam ответы будут доступны в любом случае.",
         }
     }
 

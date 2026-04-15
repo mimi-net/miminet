@@ -1,23 +1,15 @@
 import json
 import logging
-from markupsafe import Markup
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from miminet_model import User, Network, db
+from markupsafe import Markup
+from miminet_model import Network, User, db
+from quiz.entity.entity import Answer, PracticeQuestion, SessionQuestion
 from quiz.service.check_practice_service import check_task
-from quiz.entity.entity import (
-    SessionQuestion,
-    Answer,
-    PracticeQuestion,
-)
-from quiz.util.dto import (
-    QuestionDto,
-    AnswerResultDto,
-    PracticeAnswerResultDto,
-    calculate_max_score,
-)
 from quiz.service.network_upload_service import prepare_task
+from quiz.util.dto import (AnswerResultDto, PracticeAnswerResultDto,
+                           QuestionDto, calculate_max_score)
 
 MOSCOW_TZ = ZoneInfo("Europe/Moscow")
 

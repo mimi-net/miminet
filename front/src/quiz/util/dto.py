@@ -1,28 +1,19 @@
+import json
 import random
 import uuid
-import json
+from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
 from typing import Dict, List, Optional
-
-from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from flask import has_request_context
 from flask_login import current_user
 from markupsafe import Markup
-from sqlalchemy.orm import joinedload
-
 from miminet_model import Network, db
-from quiz.entity.entity import (
-    Section,
-    Test,
-    Organization,
-    Question,
-    Answer,
-    QuizSession,
-    SessionQuestion,
-)
+from quiz.entity.entity import (Answer, Organization, Question, QuizSession,
+                                Section, SessionQuestion, Test)
+from sqlalchemy.orm import joinedload
 
 
 def calculate_question_count(section: Section) -> int:

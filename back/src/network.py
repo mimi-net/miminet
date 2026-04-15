@@ -1,15 +1,14 @@
 import os
 import time
-from psutil import Process
+
+import psutil
 from ipmininet.ipnet import IPNet
 from mininet.log import info
-import psutil
-
-from network_topology import MiminetTopology
-from network_schema import Network
-
-from net_utils.vlan import setup_vlans, clean_bridges
+from net_utils.vlan import clean_bridges, setup_vlans
 from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
+from network_schema import Network
+from network_topology import MiminetTopology
+from psutil import Process
 
 
 class MiminetNetwork(IPNet):

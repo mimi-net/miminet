@@ -1,23 +1,15 @@
+import ipaddress
 import json
 import re
-import ipaddress
 import shlex
-from typing import List, Dict
+from typing import Dict, List
 
-from flask import jsonify, make_response, request, Response
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from flask_login import current_user, login_required
+from configurators import (EdgeConfigurator, HostConfigurator, HubConfigurator,
+                           RouterConfigurator, ServerConfigurator,
+                           SwitchConfigurator, get_data)
+from flask import Response, jsonify, make_response, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from miminet_model import Network, Simulate, db
-from configurators import (
-    HostConfigurator,
-    SwitchConfigurator,
-    HubConfigurator,
-    ServerConfigurator,
-    RouterConfigurator,
-    EdgeConfigurator,
-    get_data,
-)
-
 
 # ------ Argument Validators ------
 # (you can add your checks here)

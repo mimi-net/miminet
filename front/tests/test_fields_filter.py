@@ -1,8 +1,8 @@
 import pytest
-from selenium.webdriver.common.by import By
 from conftest import MiminetTester
-from utils.networks import NodeType, MiminetTestNetwork
+from selenium.webdriver.common.by import By
 from utils.locators import Location
+from utils.networks import MiminetTestNetwork, NodeType
 
 
 class TestFieldsFilter:
