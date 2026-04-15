@@ -210,7 +210,7 @@
                             <p class="quiz-card__meta">{{ quiz.section_count }} {{ section_word(quiz.section_count) }}</p>
                             {% if quiz.organization_id and quiz.organization_logo_uri and quiz.organization_domain %}
                                 <a class="quiz-card__organization-link"
-                                    href="{{ organization_url_for('/quiz/test/all', org_id=quiz.organization_id) }}"
+                                    href="{{ organization_url_for('/', org_id=quiz.organization_id) }}"
                                     aria-label="{{ quiz.organization_name or quiz.test_name }}">
                                     <img src="{{ url_for('static', filename='images/logo_organizations/' ~ quiz.organization_logo_uri) }}"
                                          alt="{{ quiz.organization_name or quiz.test_name }}">

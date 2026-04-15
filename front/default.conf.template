@@ -1,16 +1,16 @@
+# server {
+#     listen 80;
+#     server_name ${QUIZ_DOMAIN};
+#
+#     location / {
+#         include uwsgi_params;
+#         uwsgi_pass quiz:80;
+#     }
+# }
+
 server {
     listen 80;
-    server_name ${QUIZ_DOMAIN};
-
-    location / {
-        include uwsgi_params;
-        uwsgi_pass quiz:80;
-    }
-}
-
-server {
-    listen 80;
-    server_name ${BASE_DOMAIN};
+#    server_name ${BASE_DOMAIN};
 
     location / {
         include uwsgi_params;

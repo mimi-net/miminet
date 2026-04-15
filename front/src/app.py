@@ -407,6 +407,7 @@ def organization_url_for(endpoint, org_id, **kwargs):
             base = f"http://{org.domain}"
         else:
             base = f"https://{org.domain}"
+        endpoint = endpoint.lstrip("/quiz").lstrip("quiz")
 
     endpoint = endpoint.strip("/")
 
