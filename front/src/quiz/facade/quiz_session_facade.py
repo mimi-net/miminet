@@ -37,12 +37,11 @@ def _format_answer_items(question_type: str, answer_value):
 
     if question_type == "sorting":
         if isinstance(answer_value, dict):
+            ordered_items = list(answer_value.items())
             try:
-                ordered_items = sorted(
-                    answer_value.items(), key=lambda item: int(item[0])
-                )
+                ordered_items.sort(key=lambda item: int(item[0]))
             except (TypeError, ValueError):
-                ordered_items = answer_value.items()
+                pass
 
             return [
                 f"{index + 1}. {_humanize_text(value)}"
