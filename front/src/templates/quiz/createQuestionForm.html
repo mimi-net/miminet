@@ -1,0 +1,1079 @@
+{% extends "base.html" %}
+{% block title %}{{ network.title }}{% endblock %}
+{% block og %}
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Miminet">
+    <meta property="og:title" content="{{ network.title }}">
+    <meta property="og:image" content="https://miminet.ru/images/preview/{{ network.preview_uri }}">
+    <link rel="stylesheet" href="{{url_for('static',filename='assets/css/workspace.css')}}">
+{% endblock %}
+
+{% block content %}
+<main>
+    {% if network %}
+        <div class="modal" id="questionConfigModal" tabindex="-1" role="dialog" aria-labelledby="questionConfigModalLabel" aria-hidden="true" data-focus-on="input:first">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="questionConfigModalLabel">Создание задания</h5>
+                        <button id="questionConfigCancelIcon" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="section_id" class="text-sm">Раздел</label>
+                            <select type="text" class="form-control form-control-sm" id="section_id" value="">
+                                <option value="">Создать новый</option>
+                                {% for section in sections %}
+                                    <option value="{{ section.id }}">{{ section.name }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <div class="py-2">
+                                <label for="question_title" class="text-sm">Название задания</label>
+                                <input type="text" class="form-control form-control-sm" id="question_title">
+
+                                <label for="question_description" class="text-sm pt-2">Описание задания</label>
+                                <textarea rows="3" class="form-control form-control-sm" id="question_description"></textarea>
+                            </div>
+
+                            <div class="py-2">
+                                <h5>Доступные устройства</h5>
+                                <small class="text-muted d-block mb-2">Укажите максимальное количество каждого типа устройств, которое студент может использовать</small>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="available_host" class="form-label">Хостов</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" id="available_host" name="available_host" value="0" min="0">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="available_l2_switch" class="form-label">Свитчей (L2)</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" id="available_l2_switch" name="available_l2_switch" value="0" min="0">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="available_l1_hub" class="form-label">Хабов (L1)</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" id="available_l1_hub" name="available_l1_hub" value="0" min="0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="available_l3_router" class="form-label">Роутеров (L3)</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" id="available_l3_router" name="available_l3_router" value="0" min="0">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="available_server" class="form-label">Серверов</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" id="available_server" name="available_server" value="0" min="0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h5>Текущие проверки:</h5>
+                            <div id="requirementsList" class="mb-4">
+                                <!-- Здесь будут проверки -->
+                            </div>
+
+                            <button type="button" class="btn btn-primary mb-3" id="addCheckBtn">+ Добавить проверку</button>
+
+                            <div id="checkForm" style="display: none;" class="card p-3 mb-3">
+                                <h6>Новая проверка</h6>
+                                
+                                <!-- 1. Основной выбор: сеть или устройство -->
+                                <div class="mb-3">
+                                    <label class="form-label">Тип проверки:</label>
+                                    <select class="form-select" id="mainCheckType">
+                                        <option value="device">Проверка устройства</option>
+                                        <option value="network">Проверка сети</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- 2. Баллы (общие для всех) -->
+                                <div class="mb-3">
+                                    <label class="form-label">Баллы за проверку:</label>
+                                    <input type="number" class="form-control" id="checkPoints" value="1" min="1">
+                                </div>
+                                
+                                <!-- 3. Проверки сети -->
+                                <div id="networkOptions" style="display: none;">
+                                    <div class="mb-3">
+                                        <label class="form-label">Тип проверки сети:</label>
+                                        <select class="form-select" id="networkCheckType">
+                                            <option value="ip_private">Приватные IP-адреса</option>
+                                            <option value="vlan_id_above">VLAN ID выше значения</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div id="networkIpPrivateFields" class="check-type-fields">
+                                        <div class="alert alert-info">
+                                            Проверяет, что все IP-адреса в сети приватные
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="networkVlanIdAboveFields" class="check-type-fields" style="display: none;">
+                                        <div class="mb-3">
+                                            <label class="form-label">Минимальный VLAN ID:</label>
+                                            <input type="number" class="form-control" id="vlanIdValue" value="100" min="1">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 3. Проверки устройства -->
+                                <div id="deviceOptions">
+                                    <div class="mb-3">
+                                        <label class="form-label">Тип проверки устройства:</label>
+                                        <select class="form-select" id="deviceCheckType">
+                                            <option value="cmd">Выполнение команды</option>
+                                            <option value="ip_check">Проверка приватности IP</option>
+                                            <option value="mask_check">Проверка маски подсети</option>
+                                            <option value="equal_vlan_id">Одинаковые VLAN ID</option>
+                                            <option value="no_equal_vlan_id">Разные VLAN ID</option>
+                                            <option value="default_gw">Маршрут по умолчанию</option>
+                                            <option value="ip_equal">Конкретный IP-адрес</option>
+                                            <option value="abstract_ip_equal">Абстрактный IP</option>
+                                            <option value="in_one_network_with">В одной сети с</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- 4. Устройства: источник и цель -->
+                                    <div class="row mb-3" id="devicesSelection">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Исходное устройство:</label>
+                                            <select class="form-select device-select" id="sourceDeviceSelect">
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6" id="targetDeviceContainer">
+                                            <label class="form-label">Целевое устройство:</label>
+                                            <select class="form-select device-select" id="targetDeviceSelect">
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 5. Дополнительные поля для конкретных типов -->
+                                    <div id="deviceSpecificFields">
+                                        <!-- Поля для команды (cmd) -->
+                                        <div id="cmdFields" class="check-type-fields">
+                                            <div class="mb-3">
+                                                <label class="form-label">Тип команды:</label>
+                                                <select class="form-select" id="commandType">
+                                                    <option value="echo-request">Echo Request (обычный ping)</option>
+                                                    <option value="no-echo-request">No Echo Request (нет ping)</option>
+                                                    <option value="tunnel-echo-request">Tunnel Echo Request</option>
+                                                    <option value="vxlan-echo-request">VXLAN Echo Request</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <!-- Поля для echo-request -->
+                                            <div id="echo-requestFields" class="command-fields" style="display: none;">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Направление:</label>
+                                                    <select class="form-select" id="directionType">
+                                                        <option value="one-way">Однонаправленный</option>
+                                                        <option value="two-way">Двунаправленный</option>
+                                                    </select>
+                                                </div>
+                                                
+                                                <!-- Проверка пути (новый вариант) -->
+                                                <div class="mb-3">
+                                                    <label class="form-label">Проверка пути:</label>
+                                                    <select class="form-select" id="pathCheckType">
+                                                        <option value="">Нет</option>
+                                                        <option value="different">Разные пути</option>
+                                                        <option value="specific">Конкретный путь</option>
+                                                    </select>
+                                                </div>
+                                                
+                                                <!-- Для конкретного пути - выбор устройств -->
+                                                <div id="specificPathFields" class="path-fields" style="display: none;">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Устройства на пути (по порядку):</label>
+                                                        <div id="pathTargets" class="path-targets-container">
+                                                        </div>
+                                                        <button type="button" class="btn btn-sm btn-outline-primary" data-action="add-path-target">+ Добавить устройство</button>
+                                                        <small class="text-muted d-block mt-1">Укажите устройства через которые должен проходить пакет</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Поля для tunnel-echo-request -->
+                                            <div id="tunnel-echo-requestFields" class="command-fields" style="display: none;">
+                                                <div class="row mb-3">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Начало туннеля:</label>
+                                                        <select class="form-select device-select" id="tunnelStart">
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Конец туннеля:</label>
+                                                        <select class="form-select device-select" id="tunnelEnd">
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-check mb-3">
+                                                    <input class="form-check-input" type="checkbox" id="differentPathsCheckTunnel">
+                                                    <label class="form-check-label" for="differentPathsCheckTunnel">
+                                                        Проверять разные пути
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Поля для vxlan-echo-request -->
+                                            <div id="vxlan-echo-requestFields" class="command-fields" style="display: none;">
+                                                <div class="row mb-3">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Начало туннеля:</label>
+                                                        <select class="form-select device-select" id="vxlanTunnelStart">
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Конец туннеля:</label>
+                                                        <select class="form-select device-select" id="vxlanTunnelEnd">
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-check mb-3">
+                                                    <input class="form-check-input" type="checkbox" id="differentPathsCheckVxlan">
+                                                    <label class="form-check-label" for="differentPathsCheckVxlan">
+                                                        Проверять разные пути
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Поля для mask_check -->
+                                        <div id="mask_checkFields" class="check-type-fields" style="display: none;">
+                                            <div class="mb-3">
+                                                <label class="form-label">Маска подсети (CIDR):</label>
+                                                <input type="number" class="form-control" id="expectedMask" min="1" max="32" value="24">
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Поля для equal_vlan_id -->
+                                        <div id="equal_vlan_idFields" class="check-type-fields" style="display: none;">
+                                            <div class="mb-3">
+                                                <label class="form-label">Сравнить VLAN ID с устройствами:</label>
+                                                <div id="equalVlanTargets">
+                                                </div>
+                                                <button type="button" class="btn btn-sm btn-outline-primary" data-action="add-vlan-target" data-container="equalVlanTargets">+ Добавить устройство</button>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Поля для no_equal_vlan_id -->
+                                        <div id="no_equal_vlan_idFields" class="check-type-fields" style="display: none;">
+                                            <div class="mb-3">
+                                                <label class="form-label">Сравнить VLAN ID с устройствами:</label>
+                                                <div id="noEqualVlanTargets">
+                                                </div>
+                                                <button type="button" class="btn btn-sm btn-outline-primary" data-action="add-vlan-target" data-container="noEqualVlanTargets">+ Добавить устройство</button>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Поля для ip_equal -->
+                                        <div id="ip_equalFields" class="check-type-fields" style="display: none;">
+                                            <div class="mb-3">
+                                                <label class="form-label">Ожидаемый IP-адрес:</label>
+                                                <input type="text" class="form-control" id="expectedIp" placeholder="192.168.1.1">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex gap-2 mt-3">
+                                    <button type="button" class="btn btn-success" id="saveCheckBtn">Сохранить</button>
+                                    <button type="button" class="btn btn-secondary" id="cancelCheckBtn">Отмена</button>
+                                </div>
+                            </div>
+
+                            <h5>Результат (JSON):</h5>
+                            <pre id="jsonOutput" class="bg-light p-3"></pre>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="questionConfigCancel" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button id="questionConfigSubmit" type="button" class="btn btn-primary">Сохранить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <section>
+        <div class="col bg-light">
+            <div id="network_scheme" class="position-absolute border bg-white border-primary vh-100 vw-100"></div>
+        </div>
+        <nav class="navbar">
+            <a href="/">
+                <img src="{{ url_for('static', filename='/images/logo.png') }}" class="position-absolute start-0 top-0" width="170" style="margin: 17px;" alt="Miminet">
+            </a>
+            <div class="ws-name-case position-absolute top-0 start-50 translate-middle-x" style="margin-top: 17px;">
+                <a class="d-inline nav-link" href="{{ url_for('home') }}">Мои сети</a>
+                <a class="d-inline nav-link" href="#"> / </a>
+                <a class="d-inline nav-link" id="network_title_head" href="{{ url_for('web_network', guid=network.guid) }}">{{ network.title }}</a>
+            </div>
+            <div class="d-flex position-absolute end-0 top-0" style="margin: 17px;">
+                    <a class="ws-settings-button"
+                    href="#questionConfigModal"
+                    data-bs-toggle="modal"
+                    data-bs-target="#questionConfigModal"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom" title="Настройки задания">
+                    </a>
+            </div>
+            <div class="form-check pe-lg-1 position-absolute end-0 top-0" style="margin: 17px;">
+                <a class="btn btn-outline-primary btn-icon" href="#questionConfigModal" id="net-settings" data-bs-toggle="modal" data-bs-target="#questionConfigModal" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Настройки задания"><i class='bx bx-cog fs-4 mx-1'></i></a>
+            </div>
+        </nav>
+
+        <div id="side_menu" class="position-absolute start-0 top-0" style="margin-left: 17px; margin-top: 100px;">
+            <div class="ws-menu-devices-name">Устройства</div>
+            <div class="ws-menu-devices">
+                <div id="l2_switch_device" style="margin-top: 6px; margin-bottom: 6px;">
+                    <img class="drag" id="l2_switch"
+                         src="{{ url_for('static', filename='/images/l2_switch.png') }}"/>
+                    <div class="icon-text">
+                        <span data-bs-toggle="popover" data-bs-trigger="hover"
+                              data-bs-content="Свитч (коммутатор) работает на втором уровне модели OSI.">Свитч (L2)</span>
+                    </div>
+                </div>
+                <div id="host_device" style="margin-top: 6px; margin-bottom: 6px;">
+                    <img class="drag" id="host" src="{{ url_for('static', filename='/images/host.png') }}"/>
+                    <div class="icon-text pt-2">
+                        <span data-bs-toggle="popover" data-bs-trigger="hover"
+                              data-bs-content="Хост - конечное сетевое устройство.">Хост</span>
+                    </div>
+                </div>
+                <div id="l1_hub_device" style="margin-top: 6px; margin-bottom: 6px;">
+                    <img class="drag" id="l1_hub" src="{{ url_for('static', filename='/images/hub.png') }}"/>
+                    <div class="icon-text">
+                        <span data-bs-toggle="popover" data-bs-trigger="hover"
+                              data-bs-content="Хаб (концентратор) &mdash; простейшее сетевое устойство.">Хаб (L1)</span>
+                    </div>
+                </div>
+                <div id="l3_router_device" style="margin-top: 6px; margin-bottom: 6px;">
+                    <img class="drag" id="l3_router"
+                         src="{{ url_for('static', filename='/images/l3_router.png') }}"/>
+                    <div class="icon-text">
+                        <span data-bs-toggle="popover" data-bs-trigger="hover"
+                              data-bs-content="Маршрутизатор (роутер, раутер) &mdash; работает на 3-м уровне модели OSI, позволяет объединять различные сети.">Роутер (L3)</span>
+                    </div>
+                </div>
+                <div id="server_device" style="margin-top: 6px; margin-bottom: 6px;">
+                    <img class="drag" id="server" src="{{ url_for('static', filename='/images/server.png') }}"/>
+                    <div class="icon-text">
+                        <span data-bs-toggle="popover" data-bs-trigger="hover"
+                              data-bs-content="Сервер &mdash; обслуживает клиентские запросы.">Сервер</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="position-absolute end-0 top-0" style="margin-right: 17px; margin-top: 100px; pointer-events: none;">
+            <div class="ws-menu-settings-name" style="pointer-events: all;">Настройки</div>
+            <div id="config_content" class="ws-menu-settings overflow-auto" style="pointer-events: all;">
+                <span>Тут будут настройки устройств. Выделите любое на схеме.</span>
+            </div>
+            <div id="config_content_save" class="ws-menu-settings overflow-auto" style="margin-top: 8px; pointer-events: all; display: none;">
+            </div>
+        </div>
+
+        <div class="position-absolute start-0 bottom-0" style="margin: 17px; font-weight: 500;">
+            <div class="d-flex justify-content-center ws-shadow" id="NetworkPlayer">
+                <button type="button" class="btn btn-primary w-100" id="NetworkRunButton" disabled>Проверка эмуляции</button>
+            </div>
+            <div id="PacketSlider">
+                <div class="range-slider pt-3" data-start-min="0" data-min="0" data-max="100" data-step="1">
+                    <div class="range-slider-ui mt-0 mb-2" id="PacketSliderInput"></div>
+                    <input class="form-control range-slider-value-min" type="hidden">
+                </div>
+            </div>
+            <small id="NetworkPlayerLabel" class="d-flex justify-content-center text-muted text-center">Ожидание 10-30 сек.</small>
+        </div>
+    </section>
+</main>
+
+    <div id="config_host"></div>
+    <div id="config_hub"></div>
+    <div id="config_switch"></div>
+    <div id="config_edge"></div>
+    <div id="config_router"></div>
+    <div id="config_server"></div>
+    <div id="config_vlan"></div>
+    <div id="config_vxlan"></div>
+{% endblock %}
+
+{% block network %}
+<script>
+    const network_guid = "{{ network.guid }}";
+    const is_lti = "{{ is_lti }}";
+
+    const currentUrl = new URL(window.location);
+    currentUrl.searchParams.set('network_id', network_guid);
+    window.history.pushState({}, '', currentUrl);
+
+    var network_title = "{{ network.title }}";
+    var network_description = "{{ network.description }}";
+
+    var networkData = JSON.parse('{{ network.network | safe }}');
+
+    var network_config = networkData.config;
+    var network_zoom = network_config.zoom;
+    var network_pan_x = network_config.pan_x;
+    var network_pan_y = network_config.pan_y;
+
+    var nodes = networkData.nodes;
+    var edges = networkData.edges;
+    var jobs = networkData.jobs;
+    var packets = networkData.packets || null;
+    var pcaps = networkData.pcaps || null;
+    var ns = null;
+
+    SetNetworkPlayerState(-1)
+    DrawGraph();
+</script>
+
+<script>
+
+$(document).ready(function() {
+    let requirements = [];
+    let max_score = 0;
+
+    // Обработчики изменений
+    $('#mainCheckType').change(function() {
+        const mainType = $(this).val();
+        showFields(mainType);
+    });
+
+    // Показать форму добавления проверки
+    $('#addCheckBtn').click(showForm);
+
+    // Обработчик нажатия кнопки "Сохранить"
+    $('#questionConfigSubmit').click(function() {
+        const sectionId = $('#section_id').val();
+        
+        const questionData = {
+            timer: 0,
+            text: $('#question_title').val(),
+            question_type: "practice",
+            description: $('#question_description').val(),
+            explanation: "",
+            available_host: $('#available_host').val(),
+            available_l2_switch: $('#available_l2_switch').val(),
+            available_l1_hub: $('#available_l1_hub').val(),
+            available_l3_router: $('#available_l3_router').val(),
+            available_server: $('#available_server').val(),
+            start_configuration: network_guid,
+            requirements: requirements,
+            max_score: max_score
+        };
+        
+        url = '/quiz/question/create'
+        if (sectionId != "") {url += '?section_id='+sectionId}
+        
+        // Отправляем запрос
+        $.ajax({
+            url: url,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(questionData),
+            beforeSend: function() {
+                $('#questionConfigSubmit').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Сохранение...');
+            },
+            success: function(response) {
+                if (is_lti) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = response;
+                    document.body.appendChild(tempDiv);
+                    
+                    const form = tempDiv.querySelector('form');
+                    if (form) {
+                        form.submit();
+                    }
+                } else {
+                    if (response.section_id) {
+                        window.location.href = '/quiz/sections/' + response.section_id;
+                    }
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Ошибка:', error);
+                
+                let errorMsg = 'Ошибка при сохранении задания';
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    errorMsg = response.message || errorMsg;
+                } catch (e) {
+                    errorMsg = xhr.responseText || errorMsg;
+                }
+                
+                alert(errorMsg);
+            },
+            complete: function() {
+                $('#questionConfigSubmit').prop('disabled', false).html('Сохранить');
+            }
+        });
+    });
+
+    // Функция обновления select'ов
+    function updateDeviceSelects() {
+        const options = nodes.map(node => 
+            `<option value="${node.data.id}">${node.data.label} (${node.data.id})</option>`
+        ).join('');
+        
+        $('.device-select').each(function() {
+            const currentVal = $(this).val();
+            $(this).html(options);
+            if (currentVal && nodes.some(n => n.data.id === currentVal)) {
+                $(this).val(currentVal);
+            }
+        });
+    }
+    
+    // Делегирование событий для кнопок
+    $(document).on('click', '[data-action="add-vlan-target"]', function() {
+        const containerId = $(this).data('container');
+        const container = $(`#${containerId}`);
+        const targetDiv = $('<div class="vlan-target mb-2 d-flex align-items-center gap-2"></div>');
+        
+        targetDiv.html(`
+            <select class="form-select form-select-sm device-select" style="flex: 1;">
+            </select>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-action="remove-target">×</button>
+        `);
+        
+        container.append(targetDiv);
+        updateDeviceSelects();
+    });
+    
+    $(document).on('click', '[data-action="add-path-target"]', function() {
+        const container = $('#pathTargets');
+        const targetDiv = $('<div class="path-target mb-2 d-flex align-items-center gap-2"></div>');
+        
+        targetDiv.html(`
+            <select class="form-select form-select-sm device-select path-device-select" style="flex: 1;">
+            </select>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-action="remove-target">×</button>
+        `);
+        
+        container.append(targetDiv);
+        updateDeviceSelects();
+    });
+
+    $(document).on('change', '#pathCheckType', function() {
+        showPathFields($(this).val())
+    });
+    
+    // Удаление любого target'а
+    $(document).on('click', '[data-action="remove-target"]', function() {
+        $(this).closest('.vlan-target, .path-target').remove();
+    });
+
+    function showForm() {
+        $('#checkForm').show();
+        $('#mainCheckType').val('device');
+        $('#deviceSelectionContainer').show();
+        $('#networkOptions').hide();
+        $('#deviceOptions').show();
+        $('#checkType').val('cmd');
+        updateDeviceSelects();
+        showFields('device');
+    }
+
+    // Переключение типов проверок
+    $('#networkCheckType').change(() => showFields('network'));
+    $('#deviceCheckType').change(() => showFields('device'));
+    $('#commandType').change(function() {
+        const commandType = $(this).val();
+        $('.command-fields').hide();
+        
+        if (commandType) {
+            $(`#${commandType}Fields`).show();
+            
+            if (commandType === 'echo-request') {
+                showPathFields();
+            }
+        }
+        
+        // Для echo-request показываем направление
+        if (commandType === 'echo-request') {
+            $('#directionType').val('');
+        }
+    });
+
+
+    function showFields(mainType) {
+        // Скрываем все
+        $('#deviceOptions').hide();
+        $('#networkOptions').hide();
+        $('#devicesSelection').hide();
+        $('.check-type-fields').hide();
+        $('#deviceSpecificFields').hide();
+        
+        // Если не выбран основной тип - выходим
+        if (!mainType) return;
+        
+        if (mainType === 'network') {
+            $('#networkOptions').show();
+            const networkType = $('#networkCheckType').val();
+            
+            if (networkType === 'ip_private') {
+                $('#networkIpPrivateFields').show();
+            } else if (networkType === 'vlan_id_above') {
+                $('#networkVlanIdAboveFields').show();
+            }
+            
+        } else if (mainType === 'device') {
+            $('#deviceOptions').show();
+            $('#devicesSelection').show();
+            
+            const deviceType = $('#deviceCheckType').val();
+            if (deviceType) {
+                $('#deviceSpecificFields').show();
+                $(`#${deviceType}Fields`).show();
+                
+                // Показываем/скрываем поле целевого устройства
+                const needsTarget = ['cmd', 'ip_check', 'mask_check', 'ip_equal', 'abstract_ip_equal', 'in_one_network_with'].includes(deviceType);
+                $('#targetDeviceContainer').toggle(needsTarget);
+                
+                // Для команды показываем дополнительные поля
+                if (deviceType === 'cmd') {
+                    const commandType = $('#commandType').val();
+                    if (commandType) {
+                        $(`.command-fields`).hide();
+                        $(`#${commandType}Fields`).show();
+                        
+                        if (commandType === 'echo-request') {
+                            showPathFields();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Показать/скрыть поля пути
+    function showPathFields(pathType) {      
+        $('.path-fields').hide();
+        
+        if (pathType === 'specific') {
+            $('#specificPathFields').show();
+            updateDeviceSelects();
+        }
+    }
+
+
+    // Функция для сохранения проверки
+    $('#saveCheckBtn').click(function() {
+        const mainType = $('#mainCheckType').val();
+        const points = parseInt($('#checkPoints').val()) || 1;
+        max_score+=points;
+        let newRequirement = {};
+        
+        try {
+            if (mainType === 'network') {
+                // Проверка сети
+                const networkType = $('#networkCheckType').val();
+                
+                if (networkType === 'ip_private') {
+                    newRequirement = {
+                        "network_config": {
+                            "ip_private": true,
+                            "points": points
+                        }
+                    };
+                } else if (networkType === 'vlan_id_above') {
+                    newRequirement = {
+                        "network_config": {
+                            "vlan_id_above": parseInt($('#vlanIdValue').val()) || 100,
+                            "points": points
+                        }
+                    };
+                }
+                
+            } else {
+                // Проверка устройства
+                const deviceCheckType = $('#deviceCheckType').val();
+                let deviceConfig = {};
+                
+                // Получаем устройства в зависимости от типа проверки
+                const sourceDevice = $('#sourceDeviceSelect').val();
+                const targetDevice = $('#targetDeviceSelect').val();
+                
+                if (!sourceDevice) throw new Error('Выберите исходное устройство');
+                
+                switch(deviceCheckType) {
+                    case 'cmd':
+                        const commandType = $('#commandType').val();
+                        const cmdConfig = {
+                            "points": points
+                        };
+                        
+                        switch(commandType) {
+                            case 'echo-request':
+                                if (!targetDevice) throw new Error('Выберите целевое устройство');
+                                if (!$('#directionType').val()) throw new Error('Выберите направление');
+                                
+                                cmdConfig["echo-request"] = targetDevice;
+                                cmdConfig["direction"] = $('#directionType').val();
+                                
+                                // Проверка пути
+                                const pathType = $('#pathCheckType').val();
+                                
+                                if (pathType === 'different') {
+                                    // Разные пути
+                                    cmdConfig["points"] = 0
+                                    cmdConfig["different_paths"] = {
+                                        "points": points
+                                    };
+                                } else if (pathType === 'specific') {
+                                    // Конкретный путь
+                                    const pathDevices = $('#pathTargets .path-device-select')
+                                        .map(function() { return $(this).val(); })
+                                        .get()
+                                        .filter(Boolean);
+                                    
+                                    if (pathDevices.length > 0) {
+                                        cmdConfig["points"] = 0
+                                        cmdConfig["path"] = {
+                                            "required_path": pathDevices,
+                                            "points": points
+                                        };
+                                    }
+                                }
+                                break;
+                                
+                            case 'no-echo-request':
+                                if (!targetDevice) throw new Error('Выберите целевое устройство');
+                                cmdConfig["no-echo-request"] = targetDevice;
+                                break;
+                                
+                            case 'tunnel-echo-request':
+                                if (!targetDevice) throw new Error('Выберите целевое устройство');
+                                cmdConfig["tunnel-echo-request"] = targetDevice;
+                                cmdConfig["tunnel_start"] = $('#tunnelStart').val();
+                                cmdConfig["tunnel_end"] = $('#tunnelEnd').val();
+                                
+                                if ($('#differentPathsCheckTunnel').is(':checked')) {
+                                    cmdConfig["different_paths"] = {
+                                        "points": points
+                                    };
+                                }
+                                break;
+                                
+                            case 'vxlan-echo-request':
+                                if (!targetDevice) throw new Error('Выберите целевое устройство');
+                                cmdConfig["vxlan-echo-request"] = targetDevice;
+                                cmdConfig["tunnel_start"] = $('#vxlanTunnelStart').val();
+                                cmdConfig["tunnel_end"] = $('#vxlanTunnelEnd').val();
+                                
+                                if ($('#differentPathsCheckVxlan').is(':checked')) {
+                                    cmdConfig["different_paths"] = {
+                                        "points": points
+                                    };
+                                }
+                                break;
+                        }
+                        
+                        deviceConfig["cmd"] = cmdConfig;
+                        break;
+                        
+                    case 'ip_check':
+                        if (!targetDevice) throw new Error('Выберите целевое устройство');
+                        deviceConfig["ip_check"] = {
+                            "to": targetDevice,
+                            "points": points
+                        };
+                        break;
+                        
+                    case 'mask_check':
+                        if (!targetDevice) throw new Error('Выберите целевое устройство');
+                        deviceConfig["mask_check"] = {
+                            "to": targetDevice,
+                            "subnet_mask": parseInt($('#expectedMask').val()) || 24,
+                            "points": points
+                        };
+                        break;
+                        
+                    case 'equal_vlan_id':
+                    case 'no_equal_vlan_id':
+                        const targets = $(`#${deviceCheckType === 'equal_vlan_id' ? 'equal' : 'noEqual'}VlanTargets .device-select`)
+                            .map(function() { return $(this).val(); })
+                            .get()
+                            .filter(Boolean);
+                        
+                        if (targets.length === 0) throw new Error('Добавьте хотя бы одну цель');
+                        
+                        deviceConfig[deviceCheckType] = {
+                            "targets": targets,
+                            "points": points
+                        };
+                        break;
+                        
+                    case 'default_gw':
+                        deviceConfig["default_gw"] = {
+                            "points": points
+                        };
+                        break;
+                        
+                    case 'ip_equal':
+                        if (!targetDevice) throw new Error('Выберите целевое устройство');
+                        deviceConfig["ip_equal"] = {
+                            "to": targetDevice,
+                            "expected_ip": $('#expectedIp').val(),
+                            "points": points
+                        };
+                        break;
+                        
+                    case 'abstract_ip_equal':
+                        if (!targetDevice) throw new Error('Выберите целевое устройство');
+                        deviceConfig["abstract_ip_equal"] = {
+                            "to": targetDevice,
+                            "points": points
+                        };
+                        break;
+                        
+                    case 'in_one_network_with':
+                        if (!targetDevice) throw new Error('Выберите целевое устройство');
+                        deviceConfig["in_one_network_with"] = {
+                            "to": targetDevice,
+                            "points": points
+                        };
+                        break;
+                }
+                
+                newRequirement[sourceDevice] = deviceConfig;
+            }
+            
+            if (Object.keys(newRequirement).length === 0) {
+                throw new Error('Не удалось создать проверку');
+            }
+            
+            requirements.push(newRequirement);
+            updateUI();
+            cancelCheck();
+            
+        } catch (error) {
+            alert('Ошибка: ' + error.message);
+        }
+    });
+
+    // Отмена добавления
+    $('#cancelCheckBtn').click(cancelCheck);
+
+    function cancelCheck() {
+        $('#checkForm').hide();
+        // Очищаем только поля внутри формы проверки
+        $('#checkForm input[type="text"], #checkForm input[type="number"]').val('');
+        $('#checkForm .device-select').val('');
+        $('#checkForm #equalVlanTargets, #checkForm #noEqualVlanTargets').empty();
+        
+        // Также стоит сбросить выбранные опции к значениям по умолчанию
+        $('#mainCheckType').val('device');
+        $('#deviceCheckType').val('cmd');
+        $('#commandType').val('echo-request');
+        $('#networkCheckType').val('ip_private');
+        $('#checkPoints').val('1');
+        
+        // Скрыть все дополнительные поля
+        $('.check-type-fields').hide();
+        $('.command-fields').hide();
+        $('.path-fields').hide();
+    }
+
+    // Функция для обновления отображения в UI
+    function updateUI() {
+        const list = $('#requirementsList').empty();
+        max_score = 0
+        
+        if (requirements.length === 0) {
+            list.html('<div class="text-muted text-center p-3">Нет добавленных проверок</div>');
+            return;
+        }
+        
+        requirements.forEach((req, index) => {
+            if (req.network_config) {
+                // Проверка сети
+                let networkType, details;
+                const points = req.network_config.points;
+                
+                if (req.network_config.ip_private !== undefined) {
+                    networkType = 'Приватные IP-адреса';
+                    details = 'Все IP должны быть приватными';
+                } else if (req.network_config.vlan_id_above !== undefined) {
+                    networkType = `VLAN ID > ${req.network_config.vlan_id_above}`;
+                    details = 'Все VLAN ID должны быть выше указанного';
+                }
+                
+                const card = $(`
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="d-flex ">
+                                        <h6 class="card-title mb-0">Проверка сети</h6>
+                                        <span class="badge bg-primary ms-2">баллов: ${points}</span>
+                                    </div>
+                                    <p class="card-text text-muted mb-1" style="font-size: 0.9em;">
+                                        ${networkType}
+                                    </p>
+                                    <p class="card-text mb-0" style="font-size: 0.85em;">
+                                        ${details}
+                                    </p>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger" 
+                                        data-index="${index}" 
+                                        data-action="remove-check">
+                                    ×
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `);
+                
+                list.append(card);
+                max_score+=points
+                
+            } else {
+                // Проверка устройства
+                const deviceId = Object.keys(req)[0];
+                const checkType = Object.keys(req[deviceId])[0];
+                const config = req[deviceId][checkType];
+                var points = config.points;
+                
+                const typeName = getCheckTypeName(checkType);
+                
+                // Детали
+                let details = '';
+                switch(checkType) {
+                    case 'cmd':
+                        const cmdType = Object.keys(config).find(k => k.includes('echo-request'));
+                        if (cmdType === 'echo-request') {
+                            details = `Ping до: ${config['echo-request']}`;
+                            if (config.direction) details += ` (${config.direction === 'one-way' ? 'однонаправленный' : 'двунаправленный'})`;
+                            if (config.path) { details += `<br>Путь: ${config.path.required_path.join(config.direction === 'one-way' ? '  →  ' : '  ↔  ')}`; points = config.path.points; }
+                            if (config.different_paths) { details += '<br>Разные пути'; points = config.different_paths.points; }
+                        } else if (cmdType === 'no-echo-request') {
+                            details = `Нет ping до: ${config['no-echo-request']}`;
+                        } else if (cmdType === 'tunnel-echo-request') {
+                            details = `Туннель ping до: ${config['tunnel-echo-request']}<br>Туннель: ${config.tunnel_start} → ${config.tunnel_end}`;
+                        } else if (cmdType === 'vxlan-echo-request') {
+                            details = `VXLAN ping до: ${config['vxlan-echo-request']}<br>Туннель: ${config.tunnel_start} → ${config.tunnel_end}`;
+                        }
+                        break;
+                        
+                    case 'ip_check':
+                        details = `Проверка приватности IP к: ${config.to}`;
+                        break;
+                        
+                    case 'mask_check':
+                        details = `Маска /${config.subnet_mask} к: ${config.to}`;
+                        break;
+                        
+                    case 'equal_vlan_id':
+                        details = `Совпадает VLAN с: ${config.targets.join(', ')}`;
+                        break;
+                        
+                    case 'no_equal_vlan_id':
+                        details = `Разный VLAN с: ${config.targets.join(', ')}`;
+                        break;
+                        
+                    case 'default_gw':
+                        details = 'Маршрут по умолчанию не настроен';
+                        break;
+                        
+                    case 'ip_equal':
+                        details = `IP ${config.expected_ip} к: ${config.to}`;
+                        break;
+                        
+                    case 'abstract_ip_equal':
+                        details = `Абстрактный IP к: ${config.to}`;
+                        break;
+                        
+                    case 'in_one_network_with':
+                        details = `В одной сети с: ${config.to}`;
+                        break;
+                }
+                
+                const card = $(`
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div style="flex: 1;">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div>
+                                            <div class="d-flex">
+                                                <h6 class="card-title mb-0">${deviceId}</h6>
+                                                <span class="badge bg-primary ms-2">баллов: ${points}</span>
+                                            </div>
+                                            <small class="text-muted">${typeName}</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-2" style="font-size: 0.9em;">
+                                        ${details.replace(/<br>/g, '<div class="mt-1"></div>')}
+                                    </div>
+                                </div>
+                                
+                                <button class="btn btn-sm btn-outline-danger ms-2" 
+                                        data-index="${index}" 
+                                        data-action="remove-check"
+                                        style="flex-shrink: 0;">
+                                    ×
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `);
+                
+                list.append(card);
+                max_score+=points
+            }
+        });
+        
+        $('#jsonOutput').text(JSON.stringify({"requirements": requirements}, null, 2));
+    }
+
+    // Добавляем обработчик удаления через делегирование
+    $(document).on('click', '[data-action="remove-check"]', function() {
+        const index = $(this).data('index');
+        if (confirm('Удалить эту проверку?')) {
+            requirements.splice(index, 1);
+            updateUI();
+        }
+    });
+
+    // Вспомогательная функция для названий проверок
+    function getCheckTypeName(type) {
+        const names = {
+            'cmd': 'Команда',
+            'ip_check': 'Проверка приватности IP',
+            'mask_check': 'Проверка маски',
+            'equal_vlan_id': 'Одинаковые VLAN',
+            'no_equal_vlan_id': 'Разные VLAN',
+            'default_gw': 'Маршрут по умолчанию',
+            'ip_equal': 'Конкретный IP',
+            'abstract_ip_equal': 'Абстрактный IP',
+            'in_one_network_with': 'В одной сети'
+        };
+        return names[type] || type;
+    }
+        
+    // Инициализация
+    updateUI();
+});
+</script>
+
+{% endblock %}
+

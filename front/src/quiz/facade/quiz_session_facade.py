@@ -15,6 +15,23 @@ import random
 
 
 def start_session(section_id: str, user: User):
+
+    existing_session = (
+        QuizSession.query.filter(
+            QuizSession.created_by_id == user.id,
+            QuizSession.section_id == section_id,
+            QuizSession.is_deleted == False,
+            QuizSession.finished_at.is_(None)
+        ).first()
+    )
+
+    if existing_session:
+        return (
+            existing_session.id,
+            [sq.id for sq in existing_session.sessions],  # type:ignore[attr-defined]
+            201,
+        )
+
     section = Section.query.filter_by(id=section_id).first()
     if section is None or section.is_deleted:
         return None, None, 404

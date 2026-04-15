@@ -45,7 +45,7 @@
                                 <a href="{{ url_for('web_network') }}?guid={{ pr.network_guid }}"
                                    target="_blank"
                                    class="btn btn-outline-primary btn-sm">
-                                    Посмотреть мой ответ
+                                    Посмотреть ответ
                                 </a>
                             </div>
                         </div>
@@ -88,7 +88,7 @@
                             <a href="{{ url_for('web_network') }}?guid={{ practice['network_guid'] }}"
                                target="_blank"
                                class="btn btn-outline-primary btn-sm">
-                                Посмотреть мой ответ
+                                Посмотреть ответ
                             </a>
                             {% endif %}
                         </div>
@@ -123,9 +123,15 @@
     {% endif %}
 
     <div class="d-flex align-items-center text-start mt-4">
+    {% if returnToLtiPlatformUrl %}
+        <button class="btn btn-primary me-3" id="backToPlatform" style="font-size: 1rem; height: 2.5rem;">
+            Вернуться на платформу
+        </button>
+    {% else %}
         <button class="btn btn-primary me-3" id="backToTests" style="font-size: 1rem; height: 2.5rem;">
             Назад к тестам
         </button>
+    {% endif %}
     </div>
 </section>
 
@@ -137,11 +143,20 @@
         if (testName) document.getElementById("test_name").textContent = testName;
         if (sectionName) document.getElementById("section_name").textContent = sectionName;
 
-        const backBtn = document.getElementById("backToTests");
-        if (backBtn) {
-            backBtn.addEventListener('click', function () {
+        const backToTestsBtn = document.getElementById("backToTests");
+        if (backToTestsBtn) {
+            backToTestsBtn.addEventListener('click', function () {
                 sessionStorage.clear();
                 window.location.href = '/quiz/test/all';
+            });
+        }
+        
+        const returnToLtiPlatformUrl = "{{ returnToLtiPlatformUrl }}";
+        const backToPlatformBtn = document.getElementById("backToPlatform");
+        if (backToPlatformBtn) {
+            backToPlatformBtn.addEventListener('click', function () {
+                sessionStorage.clear();
+                window.location.href = returnToLtiPlatformUrl;
             });
         }
 

@@ -17,6 +17,9 @@ from quiz.util.dto import (
     PracticeAnswerResultDto,
     calculate_max_score,
 )
+
+import lti_provider.controller as lti
+from flask import session
 from quiz.service.network_upload_service import prepare_task
 
 MOSCOW_TZ = ZoneInfo("Europe/Moscow")
@@ -96,7 +99,7 @@ def get_session_question_data(session_question_id: str):
     result = {
         "id": sq.id,
         "quiz_session_id": sq.quiz_session_id,
-        "test_name": test.name,
+        "test_name": getattr(test, 'name', ''),
         "section_name": section.name,
         "question_ids": question_ids,
         "question_index": current_index,
@@ -347,6 +350,9 @@ def answer_on_session_question(session_question_id: str, answer, user: User):
     session_question = SessionQuestion.query.filter_by(id=session_question_id).first()
     if session_question.created_by_id != user.id:
         return None, 403
+
+    if "launch_id" in session: lti.send(session_question, result_type="solution")
+
     question = session_question.question
 
     # practice
@@ -403,7 +409,7 @@ def answer_on_session_question(session_question_id: str, answer, user: User):
 
         if score != max_score and len(hints) == 0:
             hints.append("По вашему решению не предусмотрены подсказки.")
-
+        
         network = Network.query.filter_by(guid=session_question.network_guid).first()
         network.author_id = 0
         db.session.add(network)
@@ -414,6 +420,8 @@ def answer_on_session_question(session_question_id: str, answer, user: User):
 
         db.session.add(session_question)
         db.session.commit()
+
+        if "launch_id" in session: lti.send(session_question, result_type="solution_score")
 
         return (
             PracticeAnswerResultDto(score, question.explanation, max_score, hints),

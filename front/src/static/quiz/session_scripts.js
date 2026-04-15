@@ -47,12 +47,24 @@ function finishQuiz() {
         .then(response => response.json())
         .then(data => {
             console.log(data);
-
-            window.location.href = sessionResultUrl + '?id=' + sessionId
+            showResult();
         })
         .catch(error => {
             console.error('Error:', error);
         });
+}
+
+function showResult()
+{
+    if (returnToLtiPlatformUrl != 'None')
+    {
+        const testName = sessionStorage.getItem("test_name");
+        const isRetakeable = sessionStorage.getItem("is_retakeable");
+        sessionStorage.clear()
+        sessionStorage.setItem("test_name", testName);
+        sessionStorage.setItem("is_retakeable", isRetakeable);
+    }
+    window.location.href = returnToLtiPlatformUrl != 'None' ? returnToLtiPlatformUrl : sessionResultUrl + '?id=' + sessionId;
 }
 
 function RunAndWaitSimulation(network_guid) {
@@ -161,8 +173,8 @@ function handlePracticeAnswerResult(data) {
     }
 }
 
-function handleScoreBasedVisibility() {
-    const answerButton = document.querySelector('button[name="answerQuestion"]');
+function handleScoreBasedVisibility(isExam) {
+    const answerButton = isExam ? document.querySelector('button[name="answerExamQuestion"]') : document.querySelector('button[name="answerQuestion"]');
     const nextButton = document.querySelector('button[name="nextQuestion"]');
     const finishButton = document.querySelector('button[name="finishQuiz"]');
     const resultsButton = document.querySelector('button[name="seeResults"]');
@@ -180,14 +192,14 @@ function handleScoreBasedVisibility() {
         }
         if (resultsButton) {
             resultsButton.hidden = false;
-            resultsButton.textContent = "Посмотреть результаты";
-            resultsButton.classList.add('btn-outline-primary'); 
+            resultsButton.textContent = returnToLtiPlatformUrl != 'None' ? "Вернуться на платформу" : "Посмотреть результаты";
+            resultsButton.classList.add('btn-outline-primary');
         }
     } else {
         if (nextButton) {
             nextButton.hidden = false;
             nextButton.textContent = "Следующий вопрос";
-            nextButton.classList.add('btn-outline-primary'); 
+            nextButton.classList.add('btn-outline-primary');
         }
         if (resultsButton) {
             resultsButton.hidden = true;
@@ -206,40 +218,6 @@ function displayHintsInModal(hints) {
             hintElement.textContent = `${index + 1}. ${hint}`;
             hintsContainer.appendChild(hintElement);
         });
-    }
-}
-
-function handleExamScoreBasedVisibility() {
-    const answerButton = document.querySelector('button[name="answerExamQuestion"]');
-    const nextButton = document.querySelector('button[name="nextQuestion"]');
-    const finishButton = document.querySelector('button[name="finishQuiz"]');
-    const resultsButton = document.querySelector('button[name="seeResults"]');
-
-    if (answerButton) {
-        answerButton.hidden = true;
-    }
-
-    if (isLastQuestion) {
-        if (nextButton) {
-            nextButton.hidden = true;
-        }
-        if (finishButton) {
-            finishButton.hidden = true;
-        }
-        if (resultsButton) {
-            resultsButton.hidden = false;
-            resultsButton.textContent = "На страницу результатов";
-            resultsButton.classList.add('btn-outline-primary'); 
-        }
-    } else {
-        if (nextButton) {
-            nextButton.hidden = false;
-            nextButton.textContent = "Следующий вопрос";
-            nextButton.classList.add('btn-outline-primary'); 
-        }
-        if (resultsButton) {
-            resultsButton.hidden = true;
-        }
     }
 }
 
@@ -277,7 +255,7 @@ function answerExamQuestion() {
     });
 
     showAnswerSavedBanner()
-    handleExamScoreBasedVisibility()
+    handleScoreBasedVisibility(isExam=true)
 }
 
 let isAnswering = false;
@@ -322,16 +300,31 @@ async function answerQuestion() {
         return;
     }
 
-    fetch(answerQuestionURL + '?id=' + questionId, {
+        const fetchOptions = {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ answer })
-    })
+    };
+
+    if (returnToLtiPlatformUrl && returnToLtiPlatformUrl !== 'None') {
+        fetchOptions.keepalive = true;
+
+        fetch(answerQuestionURL + '?id=' + questionId, fetchOptions);
+        finishQuiz();
+        
+        setTimeout(() => {
+            window.location.href = returnToLtiPlatformUrl;
+        }, 1000);
+        
+        return;
+    }
+
+    fetch(answerQuestionURL + '?id=' + questionId, fetchOptions)
     .then(response => response.json())
     .then(data => {
-        sessionStorage.setItem('answer', JSON.stringify(answer)); // Сохраняем факт ответа
+        sessionStorage.setItem('answer', JSON.stringify(answer));
 
         if (questionType === "practice") {
             handlePracticeAnswerResult(data);
@@ -347,7 +340,7 @@ async function answerQuestion() {
                 }
             }                           
 
-            handleScoreBasedVisibility();
+            handleScoreBasedVisibility(isExam=false);
         } else {
             sessionStorage.setItem('is_correct', data['is_correct']);
             sessionStorage.setItem('explanation', data['explanation']);
@@ -389,13 +382,8 @@ function handleUnload(e) {
     window.removeEventListener('beforeunload', handleUnload);
     e.preventDefault();
     e.returnValue = '';
+
     finishQuiz();
-}
-
-const hasTimer = document.querySelector('[id$="timer"]') !== null;
-
-if (hasTimer) {
-    window.addEventListener('beforeunload', handleUnload);
 }
 
 // Markdown convert
@@ -450,6 +438,8 @@ timer = sessionStorage.getItem('timer');
 const questionIds = JSON.parse(sessionStorage.getItem('question_ids'));
 const questionIndex = parseInt(sessionStorage.getItem('question_index'));
 const isLastQuestion = questionIndex + 1 >= questionsCount;
+const returnToLtiPlatformUrl = sessionStorage.getItem('returnToLtiPlatformUrl');
+
 
 if (timer !== null && parseInt(timer) !== 0) {
     setInterval(updateTimer, 1000);
@@ -460,11 +450,15 @@ if (timer !== null && parseInt(timer) !== 0) {
     if (questionIndex === 0 && sessionStorage.getItem('quizStartTime') == null) {
         sessionStorage.setItem('quizStartTime', new Date().getTime().toString());
     }
+
+    setTimeout(() => {
+        window.addEventListener('beforeunload', handleUnload);
+    }, 1000);
 }
 
 // Add event listener for finishQuiz and nextQuestion buttons
 document.querySelector('button[name="finishQuiz"]')?.addEventListener('click', finishQuiz);
-document.querySelector('button[name="seeResults"]')?.addEventListener('click', seeResults);
+document.querySelector('button[name="seeResults"]').addEventListener('click', seeResults);
 document.querySelector('button[name="answerQuestion"]')?.addEventListener('click', answerQuestion);
 document.querySelector('button[name="answerExamQuestion"]')?.addEventListener('click', answerExamQuestion);
 document.querySelector('button[name="nextQuestion"]')?.addEventListener('click', nextQuestion);
