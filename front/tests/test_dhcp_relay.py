@@ -72,225 +72,216 @@ class TestDHCPRelay:
 
     JSON_NODES = [
         {
-            "data":{
-                "id":"host_1",
-                "label":"host_1"
+            "classes": ["l2_switch"],
+            "config": {
+                "label": "l2sw1",
+                "stp": 0,
+                "type": "l2_switch"
             },
-            "position":{
-                "x":250,
-                "y":275
+            "data": {
+                "id": "l2sw1",
+                "label": "l2sw1"
             },
-            "classes":[
-                "host"
-            ],
-            "config":{
-                "type":"host",
-                "label":"host_1",
-                "default_gw":""
-            },
-            "interface":[
+            "interface": [
                 {
-                    "id":"iface_61426530",
-                    "name":"iface_61426530",
-                    "connect":"edge_mnysboa63sl7masz29i"
-                }
-            ]
-        },
-        {
-            "data":{
-                "id":"l2sw1",
-                "label":"l2sw1"
-            },
-            "position":{
-                "x":250,
-                "y":175
-            },
-            "classes":[
-                "l2_switch"
-            ],
-            "config":{
-                "type":"l2_switch",
-                "label":"l2sw1",
-                "stp":0
-            },
-            "interface":[
-                {
-                    "id":"l2sw1_1",
-                    "name":"l2sw1_1",
-                    "connect":"edge_mnysboa63sl7masz29i",
-                    "vlan":None,
-                    "type_connection":None
+                    "connect": "edge_mnxf20jpi9lk28vbr2",
+                    "id": "l2sw1_1",
+                    "name": "l2sw1_1",
+                    "type_connection": None,
+                    "vlan": None
                 },
                 {
-                    "id":"l2sw1_2",
-                    "name":"l2sw1_2",
-                    "connect":"edge_mnysbpcfq1uwnl5unw",
-                    "vlan":None,
-                    "type_connection":None
+                    "connect": "edge_mnym51eah6wx0v6s9h",
+                    "id": "l2sw1_2",
+                    "name": "l2sw1_2",
+                    "type_connection": None,
+                    "vlan": None
                 }
-            ]
+            ],
+            "position": {
+                "x": 25,
+                "y": 50
+            }
         },
         {
-            "data":{
-                "id":"router_1",
-                "label":"router_1"
+            "classes": ["l2_switch"],
+            "config": {
+                "label": "l2sw2",
+                "stp": 0,
+                "type": "l2_switch"
             },
-            "position":{
-                "x":350,
-                "y":75
+            "data": {
+                "id": "l2sw2",
+                "label": "l2sw2"
             },
-            "classes":[
-                "l3_router"
-            ],
-            "config":{
-                "type":"router",
-                "label":"router_1",
-                "default_gw":""
-            },
-            "interface":[
+            "interface": [
                 {
-                    "id":"iface_73510361",
-                    "name":"iface_73510361",
-                    "connect":"edge_mnysbpcfq1uwnl5unw",
-                    "ip":"172.16.10.3",
-                    "netmask":24
+                    "connect": "edge_mnwcvw5j8b38v1xr5sj",
+                    "id": "l2sw2_2",
+                    "name": "l2sw2_2",
+                    "type_connection": None,
+                    "vlan": None
                 },
                 {
-                    "id":"iface_37513030",
-                    "name":"iface_37513030",
-                    "connect":"edge_mnysbqjka0cbjig1jb7",
-                    "ip":"192.168.10.3",
-                    "netmask":24
+                    "connect": "edge_mnym5331cjpgqzraqy4",
+                    "id": "l2sw2_3",
+                    "name": "l2sw2_3",
+                    "type_connection": None,
+                    "vlan": None
                 }
-            ]
+            ],
+            "position": {
+                "x": 100,
+                "y": 50
+            }
         },
         {
-            "data":{
-                "id":"l2sw2",
-                "label":"l2sw2"
+            "classes": ["server"],
+            "config": {
+                "default_gw": "",
+                "label": "server_1",
+                "type": "server"
             },
-            "position":{
-                "x":400,
-                "y":175
+            "data": {
+                "id": "server_1",
+                "label": "server_1"
             },
-            "classes":[
-                "l2_switch"
-            ],
-            "config":{
-                "type":"l2_switch",
-                "label":"l2sw2",
-                "stp":0
-            },
-            "interface":[
+            "interface": [
                 {
-                    "id":"l2sw2_1",
-                    "name":"l2sw2_1",
-                    "connect":"edge_mnysbqjka0cbjig1jb7",
-                    "vlan":None,
-                    "type_connection":None
+                    "connect": "edge_mnwcvw5j8b38v1xr5sj",
+                    "id": "iface_16417632",
+                    "ip": "192.168.10.2",
+                    "name": "iface_16417632",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 100,
+                "y": 100
+            }
+        },
+        {
+            "classes": ["host"],
+            "config": {
+                "default_gw": "",
+                "label": "host_1",
+                "type": "host"
+            },
+            "data": {
+                "id": "host_1",
+                "label": "host_1"
+            },
+            "interface": [
+                {
+                    "connect": "edge_mnxf20jpi9lk28vbr2",
+                    "id": "iface_46653148",
+                    "name": "iface_46653148"
+                }
+            ],
+            "position": {
+                "x": 25,
+                "y": 100
+            }
+        },
+        {
+            "classes": ["l3_router"],
+            "config": {
+                "default_gw": "",
+                "label": "router_1",
+                "type": "router"
+            },
+            "data": {
+                "id": "router_2",
+                "label": "router_1"
+            },
+            "interface": [
+                {
+                    "connect": "edge_mnym51eah6wx0v6s9h",
+                    "id": "iface_02514152",
+                    "ip": "172.16.10.3",
+                    "name": "iface_02514152",
+                    "netmask": 24
                 },
                 {
-                    "id":"l2sw2_2",
-                    "name":"l2sw2_2",
-                    "connect":"edge_mnysbrok5nl01pdvoe3",
-                    "vlan":None,
-                    "type_connection":None
+                    "connect": "edge_mnym5331cjpgqzraqy4",
+                    "id": "iface_64411470",
+                    "ip": "192.168.10.3",
+                    "name": "iface_64411470",
+                    "netmask": 24
                 }
-            ]
-        },
-        {
-            "data":{
-                "id":"server_1",
-                "label":"server_1"
-            },
-            "position":{
-                "x":400,
-                "y":275
-            },
-            "classes":[
-                "server"
             ],
-            "config":{
-                "type":"server",
-                "label":"server_1",
-                "default_gw":"192.168.10.3"
-            },
-            "interface":[
-                {
-                    "id":"iface_84271537",
-                    "name":"iface_84271537",
-                    "connect":"edge_mnysbrok5nl01pdvoe3",
-                    "ip":"192.168.10.2",
-                    "netmask":24
-                }
-            ]
+            "position": {
+                "x": 75,
+                "y": 0
+            }
         }
     ]
     JSON_EDGES = [
         {
-            "data":{
-                "id":"edge_mnysboa63sl7masz29i",
-                "source":"host_1",
-                "target":"l2sw1",
-                "loss_percentage":0,
-                "duplicate_percentage":0
+            "data": {
+                "id": "edge_mnysboa63sl7masz29i",
+                "source": "host_1",
+                "target": "l2sw1",
+                "loss_percentage": 0,
+                "duplicate_percentage": 0
             }
         },
         {
-            "data":{
-                "id":"edge_mnysbpcfq1uwnl5unw",
-                "source":"l2sw1",
-                "target":"router_1",
-                "loss_percentage":0,
-                "duplicate_percentage":0
+            "data": {
+                "id": "edge_mnysbpcfq1uwnl5unw",
+                "source": "l2sw1",
+                "target": "router_1",
+                "loss_percentage": 0,
+                "duplicate_percentage": 0
             }
         },
         {
-            "data":{
-                "id":"edge_mnysbqjka0cbjig1jb7",
-                "source":"router_1",
-                "target":"l2sw2",
-                "loss_percentage":0,
-                "duplicate_percentage":0
+            "data": {
+                "id": "edge_mnysbqjka0cbjig1jb7",
+                "source": "router_1",
+                "target": "l2sw2",
+                "loss_percentage": 0,
+                "duplicate_percentage": 0
             }
         },
         {
-            "data":{
-                "id":"edge_mnysbrok5nl01pdvoe3",
-                "source":"l2sw2",
-                "target":"server_1",
-                "loss_percentage":0,
-                "duplicate_percentage":0
+            "data": {
+                "id": "edge_mnysbrok5nl01pdvoe3",
+                "source": "l2sw2",
+                "target": "server_1",
+                "loss_percentage": 0,
+                "duplicate_percentage": 0
             }
         }
     ]
     JSON_JOBS = [
         {
-            'id':'90f1af9818c24105b9418c1a503eb04d',
-            'job_id':108,
-            'print_cmd':'dhcp client',
-            'arg_1':'iface_61426530',
-            'level':0,
-            'host_id':'host_1'
+            "id": "90f1af9818c24105b9418c1a503eb04d",
+            "job_id": 108,
+            "print_cmd": "dhcp client",
+            "arg_1": "iface_61426530",
+            "level": 0,
+            "host_id": "host_1"
         },
         {
-            'id':'60b97a16a1cd4ae2aaa921b77f7ec2fd',
-            'job_id':204,
-            'print_cmd':'dnsmasq --dhcp-relay=172.16.10.3,192.168.10.2', 'arg_1':'192.168.10.2',
-            'arg_2':'172.16.10.3',
-            'level':1,
-            'host_id':'router_1'
+            "id": "60b97a16a1cd4ae2aaa921b77f7ec2fd",
+            "job_id": 204,
+            "print_cmd": "dnsmasq --dhcp-relay=172.16.10.3,192.168.10.2",
+            "arg_1": "192.168.10.2",
+            "arg_2": "172.16.10.3",
+            "level": 1,
+            "host_id": "router_1"
         },
         {
-            'id':'1ed7256caf6f4f75ae50eddb5607920c',
-            'job_id':203,
-            'print_cmd':'dhcp ip range: 172.16.10.10,172.16.10.100/24 gw:172.16.10.3',
-            'arg_1':'172.16.10.10',
-            'arg_2':'172.16.10.100',
-            'arg_3':'24',
-            'arg_4':'172.16.10.3',
-            'arg_5':'iface_84271537',
-            'level':2,
-            'host_id':'server_1'
+            "id": "1ed7256caf6f4f75ae50eddb5607920c",
+            "job_id": 203,
+            "print_cmd": "dhcp ip range: 172.16.10.10,172.16.10.100/24 gw: 172.16.10.3",
+            "arg_1": "172.16.10.10",
+            "arg_2": "172.16.10.100",
+            "arg_3": "24",
+            "arg_4": "172.16.10.3",
+            "arg_5": "iface_84271537",
+            "level": 2,
+            "host_id": "server_1"
         }
     ]
