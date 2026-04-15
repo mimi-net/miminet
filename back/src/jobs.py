@@ -7,7 +7,7 @@ from typing import Any, Callable, List, Dict
 from network_schema import Job
 from mininet.log import info
 from ipmininet.host.config.dnsmasq import Dnsmasq
-from ipmininet.router.config.dhcphelper import DHCPHelper
+from ipmininet.router.config.dhcprelay import DHCPRelay
 
 
 def filter_arg_for_options(
@@ -537,17 +537,15 @@ def dhcp_server(job: Job, job_host):
 
 def dhcp_relay(job: Job, job_host):
     dhcp_server_ip = job.arg_1
-    dhcp_server_mask = job.arg_2
-    intf = job.arg_3
-    daemon = DHCPHelper(
+    listening_ip = job.arg_2
+    daemon = DHCPRelay(
         node=job_host,
         dhcp_server_ip=dhcp_server_ip,
-        dhcp_server_mask=dhcp_server_mask,
-        intf=intf,
+        listening_ip=listening_ip,
     )
     job_host.build_daemon(daemon)
     job_host.start_daemon(daemon)
-    info(f"dhcp-helper -s {dhcp_server_ip} -i {intf}")
+    info(f"dnsmasq --dhcp-relay={listening_ip},{dhcp_server_ip}")
 
 
 class Jobs:

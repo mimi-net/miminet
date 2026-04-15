@@ -937,7 +937,6 @@ const ConfigRouterJobOnChange = function(evnt) {
             break;
         case '204':
             UpdateRouterForm('config_router_dhcp_relay_script');
-            FillDeviceSelectIntf("#config_router_dhcp_relay_select_iface_field", "#router_id", "Выберите линк", false)
             break;
         default:
             console.log("Unknown target.value");
@@ -1418,10 +1417,8 @@ const EditJobInRouter = function(router_id, job_id, network_guid) {
                 break;
             case '204': // Добавить DHCP Relay
                 UpdateRouterForm('config_router_dhcp_relay_script');
-                FillDeviceSelectIntf("#config_router_dhcp_relay_select_iface_field", "#router_id", "Выберите линк", false);
-                $('#config_router_dhcp_relay_ip_input_field').val(job.arg_1 || '');
-                $('#config_router_dhcp_relay_mask_input_field').val(job.arg_2 || '0');
-                $('#config_router_dhcp_relay_select_iface_field').val(job.arg_3 || '');
+                $('#config_router_dhcp_relay_server_ip_input_field').val(job.arg_1 || '');
+                $('#config_router_dhcp_relay_listening_ip_input_field').val(job.arg_2 || '');
                 break;
             default:
                 console.error('Unknown job type for editing:', job.job_id);
