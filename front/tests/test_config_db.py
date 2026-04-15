@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock
 
 import pytest
+
 # Assumes sys.path is updated in conftest.py to include src
 from app import get_database_uri
 from miminet_model import ensure_db_exists, init_db

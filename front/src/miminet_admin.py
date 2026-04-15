@@ -11,15 +11,22 @@ from flask_admin.model import typefmt
 from flask_login import current_user
 from markupsafe import Markup
 from miminet_model import Network, User, db
-from quiz.entity.entity import (Question, QuestionCategory, QuizSession,
-                                Section, SessionQuestion, Test)
-from quiz.service.network_upload_service import (create_check_task,
-                                                 create_check_task_json)
+from quiz.entity.entity import (
+    Question,
+    QuestionCategory,
+    QuizSession,
+    Section,
+    SessionQuestion,
+    Test,
+)
+from quiz.service.network_upload_service import (
+    create_check_task,
+    create_check_task_json,
+)
 from quiz.util.dto import calculate_question_count
 from sqlalchemy import func
 from sqlalchemy.orm import selectinload
-from wtforms import (DateTimeField, Form, SelectField,
-                     SubmitField, TextAreaField)
+from wtforms import DateTimeField, Form, SelectField, SubmitField, TextAreaField
 
 ADMIN_ROLE_LEVEL = 1
 

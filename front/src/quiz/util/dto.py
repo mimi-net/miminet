@@ -11,8 +11,15 @@ from flask import has_request_context
 from flask_login import current_user
 from markupsafe import Markup
 from miminet_model import Network, db
-from quiz.entity.entity import (Answer, Organization, Question, QuizSession,
-                                Section, SessionQuestion, Test)
+from quiz.entity.entity import (
+    Answer,
+    Organization,
+    Question,
+    QuizSession,
+    Section,
+    SessionQuestion,
+    Test,
+)
 from sqlalchemy.orm import joinedload
 
 
@@ -130,7 +137,7 @@ def to_test_dto_list(tests: List[Test]):
     dto_list: List[TestDto] = []
     for our_test in tests:
         active_sections = active_sections_by_test.get(our_test.id, [])
-        organization_id = getattr(our_test, "organization_id", None)
+        organization_id = getattr(our_test, "organization_id", 0)
         organization = organizations_by_id.get(organization_id)
         (
             solved_question_count,

@@ -5,8 +5,14 @@ import uuid
 from copy import deepcopy
 
 from miminet_model import Network, User, db
-from quiz.entity.entity import (Answer, PracticeQuestion, Question,
-                                QuestionCategory, QuestionImage, Section)
+from quiz.entity.entity import (
+    Answer,
+    PracticeQuestion,
+    Question,
+    QuestionCategory,
+    QuestionImage,
+    Section,
+)
 from quiz.facade.json_schema_validation import validate_requirements
 
 UPLOAD_FOLDER = "/app/static/quiz_images"

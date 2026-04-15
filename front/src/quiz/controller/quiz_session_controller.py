@@ -2,14 +2,20 @@ import json
 
 from flask import abort, jsonify, make_response, render_template, request
 from flask_login import current_user, login_required
-from quiz.facade.quiz_session_facade import (finish_old_sessions,
-                                             finish_session,
-                                             get_result_by_session_guid,
-                                             session_result, start_session)
+from quiz.facade.quiz_session_facade import (
+    finish_old_sessions,
+    finish_session,
+    get_result_by_session_guid,
+    session_result,
+    start_session,
+)
 from quiz.service.network_upload_service import create_check_task
 from quiz.service.session_question_service import (
-    answer_on_session_question, get_question_by_session_question_id,
-    get_session_question_data, handle_exam_answer)
+    answer_on_session_question,
+    get_question_by_session_question_id,
+    get_session_question_data,
+    handle_exam_answer,
+)
 
 
 @login_required

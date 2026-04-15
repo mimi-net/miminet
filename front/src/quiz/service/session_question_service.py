@@ -8,8 +8,12 @@ from miminet_model import Network, User, db
 from quiz.entity.entity import Answer, PracticeQuestion, SessionQuestion
 from quiz.service.check_practice_service import check_task
 from quiz.service.network_upload_service import prepare_task
-from quiz.util.dto import (AnswerResultDto, PracticeAnswerResultDto,
-                           QuestionDto, calculate_max_score)
+from quiz.util.dto import (
+    AnswerResultDto,
+    PracticeAnswerResultDto,
+    QuestionDto,
+    calculate_max_score,
+)
 
 MOSCOW_TZ = ZoneInfo("Europe/Moscow")
 

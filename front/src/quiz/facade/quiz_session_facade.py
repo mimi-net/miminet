@@ -3,8 +3,13 @@ import random
 
 from markupsafe import Markup
 from miminet_model import User, db
-from quiz.entity.entity import (Question, QuestionCategory, QuizSession,
-                                Section, SessionQuestion)
+from quiz.entity.entity import (
+    Question,
+    QuestionCategory,
+    QuizSession,
+    Section,
+    SessionQuestion,
+)
 from quiz.service.session_question_service import is_answer_available
 from quiz.util.dto import SessionResultDto, get_question_type
 from sqlalchemy import func

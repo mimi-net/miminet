@@ -4,10 +4,16 @@ import os
 import shutil
 import uuid
 
-from flask import (flash, jsonify, make_response, redirect, render_template,
-                   request, url_for)
-from flask_jwt_extended import (get_jwt_identity,
-                                jwt_required)
+from flask import (
+    flash,
+    jsonify,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_login import current_user, login_required
 from miminet_config import check_image_with_pil
 from miminet_model import Network, Simulate, SimulateLog, db

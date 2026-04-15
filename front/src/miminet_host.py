@@ -4,9 +4,15 @@ import re
 import shlex
 from typing import Dict, List
 
-from configurators import (EdgeConfigurator, HostConfigurator, HubConfigurator,
-                           RouterConfigurator, ServerConfigurator,
-                           SwitchConfigurator, get_data)
+from configurators import (
+    EdgeConfigurator,
+    HostConfigurator,
+    HubConfigurator,
+    RouterConfigurator,
+    ServerConfigurator,
+    SwitchConfigurator,
+    get_data,
+)
 from flask import Response, jsonify, make_response, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from miminet_model import Network, Simulate, db

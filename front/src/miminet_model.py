@@ -6,8 +6,16 @@ from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from miminet_config import make_empty_network
 from psycopg2 import OperationalError
-from sqlalchemy import (TIMESTAMP, BigInteger, Boolean, ForeignKey, MetaData,
-                        Text, inspect, not_)
+from sqlalchemy import (
+    TIMESTAMP,
+    BigInteger,
+    Boolean,
+    ForeignKey,
+    MetaData,
+    Text,
+    inspect,
+    not_,
+)
 from werkzeug.security import generate_password_hash
 
 convention = {

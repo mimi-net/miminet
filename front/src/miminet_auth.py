@@ -9,13 +9,30 @@ import uuid
 
 import google.auth.transport.requests
 import requests
-from flask import (abort, flash, jsonify, redirect, render_template, request,
-                   session, url_for)
-from flask_jwt_extended import (create_access_token, create_refresh_token,
-                                set_access_cookies, set_refresh_cookies,
-                                unset_jwt_cookies)
-from flask_login import (LoginManager, current_user, login_required,
-                         login_user, logout_user)
+from flask import (
+    abort,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    set_access_cookies,
+    set_refresh_cookies,
+    unset_jwt_cookies,
+)
+from flask_login import (
+    LoginManager,
+    current_user,
+    login_required,
+    login_user,
+    logout_user,
+)
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from miminet_config import make_example_net_switch_and_hub
@@ -232,8 +249,8 @@ def login_index():
         session.pop("next_url", None)
 
     if telegram_link_mode:
-         _start_social_link("tg", redirect_endpoint=next_url or "user_profile")
-         return render_template("auth/login.html", user=current_user)
+        _start_social_link("tg", redirect_endpoint=next_url or "user_profile")
+        return render_template("auth/login.html", user=current_user)
 
     if request.method == "POST":
         email = request.form.get("email")

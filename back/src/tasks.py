@@ -3,8 +3,11 @@ import os
 import signal
 
 import marshmallow_dataclass
-from celery_app import (SEND_NETWORK_RESPONSE_EXCHANGE,
-                        SEND_NETWORK_RESPONSE_ROUTING_KEY, app)
+from celery_app import (
+    SEND_NETWORK_RESPONSE_EXCHANGE,
+    SEND_NETWORK_RESPONSE_ROUTING_KEY,
+    app,
+)
 from emulator import emulate
 from mininet.log import error, setLogLevel
 from network_schema import Network

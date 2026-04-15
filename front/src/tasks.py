@@ -10,7 +10,9 @@ from celery.result import AsyncResult, allow_join_result
 from celery_app import EXCHANGE_TYPE, SEND_NETWORK_EXCHANGE, app
 from miminet_model import Network, Simulate, SimulateLog, db
 from quiz.service.session_question_service import (
-    answer_on_exam_question, answer_on_exam_without_session)
+    answer_on_exam_question,
+    answer_on_exam_without_session,
+)
 from sqlalchemy.orm.exc import StaleDataError
 
 
