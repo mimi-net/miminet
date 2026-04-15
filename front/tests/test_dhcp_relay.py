@@ -10,11 +10,11 @@ class TestDHCPRelay:
         network = MiminetTestNetwork(selenium)
 
         # nodes
-        network.add_node(NodeType.Host, 250, 275)  # host
-        network.add_node(NodeType.Switch, 250, 175)  # switch 1
-        network.add_node(NodeType.Router, 350, 75) # router
-        network.add_node(NodeType.Switch, 400, 175)  # switch 2
-        network.add_node(NodeType.Server, 400, 275)  # server
+        network.add_node(NodeType.Host, 25, 100)  # host
+        network.add_node(NodeType.Switch, 25, 50)  # switch 1
+        network.add_node(NodeType.Router, 75, 0) # router
+        network.add_node(NodeType.Switch, 100, 50)  # switch 2
+        network.add_node(NodeType.Server, 100, 100)  # server
 
         # edges
         network.add_edge(0, 1)  # host -> switch 1
