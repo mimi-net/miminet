@@ -4,7 +4,9 @@ from utils.networks import NodeType, MiminetTestNetwork
 from utils.locators import Location
 from utils.checkers import TestNetworkComparator
 
+
 class TestDHCPRelay:
+
     @pytest.fixture(scope="class")
     def network(self, selenium: MiminetTester):
         network = MiminetTestNetwork(selenium)
@@ -12,7 +14,7 @@ class TestDHCPRelay:
         # nodes
         network.add_node(NodeType.Host, 25, 100)  # host
         network.add_node(NodeType.Switch, 25, 50)  # switch 1
-        network.add_node(NodeType.Router, 75, 0) # router
+        network.add_node(NodeType.Router, 75, 0)  # router
         network.add_node(NodeType.Switch, 100, 50)  # switch 2
         network.add_node(NodeType.Server, 100, 100)  # server
 
@@ -64,7 +66,7 @@ class TestDHCPRelay:
         yield network
 
         network.delete()
-    
+
     def test_dhcp(self, selenium: MiminetTester, network: MiminetTestNetwork):
         assert TestNetworkComparator.compare_nodes(network.nodes, self.JSON_NODES)
         assert TestNetworkComparator.compare_edges(network.edges, self.JSON_EDGES)
@@ -73,70 +75,43 @@ class TestDHCPRelay:
     JSON_NODES = [
         {
             "classes": ["host"],
-            "config": {
-                "default_gw": "",
-                "label": "host_1",
-                "type": "host"
-            },
-            "data": {
-                "id": "host_1",
-                "label": "host_1"
-            },
+            "config": {"default_gw": "", "label": "host_1", "type": "host"},
+            "data": {"id": "host_1", "label": "host_1"},
             "interface": [
                 {
                     "connect": "edge_mo0ldvxj74nu3vhlaio",
                     "id": "iface_16773533",
-                    "name": "iface_16773533"
+                    "name": "iface_16773533",
                 }
             ],
-            "position": {
-                "x": 25,
-                "y": 100
-            }
+            "position": {"x": 25, "y": 100},
         },
         {
             "classes": ["l2_switch"],
-            "config": {
-                "label": "l2sw1",
-                "stp": 0,
-                "type": "l2_switch"
-            },
-            "data": {
-                "id": "l2sw1",
-                "label": "l2sw1"
-            },
+            "config": {"label": "l2sw1", "stp": 0, "type": "l2_switch"},
+            "data": {"id": "l2sw1", "label": "l2sw1"},
             "interface": [
                 {
                     "connect": "edge_mo0ldvxj74nu3vhlaio",
                     "id": "l2sw1_1",
                     "name": "l2sw1_1",
                     "type_connection": None,
-                    "vlan": None
+                    "vlan": None,
                 },
                 {
                     "connect": "edge_mo0ldxdrueu0023e09",
                     "id": "l2sw1_2",
                     "name": "l2sw1_2",
                     "type_connection": None,
-                    "vlan": None
-                }
+                    "vlan": None,
+                },
             ],
-            "position": {
-                "x": 25,
-                "y": 50
-            }
+            "position": {"x": 25, "y": 50},
         },
         {
             "classes": ["l3_router"],
-            "config": {
-                "default_gw": "",
-                "label": "router_1",
-                "type": "router"
-            },
-            "data": {
-                "id": "router_1",
-                "label": "router_1"
-            },
+            "config": {"default_gw": "", "label": "router_1", "type": "router"},
+            "data": {"id": "router_1", "label": "router_1"},
             "interface": [
                 {
                     "connect": "edge_mo0ldxdrueu0023e09",
@@ -150,71 +125,52 @@ class TestDHCPRelay:
                     "id": "iface_77344228",
                     "ip": "192.168.10.3",
                     "name": "iface_77344228",
-                    "netmask": 24
-                }
+                    "netmask": 24,
+                },
             ],
-            "position": {
-                "x": 75,
-                "y": 0
-            }
+            "position": {"x": 75, "y": 0},
         },
         {
             "classes": ["l2_switch"],
-            "config": {
-                "label": "l2sw2",
-                "stp": 0,
-                "type": "l2_switch"
-            },
-            "data": {
-                "id": "l2sw2",
-                "label": "l2sw2"
-            },
+            "config": {"label": "l2sw2", "stp": 0, "type": "l2_switch"},
+            "data": {"id": "l2sw2", "label": "l2sw2"},
             "interface": [
                 {
                     "connect": "edge_mo0ldyffpg9scxw32yq",
                     "id": "l2sw2_1",
                     "name": "l2sw2_1",
                     "type_connection": None,
-                    "vlan": None
+                    "vlan": None,
                 },
                 {
                     "connect": "edge_mo0ldzsfp1nakly2jf",
                     "id": "l2sw2_2",
                     "name": "l2sw2_2",
                     "type_connection": None,
-                    "vlan": None
-                }
+                    "vlan": None,
+                },
             ],
-            "position": {
-                "x": 100,
-                "y": 50
-            }
+            "position": {"x": 100, "y": 50},
         },
         {
             "classes": ["server"],
             "config": {
                 "default_gw": "192.168.10.3",
                 "label": "server_1",
-                "type": "server"
+                "type": "server",
             },
-            "data": {
-                "id": "server_1",
-                "label": "server_1"
-            },
+            "data": {"id": "server_1", "label": "server_1"},
             "interface": [
                 {
                     "connect": "edge_mo0ldzsfp1nakly2jf",
                     "id": "iface_28835140",
                     "ip": "192.168.10.2",
                     "name": "iface_28835140",
-                    "netmask": 24
+                    "netmask": 24,
                 }
             ],
-            "position": {
-                "x": 100,
-                "y": 100
-            }
-        }
+            "position": {"x": 100, "y": 100},
+        },
     ]
     JSON_EDGES = [
         {
@@ -223,7 +179,7 @@ class TestDHCPRelay:
                 "source": "host_1",
                 "target": "l2sw1",
                 "loss_percentage": 0,
-                "duplicate_percentage": 0
+                "duplicate_percentage": 0,
             }
         },
         {
@@ -232,7 +188,7 @@ class TestDHCPRelay:
                 "source": "l2sw1",
                 "target": "router_1",
                 "loss_percentage": 0,
-                "duplicate_percentage": 0
+                "duplicate_percentage": 0,
             }
         },
         {
@@ -241,7 +197,7 @@ class TestDHCPRelay:
                 "source": "router_1",
                 "target": "l2sw2",
                 "loss_percentage": 0,
-                "duplicate_percentage": 0
+                "duplicate_percentage": 0,
             }
         },
         {
@@ -250,9 +206,9 @@ class TestDHCPRelay:
                 "source": "l2sw2",
                 "target": "server_1",
                 "loss_percentage": 0,
-                "duplicate_percentage": 0
+                "duplicate_percentage": 0,
             }
-        }
+        },
     ]
     JSON_JOBS = [
         {
@@ -261,16 +217,16 @@ class TestDHCPRelay:
             "print_cmd": "dhcp client",
             "arg_1": "iface_16773533",
             "level": 0,
-            "host_id": "host_1"
+            "host_id": "host_1",
         },
         {
             "id": "317a8189832c4477a8c34f916c9d8dbe",
             "job_id": 204,
-            "print_cmd": "dnsmasq --dhcp-relay=172.16.10.3,192.168.10.2", 
+            "print_cmd": "dnsmasq --dhcp-relay=172.16.10.3,192.168.10.2",
             "arg_1": "192.168.10.2",
             "arg_2": "172.16.10.3",
             "level": 1,
-            "host_id": "router_1"
+            "host_id": "router_1",
         },
         {
             "id": "437af3d8726a4363940552c89c201693",
@@ -282,6 +238,6 @@ class TestDHCPRelay:
             "arg_4": "172.16.10.3",
             "arg_5": "iface_28835140",
             "level": 2,
-            "host_id": "server_1"
-        }
+            "host_id": "server_1",
+        },
     ]
