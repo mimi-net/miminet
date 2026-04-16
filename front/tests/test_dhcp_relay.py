@@ -118,7 +118,7 @@ class TestDHCPRelay:
                     "id": "iface_40424245",
                     "ip": "172.16.10.3",
                     "name": "iface_40424245",
-                    "netmask": 24
+                    "netmask": 24,
                 },
                 {
                     "connect": "edge_mo0ldyffpg9scxw32yq",
