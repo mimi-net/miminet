@@ -50,9 +50,11 @@ class ReviewTools:
         )
         collected: list[dict[str, str]] = []
         iterator = directory.rglob("*") if recursive else directory.iterdir()
+        truncated = False
 
         for entry in sorted(iterator):
             if len(collected) >= entry_limit:
+                truncated = True
                 break
             relative = posix_relative(entry, self.repo_root)
             if not is_allowed_by_scope(relative, self.config.scope):
@@ -68,7 +70,7 @@ class ReviewTools:
             "path": posix_relative(directory, self.repo_root),
             "recursive": recursive,
             "entries": collected,
-            "truncated": len(collected) >= entry_limit,
+            "truncated": truncated,
         }
 
     def read_file(
