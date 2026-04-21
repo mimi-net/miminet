@@ -141,13 +141,11 @@ class ReviewTools:
                 break
 
             relative = posix_relative(candidate, self.repo_root)
-            if not is_allowed_by_scope(relative, self.config.scope):
-                continue
-            if not fnmatch.fnmatchcase(candidate.name, file_glob):
-                continue
-            if candidate.stat().st_size > self.config.limits.file_bytes:
-                continue
-            if is_probably_binary(candidate):
+            if not (
+                is_allowed_by_scope(relative, self.config.scope)
+                and fnmatch.fnmatchcase(candidate.name, file_glob)
+                and candidate.stat().st_size > self.config.limits.file_bytes
+            ) or is_probably_binary(candidate):
                 continue
 
             with candidate.open("r", encoding="utf-8", errors="replace") as handle:
