@@ -130,6 +130,7 @@ class ReviewTools:
         flags = 0 if case_sensitive else re.IGNORECASE
         compiled = re.compile(pattern, flags) if regex else None
         matches: list[dict[str, Any]] = []
+        truncated = False
 
         if root.is_file():
             candidates = [root]
@@ -138,6 +139,7 @@ class ReviewTools:
 
         for candidate in candidates:
             if len(matches) >= match_limit:
+                truncated = True
                 break
 
             relative = posix_relative(candidate, self.repo_root)
@@ -165,13 +167,14 @@ class ReviewTools:
                         }
                     )
                     if len(matches) >= match_limit:
+                        truncated = True
                         break
 
         return {
             "pattern": pattern,
             "path": posix_relative(root, self.repo_root),
             "matches": matches,
-            "truncated": len(matches) >= match_limit,
+            "truncated": truncated,
         }
 
     def execute(self, tool_name: str, arguments: dict[str, Any]) -> dict[str, Any]:
