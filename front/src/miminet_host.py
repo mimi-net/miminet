@@ -6,9 +6,33 @@ from typing import List, Dict
 
 from flask import jsonify, make_response, request, Response
 from flask_login import current_user, login_required
-from miminet_model import Network, Simulate, db
-from configurators import (
+from miminet_config import (
+    ADD_ROUTE_JOB_ID,
+    ARP_CACHE_ADD_JOB_ID,
+    ARP_PROXY_JOB_ID,
     ARP_SPOOF_JOB_ID,
+    BLOCK_TCP_UDP_PORT_JOB_ID,
+    DHCP_CLIENT_JOB_ID,
+    DHCP_SERVER_JOB_ID,
+    GRE_TUNNEL_JOB_ID,
+    IPIP_TUNNEL_JOB_ID,
+    IP_ADDR_ADD_JOB_ID,
+    LINK_DOWN_JOB_ID,
+    NAT_JOB_ID,
+    OPEN_TCP_SERVER_JOB_ID,
+    OPEN_UDP_SERVER_JOB_ID,
+    PING_JOB_ID,
+    PING_WITH_OPTIONS_JOB_ID,
+    PORT_FORWARDING_TCP_JOB_ID,
+    PORT_FORWARDING_UDP_JOB_ID,
+    SEND_TCP_DATA_JOB_ID,
+    SEND_UDP_DATA_JOB_ID,
+    SLEEP_JOB_ID,
+    SUBINTERFACE_VLAN_JOB_ID,
+    TRACEROUTE_JOB_ID,
+)
+from miminet_model import Network, Simulate, db
+from configurators import (  # noqa: E402
     HostConfigurator,
     SwitchConfigurator,
     HubConfigurator,
@@ -194,13 +218,13 @@ edge = EdgeConfigurator()
 # ~ ~ ~ HOST JOBS ~ ~ ~
 
 # ping -c 1 (1 param)
-host_ping_job = host.create_job(1, "ping -c 1 [0]")
+host_ping_job = host.create_job(PING_JOB_ID, "ping -c 1 [0]")
 host_ping_job.add_param("config_host_ping_c_1_ip").add_check(IPv4_check).set_error_msg(
     build_error(ErrorType.ip, "ping")
 )
 
 # ping -c 1 (with options)
-host_ping_opt_job = host.create_job(2, "ping -c 1 [0] [1]")
+host_ping_opt_job = host.create_job(PING_WITH_OPTIONS_JOB_ID, "ping -c 1 [0] [1]")
 host_ping_opt_job.add_param(
     "config_host_ping_with_options_options_input_field"
 ).add_check(ascii_check).add_filter(ping_options_filter).set_error_msg(
@@ -211,7 +235,7 @@ host_ping_opt_job.add_param("config_host_ping_with_options_ip_input_field").add_
 ).set_error_msg(build_error(ErrorType.ip, "ping (с опциями)"))
 
 # send UDP data
-host_udp_job = host.create_job(3, "send -s [0] -p udp [1]:[2]")
+host_udp_job = host.create_job(SEND_UDP_DATA_JOB_ID, "send -s [0] -p udp [1]:[2]")
 host_udp_job.add_param("config_host_send_udp_data_size_input_field").add_check(
     data_size_check
 ).set_error_msg(build_error(ErrorType.data_size, "Отправить данные (UDP)"))
@@ -223,7 +247,7 @@ host_udp_job.add_param("config_host_send_udp_data_port_input_field").add_check(
 ).set_error_msg(build_error(ErrorType.port, "Отправить данные (UDP)"))
 
 # send TCP data
-host_tcp_job = host.create_job(4, "send -s [0] -p tcp [1]:[2]")
+host_tcp_job = host.create_job(SEND_TCP_DATA_JOB_ID, "send -s [0] -p tcp [1]:[2]")
 host_tcp_job.add_param("config_host_send_tcp_data_size_input_field").add_check(
     data_size_check
 ).set_error_msg(build_error(ErrorType.data_size, "Отправить данные (TCP)"))
@@ -235,7 +259,7 @@ host_tcp_job.add_param("config_host_send_tcp_data_port_input_field").add_check(
 ).set_error_msg(build_error(ErrorType.port, "Отправить данные (TCP)"))
 
 # traceroute -n (with options)
-traceroute_job = host.create_job(5, "traceroute -n [0] [1]")
+traceroute_job = host.create_job(TRACEROUTE_JOB_ID, "traceroute -n [0] [1]")
 traceroute_job.add_param(
     "config_host_traceroute_with_options_options_input_field"
 ).add_check(ascii_check).add_filter(traceroute_options_filter).set_error_msg(
@@ -248,7 +272,7 @@ traceroute_job.add_param(
 )
 
 # Add route
-add_route_job = host.create_job(102, "ip route add [0]/[1] via [2]")
+add_route_job = host.create_job(ADD_ROUTE_JOB_ID, "ip route add [0]/[1] via [2]")
 add_route_job.add_param("config_host_add_route_ip_input_field").add_check(
     IPv4_check
 ).set_error_msg(build_error(ErrorType.ip, "Добавить маршрут"))
@@ -260,7 +284,7 @@ add_route_job.add_param("config_host_add_route_gw_input_field").add_check(
 ).set_error_msg(build_error(ErrorType.ip, "Добавить маршрут"))
 
 # arp -s ip hw_addr
-arp_job = host.create_job(103, "arp -s [0] [1]")
+arp_job = host.create_job(ARP_CACHE_ADD_JOB_ID, "arp -s [0] [1]")
 arp_job.add_param("config_host_add_arp_cache_ip_input_field").add_check(
     IPv4_check
 ).set_error_msg(build_error(ErrorType.ip, "Добавить запись в ARP-cache"))
@@ -268,7 +292,7 @@ arp_job.add_param("config_host_add_arp_cache_mac_input_field").add_check(
     MAC_check
 ).set_error_msg('MAC-адрес для команды "Добавить запись в ARP-cache" указан неверно')
 
-host_dhclient_job = host.create_job(108, "dhcp client")
+host_dhclient_job = host.create_job(DHCP_CLIENT_JOB_ID, "dhcp client")
 host_dhclient_job.add_param(
     "config_host_add_dhclient_interface_select_iface_field"
 ).add_check(emptiness_check).set_error_msg(
@@ -299,13 +323,13 @@ host_arp_spoof_job.add_param("config_host_add_arp_spoof_mode_select_field").add_
 # ~ ~ ~ ROUTER JOBS ~ ~ ~
 
 # ping
-router_ping_job = router.create_job(1, "ping -c 1 [0]")
+router_ping_job = router.create_job(PING_JOB_ID, "ping -c 1 [0]")
 router_ping_job.add_param("config_router_ping_c_1_ip").add_check(
     IPv4_check
 ).set_error_msg(build_error(ErrorType.ip, "ping"))
 
 # add IP/mask
-add_ip_job = router.create_job(100, "ip addess add [0]/[1] dev [2]")
+add_ip_job = router.create_job(IP_ADDR_ADD_JOB_ID, "ip addess add [0]/[1] dev [2]")
 add_ip_job.add_param("config_router_add_ip_mask_iface_select_field").add_check(
     emptiness_check
 ).set_error_msg('Не указан интерфейс для команды "Добавить IP-адрес"')
@@ -317,14 +341,14 @@ add_ip_job.add_param("config_router_add_ip_mask_mask_input_field").add_check(
 ).set_error_msg(build_error(ErrorType.mask, "Добавить IP-адрес"))
 
 # add NAT masquerade to the interface
-nat_job = router.create_job(101, "add nat -o [0] -j masquerad")
+nat_job = router.create_job(NAT_JOB_ID, "add nat -o [0] -j masquerad")
 nat_job.add_param("config_router_add_nat_masquerade_iface_select_field").add_check(
     emptiness_check
 ).set_error_msg('Не указан интерфейс для команды "Включить NAT masquerade"')
 
 # add Port forwarding TCP
 port_forwarding_tcp_job = router.create_job(
-    109, "port forwarding -p tcp -i [0] from [1] to [2]:[3]"
+    PORT_FORWARDING_TCP_JOB_ID, "port forwarding -p tcp -i [0] from [1] to [2]:[3]"
 )
 port_forwarding_tcp_job.add_param(
     "config_router_add_port_forwarding_tcp_iface_select_field"
@@ -347,7 +371,7 @@ port_forwarding_tcp_job.add_param(
 
 # add Port forwarding UDP
 port_forwarding_udp_job = router.create_job(
-    110, "port forwarding -p udp -i [0] from [1] to [2]:[3]"
+    PORT_FORWARDING_UDP_JOB_ID, "port forwarding -p udp -i [0] from [1] to [2]:[3]"
 )
 port_forwarding_udp_job.add_param(
     "config_router_add_port_forwarding_udp_iface_select_field"
@@ -369,7 +393,9 @@ port_forwarding_udp_job.add_param(
 )
 
 # Add route
-router_add_route_job = router.create_job(102, "ip route add [0]/[1] via [2]")
+router_add_route_job = router.create_job(
+    ADD_ROUTE_JOB_ID, "ip route add [0]/[1] via [2]"
+)
 router_add_route_job.add_param("config_router_add_route_ip_input_field").add_check(
     IPv4_check
 ).set_error_msg(build_error(ErrorType.ip, "Добавить маршрут"))
@@ -381,7 +407,7 @@ router_add_route_job.add_param("config_router_add_route_gw_input_field").add_che
 ).set_error_msg(build_error(ErrorType.ip, "Добавить маршрут"))
 
 # Add VLAN
-vlan_job = router.create_job(104, "subinterface [1]:[2] VLAN [3]")
+vlan_job = router.create_job(SUBINTERFACE_VLAN_JOB_ID, "subinterface [1]:[2] VLAN [3]")
 vlan_job.add_param("config_router_add_subinterface_iface_select_field").add_check(
     emptiness_check
 ).set_error_msg('Не выбран линк для команды "Добавить сабинтерфейс с VLAN"')
@@ -396,7 +422,7 @@ vlan_job.add_param("config_router_add_subinterface_vlan_input_field").add_check(
 ).set_error_msg('Неверный параметр VLAN для команды "Добавить сабинтерфейс с VLAN"')
 
 # IPIP
-ipip_job = router.create_job(105, "ipip: [3] from [0] to [1] \n[3]: [2]")
+ipip_job = router.create_job(IPIP_TUNNEL_JOB_ID, "ipip: [3] from [0] to [1] \n[3]: [2]")
 ipip_job.add_param("config_router_add_ipip_tunnel_iface_select_ip_field").add_check(
     emptiness_check
 ).set_error_msg(
@@ -417,7 +443,7 @@ ipip_job.add_param("config_router_add_ipip_tunnel_interface_name_field").add_che
 )
 
 # GRE
-gre_job = router.create_job(106, "gre: [3] from [0] to [1] \n[3]: [2]")
+gre_job = router.create_job(GRE_TUNNEL_JOB_ID, "gre: [3] from [0] to [1] \n[3]: [2]")
 gre_job.add_param("config_router_add_gre_interface_select_ip_field").add_check(
     emptiness_check
 ).set_error_msg(
@@ -440,7 +466,7 @@ gre_job.add_param("config_router_add_gre_interface_name_field").add_check(
 )
 
 # Add ARP Proxy to the interface
-arp_proxy_job = router.create_job(107, "arp proxy: [1]")
+arp_proxy_job = router.create_job(ARP_PROXY_JOB_ID, "arp proxy: [1]")
 arp_proxy_job.add_param("config_router_add_arp_proxy_iface_select_field").add_check(
     emptiness_check
 ).set_error_msg('Не указан интерфейс для команды "Добавить ARP Proxy-интерфейс"')
@@ -450,7 +476,7 @@ arp_proxy_job.add_param("router_connection_host_label_hidden").add_check(
 
 
 # ~ ~ ~ SWITCH JOBS ~ ~ ~
-link_down_job = switch.create_job(6, "link down [1]")
+link_down_job = switch.create_job(LINK_DOWN_JOB_ID, "link down [1]")
 link_down_job.add_param("config_switch_link_down_iface_select_field").add_check(
     emptiness_check
 ).set_error_msg('Не указан интерфейс для команды "Удалить линк"')
@@ -458,7 +484,7 @@ link_down_job.add_param("switch_connection_host_label_hidden").add_check(
     emptiness_check
 ).set_error_msg('Не указан интерфейс для команды "Удалить линк"')
 
-sleep_job = switch.create_job(7, "sleep [0] seconds")
+sleep_job = switch.create_job(SLEEP_JOB_ID, "sleep [0] seconds")
 sleep_job.add_param("config_switch_sleep").add_check(time_check).set_error_msg(
     build_error(ErrorType.options, "sleep")
 )
@@ -467,13 +493,13 @@ sleep_job.add_param("config_switch_sleep").add_check(time_check).set_error_msg(
 # ~ ~ ~ SERVER JOBS ~ ~ ~
 
 # ping -c 1
-server_ping_job = server.create_job(1, "ping -c 1 [0]")
+server_ping_job = server.create_job(PING_JOB_ID, "ping -c 1 [0]")
 server_ping_job.add_param("config_server_ping_c_1_ip").add_check(
     IPv4_check
 ).set_error_msg(build_error(ErrorType.ip, "ping"))
 
 # start UDP server
-start_udp_server = server.create_job(200, "nc -u [0] -l [1]")
+start_udp_server = server.create_job(OPEN_UDP_SERVER_JOB_ID, "nc -u [0] -l [1]")
 start_udp_server.add_param("config_server_start_udp_server_ip_input_field").add_check(
     IPv4_check
 ).set_error_msg(build_error(ErrorType.ip, "Запустисть UDP сервер"))
@@ -482,7 +508,7 @@ start_udp_server.add_param("config_server_start_udp_server_port_input_field").ad
 ).set_error_msg(build_error(ErrorType.port, "Запустисть UDP сервер"))
 
 # start TCP server
-start_tcp_server = server.create_job(201, "nc [0] -l [1]")
+start_tcp_server = server.create_job(OPEN_TCP_SERVER_JOB_ID, "nc [0] -l [1]")
 start_tcp_server.add_param("config_server_start_tcp_server_ip_input_field").add_check(
     IPv4_check
 ).set_error_msg(build_error(ErrorType.ip, "Запустисть TCP сервер"))
@@ -491,13 +517,17 @@ start_tcp_server.add_param("config_server_start_tcp_server_port_input_field").ad
 ).set_error_msg(build_error(ErrorType.port, "Запустисть TCP сервер"))
 
 # Block TCP/UDP port
-block_server_port = server.create_job(202, "drop tcp/udp port [0]")
+block_server_port = server.create_job(
+    BLOCK_TCP_UDP_PORT_JOB_ID, "drop tcp/udp port [0]"
+)
 block_server_port.add_param("config_server_block_tcp_udp_port_input_field").add_check(
     port_check
 ).set_error_msg(build_error(ErrorType.port, "Блокировать TCP/UDP порт"))
 
 # start DHCP server
-start_dhcp_server = server.create_job(203, "dhcp ip range: [0],[1]/[2] gw: [3]")
+start_dhcp_server = server.create_job(
+    DHCP_SERVER_JOB_ID, "dhcp ip range: [0],[1]/[2] gw: [3]"
+)
 start_dhcp_server.add_param("config_server_add_dhcp_ip_range_1_input_field").add_check(
     IPv4_check
 ).set_error_msg('Неверно указан IP адрес диапазона для команды "Запустить DHCP сервер"')

@@ -690,7 +690,7 @@ const ConfigHostJobOnChange = function (evnt) {
             FillDeviceSelectIntf('#config_host_add_dhclient_interface_select_iface_field', '#host_id', "Выберите линк", false)
             break;
 
-        case '204':
+        case '205':
             UpdateHostForm('config_host_add_arp_spoof_script');
             FillDeviceSelectIntf('#config_host_add_arp_spoof_interface_select_field', '#host_id', "Выберите линк", false)
             break;
@@ -718,7 +718,7 @@ const ConfigHostJob = function (host_jobs, shared = 0) {
 
     const hostNode = nodes.find(n => n.data.id === host_id.value);
     if (!hostNode || hostNode.config.type !== 'hacker') {
-        $('#config_host_job_select_field option[value="204"]').remove();
+        $('#config_host_job_select_field option[value="205"]').remove();
     } else {
         $('#config_host_job_select_field option[value="2"]').remove();
         $('#config_host_job_select_field option[value="3"]').remove();
@@ -1331,7 +1331,7 @@ const EditJobInHost = function(host_id, job_id, network_guid) {
                 case '108': // Запросить IP адрес автоматически
                     // No parameters needed - DHCP client request
                     break;
-                case '204': // ARP spoofing / ARP cache poisoning
+                case '205': // ARP spoofing / ARP cache poisoning
                     FillDeviceSelectIntf('#config_host_add_arp_spoof_interface_select_field', '#host_id', "Выберите линк", false);
                     $('#config_host_add_arp_spoof_interface_select_field').val(job.arg_1 || '');
                     $('#config_host_add_arp_spoof_victim_ip_input_field').val(job.arg_2 || '');

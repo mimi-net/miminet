@@ -10,12 +10,37 @@ from network_schema import Job
 from mininet.log import info
 from ipmininet.host.config.dnsmasq import Dnsmasq
 
+PING_JOB_ID = 1
+PING_WITH_OPTIONS_JOB_ID = 2
+SEND_UDP_DATA_JOB_ID = 3
+SEND_TCP_DATA_JOB_ID = 4
+TRACEROUTE_JOB_ID = 5
+LINK_DOWN_JOB_ID = 6
+SLEEP_JOB_ID = 7
+
+IP_ADDR_ADD_JOB_ID = 100
+NAT_JOB_ID = 101
+ADD_ROUTE_JOB_ID = 102
+ARP_CACHE_ADD_JOB_ID = 103
+SUBINTERFACE_VLAN_JOB_ID = 104
+IPIP_TUNNEL_JOB_ID = 105
+GRE_TUNNEL_JOB_ID = 106
+ARP_PROXY_JOB_ID = 107
+DHCP_CLIENT_JOB_ID = 108
+PORT_FORWARDING_TCP_JOB_ID = 109
+PORT_FORWARDING_UDP_JOB_ID = 110
+
+OPEN_UDP_SERVER_JOB_ID = 200
+OPEN_TCP_SERVER_JOB_ID = 201
+BLOCK_TCP_UDP_PORT_JOB_ID = 202
+DHCP_SERVER_JOB_ID = 203
+ARP_SPOOF_JOB_ID = 205
+
 
 ARP_SPOOFER_SCRIPT = shlex.quote(
     str(Path(__file__).resolve().with_name("arp_spoofer.py"))
 )
 ARP_SPOOFER_PYTHON = shlex.quote(sys.executable)
-ARP_SPOOF_JOB_ID = 204
 
 
 def filter_arg_for_options(
@@ -460,10 +485,7 @@ def arp_spoof_handler(job: Job, job_host: Any) -> None:
     if arg_mode == "mitm":
         job_host.cmd("sysctl -w net.ipv4.ip_forward=1")
         job_host.cmd("sysctl -w net.ipv4.conf.all.send_redirects=0")
-        job_host.cmd("sysctl -w net.ipv4.conf.default.send_redirects=0")
-        job_host.cmd(f"sysctl -w net.ipv4.conf.{arg_hacker_iface}.send_redirects=0")
         job_host.cmd("sysctl -w net.ipv4.conf.all.rp_filter=0")
-        job_host.cmd(f"sysctl -w net.ipv4.conf.{arg_hacker_iface}.rp_filter=0")
         job_host.cmd(
             f"iptables -t nat -A POSTROUTING -o {arg_hacker_iface} -j MASQUERADE"
         )
@@ -479,7 +501,7 @@ def arp_spoof_handler(job: Job, job_host: Any) -> None:
         f"--mode {arg_mode} "
         "> /dev/null 2>&1 < /dev/null &"
     )
-    time.sleep(1.0)
+    time.sleep(1)
 
 
 def subinterface_with_vlan(job: Job, job_host: Any) -> None:
@@ -606,29 +628,29 @@ class Jobs:
         # Dictionary for storing strategies
         # (At the moment this is used since each command on the application server is encoded by a number)
         self._dct: dict[int, Callable[[Job, Any], None]] = {
-            1: ping_handler,
-            2: ping_with_options_handler,
-            3: sending_udp_data_handler,
-            4: sending_tcp_data_handler,
-            5: traceroute_handler,
-            6: link_down_handler,
-            7: sleep_handler,
-            100: ip_addr_add_handler,
-            101: iptables_handler,
-            102: ip_route_add_handler,
-            103: arp_handler,
+            PING_JOB_ID: ping_handler,
+            PING_WITH_OPTIONS_JOB_ID: ping_with_options_handler,
+            SEND_UDP_DATA_JOB_ID: sending_udp_data_handler,
+            SEND_TCP_DATA_JOB_ID: sending_tcp_data_handler,
+            TRACEROUTE_JOB_ID: traceroute_handler,
+            LINK_DOWN_JOB_ID: link_down_handler,
+            SLEEP_JOB_ID: sleep_handler,
+            IP_ADDR_ADD_JOB_ID: ip_addr_add_handler,
+            NAT_JOB_ID: iptables_handler,
+            ADD_ROUTE_JOB_ID: ip_route_add_handler,
+            ARP_CACHE_ADD_JOB_ID: arp_handler,
             ARP_SPOOF_JOB_ID: arp_spoof_handler,
-            104: subinterface_with_vlan,
-            105: add_ipip_interface,
-            106: add_gre,
-            107: arp_proxy_enable,
-            108: dhcp_client,
-            109: port_forwarding_tcp_handler,
-            110: port_forwarding_udp_handler,
-            200: open_udp_server_handler,
-            201: open_tcp_server_handler,
-            202: block_tcp_udp_port,
-            203: dhcp_server,
+            SUBINTERFACE_VLAN_JOB_ID: subinterface_with_vlan,
+            IPIP_TUNNEL_JOB_ID: add_ipip_interface,
+            GRE_TUNNEL_JOB_ID: add_gre,
+            ARP_PROXY_JOB_ID: arp_proxy_enable,
+            DHCP_CLIENT_JOB_ID: dhcp_client,
+            PORT_FORWARDING_TCP_JOB_ID: port_forwarding_tcp_handler,
+            PORT_FORWARDING_UDP_JOB_ID: port_forwarding_udp_handler,
+            OPEN_UDP_SERVER_JOB_ID: open_udp_server_handler,
+            OPEN_TCP_SERVER_JOB_ID: open_tcp_server_handler,
+            BLOCK_TCP_UDP_PORT_JOB_ID: block_tcp_udp_port,
+            DHCP_SERVER_JOB_ID: dhcp_server,
         }
         self._job: Job = job
         self._job_host = job_host

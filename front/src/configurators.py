@@ -3,12 +3,11 @@ import json
 from celery_app import app
 from flask import jsonify, make_response, request, Response
 from flask_login import current_user
+from miminet_config import ARP_SPOOF_JOB_ID, SLEEP_JOB_ID
 from miminet_model import Network, Simulate, db
 from typing import Callable, Optional
 import uuid
 import ipaddress
-
-ARP_SPOOF_JOB_ID = 204
 
 
 def get_data(arg: str):
@@ -197,7 +196,7 @@ class AbstractDeviceConfigurator:
         self._device_node = None  # current device node in miminet network
 
     __MAX_JOBS_COUNT: int = 30
-    __SLEEP_JOB_ID: int = 7
+    __SLEEP_JOB_ID: int = SLEEP_JOB_ID
     __MAX_SLEEP_TIME: int = 60
 
     def create_job(self, job_id: int, job_sign: str) -> JobConfigurator:

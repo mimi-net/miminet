@@ -33,7 +33,12 @@ def test_arp_spoof_job_starts_responder_and_enables_forwarding():
 
     assert "sysctl -w net.ipv4.ip_forward=1" in hacker.commands
     assert "sysctl -w net.ipv4.conf.all.send_redirects=0" in hacker.commands
-    assert "sysctl -w net.ipv4.conf.hacker_1-eth0.rp_filter=0" in hacker.commands
+    assert "sysctl -w net.ipv4.conf.all.rp_filter=0" in hacker.commands
+    assert "sysctl -w net.ipv4.conf.default.send_redirects=0" not in hacker.commands
+    assert (
+        "sysctl -w net.ipv4.conf.hacker_1-eth0.send_redirects=0" not in hacker.commands
+    )
+    assert "sysctl -w net.ipv4.conf.hacker_1-eth0.rp_filter=0" not in hacker.commands
     assert "iptables -P FORWARD ACCEPT" in hacker.commands
     assert any("arp_spoofer.py" in command for command in hacker.commands)
     assert any("--mode mitm" in command for command in hacker.commands)
