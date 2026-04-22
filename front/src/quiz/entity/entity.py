@@ -91,10 +91,7 @@ class CreatedByMixin(object):
         return db.relationship("User")
 
 
-class Organization(
-    IdMixin,
-    db.Model, # type:ignore[name-defined]
-):
+class Organization(db.Model):  # type:ignore[name-defined]
     __tablename__ = "organization"
 
     id = db.Column(BigInteger, primary_key=True)

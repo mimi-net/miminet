@@ -1,7 +1,6 @@
 import json
 import random
 import uuid
-import json
 from typing import Any, Dict, List, Optional, cast
 
 from datetime import datetime
@@ -14,13 +13,9 @@ from flask_login import current_user
 from markupsafe import Markup
 from miminet_model import Network, db
 from quiz.entity.entity import (
-    Section,
-    Test,
-    Organization,
     Question,
     Answer,
     Organization,
-    Question,
     QuizSession,
     Section,
     SessionQuestion,

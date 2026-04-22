@@ -15,7 +15,6 @@ from sqlalchemy.orm import selectinload
 from wtforms import (
     SelectField,
     TextAreaField,
-    BooleanField,
     DateTimeField,
     Form,
     SubmitField,
