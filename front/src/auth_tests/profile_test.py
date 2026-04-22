@@ -1,9 +1,11 @@
 import io
+from datetime import timedelta
 from types import SimpleNamespace
 
 import miminet_auth
 import pytest
 from flask import Flask, session
+from flask_jwt_extended import JWTManager
 from werkzeug.exceptions import Forbidden
 
 
@@ -11,12 +13,23 @@ def _build_test_app():
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.config["SECRET_KEY"] = "test-secret"
+    app.config.update(
+        JWT_SECRET_KEY="test-secret",
+        JWT_TOKEN_LOCATION=["cookies"],
+        JWT_COOKIE_DOMAIN=".localhost",
+        JWT_COOKIE_SECURE=False,  # True,
+        JWT_COOKIE_CSRF_PROTECT=False,
+        JWT_COOKIE_SAMESITE="Lax",
+        JWT_ACCESS_TOKEN_EXPIRES=timedelta(hours=1),
+        JWT_REFRESH_TOKEN_EXPIRES=timedelta(hours=2),
+    )
     app.add_url_rule("/profile", endpoint="user_profile", view_func=lambda: "ok")
     app.add_url_rule("/login", endpoint="login_index", view_func=lambda: "login")
     app.add_url_rule("/home", endpoint="home", view_func=lambda: "home")
     app.add_url_rule(
         "/auth/google_callback", endpoint="google_callback", view_func=lambda: "google"
     )
+    JWTManager(app)
     return app
 
 
@@ -149,8 +162,10 @@ def test_google_callback_new_user_without_picture_uses_empty_avatar(mocker):
     flow = mocker.Mock()
     flow.credentials = SimpleNamespace(_id_token="token")
     flow.fetch_token.return_value = None
+    filtered_query = mocker.Mock()
+    filtered_query.first.side_effect = [None, SimpleNamespace(id=10)]
     user_query = mocker.Mock()
-    user_query.filter_by.return_value.first.side_effect = [None, SimpleNamespace(id=10)]
+    user_query.filter_by.return_value = filtered_query
     user_ctor = mocker.patch("miminet_auth.User")
     user_ctor.query = user_query
 
@@ -171,6 +186,9 @@ def test_google_callback_new_user_without_picture_uses_empty_avatar(mocker):
     mocker.patch("miminet_auth.db.session.commit")
     mocker.patch("miminet_auth.requests.get")
     mocker.patch("miminet_auth.login_user")
+    mocker.patch("miminet_auth.create_access_token")
+    mocker.patch("miminet_auth.set_access_cookies", return_value="redirected")
+    mocker.patch("miminet_auth.set_refresh_cookies", return_value="redirected")
     redirect_next_mock = mocker.patch(
         "miminet_auth.redirect_next_url", return_value="redirected"
     )

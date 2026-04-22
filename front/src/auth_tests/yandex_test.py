@@ -1,9 +1,11 @@
 import json
 import os
+from datetime import timedelta
 from types import SimpleNamespace
 
 import pytest
 from flask import Flask, session, url_for
+from flask_jwt_extended import JWTManager
 from miminet_auth import db, login_index, yandex_callback, yandex_login
 from oauthlib.oauth2 import TokenExpiredError
 from sqlalchemy.exc import SQLAlchemyError
@@ -14,6 +16,16 @@ def app():
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.config["SECRET_KEY"] = os.urandom(16).hex()
+    app.config.update(
+        JWT_SECRET_KEY="test-secret",
+        JWT_TOKEN_LOCATION=["cookies"],
+        JWT_COOKIE_DOMAIN=".localhost",
+        JWT_COOKIE_SECURE=False,  # True,
+        JWT_COOKIE_CSRF_PROTECT=False,
+        JWT_COOKIE_SAMESITE="Lax",
+        JWT_ACCESS_TOKEN_EXPIRES=timedelta(hours=1),
+        JWT_REFRESH_TOKEN_EXPIRES=timedelta(hours=2),
+    )
 
     with app.test_request_context():
         app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///test.db"
@@ -29,6 +41,8 @@ def app():
         @app.route("/home")
         def home():
             pass
+
+    JWTManager(app)
 
     return app
 
@@ -189,8 +203,11 @@ def test_yandex_callback_handles_user_info_and_creates_user_in_db(app, mocker):
     """
     with app.test_request_context("/yandex_callback?code=test-code", method="GET"):
         session["state"] = "test_state"
-        mock_oauth2session = mocker.patch("miminet_auth.OAuth2Session")
+        filtered_query = mocker.Mock()
+        filtered_query.first.side_effect = [None, mocker.Mock(id=10)]
         mock_user = mocker.patch("miminet_auth.User")
+        mock_user.query.filter_by.return_value = filtered_query
+        mock_oauth2session = mocker.patch("miminet_auth.OAuth2Session")
         mock_session = mocker.patch("miminet_auth.db.session")
         mocker.patch("miminet_auth.login_user")
         mock_get = mock_oauth2session.return_value.get
@@ -200,7 +217,6 @@ def test_yandex_callback_handles_user_info_and_creates_user_in_db(app, mocker):
             "login": "test_login",
             "default_email": "test_email@example.com",
         }
-        mock_user.query.filter_by().first.return_value = None
         yandex_callback(yandex_json)
         mock_user.assert_called_once_with(
             nick="test_login", yandex_id="test_id", email="test_email@example.com"
