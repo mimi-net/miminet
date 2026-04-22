@@ -1,8 +1,6 @@
 import argparse
 
 from scapy.all import conf, get_if_hwaddr, sendp, sniff
-from scapy.arch.linux import L2ListenSocket
-from scapy.data import ETH_P_ARP
 from scapy.layers.l2 import ARP, Ether
 
 
@@ -70,16 +68,7 @@ def main() -> None:
                 verbose=False,
             )
 
-    listen_socket = L2ListenSocket(
-        iface=args.iface,
-        type=ETH_P_ARP,
-        promisc=True,
-        filter=None,
-    )
-    try:
-        sniff(opened_socket=listen_socket, store=False, prn=handle_packet)
-    finally:
-        listen_socket.close()
+    sniff(iface=args.iface, filter="arp", store=False, prn=handle_packet)
 
 
 if __name__ == "__main__":
