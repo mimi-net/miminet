@@ -1,7 +1,9 @@
 import io
 from types import SimpleNamespace
 
+import pytest
 from flask import Flask, session
+from werkzeug.exceptions import Forbidden
 
 import miminet_auth
 
@@ -131,6 +133,16 @@ def test_user_profile_post_without_updates_renders_page(mocker):
     render_mock.assert_called_once_with(
         "auth/profile.html", user=user, first_name="", last_name=""
     )
+
+
+def test_user_profile_view_forbidden_without_permission(mocker):
+    app = _build_test_app()
+
+    mocker.patch("miminet_auth.current_user", SimpleNamespace(id=1, role=0))
+
+    with app.test_request_context("/profile/2", method="GET"):
+        with pytest.raises(Forbidden):
+            miminet_auth.user_profile_view.__wrapped__(2)
 
 
 def test_google_callback_new_user_without_picture_uses_empty_avatar(mocker):
