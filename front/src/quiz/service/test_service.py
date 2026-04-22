@@ -1,4 +1,6 @@
 from miminet_model import User, db
+from typing import Any, cast
+
 from quiz.entity.entity import Test
 from quiz.util.dto import to_test_dto_list
 from sqlalchemy.orm import joinedload, selectinload
@@ -6,6 +8,8 @@ from sqlalchemy.orm import joinedload, selectinload
 TEST_LIST_RELATIONS = (
     joinedload(Test.created_by_user),
     selectinload(Test.sections),
+    joinedload(cast(Any, Test.created_by_user)),
+    selectinload(cast(Any, Test.sections)),
 )
 
 

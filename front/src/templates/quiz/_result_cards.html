@@ -28,7 +28,7 @@
                                     <i class="bx bx-star text-warning"></i>
                                 {% endif %}
                             {% endif %}
-                            <span class="markdown-content">{{ q.question_text }}</span>
+                            <span class="markdown-content" data-markdown="{{ q.question_text | e }}"></span>
                         </h5>
 
                         {% if q.question_type == 'practice' %}
@@ -50,30 +50,25 @@
                     <div class="result-card__actions">
                         {% if q.answer_details and q.answer_details.has_preview %}
                             <div class="answer-preview">
-                                <button type="button" class="answer-preview__trigger" aria-label="Посмотреть ответ">!</button>
+                                {% set preview_tone = 'danger' if q.answer_details.show_reference_answer else 'success' %}
+                                <button type="button"
+                                        class="answer-preview__trigger answer-preview__trigger--{{ preview_tone }}"
+                                        aria-label="Посмотреть ответ">!</button>
 
                                 <div class="answer-preview__popup">
-                                    {% if q.answer_details.show_reference_answer %}
-                                        <div class="answer-preview__tabs" role="tablist">
-                                            <button type="button" class="answer-preview__tab is-active" data-panel-target="user">Ваше решение</button>
-                                            <button type="button" class="answer-preview__tab" data-panel-target="correct">Правильный ответ</button>
-                                        </div>
-
-                                        <div class="answer-preview__panel is-active" data-panel="user">
+                                    <div class="answer-preview__content">
+                                        <div class="answer-preview__section answer-preview__section--{{ preview_tone }}">
                                             <p class="answer-preview__title">{{ q.answer_details.user_answer_title }}</p>
                                             {{ render_answer_items(q.answer_details.user_answer_items) }}
                                         </div>
 
-                                        <div class="answer-preview__panel" data-panel="correct">
+                                        {% if q.answer_details.show_reference_answer %}
+                                        <div class="answer-preview__section answer-preview__section--success">
                                             <p class="answer-preview__title">{{ q.answer_details.correct_answer_title }}</p>
                                             {{ render_answer_items(q.answer_details.correct_answer_items) }}
                                         </div>
-                                    {% else %}
-                                        <div class="answer-preview__panel is-active" data-panel="user">
-                                            <p class="answer-preview__title">{{ q.answer_details.user_answer_title }}</p>
-                                            {{ render_answer_items(q.answer_details.user_answer_items) }}
-                                        </div>
-                                    {% endif %}
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         {% endif %}

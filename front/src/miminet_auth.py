@@ -55,6 +55,9 @@ AVATAR_UPLOAD_FOLDER = "/app/static/avatar"
 ALLOWED_EXTENSIONS = {"bmp", "png", "jpg", "jpeg"}
 MAX_AVATAR_SIZE = 1 * 1024 * 1024
 PROFILE_VIEWER_MIN_ROLE = 1
+SOCIAL_LINK_PROVIDER_SESSION_KEY = "social_link_provider"
+SOCIAL_LINK_USER_ID_SESSION_KEY = "social_link_user_id"
+SOCIAL_LINK_REDIRECT_SESSION_KEY = "social_link_redirect"
 
 SOCIAL_LINK_PROVIDER_SESSION_KEY = "social_link_provider"
 SOCIAL_LINK_USER_ID_SESSION_KEY = "social_link_user_id"

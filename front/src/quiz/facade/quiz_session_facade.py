@@ -1,9 +1,11 @@
 import json
 import random
+from typing import List, cast
 
 from markupsafe import Markup
 from miminet_model import User, db
 from quiz.entity.entity import (
+    Answer,
     Question,
     QuestionCategory,
     QuizSession,
@@ -198,6 +200,197 @@ def _build_question_results(quiz_session: QuizSession, include_answer_details: b
         )
         for session_question in results
     ]
+from quiz.util.dto import SessionResultDto, get_question_type
+import json
+import random
+
+
+def _humanize_text(value):
+    if value is None:
+        return ""
+    return str(Markup.unescape(value))
+
+
+def _format_answer_items(question_type: str, answer_value):
+    if not answer_value:
+        return []
+
+    if question_type == "variable":
+        if not isinstance(answer_value, list):
+            return []
+
+        return [
+            _humanize_text(item.get("variant"))
+            for item in answer_value
+            if isinstance(item, dict) and item.get("variant")
+        ]
+
+    if question_type == "sorting":
+        if isinstance(answer_value, dict):
+            ordered_items = list(answer_value.items())
+            try:
+                ordered_items.sort(key=lambda item: int(item[0]))
+            except (TypeError, ValueError):
+                pass
+
+            return [
+                f"{index + 1}. {_humanize_text(value)}"
+                for index, (_, value) in enumerate(ordered_items)
+                if value not in (None, "")
+            ]
+
+        if isinstance(answer_value, list):
+            return [
+                f"{index + 1}. {_humanize_text(value)}"
+                for index, value in enumerate(answer_value)
+                if value not in (None, "")
+            ]
+
+        return []
+
+    if question_type == "matching":
+        if not isinstance(answer_value, list):
+            return []
+
+        items = []
+        for pair in answer_value:
+            if not isinstance(pair, dict):
+                continue
+
+            left = _humanize_text(pair.get("left"))
+            right = _humanize_text(pair.get("right"))
+            if left or right:
+                items.append(f"{left} -> {right}")
+
+        return items
+
+    return []
+
+
+def _get_correct_answer_items(question: Question):
+    question_type = get_question_type(question.question_type)
+    answers = [
+        answer
+        for answer in cast(List[Answer], question.answers)
+        if not getattr(answer, "is_deleted", False)
+    ]
+
+    if question_type == "variable":
+        ordered_answers = sorted(
+            (answer for answer in answers if answer.is_correct),
+            key=lambda item: item.id,
+        )
+        return [
+            _humanize_text(answer.variant)
+            for answer in ordered_answers
+            if answer.variant
+        ]
+
+    if question_type == "sorting":
+        ordered_answers = sorted(
+            answers,
+            key=lambda item: (
+                item.position is None,
+                item.position if item.position is not None else 0,
+                item.id,
+            ),
+        )
+        return [
+            f"{index + 1}. {_humanize_text(answer.variant)}"
+            for index, answer in enumerate(ordered_answers)
+            if answer.variant
+        ]
+
+    if question_type == "matching":
+        ordered_answers = sorted(
+            answers,
+            key=lambda item: (
+                _humanize_text(item.left),
+                _humanize_text(item.right),
+                item.id,
+            ),
+        )
+        return [
+            f"{_humanize_text(answer.left)} -> {_humanize_text(answer.right)}"
+            for answer in ordered_answers
+            if answer.left or answer.right
+        ]
+
+    return []
+
+
+def _build_answer_details(
+    session_question: SessionQuestion, include_answer_details: bool
+):
+    question = cast(Question, session_question.question)
+    question_type = get_question_type(question.question_type)
+    if question_type == "practice" or not include_answer_details:
+        return None
+
+    correct_answer_items = _get_correct_answer_items(question)
+    user_answer_items = _format_answer_items(
+        question_type, session_question.user_answer
+    )
+    has_saved_answer = session_question.user_answer is not None
+    user_answer_title = "Ваше решение"
+
+    if not user_answer_items and session_question.is_correct and correct_answer_items:
+        user_answer_items = list(correct_answer_items)
+        user_answer_title = "Ваше решение (восстановлено)"
+    elif not user_answer_items and (
+        has_saved_answer or session_question.is_correct is False
+    ):
+        user_answer_items = ["Ответ пользователя недоступен для этой попытки."]
+
+    show_reference_answer = session_question.is_correct is False and bool(
+        correct_answer_items
+    )
+    if not user_answer_items and not show_reference_answer:
+        return None
+
+    return {
+        "has_preview": True,
+        "user_answer_title": user_answer_title,
+        "user_answer_items": user_answer_items,
+        "correct_answer_title": "Правильный ответ",
+        "correct_answer_items": correct_answer_items if show_reference_answer else [],
+        "show_reference_answer": show_reference_answer,
+    }
+
+
+def _serialize_session_question(
+    session_question: SessionQuestion, include_answer_details: bool
+):
+    question = cast(Question, session_question.question)
+    question_type = get_question_type(question.question_type)
+
+    return {
+        "id": session_question.id,
+        "quiz_session_id": session_question.quiz_session_id,
+        "question_id": session_question.question_id,
+        "question_text": str(question.text or ""),
+        "question_type": question_type,
+        "is_correct": session_question.is_correct if include_answer_details else None,
+        "score": session_question.score if include_answer_details else None,
+        "max_score": session_question.max_score if include_answer_details else None,
+        "network_guid": session_question.network_guid,
+        "answer_details": _build_answer_details(
+            session_question, include_answer_details
+        ),
+    }
+
+
+def _build_question_results(quiz_session: QuizSession, include_answer_details: bool):
+    results = sorted(
+        cast(List[SessionQuestion], quiz_session.sessions), key=lambda item: item.id
+    )
+
+    return [
+        _serialize_session_question(
+            session_question, include_answer_details=include_answer_details
+        )
+        for session_question in results
+    ]
 
 
 def start_session(section_id: str, user: User):
@@ -245,7 +438,7 @@ def start_session(section_id: str, user: User):
 
     return (
         quiz_session.id,
-        [sq.id for sq in quiz_session.sessions],  # type:ignore[attr-defined]
+        [sq.id for sq in cast(List[SessionQuestion], quiz_session.sessions)],
         201,
     )
 
