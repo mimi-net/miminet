@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import fnmatch
 import pathlib
 
@@ -17,7 +15,7 @@ def posix_relative(path: pathlib.Path, root: pathlib.Path) -> str:
 
 def within_path(path: pathlib.Path, root: pathlib.Path) -> bool:
     try:
-        path.relative_to(root)
+        _ = path.relative_to(root)
         return True
     except ValueError:
         return False

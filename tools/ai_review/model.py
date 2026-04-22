@@ -1,6 +1,3 @@
-from __future__ import annotations
-
-
 def build_model_uri(folder_id: str, model_name: str) -> str:
     if model_name.startswith("gpt://"):
         return model_name
