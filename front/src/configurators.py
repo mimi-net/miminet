@@ -7,9 +7,8 @@ from typing import Callable, Optional
 from celery_app import app
 from flask import Response, jsonify, make_response, request
 from flask_login import current_user
+from miminet_config import ARP_SPOOF_JOB_ID, SLEEP_JOB_ID
 from miminet_model import Network, Simulate, db
-
-ARP_SPOOF_JOB_ID = 204
 
 
 def get_data(arg: str):
@@ -279,7 +278,7 @@ class AbstractNodeConfigurator(AbstractConfigurator):
 
 class AbstractDeviceConfigurator(AbstractNodeConfigurator):
     __MAX_JOBS_COUNT: int = 30
-    __SLEEP_JOB_ID: int = 7
+    __SLEEP_JOB_ID: int = SLEEP_JOB_ID
     __MAX_SLEEP_TIME: int = 60
 
     def __init__(self, device_type: str):
@@ -312,7 +311,7 @@ class AbstractDeviceConfigurator(AbstractNodeConfigurator):
 
         if (
             job_id == ARP_SPOOF_JOB_ID
-            and self._device_node["config"].get("type") != "hacker"
+            and self._node["config"].get("type") != "hacker"
         ):
             raise ConfigurationError(
                 'Команда "ARP spoofing / ARP cache poisoning" доступна только хосту-хакеру'
