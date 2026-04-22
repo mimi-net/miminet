@@ -244,6 +244,8 @@ def requester():
 def selenium(chrome_driver: MiminetTester, requester: Session):
     chrome_driver.get(MAIN_PAGE)
     cookies = requester.cookies
+    print(cookies)
+    jwt_cookie_names = ["access_token_cookie", "refresh_token_cookie"]
 
     # gift cookies to selenium
     for cookie in cookies:
@@ -251,6 +253,17 @@ def selenium(chrome_driver: MiminetTester, requester: Session):
             selenium_cookie = {
                 "domain": testing_setting.nginx_docker_ip,
                 "expiry": cookie.expires,
+                "httpOnly": False,
+                "name": cookie.name,
+                "path": "/",
+                "sameSite": "Lax",
+                "secure": False,
+                "value": cookie.value,
+            }
+            chrome_driver.add_cookie(selenium_cookie)
+        elif cookie.name and cookie.value and cookie.name in jwt_cookie_names:
+            selenium_cookie = {
+                "domain": testing_setting.nginx_docker_ip,
                 "httpOnly": False,
                 "name": cookie.name,
                 "path": "/",

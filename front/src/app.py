@@ -119,15 +119,24 @@ app = Flask(
     __name__, static_url_path="", static_folder="static", template_folder="templates"
 )
 
+BASE_DOMAIN = os.environ.get("BASE_DOMAIN", None)
+
+# Получаем режим работы из переменных окружения
+MODE = os.getenv("MODE", "dev")
+
 app.config.update(
     JWT_SECRET_KEY=os.environ.get("JWT_SECRET_KEY", "secret-key"),
     JWT_TOKEN_LOCATION=["cookies"],
-    JWT_COOKIE_DOMAIN=f".{os.environ.get('BASE_DOMAIN', 'local.tst')}",
-    JWT_COOKIE_SECURE=False,  # True,
-    JWT_COOKIE_CSRF_PROTECT=False,
+    JWT_COOKIE_DOMAIN=f".{BASE_DOMAIN}" if BASE_DOMAIN else None,
+    JWT_COOKIE_SECURE=False if MODE == "dev" else True,
+    JWT_COOKIE_CSRF_PROTECT=False if MODE == "dev" else True,
     JWT_COOKIE_SAMESITE="Lax",
-    JWT_ACCESS_TOKEN_EXPIRES=timedelta(minutes=3),
-    JWT_REFRESH_TOKEN_EXPIRES=timedelta(minutes=30),
+    JWT_ACCESS_TOKEN_EXPIRES=timedelta(
+        hours=float(os.environ.get("ACCESS_TOKEN_EXPIRES", 1))
+    ),
+    JWT_REFRESH_TOKEN_EXPIRES=timedelta(
+        hours=float(os.environ.get("REFRESH_TOKEN_EXPIRES", 2))
+    ),
 )
 
 allowed_hosts_env = os.environ.get("ALLOWED_HOSTS", "")
@@ -171,9 +180,6 @@ def add_cors_headers(response):
 
 # SQLAlchimy config
 load_dotenv()
-
-# Получаем режим работы из переменных окружения
-MODE = os.getenv("MODE", "dev")
 
 PUBLIC_CONFIG_KEYS = [
     "EXTERNAL_BASE_URL",
