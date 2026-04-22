@@ -140,7 +140,7 @@ def handle_needs_login():
 
 def redirect_next_url(fallback):
     if "next_url" not in session:
-        redirect(fallback)
+        return redirect(fallback)
     try:
         dest_url = url_for(session["next_url"])
         return redirect(dest_url)
