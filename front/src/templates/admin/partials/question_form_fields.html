@@ -1,0 +1,223 @@
+<fieldset>
+    <!-- Индикатор выбранного типа -->
+<!--    <div class="question-type-badge">-->
+<!--        Тип вопроса:-->
+<!--        {% if question_type == '0' %}Практическое задание-->
+<!--        {% elif question_type == '1' %}С вариантами ответов-->
+<!--        {% elif question_type == '2' %}На сортировку-->
+<!--        {% elif question_type == '3' %}На сопоставление-->
+<!--        {% endif %}-->
+<!--    </div>-->
+
+    <!-- Скрытое поле типа вопроса -->
+    <input type="hidden" name="question_type" value="{{ question_type }}">
+
+    <!-- Условие вопроса -->
+    <div class="form-group ">
+        <label for="text" class="col-form-label ">Условие&nbsp;<span class="text-danger">*</span></label>
+        <textarea class="form-control" id="text" name="text" placeholder="Введите текст вопроса...">{{ form_data.existing_text }}</textarea>
+    </div>
+
+    <!-- Пояснения -->
+    <div class="form-group ">
+        <label for="explanation" class="col-form-label ">Пояснения&nbsp;</label>
+        <textarea class="form-control" id="explanation" name="explanation">{{ form_data.existing_explanation }}</textarea>
+    </div>
+
+    <!-- Категория вопроса -->
+    {% set category_choices = [] %}
+    {% for c in categories %}
+        {% set _ = category_choices.append((c.id, c.name)) %}
+    {% endfor %}
+
+    <label for="category_id" class="form-label">Категория вопроса</label>
+    <select class="form-control" id="category_id" name="category_id">
+        <option value="">-- Выберите --</option>
+        {% for choice_value, choice_label in category_choices %}
+            <option value="{{ choice_value }}"
+                    {% if form_data.existing_category_id and form_data.existing_category_id|string == choice_value|string %}
+                        selected
+                    {% endif %}>
+                {{ choice_label }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <!-- Раздел вопроса -->
+    {% set section_choices = [] %}
+    {% for s in sections %}
+        {% set _ = section_choices.append((s.id, s.name + (' (' + s.created_by.nick + ')' if s.created_by else ''))) %}
+    {% endfor %}
+
+    <label for="section_id" class="form-label">Вопрос раздела</label>
+    <select class="form-control" id="section_id" name="section_id">
+        <option value="">-- Выберите --</option>
+        {% for choice_value, choice_label in section_choices %}
+            <option value="{{ choice_value }}"
+                    {% if form_data.existing_section_id and form_data.existing_section_id|string == choice_value|string %}
+                        selected
+                    {% endif %}>
+                {{ choice_label }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <!-- Загрузка изображения -->
+    <div class="form-group">
+        <label for="image" class="form-label">Изображение</label>
+        <input type="file" class="form-control" id="image" name="image" accept="image/*">
+        {% if form_data.existing_image_path %}
+            <div class="image-preview">
+                <img src="{{ url_for('static', filename='uploads/questions/' + form_data.existing_image_path) }}" alt="Current image">
+                <p class="text-muted small">Текущее изображение</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <link rel="stylesheet" media="screen" href="/admin/question_from.css"/>
+    <link rel="stylesheet" href="/assets/vendor/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" media="screen" href="/assets/vendor/boxicons/css/boxicons.min.css"/>
+
+    <hr>
+    <div class="form-group">
+    {% if question_type == '1' %}
+        <!-- Тип ответа -->
+        <label class="form-label fw-bold">Количество верных ответов:</label>
+        <div class="mb-4">
+            <div class="answer-type-toggle">
+                <input type="radio" id="singleChoice" name="answer_type" value="single">
+                <label for="singleChoice">Один</label>
+
+                <input type="radio" id="multipleChoice" name="answer_type" value="multiple" checked>
+                <label for="multipleChoice">Несколько</label>
+            </div>
+        </div>
+        <!-- Варианты ответов -->
+        <div class="mb-4">
+            <label class="form-label fw-bold">Варианты ответов:</label>
+            <div class="answers-container" id="answersContainer">
+                {% if existing_answers|length == 0 %}
+                    <div class="answer-item" draggable="true">
+                        <i class="bx bx-dots-vertical-rounded drag-handle"></i>
+                        <input type="checkbox" name="correct_answers[]" value="0" class="answer-radio" checked>
+                        <input type="text" class="answer-input" name="answer_text[]" value="" placeholder="Введите вариант ответа" required>
+                        <div class="answer-actions">
+                            <button type="button" class="move-up" title="Вверх"><i class="bx bx-chevron-up"></i></button>
+                            <button type="button" class="move-down" title="Вниз"><i class="bx bx-chevron-down"></i></button>
+                            <button type="button" class="delete" title="Удалить"><i class="bx bx-x"></i></button>
+                        </div>
+                    </div>
+                {% else %}
+                    {% for a in existing_answers %}
+                        <div class="answer-item" draggable="true">
+                            <i class="bx bx-dots-vertical-rounded drag-handle"></i>
+                            <input type="checkbox" name="correct_answers[]" value="{{ loop.index0 }}" class="answer-radio" {% if a.is_correct %} checked {% endif %}>
+                            <input type="text" class="answer-input" name="answer_text[]" value="{{ a.variant }}" placeholder="Введите вариант ответа" required>
+                            <div class="answer-actions">
+                                <button type="button" class="move-up" title="Вверх"><i class="bx bx-chevron-up"></i></button>
+                                <button type="button" class="move-down" title="Вниз"><i class="bx bx-chevron-down"></i></button>
+                                <button type="button" class="delete" title="Удалить"><i class="bx bx-x"></i></button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+    {% elif question_type == '2' %}
+
+        <!-- Сортировка ответов -->
+        <div class="mb-4">
+            <label class="form-label fw-bold">Верный порядок ответа:</label>
+            <div class="answers-container" id="answersContainer">
+                {% if existing_answers|length == 0 %}
+                    <div class="answer-item" draggable="true">
+                        <i class="bx bx-dots-vertical-rounded drag-handle"></i>
+                        <input type="text" class="answer-input" name="answer_text[]" value="" placeholder="Введите вариант ответа" required>
+                        <div class="answer-actions">
+                            <button type="button" class="move-up" title="Вверх"><i class="bx bx-chevron-up"></i></button>
+                            <button type="button" class="move-down" title="Вниз"><i class="bx bx-chevron-down"></i></button>
+                            <button type="button" class="delete" title="Удалить"><i class="bx bx-x"></i></button>
+                        </div>
+                    </div>
+                {% else %}
+                    {% for a in existing_answers %}
+                        <div class="answer-item" draggable="true">
+                            <i class="bx bx-dots-vertical-rounded drag-handle"></i>
+                            <input type="text" class="answer-input" name="answer_text[]" value="{{ a.variant }}" placeholder="Введите вариант ответа" required>
+                            <div class="answer-actions">
+                                <button type="button" class="move-up" title="Вверх"><i class="bx bx-chevron-up"></i></button>
+                                <button type="button" class="move-down" title="Вниз"><i class="bx bx-chevron-down"></i></button>
+                                <button type="button" class="delete" title="Удалить"><i class="bx bx-x"></i></button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+
+    {% elif question_type == '3' %}
+        <!-- На сопоставление -->
+        <div class="mb-4">
+            <label class="form-label fw-bold">Верные пары ответов:</label>
+            <div class="answers-container" id="answersContainer">
+                {% if existing_answers|length == 0 %}
+                    <div class="answer-item">
+                        <input type="text" class="answer-input" name="answer_text_left[]" value="" placeholder="" required>
+                        <div class="answer-separator">
+                            <i class='bx bx-transfer' style='color: #9ca3af; font-size: 16px;'></i>
+                        </div>
+                        <input type="text" class="answer-input" name="answer_text_right[]" value="" placeholder="" required>
+                        <div class="answer-actions">
+                            <button type="button" class="delete" title="Удалить"><i class="bx bx-x"></i></button>
+                        </div>
+                    </div>
+                {% else %}
+                    {% for a in existing_answers %}
+                        <div class="answer-item">
+                            <input type="text" class="answer-input" name="answer_text_left[]" value="{{ a.left }}" placeholder="" required>
+                            <div class="answer-separator">
+                                <i class='bx bx-transfer' style='color: #9ca3af; font-size: 16px;'></i>
+                            </div>
+                            <input type="text" class="answer-input" name="answer_text_right[]" value="{{ a.right }}" placeholder="" required>
+                            <div class="answer-actions">
+                                <button type="button" class="delete" title="Удалить"><i class="bx bx-x"></i></button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+    {% endif %}
+        <div class="form-footer">
+            <button type="button" class="add-answer-btn" id="addAnswer">
+                <i class="bi bi-plus-lg me-2"></i>Добавить вариант ответа
+            </button>
+
+            {% if form_data.share %}
+                <div>
+                    <input type="checkbox" id="share" name="share" checked>
+                    <label for="share">Публичная задача</label>
+                </div>
+            {% else %}
+                <div>
+                    <input type="checkbox" id="share" name="share">
+                    <label for="share">Публичная задача</label>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Кнопка сохранения -->
+    <hr>
+    <div class="form-group">
+      <div class="col-md-offset-2 col-md-10 submit-row">
+            <input type="submit" class="btn btn-primary" value="Save">
+            <input name="_add_another" type="submit" class="btn btn-secondary" value="Save and Add Another">
+            <input name="_continue_editing" type="submit" class="btn btn-secondary" value="Save and Continue Editing">
+            <a href="/admin/question?page_size=20" class="btn btn-danger" role="button">Cancel</a>
+        </div>
+    </div>
+</fieldset>

@@ -1,7 +1,7 @@
 import pytest
-from utils.networks import NodeType, MiminetTestNetwork
-from utils.locators import Location
 from conftest import MiminetTester
+from utils.locators import Location
+from utils.networks import MiminetTestNetwork, NodeType
 
 
 class TestOptionsFilter:

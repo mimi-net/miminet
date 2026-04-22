@@ -1,10 +1,6 @@
 import pytest
+from conftest import HOME_PAGE, MAIN_PAGE, MiminetTester
 from requests import Session
-from conftest import (
-    MiminetTester,
-    MAIN_PAGE,
-    HOME_PAGE,
-)
 
 
 class TestAvailability:

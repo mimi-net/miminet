@@ -1,12 +1,11 @@
 import json
 import uuid
 
-from sqlalchemy import func, BigInteger, Text, Boolean, TIMESTAMP, ForeignKey
+from miminet_model import db
+from sqlalchemy import TIMESTAMP, BigInteger, Boolean, ForeignKey, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import declared_attr
 from sqlalchemy.types import TypeDecorator
-
-from miminet_model import db
 
 
 class GUID(TypeDecorator):
@@ -92,6 +91,25 @@ class CreatedByMixin(object):
         return db.relationship("User")
 
 
+class Organization(
+    IdMixin,
+    db.Model, # type:ignore[name-defined]
+):
+    __tablename__ = "organization"
+
+    id = db.Column(BigInteger, primary_key=True)
+    name = db.Column(Text, nullable=False)
+    domain = db.Column(Text)
+    logo_uri = db.Column(Text, default="empty.jpg", nullable=False)
+    admin_role = db.Column(BigInteger, default=1, nullable=True)
+
+    def __str__(self):
+        return self.name
+
+    def get_id(self):
+        return self.id
+
+
 class Test(
     IdMixin,
     SoftDeleteMixin,
@@ -105,6 +123,7 @@ class Test(
     description = db.Column(Text, default="")
     is_ready = db.Column(Boolean, default=False)
     is_retakeable = db.Column(Boolean, default=False)
+    organization_id = db.Column(BigInteger, ForeignKey("organization.id"))
 
     sections = db.relationship("Section", back_populates="test")
 
@@ -225,6 +244,7 @@ class SessionQuestion(
     max_score = db.Column(BigInteger, default=0)
 
     network_guid = db.Column(Text, nullable=True)
+    user_answer = db.Column(Json, nullable=True)
 
     quiz_session = db.relationship("QuizSession", back_populates="sessions")
     question = db.relationship("Question", back_populates="session_questions")

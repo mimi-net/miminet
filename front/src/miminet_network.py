@@ -1,7 +1,8 @@
+import datetime
 import json
 import os
-import uuid
 import shutil
+import uuid
 
 from flask import (
     flash,
@@ -12,13 +13,18 @@ from flask import (
     request,
     url_for,
 )
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_login import current_user, login_required
 from miminet_config import check_image_with_pil
-from miminet_model import Network, Simulate, db, SimulateLog
-import datetime
+from miminet_model import Network, Simulate, SimulateLog, db
 from sqlalchemy import not_
 
 PREVIEW_IMAGES_ROOT = "static/images/preview"
+
+
+def CORS_header(response):
+    response.headers.add("Access-Control-Allow-Credentials", "true")
+    return response
 
 
 @login_required
@@ -35,28 +41,28 @@ def create_network():
     return redirect(url_for("web_network", guid=n.guid))
 
 
-@login_required
+@jwt_required()
 def update_network_config():
-    user = current_user
+    user_id = get_jwt_identity()
     network_guid = request.args.get("guid", type=str)
 
     if not network_guid:
         ret = {"message": "Пропущен параметр GUID. И какую сеть мне открыть?!"}
-        return make_response(jsonify(ret), 400)
+        return CORS_header(make_response(jsonify(ret), 400))
 
     net = (
         Network.query.filter(Network.guid == network_guid)
-        .filter(Network.author_id == user.id)
+        .filter(Network.author_id == user_id)
         .first()
     )
 
     if not net:
         ret = {"message": "Нет такой сети"}
-        return make_response(jsonify(ret), 400)
+        return CORS_header(make_response(jsonify(ret), 400))
 
     if request.method != "POST":
         ret = {"message": "Неверный запрос"}
-        return make_response(jsonify(ret), 400)
+        return CORS_header(make_response(jsonify(ret), 400))
 
     net_config = request.json
     jnet = json.loads(net.network)
@@ -99,27 +105,27 @@ def update_network_config():
     db.session.commit()
 
     ret = {"message": "Done"}
-    return make_response(jsonify(ret), 200)
+    return CORS_header(make_response(jsonify(ret), 200))
 
 
-@login_required
+@jwt_required()
 def delete_network():
-    user = current_user
+    user_id = get_jwt_identity()
     network_guid = request.args.get("guid", type=str)
 
     if not network_guid:
         flash("Пропущен параметр GUID. И какую сеть мне удалить?!")
-        return redirect("home")
+        return CORS_header(redirect("home"))
 
     net = (
         Network.query.filter(Network.guid == network_guid)
-        .filter(Network.author_id == user.id)
+        .filter(Network.author_id == user_id)
         .first()
     )
 
     if not net:
         flash("Нет такой сети")
-        return redirect("home")
+        return CORS_header(redirect("home"))
 
     if request.method == "POST":
         sims = Simulate.query.filter(Simulate.network_id == net.id).all()
@@ -132,7 +138,7 @@ def delete_network():
         db.session.delete(net)
         db.session.commit()
 
-    return redirect(url_for("home"))
+    return CORS_header(redirect(url_for("home")))
 
 
 def web_network_shared():
@@ -333,24 +339,24 @@ def remove_preview_image(preview_uri):
 
 
 # Depricated?
-@login_required
+@jwt_required()
 def post_nodes():
-    user = current_user
+    user_id = get_jwt_identity()
     network_guid = request.args.get("guid", type=str)
 
     if not network_guid:
         ret = {"message": "Пропущен параметр guid"}
-        return make_response(jsonify(ret), 400)
+        return CORS_header(make_response(jsonify(ret), 400))
 
     net = (
         Network.query.filter(Network.guid == network_guid)
-        .filter(Network.author_id == user.id)
+        .filter(Network.author_id == user_id)
         .first()
     )
 
     if not net:
         ret = {"message": "Нет такой сети"}
-        return make_response(jsonify(ret), 400)
+        return CORS_header(make_response(jsonify(ret), 400))
 
     if request.method == "POST":
         nodes = request.json
@@ -366,12 +372,12 @@ def post_nodes():
         db.session.commit()
 
     ret = {"message": "Done", "code": "SUCCESS"}
-    return make_response(jsonify(ret), 201)
+    return CORS_header(make_response(jsonify(ret), 201))
 
 
-@login_required
+@jwt_required()
 def post_nodes_edges():
-    user = current_user
+    user_id = get_jwt_identity()
     network_guid = request.args.get("guid", type=str)
 
     if not network_guid:
@@ -380,7 +386,7 @@ def post_nodes_edges():
 
     net = (
         Network.query.filter(Network.guid == network_guid)
-        .filter(Network.author_id == user.id)
+        .filter(Network.author_id == user_id)
         .first()
     )
 
@@ -419,9 +425,9 @@ def post_nodes_edges():
     return make_response(jsonify(ret), 201)
 
 
-@login_required
+@jwt_required()
 def move_nodes():
-    user = current_user
+    user_id = get_jwt_identity()
     network_guid = request.args.get("guid", type=str)
 
     if not network_guid:
@@ -430,7 +436,7 @@ def move_nodes():
 
     net = (
         Network.query.filter(Network.guid == network_guid)
-        .filter(Network.author_id == user.id)
+        .filter(Network.author_id == user_id)
         .first()
     )
 
@@ -449,9 +455,9 @@ def move_nodes():
     return make_response(jsonify(ret), 201)
 
 
-@login_required
+@jwt_required()
 def upload_network_picture():
-    user = current_user
+    user_id = get_jwt_identity()
     network_guid = request.args.get("guid", type=str)
 
     if not network_guid:
@@ -460,7 +466,7 @@ def upload_network_picture():
 
     net = (
         Network.query.filter(Network.guid == network_guid)
-        .filter(Network.author_id == user.id)
+        .filter(Network.author_id == user_id)
         .first()
     )
 
@@ -502,9 +508,9 @@ def upload_network_picture():
     return make_response(jsonify(ret), 400)
 
 
-@login_required
+@jwt_required()
 def copy_network():
-    user = current_user
+    user_id = get_jwt_identity()
     network_guid = request.args.get("guid", type=str)
 
     if not network_guid:
@@ -519,7 +525,7 @@ def copy_network():
 
     if request.method == "POST":
         u = uuid.uuid4()
-        n = Network(author_id=user.id, guid=str(u))
+        n = Network(author_id=user_id, guid=str(u))
         n.network = net.network
         n.title = net.title + str(" - копия")
 
@@ -543,7 +549,7 @@ def copy_network():
         return make_response(jsonify(ret), 200)
 
 
-@login_required
+@jwt_required()
 def get_last_emulation_time():
     """Answer with current last emulation starting time."""
     last_emulation_time = (
@@ -562,7 +568,7 @@ def get_last_emulation_time():
     )
 
 
-@login_required
+@jwt_required()
 def get_emulation_queue_size():
     """Answer with current emulation queue size filtered by emulation time."""
     time_filter_req: str = request.args.get("time-filter", type=str).replace(" ", "+")
