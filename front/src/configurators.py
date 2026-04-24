@@ -1,4 +1,4 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 import json
 from celery_app import app
 from flask import jsonify, make_response, request, Response
@@ -158,7 +158,7 @@ class JobConfigurator:
 
         # add args to response
         for i, conf_arg in enumerate(configured_args):
-            response[f"arg_{i+1}"] = conf_arg
+            response[f"arg_{i + 1}"] = conf_arg
 
         return response
 
@@ -178,35 +178,13 @@ class ArgCheckError(Exception):
         super().__init__(message)
 
 
-class AbstractDeviceConfigurator:
-    def __init__(self, device_type: str):
-        self.__jobs: dict[int, JobConfigurator] = {}
-        self._device_type: str = device_type
-        self._device_node = None  # current device node in miminet network
+class AbstractConfigurator(ABC):
+    def __init__(self, element_type: str):
+        self._element_type: str = element_type
+        self._cur_network: Network | None = None
+        self._json_network: dict = {}
 
-    __MAX_JOBS_COUNT: int = 30
-    __SLEEP_JOB_ID: int = 7
-    __MAX_SLEEP_TIME: int = 60
-
-    def create_job(self, job_id: int, job_sign: str) -> JobConfigurator:
-        """
-        Create job for current network device
-        Args:
-            job_id (int): ID that is assigned to the job in the select list (see static/config*.html files)
-            job_sign (str): label that will be displayed above the device after adding a job
-        """
-        if job_id in self.__jobs.keys():
-            raise ValueError("This job already added")
-
-        self.__jobs[job_id] = JobConfigurator(job_id, job_sign)
-        return self.__jobs[job_id]
-
-    # [!] I have broken device configuration process into different blocks, they will be below
-
-    def _conf_prepare(self):
-        """Prepare variables for configuring"""
-
-        # check request correctness
+    def _conf_prepare_network(self):
         if request.method != "POST":
             raise ConfigurationError("Неверный запрос: ожидался POST")
 
@@ -225,39 +203,11 @@ class AbstractDeviceConfigurator:
         if not self._cur_network:
             raise ConfigurationError("Сеть не найдена")
 
-        # get element (host, hub, switch, ...)
-        element_form_id = f"{self._device_type}_id"
-        device_id = get_data(element_form_id)
-
-        if not device_id:
-            raise ConfigurationError(f"Не указан параметр {element_form_id}")
-
         # json representation
         self._json_network: dict = json.loads(self._cur_network.network)
-        self._nodes: list = self._json_network["nodes"]
-
-        # find all matches with device in nodes
-        filt_nodes = list(filter(lambda n: n["data"]["id"] == device_id, self._nodes))
-
-        if not filt_nodes and self._device_type != "edge":
-            raise ConfigurationError(f"Такого '{self._device_type}' не существует")
-
-        # current device's node
-        if self._device_type != "edge":
-            self._device_node = filt_nodes[0]
-
-    def _conf_label_update(self):
-        """Update device label(name). Typically used at the end of the configuration"""
-        # get label with device name
-        label = get_data(f"config_{self._device_type}_name")
-
-        if label:
-            self._device_node["config"]["label"] = label
-            self._device_node["data"]["label"] = self._device_node["config"]["label"]
 
     def __conf_sims_delete(self):
         """Delete saved simulations. Typically used at the end of the configuration"""
-        # Remove all previous simulations (after configuration update)
         sims = Simulate.query.filter(Simulate.network_id == self._cur_network.id).all()
         for s in sims:
             app.control.revoke(s.task_guid, terminate=False)
@@ -266,9 +216,79 @@ class AbstractDeviceConfigurator:
         self._cur_network.network = json.dumps(self._json_network)
         db.session.commit()
 
+    @abstractmethod
+    def _configure(self) -> dict:
+        """Configuration main block in which the entire configuration process takes place"""
+        pass
+
+    def configure(self) -> Response:
+        """Configure current network device"""
+        try:
+            res = self._configure()  # configuration result
+            self.__conf_sims_delete()
+            return make_response(jsonify(res), 200)
+        except ConfigurationError as e:
+            return make_response(jsonify({"message": str(e)}), 400)
+
+
+class AbstractNodeConfigurator(AbstractConfigurator):
+    def __init__(self, element_type: str):
+        super().__init__(element_type)
+        self._node = None
+        self._nodes: list = []
+
+    def _conf_prepare_node(self):
+        self._conf_prepare_network()
+        self._nodes = self._json_network.get("nodes", [])
+
+        element_form_id = f"{self._element_type}_id"
+        node_id = get_data(element_form_id)
+
+        if not node_id:
+            raise ConfigurationError(f"Не указан параметр {element_form_id}")
+
+        filt_nodes = list(filter(lambda n: n["data"]["id"] == node_id, self._nodes))
+
+        if not filt_nodes and self._element_type != "edge":
+            raise ConfigurationError(f"Такого '{self._element_type}' не существует")
+
+        self._node = filt_nodes[0]
+
+    def _conf_label_update(self):
+        """Update device label(name). Typically used at the end of the configuration"""
+        # get label with device name
+        label = get_data(f"config_{self._element_type}_name")
+
+        if label:
+            self._node["config"]["label"] = label
+            self._node["data"]["label"] = self._node["config"]["label"]
+
+
+class AbstractDeviceConfigurator(AbstractNodeConfigurator):
+    __MAX_JOBS_COUNT: int = 30
+    __SLEEP_JOB_ID: int = 7
+    __MAX_SLEEP_TIME: int = 60
+
+    def __init__(self, device_type: str):
+        super().__init__(device_type)
+        self.__jobs: dict[int, JobConfigurator] = {}
+
+    def create_job(self, job_id: int, job_sign: str) -> JobConfigurator:
+        """
+        Create job for current network device
+        Args:
+            job_id (int): ID that is assigned to the job in the select list (see static/config*.html files)
+            job_sign (str): label that will be displayed above the device after adding a job
+        """
+        if job_id in self.__jobs.keys():
+            raise ValueError("This job already added")
+
+        self.__jobs[job_id] = JobConfigurator(job_id, job_sign)
+        return self.__jobs[job_id]
+
     def _conf_jobs(self):
         """Configure jobs added to the device"""
-        job_id_str = get_data(f"config_{self._device_type}_job_select_field")
+        job_id_str = get_data(f"config_{self._element_type}_job_select_field")
 
         if not job_id_str:
             return
@@ -308,7 +328,7 @@ class AbstractDeviceConfigurator:
             job_level = len(self._json_network["jobs"])
 
         job_conf_res["level"] = job_level
-        job_conf_res["host_id"] = self._device_node["data"]["id"]
+        job_conf_res["host_id"] = self._node["data"]["id"]
         sleep_job_list = [
             job
             for job in self._json_network["jobs"]
@@ -341,13 +361,13 @@ class AbstractDeviceConfigurator:
         """Configurate device IP-addresses"""
 
         # all interfaces
-        iface_ids = request.form.getlist(f"config_{self._device_type}_iface_ids[]")
+        iface_ids = request.form.getlist(f"config_{self._element_type}_iface_ids[]")
         for iface_id in iface_ids:
-            if not self._device_node["interface"]:
+            if not self._node["interface"]:
                 return  # we have nothing to configure
 
             filtered_ifaces = list(
-                filter(lambda x: x["id"] == iface_id, self._device_node["interface"])
+                filter(lambda x: x["id"] == iface_id, self._node["interface"])
             )
 
             if not filtered_ifaces:
@@ -355,8 +375,8 @@ class AbstractDeviceConfigurator:
 
             interface = filtered_ifaces[0]
 
-            ip_value = get_data(f"config_{self._device_type}_ip_{str(iface_id)}")
-            mask_value = get_data(f"config_{self._device_type}_mask_{str(iface_id)}")
+            ip_value = get_data(f"config_{self._element_type}_ip_{str(iface_id)}")
+            mask_value = get_data(f"config_{self._element_type}_mask_{str(iface_id)}")
 
             if not ip_value:
                 continue
@@ -387,28 +407,14 @@ class AbstractDeviceConfigurator:
             interface["netmask"] = mask_value
 
     def _conf_gw(self):
-        default_gw = get_data(f"config_{self._device_type}_default_gw")
+        default_gw = get_data(f"config_{self._element_type}_default_gw")
 
         if default_gw:
             if not self.__ip_check(default_gw):
                 raise ArgCheckError("Неверно указан IP-адрес для шлюза по умолчанию")
-            self._device_node["config"]["default_gw"] = default_gw
+            self._node["config"]["default_gw"] = default_gw
         else:
-            self._device_node["config"]["default_gw"] = ""
-
-    @abstractmethod
-    def _configure(self) -> dict:
-        """Configuration main block in which the entire configuration process takes place"""
-        pass
-
-    def configure(self) -> Response:
-        """Configure current network device"""
-        try:
-            res = self._configure()  # configuration result
-            self.__conf_sims_delete()
-            return make_response(jsonify(res), 200)
-        except ConfigurationError as e:
-            return make_response(jsonify({"message": str(e)}), 400)
+            self._node["config"]["default_gw"] = ""
 
 
 class HubConfigurator(AbstractDeviceConfigurator):
@@ -416,41 +422,41 @@ class HubConfigurator(AbstractDeviceConfigurator):
         super().__init__(device_type="hub")
 
     def _configure(self):
-        self._conf_prepare()
+        self._conf_prepare_node()
         self._conf_label_update()
 
         return {"message": "Конфигурация обновлена", "nodes": self._nodes}
 
 
-class TextboxConfigurator(AbstractDeviceConfigurator):
+class TextboxConfigurator(AbstractNodeConfigurator):
     def __init__(self):
-        super().__init__(device_type="textbox")
+        super().__init__(element_type="textbox")
 
     def _conf_content_update(self):
-        label = get_data(f"config_{self._device_type}_content")
+        label = get_data(f"config_{self._element_type}_content")
         fontsize = get_data("config_textbox_font_size")
         font_color = get_data("config_textbox_font_color")
         font_style = get_data("config_textbox_font_style")
         font_weight = get_data("config_textbox_font_weight")
 
         if label:
-            self._device_node["config"]["label"] = label
-            self._device_node["data"]["label"] = self._device_node["config"]["label"]
+            self._node["config"]["label"] = label
+            self._node["data"]["label"] = self._node["config"]["label"]
 
         if fontsize:
-            self._device_node["config"]["tb_fontsize"] = int(fontsize)
+            self._node["config"]["tb_fontsize"] = int(fontsize)
 
         if font_color:
-            self._device_node["config"]["color"] = font_color
+            self._node["config"]["color"] = font_color
 
         if font_style:
-            self._device_node["config"]["fontstyle"] = font_style
+            self._node["config"]["fontstyle"] = font_style
 
         if font_weight:
-            self._device_node["config"]["fontweight"] = font_weight
+            self._node["config"]["fontweight"] = font_weight
 
     def _configure(self):
-        self._conf_prepare()
+        self._conf_prepare_node()
         self._conf_content_update()
 
         return {"message": "Конфигурация обновлена", "nodes": self._nodes}
@@ -461,7 +467,7 @@ class SwitchConfigurator(AbstractDeviceConfigurator):
         super().__init__(device_type="switch")
 
     def _configure(self):
-        self._conf_prepare()
+        self._conf_prepare_node()
         self._conf_label_update()
         res = {}
         try:  # catch argument check errors
@@ -471,17 +477,17 @@ class SwitchConfigurator(AbstractDeviceConfigurator):
         # RSTP/STP setup
         switch_stp = get_data("config_rstp_stp")
 
-        self._device_node["config"]["stp"] = 0
+        self._node["config"]["stp"] = 0
 
         if switch_stp and switch_stp == "1":
-            self._device_node["config"]["stp"] = 1
+            self._node["config"]["stp"] = 1
         elif switch_stp and switch_stp == "2":
-            self._device_node["config"]["stp"] = 2
+            self._node["config"]["stp"] = 2
 
         stp_priority = get_data("config_stp_priority")
 
         if stp_priority:
-            self._device_node["config"]["priority"] = int(stp_priority)
+            self._node["config"]["priority"] = int(stp_priority)
         res.update(
             {
                 "message": "Конфигурация обновлена",
@@ -497,7 +503,7 @@ class HostConfigurator(AbstractDeviceConfigurator):
         super().__init__(device_type="host")
 
     def _configure(self):
-        self._conf_prepare()
+        self._conf_prepare_node()
         self._conf_label_update()
 
         res = {}
@@ -524,34 +530,34 @@ class RouterConfigurator(HostConfigurator):
     # router has the same configuration method as host
     def __init__(self):
         super().__init__()
-        self._device_type = "router"
+        self._element_type = "router"
 
 
 class ServerConfigurator(HostConfigurator):
     # server has the same configuration method as host
     def __init__(self):
         super().__init__()
-        self._device_type = "server"
+        self._element_type = "server"
 
 
-class EdgeConfigurator(AbstractDeviceConfigurator):
+class EdgeConfigurator(AbstractConfigurator):
     def __init__(self):
-        super().__init__(device_type="edge")
+        super().__init__(element_type="edge")
 
     def _configure(self):
-        self._conf_prepare()
+        self._conf_prepare_network()
         self._update_network_issue()
 
         return {
             "message": "Конфигурация обновлена",
-            "edges": self._json_network["edges"],
-            "nodes": self._nodes,
-            "jobs": self._json_network["jobs"],
+            "edges": self._json_network.get("edges", []),
+            "nodes": self._json_network.get("nodes", []),
+            "jobs": self._json_network.get("jobs", []),
         }
 
     def _update_network_issue(self):
-        loss = int(get_data("edge_loss"))
-        duplicate = int(get_data("edge_duplicate"))
+        loss = int(get_data("edge_loss") or 0)
+        duplicate = int(get_data("edge_duplicate") or 0)
         edge_id = get_data("edge_id")
 
         for edge in self._json_network["edges"]:
