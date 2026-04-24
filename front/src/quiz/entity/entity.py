@@ -91,7 +91,7 @@ class CreatedByMixin(object):
         return db.relationship("User")
 
 
-class Organization(db.Model):  # type:ignore[name-defined]
+class Organization(db.Model):  # type: ignore[name-defined]
     __tablename__ = "organization"
 
     id = db.Column(BigInteger, primary_key=True)
@@ -112,7 +112,7 @@ class Test(
     SoftDeleteMixin,
     TimeMixin,
     CreatedByMixin,
-    db.Model,  # type:ignore[name-defined]
+    db.Model,  # type: ignore[name-defined]
 ):
     __tablename__ = "test"
 
@@ -136,7 +136,7 @@ class Section(
     SoftDeleteMixin,
     TimeMixin,
     CreatedByMixin,
-    db.Model,  # type:ignore[name-defined]
+    db.Model,  # type: ignore[name-defined]
 ):
     __tablename__ = "section"
 
@@ -161,7 +161,7 @@ class Section(
         return self.id
 
 
-class QuestionImage(db.Model):  # type:ignore[name-defined]
+class QuestionImage(db.Model):  # type: ignore[name-defined]
     __tablename__ = "question_image"
     id = db.Column(BigInteger, primary_key=True)
     question_id = db.Column(BigInteger, ForeignKey("question.id"))
@@ -175,7 +175,7 @@ class Question(
     SoftDeleteMixin,
     TimeMixin,
     CreatedByMixin,
-    db.Model,  # type:ignore[name-defined]
+    db.Model,  # type: ignore[name-defined]
 ):
     __tablename__ = "question"
 
@@ -212,7 +212,7 @@ class QuizSession(
     SoftDeleteMixin,
     TimeMixin,
     CreatedByMixin,
-    db.Model,  # type:ignore[name-defined]
+    db.Model,  # type: ignore[name-defined]
 ):
     __tablename__ = "quiz_session"
 
@@ -230,7 +230,7 @@ class SessionQuestion(
     SoftDeleteMixin,
     TimeMixin,
     CreatedByMixin,
-    db.Model,  # type:ignore[name-defined]
+    db.Model,  # type: ignore[name-defined]
 ):
     __tablename__ = "session_question"
 
@@ -252,7 +252,7 @@ class Answer(
     SoftDeleteMixin,
     TimeMixin,
     CreatedByMixin,
-    db.Model,  # type:ignore[name-defined]
+    db.Model,  # type: ignore[name-defined]
 ):
     __tablename__ = "answer"
 
@@ -272,7 +272,7 @@ class PracticeQuestion(
     SoftDeleteMixin,
     TimeMixin,
     CreatedByMixin,
-    db.Model,  # type:ignore[name-defined]
+    db.Model,  # type: ignore[name-defined]
 ):
     __tablename__ = "practice_question"
 
@@ -293,7 +293,7 @@ class PracticeQuestion(
 
 
 # Table for question categories.
-class QuestionCategory(db.Model):  # type:ignore[name-defined]
+class QuestionCategory(db.Model):  # type: ignore[name-defined]
     id = db.Column(BigInteger, primary_key=True)
     name = db.Column(Text, nullable=False, default="Тестовая категория")
 

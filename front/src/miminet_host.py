@@ -519,7 +519,7 @@ def save_router_config():
     return router.configure()
 
 
-@jwt_required
+@jwt_required()
 def save_textbox_config():
     return textbox.configure()
 
