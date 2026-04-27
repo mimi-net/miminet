@@ -39,7 +39,7 @@ def load_config(config_path: pathlib.Path) -> RuntimeConfig:
         model_name=str(raw.get("model_name", "yandexgpt-lite")),
         temperature=float(raw.get("temperature", 0.1)),
         max_tokens=int(raw.get("max_tokens", 3500)),
-        max_iterations=int(raw.get("max_iterations", 12)),
+        max_iterations=int(raw.get("max_iterations", 30)),
         review_window_days=int(raw.get("review_window_days", 7)),
         disable_data_logging=bool(raw.get("disable_data_logging", True)),
         focus=tuple(str(item) for item in raw.get("focus", [])),

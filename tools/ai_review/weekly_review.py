@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from tools.ai_review.cli import DEFAULT_OUTPUT_DIR
 from tools.ai_review.cli import main
 from tools.ai_review.cli import parse_args

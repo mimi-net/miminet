@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import datetime as dt
 import os
 import pathlib
@@ -125,13 +123,13 @@ def build_initial_messages(
         Analysis date: {analysis_date}
 
         Top-level scope:
-        {chr(10).join(f"- {entry}" for entry in top_level[:40])}
+        {"\n".join(f"- {entry}" for entry in top_level[:40])}
 
         Recent commits:
-        {chr(10).join(recent_commit_lines)}
+        {"\n".join(recent_commit_lines)}
 
         Recently changed files:
-        {chr(10).join(recent_file_lines)}
+        {"\n".join(recent_file_lines)}
 
         Available tools:
         - list_dir(path=".", recursive=false, limit=200)

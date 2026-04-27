@@ -1,7 +1,7 @@
 model_name = "yandexgpt-lite"
 temperature = 0.1
 max_tokens = 3500
-max_iterations = 12
+max_iterations = 30
 review_window_days = 7
 disable_data_logging = true
 
