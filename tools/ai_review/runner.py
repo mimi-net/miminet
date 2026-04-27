@@ -6,6 +6,7 @@ import os
 import pathlib
 import textwrap
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from tools.ai_review.config import RuntimeConfig
 from tools.ai_review.exceptions import ReviewError
@@ -97,7 +98,9 @@ def run_review(
     report_path = output_dir / "report.md"
     session_path = output_dir / "session.json"
 
-    generated_at = dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat()
+    generated_at = (
+        dt.datetime.now(ZoneInfo("Europe/Moscow")).replace(microsecond=0).isoformat()
+    )
     header = textwrap.dedent(
         f"""
         # Weekly AI Review
