@@ -144,7 +144,7 @@ class ReviewTools:
             if not (
                 is_allowed_by_scope(relative, self.config.scope)
                 and fnmatch.fnmatchcase(candidate.name, file_glob)
-                and candidate.stat().st_size > self.config.limits.file_bytes
+                and candidate.stat().st_size <= self.config.limits.file_bytes
             ) or is_probably_binary(candidate):
                 continue
 

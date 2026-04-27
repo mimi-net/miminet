@@ -1,0 +1,45 @@
+model_name = "yandexgpt-lite"
+temperature = 0.1
+max_tokens = 3500
+max_iterations = 12
+review_window_days = 7
+disable_data_logging = true
+
+focus = [
+  "Find concrete bugs, regressions, fragile flows, and security issues.",
+  "Look for missing or weak tests around recently changed code.",
+  "Prefer evidence from repository files over generic advice.",
+]
+
+[limits]
+directory_entries = 200
+file_lines = 200
+file_bytes = 200000
+search_matches = 80
+
+[scope]
+include = [
+  "README.md",
+  ".github/workflows",
+  "back",
+  "front",
+]
+
+exclude = [
+  ".git/**",
+  "**/.git/**",
+  "**/__pycache__/**",
+  "**/.pytest_cache/**",
+  "**/.mypy_cache/**",
+  "**/.ruff_cache/**",
+  "**/.venv/**",
+  "**/node_modules/**",
+  "**/*.png",
+  "**/*.jpg",
+  "**/*.jpeg",
+  "**/*.gif",
+  "**/*.ico",
+  "**/*.mp4",
+  "**/*.pcap",
+  "**/*.zip",
+]
