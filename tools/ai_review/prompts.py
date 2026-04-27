@@ -5,6 +5,7 @@ import os
 import pathlib
 import textwrap
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from tools.ai_review.config import RuntimeConfig
 from tools.ai_review.config import Scope
@@ -53,7 +54,7 @@ def build_initial_messages(
     repo_name = os.environ.get("GITHUB_REPOSITORY", repo_root.name)
     sha = os.environ.get("GITHUB_SHA", "unknown")
     ref_name = os.environ.get("GITHUB_REF_NAME", "unknown")
-    analysis_date = dt.datetime.now(dt.timezone.utc).strftime("%d:%m:%Y")
+    analysis_date = dt.datetime.now(ZoneInfo("Europe/Moscow")).strftime("%d:%m:%Y")
 
     system_prompt = textwrap.dedent(
         f"""
