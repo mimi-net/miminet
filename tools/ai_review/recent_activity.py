@@ -54,12 +54,10 @@ def gather_recent_activity(repo_root: pathlib.Path, days: int) -> dict[str, Any]
                 "files": [],
             }
             commits.append(current)
-            continue
-        if current is None:
-            continue
-        current["files"].append(line)
-        if line not in files:
-            files.append(line)
+        elif current is not None:
+            current["files"].append(line)
+            if line not in files:
+                files.append(line)
 
     return {
         "since": since,
