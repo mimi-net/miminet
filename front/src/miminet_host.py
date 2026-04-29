@@ -426,6 +426,15 @@ arp_proxy_job.add_param("router_connection_host_label_hidden").add_check(
     emptiness_check
 ).set_error_msg('Не указан интерфейс для команды "Добавить ARP Proxy-интерфейс"')
 
+# Add DHCP Relay
+dhcp_relay_job = router.create_job(204, "dnsmasq --dhcp-relay=[1],[0]")
+dhcp_relay_job.add_param("config_router_dhcp_relay_server_ip_input_field").add_check(
+    IPv4_check
+).set_error_msg('Неверно указан IP адрес для команды "Включить DHCP Relay"')
+dhcp_relay_job.add_param("config_router_dhcp_relay_listening_ip_input_field").add_check(
+    IPv4_check
+).set_error_msg('Неверно указан IP адрес для команды "Включить DHCP Relay"')
+
 
 # ~ ~ ~ SWITCH JOBS ~ ~ ~
 link_down_job = switch.create_job(6, "link down [1]")

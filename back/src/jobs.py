@@ -7,6 +7,7 @@ from typing import Any, Callable, List, Dict
 from network_schema import Job
 from mininet.log import info
 from ipmininet.host.config.dnsmasq import Dnsmasq
+from ipmininet.router.config.dhcprelay import DHCPRelay
 
 
 def filter_arg_for_options(
@@ -534,6 +535,19 @@ def dhcp_server(job: Job, job_host):
     info(f"[dhcp_server] dnsmasq started on host={job_host.name}")
 
 
+def dhcp_relay(job: Job, job_host):
+    dhcp_server_ip = job.arg_1
+    listening_ip = job.arg_2
+    daemon = DHCPRelay(
+        node=job_host,
+        dhcp_server_ip=dhcp_server_ip,
+        listening_ip=listening_ip,
+    )
+    job_host.build_daemon(daemon)
+    job_host.start_daemon(daemon)
+    info(f"dnsmasq --dhcp-relay={listening_ip},{dhcp_server_ip}")
+
+
 class Jobs:
     """Class for representing various commands for working with miminet network"""
 
@@ -568,6 +582,7 @@ class Jobs:
             201: open_tcp_server_handler,
             202: block_tcp_udp_port,
             203: dhcp_server,
+            204: dhcp_relay,
         }
         self._job: Job = job
         self._job_host = job_host

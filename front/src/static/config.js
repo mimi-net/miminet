@@ -935,6 +935,9 @@ const ConfigRouterJobOnChange = function(evnt) {
             UpdateRouterForm('config_router_add_port_forwarding_udp_script');
             FillDeviceSelectIntf("#config_router_add_port_forwarding_udp_iface_select_field", "#router_id", "Выберите линк", false)
             break;
+        case '204':
+            UpdateRouterForm('config_router_dhcp_relay_script');
+            break;
         default:
             console.log("Unknown target.value");
     }
@@ -1411,6 +1414,11 @@ const EditJobInRouter = function(router_id, job_id, network_guid) {
                 $('#config_router_add_port_forwarding_udp_port_input_field').val(job.arg_2 || '')
                 $('#config_router_add_port_forwarding_udp_dest_ip_input_field').val(job.arg_3 || '')
                 $('#config_router_add_port_forwarding_udp_dest_port_input_field').val(job.arg_4 || '')
+                break;
+            case '204': // Добавить DHCP Relay
+                UpdateRouterForm('config_router_dhcp_relay_script');
+                $('#config_router_dhcp_relay_server_ip_input_field').val(job.arg_1 || '');
+                $('#config_router_dhcp_relay_listening_ip_input_field').val(job.arg_2 || '');
                 break;
             default:
                 console.error('Unknown job type for editing:', job.job_id);
