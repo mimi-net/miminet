@@ -1,17 +1,209 @@
+from typing import List, cast
+
 from sqlalchemy import func
+from markupsafe import Markup
 
 from miminet_model import User, db
 from quiz.service.session_question_service import is_answer_available
 from quiz.entity.entity import (
+    Answer,
     Question,
     QuizSession,
     SessionQuestion,
     Section,
     QuestionCategory,
 )
-from quiz.util.dto import SessionResultDto
+from quiz.util.dto import SessionResultDto, get_question_type
 import json
 import random
+
+
+def _humanize_text(value):
+    if value is None:
+        return ""
+    return str(Markup.unescape(value))
+
+
+def _format_answer_items(question_type: str, answer_value):
+    if not answer_value:
+        return []
+
+    if question_type == "variable":
+        if not isinstance(answer_value, list):
+            return []
+
+        return [
+            _humanize_text(item.get("variant"))
+            for item in answer_value
+            if isinstance(item, dict) and item.get("variant")
+        ]
+
+    if question_type == "sorting":
+        if isinstance(answer_value, dict):
+            ordered_items = list(answer_value.items())
+            try:
+                ordered_items.sort(key=lambda item: int(item[0]))
+            except (TypeError, ValueError):
+                pass
+
+            return [
+                f"{index + 1}. {_humanize_text(value)}"
+                for index, (_, value) in enumerate(ordered_items)
+                if value not in (None, "")
+            ]
+
+        if isinstance(answer_value, list):
+            return [
+                f"{index + 1}. {_humanize_text(value)}"
+                for index, value in enumerate(answer_value)
+                if value not in (None, "")
+            ]
+
+        return []
+
+    if question_type == "matching":
+        if not isinstance(answer_value, list):
+            return []
+
+        items = []
+        for pair in answer_value:
+            if not isinstance(pair, dict):
+                continue
+
+            left = _humanize_text(pair.get("left"))
+            right = _humanize_text(pair.get("right"))
+            if left or right:
+                items.append(f"{left} -> {right}")
+
+        return items
+
+    return []
+
+
+def _get_correct_answer_items(question: Question):
+    question_type = get_question_type(question.question_type)
+    answers = [
+        answer
+        for answer in cast(List[Answer], question.answers)
+        if not getattr(answer, "is_deleted", False)
+    ]
+
+    if question_type == "variable":
+        ordered_answers = sorted(
+            (answer for answer in answers if answer.is_correct),
+            key=lambda item: item.id,
+        )
+        return [
+            _humanize_text(answer.variant)
+            for answer in ordered_answers
+            if answer.variant
+        ]
+
+    if question_type == "sorting":
+        ordered_answers = sorted(
+            answers,
+            key=lambda item: (
+                item.position is None,
+                item.position if item.position is not None else 0,
+                item.id,
+            ),
+        )
+        return [
+            f"{index + 1}. {_humanize_text(answer.variant)}"
+            for index, answer in enumerate(ordered_answers)
+            if answer.variant
+        ]
+
+    if question_type == "matching":
+        ordered_answers = sorted(
+            answers,
+            key=lambda item: (
+                _humanize_text(item.left),
+                _humanize_text(item.right),
+                item.id,
+            ),
+        )
+        return [
+            f"{_humanize_text(answer.left)} -> {_humanize_text(answer.right)}"
+            for answer in ordered_answers
+            if answer.left or answer.right
+        ]
+
+    return []
+
+
+def _build_answer_details(
+    session_question: SessionQuestion, include_answer_details: bool
+):
+    question = cast(Question, session_question.question)
+    question_type = get_question_type(question.question_type)
+    if question_type == "practice" or not include_answer_details:
+        return None
+
+    correct_answer_items = _get_correct_answer_items(question)
+    user_answer_items = _format_answer_items(
+        question_type, session_question.user_answer
+    )
+    has_saved_answer = session_question.user_answer is not None
+    user_answer_title = "Ваше решение"
+
+    if not user_answer_items and session_question.is_correct and correct_answer_items:
+        user_answer_items = list(correct_answer_items)
+        user_answer_title = "Ваше решение (восстановлено)"
+    elif not user_answer_items and (
+        has_saved_answer or session_question.is_correct is False
+    ):
+        user_answer_items = ["Ответ пользователя недоступен для этой попытки."]
+
+    show_reference_answer = session_question.is_correct is False and bool(
+        correct_answer_items
+    )
+    if not user_answer_items and not show_reference_answer:
+        return None
+
+    return {
+        "has_preview": True,
+        "user_answer_title": user_answer_title,
+        "user_answer_items": user_answer_items,
+        "correct_answer_title": "Правильный ответ",
+        "correct_answer_items": correct_answer_items if show_reference_answer else [],
+        "show_reference_answer": show_reference_answer,
+    }
+
+
+def _serialize_session_question(
+    session_question: SessionQuestion, include_answer_details: bool
+):
+    question = cast(Question, session_question.question)
+    question_type = get_question_type(question.question_type)
+
+    return {
+        "id": session_question.id,
+        "quiz_session_id": session_question.quiz_session_id,
+        "question_id": session_question.question_id,
+        "question_text": str(question.text or ""),
+        "question_type": question_type,
+        "is_correct": session_question.is_correct if include_answer_details else None,
+        "score": session_question.score if include_answer_details else None,
+        "max_score": session_question.max_score if include_answer_details else None,
+        "network_guid": session_question.network_guid,
+        "answer_details": _build_answer_details(
+            session_question, include_answer_details
+        ),
+    }
+
+
+def _build_question_results(quiz_session: QuizSession, include_answer_details: bool):
+    results = sorted(
+        cast(List[SessionQuestion], quiz_session.sessions), key=lambda item: item.id
+    )
+
+    return [
+        _serialize_session_question(
+            session_question, include_answer_details=include_answer_details
+        )
+        for session_question in results
+    ]
 
 
 def start_session(section_id: str, user: User):
@@ -59,7 +251,7 @@ def start_session(section_id: str, user: User):
 
     return (
         quiz_session.id,
-        [sq.id for sq in quiz_session.sessions],  # type:ignore[attr-defined]
+        [sq.id for sq in cast(List[SessionQuestion], quiz_session.sessions)],
         201,
     )
 
@@ -123,6 +315,7 @@ def session_result(quiz_session_id: str):
     is_exam = quiz_session.section.is_exam
     answer_available = is_answer_available(quiz_session.section)
     available_from = quiz_session.section.results_available_from
+    include_answer_details = not (is_exam and not answer_available)
 
     if is_exam and not answer_available:
         theory_correct = 0
@@ -151,10 +344,15 @@ def session_result(quiz_session_id: str):
         ]
 
     return {
+        "test_name": quiz_session.section.test.name,
+        "section_name": quiz_session.section.name,
         "time_spent": time_spent,
         "theory_correct": theory_correct,
         "theory_count": theory_count,
         "practice_results": practice_results,
+        "results": _build_question_results(
+            quiz_session, include_answer_details=include_answer_details
+        ),
         "is_exam": is_exam,
         "answer_available": answer_available,
         "results_available_from": available_from,
@@ -167,42 +365,23 @@ def get_result_by_session_guid(session_guid: str):
     if quiz_session is None:
         return None, 404
 
-    results = SessionQuestion.query.filter_by(quiz_session_id=quiz_session.id).all()
     result, status = session_result(quiz_session.id)
 
     if result is None:
         return None, status
 
-    question_results = [
-        {
-            "id": sq.id,
-            "quiz_session_id": sq.quiz_session_id,
-            "question_id": sq.question_id,
-            "question_text": sq.question.text,
-            "is_correct": sq.is_correct,
-            "score": sq.score,
-            "max_score": sq.max_score,
-            "network_guid": sq.network_guid,
-        }
-        for sq in results
-    ]
-
-    is_exam = quiz_session.section.is_exam
-    answer_available = is_answer_available(quiz_session.section)
-    available_from = quiz_session.section.results_available_from
-
     session_data = SessionResultDto(
-        test_name=quiz_session.section.test.name,
-        section_name=quiz_session.section.name,
+        test_name=result["test_name"],
+        section_name=result["section_name"],
         theory_correct=result["theory_correct"],
         theory_count=result["theory_count"],
         practice_results=result["practice_results"],
-        results=question_results,
+        results=result["results"],
         start_time=quiz_session.created_on.strftime("%m/%d/%Y, %H:%M:%S"),
         time_spent=result["time_spent"],
-        is_exam=is_exam,
-        answer_available=answer_available,
-        available_from=available_from,
+        is_exam=result["is_exam"],
+        answer_available=result["answer_available"],
+        available_from=result["results_available_from"],
     )
 
     return session_data, status

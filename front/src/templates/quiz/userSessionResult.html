@@ -3,13 +3,19 @@
 {% block description %}Сетевой тренажер для обучения компьютерным сетям{% endblock %}
 
 {% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js" integrity="sha512-LhccdVNGe2QMEfI3x4DVV3ckMRe36TfydKss6mJpdHjNFiV07dFpS2xzeZedptKZrwxfICJpez09iNioiSZ3hA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js" integrity="sha512-jB0TkTBeQC9ZSkBqDhdmfTv1qdfbWpGE72yJ/01Srq6hEzZIz2xkz1e57p9ai7IeHMwEG7HpzG6NdptChif5Pg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" integrity="sha512-hasIneQUHlh06VNBe7f6ZcHmeRTLIaQWFd43YriJ0UND19bvYRauxthDg8E4eVNPm9bRUhr5JGeqH7FRFXQu5g==" crossorigin="anonymous" referrerpolicy="no-referrer">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+{% include "quiz/_result_answer_assets.html" %}
+
 <section class="container" style="margin-top: 48px; padding-top: 48px">
     <div class="row align-items-baseline mb-4">
         <div class="col-auto">
-            <h1 class="mb-0" id="test_name"></h1>
+            <h1 class="mb-0" id="test_name">{{ data.get('test_name', '') }}</h1>
         </div>
         <div class="col-auto text-center">
-            <h3 class="mb-0 text-muted" id="section_name" style="font-weight: normal;"></h3>
+            <h3 class="mb-0 text-muted" id="section_name" style="font-weight: normal;">{{ data.get('section_name', '') }}</h3>
         </div>
     </div>
 
@@ -35,7 +41,7 @@
         {% if data['practice_results'] %}
         <div id="practicePreview" class="mb-4">
             <h4 class="mb-3">Практические задания:</h4>
-            <div class="row g-2"> 
+            <div class="row g-2">
                 {% for pr in data['practice_results'] %}
                     {% if pr.network_guid %}
                     <div class="col-12">
@@ -71,7 +77,7 @@
         {% if data['practice_results'] %}
         <div id="practiceResults" class="mb-4">
             <h4 class="mb-3">Результаты практических заданий:</h4>
-            <div class="row g-2"> 
+            <div class="row g-2">
                 {% for practice in data['practice_results'] %}
                 <div class="col-12">
                     <div class="card shadow-sm">
@@ -120,6 +126,15 @@
             </p>
         </div>
         {% endif %}
+
+        {% set detailed_results = data.get('results', []) | rejectattr('question_type', 'equalto', 'practice') | list %}
+        {% if detailed_results %}
+        <div class="mt-5">
+            <h4 class="mb-3">Подробные результаты:</h4>
+            {% set results = detailed_results %}
+            {% include "quiz/_result_cards.html" %}
+        </div>
+        {% endif %}
     {% endif %}
 
     <div class="d-flex align-items-center text-start mt-4">
@@ -130,22 +145,46 @@
 </section>
 
 <script>
-    window.addEventListener("DOMContentLoaded", function () {
-        const testName = sessionStorage.getItem('test_name');
-        const sectionName = sessionStorage.getItem('section_name');
+    window.addEventListener('DOMContentLoaded', function () {
+        const converter = new showdown.Converter({
+            tables: true,
+            tasklists: true,
+            strikethrough: true,
+            simpleLineBreaks: true
+        });
 
-        if (testName) document.getElementById("test_name").textContent = testName;
-        if (sectionName) document.getElementById("section_name").textContent = sectionName;
+        document.querySelectorAll('.markdown-content').forEach(function (el) {
+            const markdown = el.getAttribute('data-markdown') || '';
+            if (!markdown) {
+                return;
+            }
 
-        const backBtn = document.getElementById("backToTests");
+            let html = converter.makeHtml(markdown);
+            html = html.replace(/^<p>|<\/p>$/g, '');
+            el.innerHTML = DOMPurify.sanitize(html);
+        });
+
+        hljs.highlightAll();
+
+        const storedTestName = sessionStorage.getItem('test_name');
+        const storedSectionName = sessionStorage.getItem('section_name');
+        const testNameElement = document.getElementById('test_name');
+        const sectionNameElement = document.getElementById('section_name');
+
+        if (storedTestName && testNameElement && !testNameElement.textContent.trim()) {
+            testNameElement.textContent = storedTestName;
+        }
+        if (storedSectionName && sectionNameElement && !sectionNameElement.textContent.trim()) {
+            sectionNameElement.textContent = storedSectionName;
+        }
+
+        const backBtn = document.getElementById('backToTests');
         if (backBtn) {
             backBtn.addEventListener('click', function () {
                 sessionStorage.clear();
                 window.location.href = '/quiz/test/all';
             });
         }
-
-        console.log({{ data | tojson | safe }});
     });
 </script>
 {% endblock %}
