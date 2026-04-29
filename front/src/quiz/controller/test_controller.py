@@ -1,19 +1,18 @@
 import json
 
-from flask_login import login_required, current_user
-from flask import request, make_response, jsonify, render_template, abort
-
+from flask import abort, jsonify, make_response, render_template, request
+from flask_login import current_user, login_required
 from quiz.service.test_service import (
     create_test,
-    get_tests_by_owner,
-    get_all_tests,
     delete_test,
-    get_deleted_tests_by_owner,
     edit_test,
-    get_tests_by_author_name,
-    publish_or_unpublish_test,
+    get_all_tests,
+    get_deleted_tests_by_owner,
     get_retakeable_tests,
     get_test,
+    get_tests_by_author_name,
+    get_tests_by_owner,
+    publish_or_unpublish_test,
 )
 from quiz.util.encoder import UUIDEncoder
 

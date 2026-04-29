@@ -1,11 +1,14 @@
-import os
-import json
-import time
 import hashlib
 import hmac
+import json
+import os
+import time
+from datetime import timedelta
+
 import pytest
 from flask import Flask, url_for
-from miminet_auth import check_tg_authorization, tg_callback, login_index, db
+from flask_jwt_extended import JWTManager
+from miminet_auth import check_tg_authorization, db, login_index, tg_callback
 from sqlalchemy.exc import SQLAlchemyError
 
 
@@ -14,6 +17,16 @@ def app():
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.config["SECRET_KEY"] = os.urandom(16).hex()
+    app.config.update(
+        JWT_SECRET_KEY="test-secret",
+        JWT_TOKEN_LOCATION=["cookies"],
+        JWT_COOKIE_DOMAIN=".localhost",
+        JWT_COOKIE_SECURE=False,  # True,
+        JWT_COOKIE_CSRF_PROTECT=False,
+        JWT_COOKIE_SAMESITE="Lax",
+        JWT_ACCESS_TOKEN_EXPIRES=timedelta(hours=1),
+        JWT_REFRESH_TOKEN_EXPIRES=timedelta(hours=2),
+    )
 
     with app.test_request_context():
         app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///test.db"
@@ -26,6 +39,8 @@ def app():
         @app.route("/home")
         def home():
             pass
+
+    JWTManager(app)
 
     return app
 
@@ -127,7 +142,11 @@ def test_tg_callback_handles_user_info_and_creates_user_in_db(app, mocker):
         mocker.patch("miminet_auth.login_user")
         mocker.patch("miminet_auth.check_tg_authorization")
         mock_user_data.return_value = user_json
-        mock_user.query.filter().first.return_value = None
+        filtered_query = mocker.Mock()
+        filtered_query.first.side_effect = [None, mocker.Mock(id=10)]
+        user_query = mocker.Mock()
+        user_query.filter.return_value = filtered_query
+        mock_user.query = user_query
         tg_callback()
         mock_user.assert_called_once_with(
             nick="test_name", tg_id="test_id", email="test_username"

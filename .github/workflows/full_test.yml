@@ -17,6 +17,8 @@ jobs:
         run: |
           cd front/
           sed -i 's/MODE=prod/MODE=dev/' .env
+          sed -i '/^BASE_DOMAIN/d' .env
+          sed -i '/^ALLOWED_HOSTS/d' .env && printf "\nALLOWED_HOSTS=http://localhost,http://172.18.0.2,http://172.18.0.3" >> .env
           docker compose up -d
 
       - name: Start selenium

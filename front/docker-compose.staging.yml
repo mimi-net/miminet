@@ -26,6 +26,8 @@ services:
     container_name: nginx
     image: nginx
     restart: always
+    env_file:
+      - .env
     volumes:
       - ./default.conf.template:/etc/nginx/templates/default.conf.template
       - ./letsencrypt:/etc/letsencrypt

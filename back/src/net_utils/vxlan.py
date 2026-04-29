@@ -1,7 +1,6 @@
 import re
 
 from ipmininet.ipnet import IPNet
-
 from network_schema import Node
 
 

@@ -1,12 +1,13 @@
-from abc import abstractmethod
+import ipaddress
 import json
+import uuid
+from abc import abstractmethod
+from typing import Callable, Optional
+
 from celery_app import app
-from flask import jsonify, make_response, request, Response
+from flask import Response, jsonify, make_response, request
 from flask_login import current_user
 from miminet_model import Network, Simulate, db
-from typing import Callable, Optional
-import uuid
-import ipaddress
 
 
 def get_data(arg: str):

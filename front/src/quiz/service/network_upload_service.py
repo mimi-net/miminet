@@ -1,8 +1,9 @@
-from typing import Dict, List, Tuple, Any
-from celery_app import app
-from copy import deepcopy
 import json
 import uuid
+from copy import deepcopy
+from typing import Any, Dict, List, Tuple
+
+from celery_app import app
 
 
 def create_check_task(network: dict, requirements: list[dict], session_question_id):

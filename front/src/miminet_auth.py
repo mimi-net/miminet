@@ -1,11 +1,11 @@
+import hashlib
+import hmac
 import json
 import logging
 import os
 import pathlib
-import uuid
 import time
-import hmac
-import hashlib
+import uuid
 
 import google.auth.transport.requests
 import requests
@@ -19,6 +19,13 @@ from flask import (
     jsonify,
     abort,
 )
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    set_access_cookies,
+    set_refresh_cookies,
+    unset_jwt_cookies,
+)
 from flask_login import (
     LoginManager,
     current_user,
@@ -28,11 +35,11 @@ from flask_login import (
 )
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
-from requests_oauthlib import OAuth2Session
-from oauthlib.oauth2 import TokenExpiredError
-from miminet_model import Network, User, db
 from miminet_config import make_example_net_switch_and_hub
+from miminet_model import Network, User, db
+from oauthlib.oauth2 import TokenExpiredError
 from pip._vendor import cachecontrol
+from requests_oauthlib import OAuth2Session
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
@@ -48,6 +55,13 @@ AVATAR_UPLOAD_FOLDER = "/app/static/avatar"
 ALLOWED_EXTENSIONS = {"bmp", "png", "jpg", "jpeg"}
 MAX_AVATAR_SIZE = 1 * 1024 * 1024
 PROFILE_VIEWER_MIN_ROLE = 1
+SOCIAL_LINK_PROVIDER_SESSION_KEY = "social_link_provider"
+SOCIAL_LINK_USER_ID_SESSION_KEY = "social_link_user_id"
+SOCIAL_LINK_REDIRECT_SESSION_KEY = "social_link_redirect"
+
+SOCIAL_LINK_PROVIDER_SESSION_KEY = "social_link_provider"
+SOCIAL_LINK_USER_ID_SESSION_KEY = "social_link_user_id"
+SOCIAL_LINK_REDIRECT_SESSION_KEY = "social_link_redirect"
 
 login_manager = LoginManager()
 login_manager.login_view = "login_index"
@@ -130,7 +144,7 @@ def handle_needs_login():
 
 def redirect_next_url(fallback):
     if "next_url" not in session:
-        redirect(fallback)
+        return redirect(fallback)
     try:
         dest_url = url_for(session["next_url"])
         return redirect(dest_url)
@@ -142,16 +156,105 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def login_index():
-    if current_user.is_authenticated:
-        return redirect(url_for("user_profile"))
+def _start_social_link(provider_name, redirect_endpoint="user_profile"):
+    if not current_user.is_authenticated:
+        return
 
+    session[SOCIAL_LINK_PROVIDER_SESSION_KEY] = provider_name
+    session[SOCIAL_LINK_USER_ID_SESSION_KEY] = current_user.id
+    session[SOCIAL_LINK_REDIRECT_SESSION_KEY] = redirect_endpoint
+    session["next_url"] = redirect_endpoint
+
+
+def _clear_social_link(provider_name=None):
+    if (
+        provider_name is not None
+        and session.get(SOCIAL_LINK_PROVIDER_SESSION_KEY) != provider_name
+    ):
+        return
+
+    session.pop(SOCIAL_LINK_PROVIDER_SESSION_KEY, None)
+    session.pop(SOCIAL_LINK_USER_ID_SESSION_KEY, None)
+    session.pop(SOCIAL_LINK_REDIRECT_SESSION_KEY, None)
+
+
+def _redirect_after_social_link(default_endpoint="user_profile"):
+    redirect_endpoint = (
+        session.get(SOCIAL_LINK_REDIRECT_SESSION_KEY) or default_endpoint
+    )
+    _clear_social_link()
+    session.pop("next_url", None)
+    return redirect(url_for(redirect_endpoint))
+
+
+def _get_social_link_user(provider_name):
+    if session.get(SOCIAL_LINK_PROVIDER_SESSION_KEY) != provider_name:
+        return None
+
+    user_id = session.get(SOCIAL_LINK_USER_ID_SESSION_KEY)
+    if not user_id:
+        return None
+
+    try:
+        user_id = int(user_id)
+    except (TypeError, ValueError):
+        return None
+
+    if not current_user.is_authenticated or current_user.id != user_id:
+        return None
+
+    return User.query.get(user_id)
+
+
+def _bind_social_account(provider_name, field_name, field_value):
+    if (
+        session.get(SOCIAL_LINK_PROVIDER_SESSION_KEY) != provider_name
+        or not current_user.is_authenticated
+    ):
+        return None
+
+    link_user = _get_social_link_user(provider_name)
+    if not link_user:
+        flash("Не удалось найти профиль для привязки соцсети.", category="error")
+        return _redirect_after_social_link()
+
+    existing_user = User.query.filter_by(**{field_name: field_value}).first()
+    if existing_user and existing_user.id != link_user.id:
+        flash("Этот аккаунт соцсети уже привязан к другому профилю.", category="error")
+        return _redirect_after_social_link()
+
+    setattr(link_user, field_name, field_value)
+    db.session.commit()
+    return _redirect_after_social_link()
+
+
+def login_index():
     next_url = request.args.get("next")
+
+    link_provider = request.args.get("link_provider", type=str)
+    telegram_link_mode = current_user.is_authenticated and link_provider == "tg"
+
+    if current_user.is_authenticated:
+        access_token = create_access_token(identity=str(current_user.id))
+        refresh_token = create_refresh_token(identity=str(current_user.id))
+
+        # if current_user.is_authenticated and not telegram_link_mode:
+        #     return redirect(url_for("user_profile"))
+        response = redirect_next_url(fallback=url_for("home"))
+        if next_url:
+            response = redirect_next_url(fallback=next_url)
+        set_access_cookies(response, access_token)
+        set_refresh_cookies(response, refresh_token)
+        return response
 
     if next_url:
         session["next_url"] = next_url
     else:
         session.pop("next_url", None)
+
+    if telegram_link_mode:
+        _start_social_link("tg", redirect_endpoint=next_url or "user_profile")
+        return render_template("auth/login.html", user=current_user)
 
     if request.method == "POST":
         email = request.form.get("email")
@@ -160,7 +263,13 @@ def login_index():
         if user:
             if check_password_hash(user.password_hash, password):
                 login_user(user, remember=True)
-                return redirect_next_url(fallback=url_for("user_profile"))
+                access_token = create_access_token(identity=str(user.id))
+                refresh_token = create_refresh_token(identity=str(user.id))
+
+                response = redirect_next_url(fallback=url_for("user_profile"))
+                set_access_cookies(response, access_token)
+                set_refresh_cookies(response, refresh_token)
+                return response
             else:
                 flash("Пара логин и пароль указаны неверно", category="error")
                 return render_template("auth/login.html", user=current_user)
@@ -357,11 +466,16 @@ def password_recovery():
 
 @login_required
 def logout():
+    _clear_social_link()
+    session.pop("next_url", None)
     logout_user()
-    return redirect(url_for("index"))
+    response = redirect(url_for("index"))
+    unset_jwt_cookies(response)
+    return response
 
 
 def google_login():
+    _start_social_link("google")
     flow = Flow.from_client_secrets_file(
         client_secrets_file=client_secrets_file,
         scopes=[
@@ -380,6 +494,7 @@ def google_login():
 
 
 def vk_login():
+    _start_social_link("vk")
     authorization_link = "https://oauth.vk.com/authorize"
     authorization_url = f"{authorization_link}?client_id={VK_CLIENT_ID}&display=page&redirect_uri={VK_REDIRECT_URI}&scope=friends,email&response_type=code&v=5.130"
     return redirect(authorization_url)
@@ -417,7 +532,12 @@ def google_callback():
         clock_skew_in_seconds=60,
     )
 
-    user = User.query.filter_by(google_id=id_info.get("sub")).first()
+    google_id = id_info.get("sub")
+    social_link_response = _bind_social_account("google", "google_id", google_id)
+    if social_link_response is not None:
+        return social_link_response
+
+    user = User.query.filter_by(google_id=google_id).first()
 
     # New user?
     if user is None:
@@ -450,7 +570,7 @@ def google_callback():
             new_user = User(
                 nick=f + n,
                 avatar_uri=avatar_uri,
-                google_id=id_info.get("sub"),
+                google_id=google_id,
                 email=id_info.get("email"),
             )
             db.session.add(new_user)
@@ -464,9 +584,15 @@ def google_callback():
             flash(error, category="error")
             return redirect(url_for("login_index"))
 
-        user = User.query.filter_by(google_id=id_info.get("sub")).first()
+        user = User.query.filter_by(google_id=google_id).first()
 
     login_user(user, remember=True)
+    access_token = create_access_token(identity=str(user.id))
+    refresh_token = create_refresh_token(identity=str(user.id))
+
+    response = redirect_next_url(fallback=url_for("home"))
+    set_access_cookies(response, access_token)
+    set_refresh_cookies(response, refresh_token)
 
     if user_is_new:
         u = uuid.uuid4()
@@ -480,7 +606,7 @@ def google_callback():
         db.session.add(n)
         db.session.commit()
 
-    return redirect_next_url(fallback=url_for("home"))
+    return response
 
 
 # https://vk.com/dev/authcode_flow_user
@@ -514,6 +640,10 @@ def vk_callback():
         vk_id = str(int(access_token_json["user_id"]))
     except (KeyError, ValueError, TypeError):
         return redirect(url_for("login_index"))
+
+    social_link_response = _bind_social_account("vk", "vk_id", vk_id)
+    if social_link_response is not None:
+        return social_link_response
 
     # Get user name
     response = requests.get(
@@ -583,6 +713,14 @@ def vk_callback():
         user = User.query.filter_by(vk_id=vk_id).first()
 
     login_user(user, remember=True)
+    access_token = create_access_token(identity=str(user.id))
+    refresh_token = create_refresh_token(identity=str(user.id))
+
+    response = redirect_next_url(fallback=url_for("home"))
+    set_access_cookies(response, access_token)
+    set_refresh_cookies(response, refresh_token)
+
+    print(f"access_token: {access_token}; refresh_token: {refresh_token}")
 
     if user_is_new:
         u = uuid.uuid4()
@@ -596,10 +734,11 @@ def vk_callback():
         db.session.add(n)
         db.session.commit()
 
-    return redirect_next_url(fallback=url_for("home"))
+    return response
 
 
 def yandex_login(yandex_json=yandex_json):
+    _start_social_link("yandex")
     yandex_session = OAuth2Session(
         yandex_json["web"]["client_id"],
         redirect_uri=yandex_json["web"]["redirect_uris"][0],
@@ -636,13 +775,18 @@ def yandex_callback(yandex_json=yandex_json):
         user_info_response.raise_for_status()
         id_info = user_info_response.json()
 
-        user = User.query.filter_by(yandex_id=id_info.get("id")).first()
+        yandex_id = id_info.get("id")
+        social_link_response = _bind_social_account("yandex", "yandex_id", yandex_id)
+        if social_link_response is not None:
+            return social_link_response
+
+        user = User.query.filter_by(yandex_id=yandex_id).first()
 
         if user is None:
             try:
                 new_user = User(
                     nick=id_info.get("login", ""),
-                    yandex_id=id_info.get("id"),
+                    yandex_id=yandex_id,
                     email=id_info.get("default_email", ""),
                 )
                 db.session.add(new_user)
@@ -655,10 +799,16 @@ def yandex_callback(yandex_json=yandex_json):
                 flash(error, category="error")
                 return redirect(url_for("login_index"))
 
-            user = User.query.filter_by(yandex_id=id_info.get("id")).first()
+            user = User.query.filter_by(yandex_id=yandex_id).first()
 
         login_user(user, remember=True)
-        return redirect_next_url(fallback=url_for("home"))
+        access_token = create_access_token(identity=str(user.id))
+        refresh_token = create_refresh_token(identity=str(user.id))
+
+        response = redirect_next_url(fallback=url_for("home"))
+        set_access_cookies(response, access_token)
+        set_refresh_cookies(response, refresh_token)
+        return response
 
     except TokenExpiredError as e:
         logger.error("Token expired: %s", e)
@@ -705,16 +855,20 @@ def tg_callback():
         flash(str(e), category="error")
         return redirect(url_for("login_index"))
 
+    tg_id = str(user_data.get("id", ""))
+    social_link_response = _bind_social_account("tg", "tg_id", tg_id)
+    if social_link_response is not None:
+        return social_link_response
+
     user = User.query.filter(
-        (User.tg_id == str(user_data.get("id", "")))
-        | (User.email == user_data.get("username", ""))
+        (User.tg_id == tg_id) | (User.email == user_data.get("username", ""))
     ).first()
 
     if user is None:
         try:
             new_user = User(
                 nick=user_data.get("first_name", ""),
-                tg_id=str(user_data.get("id", "")),
+                tg_id=tg_id,
                 email=user_data.get("username", ""),
             )
             db.session.add(new_user)
@@ -728,12 +882,17 @@ def tg_callback():
             return redirect(url_for("login_index"))
 
         user = User.query.filter(
-            (User.tg_id == str(user_data.get("id", "")))
-            | (User.email == user_data.get("username", ""))
+            (User.tg_id == tg_id) | (User.email == user_data.get("username", ""))
         ).first()
 
     login_user(user, remember=True)
-    return redirect_next_url(fallback=url_for("home"))
+    access_token = create_access_token(identity=str(user.id))
+    refresh_token = create_refresh_token(identity=str(user.id))
+
+    response = redirect_next_url(fallback=url_for("home"))
+    set_access_cookies(response, access_token)
+    set_refresh_cookies(response, refresh_token)
+    return response
 
 
 class TestUserData:

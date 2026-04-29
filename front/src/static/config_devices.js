@@ -1,11 +1,11 @@
-$('#config_host').load("/config_host.html");
-$('#config_hub').load("/config_hub.html");
-$('#config_switch').load("/config_switch.html");
-$('#config_edge').load("/config_edge.html");
-$('#config_router').load("/config_router.html");
-$('#config_server').load("/config_server.html");
-$('#config_vlan').load("/config_vlan.html");
-$('#config_vxlan').load("/config_vxlan.html");
+$('#config_host').load(ExternalUrlFor("/config_host.html"));
+$('#config_hub').load(ExternalUrlFor("/config_hub.html"));
+$('#config_switch').load(ExternalUrlFor("/config_switch.html"));
+$('#config_edge').load(ExternalUrlFor("/config_edge.html"));
+$('#config_router').load(ExternalUrlFor("/config_router.html"));
+$('#config_server').load(ExternalUrlFor("/config_server.html"));
+$('#config_vlan').load(ExternalUrlFor("/config_vlan.html"));
+$('#config_vxlan').load(ExternalUrlFor("/config_vxlan.html"));
 
 const config_content_id = "#config_content";
 const config_main_form_id = "#config_main_form";
@@ -72,7 +72,7 @@ const HostErrorMsg = function (msg) {
     $("#config_main_form :input").prop("disabled", false);
     $("#config_router_main_form :input").prop("disabled", false);
     $("#config_server_main_form :input").prop("disabled", false);
-    $("config_switch_main_form :input").prop("disabled", false)
+    $("config_switch_main_form :input").prop("disabled", false);
 
     $('#config_host_main_form_submit_button').text('Сохранить').removeClass('disabled');
     $('#config_router_main_form_submit_button').text('Сохранить').removeClass('disabled');

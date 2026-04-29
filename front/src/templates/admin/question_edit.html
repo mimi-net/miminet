@@ -1,0 +1,26 @@
+{% extends 'admin/model/edit.html' %}
+
+{% block tail %}
+{{ super() }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const questionType = '{{ model.question_type }}';
+
+    fetch('{{ url_for('.get_question_form') }}?type=' + questionType + '&id={{ model.id }}')
+        .then(response => response.text())
+        .then(html => {
+            document.querySelector('.admin-form').innerHTML = html;
+
+            if (questionType === "1") {
+                InitializeQuestionSelectForm();
+            } else if (questionType === "2") {
+                InitializeQuestionOrderForm();
+            } else if (questionType === "3") {
+                InitializeQuestionMatchForm();
+            }
+        });
+});
+</script>
+<script src="{{ url_for('static', filename='admin/question_form.js') }}"></script>
+{% endblock %}
