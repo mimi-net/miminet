@@ -6,13 +6,13 @@ import textwrap
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from tools.ai_review.config import RuntimeConfig
-from tools.ai_review.exceptions import ReviewError
-from tools.ai_review.model import build_model_uri
-from tools.ai_review.prompts import build_initial_messages
-from tools.ai_review.recent_activity import gather_recent_activity
-from tools.ai_review.agent_tools import ReviewTools
-from tools.ai_review.yandex_client import YandexClient
+from tools.warden.config import RuntimeConfig
+from tools.warden.exceptions import ReviewError
+from tools.warden.model import build_model_uri
+from tools.warden.prompts import build_initial_messages
+from tools.warden.recent_activity import gather_recent_activity
+from tools.warden.agent_tools import ReviewTools
+from tools.warden.yandex_client import YandexClient
 
 
 def format_tool_result(

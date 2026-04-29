@@ -5,10 +5,10 @@ import textwrap
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from tools.ai_review.config import RuntimeConfig
-from tools.ai_review.config import Scope
-from tools.ai_review.paths import is_allowed_by_scope
-from tools.ai_review.paths import posix_relative
+from tools.warden.config import RuntimeConfig
+from tools.warden.config import Scope
+from tools.warden.paths import is_allowed_by_scope
+from tools.warden.paths import posix_relative
 
 
 def render_focus(focus: tuple[str, ...]) -> str:

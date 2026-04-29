@@ -4,13 +4,13 @@ import pathlib
 import tempfile
 import unittest
 
-from tools.ai_review.config import Limits
-from tools.ai_review.config import RuntimeConfig
-from tools.ai_review.config import Scope
-from tools.ai_review.exceptions import ReviewError
-from tools.ai_review.model import build_model_uri
-from tools.ai_review.prompts import build_initial_messages
-from tools.ai_review.agent_tools import ReviewTools
+from tools.warden.config import Limits
+from tools.warden.config import RuntimeConfig
+from tools.warden.config import Scope
+from tools.warden.exceptions import ReviewError
+from tools.warden.model import build_model_uri
+from tools.warden.prompts import build_initial_messages
+from tools.warden.agent_tools import ReviewTools
 
 
 def make_config() -> RuntimeConfig:

@@ -3,10 +3,10 @@ import os
 import pathlib
 import sys
 
-from tools.ai_review.config import load_config
-from tools.ai_review.exceptions import ReviewError
-from tools.ai_review.paths import repo_root_from_script
-from tools.ai_review.runner import run_review
+from tools.warden.config import load_config
+from tools.warden.exceptions import ReviewError
+from tools.warden.paths import repo_root_from_script
+from tools.warden.runner import run_review
 
 
 DEFAULT_OUTPUT_DIR = pathlib.Path("tmp/ai-review")
@@ -18,7 +18,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--config",
-        default="tools/ai_review/review_config.toml",
+        default="tools.warden/review_config.toml",
         help="Path to the AI review configuration file.",
     )
     parser.add_argument(

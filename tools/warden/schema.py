@@ -1,6 +1,6 @@
 from typing import Any
 
-from tools.ai_review.exceptions import ReviewError
+from tools.warden.exceptions import ReviewError
 
 
 def build_json_schema() -> dict[str, Any]:

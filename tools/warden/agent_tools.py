@@ -3,12 +3,12 @@ import pathlib
 import re
 from typing import Any
 
-from tools.ai_review.config import RuntimeConfig
-from tools.ai_review.exceptions import ReviewError
-from tools.ai_review.paths import is_allowed_by_scope
-from tools.ai_review.paths import is_probably_binary
-from tools.ai_review.paths import posix_relative
-from tools.ai_review.paths import within_path
+from tools.warden.config import RuntimeConfig
+from tools.warden.exceptions import ReviewError
+from tools.warden.paths import is_allowed_by_scope
+from tools.warden.paths import is_probably_binary
+from tools.warden.paths import posix_relative
+from tools.warden.paths import within_path
 
 
 class ReviewTools:

@@ -1,7 +1,7 @@
 import fnmatch
 import pathlib
 
-from tools.ai_review.config import Scope
+from tools.warden.config import Scope
 
 
 def repo_root_from_script() -> pathlib.Path:

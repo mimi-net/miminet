@@ -3,10 +3,10 @@ import urllib.error
 import urllib.request
 from typing import Any
 
-from tools.ai_review.config import RuntimeConfig
-from tools.ai_review.exceptions import ReviewError
-from tools.ai_review.schema import build_json_schema
-from tools.ai_review.schema import validate_action
+from tools.warden.config import RuntimeConfig
+from tools.warden.exceptions import ReviewError
+from tools.warden.schema import build_json_schema
+from tools.warden.schema import validate_action
 
 
 API_URL = "https://llm.api.cloud.yandex.net/foundationModels/v1/completion"

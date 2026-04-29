@@ -3,8 +3,8 @@ import pathlib
 import subprocess
 from typing import Any
 
-from tools.ai_review.exceptions import ReviewError
-from tools.ai_review.process_env import safe_subprocess_env
+from tools.warden.exceptions import ReviewError
+from tools.warden.process_env import safe_subprocess_env
 
 
 def gather_recent_activity(repo_root: pathlib.Path, days: int) -> dict[str, Any]:
