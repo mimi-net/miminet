@@ -3,6 +3,7 @@ from ipmininet.ipswitch import IPSwitch
 from ipmininet.ipovs_switch import IPOVSSwitch
 
 from network_schema import Node, NodeInterface
+from node_types import NodeType
 
 
 def setup_vlans(net: IPNet, nodes: list[Node]) -> None:
@@ -15,7 +16,7 @@ def setup_vlans(net: IPNet, nodes: list[Node]) -> None:
     """
 
     for node in nodes:
-        if node.config.type == "l2_switch":
+        if node.config.type == NodeType.SWITCH:
             switch = net.get(node.data.id)
             add_bridge(switch, node.interface)
 

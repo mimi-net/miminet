@@ -6,6 +6,7 @@ $('#config_router').load("/config_router.html");
 $('#config_server').load("/config_server.html");
 $('#config_vlan').load("/config_vlan.html");
 $('#config_vxlan').load("/config_vxlan.html");
+$("#config_textbox").load("/config_textbox.html")
 
 const config_content_id = "#config_content";
 const config_main_form_id = "#config_main_form";
@@ -103,10 +104,60 @@ const UpdateHostConfigurationForm = function(host_id) {
     DeleteAndSaveJob('host', UpdateHostConfiguration, data, host_id);
 };
 
-const ConfigHostForm = function(host_id){
-    var form = document.getElementById('config_host_main_form_script').innerHTML;
-    var button = document.getElementById('config_host_save_script').innerHTML;
-    var banner = document.getElementById('config_host_edit_banner_script').innerHTML;
+const UpdateTextboxConfigurationForm = function (textbox_id) {
+	let data = $("#config_textbox_main_form").serialize();
+
+	// Disable all input fields
+	$("#config_textbox_main_form :input").prop("disabled", true);
+
+	// Set loading spinner
+	$("#config_textbox_main_form_submit_button").text("");
+	$("#config_textbox_main_form_submit_button").append(
+		'<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>',
+	);
+
+	UpdateTextboxConfiguration(data, textbox_id);
+};
+
+const ConfigTextboxForm = function (textbox_id) {
+
+	var form = document.getElementById(
+		"config_textbox_main_form_script",
+	).innerHTML;
+	var button = document.getElementById(
+		"config_textbox_save_script",
+	).innerHTML;
+
+	$(config_content_id).empty();
+	$(config_content_save_tag).empty();
+
+	document.getElementById(config_content_save_id).style.display = "block";
+
+	$(config_content_id).append(form);
+	$(config_content_save_tag).append(button);
+
+	$("#textbox_id").val(textbox_id);
+	$("#net_guid").val(network_guid);
+
+    function handleTextboxClick(event) {
+		event.preventDefault();
+		UpdateTextboxConfigurationForm(textbox_id);
+	}
+
+	$("#config_textbox_main_form_submit_button, #config_textbox_end_form").on(
+		"click",
+		handleTextboxClick,
+	);
+};
+
+const ConfigHostForm = function (host_id) {
+	var form = document.getElementById(
+		"config_host_main_form_script",
+	).innerHTML;
+	var button = document.getElementById("config_host_save_script").innerHTML;
+	var banner = document.getElementById(
+		"config_host_edit_banner_script",
+	).innerHTML;
 
     // Clear all child
     $(config_content_id).empty();
@@ -377,8 +428,123 @@ const ConfigHubName = function (hostname) {
 
     var text = document.getElementById('config_hub_name_script').innerHTML;
 
-    $(config_hub_main_form_id).prepend((text));
-    $('#config_hub_name').val(hostname);
+	$(config_hub_main_form_id).prepend(text);
+	$("#config_hub_name").val(hostname);
+};
+
+const ConfigTextboxContent = function(textbox_name) {
+	var text = document.getElementById("config_textbox_content_script").innerHTML;
+
+	$("#config_textbox_main_form").prepend(text);
+	$("#config_textbox_content").val(textbox_name)
+}
+
+const ConfigTextboxFontColor = function(textbox_font_color) {
+    var colorScript = document.getElementById("config_textbox_font_color_script").innerHTML;
+    $("#config_textbox_main_form").prepend(colorScript);
+
+    var input = $("#config_textbox_font_color");
+
+    var currentColor = textbox_font_color || "#000000";
+    input.val(currentColor);
+
+    const highlightColor = (selectedColor) => {
+        if (!selectedColor) return;
+        selectedColor = selectedColor.toLowerCase();
+
+        var $form = $("#config_textbox_main_form");
+        var $presets = $form.find(".color-preset");
+        var $customWrapper = $form.find(".custom-color-wrapper");
+
+        $presets.add($customWrapper).css({
+            "outline": "none"
+        });
+
+        let foundPreset = false;
+        $presets.each(function() {
+            var $el = $(this);
+            var presetColor = $el.data("color");
+            if (presetColor && presetColor.toLowerCase() === selectedColor) {
+                $el.css({
+                    "outline": "2px solid #0d6efd",
+                    "outline-offset": "2px"
+                });
+                foundPreset = true;
+                return false;
+            }
+        });
+
+        if (!foundPreset) {
+            $customWrapper.css({
+                "outline": "2px solid #0d6efd",
+                "outline-offset": "2px"
+            });
+        }
+    };
+
+    highlightColor(currentColor);
+
+    $("#config_textbox_main_form").on("click", ".color-preset", function() {
+        var selectedColor = $(this).data("color");
+        input.val(selectedColor);
+        highlightColor(selectedColor);
+    });
+
+    input.on("input change", function() {
+        highlightColor($(this).val());
+    });
+}
+
+const ConfigTextboxFontControls = function(size, style, weight) {
+    if ($("#config_textbox_font_size").length === 0) {
+        var controls = document.getElementById("config_textbox_font_controls_script").innerHTML;
+        $("#config_textbox_main_form").prepend(controls);
+    }
+
+    $("#config_textbox_font_size").val(size);
+
+    var inputStyle = $("#config_textbox_font_style");
+    var btnStyle = $("#btn_toggle_style");
+    var inputWeight = $("#config_textbox_font_weight");
+    var btnWeight = $("#btn_toggle_weight");
+
+    inputStyle.val(style || 'normal');
+    if (style === 'italic') {
+        btnStyle.removeClass('btn-outline-secondary').addClass('btn-primary active');
+    } else {
+        btnStyle.removeClass('btn-primary active').addClass('btn-outline-secondary');
+    }
+
+    inputWeight.val(weight || 'normal');
+    if (weight === 'bold') {
+        btnWeight.removeClass('btn-outline-secondary').addClass('btn-primary active');
+    } else {
+        btnWeight.removeClass('btn-primary active').addClass('btn-outline-secondary');
+    }
+
+    $("#config_textbox_main_form").off('click', '#btn_toggle_style').on('click', '#btn_toggle_style', function() {
+        var btn = $(this);
+        var input = $("#config_textbox_font_style");
+        if (input.val() === 'italic') {
+            input.val('normal');
+            btn.removeClass('btn-primary active').addClass('btn-outline-secondary');
+        } else {
+            input.val('italic');
+            btn.removeClass('btn-outline-secondary').addClass('btn-primary active');
+        }
+    });
+
+    $("#config_textbox_main_form").off('click', '#btn_toggle_weight').on('click', '#btn_toggle_weight', function() {
+        var btn = $(this);
+        var input = $("#config_textbox_font_weight");
+        if (input.val() === 'bold') {
+            input.val('normal');
+            btn.removeClass('btn-primary active').addClass('btn-outline-secondary');
+        } else {
+            input.val('bold');
+            btn.removeClass('btn-outline-secondary').addClass('btn-primary active');
+        }
+    });
 }
 
 const ConfigEdgeNetworkIssues = function (edge_loss, edge_duplicate) {

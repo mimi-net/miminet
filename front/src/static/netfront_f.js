@@ -22,6 +22,23 @@ const uid = function(){
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
+const TextboxUid = function(){
+    let textbox_name = "textbox_";
+
+    let textbox;
+    for (let textbox_number = 1; textbox_number < 100; textbox_number++) {
+        textbox = textbox_name + textbox_number;
+
+        let t = nodes.find(t => t.data.id === textbox);
+
+        if (!t) {
+            return textbox;
+        }
+    }
+
+    return "text_" + uid();
+}
+
 const HostUid = function(){
 
     let host_name = "host_";
@@ -129,6 +146,25 @@ const ActionWithInterface = function (n, i, fun) {
 
     fun(iface_id, ip_addr, netmask, connected_to_host_label);
 
+}
+
+const ShowTextboxConfig = function(n, shared = 0) {
+
+    let textbox_name = n.config.label;
+    let textbox_fontsize = n.config.tb_fontsize;
+    let textbox_font_color = n.config.color
+    let textbox_font_style = n.config.fontstyle
+    let textbox_font_weight = n.config.fontweight
+    textbox_name = textbox_name || n.data.id
+
+    if (shared) {
+        SharedConfigTextboxForm(n.data.id);
+    } else {
+        ConfigTextboxForm(n.data.id)
+    }
+    ConfigTextboxFontColor(textbox_font_color)
+    ConfigTextboxFontControls(textbox_fontsize, textbox_font_style, textbox_font_weight);
+    ConfigTextboxContent(textbox_name);
 }
 
 const ShowHostConfig = function(n, shared = 0){
@@ -501,6 +537,10 @@ const AddEdge = function(source_id, target_id){
             return;
         }
 
+        if (source_node.config.type === 'textbox' || target_node.config.type === 'textbox') {
+            return;
+        }
+
         // Save the network state.
         SaveNetworkObject();
 
@@ -519,9 +559,9 @@ const AddEdge = function(source_id, target_id){
         if (source_node.config.type === 'host' || source_node.config.type === 'router' || source_node.config.type === 'server'){
             let iface_id = InterfaceUid();
             source_node.interface.push({
-                  id: iface_id,
-                  name: iface_id,
-                  connect: edge_id,
+                id: iface_id,
+                name: iface_id,
+                connect: edge_id,
             });
         }
 
@@ -808,6 +848,10 @@ const prepareStylesheet = function() {
             return label;
         }
 
+        if (n.config.type === 'textbox') {
+            return n.config.text || label;
+        }
+
         $.each(n.interface, function (i) {
 
             let ip_addr = n.interface[i].ip;
@@ -919,30 +963,30 @@ const prepareStylesheet = function() {
             'source-arrow-color': 'blue'
         })
 
-        .selector('.eh-ghost-edge')
-        .css({
-            'background-color': 'blue',
-            'line-color': 'blue',
-            'target-arrow-color': 'blue',
-            'source-arrow-color': 'blue'
-        })
+		.selector('node[type="packet"]')
+		.css({
+			content: "data(label)",
+			"text-valign": "top",
+			"text-align": "center",
+			height: "5px",
+			width: "5px",
+			"border-opacity": "0",
+			"border-width": "0px",
+			"text-wrap": "wrap",
+		})
 
-        .selector('node[name]')
-        .css({
-            'content': 'data(name)'
-        })
+		.selector(".hidden")
+		.css({
+			display: "none",
+		})
 
-        .selector('node[type="packet"]')
-        .css({
-            'content': 'data(label)',
-            'text-valign': 'top',
-            'text-align': 'center',
-            'height': '5px',
-            'width': '5px',
-            'border-opacity': '0',
-            'border-width': '0px',
-            'text-wrap': 'wrap'
-        })
+        .selector(".eh-ghost-edge")
+		.css({
+			"background-color": "blue",
+			"line-color": "blue",
+			"target-arrow-color": "blue",
+			"source-arrow-color": "blue",
+		})
 
         .selector('.hidden')
         .css({
@@ -983,8 +1027,33 @@ const prepareStylesheet = function() {
       }
     }
 
+    const getConfig = function(ele, property, defaultValue) {
+        let n = nodes.find(n => n.data.id === ele.id());
+        return (n && n.config && n.config[property] !== undefined) ? n.config[property] : defaultValue;
+    };
+
+    sheet.selector('.textbox')
+    .css({
+        'shape': 'rectangle',
+        'background-opacity': 0,
+        'border-width': 0,
+        'content': 'data(label)',
+        'width': function (ele) {
+            return getConfig(ele,'width',50)
+        },
+        'height': function(ele) { return getConfig(ele,'height',50) },
+        'text-valign': 'center',
+        'text-halign': 'center',
+        'text-wrap': 'wrap',
+        'text-max-width': function(ele) { return getConfig(ele,'width',50) },
+        'color': function(ele) { return getConfig(ele,'color','#000000')  },
+        'font-size': function(ele) { return getConfig(ele,'tb_fontsize',12) },
+        'font-style': function(ele) {return getConfig(ele, 'fontstyle', 'normal')},
+        'font-weight': function(ele) {return getConfig(ele, 'fontweight', 'normal')}
+    });
+
     return sheet;
-  };
+};
 
 const SnapNodesToGrid = function(cy_instance) {
     if (!cy_instance) return;
@@ -1083,30 +1152,176 @@ const DrawGraph = function() {
 
     global_cy = cy;
 
-    // the default values of each option are outlined below:
-    let defaults = {
-        canConnect: function( sourceNode, targetNode ){
+    if ($('#resize-style').length === 0) {
+        $('head').append(`
+            <style id="resize-style">
+                .resize-frame { position: absolute; border: 1px dashed #0d6efd; z-index: 9999; pointer-events: none; }
+                .resize-handle {
+                    position: absolute; width: 12px; height: 12px;
+                    background-color: #0d6efd; border: 2px solid white; border-radius: 50%;
+                    transform: translate(-50%, -50%); pointer-events: auto; box-shadow: 0 0 3px rgba(0,0,0,0.3);
+                }
+                .resize-handle:hover { transform: translate(-50%, -50%) scale(1.2); background-color: white; border-color: #0d6efd; }
+            </style>
+        `);
+    }
 
-            // whether an edge can be created between source and target
-        return !sourceNode.same(targetNode); // e.g. disallow loops
-        },
+    let activeNodeId = null;
 
-        edgeParams: function( sourceNode, targetNode ){
-
-            // for edges between the specified source and target
-            // return element object to be passed to cy.add() for edge
-            return {};
-        },
-
-        hoverDelay: 150, // time spent hovering over a target node before it is considered selected
-        snap: false, // when enabled, the edge can be drawn by just moving close to a target node (can be confusing on compound graphs)
-        snapThreshold: 50, // the target node must be less than or equal to this many pixels away from the cursor/finger
-        snapFrequency: 15, // the number of times per second (Hz) that snap checks done (lower is less expensive)
-        noEdgeEventsInDraw: true, // set events:no to edges during draws, prevents mouseouts on compounds
-        disableBrowserGestures: true // during an edge drawing gesture, disable browser gestures such as two-finger trackpad swipe and pinch-to-zoom
+    const hideResizeFrame = () => {
+        $('#resize-frame').remove();
+        activeNodeId = null;
     };
 
-    global_eh = cy.edgehandles(defaults);
+    $(document).off('mousedown.resizeHide').on('mousedown.resizeHide', function(e) {
+        if ($(e.target).closest('#network_scheme').length > 0) {
+            return;
+        }
+        
+        if ($(e.target).closest('.resize-frame').length > 0 || $(e.target).hasClass('resize-handle')) {
+            return;
+        }
+
+        hideResizeFrame();
+    });
+
+    const updateResizeFrame = () => {
+        if (!activeNodeId) return;
+        const node = cy.getElementById(activeNodeId);
+        if (node.empty() || node.removed()) { hideResizeFrame(); return; }
+
+        const bb = node.renderedBoundingBox({ includeLabels: false });
+        const containerOffset = $(cy.container()).offset();
+        
+        let frame = $('#resize-frame');
+        if (frame.length === 0) return;
+
+        frame.css({
+            top: containerOffset.top + bb.y1,
+            left: containerOffset.left + bb.x1,
+            width: bb.w,
+            height: bb.h
+        });
+    };
+
+    const initResizeFrame = (node) => {
+        hideResizeFrame();
+        activeNodeId = node.id();
+
+        let n = nodes.find(n => n.data.id === node.id());
+        if (!n || !n.config) return;
+
+        const frame = $('<div id="resize-frame" class="resize-frame"></div>');
+        $('body').append(frame);
+
+        const handles = [
+            { d: 'nw', x: 0, y: 0, c: 'nw-resize' }, { d: 'n', x: 50, y: 0, c: 'n-resize' },
+            { d: 'ne', x: 100, y: 0, c: 'ne-resize' }, { d: 'e', x: 100, y: 50, c: 'e-resize' },
+            { d: 'se', x: 100, y: 100, c: 'se-resize' }, { d: 's', x: 50, y: 100, c: 's-resize' },
+            { d: 'sw', x: 0, y: 100, c: 'sw-resize' }, { d: 'w', x: 0, y: 50, c: 'w-resize' }
+        ];
+
+        handles.forEach(h => {
+            const handle = $('<div class="resize-handle"></div>');
+            handle.css({ left: h.x + '%', top: h.y + '%', cursor: h.c });
+
+            handle.on('mousedown', function(e) {
+                e.stopPropagation(); 
+                e.preventDefault();
+
+                const startX = e.pageX;
+                const startY = e.pageY;
+                const startW = n.config.width || 100;
+                const startH = n.config.height || 50;
+                const startPos = {x: node.position().x, y: node.position().y};
+                const zoom = cy.zoom();
+
+                node.ungrabify();
+
+                $(document).on('mousemove.resizing', function(ev) {
+                    const dx = (ev.pageX - startX) / zoom;
+                    const dy = (ev.pageY - startY) / zoom;
+
+                    let newW = startW;
+                    let newH = startH;
+                    let newX = startPos.x;
+                    let newY = startPos.y;
+
+                    // Horizontal Resize
+                    if (h.d.includes('e')) {
+                        newW = Math.max(30, startW + dx);
+                        newX += (newW - startW) / 2; // Shift center right
+                    }
+                    if (h.d.includes('w')) {
+                        newW = Math.max(30, startW - dx);
+                        newX -= (newW - startW) / 2; // Shift center left
+                    }
+
+                    // Vertical Resize
+                    if (h.d.includes('s')) {
+                        newH = Math.max(30, startH + dy);
+                        newY += (newH - startH) / 2; // Shift center down
+                    }
+                    if (h.d.includes('n')) {
+                        newH = Math.max(30, startH - dy);
+                        newY -= (newH - startH) / 2; // Shift center up
+                    }
+
+                    n.config.width = newW;
+                    n.config.height = newH;
+
+                    node.style('width', newW);
+                    node.style('height', newH);
+                    node.style('text-max-width', newW);
+
+                    node.position({x: newX, y: newY});
+
+                    updateResizeFrame();
+                });
+
+                $(document).on('mouseup.resizing', function() {
+                    $(document).off('.resizing');
+                    node.grabify();
+                    TakeGraphPictureAndUpdate();
+                    MoveNodes();
+                });
+            });
+
+            frame.append(handle);
+        });
+
+        updateResizeFrame();
+    };
+
+    cy.on('tap', '.textbox', (e) => initResizeFrame(e.target));
+    cy.on('tap', (e) => { if (e.target === cy) hideResizeFrame(); });
+    cy.on('zoom pan position', updateResizeFrame);
+
+    let allowEdges = function(src, tgt) {
+        const sNode = nodes.find(n => n.data.id === src.id());
+        const tNode = nodes.find(n => n.data.id === tgt.id());
+
+        if (sNode && sNode.config && sNode.config.type === 'textbox') return false;
+        if (tNode && tNode.config && tNode.config.type === 'textbox') return false;
+
+        return !src.same(tgt);
+    }
+
+    let customDefaults = {
+        handleNodes: '.host, .l2_switch, .l1_hub, .l3_router, .server',
+        canConnect: (src, tgt) => allowEdges(src, tgt),
+
+        edgeParams: (src, tgt) => allowEdges(src, tgt) ? {} : null,
+
+        hoverDelay: 150, 
+        snap: false, 
+        snapThreshold: 50, 
+        snapFrequency: 15, 
+        noEdgeEventsInDraw: true, 
+        disableBrowserGestures: true, 
+    };
+
+    global_eh = cy.edgehandles(customDefaults);
 
     cy.minZoom(0.5);
     cy.maxZoom(2);
@@ -1183,7 +1398,8 @@ const DrawGraph = function() {
         n.position.x = posX;
         n.position.y = posY;
 
-        MoveNodes();
+        MoveNodes();    // --- RESIZE UI LOGIC END ---
+
         TakeGraphPictureAndUpdate();
     });
 
@@ -1229,12 +1445,15 @@ const DrawGraph = function() {
             ShowRouterConfig(n);
         } else if (n.config.type === 'server'){
             ShowServerConfig(n);
+        } else if (n.config.type === 'textbox'){
+            ShowTextboxConfig(n);
         }
     });
 
     // Add edge to the edges[] and then save it to the server.
     cy.on('ehcomplete', (event, sourceNode, targetNode, addedEdge) => {
         AddEdge(sourceNode._private.data.id, targetNode._private.data.id);
+        DrawGraph();
         PostNodesEdges();
         TakeGraphPictureAndUpdate();
 
@@ -1249,6 +1468,9 @@ const DrawGraph = function() {
         }
 
         if (e.keyCode == 46 && selecteed_node_id) {
+            if (activeNodeId === selecteed_node_id) {
+                hideResizeFrame();
+            }
 
             // Save the network state.
             SaveNetworkObject();
@@ -1322,6 +1544,34 @@ const DrawGraph = function() {
 
     });
     
+
+    cy.on('tap', '.textbox', (e) => {
+        e.originalEvent.stopPropagation();
+        initResizeFrame(e.target);
+    });
+
+    cy.on('tap', (e) => {
+        if (e.target === cy) {
+            hideResizeFrame();
+            return;
+        }
+
+        if (e.target.isNode && e.target.isNode()) {
+            let n = nodes.find(n => n.data.id === e.target.id());
+            if (n && n.config && n.config.type !== 'textbox') {
+                hideResizeFrame();
+            }
+        }
+    });
+
+    cy.on('zoom pan', updateResizeFrame);
+
+    cy.on('dragstart', (e) => {
+        if (e.target.id() !== activeNodeId) {
+            hideResizeFrame();
+        }
+    });
+
     // Initialize grid
     initGrid(cy);
 }
@@ -2069,6 +2319,44 @@ const UpdateHubConfiguration = function (data, hub_id)
         dataType: 'json'
     });
 }
+
+const UpdateTextboxConfiguration = function (data, textbox_id) {
+	SetNetworkPlayerState(-1);
+
+	$.ajax({
+		type: "POST",
+		url: "/host/textbox_save_config",
+		data: data,
+		success: function (data, textStatus, xhr) {
+			if (xhr.status === 200) {
+                
+                nodes = data.nodes;
+                DrawGraph();
+
+                let n = nodes.find((n) => n.data.id === textbox_id);
+
+                if (!n) {
+                    ClearConfigForm("Нет такого текстового блока");
+                    return;
+                }
+
+                if (n.config.type === "textbox") {
+                    ShowTextboxConfig(n);
+                } else {
+                    ClearConfigForm("Нет такого текстового блока");
+                    return;
+                }
+
+			}
+		},
+        error: function(xhr) {
+            console.log("Cannot update textbox config");
+            console.log(xhr);
+        },
+        dataType: 'json'
+
+	});
+};
 
 // Update Switch configuration
 const UpdateSwitchConfiguration = function (data, switch_id)

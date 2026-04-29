@@ -11,6 +11,7 @@ from configurators import (
     HostConfigurator,
     SwitchConfigurator,
     HubConfigurator,
+    TextboxConfigurator,
     ServerConfigurator,
     RouterConfigurator,
     EdgeConfigurator,
@@ -187,6 +188,7 @@ host = HostConfigurator()
 router = RouterConfigurator()
 server = ServerConfigurator()
 edge = EdgeConfigurator()
+textbox = TextboxConfigurator()
 
 # --- Jobs ---
 
@@ -516,6 +518,11 @@ def save_host_config():
 @login_required
 def save_router_config():
     return router.configure()
+
+
+@login_required
+def save_textbox_config():
+    return textbox.configure()
 
 
 @login_required

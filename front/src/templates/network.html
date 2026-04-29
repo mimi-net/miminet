@@ -79,9 +79,14 @@
             {% endif %}
         </nav>
 
-        <div id="side_menu" class="position-absolute start-0 top-0" style="margin-left: 17px; margin-top: 100px; z-index: 10;">
-            <div class="ws-menu-devices-name">Устройства</div>
-            <div class="ws-menu-devices">
+        <div id="side_menu" class="position-absolute start-0 top-0" style="margin-left: 17px; margin-top: 100px;">
+            <div class="ws-menu-devices-name side-menu-header">
+                <i class='bx bx-chevron-left side-menu-arrow left' onclick="ToggleSideMenu()"></i>
+                <span id="side_menu_title">Устройства</span>
+                <i class='bx bx-chevron-right side-menu-arrow right' onclick="ToggleSideMenu()"></i>
+            </div>
+
+            <div class="ws-menu-devices" id="panel_devices">
                 <div id="l2_switch_device" style="margin-top: 6px; margin-bottom: 6px;">
                     <img class="drag" id="l2_switch"
                          src="{{ url_for('static', filename='/images/l2_switch.png') }}"/>
@@ -117,6 +122,16 @@
                     <div class="icon-text">
                         <span data-bs-toggle="popover" data-bs-trigger="hover"
                               data-bs-content="Сервер &mdash; обслуживает клиентские запросы.">Сервер</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ws-menu-devices" id="panel_tools" style="display: none;">
+                <div id="textbox_device" style="margin-top: 6px; margin-bottom: 6px;">
+                    <img class="drag" id="textbox" src="{{ url_for('static', filename='/images/textbox.svg') }}"/>
+                    <div class="icon-text pt-2">
+                        <span data-bs-toggle="popover" data-bs-trigger="hover"
+                              data-bs-content="Текстбокс">Текстбокс</span>
                     </div>
                 </div>
             </div>
@@ -168,6 +183,7 @@
     <div id="config_server"></div>
     <div id="config_vlan"></div>
     <div id="config_vxlan"></div>
+    <div id="config_textbox"></div>
 {% endblock %}
 
 {% block network %}
@@ -220,6 +236,23 @@
     }
 
 
+    function ToggleSideMenu() {
+        var devicesPanel = document.getElementById("panel_devices");
+        var toolsPanel = document.getElementById("panel_tools");
+        var menuTitle = document.getElementById("side_menu_title");
+
+        if (devicesPanel.style.display === "none") {
+            // Show Devices
+            devicesPanel.style.display = "block";
+            toolsPanel.style.display = "none";
+            menuTitle.innerText = "Устройства";
+        } else {
+            // Show Tools
+            devicesPanel.style.display = "none";
+            toolsPanel.style.display = "block";
+            menuTitle.innerText = "Инструменты";
+        }
+    }
 </script>
 
 {% endblock %}

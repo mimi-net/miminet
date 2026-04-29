@@ -98,6 +98,33 @@ $('#network_scheme').droppable({
                 interface: [],
             });
         }
+        else if (type === 'textbox'){
+            let node_id = TextboxUid();
+            nodes.push(
+                {
+                    data: {
+                        id: node_id,
+                        label: "Новое текстовое поле",
+                    },
+                    position: {
+                        x: CalculateDropOffset(ui.position.left, ui.position.top).x,
+                        y: CalculateDropOffset(ui.position.left, ui.position.top).y,
+                    },
+                    classes: ["textbox"],
+                    config: {
+                        type: 'textbox',
+                        label: "Новое текстовое поле",
+                        width: 150,
+                        height: 80,
+                        tb_fontsize: 12,
+                        color: 'black',
+                        fontweight: 'normal',
+                        fontstyle: 'normal',
+                    },
+                    interface: [],
+			});
+
+        }
         else {
             return;
         }
