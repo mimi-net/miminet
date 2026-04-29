@@ -54,6 +54,8 @@ class MiminetTopology(IPTopo):
             self.__handle_l1_hub(node_id)
         elif node_type == "router":
             self.__handle_router(node_id, config)
+        elif node_type == "hacker":
+            self.__handle_host_hacker(node_id, config)
 
     def __handle_l2_switch(self, node_id: str, config: NodeConfig):
         assert config.stp in (0, 1, 2), "Incorrect STP mode"
@@ -76,6 +78,11 @@ class MiminetTopology(IPTopo):
             self.__set_network_configuration_time(33)
 
     def __handle_host_or_server(self, node_id: str, config: NodeConfig):
+        default_gw = config.default_gw
+        route = f"via {default_gw}" if default_gw else ""
+        self.__nodes[node_id] = self.addHost(node_id, defaultRoute=route)
+
+    def __handle_host_hacker(self, node_id: str, config: NodeConfig):
         default_gw = config.default_gw
         route = f"via {default_gw}" if default_gw else ""
         self.__nodes[node_id] = self.addHost(node_id, defaultRoute=route)

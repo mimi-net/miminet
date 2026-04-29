@@ -6,7 +6,7 @@ import time
 import dpkt
 
 from ipmininet.ipnet import IPNet
-from jobs import Jobs
+from jobs import Jobs, SLEEP_JOB_ID
 from network_schema import Job, Network
 from pkt_parser import create_pkt_animation
 from mininet.log import setLogLevel, info, error
@@ -36,7 +36,7 @@ def emulate(
             f"Превышен лимит! В сети максимальное количество команд ({MAX_JOBS_COUNT}). "
             f"Текущее количество: {len(network.jobs)}"
         )
-    sleep_jobs = [j for j in network.jobs if j.job_id == 7]
+    sleep_jobs = [j for j in network.jobs if j.job_id == SLEEP_JOB_ID]
     total_time = sum(int(j.arg_1) for j in sleep_jobs)
     if total_time > 60 or total_time < 0:
         raise ValueError(

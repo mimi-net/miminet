@@ -3,6 +3,7 @@ import json
 from celery_app import app
 from flask import jsonify, make_response, request, Response
 from flask_login import current_user
+from miminet_config import ARP_SPOOF_JOB_ID, SLEEP_JOB_ID
 from miminet_model import Network, Simulate, db
 from typing import Callable, Optional
 import uuid
@@ -144,11 +145,21 @@ class JobConfigurator:
 
         # insert arguments into label string
         command_label: str = self.__print_cmd
+        label_args = configured_args.copy()
+
+        if self.__job_id == ARP_SPOOF_JOB_ID and len(label_args) > 3:
+            if label_args[3] == "mitm":
+                label_args[3] = "ARP Spoofing MITM"
+            elif label_args[3] == "reply_only":
+                label_args[3] = "ARP Spoofing"
 
         for i, conf_arg in enumerate(configured_args):
             if conf_arg is None:  # check whether the arguments passed the checks
                 raise ArgCheckError(self.__args[i].error_msg)
-            command_label = command_label.replace(f"[{i}]", conf_arg)
+            label_arg = label_args[i]
+            if label_arg is None:
+                raise ArgCheckError(self.__args[i].error_msg)
+            command_label = command_label.replace(f"[{i}]", label_arg)
 
         response = {
             "id": random_id,
@@ -185,7 +196,7 @@ class AbstractDeviceConfigurator:
         self._device_node = None  # current device node in miminet network
 
     __MAX_JOBS_COUNT: int = 30
-    __SLEEP_JOB_ID: int = 7
+    __SLEEP_JOB_ID: int = SLEEP_JOB_ID
     __MAX_SLEEP_TIME: int = 60
 
     def create_job(self, job_id: int, job_sign: str) -> JobConfigurator:
@@ -276,6 +287,14 @@ class AbstractDeviceConfigurator:
         job_id = int(job_id_str)
         if job_id not in self.__jobs.keys():
             return  # if user didn't select job
+
+        if (
+            job_id == ARP_SPOOF_JOB_ID
+            and self._device_node["config"].get("type") != "hacker"
+        ):
+            raise ConfigurationError(
+                'Команда "ARP spoofing / ARP cache poisoning" доступна только хосту-хакеру'
+            )
 
         editing_job_id = get_data("editing_job_id")
 

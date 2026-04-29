@@ -1,12 +1,46 @@
 import re
 import shlex
 import ipaddress
+import sys
 import time
+from pathlib import Path
 from netaddr import EUI, AddrFormatError
 from typing import Any, Callable, List, Dict
 from network_schema import Job
 from mininet.log import info
 from ipmininet.host.config.dnsmasq import Dnsmasq
+
+PING_JOB_ID = 1
+PING_WITH_OPTIONS_JOB_ID = 2
+SEND_UDP_DATA_JOB_ID = 3
+SEND_TCP_DATA_JOB_ID = 4
+TRACEROUTE_JOB_ID = 5
+LINK_DOWN_JOB_ID = 6
+SLEEP_JOB_ID = 7
+
+IP_ADDR_ADD_JOB_ID = 100
+NAT_JOB_ID = 101
+ADD_ROUTE_JOB_ID = 102
+ARP_CACHE_ADD_JOB_ID = 103
+SUBINTERFACE_VLAN_JOB_ID = 104
+IPIP_TUNNEL_JOB_ID = 105
+GRE_TUNNEL_JOB_ID = 106
+ARP_PROXY_JOB_ID = 107
+DHCP_CLIENT_JOB_ID = 108
+PORT_FORWARDING_TCP_JOB_ID = 109
+PORT_FORWARDING_UDP_JOB_ID = 110
+
+OPEN_UDP_SERVER_JOB_ID = 200
+OPEN_TCP_SERVER_JOB_ID = 201
+BLOCK_TCP_UDP_PORT_JOB_ID = 202
+DHCP_SERVER_JOB_ID = 203
+ARP_SPOOF_JOB_ID = 205
+
+
+ARP_SPOOFER_SCRIPT = shlex.quote(
+    str(Path(__file__).resolve().with_name("arp_spoofer.py"))
+)
+ARP_SPOOFER_PYTHON = shlex.quote(sys.executable)
 
 
 def filter_arg_for_options(
@@ -216,6 +250,20 @@ def valid_sleep(time) -> bool:
     return True
 
 
+def arp_spoof_checker(interface: str, victim_ip: str, spoofed_ip: str) -> bool:
+    """Validate minimal ARP spoofing arguments."""
+    return (
+        valid_iface(interface)
+        and valid_ip(victim_ip)
+        and valid_ip(spoofed_ip)
+        and victim_ip != spoofed_ip
+    )
+
+
+def arp_spoof_mode_checker(mode: str) -> bool:
+    return mode in ("mitm", "reply_only", "")
+
+
 def link_down_handler(job: Job, job_host: Any) -> None:
     arg_interface = job.arg_1
     if not net_dev_checker(arg_interface):
@@ -422,6 +470,40 @@ def arp_handler(job: Job, job_host: Any) -> None:
     job_host.cmd(f"arp -s {arg_ip} {arg_mac}")
 
 
+def arp_spoof_handler(job: Job, job_host: Any) -> None:
+    """Start an ARP responder that sends forged replies to matching ARP requests."""
+    arg_hacker_iface = job.arg_1
+    arg_victim_ip = job.arg_2
+    arg_spoofed_ip = job.arg_3
+    arg_mode = job.arg_4 if isinstance(job.arg_4, str) and job.arg_4 else "mitm"
+
+    if not arp_spoof_checker(arg_hacker_iface, arg_victim_ip, arg_spoofed_ip):
+        return
+    if not arp_spoof_mode_checker(arg_mode):
+        return
+
+    if arg_mode == "mitm":
+        job_host.cmd("sysctl -w net.ipv4.ip_forward=1")
+        job_host.cmd("sysctl -w net.ipv4.conf.all.send_redirects=0")
+        job_host.cmd("sysctl -w net.ipv4.conf.all.rp_filter=0")
+        job_host.cmd(
+            f"iptables -t nat -A POSTROUTING -o {arg_hacker_iface} -j MASQUERADE"
+        )
+        job_host.cmd("iptables -P FORWARD ACCEPT")
+    else:
+        job_host.cmd("sysctl -w net.ipv4.ip_forward=0")
+
+    job_host.cmd(
+        f"nohup {ARP_SPOOFER_PYTHON} -u {ARP_SPOOFER_SCRIPT} "
+        f"--iface {arg_hacker_iface} "
+        f"--victim-ip {arg_victim_ip} "
+        f"--spoofed-ip {arg_spoofed_ip} "
+        f"--mode {arg_mode} "
+        "> /dev/null 2>&1 < /dev/null &"
+    )
+    time.sleep(1)
+
+
 def subinterface_with_vlan(job: Job, job_host: Any) -> None:
     """Method for adding subinterface with vlan"""
     arg_intf = job.arg_1
@@ -546,28 +628,29 @@ class Jobs:
         # Dictionary for storing strategies
         # (At the moment this is used since each command on the application server is encoded by a number)
         self._dct: dict[int, Callable[[Job, Any], None]] = {
-            1: ping_handler,
-            2: ping_with_options_handler,
-            3: sending_udp_data_handler,
-            4: sending_tcp_data_handler,
-            5: traceroute_handler,
-            6: link_down_handler,
-            7: sleep_handler,
-            100: ip_addr_add_handler,
-            101: iptables_handler,
-            102: ip_route_add_handler,
-            103: arp_handler,
-            104: subinterface_with_vlan,
-            105: add_ipip_interface,
-            106: add_gre,
-            107: arp_proxy_enable,
-            108: dhcp_client,
-            109: port_forwarding_tcp_handler,
-            110: port_forwarding_udp_handler,
-            200: open_udp_server_handler,
-            201: open_tcp_server_handler,
-            202: block_tcp_udp_port,
-            203: dhcp_server,
+            PING_JOB_ID: ping_handler,
+            PING_WITH_OPTIONS_JOB_ID: ping_with_options_handler,
+            SEND_UDP_DATA_JOB_ID: sending_udp_data_handler,
+            SEND_TCP_DATA_JOB_ID: sending_tcp_data_handler,
+            TRACEROUTE_JOB_ID: traceroute_handler,
+            LINK_DOWN_JOB_ID: link_down_handler,
+            SLEEP_JOB_ID: sleep_handler,
+            IP_ADDR_ADD_JOB_ID: ip_addr_add_handler,
+            NAT_JOB_ID: iptables_handler,
+            ADD_ROUTE_JOB_ID: ip_route_add_handler,
+            ARP_CACHE_ADD_JOB_ID: arp_handler,
+            ARP_SPOOF_JOB_ID: arp_spoof_handler,
+            SUBINTERFACE_VLAN_JOB_ID: subinterface_with_vlan,
+            IPIP_TUNNEL_JOB_ID: add_ipip_interface,
+            GRE_TUNNEL_JOB_ID: add_gre,
+            ARP_PROXY_JOB_ID: arp_proxy_enable,
+            DHCP_CLIENT_JOB_ID: dhcp_client,
+            PORT_FORWARDING_TCP_JOB_ID: port_forwarding_tcp_handler,
+            PORT_FORWARDING_UDP_JOB_ID: port_forwarding_udp_handler,
+            OPEN_UDP_SERVER_JOB_ID: open_udp_server_handler,
+            OPEN_TCP_SERVER_JOB_ID: open_tcp_server_handler,
+            BLOCK_TCP_UDP_PORT_JOB_ID: block_tcp_udp_port,
+            DHCP_SERVER_JOB_ID: dhcp_server,
         }
         self._job: Job = job
         self._job_host = job_host
