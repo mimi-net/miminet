@@ -1,7 +1,7 @@
 import json
 import uuid
 
-from sqlalchemy import func, BigInteger, Text, Boolean, TIMESTAMP, ForeignKey
+from sqlalchemy import Integer, func, BigInteger, Text, Boolean, TIMESTAMP, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import declared_attr
 from sqlalchemy.types import TypeDecorator
@@ -131,6 +131,7 @@ class Section(
     is_exam = db.Column(Boolean, default=False)
     meta_description = db.Column(Text, default="")
     results_available_from = db.Column(TIMESTAMP(timezone=True), nullable=True)
+    max_score = db.Column(Integer)
 
     test = db.relationship("Test", back_populates="sections")
     questions = db.relationship("Question", back_populates="section")
@@ -201,6 +202,7 @@ class QuizSession(
     __tablename__ = "quiz_session"
 
     guid = db.Column(Text, default=lambda: str(uuid.uuid4()))
+    score = db.Column(Integer, default=0)
 
     section_id = db.Column(BigInteger, ForeignKey(Section.id))
     finished_at = db.Column(TIMESTAMP(timezone=True))

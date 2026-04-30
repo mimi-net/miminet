@@ -130,6 +130,11 @@
         {# Control buttons #}
         <div class="card-body position-absolute end-0 bottom-0" style="margin: 17px; font-weight: 500;">
             <div class="d-flex justify-content-center">
+
+                {% if returnToLtiPlatformUrl %}
+                    <button class="btn btn-primary w-100 px-2 me-2" id="backToPlatform">Вернуться на платформу</button>
+                {% endif %}
+
                 {% if is_exam and not available_answer %}
                     <button name="answerExamQuestion" class="btn btn-primary">Ответить</button>
                 {% else %}
@@ -187,6 +192,13 @@
         hintIcon.addEventListener("click", function() {
             var hintModal = new bootstrap.Modal(document.getElementById("hintModal"));
             hintModal.show();
+        });
+    }
+    const backToPlatformBtn = document.getElementById("backToPlatform");
+    if (backToPlatformBtn) {
+        backToPlatformBtn.addEventListener('click', function () {
+            sessionStorage.clear();
+            window.location.href = returnToLtiPlatformUrl;
         });
     }
 </script>

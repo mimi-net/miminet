@@ -3,8 +3,10 @@ import json
 import logging
 import os
 
+from flask import session
+
+import lti_provider.controller as lti
 from quiz.facade.json_schema_validation import validate_requirements
-from copy import deepcopy
 
 from miminet_model import db, User, Network
 from quiz.entity.entity import (
@@ -25,16 +27,8 @@ def create_single_question(section_id: str, question_dict, user: User):
         if validation_result is not True:
             return {"message": validation_result}, 400
 
-    if section_id:
-        section = Section.query.filter_by(id=section_id).first()
-        if section is None or section.is_deleted:
-            return None, 404
-        elif section.created_by_id != user.id:
-            return None, 403
-
     question = Question()
-    if section_id:
-        question.section_id = section_id
+    question.section_id = section_id
 
     question.created_by_id = user.id
     question.text = question_dict["text"]
@@ -104,25 +98,19 @@ def create_single_question(section_id: str, question_dict, user: User):
             net_guid = question_dict["start_configuration"]
             return {"message": f"Сеть {net_guid} не найдена"}, 404
 
-        original_network = json.loads(net.network)
-        modified_network = deepcopy(original_network)
-        modified_network.pop("packets", None)
-        modified_network.pop("pcap", None)
+        question_network = json.loads(net.network)
+        question_network.pop("packets", None)
+        question_network.pop("pcap", None)
 
-        net_copy = Network(
-            guid=str(uuid.uuid4()),
-            author_id=user.id,
-            network=json.dumps(modified_network),
-            title=net.title,
-            description="Task start configuration copy",
-            preview_uri=net.preview_uri,
-            is_task=True,
-        )
+        net.network = json.dumps(question_network)
+        net.author_id = 0
+        net.title = question_dict["text"]
+        net.description = question_dict["description"]
 
-        db.session.add(net_copy)
+        db.session.add(net)
         db.session.commit()
 
-        practice_question.start_configuration = net_copy.guid
+        practice_question.start_configuration = net.guid
         practice_question.created_by_id = user.id
 
         requirements = question_dict.get("requirements")
@@ -170,19 +158,38 @@ def create_question(section_id: str, question_data, user: User):
     Возвращает кортеж: (список созданных ID, HTTP статус)
     """
     created_ids = []
+
+    if section_id:
+        section = Section.query.filter_by(id=section_id).first()
+        if (section is None or section.is_deleted) and isinstance(question_data, list):
+            return None, None, 404
+        elif section.created_by_id != user.id:
+            return None, None, 403
+    else:
+        section = Section()
+        section.timer = question_data["timer"]
+        section.name = question_data["text"]
+        section.description = question_data["description"]
+        section.max_score = question_data["max_score"]
+        db.session.add(section)
+        db.session.commit()
+
     if isinstance(question_data, list):
         for q_data in question_data:
-            q_id, status = create_single_question(section_id, q_data, user)
+            q_id, status = create_single_question(section.id, q_data, user)
             if status == 201:
                 created_ids.append(q_id)
             else:
                 logging.error("Ошибка создания вопроса: %s (код %s)", q_data, status)
 
         if not created_ids:
-            return None, 400
-        return created_ids, 201
+            return None, None, 400
+        return section.id, created_ids, 201
     else:
-        return create_single_question(section_id, question_data, user)
+        q_id, status = create_single_question(section.id, question_data, user)
+
+        if "launch_id" in session: return lti.send(section), q_id, status
+        return section.id, q_id, status
 
 
 def delete_question(question_id: str, user: User):

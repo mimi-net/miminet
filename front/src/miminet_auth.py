@@ -26,6 +26,7 @@ from flask_login import (
     login_user,
     logout_user,
 )
+import lti_provider.controller as lti
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from requests_oauthlib import OAuth2Session
@@ -377,6 +378,12 @@ def google_login():
     )
     session["state"] = state
     return redirect(authorization_url)
+
+def lti_login():
+    return lti.login()
+
+def lti_callback():
+    return lti.launch()
 
 
 def vk_login():

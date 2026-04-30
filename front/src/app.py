@@ -34,7 +34,10 @@ from miminet_auth import (
     yandex_login,
     yandex_callback,
     tg_callback,
+    lti_login,
+    lti_callback
 )
+import lti_provider.controller as lti
 from miminet_config import SECRET_KEY
 from miminet_host import (
     delete_job,
@@ -81,6 +84,7 @@ from quiz.controller.quiz_session_controller import (
 )
 from quiz.controller.section_controller import (
     get_sections_by_test_endpoint,
+    get_section_endpoint
 )
 from quiz.controller.test_controller import (
     get_all_tests_endpoint,
@@ -95,6 +99,8 @@ from quiz.entity.entity import (
     QuestionCategory,
     SessionQuestion,
 )
+
+from lti_provider.controller import get_jwks, cache
 
 from quiz.controller.image_controller import image_routes
 
@@ -170,10 +176,14 @@ migrate = Migrate(app, db)
 # Init LoginManager
 login_manager.init_app(app)
 
+# Init LTI cache
+cache.init_app(app, config={'CACHE_TYPE': 'simple'})
+
 # Init Sitemap
 zero_days_ago = (datetime.now()).date().isoformat()
 
 # App add_url_rule
+
 # Login
 app.add_url_rule("/auth/login.html", methods=["GET", "POST"], view_func=login_index)
 app.add_url_rule("/auth/google_login", methods=["GET"], view_func=google_login)
@@ -187,6 +197,11 @@ app.add_url_rule("/user/profile.html", methods=["GET", "POST"], view_func=user_p
 app.add_url_rule("/profile", methods=["GET", "POST"], view_func=user_profile)
 app.add_url_rule("/profile/<int:user_id>", methods=["GET"], view_func=user_profile_view)
 app.add_url_rule("/auth/logout", methods=["GET"], view_func=logout)
+
+# LTI
+app.add_url_rule("/lti/login", methods=["GET", "POST"], view_func=lti_login)
+app.add_url_rule("/lti/launch", methods=["POST"], view_func=lti_callback)
+app.add_url_rule("/lti/jwks", methods=["GET"], view_func=get_jwks)
 
 # Network
 app.add_url_rule("/create_network", methods=["GET"], view_func=create_network)
@@ -261,9 +276,11 @@ app.add_url_rule("/quiz/test/get", methods=["GET"], view_func=get_test_endpoint)
 app.add_url_rule(
     "/quiz/section/test/all", methods=["GET"], view_func=get_sections_by_test_endpoint
 )
+  
+app.add_url_rule('/quiz/sections/<section>', methods=["GET", "POST"], view_func=get_section_endpoint)
 
 app.add_url_rule(
-    "/quiz/question/create", methods=["POST"], view_func=create_question_endpoint
+    "/quiz/question/create", methods=["GET", "POST"], view_func=create_question_endpoint
 )
 
 app.add_url_rule(
