@@ -6,27 +6,28 @@ from tools.warden.exceptions import ReviewError
 def build_json_schema() -> dict[str, Any]:
     return {
         "schema": {
-            "type": "object",
-            "properties": {
-                "action": {"type": "string", "enum": ["tool_call", "final_report"]},
-                "tool_name": {
-                    "type": "string",
-                    "enum": ["list_dir", "read_file", "search_text"],
-                },
-                "arguments": {"type": "object"},
-                "reason": {"type": "string"},
-                "report_markdown": {"type": "string"},
-            },
-            "required": ["action"],
-            "additionalProperties": False,
-            "allOf": [
+            "oneOf": [
                 {
-                    "if": {"properties": {"action": {"const": "tool_call"}}},
-                    "then": {"required": ["tool_name", "arguments"]},
+                    "type": "object",
+                    "properties": {
+                        "action": {"type": "string", "enum": ["tool_call"]},
+                        "tool_name": {
+                            "type": "string",
+                            "enum": ["list_dir", "read_file", "search_text"],
+                        },
+                        "arguments": {"type": "object"},
+                    },
+                    "required": ["action", "tool_name", "arguments"],
+                    "additionalProperties": False,
                 },
                 {
-                    "if": {"properties": {"action": {"const": "final_report"}}},
-                    "then": {"required": ["report_markdown"]},
+                    "type": "object",
+                    "properties": {
+                        "action": {"type": "string", "enum": ["final_report"]},
+                        "report_markdown": {"type": "string"},
+                    },
+                    "required": ["action", "report_markdown"],
+                    "additionalProperties": False,
                 },
             ],
         }
