@@ -1,6 +1,7 @@
 import datetime as dt
 import os
 import pathlib
+import random
 import textwrap
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -8,6 +9,7 @@ from zoneinfo import ZoneInfo
 from tools.warden.config import RuntimeConfig
 from tools.warden.config import Scope
 from tools.warden.paths import is_allowed_by_scope
+from tools.warden.paths import is_probably_binary
 from tools.warden.paths import posix_relative
 
 
@@ -31,23 +33,60 @@ def gather_top_level(repo_root: pathlib.Path, scope: Scope) -> list[str]:
     return entries
 
 
+def pick_baseline_files(
+    repo_root: pathlib.Path,
+    config: RuntimeConfig,
+    sample_size: int | None = None,
+) -> list[str]:
+    candidates: list[str] = []
+
+    for entry in sorted(repo_root.rglob("*")):
+        if not entry.is_file():
+            continue
+
+        relative = posix_relative(entry, repo_root)
+        if not is_allowed_by_scope(relative, config.scope):
+            continue
+        if entry.stat().st_size > config.limits.file_bytes:
+            continue
+        if is_probably_binary(entry):
+            continue
+
+        candidates.append(relative)
+
+    if not candidates:
+        return []
+
+    seed = (
+        f"{repo_root.name}:"
+        f"{os.environ.get('GITHUB_SHA', 'unknown')}:"
+        f"{dt.date.today().isoformat()}"
+    )
+    rng = random.Random(seed)
+    requested_size = (
+        config.baseline_sample_size if sample_size is None else sample_size
+    )
+    count = min(requested_size, len(candidates))
+    return rng.sample(candidates, count)
+
+
 def build_initial_messages(
     repo_root: pathlib.Path,
     config: RuntimeConfig,
     recent_activity: dict[str, Any],
 ) -> list[dict[str, str]]:
     top_level = gather_top_level(repo_root, config.scope)
+    baseline_scan_mode = not recent_activity["files"]
+    baseline_files = recent_activity.get("baseline_files") or []
 
     recent_commit_lines = [
         f"- {commit['date']} {commit['sha']}: {commit['subject']}"
         for commit in recent_activity["commits"]
     ] or ["- No commits found in the configured review window."]
 
-    recent_file_lines = [
-        f"- {path}"
-        for path in recent_activity["files"]
-        if is_allowed_by_scope(path, config.scope)
-    ] or ["- No changed files found in the configured review window."]
+    recent_file_lines = [f"- {path}" for path in recent_activity["files"]] or [
+        "- No changed files found in the configured review window."
+    ]
 
     repo_name = os.environ.get("GITHUB_REPOSITORY", repo_root.name)
     sha = os.environ.get("GITHUB_SHA", "unknown")
@@ -67,6 +106,12 @@ def build_initial_messages(
         - Focus on concrete bugs, regressions, fragile logic, security issues,
           dependency risk, and missing tests.
         - Start from recent activity, then inspect adjacent high-risk files if needed.
+        - If there are no recently changed files in the allowed scope, switch to
+          baseline repository scan mode and inspect the existing code without
+          relying on file modification recency.
+        - In baseline repository scan mode, start by exploring one or more
+          allowed directories with `list_dir`, then inspect concrete files with
+          `search_text` and `read_file` before forming conclusions.
         - Use tools selectively. Avoid re-reading the same content unless necessary.
         - Prefer `search_text` before reading many files.
         - Shell commands are not available.
@@ -125,6 +170,16 @@ def build_initial_messages(
         Top-level scope:
         {"\n".join(f"- {entry}" for entry in top_level[:40])}
 
+        Review mode:
+        {"- Baseline repository scan. Ignore modification dates and inspect the "
+         "allowed scope for existing bugs, vulnerabilities, and performance "
+         "problems." if baseline_scan_mode else
+         "- Recent-change-focused review. Start from the files changed within the "
+         "review window, then inspect adjacent high-risk code if needed."}
+
+        {"Baseline seed files:\n" + "\n".join(f"- {path}" for path in baseline_files)
+         if baseline_scan_mode and baseline_files else ""}
+
         Recent commits:
         {"\n".join(recent_commit_lines)}
 
@@ -136,6 +191,12 @@ def build_initial_messages(
         - read_file(path, start_line=1, max_lines=200)
         - search_text(pattern, path=".", file_glob="*", case_sensitive=false,
           regex=false, limit=80)
+
+        Tool call examples:
+        - {{"action":"tool_call","tool_name":"list_dir","arguments":{{"path":"back","recursive":false,"limit":50}}}}
+        - {{"action":"tool_call","tool_name":"read_file","arguments":{{"path":"front/src/app.py","start_line":1,"max_lines":120}}}}
+        - {{"action":"tool_call","tool_name":"search_text","arguments":{{"pattern":"TODO","path":"back","file_glob":"*.py","case_sensitive":false,"regex":false,"limit":20}}}}
+        - Do not add extra keys like `tool` inside `arguments`.
 
         Output protocol:
         - Return a JSON object matching the provided schema.

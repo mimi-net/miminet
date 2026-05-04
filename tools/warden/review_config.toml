@@ -1,8 +1,9 @@
-model_name = "yandexgpt-lite"
+model_name = "yandexgpt/latest"
 temperature = 0.1
 max_tokens = 3500
 max_iterations = 30
 review_window_days = 7
+baseline_sample_size = 5
 disable_data_logging = true
 
 focus = [
@@ -34,6 +35,7 @@ exclude = [
   "**/.ruff_cache/**",
   "**/.venv/**",
   "**/node_modules/**",
+  "front/src/static/assets/**",
   "**/*.png",
   "**/*.jpg",
   "**/*.jpeg",

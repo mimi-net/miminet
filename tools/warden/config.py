@@ -24,6 +24,7 @@ class RuntimeConfig:
     max_tokens: int
     max_iterations: int
     review_window_days: int
+    baseline_sample_size: int
     disable_data_logging: bool
     focus: tuple[str, ...]
     limits: Limits
@@ -36,11 +37,12 @@ def load_config(config_path: pathlib.Path) -> RuntimeConfig:
     limits = raw["limits"]
     scope = raw["scope"]
     return RuntimeConfig(
-        model_name=str(raw.get("model_name", "yandexgpt-lite")),
+        model_name=str(raw.get("model_name", "yandexgpt/latest")),
         temperature=float(raw.get("temperature", 0.1)),
         max_tokens=int(raw.get("max_tokens", 3500)),
         max_iterations=int(raw.get("max_iterations", 30)),
         review_window_days=int(raw.get("review_window_days", 7)),
+        baseline_sample_size=int(raw.get("baseline_sample_size", 5)),
         disable_data_logging=bool(raw.get("disable_data_logging", True)),
         focus=tuple(str(item) for item in raw.get("focus", [])),
         limits=Limits(

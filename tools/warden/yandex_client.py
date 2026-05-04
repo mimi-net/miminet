@@ -60,7 +60,9 @@ class YandexClient:
             data = response.json()
         except json.JSONDecodeError as exc:
             raise ReviewError("Yandex AI response is not valid JSON") from exc
-        alternatives = data.get("alternatives") or []
+
+        response_body = data.get("result") if isinstance(data.get("result"), dict) else data
+        alternatives = response_body.get("alternatives") or []
         if not alternatives:
             raise ReviewError("Yandex AI response does not contain alternatives")
 
@@ -78,5 +80,5 @@ class YandexClient:
         validate_action(action)
         return {
             "action": action,
-            "raw_response": data,
+            "raw_response": response_body,
         }
