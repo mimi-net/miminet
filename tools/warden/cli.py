@@ -18,7 +18,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--config",
-        default="tools.warden/review_config.toml",
+        default="tools/warden/review_config.toml",
         help="Path to the AI review configuration file.",
     )
     parser.add_argument(
