@@ -1,7 +1,7 @@
 import json
-import urllib.error
-import urllib.request
 from typing import Any
+
+import requests
 
 from tools.warden.config import RuntimeConfig
 from tools.warden.exceptions import ReviewError
@@ -39,22 +39,27 @@ class YandexClient:
         if self.config.disable_data_logging:
             headers["x-data-logging-enabled"] = "false"
 
-        request = urllib.request.Request(
-            API_URL, data=body, headers=headers, method="POST"
-        )
+        try:
+            response = requests.post(
+                API_URL,
+                data=body,
+                headers=headers,
+                timeout=120,
+            )
+            response.raise_for_status()
+        except requests.HTTPError as exc:
+            status_code = exc.response.status_code if exc.response is not None else "?"
+            details = exc.response.text if exc.response is not None else str(exc)
+            raise ReviewError(
+                f"Yandex AI request failed with HTTP {status_code}: {details}"
+            ) from exc
+        except requests.RequestException as exc:
+            raise ReviewError(f"Yandex AI request failed: {exc}") from exc
 
         try:
-            with urllib.request.urlopen(request, timeout=120) as response:
-                raw = response.read().decode("utf-8")
-        except urllib.error.HTTPError as exc:
-            details = exc.read().decode("utf-8", errors="replace")
-            raise ReviewError(
-                f"Yandex AI request failed with HTTP {exc.code}: {details}"
-            ) from exc
-        except urllib.error.URLError as exc:
-            raise ReviewError(f"Yandex AI request failed: {exc.reason}") from exc
-
-        data = json.loads(raw)
+            data = response.json()
+        except json.JSONDecodeError as exc:
+            raise ReviewError("Yandex AI response is not valid JSON") from exc
         alternatives = data.get("alternatives") or []
         if not alternatives:
             raise ReviewError("Yandex AI response does not contain alternatives")
