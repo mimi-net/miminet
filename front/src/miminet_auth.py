@@ -227,10 +227,11 @@ def _bind_social_account(provider_name, field_name, field_value):
 def login_index():
     next_url = request.args.get("next")
 
-    link_provider = request.args.get("link_provider")
+    link_provider = request.args.get("link_provider", type=str)
     telegram_link_mode = current_user.is_authenticated and link_provider == "tg"
 
     if current_user.is_authenticated:
+        _start_social_link("tg", redirect_endpoint=next_url or "user_profile")
         if telegram_link_mode:
             _start_social_link("tg", redirect_endpoint=next_url or "user_profile")
             return render_template("auth/login.html", user=current_user)
