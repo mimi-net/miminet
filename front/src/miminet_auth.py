@@ -253,7 +253,7 @@ def login_index():
         session.pop("next_url", None)
 
     if telegram_link_mode:
-        _start_social_link("tg", redirect_endpoint=next_url or "user_profile")
+        _start_social_link("tg")
         return render_template("auth/login.html", user=current_user)
 
     if request.method == "POST":
