@@ -1,23 +1,27 @@
+import json
 import random
 import uuid
-from typing import List
-import json
+from typing import Any, Dict, List, Optional, cast
 
 from datetime import datetime
+from functools import lru_cache
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from flask import has_request_context
 from flask_login import current_user
 from markupsafe import Markup
-
 from miminet_model import Network, db
 from quiz.entity.entity import (
-    Section,
-    Test,
     Question,
     Answer,
+    Organization,
     QuizSession,
+    Section,
     SessionQuestion,
+    Test,
 )
+from sqlalchemy.orm import joinedload
 
 
 def calculate_question_count(section: Section) -> int:
@@ -31,6 +35,9 @@ def calculate_question_count(section: Section) -> int:
 
 
 MOSCOW_TZ = ZoneInfo("Europe/Moscow")
+ORGANIZATION_LOGOS_DIR = (
+    Path(__file__).resolve().parents[2] / "static" / "images" / "logo_organizations"
+)
 
 
 def is_answer_available(section):
@@ -46,6 +53,47 @@ def is_answer_available(section):
         available_answer = results_time <= now_moscow
 
     return available_answer
+
+
+def normalize_organization_domain(domain: Optional[str]) -> Optional[str]:
+    if domain is None:
+        return None
+
+    normalized_domain = domain.strip()
+    if not normalized_domain:
+        return None
+
+    if "://" in normalized_domain:
+        return normalized_domain
+
+    return f"https://{normalized_domain.lstrip('/')}"
+
+
+@lru_cache(maxsize=128)
+def resolve_organization_logo_filename(logo_uri: Optional[str]) -> Optional[str]:
+    if logo_uri is None:
+        return None
+
+    logo_filename = Path(logo_uri.strip()).name
+    if not logo_filename:
+        return None
+
+    if not (ORGANIZATION_LOGOS_DIR / logo_filename).is_file():
+        return None
+
+    return logo_filename
+
+
+def get_organizations_by_id(organization_ids) -> Dict[int, Organization]:
+    if not organization_ids:
+        return {}
+
+    return {
+        organization.id: organization
+        for organization in Organization.query.filter(
+            Organization.id.in_(organization_ids)
+        ).all()
+    }
 
 
 def to_section_dto_list(sections: List[Section]):
@@ -68,22 +116,150 @@ def to_section_dto_list(sections: List[Section]):
 
 
 def to_test_dto_list(tests: List[Test]):
-    dto_list: List[TestDto] = list(
-        map(
-            lambda our_test: TestDto(
+    user_id = get_current_user_id()
+    organization_ids = {
+        our_test.organization_id
+        for our_test in tests
+        if getattr(our_test, "organization_id", None) is not None
+    }
+    organizations_by_id = get_organizations_by_id(organization_ids)
+    active_sections_by_test: Dict[int, List[Section]] = {
+        our_test.id: get_active_sections(our_test) for our_test in tests
+    }
+    all_section_ids = [
+        section.id
+        for sections in active_sections_by_test.values()
+        for section in sections
+    ]
+    solved_question_counts_by_section = get_last_correct_question_count_by_section(
+        all_section_ids, user_id
+    )
+
+    dto_list: List[TestDto] = []
+    for our_test in tests:
+        active_sections = active_sections_by_test.get(our_test.id, [])
+
+        organization_id = cast(
+            Optional[int], getattr(our_test, "organization_id", None)
+        )
+        organization = (
+            organizations_by_id.get(organization_id)
+            if organization_id is not None
+            else None
+        )
+        (
+            solved_question_count,
+            total_question_count,
+            progress_percent,
+        ) = calculate_test_progress(active_sections, solved_question_counts_by_section)
+
+        dto_list.append(
+            TestDto(
                 test_id=our_test.id,
                 test_name=our_test.name,
                 author_name=our_test.created_by_user.nick,
                 description=our_test.description,
                 is_retakeable=our_test.is_retakeable,
                 is_ready=our_test.is_ready,
-                section_count=len(our_test.sections),
-            ),
-            tests,
+                section_count=len(active_sections),
+                solved_question_count=solved_question_count,
+                total_question_count=total_question_count,
+                progress_percent=progress_percent,
+                organization_id=organization_id,
+                organization_name=getattr(organization, "name", None),
+                organization_logo_uri=resolve_organization_logo_filename(
+                    getattr(organization, "logo_uri", None)
+                ),
+                organization_domain=normalize_organization_domain(
+                    getattr(organization, "domain", None)
+                ),
+            )
         )
-    )
 
     return dto_list
+
+
+def get_current_user_id():
+    if not has_request_context():
+        return None
+
+    if not current_user.is_authenticated:
+        return None
+
+    return current_user.id
+
+
+def get_active_sections(test: Test) -> List[Section]:
+    return [
+        section
+        for section in cast(List[Section], test.sections)
+        if not section.is_deleted
+    ]
+
+
+def count_correct_answers_in_session(session: QuizSession) -> int:
+    return sum(
+        1
+        for question in cast(List[SessionQuestion], session.sessions)
+        if question.is_correct
+    )
+
+
+def get_last_correct_question_count_by_section(
+    section_ids: List[int], user_id
+) -> Dict[int, int]:
+    if not section_ids or user_id is None:
+        return {}
+
+    sessions = (
+        QuizSession.query.options(joinedload(cast(Any, QuizSession.sessions)))
+        .filter(QuizSession.section_id.in_(section_ids))
+        .filter(QuizSession.created_by_id == user_id)
+        .filter(QuizSession.is_deleted.is_(False))
+        .order_by(QuizSession.section_id.asc(), QuizSession.finished_at.desc())
+        .all()
+    )
+
+    section_progress: Dict[int, int] = {}
+    for session in sessions:
+        if session.section_id in section_progress:
+            continue
+        section_progress[int(session.section_id)] = count_correct_answers_in_session(
+            session
+        )
+
+    return section_progress
+
+
+def calculate_progress_percent(
+    solved_question_count: int, total_question_count: int
+) -> int:
+    if total_question_count <= 0:
+        return 0
+
+    normalized_solved_count = max(0, min(solved_question_count, total_question_count))
+    return round((normalized_solved_count / total_question_count) * 100)
+
+
+def calculate_test_progress(
+    sections: List[Section], solved_question_counts_by_section: Dict[int, int]
+):
+    solved_question_count = 0
+    total_question_count = 0
+
+    for section in sections:
+        question_count = calculate_question_count(section)
+        total_question_count += question_count
+        solved_question_count += min(
+            solved_question_counts_by_section.get(section.id, 0),
+            question_count,
+        )
+
+    progress_percent = calculate_progress_percent(
+        solved_question_count, total_question_count
+    )
+
+    return solved_question_count, total_question_count, progress_percent
 
 
 def to_question_for_editor_dto_list(questions: List[Question]):
@@ -308,9 +484,7 @@ class SectionDto:
 
         session = current_user_sessions.order_by(QuizSession.finished_at.desc()).first()
         if session:
-            self.last_correct_count = sum(
-                1 for question in session.sessions if question.is_correct
-            )
+            self.last_correct_count = count_correct_answers_in_session(session)
             if session.guid:
                 self.session_guid = session.guid
 
@@ -349,6 +523,13 @@ class TestDto:
         is_retakeable: bool,
         is_ready: bool,
         section_count: int,
+        solved_question_count: int,
+        total_question_count: int,
+        progress_percent: int,
+        organization_id: Optional[int] = None,
+        organization_name: Optional[str] = None,
+        organization_logo_uri: Optional[str] = None,
+        organization_domain: Optional[str] = None,
     ):
         self.test_id = test_id
         self.test_name = test_name
@@ -357,6 +538,13 @@ class TestDto:
         self.is_retakeable = is_retakeable
         self.is_ready = is_ready
         self.section_count = section_count
+        self.solved_question_count = solved_question_count
+        self.total_question_count = total_question_count
+        self.progress_percent = progress_percent
+        self.organization_id = organization_id
+        self.organization_name = organization_name
+        self.organization_logo_uri = organization_logo_uri
+        self.organization_domain = organization_domain
 
 
 class QuestionForEditorDto:

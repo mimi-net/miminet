@@ -7,11 +7,11 @@ import dpkt
 
 from ipmininet.ipnet import IPNet
 from jobs import Jobs
+from network import MiminetNetwork
 from network_schema import Job, Network
 from pkt_parser import create_pkt_animation
 from mininet.log import setLogLevel, info, error
 from network_topology import MiminetTopology
-from network import MiminetNetwork
 
 
 def emulate(

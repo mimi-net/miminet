@@ -1,25 +1,22 @@
 import os
 from os import urandom
 
+import psycopg2
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
-from miminet_config import (
-    make_empty_network,
-)
+from miminet_config import make_empty_network
+from psycopg2 import OperationalError
 from sqlalchemy import (
-    MetaData,
-    BigInteger,
-    Text,
-    Boolean,
     TIMESTAMP,
+    BigInteger,
+    Boolean,
     ForeignKey,
-    not_,
+    MetaData,
+    Text,
     inspect,
+    not_,
 )
 from werkzeug.security import generate_password_hash
-import psycopg2
-from psycopg2 import OperationalError
-
 
 convention = {
     "ix": "ix_%(column_0_label)s",

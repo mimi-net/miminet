@@ -144,11 +144,11 @@
             <small id="NetworkPlayerLabel" class="d-flex justify-content-center text-muted text-center">Ожидание 10-30 сек.</small>
         </div>
 
-	<div id="ImpulseDiv" class="position-fixed bottom-0 start-50 translate-middle-x alert alert-primary mx-auto text-center d-flex align-items-center mb-4 alert-dismissible fade show d-none" role="alert">
+	<!--<div id="ImpulseDiv" class="position-fixed bottom-0 start-50 translate-middle-x alert alert-primary mx-auto text-center d-flex align-items-center mb-4 alert-dismissible fade show d-none" role="alert">
 		<span class="fs-4 pe-2">&#x1F468;&#x200D;&#x1F4BB;</span>
 		<a href="https://edu.yadro.com/impulse/?utm_source=telegram&utm_medium=messenger&utm_campaign=promo_impulse_2026&utm_content=miminet&utm_term=edhub" target="_blank" class="alert-link fw-semibold" onclick="if (typeof window.ym != 'undefined'){ym(92293993,'reachGoal','Impulse2026Network');}" >Оплачиваемая IT-стажировка в YADRO</a>
 		<button type="button" id="ImpulseCloseButton" class="btn-close py-0" data-bs-dismiss="alert" aria-label="Close" style="margin-top:26px;"></button>
-	</div>	
+	</div>	-->
 
         <a href="https://t.me/MimiNetCommunity" target="_blank" class="btn btn-secondary position-absolute bottom-0 end-0" style="z-index: 10; margin:17px; margin-bottom:33px;">
 	<svg  xmlns="http://www.w3.org/2000/svg" width="22" height="22"  
@@ -198,14 +198,14 @@
 
         if (impulse_ts) {
             const now = Date.now();
-	    const diff = now - Number(impulse_ts);
-	    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
-	    if (diff > threeDaysMs) {
+	        const diff = now - Number(impulse_ts);
+	        const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+	        if (diff > threeDaysMs) {
                 impulse_div.classList.remove('d-none');
+            }
+	    } else {
+	        impulse_div.classList.remove('d-none');
 	    }
-	} else {
-	    impulse_div.classList.remove('d-none');
-	}
     }
 
     if (close_impulse_btn) {

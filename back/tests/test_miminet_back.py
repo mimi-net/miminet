@@ -5,8 +5,8 @@ import re
 import json
 from pathlib import Path
 
-from mininet.log import setLogLevel, info, error
 import pytest
+from mininet.log import error, info, setLogLevel
 from src.tasks import run_miminet
 
 setLogLevel("info")

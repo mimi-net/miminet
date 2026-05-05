@@ -1,11 +1,10 @@
 from typing import Tuple
 
 import pytest
-
 from conftest import MiminetTester
 from utils.checkers import TestNetworkComparator
-from utils.networks import MiminetTestNetwork, NodeType
 from utils.locators import Location
+from utils.networks import MiminetTestNetwork, NodeType
 
 
 class TestPortForwardingTCP:

@@ -1,9 +1,9 @@
 import pytest
-from selenium.webdriver.common.by import By
+from conftest import HOME_PAGE, MAIN_PAGE, MiminetTester
 from selenium.webdriver import Chrome
-from conftest import MiminetTester, HOME_PAGE, MAIN_PAGE
-from utils.networks import MiminetTestNetwork
+from selenium.webdriver.common.by import By
 from utils.locators import Location
+from utils.networks import MiminetTestNetwork
 
 
 class TestNetworkMenu:

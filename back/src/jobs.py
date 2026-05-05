@@ -1,12 +1,13 @@
+import ipaddress
 import re
 import shlex
-import ipaddress
 import time
-from netaddr import EUI, AddrFormatError
-from typing import Any, Callable, List, Dict
-from network_schema import Job
-from mininet.log import info
+from typing import Any, Callable, Dict, List
+
 from ipmininet.host.config.dnsmasq import Dnsmasq
+from mininet.log import info
+from netaddr import EUI, AddrFormatError
+from network_schema import Job
 
 
 def filter_arg_for_options(
