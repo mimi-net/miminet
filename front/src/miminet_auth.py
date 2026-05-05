@@ -231,7 +231,6 @@ def login_index():
     telegram_link_mode = current_user.is_authenticated and link_provider == "tg"
 
     if current_user.is_authenticated:
-        _start_social_link("tg", redirect_endpoint=next_url or "user_profile")
         if telegram_link_mode:
             _start_social_link("tg", redirect_endpoint=next_url or "user_profile")
             return render_template("auth/login.html", user=current_user)
