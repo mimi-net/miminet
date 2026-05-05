@@ -252,7 +252,7 @@ def login_index():
     else:
         session.pop("next_url", None)
 
-    if telegram_link_mode:
+    if link_provider == "tg":
         _start_social_link("tg")
         return render_template("auth/login.html", user=current_user)
 
