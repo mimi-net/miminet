@@ -234,6 +234,10 @@ def login_index():
     link_provider = request.args.get("link_provider", type=str)
     telegram_link_mode = current_user.is_authenticated and link_provider == "tg"
 
+    if telegram_link_mode:
+        _start_social_link("tg", redirect_endpoint=next_url or "user_profile")
+        return render_template("auth/login.html", user=current_user)
+
     if current_user.is_authenticated:
         access_token = create_access_token(identity=str(current_user.id))
         refresh_token = create_refresh_token(identity=str(current_user.id))
@@ -251,10 +255,6 @@ def login_index():
         session["next_url"] = next_url
     else:
         session.pop("next_url", None)
-
-    if telegram_link_mode:
-        _start_social_link("tg", redirect_endpoint=next_url or "user_profile")
-        return render_template("auth/login.html", user=current_user)
 
     if request.method == "POST":
         email = request.form.get("email")
