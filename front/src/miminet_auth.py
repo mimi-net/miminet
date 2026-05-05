@@ -227,7 +227,7 @@ def _bind_social_account(provider_name, field_name, field_value):
 def login_index():
     next_url = request.args.get("next")
 
-    link_provider = request.args.get("link_provider", type=str)
+    link_provider = request.args.get("link_provider")
     telegram_link_mode = current_user.is_authenticated and link_provider == "tg"
 
     if current_user.is_authenticated and not telegram_link_mode:
