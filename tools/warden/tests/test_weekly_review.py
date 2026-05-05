@@ -209,33 +209,23 @@ class SchemaFormatTest(unittest.TestCase):
         )
 
 
-@unittest.skipIf(YandexClient is None, "requests is not installed")
+@unittest.skipIf(YandexClient is None, "openai is not installed")
 class YandexClientTest(unittest.TestCase):
-    @mock.patch("tools.warden.yandex_client.requests.post")
-    def test_complete_accepts_nested_result_payload(self, post: mock.Mock) -> None:
+    @mock.patch("tools.warden.yandex_client.OpenAI")
+    def test_complete_accepts_openai_response_payload(
+        self, openai_client: mock.Mock
+    ) -> None:
         response = mock.Mock()
-        response.raise_for_status.return_value = None
-        response.json.return_value = {
-            "result": {
-                "alternatives": [
-                    {
-                        "message": {
-                            "role": "assistant",
-                            "text": (
-                                '{"action":"final_report",'
-                                '"report_markdown":"ok"}'
-                            ),
-                        },
-                        "status": "ALTERNATIVE_STATUS_FINAL",
-                    }
-                ],
-                "usage": {"totalTokens": "1"},
-            }
-        }
-        post.return_value = response
+        response.output_text = '{"action":"final_report","report_markdown":"ok"}'
+        response.status = "completed"
+        response.id = "resp_123"
+        response.usage = mock.Mock()
+        response.usage.model_dump.return_value = {"total_tokens": 1}
+        openai_client.return_value.responses.create.return_value = response
 
         client = YandexClient(
             api_key="key",
+            folder_id="folder",
             model_uri="gpt://folder/yandexgpt-lite",
             config=make_config(),
         )
@@ -244,7 +234,7 @@ class YandexClientTest(unittest.TestCase):
         self.assertEqual(result["action"]["action"], "final_report")
         self.assertEqual(
             result["raw_response"]["alternatives"][0]["status"],
-            "ALTERNATIVE_STATUS_FINAL",
+            "completed",
         )
 
 

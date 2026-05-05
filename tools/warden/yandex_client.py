@@ -1,7 +1,9 @@
 import json
 from typing import Any
+from typing import cast
 
-import requests
+import openai
+from openai import OpenAI
 
 from tools.warden.config import RuntimeConfig
 from tools.warden.exceptions import ReviewError
@@ -9,73 +11,95 @@ from tools.warden.schema import build_json_schema
 from tools.warden.schema import validate_action
 
 
-API_URL = "https://llm.api.cloud.yandex.net/foundationModels/v1/completion"
+API_URL = "https://ai.api.cloud.yandex.net/v1"
 
 
 class YandexClient:
-    def __init__(self, api_key: str, model_uri: str, config: RuntimeConfig) -> None:
+    def __init__(
+        self,
+        api_key: str,
+        folder_id: str,
+        model_uri: str,
+        config: RuntimeConfig,
+    ) -> None:
         self.api_key = api_key
+        self.folder_id = folder_id
         self.model_uri = model_uri
         self.config = config
+        self.client = OpenAI(
+            api_key=api_key,
+            base_url=API_URL,
+            project=folder_id,
+        )
 
     def complete(self, messages: list[dict[str, str]]) -> dict[str, Any]:
-        payload = {
-            "modelUri": self.model_uri,
-            "completionOptions": {
-                "stream": False,
-                "temperature": self.config.temperature,
-                "maxTokens": str(self.config.max_tokens),
-                "reasoningOptions": {"mode": "DISABLED"},
-            },
-            "messages": messages,
-            "jsonSchema": build_json_schema(),
-        }
-
-        body = json.dumps(payload).encode("utf-8")
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Api-Key {self.api_key}",
-        }
+        request_headers: dict[str, str] = {}
         if self.config.disable_data_logging:
-            headers["x-data-logging-enabled"] = "false"
+            request_headers["x-data-logging-enabled"] = "false"
+
+        instructions = None
+        input_messages = messages
+        if messages and messages[0]["role"] == "system":
+            instructions = messages[0]["text"]
+            input_messages = messages[1:]
+
+        response_input = [
+            {
+                "role": message["role"],
+                "content": [{"type": "input_text", "text": message["text"]}],
+            }
+            for message in input_messages
+        ]
 
         try:
-            response = requests.post(
-                API_URL,
-                data=body,
-                headers=headers,
+            response = self.client.responses.create(
+                model=self.model_uri,
+                temperature=self.config.temperature,
+                max_output_tokens=self.config.max_tokens,
+                instructions=instructions,
+                input=cast(Any, response_input),
+                text={
+                    "format": {
+                        "type": "json_schema",
+                        "name": "weekly_review_action",
+                        "schema": build_json_schema()["schema"],
+                        "strict": True,
+                    }
+                },
+                extra_headers=request_headers or None,
                 timeout=120,
             )
-            response.raise_for_status()
-        except requests.HTTPError as exc:
-            status_code = exc.response.status_code if exc.response is not None else "?"
+        except openai.APIStatusError as exc:
+            status_code = exc.status_code if exc.status_code is not None else "?"
             details = exc.response.text if exc.response is not None else str(exc)
             raise ReviewError(
                 f"Yandex AI request failed with HTTP {status_code}: {details}"
             ) from exc
-        except requests.RequestException as exc:
+        except openai.OpenAIError as exc:
             raise ReviewError(f"Yandex AI request failed: {exc}") from exc
 
-        try:
-            data = response.json()
-        except json.JSONDecodeError as exc:
-            raise ReviewError("Yandex AI response is not valid JSON") from exc
-
-        response_body = data.get("result") if isinstance(data.get("result"), dict) else data
-        alternatives = response_body.get("alternatives") or []
-        if not alternatives:
-            raise ReviewError("Yandex AI response does not contain alternatives")
-
-        alternative = alternatives[0]
-        message = alternative.get("message") or {}
-        text = message.get("text")
-        if not isinstance(text, str):
+        text = response.output_text
+        if not isinstance(text, str) or not text:
             raise ReviewError("Yandex AI response does not contain a text completion")
 
         try:
             action = json.loads(text)
         except json.JSONDecodeError as exc:
             raise ReviewError(f"model returned invalid JSON: {text}") from exc
+
+        usage = response.usage
+        usage_data = usage.model_dump(mode="json") if usage is not None else None
+        response_body = {
+            "id": getattr(response, "id", None),
+            "status": getattr(response, "status", None),
+            "usage": usage_data,
+            "alternatives": [
+                {
+                    "status": getattr(response, "status", None),
+                    "message": {"text": text},
+                }
+            ],
+        }
 
         validate_action(action)
         return {

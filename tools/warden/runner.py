@@ -127,7 +127,12 @@ def run_review(
         recent_activity["baseline_files"] = pick_baseline_files(repo_root, config)
     messages = build_initial_messages(repo_root, config, recent_activity)
 
-    client = YandexClient(api_key=api_key, model_uri=model_uri, config=config)
+    client = YandexClient(
+        api_key=api_key,
+        folder_id=folder_id,
+        model_uri=model_uri,
+        config=config,
+    )
     tools = ReviewTools(repo_root=repo_root, config=config)
     transcript: list[dict[str, Any]] = []
 
