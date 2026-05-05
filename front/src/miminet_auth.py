@@ -247,14 +247,14 @@ def login_index():
         set_refresh_cookies(response, refresh_token)
         return response
 
-    if telegram_link_mode:
-        _start_social_link("tg", redirect_endpoint=next_url or "user_profile")
-        return render_template("auth/login.html", user=current_user)
-
     if next_url:
         session["next_url"] = next_url
     else:
         session.pop("next_url", None)
+
+    if telegram_link_mode:
+        _start_social_link("tg", redirect_endpoint=next_url or "user_profile")
+        return render_template("auth/login.html", user=current_user)
 
     if request.method == "POST":
         email = request.form.get("email")
