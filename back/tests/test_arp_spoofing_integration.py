@@ -75,9 +75,9 @@ def test_arp_spoofing_reply_only_sends_spoofed_arp_without_mitm_forwarding():
     host_arp_response_labels = {
         pkt.get("data", {}).get("label", "") for pkt in host_arp_responses
     }
-    assert (
-        len(host_arp_response_labels) >= 2
-    ), "Reply-only mode should expose host to both router and hacker ARP responses"
+    assert len(host_arp_response_labels) >= 2, (
+        "Reply-only mode should expose host to both router and hacker ARP responses"
+    )
     assert packets_by_label_and_path(
         packets, "ICMP echo-request", "edge_arp_hacker_switch"
     ), "Reply-only mode should attract ICMP echo-request to hacker"
