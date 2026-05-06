@@ -57,7 +57,7 @@ class MiminetTopology(IPTopo):
         elif node_type == NodeType.ROUTER:
             self.__handle_router(node_id, config)
         elif node_type == NodeType.HACKER:
-            self.__handle_host_hacker(node_id, config)
+            self.__handle_host_or_server(node_id, config)
         else:
             print(f"Unknown node type: {node_type}")
             return
@@ -85,12 +85,7 @@ class MiminetTopology(IPTopo):
     def __handle_host_or_server(self, node_id: str, config: NodeConfig):
         default_gw = config.default_gw
         route = f"via {default_gw}" if default_gw else ""
-        self.__nodes[node_id] = self.addHost(node_id, defaultRoute=route)
-
-    def __handle_host_hacker(self, node_id: str, config: NodeConfig):
-        default_gw = config.default_gw
-        route = f"via {default_gw}" if default_gw else ""
-        self.__nodes[node_id] = self.addHost(node_id, defaultRoute=route)
+        self.__nodes[node_id] = self.addHost(node_id, defaultRoute=route, cwd="/tmp")
 
     def __handle_l1_hub(self, node_id: str):
         self.__nodes[node_id] = self.addSwitch(

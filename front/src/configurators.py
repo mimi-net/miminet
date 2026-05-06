@@ -309,10 +309,7 @@ class AbstractDeviceConfigurator(AbstractNodeConfigurator):
         if job_id not in self.__jobs.keys():
             return  # if user didn't select job
 
-        if (
-            job_id == ARP_SPOOF_JOB_ID
-            and self._node["config"].get("type") != "hacker"
-        ):
+        if job_id == ARP_SPOOF_JOB_ID and self._node["config"].get("type") != "hacker":
             raise ConfigurationError(
                 'Команда "ARP spoofing / ARP cache poisoning" доступна только хосту-хакеру'
             )
@@ -544,6 +541,13 @@ class HostConfigurator(AbstractDeviceConfigurator):
         )
 
         return res
+
+
+class HostHackerConfigurator(HostConfigurator):
+    # hacker has the same base configuration method as host
+    def __init__(self):
+        super().__init__()
+        self._device_type = "host_hacker"
 
 
 class RouterConfigurator(HostConfigurator):

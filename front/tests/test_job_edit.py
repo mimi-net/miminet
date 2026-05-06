@@ -170,7 +170,7 @@ class TestJobEdit:
             config_host.add_jobs(
                 1,
                 {
-                    Location.Network.ConfigPanel.Host.Job.PING_FIELD.selector: f"10.20.30.{10+i}"
+                    Location.Network.ConfigPanel.Host.Job.PING_FIELD.selector: f"10.20.30.{10 + i}"
                 },
             )
         config_host.submit()

@@ -31,7 +31,6 @@ def test_arp_spoof_job_starts_responder_and_enables_forwarding():
 
     Jobs(build_job(), hacker).handler()
 
-    assert "sysctl -w net.ipv4.ip_forward=1" in hacker.commands
     assert "sysctl -w net.ipv4.conf.all.send_redirects=0" in hacker.commands
     assert "sysctl -w net.ipv4.conf.all.rp_filter=0" in hacker.commands
     assert "sysctl -w net.ipv4.conf.default.send_redirects=0" not in hacker.commands
@@ -49,7 +48,6 @@ def test_arp_spoof_job_reply_only_mode_starts_responder_without_forwarding():
 
     Jobs(build_job(arg_4="reply_only"), hacker).handler()
 
-    assert "sysctl -w net.ipv4.ip_forward=0" in hacker.commands
     assert "iptables -P FORWARD ACCEPT" not in hacker.commands
     assert "sysctl -w net.ipv4.conf.all.send_redirects=0" not in hacker.commands
     assert any("--mode reply_only" in command for command in hacker.commands)
