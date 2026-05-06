@@ -7,6 +7,7 @@ from typing import Dict, List
 from configurators import (
     EdgeConfigurator,
     HostConfigurator,
+    HostHackerConfigurator,
     HubConfigurator,
     TextboxConfigurator,
     RouterConfigurator,
@@ -209,6 +210,7 @@ def build_error(error_type: str, cmd: str) -> str:
 hub = HubConfigurator()
 switch = SwitchConfigurator()
 host = HostConfigurator()
+host_hacker = HostHackerConfigurator()
 router = RouterConfigurator()
 server = ServerConfigurator()
 edge = EdgeConfigurator()
@@ -320,6 +322,86 @@ host_arp_spoof_job.add_param(
 host_arp_spoof_job.add_param("config_host_add_arp_spoof_mode_select_field").add_check(
     emptiness_check
 ).set_error_msg('Не выбран режим для команды "ARP spoofing / ARP cache poisoning"')
+
+# ~ ~ ~ HOST HACKER JOBS ~ ~ ~
+
+# ping -c 1 (1 param)
+host_hacker_ping_job = host_hacker.create_job(PING_JOB_ID, "ping -c 1 [0]")
+host_hacker_ping_job.add_param("config_host_hacker_ping_c_1_ip").add_check(
+    IPv4_check
+).set_error_msg(build_error(ErrorType.ip, "ping"))
+
+# traceroute -n (with options)
+host_hacker_traceroute_job = host_hacker.create_job(
+    TRACEROUTE_JOB_ID, "traceroute -n [0] [1]"
+)
+host_hacker_traceroute_job.add_param(
+    "config_host_hacker_traceroute_with_options_options_input_field"
+).add_check(ascii_check).add_filter(traceroute_options_filter).set_error_msg(
+    build_error(ErrorType.options, "traceroute -n (с опциями)")
+)
+host_hacker_traceroute_job.add_param(
+    "config_host_hacker_traceroute_with_options_ip_input_field"
+).add_check(IPv4_check).set_error_msg(
+    build_error(ErrorType.ip, "traceroute -n (с опциями)")
+)
+
+# Add route
+host_hacker_add_route_job = host_hacker.create_job(
+    ADD_ROUTE_JOB_ID, "ip route add [0]/[1] via [2]"
+)
+host_hacker_add_route_job.add_param(
+    "config_host_hacker_add_route_ip_input_field"
+).add_check(IPv4_check).set_error_msg(build_error(ErrorType.ip, "Добавить маршрут"))
+host_hacker_add_route_job.add_param(
+    "config_host_hacker_add_route_mask_input_field"
+).add_check(mask_check).set_error_msg(build_error(ErrorType.mask, "Добавить маршрут"))
+host_hacker_add_route_job.add_param(
+    "config_host_hacker_add_route_gw_input_field"
+).add_check(IPv4_check).set_error_msg(build_error(ErrorType.ip, "Добавить маршрут"))
+
+# arp -s ip hw_addr
+host_hacker_arp_job = host_hacker.create_job(ARP_CACHE_ADD_JOB_ID, "arp -s [0] [1]")
+host_hacker_arp_job.add_param(
+    "config_host_hacker_add_arp_cache_ip_input_field"
+).add_check(IPv4_check).set_error_msg(
+    build_error(ErrorType.ip, "Добавить запись в ARP-cache")
+)
+host_hacker_arp_job.add_param(
+    "config_host_hacker_add_arp_cache_mac_input_field"
+).add_check(MAC_check).set_error_msg(
+    'MAC-адрес для команды "Добавить запись в ARP-cache" указан неверно'
+)
+
+host_hacker_dhclient_job = host_hacker.create_job(DHCP_CLIENT_JOB_ID, "dhcp client")
+host_hacker_dhclient_job.add_param(
+    "config_host_hacker_add_dhclient_interface_select_iface_field"
+).add_check(emptiness_check).set_error_msg(
+    'Не указан интерфейс для команды "Запросить IP адрес автоматически"'
+)
+
+# ARP spoofing / cache poisoning
+host_hacker_arp_spoof_job = host_hacker.create_job(ARP_SPOOF_JOB_ID, "[3] -> [1]")
+host_hacker_arp_spoof_job.add_param(
+    "config_host_hacker_add_arp_spoof_interface_select_field"
+).add_check(emptiness_check).set_error_msg(
+    'Не указан интерфейс для команды "ARP spoofing / ARP cache poisoning"'
+)
+host_hacker_arp_spoof_job.add_param(
+    "config_host_hacker_add_arp_spoof_victim_ip_input_field"
+).add_check(IPv4_check).set_error_msg(
+    'Неверно указан IP целевого хоста для команды "ARP spoofing / ARP cache poisoning"'
+)
+host_hacker_arp_spoof_job.add_param(
+    "config_host_hacker_add_arp_spoof_target_ip_input_field"
+).add_check(IPv4_check).set_error_msg(
+    'Неверно указан IP узла, от лица которого отвечает хакер, для команды "ARP spoofing / ARP cache poisoning"'
+)
+host_hacker_arp_spoof_job.add_param(
+    "config_host_hacker_add_arp_spoof_mode_select_field"
+).add_check(emptiness_check).set_error_msg(
+    'Не выбран режим для команды "ARP spoofing / ARP cache poisoning"'
+)
 
 # ~ ~ ~ ROUTER JOBS ~ ~ ~
 
@@ -564,6 +646,11 @@ def save_switch_config():
 @jwt_required()
 def save_host_config():
     return host.configure()
+
+
+@jwt_required()
+def save_host_hacker_config():
+    return host_hacker.configure()
 
 
 @jwt_required()

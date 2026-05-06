@@ -484,7 +484,6 @@ def arp_spoof_handler(job: Job, job_host: Any) -> None:
         return
 
     if arg_mode == "mitm":
-        job_host.cmd("sysctl -w net.ipv4.ip_forward=1")
         job_host.cmd("sysctl -w net.ipv4.conf.all.send_redirects=0")
         job_host.cmd("sysctl -w net.ipv4.conf.all.rp_filter=0")
         job_host.cmd(
