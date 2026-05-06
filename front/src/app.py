@@ -60,6 +60,7 @@ from miminet_host import (
     delete_job,
     save_edge_config,
     save_host_config,
+    save_host_hacker_config,
     save_hub_config,
     save_textbox_config,
     save_router_config,
@@ -308,6 +309,11 @@ app.add_url_rule(
     "/host/save_config", methods=["GET", "POST"], view_func=save_host_config
 )
 app.add_url_rule(
+    "/host_hacker/save_config",
+    methods=["GET", "POST"],
+    view_func=save_host_hacker_config,
+)
+app.add_url_rule(
     "/host/router_save_config", methods=["GET", "POST"], view_func=save_router_config
 )
 app.add_url_rule(
@@ -332,6 +338,7 @@ app.add_url_rule("/ai/generate-task", methods=["POST"], view_func=generate_ai_ta
 
 # MimiShark
 app.add_url_rule("/host/mimishark", methods=["GET"], view_func=mimishark_page)
+app.add_url_rule("/host_hacker/mimishark", methods=["GET"], view_func=mimishark_page)
 app.add_url_rule("/router/mimishark", methods=["GET"], view_func=mimishark_page)
 app.add_url_rule("/server/mimishark", methods=["GET"], view_func=mimishark_page)
 app.add_url_rule("/hub/mimishark", methods=["GET"], view_func=mimishark_page)
