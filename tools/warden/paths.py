@@ -50,10 +50,3 @@ def is_probably_binary(path: pathlib.Path) -> bool:
     with path.open("rb") as handle:
         chunk = handle.read(4096)
     return b"\x00" in chunk
-
-
-def sanitize_text(text: str, limit: int) -> str:
-    if len(text) <= limit:
-        return text
-    omitted = len(text) - limit
-    return f"{text[:limit]}\n\n[truncated {omitted} chars]"
