@@ -6,10 +6,13 @@ import textwrap
 from typing import Any
 from zoneinfo import ZoneInfo
 
+from tools.warden.config import with_force_include_paths
 from tools.warden.config import RuntimeConfig
+from tools.warden.exceptions import ReviewError
 from tools.warden.model import build_model_uri
 from tools.warden.prompts import build_initial_messages
 from tools.warden.prompts import pick_baseline_files
+from tools.warden.recent_activity import gather_pull_request_activity
 from tools.warden.recent_activity import gather_recent_activity
 from tools.warden.agent_tools import ReviewTools
 from tools.warden.yandex_client import YandexClient
@@ -31,7 +34,7 @@ def format_tool_result(
 
 
 def build_forced_final_report_prompt(
-    recent_activity: dict[str, Any], transcript: list[dict[str, Any]]
+    review_context: dict[str, Any], transcript: list[dict[str, Any]]
 ) -> str:
     inspected_paths: list[str] = []
 
@@ -45,11 +48,17 @@ def build_forced_final_report_prompt(
         if isinstance(path, str) and path not in inspected_paths:
             inspected_paths.append(path)
 
-    baseline_files = recent_activity.get("baseline_files") or []
+    baseline_files = review_context.get("baseline_files") or []
+    mode = review_context.get("mode")
+    context_label = (
+        "Pull request scoped files"
+        if mode == "pull_request"
+        else "Recently changed scoped files"
+    )
     return (
         "This is the final allowed iteration. Do not call any more tools. "
         "Return final_report now based only on the evidence collected in this "
-        f"session. Recently changed scoped files: {recent_activity.get('files', [])}. "
+        f"session. {context_label}: {review_context.get('files', [])}. "
         f"Baseline seed files: {baseline_files}. "
         f"Inspected paths so far: {inspected_paths}. "
         "If the evidence is limited, explicitly say so in the report instead of "
@@ -58,7 +67,7 @@ def build_forced_final_report_prompt(
 
 
 def build_iteration_limit_report(
-    recent_activity: dict[str, Any], transcript: list[dict[str, Any]]
+    review_context: dict[str, Any], transcript: list[dict[str, Any]]
 ) -> str:
     inspected_paths: list[str] = []
 
@@ -74,8 +83,13 @@ def build_iteration_limit_report(
 
     analysis_date = dt.datetime.now(ZoneInfo("Europe/Moscow")).strftime("%d:%m:%Y")
     inspected_text = ", ".join(inspected_paths[:10]) or "нет подтверждённых файлов"
-    changed_files = recent_activity.get("files") or []
+    changed_files = review_context.get("files") or []
     changed_text = ", ".join(changed_files[:10]) or "нет"
+    changed_label = (
+        "Изменения pull request"
+        if review_context.get("mode") == "pull_request"
+        else "Недавние scoped-изменения"
+    )
 
     return textwrap.dedent(
         f"""
@@ -96,8 +110,8 @@ def build_iteration_limit_report(
         уязвимостей или проблем с производительностью.
 
         #### Как проверить
-        Перезапустить ревью с большим лимитом итераций или сузить scope. Недавние
-        scoped-изменения: {changed_text}.
+        Перезапустить ревью с большим лимитом итераций или сузить scope.
+        {changed_label}: {changed_text}.
 
         #### Возможное направление исправления
         Упростить prompt, уменьшить объём анализа за один запуск или повысить
@@ -110,30 +124,69 @@ def build_iteration_limit_report(
     ).strip()
 
 
+def collect_pull_request_scope_paths(file_changes: list[dict[str, str]]) -> list[str]:
+    paths: list[str] = []
+
+    for item in file_changes:
+        for candidate in (item.get("path"), item.get("old_path")):
+            if not isinstance(candidate, str) or candidate in paths:
+                continue
+            paths.append(candidate)
+
+    return paths
+
+
 def run_review(
     repo_root: pathlib.Path,
     output_dir: pathlib.Path,
     config: RuntimeConfig,
     api_key: str,
     folder_id: str,
+    review_mode: str = "repository",
+    base_ref: str | None = None,
+    base_sha: str | None = None,
+    head_sha: str | None = None,
+    pull_request: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     model_name = os.environ.get("YANDEX_AI_MODEL", config.model_name)
     model_uri = build_model_uri(folder_id, model_name)
+    effective_config = config
 
-    recent_activity = gather_recent_activity(
-        repo_root, config.review_window_days, config.scope
-    )
-    if not recent_activity["files"]:
-        recent_activity["baseline_files"] = pick_baseline_files(repo_root, config)
-    messages = build_initial_messages(repo_root, config, recent_activity)
+    if review_mode == "pull_request":
+        review_context = gather_pull_request_activity(
+            repo_root=repo_root,
+            scope=None,
+            base_ref=base_ref,
+            base_sha=base_sha,
+            head_sha=head_sha,
+            patch_line_limit=min(config.limits.file_lines, 120),
+            metadata=pull_request,
+        )
+        auto_scope_paths = collect_pull_request_scope_paths(
+            review_context.get("file_changes") or []
+        )
+        effective_config = with_force_include_paths(config, auto_scope_paths)
+        review_context["auto_scope_paths"] = auto_scope_paths
+    elif review_mode == "repository":
+        review_context = gather_recent_activity(
+            repo_root, config.review_window_days, config.scope
+        )
+        if not review_context["files"]:
+            review_context["baseline_files"] = pick_baseline_files(
+                repo_root, effective_config
+            )
+    else:
+        raise ReviewError(f"unknown review mode: {review_mode}")
+
+    messages = build_initial_messages(repo_root, effective_config, review_context)
 
     client = YandexClient(
         api_key=api_key,
         folder_id=folder_id,
         model_uri=model_uri,
-        config=config,
+        config=effective_config,
     )
-    tools = ReviewTools(repo_root=repo_root, config=config)
+    tools = ReviewTools(repo_root=repo_root, config=effective_config)
     transcript: list[dict[str, Any]] = []
 
     final_report = ""
@@ -179,7 +232,7 @@ def run_review(
         messages.append(
             {
                 "role": "user",
-                "text": build_forced_final_report_prompt(recent_activity, transcript),
+                "text": build_forced_final_report_prompt(review_context, transcript),
             }
         )
         completion = client.complete(messages)
@@ -199,7 +252,7 @@ def run_review(
             final_report = action["report_markdown"].strip()
         else:
             transcript[-1]["rejected"] = "tool_call_on_forced_final_iteration"
-            final_report = build_iteration_limit_report(recent_activity, transcript)
+            final_report = build_iteration_limit_report(review_context, transcript)
 
     output_dir.mkdir(parents=True, exist_ok=True)
     report_path = output_dir / "report.md"
@@ -210,23 +263,34 @@ def run_review(
     )
     header = textwrap.dedent(
         f"""
-        # Weekly AI Review
+        # {"Pull Request AI Review" if review_mode == "pull_request" else "Weekly AI Review"}
 
         Generated at: {generated_at}
         Model URI: {model_uri}
-        Review window: last {config.review_window_days} days
+        Review mode: {review_mode}
         """
     ).strip()
 
     report_path.write_text(f"{header}\n\n{final_report}\n", encoding="utf-8")
+    session_payload = {
+        "generated_at": generated_at,
+        "model_uri": model_uri,
+        "review_mode": review_mode,
+        "review_context": review_context,
+        "effective_scope": {
+            "include": list(effective_config.scope.include),
+            "exclude": list(effective_config.scope.exclude),
+            "force_include": list(effective_config.scope.force_include),
+        },
+        "transcript": transcript,
+    }
+    if review_mode == "repository":
+        session_payload["recent_activity"] = review_context
+    else:
+        session_payload["pull_request"] = review_context
     session_path.write_text(
         json.dumps(
-            {
-                "generated_at": generated_at,
-                "model_uri": model_uri,
-                "recent_activity": recent_activity,
-                "transcript": transcript,
-            },
+            session_payload,
             ensure_ascii=False,
             indent=2,
         ),

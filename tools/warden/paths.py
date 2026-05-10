@@ -29,19 +29,26 @@ def match_glob(relative_path: str, pattern: str) -> bool:
     return relative_obj.match(pattern)
 
 
+def matches_scope_prefixes(relative_path: str, prefixes: tuple[str, ...]) -> bool:
+    return any(
+        relative_path == prefix
+        or relative_path.startswith(f"{prefix.rstrip('/')}/")
+        or prefix.startswith(f"{relative_path.rstrip('/')}/")
+        for prefix in prefixes
+    )
+
+
 def is_allowed_by_scope(relative_path: str, scope: Scope) -> bool:
     if relative_path == ".":
         return True
 
-    if scope.include:
-        included = any(
-            relative_path == prefix
-            or relative_path.startswith(f"{prefix.rstrip('/')}/")
-            or prefix.startswith(f"{relative_path.rstrip('/')}/")
-            for prefix in scope.include
-        )
-        if not included:
-            return False
+    if scope.force_include and matches_scope_prefixes(
+        relative_path, scope.force_include
+    ):
+        return True
+
+    if scope.include and not matches_scope_prefixes(relative_path, scope.include):
+        return False
 
     return not any(match_glob(relative_path, pattern) for pattern in scope.exclude)
 

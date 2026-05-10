@@ -1,6 +1,7 @@
 import pathlib
 import tomllib
 from dataclasses import dataclass
+from dataclasses import replace
 
 
 @dataclass(frozen=True)
@@ -15,6 +16,7 @@ class Limits:
 class Scope:
     include: tuple[str, ...]
     exclude: tuple[str, ...]
+    force_include: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -54,5 +56,31 @@ def load_config(config_path: pathlib.Path) -> RuntimeConfig:
         scope=Scope(
             include=tuple(str(item) for item in scope.get("include", [])),
             exclude=tuple(str(item) for item in scope.get("exclude", [])),
+            force_include=tuple(str(item) for item in scope.get("force_include", [])),
+        ),
+    )
+
+
+def with_force_include_paths(
+    config: RuntimeConfig, extra_paths: list[str]
+) -> RuntimeConfig:
+    seen = set(config.scope.force_include)
+    additions: list[str] = []
+
+    for raw_path in extra_paths:
+        path = str(raw_path).strip()
+        if not path or path in seen:
+            continue
+        seen.add(path)
+        additions.append(path)
+
+    if not additions:
+        return config
+
+    return replace(
+        config,
+        scope=replace(
+            config.scope,
+            force_include=config.scope.force_include + tuple(additions),
         ),
     )

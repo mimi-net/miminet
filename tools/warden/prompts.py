@@ -70,23 +70,57 @@ def pick_baseline_files(
     return rng.sample(candidates, count)
 
 
+def render_file_changes(file_changes: list[dict[str, str]]) -> list[str]:
+    lines: list[str] = []
+    for item in file_changes:
+        status = item["status"]
+        path = item["path"]
+        old_path = item.get("old_path")
+        if old_path:
+            lines.append(f"- {status} {old_path} -> {path}")
+        else:
+            lines.append(f"- {status} {path}")
+    return lines
+
+
+def render_patch_sections(patches: list[dict[str, Any]]) -> str:
+    sections: list[str] = []
+
+    for patch in patches:
+        header = f"### {patch['status']} {patch['path']}"
+        if patch.get("old_path"):
+            header = f"{header} (from {patch['old_path']})"
+
+        suffix = "\n[diff excerpt truncated]" if patch.get("truncated") else ""
+        sections.append(
+            f"{header}\n```diff\n{patch['diff']}{suffix}\n```"
+        )
+
+    return "\n\n".join(sections)
+
+
 def build_initial_messages(
     repo_root: pathlib.Path,
     config: RuntimeConfig,
-    recent_activity: dict[str, Any],
+    review_context: dict[str, Any],
 ) -> list[dict[str, str]]:
     top_level = gather_top_level(repo_root, config.scope)
-    baseline_scan_mode = not recent_activity["files"]
-    baseline_files = recent_activity.get("baseline_files") or []
+    review_mode = str(review_context["mode"])
+    pull_request_mode = review_mode == "pull_request"
+    baseline_scan_mode = review_mode == "repository" and not review_context["files"]
+    baseline_files = review_context.get("baseline_files") or []
+    auto_scope_paths = review_context.get("auto_scope_paths") or []
 
     recent_commit_lines = [
         f"- {commit['date']} {commit['sha']}: {commit['subject']}"
-        for commit in recent_activity["commits"]
-    ] or ["- No commits found in the configured review window."]
+        for commit in review_context["commits"]
+    ] or ["- No commits found in the current review context."]
 
-    recent_file_lines = [f"- {path}" for path in recent_activity["files"]] or [
-        "- No changed files found in the configured review window."
+    recent_file_lines = [f"- {path}" for path in review_context["files"]] or [
+        "- No scoped files found in the current review context."
     ]
+    file_change_lines = render_file_changes(review_context.get("file_changes") or [])
+    patch_sections = render_patch_sections(review_context.get("patches") or [])
 
     repo_name = os.environ.get("GITHUB_REPOSITORY", repo_root.name)
     sha = os.environ.get("GITHUB_SHA", "unknown")
@@ -105,10 +139,17 @@ def build_initial_messages(
         Operating rules:
         - Focus on concrete bugs, regressions, fragile logic, security issues,
           dependency risk, and missing tests.
-        - Start from recent activity, then inspect adjacent high-risk files if needed.
-        - If there are no recently changed files in the allowed scope, switch to
-          baseline repository scan mode and inspect the existing code without
-          relying on file modification recency.
+        - If the review mode is pull request, analyze all changes introduced by
+          the pull request, using the changed files and patch excerpts as the
+          primary context.
+        - In pull request review mode, use `read_file` to inspect the full
+          current version of changed files whenever the patch excerpt is not
+          enough to judge correctness.
+        - In repository review mode, start from recent activity, then inspect
+          adjacent high-risk files if needed.
+        - If there are no recently changed files in the allowed scope during
+          repository review mode, switch to baseline repository scan mode and
+          inspect the existing code without relying on file modification recency.
         - In baseline repository scan mode, start by exploring one or more
           allowed directories with `list_dir`, then inspect concrete files with
           `search_text` and `read_file` before forming conclusions.
@@ -163,28 +204,59 @@ def build_initial_messages(
         Repository root: {repo_root}
         Current ref: {ref_name}
         Current SHA: {sha}
-        Review window: last {config.review_window_days} days
-        Since: {recent_activity["since"]}
         Analysis date: {analysis_date}
+
+        {"Review window: last "
+         f"{config.review_window_days} days\nSince: {review_context['since']}"
+         if review_mode == "repository" else
+         "Pull request number: "
+         f"{review_context.get('number') or 'unknown'}\n"
+         "Pull request title: "
+         f"{review_context.get('title') or 'unknown'}\n"
+         "Pull request URL: "
+         f"{review_context.get('url') or 'unknown'}\n"
+         "Base ref: "
+         f"{review_context.get('base_ref') or 'unknown'}\n"
+         "Base SHA: "
+         f"{review_context.get('base_sha') or 'unknown'}\n"
+         "Head ref: "
+         f"{review_context.get('head_ref') or 'unknown'}\n"
+         "Head SHA: "
+         f"{review_context.get('head_sha') or 'unknown'}\n"
+         "Merge base: "
+         f"{review_context.get('merge_base') or 'unknown'}"}
 
         Top-level scope:
         {"\n".join(f"- {entry}" for entry in top_level[:40])}
 
         Review mode:
-        {"- Baseline repository scan. Ignore modification dates and inspect the "
+        {"- Pull request review. Analyze the delta introduced by the pull request,"
+         " then inspect the full file content or adjacent code when the diff"
+         " excerpt is not enough." if pull_request_mode else
+         "- Baseline repository scan. Ignore modification dates and inspect the "
          "allowed scope for existing bugs, vulnerabilities, and performance "
          "problems." if baseline_scan_mode else
-         "- Recent-change-focused review. Start from the files changed within the "
-         "review window, then inspect adjacent high-risk code if needed."}
+         "- Recent-change-focused repository review. Start from the files changed "
+         "within the review window, then inspect adjacent high-risk code if needed."}
 
         {"Baseline seed files:\n" + "\n".join(f"- {path}" for path in baseline_files)
          if baseline_scan_mode and baseline_files else ""}
 
-        Recent commits:
+        {"Pull request files automatically added to runtime scope:\n"
+         + "\n".join(f"- {path}" for path in auto_scope_paths)
+         if pull_request_mode and auto_scope_paths else ""}
+
+        {"Pull request commits:" if pull_request_mode else "Recent commits:"}
         {"\n".join(recent_commit_lines)}
 
-        Recently changed files:
+        {"Pull request changed files:" if pull_request_mode else "Recently changed files:"}
         {"\n".join(recent_file_lines)}
+
+        {"Changed file statuses:\n" + "\n".join(file_change_lines)
+         if pull_request_mode and file_change_lines else ""}
+
+        {"Patch excerpts:\n" + patch_sections
+         if pull_request_mode and patch_sections else ""}
 
         Available tools:
         - list_dir(path=".", recursive=false, limit=200)

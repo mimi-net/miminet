@@ -1,17 +1,23 @@
 from __future__ import annotations
 
+import argparse
+import json
 import pathlib
 import tempfile
 import unittest
 from unittest import mock
 
+from tools.warden.cli import resolve_review_options
 from tools.warden.config import Limits
 from tools.warden.config import RuntimeConfig
 from tools.warden.config import Scope
+from tools.warden.config import with_force_include_paths
 from tools.warden.exceptions import ReviewError
 from tools.warden.model import build_model_uri
 from tools.warden.prompts import build_initial_messages
 from tools.warden.prompts import pick_baseline_files
+from tools.warden.paths import is_allowed_by_scope
+from tools.warden.recent_activity import gather_pull_request_activity
 from tools.warden.recent_activity import gather_recent_activity
 from tools.warden.schema import build_json_schema
 from tools.warden.agent_tools import ReviewTools
@@ -93,6 +99,14 @@ class ReviewToolsTest(unittest.TestCase):
         self.assertEqual(result["matches"][0]["path"], "src/main.py")
 
 
+class ScopeOverrideTest(unittest.TestCase):
+    def test_force_include_paths_override_include_and_exclude(self) -> None:
+        config = with_force_include_paths(make_config(), ["docs/image.png"])
+
+        self.assertTrue(is_allowed_by_scope("docs", config.scope))
+        self.assertTrue(is_allowed_by_scope("docs/image.png", config.scope))
+
+
 class ModelUriTest(unittest.TestCase):
     def test_build_model_uri(self) -> None:
         self.assertEqual(
@@ -113,7 +127,12 @@ class PromptFormatTest(unittest.TestCase):
             messages = build_initial_messages(
                 repo_root,
                 make_config(),
-                {"since": "2026-04-14", "commits": [], "files": []},
+                {
+                    "mode": "repository",
+                    "since": "2026-04-14",
+                    "commits": [],
+                    "files": [],
+                },
             )
 
         prompt_text = "\n\n".join(message["text"] for message in messages)
@@ -134,6 +153,7 @@ class PromptFormatTest(unittest.TestCase):
                 repo_root,
                 make_config(),
                 {
+                    "mode": "repository",
                     "since": "2026-04-14",
                     "commits": [],
                     "files": [],
@@ -145,6 +165,51 @@ class PromptFormatTest(unittest.TestCase):
         self.assertIn("Baseline repository scan", prompt_text)
         self.assertIn("Ignore modification dates", prompt_text)
         self.assertIn("Baseline seed files", prompt_text)
+        self.assertIn("src/main.py", prompt_text)
+
+    def test_initial_prompt_switches_to_pull_request_mode(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = pathlib.Path(temp_dir)
+            (repo_root / "src").mkdir()
+            messages = build_initial_messages(
+                repo_root,
+                make_config(),
+                {
+                    "mode": "pull_request",
+                    "number": 14,
+                    "title": "Add guard for edge case",
+                    "url": "https://example.test/pr/14",
+                    "base_ref": "main",
+                    "base_sha": "base123",
+                    "head_ref": "feature/pr",
+                    "head_sha": "head456",
+                    "merge_base": "merge789",
+                    "commits": [
+                        {
+                            "sha": "abc123",
+                            "date": "2026-05-10",
+                            "subject": "adjust handler",
+                            "files": ["src/main.py"],
+                        }
+                    ],
+                    "files": ["src/main.py"],
+                    "file_changes": [{"status": "M", "path": "src/main.py"}],
+                    "patches": [
+                        {
+                            "status": "M",
+                            "path": "src/main.py",
+                            "diff": "@@ -1 +1 @@\n-print('old')\n+print('new')",
+                            "truncated": False,
+                        }
+                    ],
+                },
+            )
+
+        prompt_text = "\n\n".join(message["text"] for message in messages)
+        self.assertIn("Pull request review", prompt_text)
+        self.assertIn("Pull request changed files", prompt_text)
+        self.assertIn("Patch excerpts", prompt_text)
+        self.assertIn("Add guard for edge case", prompt_text)
         self.assertIn("src/main.py", prompt_text)
 
 
@@ -171,6 +236,7 @@ class RecentActivityTest(unittest.TestCase):
         self, run: mock.Mock
     ) -> None:
         run.return_value = mock.Mock(
+            returncode=0,
             stdout=(
                 "abc123\t2026-05-03\twarden change\n"
                 "src/main.py\n"
@@ -178,7 +244,8 @@ class RecentActivityTest(unittest.TestCase):
                 "\n"
                 "def456\t2026-05-02\treadme change\n"
                 "README.md\n"
-            )
+            ),
+            stderr="",
         )
 
         result = gather_recent_activity(
@@ -191,6 +258,101 @@ class RecentActivityTest(unittest.TestCase):
         self.assertEqual(len(result["commits"]), 2)
         self.assertEqual(result["commits"][0]["files"], ["src/main.py"])
         self.assertEqual(result["commits"][1]["files"], ["README.md"])
+
+    @mock.patch("tools.warden.recent_activity.subprocess.run")
+    def test_gather_pull_request_activity_collects_scoped_diff_context(
+        self, run: mock.Mock
+    ) -> None:
+        run.side_effect = [
+            mock.Mock(returncode=0, stdout="mergebase123\n", stderr=""),
+            mock.Mock(
+                returncode=0,
+                stdout=(
+                    "abc123\t2026-05-10\tadjust handler\n"
+                    "src/main.py\n"
+                    "tools/warden/runner.py\n"
+                ),
+                stderr="",
+            ),
+            mock.Mock(
+                returncode=0,
+                stdout="M\tsrc/main.py\nD\tREADME.md\n",
+                stderr="",
+            ),
+            mock.Mock(
+                returncode=0,
+                stdout="diff --git a/src/main.py b/src/main.py\n@@ -1 +1 @@\n-old\n+new\n",
+                stderr="",
+            ),
+            mock.Mock(
+                returncode=0,
+                stdout="diff --git a/README.md b/README.md\n@@ -1 +0,0 @@\n-# demo\n",
+                stderr="",
+            ),
+        ]
+
+        result = gather_pull_request_activity(
+            repo_root=pathlib.Path("."),
+            scope=make_config().scope,
+            base_ref="main",
+            base_sha="base123",
+            head_sha="head456",
+            patch_line_limit=20,
+            metadata={
+                "number": 14,
+                "title": "Adjust handler",
+                "url": "https://example.test/pr/14",
+                "head_ref": "feature/pr",
+            },
+        )
+
+        self.assertEqual(result["mode"], "pull_request")
+        self.assertEqual(result["merge_base"], "mergebase123")
+        self.assertEqual(result["files"], ["src/main.py", "README.md"])
+        self.assertEqual(result["file_changes"][0]["path"], "src/main.py")
+        self.assertEqual(result["patches"][0]["path"], "src/main.py")
+        self.assertIn("+new", result["patches"][0]["diff"])
+
+
+class CliReviewModeTest(unittest.TestCase):
+    def test_resolve_review_options_uses_pull_request_event_metadata(self) -> None:
+        with tempfile.NamedTemporaryFile("w+", encoding="utf-8") as handle:
+            json.dump(
+                {
+                    "pull_request": {
+                        "number": 14,
+                        "title": "Adjust handler",
+                        "html_url": "https://example.test/pr/14",
+                        "base": {"ref": "main", "sha": "base123"},
+                        "head": {"ref": "feature/pr", "sha": "head456"},
+                    }
+                },
+                handle,
+            )
+            handle.flush()
+            args = argparse.Namespace(
+                mode="auto",
+                config="tools/warden/review_config.toml",
+                output_dir="tmp/ai-review",
+                base_ref=None,
+                base_sha=None,
+                head_sha=None,
+            )
+
+            with mock.patch.dict(
+                "os.environ",
+                {
+                    "GITHUB_EVENT_NAME": "pull_request",
+                    "GITHUB_EVENT_PATH": handle.name,
+                },
+                clear=False,
+            ):
+                options = resolve_review_options(args)
+
+        self.assertEqual(options["review_mode"], "pull_request")
+        self.assertEqual(options["base_sha"], "base123")
+        self.assertEqual(options["head_sha"], "head456")
+        self.assertEqual(options["pull_request"]["title"], "Adjust handler")
 
 
 class SchemaFormatTest(unittest.TestCase):
