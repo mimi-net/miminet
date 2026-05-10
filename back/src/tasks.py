@@ -1,9 +1,7 @@
 import json
 import os
 import signal
-import datetime
 import logging
-
 import logging_config  
 import marshmallow_dataclass
 from celery_app import (
@@ -16,7 +14,7 @@ from network_schema import Network
 from emulator import emulate
 
 logger = logging.getLogger(__name__)
-
+logging_config.configure_logging(logger)
 
 def run_miminet(network_json: str):
     """Load network from JSON and start emulation safely.
@@ -48,10 +46,8 @@ def run_miminet(network_json: str):
             # Sometimes mininet doesn't work correctly and simulation needs to be redone,
             # Example of mininet error: https://github.com/mininet/mininet/issues/737.
             logger.warning(
-                "emulating_retry",
+                "Emulating retry",
                 extra={
-                    "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
-                    "level": "WARNING",
                     "task_id": None,
                     "attempt": attempt + 1,
                     "error": str(e),

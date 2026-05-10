@@ -2,7 +2,6 @@ import os
 import uuid
 import logging
 import logging_config 
-
 from celery_app import (
     SEND_NETWORK_EXCHANGE,
     EXCHANGE_TYPE,

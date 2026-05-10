@@ -5,7 +5,6 @@ import logging
 import json
 import logging_config  
 from sqlalchemy.orm.exc import StaleDataError
-
 from celery_app import (
     SEND_NETWORK_EXCHANGE,
     EXCHANGE_TYPE,
@@ -15,7 +14,6 @@ from app import app as flask_app
 from miminet_model import Simulate, SimulateLog, db, Network
 from celery.result import AsyncResult, allow_join_result
 from celery.exceptions import TimeoutError
-
 from quiz.service.session_question_service import (
     answer_on_exam_question,
     answer_on_exam_without_session,
