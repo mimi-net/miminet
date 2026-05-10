@@ -3,7 +3,6 @@ import os
 import uuid
 import shutil
 import logging
-
 import logging_config  
 from flask import (
     flash,
@@ -23,7 +22,7 @@ from sqlalchemy import not_
 PREVIEW_IMAGES_ROOT = "static/images/preview"
 
 logger = logging.getLogger(__name__)
-
+logging_config.configure_logging(logger)
 
 @login_required
 def create_network():
@@ -583,10 +582,8 @@ def get_emulation_queue_size():
     )
 
     logger.info(
-        "emulation_queue_size",
+        "Emulation queue size",
         extra={
-            "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
-            "level": "INFO",
             "time_filter": time_filter_req,
             "count": emulated_networks_count,
         },

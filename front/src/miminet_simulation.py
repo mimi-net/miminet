@@ -1,7 +1,6 @@
 import os
 import uuid
 import logging
-
 import logging_config 
 
 from celery_app import (
@@ -15,11 +14,7 @@ from miminet_model import Network, Simulate, SimulateLog, db
 from werkzeug.wrappers import Response
 
 logger = logging.getLogger(__name__)
-
-
-def _log(level, event, extra):
-    logger.log(level, event, extra=extra)
-
+logging_config.configure_logging(logger)
 
 @login_required
 def run_simulation() -> Response:
@@ -27,10 +22,9 @@ def run_simulation() -> Response:
     user = current_user
     network_guid = request.args.get("guid", type=str)
 
-    _log(
-        logging.INFO,
-        "run_simulation_start",
-        {"user_id": getattr(user, "id", None), "guid": network_guid, "method": request.method},
+    logger.info(
+        "Run simulation start",
+        extra={"user_id": getattr(user, "id", None), "guid": network_guid, "method": request.method}
     )
 
     if not network_guid:
@@ -62,10 +56,9 @@ def run_simulation() -> Response:
             db.session.delete(s)
             db.session.commit()
 
-        _log(
-            logging.INFO,
-            "run_simulation_cleanup",
-            {"network_id": net.id, "removed_sims": removed},
+        logger.info(
+            "Run simulation cleanup",
+            extra={"network_id": net.id, "removed_sims": removed}
         )
 
         # Write log
@@ -80,10 +73,9 @@ def run_simulation() -> Response:
         db.session.add(simlog)
         db.session.commit()
 
-        _log(
-            logging.INFO,
-            "run_simulation_created",
-            {"network_id": net.id, "simulation_id": sim.id, "task_guid": str(task_guid)},
+        logger.info(
+            "Run simulation created",
+            extra={"network_id": net.id, "simulation_id": sim.id, "task_guid": str(task_guid)}
         )
 
         # Send emulation task to celery
@@ -98,27 +90,25 @@ def run_simulation() -> Response:
                 task_id=str(task_guid),
                 headers={"network_task_name": "tasks.save_simulate_result"},
             )
-            _log(
-                logging.INFO,
-                "run_simulation_enqueued",
-                {
+            logger.info(
+                "Run simulation enqueued",
+                extra={
                     "simulation_id": sim.id,
                     "task_guid": str(task_guid),
                     "routing_key": routing_key,
                     "exchange": SEND_NETWORK_EXCHANGE.name,
-                },
+                }
             )
         except Exception as e:
-            _log(
-                logging.ERROR,
-                "run_simulation_enqueue_failed",
-                {
+            logger.error(
+                "Run simulation enqueue failed",
+                extra={
                     "simulation_id": sim.id,
                     "task_guid": str(task_guid),
                     "routing_key": routing_key,
                     "exchange": SEND_NETWORK_EXCHANGE.name,
                     "error": str(e),
-                },
+                }
             )
             raise
 

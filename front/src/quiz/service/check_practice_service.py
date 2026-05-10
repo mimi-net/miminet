@@ -6,10 +6,8 @@ import quiz.service.check_host_service as chs
 from quiz.service.check_network_service import check_network_configuration
 
 logger = logging.getLogger(__name__)
-
-
-def _log(level, event, extra):
-    logger.log(level, event, extra=extra)
+logging_config.configure_logging(logger)
+logger.setLevel(logging.DEBUG)
 
 def check_in_one_network_with(requirement, answer, device):
     points = 0
@@ -18,14 +16,13 @@ def check_in_one_network_with(requirement, answer, device):
     target_id = requirement.get("target")
     points_awarded = requirement.get("points", 1)
     # Log start of in_one_network_with check
-    _log(
-        logging.DEBUG,
-        "in_one_network_with_start",
-        {
+    logger.debug(
+        "In one network with, start",
+        extra={
             "device": device,
             "target": target_id,
             "points_awarded": points_awarded,
-        },
+        }
     )
 
     if not target_id:
@@ -65,29 +62,27 @@ def check_in_one_network_with(requirement, answer, device):
         for net2 in target_networks:
             if net1.overlaps(net2):
                 points = points_awarded
-                _log(
-                    logging.INFO,
-                    "in_one_network_with_success",
-                    {
+                logger.info(
+                    "In one network with, success",
+                    extra={
                         "device": device,
                         "target": target_id,
                         "network": str(net1),
                         "awarded": points,
-                    },
+                    }
                 )
                 return points, hints
 
     hints.append(f"{device} и {target_id} не находятся в одной сети.")
     # Log failure to be in same network and awarded points (usually 0)
-    _log(
-        logging.INFO,
-        "in_one_network_with_fail",
-        {
+    logger.info(
+        "In one network with, fail",
+        extra={
             "device": device,
             "target": target_id,
             "awarded": points,
             "hints": hints,
-        },
+        }
     )
     return points, hints
 
@@ -100,15 +95,14 @@ def check_abstract_ip_equal(abstract_equal, answer, device):
         return points, hints
 
     # Log parameters before abstract IP equality check
-    _log(
-        logging.DEBUG,
-        "abstract_ip_equal_start",
-        {
+    logger.debug(
+        "Abstract ip equal, start",
+        extra={
             "device": device,
             "to": abstract_equal.get("to"),
             "expected_equal_with": abstract_equal.get("expected_equal_with"),
             "points_awarded": abstract_equal.get("points", 1),
-        },
+        }
     )
 
     nodes = answer["nodes"]
@@ -161,16 +155,15 @@ def check_abstract_ip_equal(abstract_equal, answer, device):
     if common_ips:
         points = max(points_awarded, 0)
         # Log successful abstract IP equality and awarded points
-        _log(
-            logging.INFO,
-            "abstract_ip_equal_success",
-            {
+        logger.info(
+            "Abstract ip equal, success",
+            extra={
                 "device": device,
                 "to": to_node_id,
                 "compare": expected_equal_with,
                 "common_ips": list(common_ips),
                 "awarded": points,
-            },
+            }
         )
     else:
         hints.append(
@@ -180,16 +173,15 @@ def check_abstract_ip_equal(abstract_equal, answer, device):
         if points_awarded < 0:
             points = points_awarded
     # Log final abstract IP equality result and hints
-    _log(
-        logging.INFO,
-        "abstract_ip_equal_result",
-        {
+    logger.info(
+        "Abstract ip equal result",
+        extra={
             "device": device,
             "to": to_node_id,
             "compare": expected_equal_with,
             "awarded": points,
             "hints": hints,
-        },
+        }
     )
 
     return points, hints
@@ -208,34 +200,31 @@ def check_host(requirement, answer, device):
         return points_for_host, hints
 
     # Log start of host check and requirement keys
-    _log(
-        logging.DEBUG,
-        "practice_check_host_start",
-        {"device": device, "requirement_keys": list(requirement.keys())},
+    logger.debug(
+        "Practice check host start",
+        extra={"device": device, "requirement_keys": list(requirement.keys())}
     )
 
     # Checking commands (ping in particular)
     cmd = requirement.get("cmd")
     if cmd:
         # Log command check input
-        _log(
-            logging.DEBUG,
-            "practice_cmd_check",
-            {"device": device, "cmd": cmd},
+        logger.debug(
+            "Practice cmd check",
+            extra={"device": device, "cmd": cmd}
         )
         points_for_cmd, cmd_hints = chs.process_host_command(cmd, answer, device)
         points_for_host += points_for_cmd
         hints.extend(cmd_hints)
         # Log command check result and awarded points
-        _log(
-            logging.INFO,
-            "practice_cmd_result",
-            {
+        logger.info(
+            "Practice cmd result",
+            extra={
                 "device": device,
                 "awarded": points_for_cmd,
                 "host_total": points_for_host,
                 "hints": cmd_hints,
-            },
+            }
         )
 
     # Checking for identical VLANs
@@ -249,10 +238,9 @@ def check_host(requirement, answer, device):
         equal_vlan_targets = targets
         equal_vlan_points = equal_vlan_id.get("points", 1)
         # Log VLAN equality check input
-        _log(
-            logging.DEBUG,
-            "practice_equal_vlan_check",
-            {"device": device, "targets": targets, "points": equal_vlan_points},
+        logger.debug(
+            "Practice equal vlan check",
+            extra={"device": device, "targets": targets, "points": equal_vlan_points}
         )
 
         equal_vlan_hints_all = []
@@ -272,17 +260,16 @@ def check_host(requirement, answer, device):
     if all_vlan_conditions_passed:
         points_for_host += equal_vlan_points
     # Log VLAN equality result and points
-    _log(
-        logging.INFO,
-        "practice_equal_vlan_result",
-            {
-                "device": device,
-                "targets": equal_vlan_targets,
-                "awarded": equal_vlan_awarded,
-                "host_total": points_for_host,
-                "hints": equal_vlan_hints_all if not all_vlan_conditions_passed else [],
-            },
-        )
+    logger.info(
+        "Practice equal vlan result",
+        extra={
+            "device": device,
+            "targets": equal_vlan_targets,
+            "awarded": equal_vlan_awarded,
+            "host_total": points_for_host,
+            "hints": equal_vlan_hints_all if not all_vlan_conditions_passed else [],
+        }
+    )
 
     # Checking for different VLANs
     all_vlan_conditions_passed = True
@@ -295,10 +282,9 @@ def check_host(requirement, answer, device):
         no_equal_vlan_targets = targets
         no_equal_vlan_points = no_equal_vlan_id.get("points", 1)
         # Log VLAN inequality check input
-        _log(
-            logging.DEBUG,
-            "practice_no_equal_vlan_check",
-            {"device": device, "targets": targets, "points": no_equal_vlan_points},
+        logger.debug(
+            "Practice no equal vlan check",
+            extra={"device": device, "targets": targets, "points": no_equal_vlan_points}
         )
 
         no_equal_vlan_hints_all = []
@@ -318,17 +304,16 @@ def check_host(requirement, answer, device):
     if all_vlan_conditions_passed:
         points_for_host += no_equal_vlan_points
     # Log VLAN inequality result and points
-    _log(
-        logging.INFO,
-            "practice_no_equal_vlan_result",
-            {
-                "device": device,
-                "targets": no_equal_vlan_targets,
-                "awarded": no_equal_vlan_awarded,
-                "host_total": points_for_host,
-                "hints": no_equal_vlan_hints_all if not all_vlan_conditions_passed else [],
-            },
-        )
+    logger.info(
+        "Practice no equal vlan result",
+        extra={
+            "device": device,
+            "targets": no_equal_vlan_targets,
+            "awarded": no_equal_vlan_awarded,
+            "host_total": points_for_host,
+            "hints": no_equal_vlan_hints_all if not all_vlan_conditions_passed else [],
+        }
+    )
 
     # Checking for the privacy of an IP address
     ip_check = requirement.get("ip_check")
@@ -336,10 +321,9 @@ def check_host(requirement, answer, device):
         points = ip_check.get("points", 1)
         target_node_id = ip_check.get("to")
         # Log IP privacy check input
-        _log(
-            logging.DEBUG,
-            "practice_ip_check",
-            {"device": device, "target": target_node_id, "points": points},
+        logger.debug(
+            "Practice ip check",
+            extra={"device": device, "target": target_node_id, "points": points}
         )
 
         ip_check_hints = []
@@ -410,16 +394,15 @@ def check_host(requirement, answer, device):
                 )
         awarded_ip_check = points_for_host - before
         # Log IP privacy check result and points
-        _log(
-            logging.INFO,
-            "practice_ip_check_result",
-            {
+        logger.info(
+            "Practice ip check result",
+            extra={
                 "device": device,
                 "target": target_node_id,
                 "awarded": awarded_ip_check,
                 "host_total": points_for_host,
                 "hints": ip_check_hints,
-            },
+            }
         )
 
     # Checking whether the default gateway is configured
@@ -428,15 +411,14 @@ def check_host(requirement, answer, device):
         points = required_default_gw.get("points", 1)
         actual_default_gw = host_node["config"].get("default_gw")
         # Log default gateway absence check input
-        _log(
-            logging.DEBUG,
-            "practice_default_gw_check",
-            {
+        logger.debug(
+            "Practice default gw check",
+            extra={
                 "device": device,
                 "expected_absent": True,
                 "actual": actual_default_gw,
                 "points": points,
-            },
+            }
         )
 
         default_gw_hints = []
@@ -453,15 +435,14 @@ def check_host(requirement, answer, device):
             )
         awarded_default_gw = points_for_host - before
         # Log default gateway check result and points
-        _log(
-            logging.INFO,
-            "practice_default_gw_result",
-            {
+        logger.info(
+            "Practice default gw result",
+            extra={
                 "device": device,
                 "awarded": awarded_default_gw,
                 "host_total": points_for_host,
                 "hints": default_gw_hints,
-            },
+            }
         )
 
     # Mask check
@@ -471,15 +452,14 @@ def check_host(requirement, answer, device):
         target = mask_check.get("to")
         expected_mask = mask_check.get("subnet_mask")
         # Log subnet mask check input
-        _log(
-            logging.DEBUG,
-            "practice_mask_check",
-            {
+        logger.debug(
+            "Practice mask check",
+            extra={
                 "device": device,
                 "target": target,
                 "expected_mask": expected_mask,
                 "points": points,
-            },
+            }
         )
 
         result, mask_hints = chs.check_subnet_mask(
@@ -493,16 +473,15 @@ def check_host(requirement, answer, device):
         else:
             hints.extend(mask_hints)
         # Log subnet mask check result and points
-        _log(
-            logging.INFO,
-            "practice_mask_check_result",
-            {
+        logger.info(
+            "Practice mask check result",
+            extra={
                 "device": device,
                 "target": target,
                 "awarded": awarded_mask,
                 "host_total": points_for_host,
                 "hints": mask_hints if not result else [],
-            },
+            }
         )
 
     # Check for a specific IP address
@@ -512,15 +491,14 @@ def check_host(requirement, answer, device):
         expected_ip = ip_equal.get("expected_ip")
         target_node_id = ip_equal.get("to")
         # Log specific IP check input
-        _log(
-            logging.DEBUG,
-            "practice_ip_equal_check",
-            {
+        logger.debug(
+            "Practice ip equal check",
+            extra={
                 "device": device,
                 "target": target_node_id,
                 "expected_ip": expected_ip,
                 "points": points,
-            },
+            }
         )
 
         found = False
@@ -568,17 +546,16 @@ def check_host(requirement, answer, device):
             )
 
         # Log specific IP check result and points
-        _log(
-            logging.INFO,
-            "practice_ip_equal_result",
-            {
+        logger.info(
+            "Practice ip equal result",
+            extra={
                 "device": device,
                 "target": target_node_id,
                 "expected_ip": expected_ip,
                 "awarded": points if found else 0,
                 "host_total": points_for_host,
                 "hints": ip_equal_hints,
-            },
+            }
         )
 
     # abstract_ip_equal
@@ -588,15 +565,14 @@ def check_host(requirement, answer, device):
         points_for_host += points
         hints.extend(abstract_hints)
         # Log abstract IP equality aggregation result
-        _log(
-            logging.INFO,
-            "practice_abstract_ip_equal_result",
-            {
+        logger.info(
+            "Practice abstract ip equal result",
+            extra={
                 "device": device,
                 "awarded": points,
                 "host_total": points_for_host,
                 "hints": abstract_hints,
-            },
+            }
         )
 
     # Check if two hosts are in the same network
@@ -606,22 +582,20 @@ def check_host(requirement, answer, device):
         points_for_host += p
         hints.extend(net_hints)
         # Log same-network check result and points
-        _log(
-            logging.INFO,
-            "practice_in_one_network_result",
-            {
+        logger.info(
+            "Practice in one network result",
+            extra={
                 "device": device,
                 "awarded": p,
                 "host_total": points_for_host,
                 "hints": net_hints,
-            },
+            }
         )
 
     # Log host-level summary: points and hints count
-    _log(
-        logging.INFO,
-        "practice_check_host_done",
-        {"device": device, "host_total": points_for_host, "hints_count": len(hints)},
+    logger.info(
+        "Practice check host done",
+        extra={"device": device, "host_total": points_for_host, "hints_count": len(hints)}
     )
 
     return points_for_host, hints
@@ -631,23 +605,21 @@ def check_task(requirements, answer):
     total_points = 0
     hints = []
     # Log task-level start: counts of requirements/nodes/edges
-    _log(
-        logging.INFO,
-        "practice_check_task_start",
-        {
+    logger.info(
+        "Practice check task start",
+        extra={
             "requirements_count": len(requirements),
             "nodes_count": len(answer.get("nodes", [])),
             "edges_count": len(answer.get("edges", [])),
-        },
+        }
     )
 
     for requirement in requirements:
         for device, requirements in requirement.items():
             # Log device requirement keys before processing
-            _log(
-                logging.DEBUG,
-                "practice_check_task_device",
-                {"device": device, "requirements_keys": list(requirements.keys())},
+            logger.debug(
+                "Practice check task device",
+                extra={"device": device, "requirements_keys": list(requirements.keys())}
             )
             if (
                 device.startswith("host")
@@ -658,15 +630,14 @@ def check_task(requirements, answer):
                 total_points += points
                 hints.extend(device_hints)
                 # Log device result: points and hints
-                _log(
-                    logging.INFO,
-                    "practice_device_result",
-                    {
+                logger.info(
+                    "Practice device result",
+                    extra={
                         "device": device,
                         "awarded": points,
                         "total_points": total_points,
                         "hints": device_hints,
-                    },
+                    }
                 )
             elif device.startswith("network"):
                 points, network_hints = check_network_configuration(
@@ -675,21 +646,19 @@ def check_task(requirements, answer):
                 total_points += points
                 hints.extend(network_hints)
                 # Log network result: points and hints
-                _log(
-                    logging.INFO,
-                    "practice_network_result",
-                    {
+                logger.info(
+                    "Practice network result",
+                    extra={
                         "network": device,
                         "awarded": points,
                         "total_points": total_points,
                         "hints": network_hints,
-                    },
+                    }
                 )
 
     # Log task-level summary: total points and hints count
-    _log(
-        logging.INFO,
-        "practice_check_task_done",
-        {"total_points": total_points, "hints_count": len(hints)},
+    logger.info(
+        "Practice check task done",
+        extra={"total_points": total_points, "hints_count": len(hints)}
     )
     return total_points, hints

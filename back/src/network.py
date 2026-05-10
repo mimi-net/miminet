@@ -10,10 +10,10 @@ from network_topology import MiminetTopology
 from network_schema import Network
 from net_utils.vlan import setup_vlans, clean_bridges
 from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
-from datetime import date, datetime
-
 
 logger = logging.getLogger(__name__)
+logging_config.configure_logging(logger)
+
 class MiminetNetwork(IPNet):
     def __init__(self, topo: MiminetTopology, network: Network):
         super().__init__(topo=topo, use_v6=False, autoSetMacs=True, allocate_IPs=False)
@@ -58,10 +58,8 @@ class MiminetNetwork(IPNet):
             if not os.path.exists(pcap_out_file1):
                 self.__clear_files()
                 logger.error(
-                    "pcap_out_file_not_found", 
+                    "Pcap out file isn't found", 
                     extra={
-                        "timestamp": datetime().utcnow().isoformat() + "Z",
-                        "level": "ERROR",
                         "task_id": getattr(self, "task_id", None),
                         "interface": link1,
                         "expected_file": pcap_out_file1,
@@ -72,10 +70,8 @@ class MiminetNetwork(IPNet):
             if not os.path.exists(pcap_out_file2):
                 self.__clear_files()
                 logger.error(
-                    "pcap_file_not_found",
+                    "Pcap file isn't found",
                     extra={
-                        "timestamp": datetime().utcnow().isoformat() + "Z",
-                        "level": "ERROR",
                         "task_id": getattr(self, "task_id", None),
                         "interface": link2,
                         "expected_file": pcap_out_file2,
@@ -122,10 +118,8 @@ class MiminetNetwork(IPNet):
                 killed_count += 1
         if zombie_count > 0 or killed_count > 0:
             logger.warning(
-                "cleanup_incomplete",
-                extra={
-                    "timestamp": datetime().utcnow().isoformat() + "Z",
-                    "level": "ERROR",    
+                "Cleanup is incomplete",
+                extra={    
                     "killed_processes": killed_count,
                     "zombies_left": zombie_count  
                 }

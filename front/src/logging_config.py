@@ -2,15 +2,17 @@ import json
 import logging
 import os
 from datetime import datetime, timezone
-
 import requests
+from dotenv import load_dotenv
 
+load_dotenv()
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
-UNIFIED_AGENT_URL = os.getenv("UNIFIED_AGENT_URL", "http://158.160.179.91:22132/write")
+UNIFIED_AGENT_URL = os.getenv("UNIFIED_AGENT_URL", "http://localhost")
 HTTP_TIMEOUT = float(os.getenv("LOG_HTTP_TIMEOUT", "1.0"))
+MIMINET_LOG_GROUP = os.getenv("MIMINET_LOG_GROUP", "")
 
-# Keys present on every LogRecord; used to filter extras for JSON payload.
+# Keys present on every LogRecord; used to filter extras for JSON payload
 _RESERVED = {
     "name",
     "msg",
@@ -39,6 +41,18 @@ _RESERVED = {
 class JsonFormatter(logging.Formatter):
     """Render log records as JSON with extras preserved."""
 
+    def convert_level(self, level: str) -> str:
+        """Yandex log groups use different names for log levels, so this function does the conversion."""
+        if level == "NOTSET":
+            return "TRACE"
+        elif level == "WARNING":
+            return "WARN"
+        elif level == "CRITICAL":
+            return "FATAL"
+        else:
+            return level
+
+
     def format(self, record: logging.LogRecord) -> str:
         extras = {
             k: v
@@ -47,7 +61,7 @@ class JsonFormatter(logging.Formatter):
         }
         payload = {
             "message": record.getMessage(),
-            "level": record.levelname,
+            "level": self.convert_level(record.levelname),
             "logger": record.name,
             "timestamp": datetime.fromtimestamp(record.created, tz=timezone.utc).isoformat(),
         }
@@ -69,32 +83,19 @@ class HttpPostHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:
         try:
             payload = self.format(record)
-            headers = {"Content-Type": "application/json"}
+            headers = {"Content-Type": "application/json", "log-group": MIMINET_LOG_GROUP}
             requests.post(self.url, data=payload, headers=headers, timeout=self.timeout)
             print("log requested")
         except Exception:
             self.handleError(record)
 
 
-def _configure_logging() -> None:
-    root = logging.getLogger()
-    root.setLevel(LOG_LEVEL)
-
-    # Prevent duplicate handlers on reload.
-    if any(isinstance(h, HttpPostHandler) for h in root.handlers):
-        return
+def configure_logging(logger: logging.Logger):
+    logger.setLevel(logging.INFO)
 
     formatter = JsonFormatter()
-
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(LOG_LEVEL)
-    console_handler.setFormatter(formatter)
-    root.addHandler(console_handler)
 
     http_handler = HttpPostHandler(UNIFIED_AGENT_URL, timeout=HTTP_TIMEOUT)
     http_handler.setLevel(LOG_LEVEL)
     http_handler.setFormatter(formatter)
-    root.addHandler(http_handler)
-
-
-_configure_logging()
+    logger.addHandler(http_handler)

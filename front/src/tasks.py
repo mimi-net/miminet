@@ -3,7 +3,6 @@ import shutil
 import uuid
 import logging
 import json
-
 import logging_config  
 from sqlalchemy.orm.exc import StaleDataError
 
@@ -23,11 +22,7 @@ from quiz.service.session_question_service import (
 )
 
 logger = logging.getLogger(__name__)
-
-
-def _log(level, event, extra):
-    logger.log(level, event, extra=extra)
-
+logging_config.configure_logging(logger)
 
 @app.task(bind=True, queue="common-results-queue")
 def save_simulate_result(self, animation, pcaps):
@@ -108,10 +103,9 @@ def perform_task_check(session_question_id, data_list):
                 )
 
             except Exception as e:
-                _log(
-                    logging.ERROR,
-                    "check_task_emulation_create_failed",
-                    {"error": str(e), "guid": guid},
+                logger.error(
+                    "Check task emulation create failed",
+                    extra={"error": str(e), "guid": guid}
                 )
 
         answer_on_exam_without_session(networks_to_check, guid)
@@ -139,13 +133,12 @@ def perform_task_check(session_question_id, data_list):
                 )
 
             except Exception as e:
-                _log(
-                    logging.ERROR,
-                    "check_task_emulation_create_failed",
-                    {
+                logger.error(
+                    "Check task emulation create failed",
+                    extra={
                         "error": str(e),
                         "session_question_id": session_question_id,
-                    },
+                    }
                 )
 
         with flask_app.app_context():
@@ -162,10 +155,9 @@ def create_emulation_task(net_schema):
     routing_key = str(uuid.uuid4())
 
     # Log start of sending task to RabbitMQ
-    _log(
-        logging.INFO,
-        "rabbitmq_send_task_start",
-        {"routing_key": routing_key, "exchange": SEND_NETWORK_EXCHANGE.name},
+    logger.info(
+        "Rabbitmq send task start",
+        extra={"routing_key": routing_key, "exchange": SEND_NETWORK_EXCHANGE.name}
     )
 
     try:
@@ -178,23 +170,21 @@ def create_emulation_task(net_schema):
         )
     except Exception as e:
         # Log broker rejection (incl. disk_free_limit)
-        _log(
-            logging.ERROR,
-            "rabbitmq_send_task_failed",
-            {
+        logger.error(
+            "Rabbitmq send task failed",
+            extra={
                 "routing_key": routing_key,
                 "exchange": SEND_NETWORK_EXCHANGE.name,
                 "error": str(e),
                 "hint": "Check RabbitMQ disk_free_limit and broker availability",
-            },
+            }
         )
         raise
 
     # Log successful scheduling of task in queue
-    _log(
-        logging.INFO,
-        "rabbitmq_send_task_scheduled",
-        {"routing_key": routing_key, "task_id": async_obj.id},
+    logger.info(
+        "Rabbitmq send task scheduled",
+        extra={"routing_key": routing_key, "task_id": async_obj.id}
     )
 
     async_res = AsyncResult(id=async_obj.id, app=app)
@@ -204,26 +194,23 @@ def create_emulation_task(net_schema):
             animation, _ = async_res.wait(timeout=120)
 
             # Log successful result receipt from worker
-            _log(
-                logging.INFO,
-                "rabbitmq_receive_result_success",
-                {"routing_key": routing_key, "task_id": async_obj.id},
+            logger.info(
+                "Rabbitmq receive result success",
+                extra={"routing_key": routing_key, "task_id": async_obj.id}
             )
             return animation
     except TimeoutError:
         # Log timeout while waiting for result
-        _log(
-            logging.ERROR,
-            "rabbitmq_receive_result_timeout",
-            {"routing_key": routing_key, "task_id": async_obj.id},
+        logger.error(
+            "Rabbitmq receive result timeout",
+            extra={"routing_key": routing_key, "task_id": async_obj.id}
         )
         # TODO improve error message (add user info)
         raise Exception(f"""Check task failed!\nNetwork Schema: {net_schema}.""")
     except Exception as e:
         # Log any other errors while waiting for result
-        _log(
-            logging.ERROR,
-            "rabbitmq_receive_result_failed",
-            {"routing_key": routing_key, "task_id": async_obj.id, "error": str(e)},
+        logger.error(
+            "Rabbitmq receive result failed",
+            extra={"routing_key": routing_key, "task_id": async_obj.id, "error": str(e)}
         )
         raise

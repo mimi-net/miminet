@@ -7,11 +7,11 @@ from ipmininet.router.config import RouterConfig
 from network_schema import Network, Node, NodeConfig, NodeInterface
 from pkt_parser import is_ipv4_address
 import logging
-import datetime
 import logging_config
 
 logger = logging.getLogger(__name__)
-
+logging_config.configure_logging(logger)
+logger.setLevel(logging.DEBUG)
 
 class MiminetTopology(IPTopo):
     """Class representing topology for miminet networks."""
@@ -133,8 +133,6 @@ class MiminetTopology(IPTopo):
         logger.info(
             "Topology build started",
             extra={
-                "timestamp": datetime().utcnow().isoformat() + "Z",
-                "level": "INFO",
                 "event": "topology_build_start",
                 "nodes_count": len(self.__network.nodes),
                 "edges_count": len(self.__network.edges),
@@ -210,8 +208,6 @@ class MiminetTopology(IPTopo):
             logger.debug(
                 "Link created", 
                 extra={
-                    "timestamp": datetime().utcnow().isoformat() + "Z",
-                    "level": "DEBUG",
                     "event": "link_created",
                     "edge_id": edge_id,
                     "link1": str(link1),
@@ -234,8 +230,6 @@ class MiminetTopology(IPTopo):
             logger.debug(
                 "Network capture setup", 
                 extra={
-                    "timestamp": datetime().utcnow().isoformat() + "Z",
-                    "level": "DEBUG",
                     "event": "capture_setup",
                     "interfaces": interfaces,
                     "links": [str(l) for l in links],
@@ -253,10 +247,8 @@ class MiminetTopology(IPTopo):
                 extra_arguments="not igmp",
             )
         logger.info(
-            "Topology build complete", 
+            "Topology build completed", 
             extra={
-                "timestamp": datetime().utcnow().isoformat() + "Z",
-                "level": "INFO",
                 "event": "topology_build_end",
                 "interfaces": self.__iface_pairs.copy(),
             }
