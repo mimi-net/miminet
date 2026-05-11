@@ -2886,6 +2886,10 @@ const initGrid = function(cy) {
     // Add cy resize listener to handle container resizing specifically
     if (cy) {
         cy.on('resize', resizeAndDrawCanvas);
+        cy.on('viewport', function() {
+            currentGridZoom = cy.zoom();
+            drawGrid();
+        });
     }
 
     // Initialize current zoom from cytoscape
