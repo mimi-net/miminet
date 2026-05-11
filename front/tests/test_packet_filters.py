@@ -1,11 +1,11 @@
-import pytest
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import ElementClickInterceptedException
+from enum import Enum
 
+import pytest
 from conftest import MiminetTester
+from selenium.common.exceptions import ElementClickInterceptedException
+from selenium.webdriver.common.by import By
 from utils.locators import Location
 from utils.networks import MiminetTestNetwork
-from enum import Enum
 
 
 class TestPacketFilters:

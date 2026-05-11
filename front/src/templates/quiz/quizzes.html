@@ -1,8 +1,179 @@
 {% extends "base.html" %}
+{% macro section_word(count) -%}
+    {%- set mod100 = count % 100 -%}
+    {%- set mod10 = count % 10 -%}
+    {%- if 11 <= mod100 <= 14 -%}
+        разделов
+    {%- elif mod10 == 1 -%}
+        раздел
+    {%- elif mod10 in [2, 3, 4] -%}
+        раздела
+    {%- else -%}
+        разделов
+    {%- endif -%}
+{%- endmacro %}
 {% block title %} Тестирование {% endblock %}
 {% block description %}Сетевой тренажер для обучения компьютерным сетям{% endblock %}
 
 {% block content %}
+    <style>
+        .quiz-card {
+            position: relative;
+            border-radius: 24px;
+            min-height: 128px;
+        }
+
+        .quiz-card__body {
+            padding: 28px 32px 28px 96px;
+        }
+
+        .quiz-card__title {
+            margin: 0 0 8px;
+            line-height: 1.25;
+        }
+
+        .quiz-card__header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .quiz-card__aside {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .quiz-card__title a {
+            color: var(--si-heading-color);
+            text-decoration: none;
+        }
+
+        .quiz-card__title a:hover {
+            color: var(--si-primary);
+        }
+
+        .quiz-card__description {
+            margin: 0;
+        }
+
+        .quiz-card__meta {
+            margin: 4px 0 0;
+            color: var(--si-body-color);
+            font-size: 14px;
+            line-height: 1.4;
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        .quiz-card__organization-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: flex-end;
+            max-width: 168px;
+        }
+
+        .quiz-card__organization-link img {
+            display: block;
+            max-width: 100%;
+            max-height: 56px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .quiz-card__progress {
+            position: absolute;
+            top: 50%;
+            left: 24px;
+            width: 40px;
+            height: 118px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            transform: translateY(-50%);
+        }
+
+        .quiz-card__progress-badge {
+            min-width: 54px;
+            height: 34px;
+            padding: 0 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #58c776 0%, #22b355 100%);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            box-shadow: 0 12px 24px rgba(34, 179, 85, 0.22);
+        }
+
+        .quiz-card__progress-track {
+            width: 100%;
+            flex: 1;
+            border-radius: 999px;
+            overflow: hidden;
+            background: #e3f4e8;
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .quiz-card__progress-fill {
+            width: 100%;
+            height: var(--quiz-progress);
+            border-radius: 0;
+            background: linear-gradient(180deg, #34ce68 0%, #1fb856 100%);
+        }
+
+        @media (max-width: 575.98px) {
+            .quiz-card__body {
+                padding: 24px 20px 24px 84px;
+            }
+
+            .quiz-card__progress {
+                left: 20px;
+                width: 36px;
+                height: 108px;
+            }
+
+            .quiz-card__title {
+                font-size: 1.35rem;
+            }
+
+            .quiz-card__header {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .quiz-card__aside {
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .quiz-card__progress-badge {
+                min-width: 48px;
+                height: 30px;
+                padding: 0 12px;
+                font-size: 12px;
+            }
+
+            .quiz-card__meta {
+                margin-top: 0;
+                white-space: normal;
+                text-align: left;
+            }
+
+            .quiz-card__organization-link {
+                justify-content: flex-start;
+                max-width: 144px;
+            }
+        }
+    </style>
 
     <section class="container py-5 my-lg-5">
         <div class="row" style="align-content: center; justify-content: space-between">
@@ -14,40 +185,52 @@
             </div>#}
         </div>
 
-        <!-- Item -->
         {% for quiz in quizzes %}
-            <article class="card border-0 shadow-sm overflow-hidden mb-4">
-                <div class="row g-0" style="align-items: baseline">
-                    <div class="col-sm-8">
-                        <div class="card-body" style="margin-left: 20px;">
-                            <h4 class="h4" style="margin-top: 20px;margin-bottom: 4px">
-                                <a href="{{ url_for('get_sections_by_test_endpoint', test_id=quiz.test_id) }}">{{ quiz.test_name }}</a>
-                            </h4>
-                            {% if quiz.description %}
-                                <p style="margin-bottom: 4px">{{ quiz.description }}</p>
-                            {% else %}
-                                <p style="margin-bottom: 20px;"></p> 
-                            {% endif %}                        
+            <article class="card border-0 shadow-sm overflow-hidden mb-4 quiz-card"
+                     style="--quiz-progress: {{ quiz.progress_percent }}%;">
+                <div class="quiz-card__progress"
+                     title="{{ quiz.solved_question_count }}/{{ quiz.total_question_count }}">
+                    <span class="quiz-card__progress-badge">{{ quiz.progress_percent }}%</span>
+                    <span class="quiz-card__progress-track"
+                          role="progressbar"
+                          aria-valuemin="0"
+                          aria-valuemax="100"
+                          aria-valuenow="{{ quiz.progress_percent }}"
+                          aria-label="{{ quiz.solved_question_count }}/{{ quiz.total_question_count }}">
+                        <span class="quiz-card__progress-fill"></span>
+                    </span>
+                </div>
+
+                <div class="card-body quiz-card__body">
+                    <div class="quiz-card__header">
+                        <h4 class="h4 quiz-card__title">
+                            <a href="{{ organization_url_for('/quiz/section/test/all', org_id=quiz.organization_id, test_id=quiz.test_id) }}">{{ quiz.test_name }}</a>
+                        </h4>
+                        <div class="quiz-card__aside">
+                            <p class="quiz-card__meta">{{ quiz.section_count }} {{ section_word(quiz.section_count) }}</p>
+                            {% if quiz.organization_id and quiz.organization_logo_uri and quiz.organization_domain %}
+                                <a class="quiz-card__organization-link"
+                                    href="{{ organization_url_for('/', org_id=quiz.organization_id) }}"
+                                    aria-label="{{ quiz.organization_name or quiz.test_name }}">
+                                    <img src="{{ url_for('static', filename='images/logo_organizations/' ~ quiz.organization_logo_uri) }}"
+                                         alt="{{ quiz.organization_name or quiz.test_name }}">
+                                </a>
+                            {% elif quiz.organization_id and quiz.organization_logo_uri %}
+                                <span class="quiz-card__organization-link">
+                                    <img src="{{ url_for('static', filename='images/logo_organizations/' ~ quiz.organization_logo_uri) }}"
+                                         alt="{{ quiz.organization_name or quiz.test_name }}">
+                                </span>
+                            {% endif %}
                         </div>
                     </div>
-                    <div class="col-sm-4">
-                        <div class="card-body">
-                            <p id="{{ quiz.test_id }}"
-                               style="text-align: right; margin-right: 40px; margin-top: 20px;"></p>
-                        </div>
-                    </div>
+                    {% if quiz.description %}
+                        <p class="quiz-card__description">{{ quiz.description }}</p>
+                    {% else %}
+                        <p class="quiz-card__description">&nbsp;</p>
+                    {% endif %}
                 </div>
             </article>
-
-            <script>
-                function morph(int, array) {
-                    return (array = array || ['раздел', 'раздела', 'разделов']) && array[(int % 100 > 4 && int % 100 < 20) ? 2 : [2, 0, 1, 1, 1, 2][(int % 10 < 5) ? int % 10 : 5]];
-                }
-
-                document.getElementById('{{quiz.test_id}}').innerHTML = {{ quiz.section_count }} + ' ' + morph({{ quiz.section_count}});
-            </script>
         {% endfor %}
 
     </section>
 {% endblock %}
-

@@ -1,6 +1,7 @@
 import os
 import uuid
-from flask import Blueprint, request, jsonify, send_from_directory
+
+from flask import Blueprint, jsonify, request, send_from_directory
 from PIL import Image
 
 UPLOAD_FOLDER = "static/quiz_images"

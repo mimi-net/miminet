@@ -1,11 +1,12 @@
-from selenium.webdriver.common.by import By
-from utils.locators import Location
-from conftest import HOME_PAGE, MiminetTester
 import random
-from typing import Optional, Type, Tuple
-from selenium.common.exceptions import NoSuchElementException
 from json import dumps as json_dumps
+from typing import Optional, Tuple, Type
+
+from conftest import HOME_PAGE, MiminetTester
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
+from utils.locators import Location
 
 
 class NodeType:

@@ -1,7 +1,6 @@
 from ipmininet.ipnet import IPNet
-from ipmininet.ipswitch import IPSwitch
 from ipmininet.ipovs_switch import IPOVSSwitch
-
+from ipmininet.ipswitch import IPSwitch
 from network_schema import Node, NodeInterface
 
 

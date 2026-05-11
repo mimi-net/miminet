@@ -1,5 +1,252 @@
 {% extends 'admin/master.html' %}
 
 {% block body %}
+<style>
+    .admin-results {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 32px 18px 48px;
+        color: #202733;
+    }
 
+    .admin-results__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 28px;
+    }
+
+    .admin-results__title {
+        margin: 0;
+        font-size: 36px;
+        font-weight: 700;
+        line-height: 1.1;
+        color: #18202c;
+    }
+
+    .admin-results__subtitle {
+        margin: 10px 0 0;
+        max-width: 700px;
+        color: #6b7280;
+        font-size: 15px;
+        line-height: 1.5;
+    }
+
+    .admin-results__stats-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 0 18px;
+        border: 1px solid #d6dce5;
+        border-radius: 10px;
+        background: #ffffff;
+        color: #364152;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+        cursor: pointer;
+    }
+
+    .admin-results__stats-link:hover,
+    .admin-results__stats-link:focus {
+        color: #364152;
+        text-decoration: none;
+    }
+
+    .admin-results__list {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .admin-results__card {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 24px;
+        padding: 26px 28px;
+        border-radius: 18px;
+        border: 1px solid #edf1f6;
+        background: #ffffff;
+        box-shadow: 0 16px 38px rgba(15, 23, 42, 0.07);
+    }
+
+    .admin-results__main {
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    .admin-results__badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+
+    .admin-results__badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 12px;
+        border-radius: 999px;
+        background: #eef3ff;
+        color: #3851a6;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+    }
+
+    .admin-results__badge--muted {
+        background: #f4f6f8;
+        color: #5b6676;
+    }
+
+    .admin-results__name {
+        margin: 0 0 10px;
+        font-size: 30px;
+        font-weight: 700;
+        line-height: 1.18;
+        color: #18202c;
+    }
+
+    .admin-results__description {
+        margin: 0;
+        color: #667085;
+        font-size: 15px;
+        line-height: 1.6;
+        max-width: 760px;
+    }
+
+    .admin-results__sections {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+    }
+
+    .admin-results__section-pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 32px;
+        padding: 0 14px;
+        border-radius: 999px;
+        background: #f6f8fb;
+        color: #415062;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .admin-results__footer {
+        margin-top: 18px;
+        color: #667085;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .admin-results__meta {
+        min-width: 220px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+        padding-top: 6px;
+    }
+
+    .admin-results__meta-item {
+        color: #5f6b7a;
+        font-size: 16px;
+        font-weight: 600;
+        text-align: right;
+    }
+
+    .admin-results__empty {
+        padding: 42px 28px;
+        border-radius: 18px;
+        border: 1px dashed #d9e1ea;
+        background: #fbfcfe;
+        color: #667085;
+        font-size: 16px;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 900px) {
+        .admin-results__header,
+        .admin-results__card {
+            flex-direction: column;
+        }
+
+        .admin-results__stats-link {
+            width: 100%;
+        }
+
+        .admin-results__meta {
+            min-width: 0;
+            width: 100%;
+            align-items: flex-start;
+            padding-top: 0;
+        }
+
+        .admin-results__meta-item {
+            text-align: left;
+        }
+    }
+</style>
+
+<div class="admin-results">
+    <div class="admin-results__header">
+        <div>
+            <h1 class="admin-results__title">Мои тесты</h1>
+            <p class="admin-results__subtitle">
+                Здесь собраны созданные вами тесты. Для каждого теста показываем число разделов,
+                заданий и количество завершенных прохождений.
+            </p>
+        </div>
+        <a href="{{ statistics_url }}" class="admin-results__stats-link">Статистика</a>
+    </div>
+
+    {% if test_cards %}
+        <div class="admin-results__list">
+            {% for test in test_cards %}
+                <article class="admin-results__card">
+                    <div class="admin-results__main">
+                        <div class="admin-results__badges">
+                            <span class="admin-results__badge">{{ test.status_label }}</span>
+                            <span class="admin-results__badge admin-results__badge--muted">{{ test.retakeable_label }}</span>
+                        </div>
+
+                        <h2 class="admin-results__name">{{ test.name }}</h2>
+                        <p class="admin-results__description">
+                            {{ test.description or 'Описание пока не добавлено.' }}
+                        </p>
+
+                        {% if test.section_names %}
+                            <div class="admin-results__sections">
+                                {% for section_name in test.section_names %}
+                                    <span class="admin-results__section-pill">{{ section_name }}</span>
+                                {% endfor %}
+                                {% if test.hidden_section_count %}
+                                    <span class="admin-results__section-pill">+{{ test.hidden_section_count }}</span>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+                        <div class="admin-results__footer">{{ test.attempts_label }}</div>
+                    </div>
+
+                    <div class="admin-results__meta">
+                        <div class="admin-results__meta-item">{{ test.section_label }}</div>
+                        <div class="admin-results__meta-item">{{ test.question_label }}</div>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="admin-results__empty">
+            Пока нет созданных тестов. Когда появятся тесты и разделы, здесь будет их краткая сводка.
+        </div>
+    {% endif %}
+</div>
 {% endblock %}

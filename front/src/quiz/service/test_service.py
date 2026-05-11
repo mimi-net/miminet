@@ -1,6 +1,18 @@
-from miminet_model import db, User
+from miminet_model import User, db
+from typing import Any, cast
+
 from quiz.entity.entity import Test
 from quiz.util.dto import to_test_dto_list
+from sqlalchemy.orm import joinedload, selectinload
+
+TEST_LIST_RELATIONS = (
+    joinedload(cast(Any, Test.created_by_user)),
+    selectinload(cast(Any, Test.sections)),
+)
+
+
+def _get_tests_with_relations(**filters):
+    return Test.query.options(*TEST_LIST_RELATIONS).filter_by(**filters).all()
 
 
 def create_test(name: str, description: str, user: User, is_retakeable: bool):
@@ -25,28 +37,28 @@ def get_test(test_id: str):
 
 
 def get_tests_by_owner(user: User):
-    tests = Test.query.filter_by(created_by_id=user.id, is_deleted=False).all()
+    tests = _get_tests_with_relations(created_by_id=user.id, is_deleted=False)
     test_dtos = to_test_dto_list(tests)
 
     return test_dtos
 
 
 def get_retakeable_tests():
-    tests = Test.query.filter_by(is_deleted=False, is_retakeable=True).all()
+    tests = _get_tests_with_relations(is_deleted=False, is_retakeable=True)
     test_dtos = to_test_dto_list(tests)
 
     return test_dtos
 
 
 def get_all_tests():
-    tests = Test.query.filter_by(is_deleted=False, is_ready=True).all()
+    tests = _get_tests_with_relations(is_deleted=False, is_ready=True)
     test_dtos = to_test_dto_list(tests)
 
     return test_dtos
 
 
 def get_deleted_tests_by_owner(user: User):
-    tests = Test.query.filter_by(created_by_id=user.id, is_deleted=True).all()
+    tests = _get_tests_with_relations(created_by_id=user.id, is_deleted=True)
     test_dtos = to_test_dto_list(tests)
 
     return test_dtos
@@ -84,13 +96,14 @@ def edit_test(
 
 def get_tests_by_author_name(author_name: str):
     tests = (
-        db.session.query(User, Test)
+        Test.query.options(*TEST_LIST_RELATIONS)
+        .join(User, User.id == Test.created_by_id)
         .filter(User.nick == author_name)
-        .filter(User.id == Test.created_by_id)
         .filter(Test.is_deleted.is_(False))
         .filter(Test.is_ready.is_(True))
+        .all()
     )
-    test_dtos = to_test_dto_list(tests)  # type: ignore
+    test_dtos = to_test_dto_list(tests)
 
     return test_dtos
 

@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Профиль пользователя{% endblock %}
+
+{% block content %}
+<div class="container py-5 mt-5">
+  {% set vk_link = 'https://vk.com/id' ~ user.vk_id if user.vk_id else '' %}
+  {% set google_link = 'https://myaccount.google.com/' if user.google_id else '' %}
+  {% set yandex_link = 'https://id.yandex.ru/' if user.yandex_id else '' %}
+  {% set tg_link = 'tg://user?id=' ~ user.tg_id if user.tg_id else '' %}
+
+  <div class="row g-4 align-items-start">
+    <div class="col-12 col-lg-3">
+      <div class="text-center pe-lg-3">
+        <div style="width: 180px; height: 180px; border-radius: 50%; overflow: hidden; margin: 0 auto 1rem;">
+          <img
+            src="{{ url_for('static', filename='avatar/' + user.avatar_uri) }}"
+            alt="Аватар пользователя"
+            style="width: 100%; height: 100%; object-fit: cover;"
+          >
+        </div>
+
+        <h2 class="h4 mb-0">
+          {{ first_name }}{% if last_name %} {{ last_name }}{% endif %}
+        </h2>
+        <p class="text-muted small mt-2 mb-0">Режим просмотра профиля</p>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-8">
+      <div class="ps-lg-4 border-start">
+        <h1 class="mb-4">Профиль пользователя</h1>
+
+        <div class="pb-4 border-bottom">
+          <h5 class="text-primary mb-3">Основная информация</h5>
+
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <label class="form-label">Имя</label>
+              <input type="text" class="form-control form-control-lg" value="{{ first_name }}" readonly>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label">Фамилия</label>
+              <input type="text" class="form-control form-control-lg" value="{{ last_name }}" readonly>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4">
+          <h5 class="text-primary mb-3">Контакты</h5>
+
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                  <div class="d-flex align-items-center gap-3">
+                    <span class="btn btn-secondary btn-vk btn-icon flex-shrink-0" style="width: 52px; height: 52px;" aria-hidden="true">
+                      <i class="bx bxl-vk"></i>
+                    </span>
+                    <div class="w-100">
+                      {% if vk_link %}
+                        <a href="{{ vk_link }}" target="_blank" rel="noopener" class="form-control text-decoration-none">{{ vk_link }}</a>
+                      {% else %}
+                        <input class="form-control" readonly value="VK не привязан">
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                  <div class="d-flex align-items-center gap-3">
+                    <span class="btn btn-secondary btn-google btn-icon flex-shrink-0" style="width: 52px; height: 52px;" aria-hidden="true">
+                      <i class="bx bxl-google"></i>
+                    </span>
+                    <div class="w-100">
+                      {% if google_link %}
+                        <a href="{{ google_link }}" target="_blank" rel="noopener" class="form-control text-decoration-none">{{ google_link }}</a>
+                      {% else %}
+                        <input class="form-control" readonly value="Google не привязан">
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                  <div class="d-flex align-items-center gap-3">
+                    <span class="btn btn-secondary btn-yandex btn-icon flex-shrink-0" style="width: 52px; height: 52px;" aria-hidden="true">
+                      <img src="{{ url_for('static', filename='images/yandex_icon.png') }}" style="width: 24px; height: 24px;" alt="Yandex">
+                    </span>
+                    <div class="w-100">
+                      {% if yandex_link %}
+                        <a href="{{ yandex_link }}" target="_blank" rel="noopener" class="form-control text-decoration-none">{{ yandex_link }}</a>
+                      {% else %}
+                        <input class="form-control" readonly value="Yandex не привязан">
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                  <div class="d-flex align-items-center gap-3">
+                    <span class="btn btn-secondary btn-telegram btn-icon flex-shrink-0" style="width: 52px; height: 52px;" aria-hidden="true">
+                      <i class="bx bxl-telegram"></i>
+                    </span>
+                    <div class="w-100">
+                      {% if tg_link %}
+                        <a href="{{ tg_link }}" class="form-control text-decoration-none">{{ tg_link }}</a>
+                      {% else %}
+                        <input class="form-control" readonly value="Telegram не привязан">
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

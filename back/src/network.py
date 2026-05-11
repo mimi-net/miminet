@@ -1,15 +1,14 @@
 import os
 import time
-from psutil import Process
+
+import psutil
 from ipmininet.ipnet import IPNet
 from mininet.log import info
-import psutil
-
-from network_topology import MiminetTopology
-from network_schema import Network
-
-from net_utils.vlan import setup_vlans, clean_bridges
+from net_utils.vlan import clean_bridges, setup_vlans
 from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
+from network_schema import Network
+from network_topology import MiminetTopology
+from psutil import Process
 
 
 class MiminetNetwork(IPNet):
@@ -32,14 +31,20 @@ class MiminetNetwork(IPNet):
         self.__check_files()
 
     def stop(self):
+        info("[network.stop] called, sleeping 2s before teardown\n")
         # Wait before stop
         time.sleep(2)
 
         clean_bridges(self)
         teardown_vtep_bridges(self, self.__network_schema.nodes)
 
+        info("[network.stop] calling __clean_services\n")
         self.__clean_services()
+        info(
+            "[network.stop] calling super().stop() — this will send SIGINT to mimidump\n"
+        )
         super().stop()
+        info("[network.stop] done\n")
 
     def __check_files(self):
         """Checking for the existence of pcap files."""
