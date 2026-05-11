@@ -126,6 +126,25 @@ def build_initial_messages(
     sha = os.environ.get("GITHUB_SHA", "unknown")
     ref_name = os.environ.get("GITHUB_REF_NAME", "unknown")
     analysis_date = dt.datetime.now(ZoneInfo("Europe/Moscow")).strftime("%d:%m:%Y")
+    report_scope_rule = (
+        "In pull request review mode, report only findings introduced by the "
+        "changed logic in this pull request. Do not report pre-existing issues "
+        "that merely happen to live in changed files. If a bug already existed "
+        "before the pull request and the pull request did not introduce or "
+        "worsen it, omit it."
+        if pull_request_mode
+        else "In repository review mode, report concrete bugs, vulnerabilities, "
+        "and performance problems from the inspected repository scope."
+    )
+    no_findings_rule = (
+        "If there are no material findings, submit exactly one final_report "
+        "tool call stating that no concrete PR-introduced bugs, vulnerabilities, "
+        "or performance problems were found."
+        if pull_request_mode
+        else "If there are no material findings, submit exactly one final_report "
+        "tool call stating that no concrete bugs, vulnerabilities, or "
+        "performance problems were found."
+    )
 
     system_prompt = textwrap.dedent(
         f"""
@@ -142,6 +161,7 @@ def build_initial_messages(
         - If the review mode is pull request, analyze all changes introduced by
           the pull request, using the changed files and patch excerpts as the
           primary context.
+        - {report_scope_rule}
         - In pull request review mode, use `read_file` to inspect the full
           current version of changed files whenever the patch excerpt is not
           enough to judge correctness.
@@ -156,18 +176,23 @@ def build_initial_messages(
         - Use tools selectively. Avoid re-reading the same content unless necessary.
         - Prefer `search_text` before reading many files.
         - Shell commands are not available.
-        - When you have enough evidence, return `final_report`.
+        - Submit findings with the `final_report` tool. End the review only
+          with the `end_review` tool.
+        - The runner may eventually close repository inspection tools. If that
+          happens, stop calling `list_dir`, `read_file`, and `search_text`.
+          Use `final_report` as many times as needed, then finish with `end_review`.
 
         Final report requirements:
         - Write the report in Russian Markdown.
         - Report only concrete bugs, vulnerabilities, and performance problems.
         - Do not create separate findings for generic advice or style issues.
-        - Each confirmed problem must be a separate finding block.
+        - Each confirmed problem must be submitted through a separate
+          `final_report` tool call.
         - Assign exactly one tag to each finding:
           `Alert` for high-impact or exploitable problems,
           `Warning` for medium-impact problems,
           `Notice` for low-impact but actionable problems.
-        - Use this exact finding structure:
+        - The Markdown passed to `final_report` must use this exact structure:
 
           ### [Alert|Warning|Notice] <Название>
           Анализ был проведён DD:MM:YYYY.
@@ -194,8 +219,7 @@ def build_initial_messages(
           ...
 
         - Replace DD:MM:YYYY with the provided Analysis date exactly.
-        - If there are no material findings, say explicitly that no concrete
-          bugs, vulnerabilities, or performance problems were found.
+        - {no_findings_rule}
         """
     ).strip()
 
@@ -263,17 +287,23 @@ def build_initial_messages(
         - read_file(path, start_line=1, max_lines=200)
         - search_text(pattern, path=".", file_glob="*", case_sensitive=false,
           regex=false, limit=80)
+        - final_report(report_markdown) to submit one complete Markdown report
+          for one finding
+        - end_review() to finish the review after all reports are submitted
 
         Tool call examples:
         - {{"action":"tool_call","tool_name":"list_dir","arguments":{{"path":"back","recursive":false,"limit":50}}}}
         - {{"action":"tool_call","tool_name":"read_file","arguments":{{"path":"front/src/app.py","start_line":1,"max_lines":120}}}}
         - {{"action":"tool_call","tool_name":"search_text","arguments":{{"pattern":"TODO","path":"back","file_glob":"*.py","case_sensitive":false,"regex":false,"limit":20}}}}
+        - {{"action":"tool_call","tool_name":"final_report","arguments":{{"report_markdown":"### [Warning] ..."}}}}
+        - {{"action":"tool_call","tool_name":"end_review","arguments":{{}}}}
         - Do not add extra keys like `tool` inside `arguments`.
 
         Output protocol:
         - Return a JSON object matching the provided schema.
-        - Use tool_call JSON while investigating.
-        - Use final_report JSON when the review is complete.
+        - Always use tool_call JSON.
+        - Use `final_report` one or more times to submit findings.
+        - Call `end_review` only after all final_report tool calls are done.
         """
     ).strip()
 

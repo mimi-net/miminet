@@ -14,6 +14,49 @@ from tools.warden.schema import validate_action
 API_URL = "https://ai.api.cloud.yandex.net/v1"
 
 
+def normalize_action(action: dict[str, Any]) -> dict[str, Any]:
+    if "action" in action:
+        if action.get("action") == "final_report":
+            if "reports" in action and isinstance(action["reports"], list):
+                return {
+                    "action": "tool_call",
+                    "tool_name": "final_report",
+                    "arguments": {"reports": action["reports"]},
+                }
+            report_markdown = action.get("report_markdown")
+            if isinstance(report_markdown, str) and report_markdown.strip():
+                return {
+                    "action": "tool_call",
+                    "tool_name": "final_report",
+                    "arguments": {"report_markdown": report_markdown},
+                }
+        if action.get("action") == "end_review":
+            return {
+                "action": "tool_call",
+                "tool_name": "end_review",
+                "arguments": {},
+            }
+        return action
+
+    reports = action.get("reports")
+    if isinstance(reports, list) and reports:
+        return {
+            "action": "tool_call",
+            "tool_name": "final_report",
+            "arguments": {"reports": reports},
+        }
+
+    report_markdown = action.get("report_markdown")
+    if isinstance(report_markdown, str) and report_markdown.strip():
+        return {
+            "action": "tool_call",
+            "tool_name": "final_report",
+            "arguments": {"report_markdown": report_markdown},
+        }
+
+    return action
+
+
 class YandexClient:
     def __init__(
         self,
@@ -83,7 +126,7 @@ class YandexClient:
             raise ReviewError("Yandex AI response does not contain a text completion")
 
         try:
-            action = json.loads(text)
+            action = normalize_action(json.loads(text))
         except json.JSONDecodeError as exc:
             raise ReviewError(f"model returned invalid JSON: {text}") from exc
 

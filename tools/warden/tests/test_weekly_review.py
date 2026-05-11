@@ -19,6 +19,7 @@ from tools.warden.prompts import pick_baseline_files
 from tools.warden.paths import is_allowed_by_scope
 from tools.warden.recent_activity import gather_pull_request_activity
 from tools.warden.recent_activity import gather_recent_activity
+from tools.warden.runner import run_review
 from tools.warden.schema import build_json_schema
 from tools.warden.agent_tools import ReviewTools
 
@@ -144,6 +145,8 @@ class PromptFormatTest(unittest.TestCase):
         self.assertIn("Как проверить", prompt_text)
         self.assertIn("Возможное направление исправления", prompt_text)
         self.assertIn("Дополнительный контекст", prompt_text)
+        self.assertIn('"tool_name":"final_report"', prompt_text)
+        self.assertIn('"tool_name":"end_review"', prompt_text)
 
     def test_initial_prompt_switches_to_baseline_scan_mode(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -211,6 +214,7 @@ class PromptFormatTest(unittest.TestCase):
         self.assertIn("Patch excerpts", prompt_text)
         self.assertIn("Add guard for edge case", prompt_text)
         self.assertIn("src/main.py", prompt_text)
+        self.assertIn("introduced by the changed logic in this pull request", prompt_text)
 
 
 class BaselineFilesTest(unittest.TestCase):
@@ -356,19 +360,11 @@ class CliReviewModeTest(unittest.TestCase):
 
 
 class SchemaFormatTest(unittest.TestCase):
-    def test_json_schema_uses_required_variants(self) -> None:
+    def test_json_schema_supports_finalization_tools(self) -> None:
         schema = build_json_schema()["schema"]
-        variants = schema["oneOf"]
-
-        self.assertEqual(len(variants), 2)
-        self.assertEqual(
-            variants[0]["required"],
-            ["action", "tool_name", "arguments"],
-        )
-        self.assertEqual(
-            variants[1]["required"],
-            ["action", "report_markdown"],
-        )
+        self.assertEqual(schema["required"], ["action", "tool_name", "arguments"])
+        self.assertIn("final_report", schema["properties"]["tool_name"]["enum"])
+        self.assertIn("end_review", schema["properties"]["tool_name"]["enum"])
 
 
 @unittest.skipIf(YandexClient is None, "openai is not installed")
@@ -378,7 +374,7 @@ class YandexClientTest(unittest.TestCase):
         self, openai_client: mock.Mock
     ) -> None:
         response = mock.Mock()
-        response.output_text = '{"action":"final_report","report_markdown":"ok"}'
+        response.output_text = '{"action":"final_report","reports":["ok"]}'
         response.status = "completed"
         response.id = "resp_123"
         response.usage = mock.Mock()
@@ -393,11 +389,122 @@ class YandexClientTest(unittest.TestCase):
         )
         result = client.complete([{"role": "user", "text": "test"}])
 
-        self.assertEqual(result["action"]["action"], "final_report")
+        self.assertEqual(result["action"]["action"], "tool_call")
+        self.assertEqual(result["action"]["tool_name"], "final_report")
+        self.assertEqual(result["action"]["arguments"]["reports"], ["ok"])
         self.assertEqual(
             result["raw_response"]["alternatives"][0]["status"],
             "completed",
         )
+
+    @mock.patch("tools.warden.yandex_client.OpenAI")
+    def test_complete_normalizes_legacy_single_report_payload(
+        self, openai_client: mock.Mock
+    ) -> None:
+        response = mock.Mock()
+        response.output_text = '{"report_markdown":"ok"}'
+        response.status = "completed"
+        response.id = "resp_124"
+        response.usage = mock.Mock()
+        response.usage.model_dump.return_value = {"total_tokens": 1}
+        openai_client.return_value.responses.create.return_value = response
+
+        client = YandexClient(
+            api_key="key",
+            folder_id="folder",
+            model_uri="gpt://folder/yandexgpt-lite",
+            config=make_config(),
+        )
+        result = client.complete([{"role": "user", "text": "test"}])
+
+        self.assertEqual(result["action"]["action"], "tool_call")
+        self.assertEqual(result["action"]["tool_name"], "final_report")
+        self.assertEqual(result["action"]["arguments"]["report_markdown"], "ok")
+
+
+class RunnerProtocolTest(unittest.TestCase):
+    def test_run_review_collects_multiple_reports_and_finishes_with_end_review(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = pathlib.Path(temp_dir)
+            output_dir = repo_root / "out"
+            (repo_root / "src").mkdir()
+            (repo_root / "src" / "main.py").write_text("print('ok')\n", encoding="utf-8")
+            config = make_config()
+
+            completions = [
+                {
+                    "action": {
+                        "action": "tool_call",
+                        "tool_name": "final_report",
+                        "arguments": {
+                            "report_markdown": "### [Warning] First\nАнализ был проведён 11:05:2026."
+                        },
+                    },
+                    "raw_response": {
+                        "usage": None,
+                        "alternatives": [{"status": "completed"}],
+                    },
+                },
+                {
+                    "action": {
+                        "action": "tool_call",
+                        "tool_name": "final_report",
+                        "arguments": {
+                            "report_markdown": "### [Notice] Second\nАнализ был проведён 11:05:2026."
+                        },
+                    },
+                    "raw_response": {
+                        "usage": None,
+                        "alternatives": [{"status": "completed"}],
+                    },
+                },
+                {
+                    "action": {
+                        "action": "tool_call",
+                        "tool_name": "end_review",
+                        "arguments": {},
+                    },
+                    "raw_response": {
+                        "usage": None,
+                        "alternatives": [{"status": "completed"}],
+                    },
+                },
+            ]
+
+            class FakeClient:
+                def __init__(self, *args, **kwargs) -> None:
+                    self._completions = list(completions)
+
+                def complete(self, messages) -> dict[str, object]:
+                    return self._completions.pop(0)
+
+            with mock.patch(
+                "tools.warden.runner.gather_recent_activity",
+                return_value={
+                    "mode": "repository",
+                    "since": "2026-05-01",
+                    "commits": [],
+                    "files": ["src/main.py"],
+                },
+            ), mock.patch("tools.warden.runner.build_client", return_value=FakeClient()):
+                result = run_review(
+                    repo_root=repo_root,
+                    output_dir=output_dir,
+                    config=config,
+                    api_key="key",
+                    folder_id="folder",
+                )
+
+            session = json.loads(pathlib.Path(result["session_path"]).read_text())
+            report_text = pathlib.Path(result["report_path"]).read_text()
+
+            self.assertEqual(len(session["final_reports"]), 2)
+            self.assertTrue(session["finalized_with_end_review"])
+            self.assertIn("### [Warning] First", report_text)
+            self.assertIn("### [Notice] Second", report_text)
+            self.assertIn("\n\n---\n\n", report_text)
 
 
 if __name__ == "__main__":

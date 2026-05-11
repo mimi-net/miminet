@@ -6,48 +6,61 @@ from tools.warden.exceptions import ReviewError
 def build_json_schema() -> dict[str, Any]:
     return {
         "schema": {
-            "oneOf": [
-                {
-                    "type": "object",
-                    "properties": {
-                        "action": {"type": "string", "enum": ["tool_call"]},
-                        "tool_name": {
-                            "type": "string",
-                            "enum": ["list_dir", "read_file", "search_text"],
-                        },
-                        "arguments": {"type": "object"},
-                    },
-                    "required": ["action", "tool_name", "arguments"],
-                    "additionalProperties": False,
+            "type": "object",
+            "properties": {
+                "action": {"type": "string", "enum": ["tool_call"]},
+                "tool_name": {
+                    "type": "string",
+                    "enum": [
+                        "list_dir",
+                        "read_file",
+                        "search_text",
+                        "final_report",
+                        "end_review",
+                    ],
                 },
-                {
-                    "type": "object",
-                    "properties": {
-                        "action": {"type": "string", "enum": ["final_report"]},
-                        "report_markdown": {"type": "string"},
-                    },
-                    "required": ["action", "report_markdown"],
-                    "additionalProperties": False,
-                },
-            ],
+                "arguments": {"type": "object"},
+            },
+            "required": ["action", "tool_name", "arguments"],
+            "additionalProperties": False,
         }
     }
 
 
 def validate_action(action: dict[str, Any]) -> dict[str, Any]:
     action_type = action.get("action")
-    if action_type not in {"tool_call", "final_report"}:
+    if action_type != "tool_call":
         raise ReviewError("model response does not contain a valid action")
 
-    if action_type == "tool_call":
-        if not isinstance(action.get("tool_name"), str):
-            raise ReviewError("tool_call action is missing tool_name")
-        if not isinstance(action.get("arguments"), dict):
-            raise ReviewError("tool_call action is missing arguments object")
+    tool_name = action.get("tool_name")
+    if not isinstance(tool_name, str):
+        raise ReviewError("tool_call action is missing tool_name")
 
-    if action_type == "final_report":
-        report = action.get("report_markdown")
-        if not isinstance(report, str) or not report.strip():
-            raise ReviewError("final_report action is missing report_markdown")
+    arguments = action.get("arguments")
+    if not isinstance(arguments, dict):
+        raise ReviewError("tool_call action is missing arguments object")
+
+    if tool_name == "final_report":
+        reports = arguments.get("reports")
+        report_markdown = arguments.get("report_markdown")
+
+        if isinstance(report_markdown, str) and report_markdown.strip():
+            return action
+
+        if isinstance(reports, list) and reports:
+            if not all(
+                isinstance(report, str) and report.strip() for report in reports
+            ):
+                raise ReviewError(
+                    "final_report reports must contain non-empty strings"
+                )
+            return action
+
+        raise ReviewError(
+            "final_report tool_call requires report_markdown or reports"
+        )
+
+    if tool_name == "end_review" and arguments:
+        raise ReviewError("end_review tool_call must not contain arguments")
 
     return action
