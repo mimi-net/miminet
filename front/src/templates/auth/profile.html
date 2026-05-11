@@ -1,10 +1,267 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-</body>
-</html>
+{% block title %}Профиль{% endblock %}
+
+{% block content %}
+<div class="container py-5 mt-5">
+  {% set vk_link = 'https://vk.com/id' ~ user.vk_id if user.vk_id else '' %}
+  {% set google_link = 'https://myaccount.google.com/' if user.google_id else '' %}
+  {% set yandex_link = 'https://id.yandex.ru/' if user.yandex_id else '' %}
+  {% set tg_link = 'tg://user?id=' ~ user.tg_id if user.tg_id else '' %}
+
+  <div class="row g-4 align-items-start">
+    <!-- Левая колонка -->
+    <div class="col-12 col-lg-3">
+      <div class="text-center pe-lg-3">
+        <div class="position-relative d-inline-block mb-3">
+        
+          <!-- ВАЖНО: обертка -->
+          <div style="width: 180px; height: 180px; border-radius: 50%; overflow: hidden;">
+            <img src="{{ url_for('static', filename='avatar/' + user.avatar_uri) }}" alt="Аватар пользователя"
+              style="width: 100%; height: 100%; object-fit: cover;">
+          </div>
+
+          <button type="button" id="avatar-upload-button"
+            class="btn btn-light border rounded-circle shadow-sm position-absolute bottom-0 end-0" title="Изменить фото"
+            style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; line-height: 1;">
+            <i class="bx bx-refresh"></i>
+          </button>
+        </div>
+
+        <h2 class="h4 mb-0">
+          {{ first_name }}{% if last_name %} {{ last_name }}{% endif %}
+        </h2>
+
+        <form id="avatar-upload-form" method="post" enctype="multipart/form-data" class="mt-2">
+          <input type="file" class="d-none" id="avatar" name="avatar" accept=".bmp,.png,.jpg,.jpeg,image/*">
+        </form>
+      </div>
+    </div>
+
+    <!-- Правая колонка -->
+    <div class="col-12 col-lg-8">
+      <div class="ps-lg-4 border-start">
+        <h1 class="mb-4">Настройка профиля</h1>
+
+        <form method="post" class="pb-4 border-bottom">
+          <h5 class="text-primary mb-3">Основная информация</h5>
+
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <label for="first_name" class="form-label">Имя</label>
+              <input type="text" class="form-control form-control-lg" id="first_name" name="first_name"
+                value="{{ first_name }}" required>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label for="last_name" class="form-label">Фамилия</label>
+              <input type="text" class="form-control form-control-lg" id="last_name" name="last_name"
+                value="{{ last_name }}">
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary mt-3 px-4">
+            Сохранить изменения
+          </button>
+        </form>
+
+        <div class="pt-4">
+          <h5 class="text-primary mb-3">Контакты</h5>
+
+          <div class="row g-3">
+            <!-- VK -->
+            <div class="col-12 col-md-6">
+              <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                  <div class="d-flex align-items-center gap-3">
+                    <a href="{{ url_for('vk_login') }}"
+                      class="btn btn-secondary btn-vk btn-icon flex-shrink-0"
+                      title="Привязать VK" style="width: 52px; height: 52px;">
+                      <i class="bx bxl-vk"></i>
+                    </a>
+
+                    <div class="w-100">
+                      <input class="form-control" readonly value="{{ vk_link if vk_link else 'VK не привязан' }}">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Google -->
+            <div class="col-12 col-md-6">
+              <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                  <div class="d-flex align-items-center gap-3">
+                    <a href="{{ url_for('google_login') }}"
+                      class="btn btn-secondary btn-google btn-icon flex-shrink-0"
+                      title="Привязать Google" style="width: 52px; height: 52px;">
+                      <i class="bx bxl-google"></i>
+                    </a>
+
+                    <div class="w-100">
+                      <input class="form-control" readonly
+                        value="{{ google_link if google_link else 'Google не привязан' }}">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Yandex -->
+            <div class="col-12 col-md-6">
+              <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                  <div class="d-flex align-items-center gap-3">
+                    <a href="{{ url_for('yandex_login') }}"
+                      class="btn btn-icon btn-secondary btn-yandex flex-shrink-0"
+                      title="Привязать Yandex" style="width: 52px; height: 52px;">
+                      <img src="{{ url_for('static', filename='images/yandex_icon.png') }}"
+                        style="width: 24px; height: 24px;" alt="Yandex">
+                    </a>
+
+                    <div class="w-100">
+                      <input class="form-control" readonly
+                        value="{{ yandex_link if yandex_link else 'Yandex не привязан' }}">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Telegram -->
+            <div class="col-12 col-md-6">
+              <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                  <div class="d-flex align-items-center gap-3">
+                    {% if user.tg_id %}
+                    <span class="btn btn-secondary btn-telegram btn-icon flex-shrink-0"
+                      aria-disabled="true" style="width: 52px; height: 52px;">
+                      <i class="bx bxl-telegram"></i>
+                    </span>
+                    {% else %}
+                    <a href="{{ url_for('login_index', next='user_profile', link_provider='tg') }}"
+                      class="btn btn-secondary btn-telegram btn-icon flex-shrink-0"
+                      title="Привязать Telegram" style="width: 52px; height: 52px;">
+                      <i class="bx bxl-telegram"></i>
+                    </a>
+                    {% endif %}
+
+                    <div class="w-100">
+                      <input class="form-control" readonly
+                        value="{{ tg_link if user.tg_id else 'Telegram не привязан' }}">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const avatarInput = document.getElementById('avatar');
+    const avatarButton = document.getElementById('avatar-upload-button');
+    const avatarForm = document.getElementById('avatar-upload-form');
+
+    const TARGET_BYTES = 1024 * 1024;
+    const MAX_DIMENSION = 1600;
+
+    if (!avatarInput || !avatarButton || !avatarForm) return;
+
+    avatarButton.addEventListener('click', function () {
+      avatarInput.click();
+    });
+
+    async function fileToImage(file) {
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      const img = await new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = reject;
+        image.src = dataUrl;
+      });
+
+      return img;
+    }
+
+    async function canvasToBlob(canvas, type, quality) {
+      return await new Promise((resolve) => {
+        canvas.toBlob((blob) => resolve(blob), type, quality);
+      });
+    }
+
+    async function compressToTarget(file) {
+      if (!file.type.startsWith('image/')) return file;
+
+      const img = await fileToImage(file);
+
+      let width = img.width;
+      let height = img.height;
+
+      const maxSide = Math.max(width, height);
+      if (maxSide > MAX_DIMENSION) {
+        const ratio = MAX_DIMENSION / maxSide;
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const mime = 'image/jpeg';
+      let quality = 0.9;
+      let blob = await canvasToBlob(canvas, mime, quality);
+
+      while (blob && blob.size > TARGET_BYTES && quality > 0.1) {
+        quality -= 0.1;
+        blob = await canvasToBlob(canvas, mime, quality);
+      }
+
+      if (!blob) return file;
+
+      const safeName = (file.name || 'avatar').replace(/\.[^.]+$/, '') + '.jpg';
+      return new File([blob], safeName, { type: mime });
+    }
+
+    avatarInput.addEventListener('change', async function () {
+      if (!avatarInput.files || avatarInput.files.length === 0) return;
+
+      const original = avatarInput.files[0];
+      let processed = original;
+
+      try {
+        processed = await compressToTarget(original);
+      } catch (e) {
+        console.warn('Avatar precompression failed:', e);
+      }
+
+      if (processed.size > TARGET_BYTES) {
+        alert('Файл слишком большой. Выберите изображение поменьше.');
+        avatarInput.value = '';
+        return;
+      }
+
+      const dt = new DataTransfer();
+      dt.items.add(processed);
+      avatarInput.files = dt.files;
+
+      avatarForm.submit();
+    });
+  })();
+</script>
+{% endblock %}

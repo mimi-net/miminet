@@ -1,12 +1,13 @@
+import ipaddress
 import re
 import shlex
-import ipaddress
+import time
+from typing import Any, Callable, Dict, List
 
-from netaddr import EUI, AddrFormatError
-from typing import Any, Callable, List, Dict
-from network_schema import Job
-from mininet.log import info
 from ipmininet.host.config.dnsmasq import Dnsmasq
+from mininet.log import info
+from netaddr import EUI, AddrFormatError
+from network_schema import Job
 
 
 def filter_arg_for_options(
@@ -157,6 +158,17 @@ def add_gre_checker(ip_start, ip_end, ip_iface, name_iface) -> bool:
     return True
 
 
+def port_forwarding_checker(iface, port, dest_addr, dest_port) -> bool:
+    """Checker args for port_forwarding_tcp and port_forwarding_udp"""
+
+    return (
+        valid_ip(dest_addr)
+        and valid_port(port)
+        and valid_port(dest_port)
+        and valid_iface(iface)
+    )
+
+
 def valid_port(port) -> bool:
     """Check if given arg is port or not"""
     try:
@@ -192,6 +204,31 @@ def valid_iface(iface) -> bool:
     if not re.match(r"^[a-z][a-z0-9_-]{0,14}$", iface):
         return False
     return True
+
+
+def valid_sleep(time) -> bool:
+    try:
+        _ = int(time)
+    except (ValueError, TypeError):
+        return False
+    if int(time) > 50 or int(time) <= 0:
+        return False
+
+    return True
+
+
+def link_down_handler(job: Job, job_host: Any) -> None:
+    arg_interface = job.arg_1
+    if not net_dev_checker(arg_interface):
+        return
+    job_host.cmd(f"ip link set {arg_interface} down")
+
+
+def sleep_handler(job: Job, job_host: Any) -> None:
+    arg_time = job.arg_1
+    if not valid_sleep(arg_time):
+        return
+    time.sleep(int(arg_time))
 
 
 def ping_handler(job: Job, job_host: Any) -> None:
@@ -292,6 +329,38 @@ def iptables_handler(job: Job, job_host: Any) -> None:
         return
 
     job_host.cmd(f"iptables -t nat -A POSTROUTING -o {arg_dev} -j MASQUERADE")
+
+
+def port_forwarding_tcp_handler(job: Job, job_host: Any) -> None:
+    """Method for adding tcp port forwarding"""
+
+    arg_iface = job.arg_1
+    arg_port = job.arg_2
+    arg_dest_addr = job.arg_3
+    arg_dest_port = job.arg_4
+
+    if not port_forwarding_checker(arg_iface, arg_port, arg_dest_addr, arg_dest_port):
+        return
+
+    job_host.cmd(
+        f"iptables -t nat -A PREROUTING -p tcp -i {arg_iface} --dport {arg_port} -j DNAT --to-destination {arg_dest_addr}:{arg_dest_port}"
+    )
+
+
+def port_forwarding_udp_handler(job: Job, job_host: Any) -> None:
+    """Method for adding udp port forwarding"""
+
+    arg_iface = job.arg_1
+    arg_port = job.arg_2
+    arg_dest_addr = job.arg_3
+    arg_dest_port = job.arg_4
+
+    if not port_forwarding_checker(arg_iface, arg_port, arg_dest_addr, arg_dest_port):
+        return
+
+    job_host.cmd(
+        f"iptables -t nat -A PREROUTING -p udp -i {arg_iface} --dport {arg_port} -j DNAT --to-destination {arg_dest_addr}:{arg_dest_port}"
+    )
 
 
 def ip_route_add_handler(job: Job, job_host: Any) -> None:
@@ -417,14 +486,22 @@ def arp_proxy_enable(job: Job, job_host: Any) -> None:
 
 
 def dhcp_client(job: Job, job_host):
-    job_host.cmd(f"ifconfig {job.arg_1} 0")
-    job_host.cmd("rm /var/lib/dhcp/dhclient.leases")
+    info(f"[dhcp_client] host={job_host.name} iface={job.arg_1}")
+    out_ifconfig = job_host.cmd(f"ifconfig {job.arg_1} 0")
+    info(f"[dhcp_client] ifconfig {job.arg_1} 0 -> {out_ifconfig!r}")
+    out_rm = job_host.cmd("rm -f /var/lib/dhcp/dhclient.leases")
+    info(f"[dhcp_client] rm leases -> {out_rm!r}")
     job_host.cmd("echo 'initial-interval 6;' > /tmp/dhclient.conf")
-    out = job_host.cmd(
+    dhclient_cmd = (
         f"timeout -k 1 5 dhclient -d -v -4 -cf /tmp/dhclient.conf {job.arg_1} && "
-        + "ip route show && rm -f /tmp/dhclient.conf"
+        "ip route show && rm -f /tmp/dhclient.conf"
     )
-    info(out)
+    info(f"[dhcp_client] running: {dhclient_cmd}")
+    out = job_host.cmd(dhclient_cmd)
+    info(f"[dhcp_client] dhclient output:\n{out}")
+    # Log resulting IP configuration
+    out_ip = job_host.cmd(f"ip addr show {job.arg_1}")
+    info(f"[dhcp_client] ip addr after dhclient:\n{out_ip}")
 
 
 def dhcp_server(job: Job, job_host):
@@ -433,6 +510,10 @@ def dhcp_server(job: Job, job_host):
     mask = job.arg_3
     gw = job.arg_4
     intfs = [job.arg_5]
+    info(
+        f"[dhcp_server] host={job_host.name} range={ip_range_start}-{ip_range_end} "
+        f"mask={mask} gw={gw} intfs={intfs}"
+    )
     daemon = Dnsmasq(
         node=job_host,
         ip_range=f"{ip_range_start},{ip_range_end}",
@@ -441,7 +522,17 @@ def dhcp_server(job: Job, job_host):
         intfs=intfs,
     )
     job_host.build_daemon(daemon)
+
+    # Log the generated dnsmasq config so we can inspect it in CI
+    try:
+        cfg_file = daemon.cfg_filenames[0]
+        cfg_content = job_host.cmd(f"cat {cfg_file}")
+        info(f"[dhcp_server] dnsmasq config ({cfg_file}):\n{cfg_content}")
+    except Exception as e:
+        info(f"[dhcp_server] could not read dnsmasq config: {e}")
+
     job_host.start_daemon(daemon)
+    info(f"[dhcp_server] dnsmasq started on host={job_host.name}")
 
 
 class Jobs:
@@ -461,6 +552,8 @@ class Jobs:
             3: sending_udp_data_handler,
             4: sending_tcp_data_handler,
             5: traceroute_handler,
+            6: link_down_handler,
+            7: sleep_handler,
             100: ip_addr_add_handler,
             101: iptables_handler,
             102: ip_route_add_handler,
@@ -470,6 +563,8 @@ class Jobs:
             106: add_gre,
             107: arp_proxy_enable,
             108: dhcp_client,
+            109: port_forwarding_tcp_handler,
+            110: port_forwarding_udp_handler,
             200: open_udp_server_handler,
             201: open_tcp_server_handler,
             202: block_tcp_udp_port,

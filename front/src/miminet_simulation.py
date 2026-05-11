@@ -1,21 +1,17 @@
 import os
 import uuid
 
-from celery_app import (
-    SEND_NETWORK_EXCHANGE,
-    EXCHANGE_TYPE,
-    app,
-)
+from celery_app import EXCHANGE_TYPE, SEND_NETWORK_EXCHANGE, app
 from flask import jsonify, make_response, redirect, request, url_for
-from flask_login import current_user, login_required
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from miminet_model import Network, Simulate, SimulateLog, db
 from werkzeug.wrappers import Response
 
 
-@login_required
+@jwt_required()
 def run_simulation() -> Response:
     """Add new celery task and create record (for emulation result) in database."""
-    user = current_user
+    user_id = get_jwt_identity()
     network_guid = request.args.get("guid", type=str)
 
     if not network_guid:
@@ -27,7 +23,7 @@ def run_simulation() -> Response:
 
     net = (
         Network.query.filter(Network.guid == network_guid)
-        .filter(Network.author_id == user.id)
+        .filter(Network.author_id == user_id)
         .first()
     )
 
@@ -40,7 +36,6 @@ def run_simulation() -> Response:
 
         # Get saved emulations
         sims = Simulate.query.filter(Simulate.network_id == net.id).all()
-
         # Remove all previous emulations
         for s in sims:
             db.session.delete(s)
@@ -76,7 +71,7 @@ def run_simulation() -> Response:
     return redirect(url_for("home"))
 
 
-@login_required
+@jwt_required()
 def check_simulation():
     sim_id = request.args.get("simulation_id", type=int)
     network_guid = request.args.get("network_guid", type=str)
@@ -90,7 +85,6 @@ def check_simulation():
         return make_response(jsonify(ret), 400)
 
     sim = Simulate.query.filter(Simulate.id == sim_id).first()
-
     if not sim:
         ret = {"message": "Нет такой симуляции."}
         return make_response(jsonify(ret), 400)

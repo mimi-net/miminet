@@ -6,6 +6,7 @@ from utils.networks import MiminetTestNetwork, NodeType
 class TestDeviceNameChange:
     @pytest.fixture(scope="class")
     def network(self, selenium: MiminetTester):
+        print(f"Selenium cookies: {selenium.get_cookies()}")
         network = MiminetTestNetwork(selenium)
 
         network.add_node(NodeType.Host)

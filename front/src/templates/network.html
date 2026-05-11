@@ -22,21 +22,17 @@
         <nav class="navbar">
             {% if current_user.is_authenticated %}
                 <a href="/">
-                    <img src="{{ url_for('static', filename='/images/logo.png') }}" class="position-absolute start-0 top-0" width="170" style="margin: 17px;" alt="Miminet">
+                    <img src="{{ url_for('static', filename='/images/logo.png') }}" class="position-absolute start-0 top-0" width="170" style="margin: 17px; z-index: 10;" alt="Miminet">
                 </a>
-                <div class="ws-name-case position-absolute top-0 start-50 translate-middle-x" style="margin-top: 17px;">
+                <div class="ws-name-case position-absolute top-0 start-50 translate-middle-x" style="margin-top: 17px; z-index: 10;">
                      {% if request.path != url_for('web_network_shared') %}
                         <a class="d-inline nav-link" href="{{ url_for('home') }}">Мои сети</a>
                         <a class="d-inline nav-link" href="#"> / </a>
                      {% endif %}
                         <a class="d-inline nav-link" id="network_title_head" href="{{ url_for('web_network', guid=network.guid) }}">{{ network.title }}</a>
                 </div>
-                <div class="d-flex position-absolute end-0 top-0" style="margin: 17px;">
-                     <a {% if request.path != url_for('web_network_shared') %}
-                            class="ws-settings-button"
-                        {% else %}
-                            class="ws-settings-button disabled"
-                        {% endif %}
+                <div class="d-flex position-absolute end-0 top-0" style="margin: 17px; z-index: 10;">
+                     <a class="ws-settings-button"
                         href="#netConfigModal"
                         data-bs-toggle="modal"
                         data-target="#netConfigModal"
@@ -59,31 +55,31 @@
                         style="margin-left: 16px; cursor: pointer;">
                      </a>
                 </div>
-                 <div class="form-check pe-lg-1 position-absolute end-0 top-0" style="margin: 17px;">
+                 <div class="form-check pe-lg-1 position-absolute end-0 top-0" style="margin: 17px; z-index: 10;">
                     <a class="btn btn-success btn-icon me-4" data-toggle="tooltip" data-bs-placement="bottom" id="share-network" title="Сеть доступна по URL" onclick="urlCopyButton()">
                         <i class='bx bx-share-alt fs-4 mx-1' ></i>
                     </a>
                     <a class="btn btn-outline-primary btn-icon me-4" data-target="#ModalCopy" id="copy-network" data-toggle="tooltip" data-bs-placement="bottom" title="Сохранить копию" onclick="CopyNetwork()">
                         <i class='bx bx-copy fs-4 mx-1'></i>
                     </a>
-                    <a {% if request.path != url_for('web_network_shared') %} class="btn btn-outline-primary btn-icon" {% else %} class="btn btn-outline-primary btn-icon disabled" {% endif %} href="#netConfigModal" id="net-settings" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети"><i class='bx bx-cog fs-4 mx-1'></i></a>
+                    <a class="btn btn-outline-primary btn-icon" href="#netConfigModal" id="net-settings" data-bs-toggle="modal" data-target="#netConfigModal" data-toggle="tooltip" data-bs-placement="bottom" title="Настройки сети"><i class='bx bx-cog fs-4 mx-1'></i></a>
                 </div>
             {% else %}
                  <a href="/">
-                    <img src="{{ url_for('static', filename='/images/logo.png') }}" class="position-absolute start-0 top-0" width="170" style="margin: 17px;" alt="Miminet">
+                    <img src="{{ url_for('static', filename='/images/logo.png') }}" class="position-absolute start-0 top-0" width="170" style="margin: 17px; z-index: 10;" alt="Miminet">
                 </a>
-                <div class="ws-name-case position-absolute top-0 start-50 translate-middle-x" style="margin-top: 17px;">
+                <div class="ws-name-case position-absolute top-0 start-50 translate-middle-x" style="margin-top: 17px; z-index: 10;">
                      <a class="nav-link" id="network_title_head" href="#">
                         {{ network.title }}
                      </a>
                 </div>
-                <a href="{{ url_for('login_index') }}" class="position-absolute end-0 top-0 btn btn-outline-primary ws-shadow" style="margin: 17px;">
+                <a href="{{ url_for('login_index') }}" class="position-absolute end-0 top-0 btn btn-outline-primary ws-shadow" style="margin: 17px; z-index: 10;">
                     <i class="bx fs-5 lh-1 me-1"></i>Вход
                 </a>
             {% endif %}
         </nav>
 
-        <div id="side_menu" class="position-absolute start-0 top-0" style="margin-left: 17px; margin-top: 100px;">
+        <div id="side_menu" class="position-absolute start-0 top-0" style="margin-left: 17px; margin-top: 100px; z-index: 10;">
             <div class="ws-menu-devices-name">Устройства</div>
             <div class="ws-menu-devices">
                 <div id="l2_switch_device" style="margin-top: 6px; margin-bottom: 6px;">
@@ -126,7 +122,7 @@
             </div>
         </div>
 
-        <div class="position-absolute end-0 top-0" style="margin-right: 17px; margin-top: 100px; pointer-events: none;">
+        <div class="position-absolute end-0 top-0" style="margin-right: 17px; margin-top: 100px; pointer-events: none; z-index: 10;">
             <div class="ws-menu-settings-name" style="pointer-events: all;">Настройки</div>
             <div id="config_content" class="ws-menu-settings overflow-auto" style="pointer-events: all;">
                 <span>Тут будут настройки устройств. Выделите любое на схеме.</span>
@@ -135,7 +131,7 @@
             </div>
         </div>
 
-        <div class="position-absolute start-0 bottom-0" style="margin: 17px; font-weight: 500;">
+        <div class="position-absolute start-0 bottom-0" style="margin: 17px; font-weight: 500; z-index: 10;">
             <div class="d-flex justify-content-center ws-shadow" id="NetworkPlayer">
                 <button type="button" class="btn btn-primary w-100" id="NetworkRunButton" disabled>Проверка эмуляции</button>
             </div>
@@ -148,10 +144,18 @@
             <small id="NetworkPlayerLabel" class="d-flex justify-content-center text-muted text-center">Ожидание 10-30 сек.</small>
         </div>
 
-        <a href="https://t.me/MimiNetCommunity" target="_blank" class="position-absolute bottom-0 end-0 ws-ask-link">
-            <div id="NetworkRunButtonHelpLabel" class="ws-ask-button">
-                <img src="{{ url_for('static', filename='/images/tg_logo.png') }}" width="24" style="margin-right: 8px;"/>Задать вопрос
-            </div>
+	<!--<div id="ImpulseDiv" class="position-fixed bottom-0 start-50 translate-middle-x alert alert-primary mx-auto text-center d-flex align-items-center mb-4 alert-dismissible fade show d-none" role="alert">
+		<span class="fs-4 pe-2">&#x1F468;&#x200D;&#x1F4BB;</span>
+		<a href="https://edu.yadro.com/impulse/?utm_source=telegram&utm_medium=messenger&utm_campaign=promo_impulse_2026&utm_content=miminet&utm_term=edhub" target="_blank" class="alert-link fw-semibold" onclick="if (typeof window.ym != 'undefined'){ym(92293993,'reachGoal','Impulse2026Network');}" >Оплачиваемая IT-стажировка в YADRO</a>
+		<button type="button" id="ImpulseCloseButton" class="btn-close py-0" data-bs-dismiss="alert" aria-label="Close" style="margin-top:26px;"></button>
+	</div>	-->
+
+        <a href="https://t.me/MimiNetCommunity" target="_blank" class="btn btn-secondary position-absolute bottom-0 end-0" style="z-index: 10; margin:17px; margin-bottom:33px;">
+	<svg  xmlns="http://www.w3.org/2000/svg" width="22" height="22"  
+		fill="currentColor" viewBox="0 0 24 24" >
+		<!--Boxicons v3.0.8 https://boxicons.com | License  https://docs.boxicons.com/free-->
+		<path d="m20.665 3.717-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l.002.001-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.785l3.019-14.228c.309-1.239-.473-1.8-1.282-1.434"/>
+	</svg>&nbsp;&nbsp;Задать вопрос
         </a>
     </section>
 </main>
@@ -185,6 +189,37 @@
 
     SetNetworkPlayerState({% if simulating %} {% if simulating.ready %} 0 {% else %} {{simulating.id}} {% endif%} {% else %} -1 {% endif%})
     DrawGraph();
+
+    var close_impulse_btn = document.getElementById('ImpulseCloseButton');
+    var impulse_div = document.getElementById('ImpulseDiv');
+
+    if (impulse_div) {
+        var impulse_ts = localStorage.getItem('impulse_2026');
+
+        if (impulse_ts) {
+            const now = Date.now();
+	        const diff = now - Number(impulse_ts);
+	        const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+	        if (diff > threeDaysMs) {
+                impulse_div.classList.remove('d-none');
+            }
+	    } else {
+	        impulse_div.classList.remove('d-none');
+	    }
+    }
+
+    if (close_impulse_btn) {
+        close_impulse_btn.addEventListener("click", function() {
+	   
+	    if (typeof window.ym != 'undefined') {
+	        ym(92293993,'reachGoal','ImpulseClose');
+	    }
+
+	    localStorage.setItem('impulse_2026', Date.now().toString());
+	}, false);
+    }
+
+
 </script>
 
 {% endblock %}

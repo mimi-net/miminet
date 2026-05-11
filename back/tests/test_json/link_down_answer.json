@@ -1,0 +1,110 @@
+[
+    [
+        {
+            "data": {
+                "id": "",
+                "label": "ARP-request\nWho has 192.168.0.2? Tell 192.168.0.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\nWho has 192.168.0.2? Tell 192.168.0.1",
+                "path": "edge_mjcztrism9ezamqqda",
+                "source": "host_1",
+                "target": "l2sw1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": ""
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "",
+                "label": "ARP-request\nWho has 192.168.0.2? Tell 192.168.0.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\nWho has 192.168.0.2? Tell 192.168.0.1",
+                "path": "edge_mjcztsiqna2lxz6nnwd",
+                "source": "l2sw1",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": ""
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "",
+                "label": "ARP-request\nWho has 192.168.0.2? Tell 192.168.0.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\nWho has 192.168.0.2? Tell 192.168.0.1",
+                "path": "edge_mjcztrism9ezamqqda",
+                "source": "host_1",
+                "target": "l2sw1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": ""
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "",
+                "label": "ARP-request\nWho has 192.168.0.2? Tell 192.168.0.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\nWho has 192.168.0.2? Tell 192.168.0.1",
+                "path": "edge_mjcztsiqna2lxz6nnwd",
+                "source": "l2sw1",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": ""
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "",
+                "label": "ARP-request\nWho has 192.168.0.2? Tell 192.168.0.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\nWho has 192.168.0.2? Tell 192.168.0.1",
+                "path": "edge_mjcztrism9ezamqqda",
+                "source": "host_1",
+                "target": "l2sw1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": ""
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "",
+                "label": "ARP-request\nWho has 192.168.0.2? Tell 192.168.0.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\nWho has 192.168.0.2? Tell 192.168.0.1",
+                "path": "edge_mjcztsiqna2lxz6nnwd",
+                "source": "l2sw1",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": ""
+        }
+    ]
+]

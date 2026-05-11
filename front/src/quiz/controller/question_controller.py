@@ -1,8 +1,7 @@
 import json
 
-from flask import request, abort, make_response, jsonify
-from flask_login import login_required, current_user
-
+from flask import abort, jsonify, make_response, request
+from flask_login import current_user, login_required
 from quiz.facade.question_facade import create_question, delete_question
 from quiz.service.question_service import get_questions_by_section
 from quiz.util.encoder import UUIDEncoder

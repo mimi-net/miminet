@@ -7,14 +7,14 @@ const ConfigVxlan = function (currentDevice) {
     var buttonElem = document.getElementById('config_button_vxlan_script');
     var modalElem = document.getElementById('config_modal_vxlan_script');
     var tableElem = document.getElementById('config_table_vxlan_script');
-    
+
     if (!buttonElem || !modalElem || !tableElem) {
         return;
     }
-    
+
     var buttonHTML = buttonElem.innerHTML;
     var modalHTML = modalElem.innerHTML;
-    var tableHTML = tableElem.innerHTML;    
+    var tableHTML = tableElem.innerHTML;
 
     modalHTML = modalHTML.replace('id="VxlanModal"', 'id="' + modalId + '"');
     tableHTML = tableHTML.replace('id="config_table_vxlan"', 'id="' + tableId + '"');
@@ -59,7 +59,7 @@ function setupVxlanEventHandlers(currentDevice, modalId, tableId) {
         PostNodesEdges();
     });
 
-    $('#' + modalId).find('#vxlanConfigrationSubmit').on('click', function () {
+    $('#' + modalId).find('#vxlanConfigurationSubmit').on('click', function () {
         $('#' + modalId).modal('hide');
     });
 
@@ -274,7 +274,7 @@ function addClientVxlanInterface(currentDevice, tableId, modalId) {
         return item.id === deviceEntry;
     });
     if (iface) {
-          if (iface.vxlan_connection_type === 0 && iface.vxlan_vni !== null && iface.vxlan_vni !== undefined) {
+        if (iface.vxlan_connection_type === 0 && iface.vxlan_vni !== null && iface.vxlan_vni !== undefined) {
             showAlert("Этот интерфейс уже привязан к VNI: " + String(iface.vxlan_vni), "warning", modalId);
             return;
         }

@@ -5,6 +5,19 @@ var NetworkUpdateTimeoutId = -1;
 let NetworkCache = [];
 let lastSimulationId = 0
 
+let packetsNotFiltered = null;
+let packetFilterState = {
+    hideARP: false,
+    hideSTP: false,
+    hideSYN: false,
+};
+
+const LINK_DOWN_JOB_ID = 6;
+
+let gridCanvasLayer = undefined;
+let gridEnabled = true;
+let currentGridZoom = 1.0;
+
 const uid = function(){
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
@@ -120,6 +133,11 @@ const ActionWithInterface = function (n, i, fun) {
 
 const ShowHostConfig = function(n, shared = 0){
 
+    // Exit edit mode when switching to different device
+    if (editingJobId && editingDeviceType) {
+        ExitEditMode(editingDeviceType);
+    }
+
     let hostname = n.config.label;
     hostname = hostname || n.data.id;
 
@@ -164,6 +182,11 @@ const ShowHostConfig = function(n, shared = 0){
 }
 
 const ShowRouterConfig = function(n, shared = 0){
+
+    // Exit edit mode when switching to different device
+    if (editingJobId && editingDeviceType) {
+        ExitEditMode(editingDeviceType);
+    }
 
     let hostname = n.config.label;
     hostname = hostname || n.data.id;
@@ -212,6 +235,11 @@ const ShowRouterConfig = function(n, shared = 0){
 }
 
 const ShowServerConfig = function(n, shared = 0){
+
+    // Exit edit mode when switching to different device
+    if (editingJobId && editingDeviceType) {
+        ExitEditMode(editingDeviceType);
+    }
 
     let hostname = n.config.label;
     hostname = hostname || n.data.id;
@@ -299,6 +327,13 @@ const ShowSwitchConfig = function(n, shared = 0){
 
     // Add hostname
     ConfigSwitchName(hostname);
+    let switch_jobs = [];
+
+    if (jobs){
+        switch_jobs = jobs.filter(j => j.host_id === n.data.id);
+    }
+
+    ConfigSwitchJob(switch_jobs, shared);
 
     //Add checkbox STP
 //    ConfigSwtichSTP(n.config.stp);
@@ -335,7 +370,8 @@ const ShowEdgeConfig = function(edge_id, shared = 0){
 
     let edge_source = ed.data.source;
     let edge_target = ed.data.target;
-    let edge_loss = ed.data.loss_percentage || 0
+    let edge_loss = ed.data.loss_percentage || 0;
+    let edge_duplicate = ed.data.duplicate_percentage || 0;
 
     // Create form
     if (shared){
@@ -344,9 +380,7 @@ const ShowEdgeConfig = function(edge_id, shared = 0){
         ConfigEdgeForm(edge_id);
     }
 
-
-    // Add loss percentage info
-    ConfigEdgePercentage(edge_loss)
+    ConfigEdgeNetworkIssues(edge_loss, edge_duplicate);
 
     // Add source and target info
     ConfigEdgeEndpoints(edge_source, edge_target);
@@ -445,10 +479,10 @@ const InterfaceUid = function(){
 }
 
 const PostNodesEdges = function(){
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/post_nodes_edges?guid=' + network_guid,
-        data: JSON.stringify([nodes, edges]),
+        url: ExternalUrlFor('/post_nodes_edges?guid=' + network_guid),
+        data: JSON.stringify([nodes, edges, jobs]),
         success: function(data) {},
         error: function(err) {console.log('Cannot post edges to server')},
         contentType: "application/json",
@@ -573,7 +607,7 @@ const DeleteJob = function(node_id){
             jobs_to_delete.push(idx);
         }
     });
-
+    jobs_to_delete.reverse()
     $.each(jobs_to_delete, function (idx, val){
         jobs.splice(val, 1);
     });
@@ -683,9 +717,9 @@ const DeleteEdge = function (edge_id) {
 }
 
 const PostNodes = function(){
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/post_network_nodes?guid=' + network_guid,
+        url: ExternalUrlFor('/post_network_nodes?guid=' + network_guid),
         data: JSON.stringify(nodes),
         success: function(data) {},
         error: function(err) {console.log('Cannot post nodes to server')},
@@ -696,9 +730,9 @@ const PostNodes = function(){
 
 const MoveNodes = function(){
 
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/move_network_nodes?guid=' + network_guid,
+        url: ExternalUrlFor('/move_network_nodes?guid=' + network_guid),
         data: JSON.stringify(nodes),
         success: function(data) {},
         error: function(err) {console.log('Cannot post nodes to server')},
@@ -710,9 +744,10 @@ const MoveNodes = function(){
 const prepareStylesheet = function() {
     const getColor = function(ele) {
         if (ele.group() === "edges") {
-            const loss = ele.data('loss_percentage') || 0;
-            if (loss > 0)
-                return '#FF8C00';
+            const dup = ele.data('duplicate_percentage');
+            if (dup > 0) {
+                return '#26AE31';
+            }
         }
         return ele.data('color') || '#9FBFE5';
     };
@@ -720,7 +755,23 @@ const prepareStylesheet = function() {
       return ele.data('label') || '';
     };
     const getLineStyle = function(ele) {
+      if (ele.group() === "edges") {
+        const loss = ele.data('loss_percentage');
+        if (loss > 0) {
+          return 'dashed';
+        }
+      }
       return ele.data('line') || 'solid';
+    };
+    const getLineDashPattern = function(ele) {
+      if (ele.group() === "edges") {
+        const loss = ele.data('loss_percentage');
+        if (loss > 0) {
+          const gap = 2 + Math.round((loss / 100) * 18);
+          return [6, gap];
+        }
+      }
+      return [6, 0];
     };
     const getCurveStyle = function(ele) {
       return ele.data('style') || 'bezier';
@@ -826,6 +877,7 @@ const prepareStylesheet = function() {
           'curve-style': getCurveStyle,
           'label': getEdgeLabel,
           'line-style': getLineStyle,
+          'line-dash-pattern': getLineDashPattern,
           'color': '#000',
           'text-outline-color': '#FFF',
           'text-outline-width': 1,
@@ -900,6 +952,18 @@ const prepareStylesheet = function() {
         .selector('.eh-ghost-edge.eh-preview-active')
         .css({
             'opacity': 0
+        })
+
+        .selector('edge.link-down')
+        .css({
+            'line-color': '#E8A838',
+        })
+
+        .selector('edge.link-down-active')
+        .css({
+            'line-color': '#999',
+            'opacity': 0.5,
+            'width': 1,
         });
 
     const appendIconClass = function(stylesheet, cssClass) {
@@ -922,6 +986,69 @@ const prepareStylesheet = function() {
     return sheet;
   };
 
+const SnapNodesToGrid = function(cy_instance) {
+    if (!cy_instance) return;
+
+    let anyMoved = false;
+    const baseGridSize = 25;
+
+    cy_instance.nodes().each(function(ele) {
+        if (!ele.isNode()) return;
+
+        const pos = ele.position();
+        
+        // Calculate snapped position
+        const newX = Math.round(pos.x / baseGridSize) * baseGridSize;
+        const newY = Math.round(pos.y / baseGridSize) * baseGridSize;
+        
+        // If coordinate differs significantly (float error)
+        if (Math.abs(newX - pos.x) > 0.5 || Math.abs(newY - pos.y) > 0.5) {
+            
+            // Move cy node
+            ele.position({x: newX, y: newY});
+            
+            // Update global nodes array
+            if (typeof nodes !== 'undefined') {
+                 let n = nodes.find(n => n.data.id === ele.id());
+                 if (n) {
+                     n.position.x = newX;
+                     n.position.y = newY;
+                     anyMoved = true;
+                 }
+            }
+        }
+    });
+
+    if (anyMoved) {
+        MoveNodes();
+    }
+}
+
+const FindEdgeIdByJob = function(job) {
+    const node = nodes.find(n => n.data.id === job.host_id);
+    if (!node || !Array.isArray(node.interface)) return null;
+    const iface = node.interface.find(i => i.id === job.arg_1);
+    return iface?.connect || null;
+};
+
+const MarkLinkDownEdges = function(cy_instance) {
+    if (!cy_instance) return;
+
+    cy_instance.edges('.link-down, .link-down-active')
+        .removeClass('link-down')
+        .removeClass('link-down-active')
+        .removeStyle();
+
+    jobs.forEach(function(j) {
+        if (j.job_id == LINK_DOWN_JOB_ID) {
+            const edgeId = FindEdgeIdByJob(j);
+            if (edgeId) {
+                cy_instance.edges('[id="' + edgeId + '"]').addClass('link-down');
+            }
+        }
+    });
+};
+
 const DrawGraph = function() {
 
     // Do we already have one?
@@ -936,6 +1063,7 @@ const DrawGraph = function() {
         cy.autounselectify(true);
         cy.add(nodes);
         cy.add(edges);
+        MarkLinkDownEdges(cy);
         cy.nodes().grabify();
         global_eh.enable();
         return;
@@ -971,7 +1099,7 @@ const DrawGraph = function() {
         },
 
         hoverDelay: 150, // time spent hovering over a target node before it is considered selected
-        snap: true, // when enabled, the edge can be drawn by just moving close to a target node (can be confusing on compound graphs)
+        snap: false, // when enabled, the edge can be drawn by just moving close to a target node (can be confusing on compound graphs)
         snapThreshold: 50, // the target node must be less than or equal to this many pixels away from the cursor/finger
         snapFrequency: 15, // the number of times per second (Hz) that snap checks done (lower is less expensive)
         noEdgeEventsInDraw: true, // set events:no to edges during draws, prevents mouseouts on compounds
@@ -986,6 +1114,12 @@ const DrawGraph = function() {
     cy.add(nodes);
     cy.add(edges);
 
+    // Mark edges that have a link-down job configured
+    MarkLinkDownEdges(cy);
+
+    // Auto-snap existing network nodes on load
+    SnapNodesToGrid(cy);
+
     // Changing zoom
     cy.on('zoom', function(evt){
 
@@ -995,6 +1129,12 @@ const DrawGraph = function() {
         }
 
         NetworkUpdateTimeoutId = setTimeout(UpdateNetworkConfig, 2000);
+        
+        // Update grid zoom and redraw
+        if (gridCanvasLayer) {
+            currentGridZoom = cy.zoom();
+            drawGrid();
+        }
     });
 
     // Changing the pan
@@ -1006,6 +1146,11 @@ const DrawGraph = function() {
         }
 
         NetworkUpdateTimeoutId = setTimeout(UpdateNetworkConfig, 2000);
+        
+        // Update grid when panning to keep it aligned with nodes
+        if (gridCanvasLayer) {
+            drawGrid();
+        }
     });
 
     // Looking for a position changing
@@ -1018,8 +1163,25 @@ const DrawGraph = function() {
             return;
         }
 
-        n.position.x = this.position().x;
-        n.position.y = this.position().y;
+        // Get current position
+        let posX = this.position().x;
+        let posY = this.position().y;
+
+        // Snap to grid (like draw.io)
+        const baseGridSize = 25;
+        
+        // Snap position to nearest grid intersection
+        posX = Math.round(posX / baseGridSize) * baseGridSize;
+        posY = Math.round(posY / baseGridSize) * baseGridSize;
+        
+        // Apply snapped position back to node
+        this.position({
+            x: posX,
+            y: posY
+        });
+
+        n.position.x = posX;
+        n.position.y = posY;
 
         MoveNodes();
         TakeGraphPictureAndUpdate();
@@ -1081,11 +1243,16 @@ const DrawGraph = function() {
 
     $(document).on('keyup', function(e){
 
+        const evtTarget = e.target;
+        if (evtTarget && evtTarget.form) {
+            return;
+        }
+
         if (e.keyCode == 46 && selecteed_node_id) {
 
             // Save the network state.
             SaveNetworkObject();
-                        
+
             DeleteNode(selecteed_node_id);
             DeleteJob(selecteed_node_id);
 
@@ -1107,11 +1274,20 @@ const DrawGraph = function() {
 
             // Save the network state.
             SaveNetworkObject();
-
+            
+            // If the source or target is a switch, delete the jobs.
+            let ed = edges.find(ed => ed.data.id === selected_edge_id);
+            if (ed){
+                if (ed.data.source.startsWith("l2sw")){
+                    DeleteJob(ed.data.source)
+                }
+                if (ed.data.target.startsWith("l2sw")){
+                    DeleteJob(ed.data.target)
+                }
+            }
             DeleteEdge(selected_edge_id);
 
             ClearConfigForm('');
-            selecteed_node_id = 0;
             selected_edge_id = 0;
 
             PostNodesEdges();               // Update network on server
@@ -1145,6 +1321,9 @@ const DrawGraph = function() {
         }
 
     });
+    
+    // Initialize grid
+    initGrid(cy);
 }
 
 const DrawGraphStatic = function(nodes, edges, shared=0) {
@@ -1186,7 +1365,12 @@ const DrawGraphStatic = function(nodes, edges, shared=0) {
     cy.autounselectify(false);
     cy.add(nodes);
     cy.add(edges);
+    MarkLinkDownEdges(cy);
     cy.nodes().ungrabify();
+
+    // Initialize grid
+    initGrid(cy);
+
     return;
 }
 
@@ -1222,6 +1406,7 @@ const DrawSharedGraph = function(nodes, edges) {
 
     cy.add(nodes);
     cy.add(edges);
+    MarkLinkDownEdges(cy);
 
     // Click on object
     cy.on('click', function (evt) {
@@ -1253,17 +1438,20 @@ const DrawSharedGraph = function(nodes, edges) {
         selected_edge_id = 0;
 
         if (n.config.type === 'host'){
-            ShowHostConfig(n, shared=1);
+            ShowHostConfig(n, 1);
         } else if (n.config.type === 'l1_hub'){
-            ShowHubConfig(n, shared=1);
+            ShowHubConfig(n, 1);
         } else if (n.config.type === 'l2_switch'){
-            ShowSwitchConfig(n, shared=1);
+            ShowSwitchConfig(n, 1);
         } else if (n.config.type === 'router'){
-            ShowRouterConfig(n, shared=1);
+            ShowRouterConfig(n, 1);
         } else if (n.config.type === 'server'){
-            ShowServerConfig(n, shared=1);
+            ShowServerConfig(n, 1);
         }
     });
+    
+    // Initialize grid
+    initGrid(cy);
 }
 
 const DrawIndexGraphStatic = function(nodes, edges, container_id, graph_network_zoom,
@@ -1295,12 +1483,11 @@ const DrawIndexGraphStatic = function(nodes, edges, container_id, graph_network_
 // Check whether simulation is over and we can run packets
 const CheckSimulation = function (simulation_id)
 {
-    $.ajax({
+    ajaxWithAuth({
         type: 'GET',
-        url: '/check_simulation?simulation_id=' + simulation_id + '&network_guid=' + network_guid,
+        url: ExternalUrlFor('/check_simulation?simulation_id=' + simulation_id + '&network_guid=' + network_guid),
         data: '',
         success: function(data, textStatus, xhr) {
-            lastSimulationId = data.simulation_id
             // If we got 210 (processing) wait 2 sec and call themself again
             if (xhr.status === 210)
             {
@@ -1312,7 +1499,10 @@ const CheckSimulation = function (simulation_id)
             {
                 packets = JSON.parse(data.packets);
                 pcaps = data.pcaps;
-                SetNetworkPlayerState(0);
+
+                // Set filters
+                packetsNotFiltered = null;
+                SetPacketFilter();
 
                 const answerButton = document.querySelector('button[name="answerQuestion"]');
                 if (answerButton) {
@@ -1335,9 +1525,9 @@ const CheckSimulation = function (simulation_id)
 const UpdateEdgeConfiguration = (data) => {
     SetNetworkPlayerState(-1);
 
-    return $.ajax({
+    return ajaxWithAuth({
         type: 'POST',
-        url: '/edge/save_config',
+        url: ExternalUrlFor('/edge/save_config'),
         data: data,
         complete: function() {
             DrawGraph();
@@ -1356,9 +1546,9 @@ const InsertWaitingTime = function ()
 {
     // Get last emulation task time
     // and send request to get count of emulating networks before this time
-    $.ajax({
+    ajaxWithAuth({
         type: 'GET',
-        url: 'emulation_queue/time',
+        url: ExternalUrlFor('/emulation_queue/time'),
         data: '',
         success: function(data) {
             // Run helper function with time param
@@ -1374,9 +1564,9 @@ const InsertWaitingTime = function ()
 
 const InsertWaitingTimeHelper = function(time_filter) {
     // Insert field with queue size
-    $.ajax({
+    ajaxWithAuth({
         type: 'GET',
-        url: 'emulation_queue/size?time-filter=' + time_filter.toString(),
+        url: ExternalUrlFor('/emulation_queue/size?time-filter=' + time_filter.toString()),
         data: '',
         success: function(data) {
             const queue_size = parseInt(data.size);
@@ -1407,22 +1597,24 @@ const UpdateHostConfiguration = function (data, host_id)
     // Reset network player
     SetNetworkPlayerState(-1);
 
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/host/save_config',
+        url: ExternalUrlFor('/host/save_config'),
         data: data,
         success: function(data, textStatus, xhr) {
 
             if (xhr.status === 200)
             {
+                // Exit edit mode on successful save
+                if (editingJobId && editingDeviceType === 'host') {
+                    ExitEditMode('host');
+                }
                 if (!data.warning){
-
                     // Update nodes
                     nodes = data.nodes;
-
                     // Update jobs
                     jobs = data.jobs;
-
+                    
                     // Update graph
                     DrawGraph();
                 }
@@ -1460,6 +1652,11 @@ const UpdateHostConfiguration = function (data, host_id)
                 errorMsg = xhr.responseJSON.message;
             }
             HostErrorMsg(errorMsg);
+
+            // Exit edit mode on error to allow retry
+            if (editingJobId && editingDeviceType === 'host') {
+                ExitEditMode('host');
+            }
         },
         dataType: 'json'
     });
@@ -1476,9 +1673,9 @@ const DeleteJobFromHost = function (host_id, job_id, network_guid)
       guid: network_guid,
     };
 
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/host/delete_job',
+        url: ExternalUrlFor('/host/delete_job'),
         data: data,
         encode: true,
         success: function(data, textStatus, xhr) {
@@ -1570,6 +1767,55 @@ const DeleteJobFromRouter = function (router_id, job_id, network_guid)
     });
 }
 
+const DeleteJobFromSwitch = function (switch_id, job_id, network_guid)
+{
+    // Reset network player
+    SetNetworkPlayerState(-1);
+
+    let data = {
+      id: job_id,
+      guid: network_guid,
+    };
+
+    $.ajax({
+        type: 'POST',
+        url: '/host/delete_job',
+        data: data,
+        encode: true,
+        success: function(data, textStatus, xhr) {
+
+            if (xhr.status === 200)
+            {
+                // Update jobs
+                jobs = data.jobs;
+
+                // Update graph
+                DrawGraph();
+
+                // Ok, let's try to update host config form
+                let n = nodes.find(n => n.data.id === switch_id);
+
+                if (!n) {
+                    ClearConfigForm('Нет такого хоста');
+                    return;
+                }
+
+                if (n.config.type === 'l2_switch'){
+                    ShowSwitchConfig(n);
+                } else {
+                    ClearConfigForm('Узел есть, но это не свитч');
+                }
+                UpdateJobCounter('config_switch_job_counter', switch_id);
+            }
+        },
+        error: function(xhr) {
+            console.log('Не удалось удалить команду');
+            console.log(xhr);
+        },
+        dataType: 'json'
+    });
+}
+
 // Delete job from server
 const DeleteJobFromServer = function (server_id, job_id, network_guid)
 {
@@ -1628,14 +1874,20 @@ const UpdateRouterConfiguration = function (data, router_id)
     // Reset network player
     SetNetworkPlayerState(-1);
 
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/host/router_save_config',
+        url: ExternalUrlFor('/host/router_save_config'),
         data: data,
         success: function(data, textStatus, xhr) {
 
             if (xhr.status === 200)
             {
+
+                // Exit edit mode on successful save
+                if (editingJobId && editingDeviceType === 'router') {
+                    ExitEditMode('router');
+                }
+
                 // Update nodes
                 if (data.nodes)
                 {
@@ -1686,6 +1938,11 @@ const UpdateRouterConfiguration = function (data, router_id)
                 errorMsg = xhr.responseJSON.message;
             }
             HostErrorMsg(errorMsg);
+
+            // Exit edit mode on error to allow retry
+            if (editingJobId && editingDeviceType === 'router') {
+                ExitEditMode('router');
+            }
         },
         dataType: 'json'
     });
@@ -1697,14 +1954,19 @@ const UpdateServerConfiguration = function (data, router_id)
     // Reset network player
     SetNetworkPlayerState(-1);
 
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/host/server_save_config',
+        url: ExternalUrlFor('/host/server_save_config'),
         data: data,
         success: function(data, textStatus, xhr) {
 
             if (xhr.status === 200)
             {
+
+                // Exit edit mode on successful save
+                if (editingJobId && editingDeviceType === 'server') {
+                    ExitEditMode('server');
+                }
 
                 if (!data.warning){
 
@@ -1755,6 +2017,11 @@ const UpdateServerConfiguration = function (data, router_id)
                 errorMsg = xhr.responseJSON.message;
             }
             HostErrorMsg(errorMsg);
+
+            // Exit edit mode on error to allow retry
+            if (editingJobId && editingDeviceType === 'server') {
+                ExitEditMode('server');
+            }
         },
         dataType: 'json'
     });
@@ -1763,9 +2030,9 @@ const UpdateServerConfiguration = function (data, router_id)
 // Update hub configuration
 const UpdateHubConfiguration = function (data, hub_id)
 {
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/host/hub_save_config',
+        url: ExternalUrlFor('/host/hub_save_config'),
         data: data,
         success: function(data, textStatus, xhr) {
 
@@ -1809,22 +2076,31 @@ const UpdateSwitchConfiguration = function (data, switch_id)
     // Reset network player
     SetNetworkPlayerState(-1);
 
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/host/switch_save_config',
+        url: ExternalUrlFor('/host/switch_save_config'),
         data: data,
         success: function(data, textStatus, xhr) {
 
             if (xhr.status === 200)
             {
-                // Update nodes
-                nodes = data.nodes;
+                if (editingJobId && editingDeviceType === 'switch') {
+                    ExitEditMode('switch');
+                }
+                if (!data.warning){
+
+                    // Update nodes
+                    nodes = data.nodes;
+
+                    // Update jobs
+                    jobs = data.jobs;
+
+                    // Update graph
+                    DrawGraph();
+                }
 
                 // We don't clear packets and RunButtonState.
                 // Hub can change only names
-
-                // Update graph
-                DrawGraph();
 
                 // Ok, let's try to update host config form
                 let n = nodes.find(n => n.data.id === switch_id);
@@ -1839,11 +2115,26 @@ const UpdateSwitchConfiguration = function (data, switch_id)
                 } else {
                     ClearConfigForm('Нет такого свитча');
                 }
+                if (data.warning){
+                    SwitchWarningMsg(data.warning)
+                }
+                UpdateJobCounter('config_switch_job_counter', switch_id);
             }
         },
         error: function(xhr) {
-            console.log('Cannot update host config');
+            console.log('Cannot update switch config');
             console.log(xhr);
+            // Show error message to user
+            let errorMsg = 'Ошибка при сохранении конфигурации свитча';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMsg = xhr.responseJSON.message;
+            }
+            HostErrorMsg(errorMsg);
+
+            // Exit edit mode on error to allow retry
+            if (editingJobId && editingDeviceType === 'switch') {
+                ExitEditMode('switch');
+            }
         },
         dataType: 'json'
     });
@@ -1851,13 +2142,14 @@ const UpdateSwitchConfiguration = function (data, switch_id)
 
 const RunSimulation = function (network_guid)
 {
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/run_simulation?guid=' + network_guid,
+        url: ExternalUrlFor('/run_simulation?guid=' + network_guid),
         data: '',
         success: function(data, textStatus, xhr) {
             if (xhr.status === 201)
             {
+                lastSimulationId = data.simulation_id
                 console.log("Simulation is running!");
                 // Ok, run CheckSimulation
                 if (data.simulation_id)
@@ -1875,6 +2167,104 @@ const RunSimulation = function (network_guid)
     });
 }
 
+const FilterPackets = function () {
+    const tcpRegex = /TCP \((ACK|SYN|FIN)/;
+    packets = packets
+        .map((step) =>
+            step.filter(
+                (pkt) =>
+                    !(
+                        (packetFilterState.hideARP &&
+                            pkt.data.label.startsWith("ARP")) ||
+                        (packetFilterState.hideSTP &&
+                            (pkt.data.label.startsWith("STP") ||
+                            pkt.data.label.startsWith("RSTP"))) ||
+                        (packetFilterState.hideSYN &&
+                            tcpRegex.test(pkt.data.label))
+                    )
+            )
+        )
+        .filter((step) => step.length > 0);
+};
+
+const UpdateFilterStates = function (settings) {
+    if (!settings) {
+        return;
+    }
+
+    Object.assign(packetFilterState, settings);
+    $("#ARPFilterCheckbox").prop("checked", packetFilterState.hideARP);
+    $("#STPFilterCheckbox").prop("checked", packetFilterState.hideSTP);
+    $("#SYNFilterCheckbox").prop("checked", packetFilterState.hideSYN);
+};
+
+const SaveAnimationFilters = function () {
+    if (!window.isAuthenticated) {
+        return;
+    }
+
+    const payload = {
+        hideARP: Boolean(packetFilterState.hideARP),
+        hideSTP: Boolean(packetFilterState.hideSTP),
+        hideSYN: Boolean(packetFilterState.hideSYN),
+    };
+
+    $.ajax({
+        type: "POST",
+        url: "/user/animation_filters",
+        data: JSON.stringify(payload),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (data) {
+            if (!data) {
+                return;
+            }
+
+            const saved = {
+                hideARP: Boolean(data.hideARP),
+                hideSTP: Boolean(data.hideSTP),
+                hideSYN: Boolean(data.hideSYN),
+            };
+
+            UpdateFilterStates(saved);
+        },
+        error: function (xhr) {
+            console.log("Cannot save animation filters");
+            console.log(xhr);
+        },
+    });
+};
+
+const SetPacketFilter = function (shared = 0) {
+    // If network player UI is absent (e.g., not on network page), skip.
+    if (!document.getElementById("NetworkPlayer") || !document.getElementById("PacketSliderInput")) {
+        return;
+    }
+
+    console.log("Packet filter call");
+    // SetPacketFilter first call on emulated network
+    if (packets && !packetsNotFiltered) {
+        packetsNotFiltered = JSON.parse(JSON.stringify(packets)); // Array deep copy
+    }
+    // Numerous filter call, we grab our packets copy to filter it
+    else if (packetsNotFiltered) {
+        packets = JSON.parse(JSON.stringify(packetsNotFiltered));
+    }
+
+    packetFilterState.hideARP = $("#ARPFilterCheckbox").is(":checked");
+    packetFilterState.hideSTP = $("#STPFilterCheckbox").is(":checked");
+    packetFilterState.hideSYN = $("#SYNFilterCheckbox").is(":checked");
+
+    if (packets) {
+        FilterPackets();
+        if (shared) {
+            SetSharedNetworkPlayerState();
+        } else {
+            SetNetworkPlayerState(0);
+        }
+    }
+};
+
 // 2 states:
 // Do we need emulation
 // We have a packets and ready to play packets
@@ -1882,6 +2272,7 @@ const SetNetworkPlayerState = function (simulation_id) {
 
     // Reset?
     if (simulation_id === -1) {
+        packetsNotFiltered = null;
         packets = null;
         pcaps = [];
         SetNetworkPlayerState(0);
@@ -1899,6 +2290,10 @@ const SetNetworkPlayerState = function (simulation_id) {
         PacketPlayer.getInstance().InitPlayer(packets);
 
         // Configure the slider
+        if (!$('#PacketSliderInput')[0] || !$('#PacketSliderInput')[0].noUiSlider) {
+            return;
+        }
+
         $('#PacketSliderInput')[0].noUiSlider.updateOptions({
             start: [1],
             range: {
@@ -2165,9 +2560,9 @@ const TakeGraphPictureAndUpdate = function()
 
     let png_blob = global_cy.png({output: 'blob', maxWidth: 512, maxHeight: 512});
 
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/network/upload_network_picture?guid=' + network_guid,
+        url: ExternalUrlFor('/network/upload_network_picture?guid=' + network_guid),
         data: png_blob,
         processData: false,
         error: function(xhr) {
@@ -2203,6 +2598,11 @@ const CalculateDropOffset = function(elem_x, elem_y)
 
         ret.x = (elem_x - ret.x) / global_cy.zoom();
         ret.y = (elem_y - ret.y) / global_cy.zoom();
+        
+        // Apply snap-to-grid
+        const baseGridSize = 25;
+        ret.x = Math.round(ret.x / baseGridSize) * baseGridSize;
+        ret.y = Math.round(ret.y / baseGridSize) * baseGridSize;
     }
 
     return ret;
@@ -2217,9 +2617,9 @@ const UpdateNetworkConfig = function()
     let data = {'network_title' : network_title, 'network_description' : network_description,
     'zoom' : global_cy.zoom(),'pan_x' : global_cy.pan().x, 'pan_y' : global_cy.pan().y};
 
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/network/update_network_config?guid=' + network_guid,
+        url: ExternalUrlFor('/network/update_network_config?guid=' + network_guid),
         data: JSON.stringify(data),
         contentType: "application/json; charset=utf-8",
         success: function(data, textStatus, xhr) {
@@ -2235,9 +2635,9 @@ const UpdateNetworkConfig = function()
 
 const CopyNetwork = function ()
 {
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
-        url: '/network/copy_network?guid=' + network_guid,
+        url: ExternalUrlFor('/network/copy_network?guid=' + network_guid),
         data: '',
         success: function(data, textStatus, xhr) {
             if (xhr.status === 200)
@@ -2298,4 +2698,276 @@ const RestoreNetworkObject = function (){
     edges=x.edges;
 
     return 0;
+}
+
+// ========== COMMAND EDITING UTILITIES ==========
+// Global variables to track editing state
+let editingJobId = null;
+let editingDeviceType = null;
+
+// Function to enter edit mode
+const EnterEditMode = function(deviceType, jobId, jobTypeId) {
+    editingJobId = jobId;
+    editingDeviceType = deviceType;
+
+    // Change submit button text
+    const submitButton = document.getElementById(`config_${deviceType}_main_form_submit_button`);
+    if (submitButton) {
+        submitButton.textContent = 'Сохранить изменения';
+    }
+
+    // Change label text from "Выполнить команду" to "Редактировать команду"
+    const selectLabel = $(`label[for="config_${deviceType}_job_select_field"]`);
+    if (selectLabel.length) {
+        selectLabel.text('Редактировать команду');
+    }
+
+    // Hide the select dropdown and show command name
+    const selectField = document.getElementById(`config_${deviceType}_job_select_field`);
+    if (selectField) {
+        selectField.style.display = 'none';
+
+        // Remove old command display if exists
+        const existingDisplay = document.getElementById(`config_${deviceType}_edit_command_display`);
+        if (existingDisplay) {
+            existingDisplay.remove();
+        }
+
+        // Get command name from the selected option in HTML
+        const selectedOption = selectField.querySelector(`option[value="${jobTypeId}"]`);
+        const commandName = selectedOption ? selectedOption.textContent : 'Команда';
+
+        // Create and insert command name display
+        const commandDisplay = document.createElement('input');
+        commandDisplay.type = 'text';
+        commandDisplay.id = `config_${deviceType}_edit_command_display`;
+        commandDisplay.className = 'form-control form-control-sm';
+        commandDisplay.value = commandName;
+        commandDisplay.disabled = true;
+        selectField.parentNode.insertBefore(commandDisplay, selectField.nextSibling);
+    }
+
+    // Highlight the editing command
+    $(`#config_${deviceType}_job_list li`).removeClass('editing-command');
+    const listItem = $(`#config_${deviceType}_job_delete_${jobId}`).closest('li');
+    listItem.addClass('editing-command');
+
+    // Highlight only the input fields area after it's inserted into DOM
+    setTimeout(() => {
+        const jobList = document.getElementById(`config_${deviceType}_job_list`);
+        if (jobList) {
+            const inputDiv = $(jobList).prev(`div[name="config_${deviceType}_select_input"]`);
+            if (inputDiv.length) {
+                inputDiv.addClass('editing-form-area');
+            }
+        }
+
+        // Scroll to the "Редактировать команду" label (select field)
+        // This helps when user clicks edit on a command at the bottom of the list
+        const selectLabel = $(`label[for="config_${deviceType}_job_select_field"]`);
+        if (selectLabel.length) {
+            selectLabel[0].scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+                inline: 'nearest'
+            });
+        }
+    }, 50);
+};
+
+// Function to exit edit mode
+const ExitEditMode = function(deviceType) {
+    editingJobId = null;
+    editingDeviceType = null;
+
+    // Reset submit button text
+    const submitButton = document.getElementById(`config_${deviceType}_main_form_submit_button`);
+    if (submitButton) {
+        submitButton.textContent = 'Сохранить';
+    }
+
+    // Reset label text back to "Выполнить команду"
+    const selectLabel = $(`label[for="config_${deviceType}_job_select_field"]`);
+    if (selectLabel.length) {
+        selectLabel.text('Выполнить команду');
+    }
+
+    // Remove command text display
+    const commandDisplay = document.getElementById(`config_${deviceType}_edit_command_display`);
+    if (commandDisplay) {
+        commandDisplay.remove();
+    }
+
+    // Show the select dropdown again
+    const selectField = document.getElementById(`config_${deviceType}_job_select_field`);
+    if (selectField) {
+        selectField.style.display = 'block';
+        selectField.value = '0';
+    }
+
+    // Remove highlight from command and input areas
+    $(`#config_${deviceType}_job_list li`).removeClass('editing-command');
+    $(`div[name="config_${deviceType}_select_input"]`).removeClass('editing-form-area');
+
+    // Clear form inputs
+    $('div[name="config_' + deviceType + '_select_input"]').remove();
+};
+
+// Function to delete old job and save new configuration
+const DeleteAndSaveJob = function(deviceType, updateFunction, formData, deviceId) {
+    if (!editingJobId || editingDeviceType !== deviceType) {
+        // Not in edit mode, just save
+        updateFunction(formData, deviceId);
+        return;
+    }
+
+    // In edit mode: pass editing_job_id to server
+    // Server will validate first, then delete old and add new atomically
+    formData += '&editing_job_id=' + encodeURIComponent(editingJobId);
+
+    updateFunction(formData, deviceId);
+};
+
+// Grid drawing functions
+const initGrid = function(cy) {
+    if (!cy) return;
+
+    // Clean up previous listener
+    if (typeof gridCanvasLayer !== 'undefined' && gridCanvasLayer && gridCanvasLayer.resizeAndDrawCanvas) {
+        window.removeEventListener('resize', gridCanvasLayer.resizeAndDrawCanvas);
+    }
+
+    // Remove old grid canvas if exists
+    const oldCanvas = document.getElementById('grid-canvas-static');
+    if (oldCanvas) {
+        oldCanvas.remove();
+    }
+
+    // Create canvas with absolute positioning to overlay on top of cytoscape container
+    const canvas = document.createElement('canvas');
+    canvas.id = 'grid-canvas-static';
+    canvas.style.position = 'absolute';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.pointerEvents = 'none';
+
+    const container = cy.container();
+    container.insertBefore(canvas, container.firstChild);
+
+    const ctx = canvas.getContext('2d');
+
+    const resizeAndDrawCanvas = function() {
+        const pixelRatio = window.devicePixelRatio || 1;
+        
+        // Use container dimensions instead of window dimensions to prevent distortion
+        // when container is not full screen
+        canvas.width = container.clientWidth * pixelRatio;
+        canvas.height = container.clientHeight * pixelRatio;
+
+        // Always redraw when resizing
+        if (gridCanvasLayer) {
+            drawGrid();
+        }
+    };
+
+    gridCanvasLayer = {
+        canvas: canvas,
+        ctx: ctx,
+        resizeAndDrawCanvas: resizeAndDrawCanvas
+    };
+
+    resizeAndDrawCanvas();
+
+    // Add event listener for resize
+    window.addEventListener('resize', resizeAndDrawCanvas);
+
+    // Add cy resize listener to handle container resizing specifically
+    if (cy) {
+        cy.on('resize', resizeAndDrawCanvas);
+    }
+
+    // Initialize current zoom from cytoscape
+    if (cy && cy.zoom) {
+        currentGridZoom = cy.zoom();
+    }
+
+    // Draw grid
+    drawGrid();
+};
+
+const drawGrid = function() {
+    if (!gridCanvasLayer) {
+        return;
+    }
+
+    const canvas = gridCanvasLayer.canvas;
+    const ctx = gridCanvasLayer.ctx;
+
+    if (!canvas || !ctx) {
+        return;
+    }
+
+    // Scale grid with zoom: at max zoom (2.0) = 50px like before, at min zoom (0.5) = small cells
+    const gridSize = 25 * currentGridZoom; // 25 * 2.0 = 50px (max zoom), 25 * 0.5 = 12.5px (min zoom)
+    const pixelRatio = window.devicePixelRatio || 1;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const screenWidth = canvas.width / pixelRatio;
+    const screenHeight = canvas.height / pixelRatio;
+
+    // Get pan offset to align grid with cytoscape coordinate system
+    let panX = 0;
+    let panY = 0;
+    if (global_cy && global_cy.pan) {
+        const pan = global_cy.pan();
+        panX = pan.x;
+        panY = pan.y;
+    }
+
+    ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+
+    // Draw grid lines across entire viewport
+    ctx.strokeStyle = 'rgba(200, 200, 200, 0.4)';
+    ctx.lineWidth = 1;
+
+    ctx.beginPath();
+
+    // Calculate grid origin with pan offset
+    // Grid should be offset by pan to stay aligned with nodes
+    const gridOriginX = panX % gridSize;
+    const gridOriginY = panY % gridSize;
+
+    // Vertical lines across entire viewport
+    let verticalCount = 0;
+    const startX = Math.floor(-gridOriginX / gridSize) * gridSize + gridOriginX;
+    for (let x = startX; x <= screenWidth; x += gridSize) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, screenHeight);
+        verticalCount++;
+    }
+
+    // Horizontal lines across entire viewport
+    let horizontalCount = 0;
+    const startY = Math.floor(-gridOriginY / gridSize) * gridSize + gridOriginY;
+    for (let y = startY; y <= screenHeight; y += gridSize) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(screenWidth, y);
+        horizontalCount++;
+    }
+
+    ctx.stroke();
+};
+
+
+// Update grid when config panel opens/closes
+const updateGridForConfigPanel = function() {
+    if (gridCanvasLayer && gridCanvasLayer.resizeAndDrawCanvas) {
+        // Small delay to let DOM update
+        setTimeout(function() {
+            gridCanvasLayer.resizeAndDrawCanvas();
+        }, 50);
+    }
 }

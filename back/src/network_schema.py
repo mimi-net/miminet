@@ -1,7 +1,7 @@
 """Classes for deserializing a Miminet network"""
 
 from dataclasses import dataclass
-from typing import Union, Optional
+from typing import Optional, Union
 
 
 @dataclass
@@ -115,6 +115,7 @@ class EdgeData:
     source: str
     target: str
     loss_percentage: int = 0
+    duplicate_percentage: int = 0
 
 
 @dataclass

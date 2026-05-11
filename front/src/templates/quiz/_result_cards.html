@@ -1,0 +1,88 @@
+{% macro render_answer_items(items) -%}
+    {% if items %}
+        <ul class="answer-preview__list">
+            {% for item in items %}
+                <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="answer-preview__empty">Ответ недоступен</p>
+    {% endif %}
+{%- endmacro %}
+
+<div class="row">
+    {% for q in results %}
+        <div class="col-12 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body result-card__body">
+                    <div class="result-card__content">
+                        <h5 class="mb-1">
+                            {% if q.question_type != 'practice' %}
+                                {% if q.max_score == 0 %}
+                                    <i class="bx bx-loader-circle text-secondary"></i>
+                                {% elif q.score == q.max_score %}
+                                    <i class="bx bx-check-circle text-success"></i>
+                                {% elif (q.score == 0) and (q.max_score != 0) %}
+                                    <i class="bx bx-x-circle text-danger"></i>
+                                {% else %}
+                                    <i class="bx bx-star text-warning"></i>
+                                {% endif %}
+                            {% endif %}
+                            <span class="markdown-content" data-markdown="{{ q.question_text | e }}"></span>
+                        </h5>
+
+                        {% if q.question_type == 'practice' %}
+                            <p class="card-text mb-0">
+                                <strong>Баллы:</strong>
+                                {% if q.score is not none and q.max_score is not none %}
+                                    {{ q.score }} из {{ q.max_score }}
+                                {% else %}
+                                    Ответ на проверке
+                                {% endif %}
+                            </p>
+                        {% elif q.max_score == 0 %}
+                            <p class="card-text mb-0"><strong>Ответ на проверке</strong></p>
+                        {% else %}
+                            <p class="card-text mb-0"><strong>Баллы:</strong> {{ q.score }} из {{ q.max_score }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="result-card__actions">
+                        {% if q.answer_details and q.answer_details.has_preview %}
+                            <div class="answer-preview">
+                                {% set preview_tone = 'danger' if q.answer_details.show_reference_answer else 'success' %}
+                                <button type="button"
+                                        class="answer-preview__trigger answer-preview__trigger--{{ preview_tone }}"
+                                        aria-label="Посмотреть ответ">!</button>
+
+                                <div class="answer-preview__popup">
+                                    <div class="answer-preview__content">
+                                        <div class="answer-preview__section answer-preview__section--{{ preview_tone }}">
+                                            <p class="answer-preview__title">{{ q.answer_details.user_answer_title }}</p>
+                                            {{ render_answer_items(q.answer_details.user_answer_items) }}
+                                        </div>
+
+                                        {% if q.answer_details.show_reference_answer %}
+                                        <div class="answer-preview__section answer-preview__section--success">
+                                            <p class="answer-preview__title">{{ q.answer_details.correct_answer_title }}</p>
+                                            {{ render_answer_items(q.answer_details.correct_answer_items) }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if q.network_guid %}
+                            <a href="{{ url_for('web_network') }}?guid={{ q.network_guid }}"
+                               target="_blank"
+                               class="btn btn-outline-primary btn-sm">
+                                Посмотреть мой ответ
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>

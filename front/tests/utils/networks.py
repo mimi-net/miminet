@@ -1,11 +1,12 @@
-from selenium.webdriver.common.by import By
-from utils.locators import Location
-from conftest import HOME_PAGE, MiminetTester
 import random
-from typing import Optional, Type, Tuple
-from selenium.common.exceptions import NoSuchElementException
 from json import dumps as json_dumps
+from typing import Optional, Tuple, Type
+
+from conftest import HOME_PAGE, MiminetTester
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
+from utils.locators import Location
 
 
 class NodeType:
@@ -510,6 +511,7 @@ class NodeConfig:
             self.__config_locator == Location.Network.ConfigPanel.Host
             or self.__config_locator == Location.Network.ConfigPanel.Router
             or self.__config_locator == Location.Network.ConfigPanel.Server
+            or self.__config_locator == Location.Network.ConfigPanel.Switch
         ):
             self.__selenium.select_by_value(
                 by, self.__config_locator.JOB_SELECT.selector, str(job_id)

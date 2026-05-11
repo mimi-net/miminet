@@ -1,22 +1,21 @@
+import ipaddress
 import json
 import re
-import ipaddress
 import shlex
-from typing import List, Dict
+from typing import Dict, List
 
-from flask import jsonify, make_response, request, Response
-from flask_login import current_user, login_required
-from miminet_model import Network, Simulate, db
 from configurators import (
-    HostConfigurator,
-    SwitchConfigurator,
-    HubConfigurator,
-    ServerConfigurator,
-    RouterConfigurator,
     EdgeConfigurator,
+    HostConfigurator,
+    HubConfigurator,
+    RouterConfigurator,
+    ServerConfigurator,
+    SwitchConfigurator,
     get_data,
 )
-
+from flask import Response, jsonify, make_response, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
+from miminet_model import Network, Simulate, db
 
 # ------ Argument Validators ------
 # (you can add your checks here)
@@ -64,6 +63,14 @@ def port_check(arg: str) -> bool:
         return False
 
 
+def data_size_check(arg: str) -> bool:
+    """Check data size correctness"""
+    try:
+        return int(arg) in range(0, 65536)
+    except (ValueError, TypeError):
+        return False
+
+
 def name_check(arg: str) -> bool:
     """Check that the name is in the allowed length from 2 to 15,
     from allowed characters: a-z, A-Z, 0-9, -, _."""
@@ -85,6 +92,11 @@ def ascii_check(arg: str) -> bool:
 def emptiness_check(arg: str) -> bool:
     """Check if the Python String is empty or equals 0"""
     return bool(arg and str(arg).strip()) and str(arg) != "0"
+
+
+def time_check(arg: str) -> bool:
+    """Check if a string is >=50 or <= 0 or empty"""
+    return range_check(arg, range(1, 51))
 
 
 def regex_check(arg: str, regex: str) -> bool:
@@ -150,6 +162,7 @@ class ErrorType:
     port = "Неверно указан порт"
     mask = "Неверно указана маска подсети"
     options = "Неверно указаны опции"
+    data_size = "Неверно указан размер данных"
 
 
 def build_error(error_type: str, cmd: str) -> str:
@@ -198,8 +211,8 @@ host_ping_opt_job.add_param("config_host_ping_with_options_ip_input_field").add_
 # send UDP data
 host_udp_job = host.create_job(3, "send -s [0] -p udp [1]:[2]")
 host_udp_job.add_param("config_host_send_udp_data_size_input_field").add_check(
-    port_check
-).set_error_msg(build_error(ErrorType.port, "Отправить данные (UDP)"))
+    data_size_check
+).set_error_msg(build_error(ErrorType.data_size, "Отправить данные (UDP)"))
 host_udp_job.add_param("config_host_send_udp_data_ip_input_field").add_check(
     IPv4_check
 ).set_error_msg(build_error(ErrorType.ip, "Отправить данные (UDP)"))
@@ -210,8 +223,8 @@ host_udp_job.add_param("config_host_send_udp_data_port_input_field").add_check(
 # send TCP data
 host_tcp_job = host.create_job(4, "send -s [0] -p tcp [1]:[2]")
 host_tcp_job.add_param("config_host_send_tcp_data_size_input_field").add_check(
-    port_check
-).set_error_msg(build_error(ErrorType.port, "Отправить данные (TCP)"))
+    data_size_check
+).set_error_msg(build_error(ErrorType.data_size, "Отправить данные (TCP)"))
 host_tcp_job.add_param("config_host_send_tcp_data_ip_input_field").add_check(
     IPv4_check
 ).set_error_msg(build_error(ErrorType.ip, "Отправить данные (TCP)"))
@@ -285,6 +298,52 @@ nat_job = router.create_job(101, "add nat -o [0] -j masquerad")
 nat_job.add_param("config_router_add_nat_masquerade_iface_select_field").add_check(
     emptiness_check
 ).set_error_msg('Не указан интерфейс для команды "Включить NAT masquerade"')
+
+# add Port forwarding TCP
+port_forwarding_tcp_job = router.create_job(
+    109, "port forwarding -p tcp -i [0] from [1] to [2]:[3]"
+)
+port_forwarding_tcp_job.add_param(
+    "config_router_add_port_forwarding_tcp_iface_select_field"
+).add_check(emptiness_check).set_error_msg("Добавить Port forwarding для TCP")
+port_forwarding_tcp_job.add_param(
+    "config_router_add_port_forwarding_tcp_port_input_field"
+).add_check(port_check).set_error_msg(
+    build_error(ErrorType.port, "Добавить Port forwarding для TCP")
+)
+port_forwarding_tcp_job.add_param(
+    "config_router_add_port_forwarding_tcp_dest_ip_input_field"
+).add_check(IPv4_check).set_error_msg(
+    build_error(ErrorType.ip, "Добавить Port forwarding для TCP")
+)
+port_forwarding_tcp_job.add_param(
+    "config_router_add_port_forwarding_tcp_dest_port_input_field"
+).add_check(port_check).set_error_msg(
+    build_error(ErrorType.port, "Добавить Port forwarding для TCP")
+)
+
+# add Port forwarding UDP
+port_forwarding_udp_job = router.create_job(
+    110, "port forwarding -p udp -i [0] from [1] to [2]:[3]"
+)
+port_forwarding_udp_job.add_param(
+    "config_router_add_port_forwarding_udp_iface_select_field"
+).add_check(emptiness_check).set_error_msg("Добавить Port forwarding для UDP")
+port_forwarding_udp_job.add_param(
+    "config_router_add_port_forwarding_udp_port_input_field"
+).add_check(port_check).set_error_msg(
+    build_error(ErrorType.port, "Добавить Port forwarding для UDP")
+)
+port_forwarding_udp_job.add_param(
+    "config_router_add_port_forwarding_udp_dest_ip_input_field"
+).add_check(IPv4_check).set_error_msg(
+    build_error(ErrorType.ip, "Добавить Port forwarding для UDP")
+)
+port_forwarding_udp_job.add_param(
+    "config_router_add_port_forwarding_udp_dest_port_input_field"
+).add_check(port_check).set_error_msg(
+    build_error(ErrorType.port, "Добавить Port forwarding для UDP")
+)
 
 # Add route
 router_add_route_job = router.create_job(102, "ip route add [0]/[1] via [2]")
@@ -366,6 +425,22 @@ arp_proxy_job.add_param("router_connection_host_label_hidden").add_check(
     emptiness_check
 ).set_error_msg('Не указан интерфейс для команды "Добавить ARP Proxy-интерфейс"')
 
+
+# ~ ~ ~ SWITCH JOBS ~ ~ ~
+link_down_job = switch.create_job(6, "link down [1]")
+link_down_job.add_param("config_switch_link_down_iface_select_field").add_check(
+    emptiness_check
+).set_error_msg('Не указан интерфейс для команды "Удалить линк"')
+link_down_job.add_param("switch_connection_host_label_hidden").add_check(
+    emptiness_check
+).set_error_msg('Не указан интерфейс для команды "Удалить линк"')
+
+sleep_job = switch.create_job(7, "sleep [0] seconds")
+sleep_job.add_param("config_switch_sleep").add_check(time_check).set_error_msg(
+    build_error(ErrorType.options, "sleep")
+)
+
+
 # ~ ~ ~ SERVER JOBS ~ ~ ~
 
 # ping -c 1
@@ -422,37 +497,37 @@ start_dhcp_server.add_param(
 # ------ request handlers ------
 
 
-@login_required
+@jwt_required()
 def save_hub_config():
     return hub.configure()
 
 
-@login_required
+@jwt_required()
 def save_switch_config():
     return switch.configure()
 
 
-@login_required
+@jwt_required()
 def save_host_config():
     return host.configure()
 
 
-@login_required
+@jwt_required()
 def save_router_config():
     return router.configure()
 
 
-@login_required
+@jwt_required()
 def save_server_config():
     return server.configure()
 
 
-@login_required
+@jwt_required()
 def save_edge_config():
     return edge.configure()
 
 
-@login_required
+@jwt_required()
 def delete_job():
     """
     Called when job is removed for an network device
@@ -461,7 +536,7 @@ def delete_job():
     def build_response(msg: str) -> Response:
         return make_response(jsonify({"message": msg}), 400)
 
-    user = current_user
+    user_id = get_jwt_identity()
     network_guid = get_data("guid")
     job_id = get_data("id")
 
@@ -473,7 +548,7 @@ def delete_job():
 
     cur_network: Network = (
         Network.query.filter(Network.guid == network_guid)
-        .filter(Network.author_id == user.id)
+        .filter(Network.author_id == user_id)
         .first()
     )
 
