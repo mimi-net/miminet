@@ -9,7 +9,7 @@ from celery_app import (
     SEND_NETWORK_RESPONSE_ROUTING_KEY,
     app,
 )
-from mininet.log import setLogLevel, error
+from mininet.log import setLogLevel
 from network_schema import Network
 from emulator import emulate
 
