@@ -3,7 +3,7 @@ import os
 import shutil
 import uuid
 import logging
-import logging_config  
+import logging_config
 from sqlalchemy.orm.exc import StaleDataError
 from app import app as flask_app
 from celery.exceptions import TimeoutError
@@ -17,6 +17,7 @@ from quiz.service.session_question_service import (
 
 logger = logging.getLogger(__name__)
 logging_config.configure_logging(logger)
+
 
 @app.task(bind=True, queue="common-results-queue")
 def save_simulate_result(self, animation, pcaps):
@@ -99,7 +100,7 @@ def perform_task_check(session_question_id, data_list):
             except Exception as e:
                 logger.error(
                     "Check task emulation create failed",
-                    extra={"error": str(e), "guid": guid}
+                    extra={"error": str(e), "guid": guid},
                 )
 
         answer_on_exam_without_session(networks_to_check, guid)
@@ -132,7 +133,7 @@ def perform_task_check(session_question_id, data_list):
                     extra={
                         "error": str(e),
                         "session_question_id": session_question_id,
-                    }
+                    },
                 )
 
         with flask_app.app_context():
@@ -151,7 +152,7 @@ def create_emulation_task(net_schema):
     # Log start of sending task to RabbitMQ
     logger.info(
         "Rabbitmq send task start",
-        extra={"routing_key": routing_key, "exchange": SEND_NETWORK_EXCHANGE.name}
+        extra={"routing_key": routing_key, "exchange": SEND_NETWORK_EXCHANGE.name},
     )
 
     try:
@@ -171,14 +172,14 @@ def create_emulation_task(net_schema):
                 "exchange": SEND_NETWORK_EXCHANGE.name,
                 "error": str(e),
                 "hint": "Check RabbitMQ disk_free_limit and broker availability",
-            }
+            },
         )
         raise
 
     # Log successful scheduling of task in queue
     logger.info(
         "Rabbitmq send task scheduled",
-        extra={"routing_key": routing_key, "task_id": async_obj.id}
+        extra={"routing_key": routing_key, "task_id": async_obj.id},
     )
 
     async_res = AsyncResult(id=async_obj.id, app=app)
@@ -190,14 +191,14 @@ def create_emulation_task(net_schema):
             # Log successful result receipt from worker
             logger.info(
                 "Rabbitmq receive result success",
-                extra={"routing_key": routing_key, "task_id": async_obj.id}
+                extra={"routing_key": routing_key, "task_id": async_obj.id},
             )
             return animation
     except TimeoutError:
         # Log timeout while waiting for result
         logger.error(
             "Rabbitmq receive result timeout",
-            extra={"routing_key": routing_key, "task_id": async_obj.id}
+            extra={"routing_key": routing_key, "task_id": async_obj.id},
         )
         # TODO improve error message (add user info)
         raise Exception(f"""Check task failed!\nNetwork Schema: {net_schema}.""")
@@ -205,6 +206,10 @@ def create_emulation_task(net_schema):
         # Log any other errors while waiting for result
         logger.error(
             "Rabbitmq receive result failed",
-            extra={"routing_key": routing_key, "task_id": async_obj.id, "error": str(e)}
+            extra={
+                "routing_key": routing_key,
+                "task_id": async_obj.id,
+                "error": str(e),
+            },
         )
         raise

@@ -11,6 +11,7 @@ from werkzeug.wrappers import Response
 logger = logging.getLogger(__name__)
 logging_config.configure_logging(logger)
 
+
 @jwt_required()
 def run_simulation() -> Response:
     """Add new celery task and create record (for emulation result) in database."""
@@ -19,7 +20,11 @@ def run_simulation() -> Response:
 
     logger.info(
         "Run simulation start",
-        extra={"user_id": getattr(user_id, "id", None), "guid": network_guid, "method": request.method}
+        extra={
+            "user_id": getattr(user_id, "id", None),
+            "guid": network_guid,
+            "method": request.method,
+        },
     )
 
     if not network_guid:
@@ -53,7 +58,7 @@ def run_simulation() -> Response:
 
         logger.info(
             "Run simulation cleanup",
-            extra={"network_id": net.id, "removed_sims": removed}
+            extra={"network_id": net.id, "removed_sims": removed},
         )
 
         # Write log
@@ -70,7 +75,11 @@ def run_simulation() -> Response:
 
         logger.info(
             "Run simulation created",
-            extra={"network_id": net.id, "simulation_id": sim.id, "task_guid": str(task_guid)}
+            extra={
+                "network_id": net.id,
+                "simulation_id": sim.id,
+                "task_guid": str(task_guid),
+            },
         )
 
         # Send emulation task to celery
@@ -92,7 +101,7 @@ def run_simulation() -> Response:
                     "task_guid": str(task_guid),
                     "routing_key": routing_key,
                     "exchange": SEND_NETWORK_EXCHANGE.name,
-                }
+                },
             )
         except Exception as e:
             logger.error(
@@ -103,7 +112,7 @@ def run_simulation() -> Response:
                     "routing_key": routing_key,
                     "exchange": SEND_NETWORK_EXCHANGE.name,
                     "error": str(e),
-                }
+                },
             )
             raise
 

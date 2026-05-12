@@ -85,10 +85,7 @@ def net_dev_checker(dev) -> bool:
         # Log invalid interface name
         logger.warning(
             "Net dev is invalid",
-            extra={
-                "dev": dev,
-                "reason": "device name not matched"
-            }
+            extra={"dev": dev, "reason": "device name not matched"},
         )
         return False
     return True
@@ -110,15 +107,13 @@ def ip_addr_add_checker(ip, mask, dev) -> bool:
     except (ValueError, TypeError):
         # Log invalid mask
         logger.warning(
-            "Ip addr add, invalid mask",
-            extra={"ip": ip, "mask": mask, "dev": dev}
+            "Ip addr add, invalid mask", extra={"ip": ip, "mask": mask, "dev": dev}
         )
         return False
     if not net_dev_checker(dev):
         # Log invalid device when adding IP
         logger.warning(
-            "Ip addr add, invalid dev",
-            extra={"ip": ip, "mask": mask, "dev": dev}
+            "Ip addr add, invalid dev", extra={"ip": ip, "mask": mask, "dev": dev}
         )
         return False
     return True
@@ -169,7 +164,12 @@ def ipip_interface_checker(ip_start, ip_end, ip_int, name_int) -> bool:
         # Log missing/invalid start IP of IPIP tunnel
         logger.warning(
             "Ipip, invalid start ip",
-            extra={"ip_start": ip_start, "ip_end": ip_end, "ip_int": ip_int, "name": name_int}
+            extra={
+                "ip_start": ip_start,
+                "ip_end": ip_end,
+                "ip_int": ip_int,
+                "name": name_int,
+            },
         )
         return False
 
@@ -177,7 +177,12 @@ def ipip_interface_checker(ip_start, ip_end, ip_int, name_int) -> bool:
         # Log missing/invalid end IP of IPIP tunnel
         logger.warning(
             "Ipip, invalid end ip",
-            extra={"ip_start": ip_start, "ip_end": ip_end, "ip_int": ip_int, "name": name_int}
+            extra={
+                "ip_start": ip_start,
+                "ip_end": ip_end,
+                "ip_int": ip_int,
+                "name": name_int,
+            },
         )
         return False
 
@@ -185,7 +190,12 @@ def ipip_interface_checker(ip_start, ip_end, ip_int, name_int) -> bool:
         # Log missing/invalid IP of IPIP interface
         logger.warning(
             "Ipip, invalid iface ip",
-            extra={"ip_start": ip_start, "ip_end": ip_end, "ip_int": ip_int, "name": name_int}
+            extra={
+                "ip_start": ip_start,
+                "ip_end": ip_end,
+                "ip_int": ip_int,
+                "name": name_int,
+            },
         )
         return False
 
@@ -193,7 +203,12 @@ def ipip_interface_checker(ip_start, ip_end, ip_int, name_int) -> bool:
         # Log invalid IPIP interface name
         logger.warning(
             "Ipip, invalid iface name",
-            extra={"ip_start": ip_start, "ip_end": ip_end, "ip_int": ip_int, "name": name_int}
+            extra={
+                "ip_start": ip_start,
+                "ip_end": ip_end,
+                "ip_int": ip_int,
+                "name": name_int,
+            },
         )
         return False
 
@@ -259,6 +274,7 @@ def valid_iface(iface) -> bool:
         return False
     return True
 
+
 def valid_sleep(time) -> bool:
     try:
         _ = int(time)
@@ -285,7 +301,7 @@ def sleep_handler(job: Job, job_host: Any) -> None:
     time.sleep(int(arg_time))
 
 
-def run_command(job, host, command) -> (str | Any | None):
+def run_command(job, host, command) -> str | Any | None:
     """Does the same as job_host.cmd(command) and returns the same output with additional logs."""
     output = host.cmd(command)
     return_code = host.cmd(f"echo $?")
@@ -299,7 +315,7 @@ def run_command(job, host, command) -> (str | Any | None):
                 "command": command,
                 "return_code": return_code,
                 "stderr": output,
-            }
+            },
         )
     else:
         # Log successful command execution
@@ -311,10 +327,11 @@ def run_command(job, host, command) -> (str | Any | None):
                 "command": command,
                 "return_code": return_code,
                 "stdout": output,
-            }
+            },
         )
     return output
-    
+
+
 def ping_handler(job: Job, job_host: Any) -> None:
     """Execute ping -c 1"""
     arg_ip = job.arg_1
@@ -323,6 +340,7 @@ def ping_handler(job: Job, job_host: Any) -> None:
         return
     cmd = f"ping -c 1 {arg_ip}"
     run_command(job, job_host, cmd)
+
 
 def ping_with_options_handler(job: Job, job_host: Any) -> None:
     """Execute ping with options"""
@@ -336,7 +354,7 @@ def ping_with_options_handler(job: Job, job_host: Any) -> None:
     if len(arg_opt) > 0:
         arg_opt = ping_options_filter(arg_opt)
     cmd = f"ping -c 1 {arg_opt} {arg_ip}"
-    run_command(job, job_host, cmd)    
+    run_command(job, job_host, cmd)
 
 
 def get_sending_data_argument(job: Job) -> tuple[str | int, str | int, str | int]:
@@ -359,6 +377,7 @@ def sending_udp_data_handler(job: Job, job_host: Any) -> None:
 
     cmd = f"dd if=/dev/urandom bs={arg_size} count=1 | nc -uq1 {arg_ip} {arg_port}"
     run_command(job, job_host, cmd)
+
 
 def sending_tcp_data_handler(job: Job, job_host: Any) -> None:
     """Method for sending TCP data sending"""
@@ -399,12 +418,13 @@ def ip_addr_add_handler(job: Job, job_host: Any) -> None:
         # Log skipping ip addr add due to invalid args
         logger.error(
             "Ip addr add skipped",
-            extra={"dev": arg_dev, "ip": arg_ip, "mask": arg_mask}
+            extra={"dev": arg_dev, "ip": arg_ip, "mask": arg_mask},
         )
         return
 
     cmd = f"ip addr add {arg_ip}/{arg_mask} dev {arg_dev}"
     run_command(job, job_host, cmd)
+
 
 def iptables_handler(job: Job, job_host: Any) -> None:
     """Method for adding forwarding rule"""
@@ -472,6 +492,7 @@ def block_tcp_udp_port(job: Job, job_host: Any) -> None:
     cmd = f"iptables -A INPUT -p udp --dport {arg_port} -j DROP"
     run_command(job, job_host, cmd)
 
+
 def open_tcp_server_handler(job: Job, job_host: Any) -> None:
     """ "Method for open tcp server"""
     arg_ip = job.arg_1
@@ -479,11 +500,10 @@ def open_tcp_server_handler(job: Job, job_host: Any) -> None:
 
     if not valid_port(arg_port) or not valid_ip(arg_ip):
         return
-
     
     cmd = f"nohup nc -k -d {arg_ip} -l {arg_port} > /tmp/tcpserver 2>&1 < /dev/null &"
     run_command(job, job_host, cmd)
-    
+
 
 def open_udp_server_handler(job: Job, job_host: Any) -> None:
     """ "Method for open udp server"""
@@ -529,6 +549,7 @@ def subinterface_with_vlan(job: Job, job_host: Any) -> None:
     cmd = f"ip link set dev {arg_intf_name}.{arg_vlan} up"
     run_command(job, job_host, cmd)
 
+
 def add_ipip_interface(job: Job, job_host: Any) -> None:
     """Method for adding ipip-interface"""
     arg_ip_start = job.arg_1
@@ -545,7 +566,7 @@ def add_ipip_interface(job: Job, job_host: Any) -> None:
                 "ip_end": arg_ip_end,
                 "ip_int": arg_ip_int,
                 "name": arg_name_int,
-            }
+            },
         )
         return
 
@@ -553,6 +574,7 @@ def add_ipip_interface(job: Job, job_host: Any) -> None:
     run_command(job, job_host, cmd)
     cmd = f"ifconfig {arg_name_int} {arg_ip_int}"
     run_command(job, job_host, cmd)
+
 
 def add_gre(job: Job, job_host: Any) -> None:
     arg_ip_start = job.arg_1
@@ -569,6 +591,7 @@ def add_gre(job: Job, job_host: Any) -> None:
     run_command(job, job_host, cmd)
     cmd = f"ip link set {arg_name_iface} up"
     run_command(job, job_host, cmd)
+
 
 def arp_proxy_enable(job: Job, job_host: Any) -> None:
     """Enable ARP proxying on the interface"""
@@ -694,21 +717,15 @@ class Jobs:
         job_id = getattr(self._job, "job_id", None)
         host_id = getattr(self._job, "host_id", None)
         # Log job start
-        logger.debug(
-            "Job start",
-            extra={"job_id": job_id, "host_id": host_id}
-        )
+        logger.debug("Job start", extra={"job_id": job_id, "host_id": host_id})
         try:
             self._strategy(self._job, self._job_host)
             # Log job success
-            logger.debug(
-                "Job done",
-                extra={"job_id": job_id, "host_id": host_id}
-            )
+            logger.debug("Job done", extra={"job_id": job_id, "host_id": host_id})
         except Exception as e:
             # Log job failure
             logger.error(
                 "Job failed",
-                extra={"job_id": job_id, "host_id": host_id, "error": str(e)}
+                extra={"job_id": job_id, "host_id": host_id, "error": str(e)},
             )
             raise

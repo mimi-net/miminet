@@ -16,6 +16,7 @@ from network_topology import MiminetTopology
 logger = logging.getLogger(__name__)
 logging_config.configure_logging(logger)
 
+
 def emulate(
     network: Network,
 ) -> tuple[list[list], list[tuple[bytes, str]]]:
@@ -32,9 +33,11 @@ def emulate(
 
     logger.info(
         "Emulation started",
-        extra={"jobs_count": len(network.jobs) if getattr(network, "jobs", None) else 0}
+        extra={
+            "jobs_count": len(network.jobs) if getattr(network, "jobs", None) else 0
+        },
     )
-    
+
     setLogLevel("info")
 
     # Validate job limit
@@ -134,11 +137,8 @@ def emulate(
 
     except Exception as e:
 
-        logger.error(
-            "Miminet configuration failed",
-            extra={"error": str(e)}
-        )
-        
+        logger.error("Miminet configuration failed", extra={"error": str(e)})
+
         error(f"An error occurred during mininet configuration: {str(e)}")
         subprocess.call("mn -c", shell=True)
 
@@ -163,9 +163,9 @@ def emulate(
         extra={
             "pcaps_count": len(pcaps),
             "duration_ms": duration_ms,
-        }
+        },
     )
-    
+
     return animation, pcaps
 
 

@@ -2,7 +2,7 @@ import json
 import os
 import signal
 import logging
-import logging_config  
+import logging_config
 import marshmallow_dataclass
 from celery_app import (
     SEND_NETWORK_RESPONSE_EXCHANGE,
@@ -15,6 +15,7 @@ from emulator import emulate
 
 logger = logging.getLogger(__name__)
 logging_config.configure_logging(logger)
+
 
 def run_miminet(network_json: str):
     """Load network from JSON and start emulation safely.

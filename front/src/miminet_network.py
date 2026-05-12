@@ -25,6 +25,7 @@ PREVIEW_IMAGES_ROOT = "static/images/preview"
 logger = logging.getLogger(__name__)
 logging_config.configure_logging(logger)
 
+
 def CORS_header(response):
     response.headers.add("Access-Control-Allow-Credentials", "true")
     return response

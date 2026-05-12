@@ -52,7 +52,6 @@ class JsonFormatter(logging.Formatter):
         else:
             return level
 
-
     def format(self, record: logging.LogRecord) -> str:
         extras = {
             k: v
@@ -63,7 +62,9 @@ class JsonFormatter(logging.Formatter):
             "message": record.getMessage(),
             "level": self.convert_level(record.levelname),
             "logger": record.name,
-            "timestamp": datetime.fromtimestamp(record.created, tz=timezone.utc).isoformat(),
+            "timestamp": datetime.fromtimestamp(
+                record.created, tz=timezone.utc
+            ).isoformat(),
             "extra": {},
         }
         if extras:
@@ -84,7 +85,10 @@ class HttpPostHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:
         try:
             payload = self.format(record)
-            headers = {"Content-Type": "application/json", "log-group": MIMINET_LOG_GROUP}
+            headers = {
+                "Content-Type": "application/json",
+                "log-group": MIMINET_LOG_GROUP,
+            }
             requests.post(self.url, data=payload, headers=headers, timeout=self.timeout)
             print("log requested")
         except Exception:
