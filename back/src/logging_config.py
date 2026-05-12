@@ -8,7 +8,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
-UNIFIED_AGENT_URL = os.getenv("UNIFIED_AGENT_URL", "http://localhost")
+if os.getenv("MODE") == "dev":
+    UNIFIED_AGENT_URL = "http://localhost"
+else:
+    UNIFIED_AGENT_URL = os.getenv("UNIFIED_AGENT_URL", "http://localhost")
 HTTP_TIMEOUT = float(os.getenv("LOG_HTTP_TIMEOUT", "1.0"))
 CELERY_LOG_GROUP = os.getenv("CELERY_LOG_GROUP", "")
 

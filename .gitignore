@@ -7,7 +7,6 @@ vk_auth.json
 __init__.py
 eslint.config.mjs
 back/rabbitmq/rabbitmq/
-.env
 *.log
 *.ini
 front/rabbitmq/rabbitmq
