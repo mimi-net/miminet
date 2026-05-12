@@ -513,11 +513,11 @@ def generate_ai_task():
             )
         except Exception as e:
             logger.error("AI generate unexpected error: %s", e, exc_info=True)
-            return make_response(jsonify({"error": f"Ошибка API: {e}"}), 500)
+            return make_response(jsonify({"error": "Ошибка API"}), 500)
 
     if topology is None:
         logger.error("AI generate failed after 3 attempts: %s", last_error)
-        return make_response(jsonify({"error": last_error}), 500)
+        return make_response(jsonify({"error": "Не удалось сгенерировать топологию. Повторите попытку позже."}), 500)
 
     # Нормализация типов
     for node in topology.get("nodes", []):
