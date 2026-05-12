@@ -304,7 +304,7 @@ def sleep_handler(job: Job, job_host: Any) -> None:
 def run_command(job, host, command) -> str | Any | None:
     """Does the same as job_host.cmd(command) and returns the same output with additional logs."""
     output = host.cmd(command)
-    return_code = host.cmd(f"echo $?")
+    return_code = host.cmd("echo $?")
     if return_code != "0\r\n":
         # Log failed command execution
         logger.error(
