@@ -389,7 +389,7 @@ def sending_tcp_data_handler(job: Job, job_host: Any) -> None:
 
     cmd = f"dd if=/dev/urandom bs={arg_size} count=1 | nc -w 30 -q1 {arg_ip} {arg_port}"
     run_command(job, job_host, cmd)
-    
+
 
 def traceroute_handler(job: Job, job_host: Any) -> None:
     """Method for executing traceroute"""
@@ -500,7 +500,7 @@ def open_tcp_server_handler(job: Job, job_host: Any) -> None:
 
     if not valid_port(arg_port) or not valid_ip(arg_ip):
         return
-    
+
     cmd = f"nohup nc -k -d {arg_ip} -l {arg_port} > /tmp/tcpserver 2>&1 < /dev/null &"
     run_command(job, job_host, cmd)
 
