@@ -517,7 +517,14 @@ def generate_ai_task():
 
     if topology is None:
         logger.error("AI generate failed after 3 attempts: %s", last_error)
-        return make_response(jsonify({"error": "Не удалось сгенерировать топологию. Повторите попытку позже."}), 500)
+        return make_response(
+            jsonify(
+                {
+                    "error": "Не удалось сгенерировать топологию. Повторите попытку позже."
+                }
+            ),
+            500,
+        )
 
     # Нормализация типов
     for node in topology.get("nodes", []):
