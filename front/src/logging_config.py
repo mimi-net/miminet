@@ -64,6 +64,7 @@ class JsonFormatter(logging.Formatter):
             "level": self.convert_level(record.levelname),
             "logger": record.name,
             "timestamp": datetime.fromtimestamp(record.created, tz=timezone.utc).isoformat(),
+            "extra": {},
         }
         if extras:
             payload["extra"] = extras
