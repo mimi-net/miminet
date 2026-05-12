@@ -1,29 +1,25 @@
 import os
 import uuid
 import logging
-import logging_config 
-from celery_app import (
-    SEND_NETWORK_EXCHANGE,
-    EXCHANGE_TYPE,
-    app,
-)
+import logging_config
+from celery_app import EXCHANGE_TYPE, SEND_NETWORK_EXCHANGE, app
 from flask import jsonify, make_response, redirect, request, url_for
-from flask_login import current_user, login_required
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from miminet_model import Network, Simulate, SimulateLog, db
 from werkzeug.wrappers import Response
 
 logger = logging.getLogger(__name__)
 logging_config.configure_logging(logger)
 
-@login_required
+@jwt_required()
 def run_simulation() -> Response:
     """Add new celery task and create record (for emulation result) in database."""
-    user = current_user
+    user_id = get_jwt_identity()
     network_guid = request.args.get("guid", type=str)
 
     logger.info(
         "Run simulation start",
-        extra={"user_id": getattr(user, "id", None), "guid": network_guid, "method": request.method}
+        extra={"user_id": getattr(user_id, "id", None), "guid": network_guid, "method": request.method}
     )
 
     if not network_guid:
@@ -35,7 +31,7 @@ def run_simulation() -> Response:
 
     net = (
         Network.query.filter(Network.guid == network_guid)
-        .filter(Network.author_id == user.id)
+        .filter(Network.author_id == user_id)
         .first()
     )
 
@@ -118,7 +114,7 @@ def run_simulation() -> Response:
     return redirect(url_for("home"))
 
 
-@login_required
+@jwt_required()
 def check_simulation():
     sim_id = request.args.get("simulation_id", type=int)
     network_guid = request.args.get("network_guid", type=str)

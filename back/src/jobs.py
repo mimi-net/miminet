@@ -1,6 +1,6 @@
+import ipaddress
 import re
 import shlex
-import ipaddress
 import time
 import logging
 import logging_config

@@ -1,7 +1,6 @@
 import logging
 import os
 import time
-from psutil import Process
 from ipmininet.ipnet import IPNet
 from mininet.log import info
 import psutil
@@ -10,6 +9,7 @@ from network_topology import MiminetTopology
 from network_schema import Network
 from net_utils.vlan import setup_vlans, clean_bridges
 from net_utils.vxlan import setup_vtep_interfaces, teardown_vtep_bridges
+from psutil import Process
 
 logger = logging.getLogger(__name__)
 logging_config.configure_logging(logger)

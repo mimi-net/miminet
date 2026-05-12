@@ -1,0 +1,78 @@
+{% extends 'admin/model/create.html' %}
+
+{% block tail %}
+{{ super() }}
+
+<!-- Модальное окно выбора типа вопроса -->
+<div id="questionTypeModal" class="modal" tabindex="-1" role="dialog"
+     style="display:block; position:fixed; z-index:1050; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+    <div class="modal-dialog" role="document" style="margin:10% auto;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Выберите тип вопроса</h5>
+            </div>
+            <div class="modal-body">
+                <form id="questionTypeForm">
+                    <div class="form-group">
+                        <label for="question_type">Тип вопроса:</label>
+                        <select name="question_type" id="question_type" class="form-control select2" required>
+                            <option value="">-- Выберите тип --</option>
+<!--                            <option value="0">Практическое задание</option>-->
+                            <option value="1">С вариантами ответов</option>
+                            <option value="2">На сортировку</option>
+                            <option value="3">На сопоставление</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="continueBtn">Продолжить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('continueBtn').addEventListener('click', function() {
+    const questionType = document.getElementById('question_type').value;
+
+    if (!questionType) {
+        alert('Пожалуйста, выберите тип вопроса');
+        return;
+    }
+
+    fetch('{{ url_for('.get_question_form') }}?type=' + questionType)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('questionTypeModal').style.display = 'none';
+            document.querySelector('.admin-form').innerHTML = html;
+            document.querySelector('.admin-form').style.display = 'block';
+
+            if (questionType === "1") {
+                InitializeQuestionSelectForm();
+            } else if (questionType === "2") {
+                InitializeQuestionOrderForm();
+            } else if (questionType === "3") {
+                InitializeQuestionMatchForm();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ошибка загрузки формы');
+        });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const adminForm = document.querySelector('.admin-form');
+    if (adminForm) {
+        adminForm.style.display = 'none';
+    }
+
+    const saveBtn = document.querySelector('.admin-form .btn-primary');
+    if (saveBtn) {
+        saveBtn.style.display = 'none';
+    }
+});
+</script>
+<script src="{{ url_for('static', filename='admin/question_form.js') }}"></script>
+{% endblock %}

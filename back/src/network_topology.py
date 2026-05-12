@@ -1,7 +1,8 @@
 from typing import List
+
 from ipmininet.ipnet import IPNet
-from ipmininet.ipswitch import IPSwitch
 from ipmininet.ipovs_switch import IPOVSSwitch
+from ipmininet.ipswitch import IPSwitch
 from ipmininet.iptopo import IPTopo
 from ipmininet.router.config import RouterConfig
 from network_schema import Network, Node, NodeConfig, NodeInterface

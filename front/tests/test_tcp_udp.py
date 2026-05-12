@@ -1,9 +1,10 @@
+from typing import Tuple
+
 import pytest
 from conftest import MiminetTester
-from utils.networks import NodeConfig, NodeType, MiminetTestNetwork
-from utils.locators import Location
-from typing import Tuple
 from utils.checkers import TestNetworkComparator
+from utils.locators import Location
+from utils.networks import MiminetTestNetwork, NodeConfig, NodeType
 
 
 class TestTcpUdp:
