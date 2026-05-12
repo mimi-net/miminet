@@ -234,7 +234,7 @@ class MiminetTopology(IPTopo):
                 extra={
                     "event": "capture_setup",
                     "interfaces": interfaces,
-                    "links": [str(l) for l in links],
+                    "links": [str(link) for link in links],
                     "options": {
                         "base_filename": "capture",
                         "extra_arguments": "not igmp",
