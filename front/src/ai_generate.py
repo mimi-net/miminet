@@ -80,33 +80,46 @@ TECHNOLOGY_HINTS = {
     "dhcp": (
         "DHCP",
         "Требует: 1 сервер (server) как DHCP-сервер, 2+ хоста. "
-        "В описании: настроить DHCP-сервер на server_1, хосты должны получить адреса автоматически."
+        "ВАЖНО: DHCP-сервер выдаёт адреса только хостам в той же подсети (relay не поддерживается). "
+        "В описании: настроить DHCP-сервер на server_1 — задать диапазон адресов, маску и шлюз. Хосты должны получить адреса автоматически. "
+        "НЕ писать про несколько пулов и про DHCP relay — это не поддерживается."
     ),
     "stp": (
         "STP/RSTP",
         "Требует: 2+ коммутатора (l2_switch) с избыточными связями (кольцо). "
-        "В описании: настроить STP/RSTP, убедиться что петли устранены, проверить root bridge."
+        "В описании: включить STP или RSTP на коммутаторах через интерфейс эмулятора, при необходимости задать приоритет для root bridge. "
+        "Убедиться что петли устранены. RSTP сходится быстрее (10 сек) чем STP (30 сек)."
     ),
     "nat": (
         "NAT",
         "Требует: 1 роутер (l3_router) на границе между внутренней и внешней сетью, 2+ хоста во внутренней подсети, 1 сервер во внешней. "
         "NAT-роутер — это тот который напрямую соединён и с внутренней подсетью хостов и с внешней сетью сервера. "
-        "В описании: настроить NAT masquerade на пограничном роутере, хосты с приватными адресами должны достигать сервера с публичным адресом."
+        "В описании: настроить NAT masquerade на исходящем интерфейсе пограничного роутера через интерфейс эмулятора. "
+        "Хосты с приватными адресами должны достигать сервера с публичным адресом."
     ),
     "routing": (
         "Статические маршруты",
         "Требует: 1+ роутер (l3_router), 2+ подсети, хосты в разных подсетях. "
-        "В описании: добавить статические маршруты на роутере через интерфейс эмулятора, настроить шлюзы на хостах, проверить ping между подсетями."
+        "В описании: добавить статические маршруты на роутере через интерфейс эмулятора (указать сеть назначения и шлюз), "
+        "настроить шлюзы на хостах, проверить ping между подсетями."
     ),
-    "ipip": (
-        "IPIP-туннель",
-        "Требует: 2 роутера (l3_router) или 2 хоста в разных подсетях. "
-        "В описании: создать IPIP-туннель между двумя узлами через интерфейс эмулятора, назначить адреса туннельным интерфейсам, проверить связность через туннель."
+    "tunnel": (
+        "Туннель (IPIP или GRE)",
+        "Требует: 2 роутера (l3_router) в разных подсетях. "
+        "В описании: создать туннель между двумя роутерами через интерфейс эмулятора (выбрать тип IPIP или GRE, указать локальный и удалённый IP), "
+        "назначить адреса туннельным интерфейсам, добавить маршруты через туннель, проверить связность."
     ),
-    "gre": (
-        "GRE-туннель",
-        "Требует: 2 роутера (l3_router) или 2 хоста в разных подсетях. "
-        "В описании: создать GRE-туннель между двумя узлами через интерфейс эмулятора, назначить адреса туннельным интерфейсам, проверить связность через туннель."
+    "vxlan": (
+        "VXLAN",
+        "Требует: 2+ роутера или хоста, каждый с VXLAN-интерфейсом. "
+        "В описании: настроить VXLAN на узлах через интерфейс эмулятора — указать VNI и удалённый VTEP IP, "
+        "назначить адреса на VXLAN-интерфейсы, проверить связность между узлами через VXLAN-туннель."
+    ),
+    "portforward": (
+        "Port Forwarding",
+        "Требует: 1 роутер (l3_router) с NAT, 1+ сервер во внутренней сети, 1+ хост во внешней сети. "
+        "В описании: настроить проброс порта на роутере через интерфейс эмулятора — указать входящий интерфейс, "
+        "внешний порт, внутренний IP и порт сервера. Проверить доступность сервиса с внешнего хоста."
     ),
 }
 
@@ -116,7 +129,7 @@ DIFFICULTY_HINTS = {
         "Для маршрутизации: 1 роутер соединяет 2 подсети через 2 свитча. "
         "Для VLAN: 1-2 свитча, 2 VLAN, 3-4 хоста. "
         "Для STP: 2-3 свитча в кольце. "
-        "Для туннелей: 2 роутера, туннель между ними."
+        "Для туннелей/VXLAN: 2 роутера, туннель или VXLAN между ними."
     ),
     2: (
         "Средняя топология: ровно 3 роутера, 3+ подсети, коммутаторы для группировки хостов. "
@@ -130,7 +143,7 @@ DIFFICULTY_HINTS = {
         "Также варьируй количество хостов в подсетях (1, 2 или 3 хоста на подсеть) и наличие серверов. "
         "Для VLAN: 3 свитча, 3 VLAN, роутер для межVLAN маршрутизации, транковые порты. "
         "Для STP: 3-4 свитча с несколькими кольцами. "
-        "Для туннелей: 3-4 роутера, туннель поверх транзитной сети."
+        "Для туннелей/VXLAN: 3-4 роутера, туннель или VXLAN поверх транзитной сети."
     ),
     3: (
         "Сложная топология: 5+ роутеров, 4+ подсети, асимметричная маршрутизация или избыточные пути. "
@@ -138,7 +151,7 @@ DIFFICULTY_HINTS = {
         "добавь асимметрию (трафик туда и обратно идёт разными путями) или избыточность (несколько путей между подсетями). "
         "Для VLAN: 4+ свитча, 3+ VLAN, 2 роутера для межVLAN маршрутизации, транки между всеми свитчами. "
         "Для STP: 4-5 свитчей с несколькими кольцами и избыточными связями. "
-        "Для туннелей: 5 роутеров в цепочке, туннель между крайними, NAT на пограничных роутерах. "
+        "Для туннелей/VXLAN: 5 роутеров в цепочке, туннель между крайними, NAT на пограничных роутерах. "
         "Условие должно требовать нетривиальной настройки — асимметрия путей, проверка конкретного маршрута трассировкой."
     ),
 }
@@ -146,7 +159,6 @@ DIFFICULTY_HINTS = {
 MASKS_HINT = (
     "ДОПОЛНИТЕЛЬНОЕ ТРЕБОВАНИЕ к описанию: укажи что для point-to-point линков между роутерами "
     "нужно использовать маску /30, а для подсетей с хостами студент должен сам посчитать нужную маску "
-    "исходя из количества устройств (подсказка: /29 — до 6 хостов, /28 — до 14, /27 — до 30). "
     "Не давай готовые маски — пусть студент считает сам."
 )
 
@@ -209,9 +221,9 @@ def _call_routerai(system: str, user: str, model_id: str, api_key_override: str 
     return result["choices"][0]["message"]["content"].strip()
 
 
-def _call_yandex(system: str, user: str, model_id: str) -> str:
-    api_key = os.environ.get("YANDEX_AI_API_KEY", "")
-    folder_id = os.environ.get("YANDEX_FOLDER_ID", "")
+def _call_yandex(system: str, user: str, model_id: str, api_key_override: str = "", folder_override: str = "") -> str:
+    api_key = api_key_override or os.environ.get("YANDEX_AI_API_KEY", "")
+    folder_id = folder_override or os.environ.get("YANDEX_FOLDER_ID", "")
 
     base_model = model_id.split("/")[0]
     if base_model in YANDEX_MODELS_GRPC:
@@ -236,7 +248,6 @@ def _call_yandex(system: str, user: str, model_id: str) -> str:
             result = json.loads(resp.read())
         return result["result"]["alternatives"][0]["message"]["text"].strip()
     else:
-        # Responses API для сторонних моделей (DeepSeek, Qwen и др.)
         payload = json.dumps({
             "model": f"gpt://{folder_id}/{model_id}",
             "temperature": 0.1,
@@ -266,11 +277,11 @@ def _call_yandex(system: str, user: str, model_id: str) -> str:
         raise Exception(f"Пустой ответ от модели: {json.dumps(result)[:300]}")
 
 
-def _call_ai(system: str, user: str, model_id: str, api_key_override: str = "") -> str:
+def _call_ai(system: str, user: str, model_id: str, api_key_override: str = "", yandex_key_override: str = "", yandex_folder_override: str = "") -> str:
     """Роутинг между провайдерами по model_id."""
     if model_id.startswith("anthropic/"):
         return _call_routerai(system, user, model_id, api_key_override=api_key_override)
-    return _call_yandex(system, user, model_id)
+    return _call_yandex(system, user, model_id, api_key_override=yandex_key_override, folder_override=yandex_folder_override)
 
 
 def _fix_topology(topology: dict) -> None:
@@ -393,7 +404,10 @@ def generate_ai_task():
         return make_response(jsonify({"error": "Доступ запрещён"}), 403)
 
     user_api_key = request.form.get("api_key", "").strip()
-    folder_id = os.environ.get("YANDEX_FOLDER_ID", "")
+    # Яндекс ключи из браузера (если переданы) или из env
+    yandex_api_key_override = request.form.get("yandex_api_key", "").strip()
+    yandex_folder_override = request.form.get("yandex_folder_id", "").strip()
+    folder_id = yandex_folder_override or os.environ.get("YANDEX_FOLDER_ID", "")
 
     model_id = request.form.get("model", "yandexgpt")
     allowed_techs = set(TECHNOLOGY_HINTS.keys())
@@ -421,7 +435,7 @@ def generate_ai_task():
         if extra_instruction:
             user_prompt += f"\n\nИСПРАВЬ ОШИБКИ из предыдущей попытки:\n{extra_instruction}"
         try:
-            raw = _call_ai(SYSTEM_PROMPT, user_prompt, model_id, api_key_override=user_api_key)
+            raw = _call_ai(SYSTEM_PROMPT, user_prompt, model_id, api_key_override=user_api_key, yandex_key_override=yandex_api_key_override, yandex_folder_override=yandex_folder_override)
 
             if raw.startswith("```"):
                 raw = raw.split("\n", 1)[1]
