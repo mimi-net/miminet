@@ -1,22 +1,42 @@
-﻿import sys
 import os
-from datetime import datetime
-from dotenv import load_dotenv
+import sys
+from datetime import datetime, timedelta
+from urllib.parse import urlencode, urljoin, urlparse, urlunparse
 
-from flask import Flask, make_response, render_template
+from dotenv import load_dotenv
+from flask import (
+    Flask,
+    Response,
+    jsonify,
+    make_response,
+    redirect,
+    render_template,
+    render_template_string,
+    request,
+    url_for,
+)
 from flask_admin import Admin
+from flask_cors import CORS
+from flask_jwt_extended import (
+    JWTManager,
+    create_access_token,
+    create_refresh_token,
+    get_jwt_identity,
+    jwt_required,
+    set_access_cookies,
+    set_refresh_cookies,
+)
 from flask_login import current_user, login_required
 from flask_migrate import Migrate
-
 from miminet_admin import (
-    MiminetAdminIndexView,
-    TestView,
-    SectionView,
-    QuestionView,
     AnswerView,
-    QuestionCategoryView,
-    SessionQuestionView,
     CreateCheckTaskView,
+    MiminetAdminIndexView,
+    QuestionCategoryView,
+    QuestionView,
+    SectionView,
+    SessionQuestionView,
+    TestView,
 )
 from miminet_auth import (
     animation_filters,
@@ -27,29 +47,31 @@ from miminet_auth import (
     login_manager,
     logout,
     remove_test_user,
+    tg_callback,
     user_profile,
     user_profile_view,
     vk_callback,
     vk_login,
-    yandex_login,
     yandex_callback,
-    tg_callback,
+    yandex_login,
 )
 from miminet_config import SECRET_KEY
 from miminet_host import (
     delete_job,
+    save_edge_config,
     save_host_config,
     save_hub_config,
     save_router_config,
     save_server_config,
     save_switch_config,
-    save_edge_config,
 )
 from miminet_model import Network, db, init_db
 from miminet_network import (
     copy_network,
     create_network,
     delete_network,
+    get_emulation_queue_size,
+    get_last_emulation_time,
     move_nodes,
     post_nodes,
     post_nodes_edges,
@@ -57,56 +79,111 @@ from miminet_network import (
     upload_network_picture,
     web_network,
     web_network_shared,
-    get_emulation_queue_size,
-    get_last_emulation_time,
 )
 from miminet_shark import mimishark_page
 from miminet_simulation import check_simulation, run_simulation
+from quiz.controller.image_controller import image_routes, upload_image_endpoint
 from quiz.controller.question_controller import (
-    get_questions_by_section_endpoint,
     create_question_endpoint,
     delete_question_endpoint,
+    get_questions_by_section_endpoint,
 )
-from quiz.controller.image_controller import upload_image_endpoint
 from quiz.controller.quiz_session_controller import (
-    start_session_endpoint,
-    get_question_by_session_question_id_endpoint,
-    finish_session_endpoint,
     answer_on_session_question_endpoint,
-    session_result_endpoint,
-    get_result_by_session_guid_endpoint,
     check_network_task_endpoint,
     finish_old_session_endpoint,
+    finish_session_endpoint,
+    get_question_by_session_question_id_endpoint,
+    get_result_by_session_guid_endpoint,
     get_session_question_json,
+    session_result_endpoint,
+    start_session_endpoint,
 )
-from quiz.controller.section_controller import (
-    get_sections_by_test_endpoint,
-)
+from quiz.controller.section_controller import get_sections_by_test_endpoint
 from quiz.controller.test_controller import (
     get_all_tests_endpoint,
-    get_tests_by_owner_endpoint,
     get_test_endpoint,
+    get_tests_by_owner_endpoint,
 )
 from quiz.entity.entity import (
-    Section,
-    Test,
-    Question,
     Answer,
+    Organization,
+    Question,
     QuestionCategory,
+    Section,
     SessionQuestion,
+    Test,
 )
-
-from quiz.controller.image_controller import image_routes
 
 app = Flask(
     __name__, static_url_path="", static_folder="static", template_folder="templates"
 )
 
-# SQLAlchimy config
-load_dotenv()
+BASE_DOMAIN = os.environ.get("BASE_DOMAIN", None)
 
 # Получаем режим работы из переменных окружения
 MODE = os.getenv("MODE", "dev")
+
+app.config.update(
+    JWT_SECRET_KEY=os.environ.get("JWT_SECRET_KEY", "secret-key"),
+    JWT_TOKEN_LOCATION=["cookies"],
+    JWT_COOKIE_DOMAIN=f".{BASE_DOMAIN}" if BASE_DOMAIN else None,
+    JWT_COOKIE_SECURE=False if MODE == "dev" else True,
+    JWT_COOKIE_CSRF_PROTECT=False if MODE == "dev" else True,
+    JWT_COOKIE_SAMESITE="Lax",
+    JWT_ACCESS_TOKEN_EXPIRES=timedelta(
+        hours=float(os.environ.get("ACCESS_TOKEN_EXPIRES", 1))
+    ),
+    JWT_REFRESH_TOKEN_EXPIRES=timedelta(
+        hours=float(os.environ.get("REFRESH_TOKEN_EXPIRES", 2))
+    ),
+)
+
+allowed_hosts_env = os.environ.get("ALLOWED_HOSTS", "")
+allowed_hosts = []
+if allowed_hosts_env:
+    allowed_hosts = [item.strip() for item in allowed_hosts_env.split(",")]
+
+print(f"Allowed Origins: {allowed_hosts}")
+CORS(
+    app,
+    resources={
+        r"/*": {
+            "origins": allowed_hosts,
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"],
+            "supports_credentials": True,
+            "max_age": 3600,
+        }
+    },
+    intercept_exceptions=False,
+)
+
+
+@app.after_request
+def add_cors_headers(response):
+    origin = request.headers.get("Origin")
+
+    if origin and origin in allowed_hosts:
+        response.headers.add("Access-Control-Allow-Origin", origin)
+        response.headers.add("Access-Control-Allow-Credentials", "true")
+        response.headers.add(
+            "Access-Control-Allow-Headers",
+            "Content-Type,Authorization,X-Requested-With",
+        )
+        response.headers.add(
+            "Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS"
+        )
+
+    return response
+
+
+# SQLAlchimy config
+load_dotenv()
+
+PUBLIC_CONFIG_KEYS = [
+    "EXTERNAL_BASE_URL",
+]
 
 
 def get_database_uri(mode):
@@ -169,6 +246,7 @@ migrate = Migrate(app, db)
 
 # Init LoginManager
 login_manager.init_app(app)
+jwt = JWTManager(app)
 
 # Init Sitemap
 zero_days_ago = (datetime.now()).date().isoformat()
@@ -233,7 +311,6 @@ app.add_url_rule(
 app.add_url_rule(
     "/host/server_save_config", methods=["GET", "POST"], view_func=save_server_config
 )
-app.add_url_rule("/host/delete_job", methods=["GET", "POST"], view_func=delete_job)
 app.add_url_rule(
     "/host/hub_save_config", methods=["GET", "POST"], view_func=save_hub_config
 )
@@ -243,6 +320,7 @@ app.add_url_rule(
 app.add_url_rule(
     "/edge/save_config", methods=["GET", "POST"], view_func=save_edge_config
 )
+app.add_url_rule("/host/delete_job", methods=["GET", "POST"], view_func=delete_job)
 
 # MimiShark
 app.add_url_rule("/host/mimishark", methods=["GET"], view_func=mimishark_page)
@@ -328,7 +406,7 @@ admin = Admin(
 
 admin.add_view(TestView(Test, db.session, name="Тесты"))
 admin.add_view(SectionView(Section, db.session, name="Разделы"))
-admin.add_view(QuestionView(Question, db.session, name="Задания"))
+admin.add_view(QuestionView(Question, db.session, name="Задания", endpoint="question"))
 admin.add_view(AnswerView(Answer, db.session, name="Варианты"))
 admin.add_view(QuestionCategoryView(QuestionCategory, db.session, name="Категории"))
 admin.add_view(SessionQuestionView(SessionQuestion, db.session, name="Решения"))
@@ -340,6 +418,104 @@ admin.add_view(
         endpoint="create_check_task",
     )
 )
+
+
+def organization_url_for(endpoint, org_id, **kwargs):
+    org = Organization.query.filter_by(id=org_id).first()
+    base = ""
+    if org:
+        if MODE == "dev":
+            base = f"http://{org.domain}"
+        else:
+            base = f"https://{org.domain}"
+        endpoint = endpoint.lstrip("/quiz").lstrip("quiz")
+
+    endpoint = endpoint.strip("/")
+
+    path = endpoint.lstrip("/")
+    query_string = urlencode(kwargs) if kwargs else ""
+
+    full_url = urljoin(base + "/", path)
+    if query_string:
+        parsed = urlparse(full_url)
+        full_url = urlunparse(
+            (
+                parsed.scheme,
+                parsed.netloc,
+                parsed.path,
+                parsed.params,
+                query_string,
+                parsed.fragment,
+            )
+        )
+
+    return full_url
+
+
+@app.context_processor
+def utility_processor():
+    return dict(organization_url_for=organization_url_for)
+
+
+def is_api_request():
+    if (
+        request.accept_mimetypes.accept_json
+        and not request.accept_mimetypes.accept_html
+    ):
+        return True
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return True
+    if request.content_type and "application/json" in request.content_type:
+        return True
+    return False
+
+
+@jwt.expired_token_loader
+def expired_token_callback(jwt_header, jwt_payload):
+    if is_api_request():
+        return jsonify({"msg": "Token expired"}), 401
+    else:
+        return redirect(url_for("login_index", next=request.url))
+
+
+@jwt.invalid_token_loader
+def invalid_token_callback(error):
+    if is_api_request():
+        return jsonify({"msg": "Invalid token"}), 422
+    else:
+        return redirect(url_for("login_index", next=request.url))
+
+
+@jwt.unauthorized_loader
+def missing_token_callback(error):
+    if is_api_request():
+        return jsonify({"msg": "Missing token"}), 401
+    else:
+        return redirect(url_for("login_index", next=request.url))
+
+
+@app.route("/config.js")
+def confing_js():
+    config = {key: os.getenv(key) for key in PUBLIC_CONFIG_KEYS if os.getenv(key)}
+
+    js_content = render_template_string(
+        open("templates/config.js", "r", encoding="utf-8").read(), **config
+    )
+
+    return Response(js_content, mimetype="application/javascript")
+
+
+@app.route("/refresh_access", methods=["POST", "GET"])
+@jwt_required(refresh=True)
+def refresh_access():
+    identity = get_jwt_identity()
+    access_token = create_access_token(identity=identity)
+    refresh_token = create_refresh_token(identity=identity)
+
+    response = jsonify({"msg": "access token refreshed"})
+    set_access_cookies(response, access_token)
+    set_refresh_cookies(response, refresh_token)
+    return response
 
 
 @app.route("/")

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-labelledby="baikLogoTitle baikLogoDesc">
+  <title id="baikLogoTitle">Бобровский аграрно-индустриальный колледж имени М.Ф. Тимашовой</title>
+  <desc id="baikLogoDesc">Логотип БАИК с черной аббревиатурой и золотым колосом</desc>
+
+  <g>
+    <text x="4" y="150" fill="#050505" font-family="Arial, Helvetica, sans-serif" font-size="184" font-weight="700" lengthAdjust="spacingAndGlyphs" textLength="400">БАИ</text>
+  </g>
+
+  <g fill="none" stroke="#E5AE17" stroke-linecap="round" stroke-linejoin="round" stroke-width="18">
+    <path d="M430 112 H705" />
+    <path d="M446 112 C474 112 486 152 514 184" />
+    <path d="M486 112 C514 112 527 152 554 184" />
+    <path d="M528 112 C556 112 569 152 596 184" />
+    <path d="M570 112 C598 112 611 152 638 184" />
+    <path d="M612 112 C640 112 653 152 680 184" />
+  </g>
+
+  <g fill="#E5AE17" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="500">
+    <text x="0" y="248">Бобровский аграрно-</text>
+    <text x="0" y="298">индустриальный колледж</text>
+    <text x="0" y="348">им. М.Ф. Тимашовой</text>
+  </g>
+</svg>

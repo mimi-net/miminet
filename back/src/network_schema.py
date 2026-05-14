@@ -1,7 +1,7 @@
 """Classes for deserializing a Miminet network"""
 
 from dataclasses import dataclass
-from typing import Union, Optional
+from typing import Optional, Union
 
 
 @dataclass

@@ -1,14 +1,13 @@
 import json
-
 from datetime import date
 
-from flask import request, flash, redirect, url_for
+from flask import flash, redirect, request, url_for
 from flask_admin import AdminIndexView, expose
+from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.fields import QuerySelectField
-from flask_admin.form import Select2Widget
+from flask_admin.form import DateTimePickerWidget, Select2Widget
 from flask_admin.model import typefmt
-from flask_admin.actions import action
 from flask_login import current_user
 from markupsafe import Markup
 from sqlalchemy import func
@@ -16,7 +15,6 @@ from sqlalchemy.orm import selectinload
 from wtforms import (
     SelectField,
     TextAreaField,
-    BooleanField,
     DateTimeField,
     Form,
     SubmitField,
@@ -421,34 +419,65 @@ class SectionView(MiminetAdminModelView):
         "test_id": get_test_name,
     }
 
-    form_extra_fields = {
-        "is_exam": BooleanField(default=False),
-        "results_available_from": DateTimeField(
-            label="Дата открытия результатов",
-            format="%d-%m-%Y %H:%M",
-            description="Формат: d-m-Y, H:M. Время в мск. Обратите внимание, что без is_exam, ответы будут доступны в любом случае.",
-        ),
-        "test_id": QuerySelectField(
-            "Раздел теста",
-            query_factory=lambda: Test.query.filter(
-                Test.created_by_id == current_user.id
-            ).all(),
-            get_pk=lambda test: test.id,
-            get_label=lambda test: (
-                test.name
-                + (", " + test.description if test.description else "")
-                + (" (" + User.query.get(test.created_by_id).nick)
-                + ")"
-                if test.created_by_id
-                else ""
-            ),
-        ),
+    form_excluded_columns = [
+        "created_by_id",
+        "created_by_user",
+        "created_on",
+        "updated_on",
+    ]
+
+    # form_extra_fields = {
+    #     "is_exam": BooleanField(default=False),
+    #     # "results_available_from": DateTimeField(
+    #     #     label="Дата открытия результатов",
+    #     #     format="%d-%m-%Y %H:%M",
+    #     #     description="Формат: d-m-Y, H:M. Время в мск. Обратите внимание, что без is_exam, ответы будут доступны в любом случае.",
+    #     # ),
+    #     "test_id": QuerySelectField(
+    #         "Раздел теста",
+    #         query_factory=lambda: Test.query.filter(
+    #             Test.created_by_id == current_user.id
+    #         ).all(),
+    #         get_pk=lambda test: test.id,
+    #         get_label=lambda test: (
+    #             test.name
+    #             + (", " + test.description if test.description else "")
+    #             + (" (" + User.query.get(test.created_by_id).nick)
+    #             + ")"
+    #             if test.created_by_id
+    #             else ""
+    #         ),
+    #     ),
+    # }
+
+    form_overrides = {"results_available_from": DateTimeField}
+
+    form_args = {
+        "results_available_from": {
+            "widget": DateTimePickerWidget(),
+            # 'format': '%d-%m-%Y %H:%M:%S',
+            "label": "Дата открытия результатов",
+            "description": "Формат: d-m-Y H:M:S. Время в мск. Обратите внимание, что без is_exam ответы будут доступны в любом случае.",
+        }
     }
 
+    # form_args = {
+    #     'results_available_from': {
+    #         'widget': DateTimePickerWidget(),
+    #         'format': '%d-%m-%Y %H:%M:%S',
+    #         'label': 'Дата открытия результатов',
+    #         'description': 'Формат: d-m-Y H:M:S. Время в мск. Обратите внимание, что без is_exam ответы будут доступны в любом случае.'
+    #     }
+    # }
+
     def on_model_change(self, form, model, is_created, **kwargs):
+        if is_created:
+            if current_user.is_authenticated:
+                model.created_by_id = current_user.id
+
         super().on_model_change(form, model, is_created)
 
-        model.test_id = model.test_id.get_id()
+        # model.test_id = model.test_id.get_id()
 
     pass
 

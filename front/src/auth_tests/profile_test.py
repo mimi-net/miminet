@@ -1,4 +1,5 @@
 import io
+from datetime import timedelta
 from types import SimpleNamespace
 
 import pytest
@@ -6,18 +7,30 @@ from flask import Flask, session
 from werkzeug.exceptions import Forbidden
 
 import miminet_auth
+from flask_jwt_extended import JWTManager
 
 
 def _build_test_app():
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.config["SECRET_KEY"] = "test-secret"
+    app.config.update(
+        JWT_SECRET_KEY="test-secret",
+        JWT_TOKEN_LOCATION=["cookies"],
+        JWT_COOKIE_DOMAIN=".localhost",
+        JWT_COOKIE_SECURE=False,  # True,
+        JWT_COOKIE_CSRF_PROTECT=False,
+        JWT_COOKIE_SAMESITE="Lax",
+        JWT_ACCESS_TOKEN_EXPIRES=timedelta(hours=1),
+        JWT_REFRESH_TOKEN_EXPIRES=timedelta(hours=2),
+    )
     app.add_url_rule("/profile", endpoint="user_profile", view_func=lambda: "ok")
     app.add_url_rule("/login", endpoint="login_index", view_func=lambda: "login")
     app.add_url_rule("/home", endpoint="home", view_func=lambda: "home")
     app.add_url_rule(
         "/auth/google_callback", endpoint="google_callback", view_func=lambda: "google"
     )
+    JWTManager(app)
     return app
 
 
@@ -150,8 +163,10 @@ def test_google_callback_new_user_without_picture_uses_empty_avatar(mocker):
     flow = mocker.Mock()
     flow.credentials = SimpleNamespace(_id_token="token")
     flow.fetch_token.return_value = None
+    filtered_query = mocker.Mock()
+    filtered_query.first.side_effect = [None, SimpleNamespace(id=10)]
     user_query = mocker.Mock()
-    user_query.filter_by.return_value.first.side_effect = [None, SimpleNamespace(id=10)]
+    user_query.filter_by.return_value = filtered_query
     user_ctor = mocker.patch("miminet_auth.User")
     user_ctor.query = user_query
 
@@ -172,6 +187,9 @@ def test_google_callback_new_user_without_picture_uses_empty_avatar(mocker):
     mocker.patch("miminet_auth.db.session.commit")
     mocker.patch("miminet_auth.requests.get")
     mocker.patch("miminet_auth.login_user")
+    mocker.patch("miminet_auth.create_access_token")
+    mocker.patch("miminet_auth.set_access_cookies", return_value="redirected")
+    mocker.patch("miminet_auth.set_refresh_cookies", return_value="redirected")
     redirect_next_mock = mocker.patch(
         "miminet_auth.redirect_next_url", return_value="redirected"
     )
@@ -183,3 +201,131 @@ def test_google_callback_new_user_without_picture_uses_empty_avatar(mocker):
     assert result == "redirected"
     assert user_ctor.call_args.kwargs["avatar_uri"] == "empty.jpg"
     redirect_next_mock.assert_called_once()
+
+
+def test_login_index_allows_authenticated_telegram_link_mode(mocker):
+    app = _build_test_app()
+    current_user = SimpleNamespace(id=42, is_authenticated=True)
+
+    mocker.patch("miminet_auth.current_user", current_user)
+    render_mock = mocker.patch("miminet_auth.render_template", return_value="rendered")
+
+    with app.test_request_context(
+        "/login?next=user_profile&link_provider=tg", method="GET"
+    ):
+        result = miminet_auth.login_index()
+        assert session["social_link_provider"] == "tg"
+        assert session["social_link_user_id"] == 42
+        assert session["social_link_redirect"] == "user_profile"
+
+    assert result == "rendered"
+    render_mock.assert_called_once_with("auth/login.html", user=current_user)
+
+
+def test_google_callback_links_social_account_to_current_profile(mocker):
+    app = _build_test_app()
+    flow = mocker.Mock()
+    flow.credentials = SimpleNamespace(_id_token="token")
+    flow.fetch_token.return_value = None
+    linked_user = SimpleNamespace(id=10, google_id=None)
+    mocker.patch(
+        "miminet_auth.current_user", SimpleNamespace(id=10, is_authenticated=True)
+    )
+    user_model = mocker.patch("miminet_auth.User")
+    user_model.query.get.return_value = linked_user
+    user_model.query.filter_by.return_value.first.return_value = None
+
+    mocker.patch("miminet_auth.Flow.from_client_secrets_file", return_value=flow)
+    mocker.patch("miminet_auth.cachecontrol.CacheControl", return_value=mocker.Mock())
+    mocker.patch("miminet_auth.google.auth.transport.requests.Request")
+    mocker.patch(
+        "miminet_auth.id_token.verify_oauth2_token",
+        return_value={"sub": "g-1", "email": "u@test.local"},
+    )
+    commit_mock = mocker.patch("miminet_auth.db.session.commit")
+    login_user_mock = mocker.patch("miminet_auth.login_user")
+
+    with app.test_request_context("/auth/google_callback?state=state", method="GET"):
+        session["state"] = "state"
+        session["social_link_provider"] = "google"
+        session["social_link_user_id"] = 10
+        session["social_link_redirect"] = "user_profile"
+        response = miminet_auth.google_callback()
+        assert "social_link_provider" not in session
+
+    assert response.status_code == 302
+    assert response.location.endswith("/profile")
+    assert linked_user.google_id == "g-1"
+    commit_mock.assert_called_once()
+    login_user_mock.assert_not_called()
+
+
+def test_google_callback_does_not_steal_existing_social_binding(mocker):
+    app = _build_test_app()
+    flow = mocker.Mock()
+    flow.credentials = SimpleNamespace(_id_token="token")
+    flow.fetch_token.return_value = None
+    linked_user = SimpleNamespace(id=10, google_id=None)
+    other_user = SimpleNamespace(id=11, google_id="g-1")
+    mocker.patch(
+        "miminet_auth.current_user", SimpleNamespace(id=10, is_authenticated=True)
+    )
+    user_model = mocker.patch("miminet_auth.User")
+    user_model.query.get.return_value = linked_user
+    user_model.query.filter_by.return_value.first.return_value = other_user
+
+    mocker.patch("miminet_auth.Flow.from_client_secrets_file", return_value=flow)
+    mocker.patch("miminet_auth.cachecontrol.CacheControl", return_value=mocker.Mock())
+    mocker.patch("miminet_auth.google.auth.transport.requests.Request")
+    mocker.patch(
+        "miminet_auth.id_token.verify_oauth2_token",
+        return_value={"sub": "g-1", "email": "u@test.local"},
+    )
+    flash_mock = mocker.patch("miminet_auth.flash")
+    commit_mock = mocker.patch("miminet_auth.db.session.commit")
+    login_user_mock = mocker.patch("miminet_auth.login_user")
+
+    with app.test_request_context("/auth/google_callback?state=state", method="GET"):
+        session["state"] = "state"
+        session["social_link_provider"] = "google"
+        session["social_link_user_id"] = 10
+        session["social_link_redirect"] = "user_profile"
+        response = miminet_auth.google_callback()
+
+    assert response.status_code == 302
+    assert response.location.endswith("/profile")
+    assert linked_user.google_id is None
+    commit_mock.assert_not_called()
+    login_user_mock.assert_not_called()
+    flash_mock.assert_called_once()
+
+
+def test_tg_callback_links_social_account_to_current_profile(mocker):
+    app = _build_test_app()
+    linked_user = SimpleNamespace(id=5, tg_id=None)
+    mocker.patch(
+        "miminet_auth.current_user", SimpleNamespace(id=5, is_authenticated=True)
+    )
+    user_model = mocker.patch("miminet_auth.User")
+    user_model.query.get.return_value = linked_user
+    user_model.query.filter_by.return_value.first.return_value = None
+
+    mocker.patch(
+        "miminet_auth.json.loads",
+        return_value={"id": 999, "first_name": "Test", "username": "tester"},
+    )
+    mocker.patch("miminet_auth.check_tg_authorization")
+    commit_mock = mocker.patch("miminet_auth.db.session.commit")
+    login_user_mock = mocker.patch("miminet_auth.login_user")
+
+    with app.test_request_context("/auth/tg_callback?user=payload", method="GET"):
+        session["social_link_provider"] = "tg"
+        session["social_link_user_id"] = 5
+        session["social_link_redirect"] = "user_profile"
+        response = miminet_auth.tg_callback()
+
+    assert response.status_code == 302
+    assert response.location.endswith("/profile")
+    assert linked_user.tg_id == "999"
+    commit_mock.assert_called_once()
+    login_user_mock.assert_not_called()

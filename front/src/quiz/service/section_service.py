@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from miminet_model import db, User
+from miminet_model import User, db
 from quiz.entity.entity import Section, Test
 from quiz.util.dto import to_section_dto_list
 
