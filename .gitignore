@@ -10,3 +10,4 @@ back/rabbitmq/rabbitmq/
 *.log
 *.ini
 front/rabbitmq/rabbitmq
+!.env
