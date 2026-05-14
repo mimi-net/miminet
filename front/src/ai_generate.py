@@ -548,9 +548,7 @@ def generate_ai_task():
         except urllib.error.HTTPError as e:
             body = e.read().decode()
             logger.error("AI generate HTTP error %s: %s", e.code, body)
-            return make_response(
-                jsonify({"error": f"Yandex API {e.code}: {body}"}), 500
-            )
+            return make_response(jsonify({"error": f"Ошибка API ({e.code})"}), 500)
         except Exception as e:
             logger.error("AI generate unexpected error: %s", e, exc_info=True)
             return make_response(jsonify({"error": "Ошибка API"}), 500)
