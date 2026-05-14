@@ -115,25 +115,6 @@
                     <label class="btn btn-sm btn-outline-secondary" for="model-claude">Claude Sonnet</label>
                 </div>
             </div>
-            <div class="modal-body pt-0">
-                <label class="form-label fw-semibold">Ключи API</label>
-                <div class="input-group mb-1">
-                    <span class="input-group-text" style="font-size:0.75rem; min-width:110px;">RouterAI (Claude)</span>
-                    <input type="password" class="form-control form-control-sm" id="ai-api-key" placeholder="sk-...">
-                </div>
-                <div class="input-group mb-1">
-                    <span class="input-group-text" style="font-size:0.75rem; min-width:110px;">Яндекс API</span>
-                    <input type="password" class="form-control form-control-sm" id="yandex-api-key" placeholder="AQVN...">
-                </div>
-                <div class="input-group mb-1">
-                    <span class="input-group-text" style="font-size:0.75rem; min-width:110px;">Яндекс Folder</span>
-                    <input type="text" class="form-control form-control-sm" id="yandex-folder-id" placeholder="b1g...">
-                </div>
-                <div class="d-flex gap-2 mt-1">
-                    <button class="btn btn-sm btn-outline-secondary" type="button" onclick="saveApiKeys()">Сохранить ключи</button>
-                    <button class="btn btn-sm btn-outline-danger" type="button" onclick="clearApiKeys()">Удалить</button>
-                </div>
-            </div>
             <div class="modal-footer">
                 <small class="text-danger me-auto" id="ai-modal-status"></small>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
@@ -159,34 +140,6 @@ document.querySelectorAll("input[name='difficulty']").forEach(el => {
     });
 });
 
-function saveApiKeys() {
-    const routerKey = document.getElementById("ai-api-key").value.trim();
-    const yandexKey = document.getElementById("yandex-api-key").value.trim();
-    const yandexFolder = document.getElementById("yandex-folder-id").value.trim();
-    if (routerKey) localStorage.setItem("ai_api_key", routerKey);
-    if (yandexKey) localStorage.setItem("yandex_api_key", yandexKey);
-    if (yandexFolder) localStorage.setItem("yandex_folder_id", yandexFolder);
-    document.getElementById("ai-api-key").value = "";
-    document.getElementById("yandex-api-key").value = "";
-    document.getElementById("yandex-folder-id").value = "";
-    alert("Ключи сохранены");
-}
-
-function clearApiKeys() {
-    localStorage.removeItem("ai_api_key");
-    localStorage.removeItem("yandex_api_key");
-    localStorage.removeItem("yandex_folder_id");
-    alert("Ключи удалены");
-}
-
-document.addEventListener("DOMContentLoaded", function() {
-    if (localStorage.getItem("ai_api_key"))
-        document.getElementById("ai-api-key").placeholder = "Сохранён ✓";
-    if (localStorage.getItem("yandex_api_key"))
-        document.getElementById("yandex-api-key").placeholder = "Сохранён ✓";
-    if (localStorage.getItem("yandex_folder_id"))
-        document.getElementById("yandex-folder-id").placeholder = "Сохранён ✓";
-});
 
 function generateAiTask() {
     const techs = [...document.querySelectorAll("input[id^='tech-']:checked")].map(el => el.value);
@@ -205,21 +158,25 @@ function generateAiTask() {
     if (masks) body.append("masks", "1");
     techs.forEach(t => body.append("tech", t));
 
-    if (model.startsWith("anthropic/")) {
-        const key = localStorage.getItem("ai_api_key") || "";
-        if (key) body.append("api_key", key);
-    } else {
-        const yKey = localStorage.getItem("yandex_api_key") || "";
-        const yFolder = localStorage.getItem("yandex_folder_id") || "";
-        if (yKey) body.append("yandex_api_key", yKey);
-        if (yFolder) body.append("yandex_folder_id", yFolder);
-    }
-
     fetch("/ai/generate-task", { method: "POST", body })
         .then(r => {
             if (r.redirected) { window.location.href = r.url; return; }
             return r.json().then(j => {
-                document.getElementById("ai-modal-status").textContent = j.error || "Ошибка";
+                const status = document.getElementById("ai-modal-status");
+                const msg = j.error || "Ошибка";
+                const urlMatch = msg.match(/https?:\/\/\S+/);
+                if (urlMatch) {
+                    const text = msg.replace(urlMatch[0], "").trim();
+                    status.innerHTML = "";
+                    status.appendChild(document.createTextNode(text + " "));
+                    const a = document.createElement("a");
+                    a.href = urlMatch[0];
+                    a.target = "_blank";
+                    a.textContent = "Инструкция";
+                    status.appendChild(a);
+                } else {
+                    status.textContent = msg;
+                }
                 btn.disabled = false;
                 document.getElementById("ai-btn-spinner").classList.add("d-none");
                 document.getElementById("ai-btn-text").textContent = "Сгенерировать";

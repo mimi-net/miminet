@@ -436,12 +436,33 @@ def generate_ai_task():
     if not current_user.role or current_user.role < 1:
         return make_response(jsonify({"error": "Доступ запрещён"}), 403)
 
-    user_api_key = request.form.get("api_key", "").strip()
-    # Яндекс ключи из браузера (если переданы) или из env
-    yandex_api_key_override = request.form.get("yandex_api_key", "").strip()
-    yandex_folder_override = request.form.get("yandex_folder_id", "").strip()
+    # Ключи берём из БД (поле ai_keys у текущего пользователя) или из env
+    ai_keys = {}
+    if current_user.ai_keys:
+        try:
+            ai_keys = json.loads(current_user.ai_keys)
+        except (json.JSONDecodeError, TypeError):
+            ai_keys = {}
+
+    user_api_key = ai_keys.get("routerai", "")
+    yandex_api_key_override = ai_keys.get("yandex_api_key", "")
+    yandex_folder_override = ai_keys.get("yandex_folder_id", "")
 
     model_id = request.form.get("model", "yandexgpt")
+
+    # Проверяем наличие нужного ключа для выбранной модели
+    if model_id.startswith("anthropic/") and not user_api_key:
+        return make_response(
+            jsonify({"error": "Ключи API не найдены в БД. Инструкция: https://github.com/mimi-net/miminet/pull/438"}),
+            400,
+        )
+    if not model_id.startswith("anthropic/") and not (
+        yandex_api_key_override or os.environ.get("YANDEX_AI_API_KEY")
+    ):
+        return make_response(
+            jsonify({"error": "Ключи API не найдены в БД. Инструкция: https://github.com/mimi-net/miminet/pull/438"}),
+            400,
+        )
     allowed_techs = set(TECHNOLOGY_HINTS.keys())
     technologies = [t for t in request.form.getlist("tech") if t in allowed_techs]
 
