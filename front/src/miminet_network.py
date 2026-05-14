@@ -2,8 +2,9 @@ import datetime
 import json
 import os
 import shutil
+import logging
+import logging_config
 import uuid
-
 from flask import (
     flash,
     jsonify,
@@ -20,6 +21,9 @@ from miminet_model import Network, Simulate, SimulateLog, db
 from sqlalchemy import not_
 
 PREVIEW_IMAGES_ROOT = "static/images/preview"
+
+logger = logging.getLogger(__name__)
+logging_config.configure_logging(logger)
 
 
 def CORS_header(response):
@@ -582,6 +586,14 @@ def get_emulation_queue_size():
         SimulateLog.query.filter(not_(SimulateLog.ready))
         .filter(SimulateLog.simulate_start <= time_filter)
         .count()
+    )
+
+    logger.info(
+        "Emulation queue size",
+        extra={
+            "time_filter": time_filter_req,
+            "count": emulated_networks_count,
+        },
     )
 
     return make_response(

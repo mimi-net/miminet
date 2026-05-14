@@ -17,6 +17,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Create .env file with MODE=dev
+        run: |
+          touch .env
+          echo "MODE=dev" >> .env
+
       - name: Install apt package
         run: |
           sudo apt-get update \

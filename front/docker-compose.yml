@@ -13,6 +13,7 @@ services:
       rabbitmq_network:
     env_file:
       - .env
+      - ../.env
     expose:
       - 80
     volumes:
@@ -61,6 +62,7 @@ services:
     restart: always
     env_file:
       - .env
+      - ../.env
     volumes:
       - ./default.conf.template:/etc/nginx/templates/default.conf.template
     ports:
@@ -86,6 +88,7 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+      - ../.env
     volumes:
       - pgdata:/var/lib/postgresql
     networks:

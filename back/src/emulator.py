@@ -2,9 +2,9 @@ import os
 import os.path
 import subprocess
 import time
-
 import dpkt
-
+import logging
+import logging_config
 from ipmininet.ipnet import IPNet
 from jobs import Jobs
 from network import MiminetNetwork
@@ -12,6 +12,9 @@ from network_schema import Job, Network
 from pkt_parser import create_pkt_animation
 from mininet.log import setLogLevel, info, error
 from network_topology import MiminetTopology
+
+logger = logging.getLogger(__name__)
+logging_config.configure_logging(logger)
 
 
 def emulate(
@@ -25,6 +28,15 @@ def emulate(
     Returns:
         tuple: animation list and pcap files.
     """
+
+    start_ts = time.time()
+
+    logger.info(
+        "Emulation started",
+        extra={
+            "jobs_count": len(network.jobs) if getattr(network, "jobs", None) else 0
+        },
+    )
 
     setLogLevel("info")
 
@@ -42,7 +54,6 @@ def emulate(
         raise ValueError(
             f"Превышен лимит! В сети максимальное количество команд sleep {MAX_TIME_SLEEP})."
         )
-
     if len(network.jobs) == 0:
         return [], []
 
@@ -125,6 +136,9 @@ def emulate(
         net.stop()
 
     except Exception as e:
+
+        logger.error("Miminet configuration failed", extra={"error": str(e)})
+
         error(f"An error occurred during mininet configuration: {str(e)}")
         subprocess.call("mn -c", shell=True)
 
@@ -142,6 +156,15 @@ def emulate(
     error("[emulator] Animation groups before grouping: %d\n" % len(animation))
     animation = group_packets_by_time(animation)
     error("[emulator] Animation groups after time-grouping: %d\n" % len(animation))
+
+    duration_ms = int((time.time() - start_ts) * 1000)
+    logger.info(
+        "Emulation finished",
+        extra={
+            "pcaps_count": len(pcaps),
+            "duration_ms": duration_ms,
+        },
+    )
 
     return animation, pcaps
 

@@ -7,6 +7,12 @@ from ipmininet.iptopo import IPTopo
 from ipmininet.router.config import RouterConfig
 from network_schema import Network, Node, NodeConfig, NodeInterface
 from pkt_parser import is_ipv4_address
+import logging
+import logging_config
+
+logger = logging.getLogger(__name__)
+logging_config.configure_logging(logger)
+logger.setLevel(logging.DEBUG)
 
 
 class MiminetTopology(IPTopo):
@@ -126,6 +132,15 @@ class MiminetTopology(IPTopo):
         links = []
         interfaces = []
 
+        logger.info(
+            "Topology build started",
+            extra={
+                "event": "topology_build_start",
+                "nodes_count": len(self.__network.nodes),
+                "edges_count": len(self.__network.edges),
+            },
+        )
+
         for node in self.__network.nodes:
             # Caches node by ID for quick lookup later
             self.__id_to_node[node.data.id] = node
@@ -158,7 +173,6 @@ class MiminetTopology(IPTopo):
                 raise ValueError(
                     f"Edge '{edge_id}' references unknown target node '{target_id}'."
                 )
-
             # Mininet host objects (https://mininet.org/api/classmininet_1_1node_1_1Host.html)
             src_host = self.__nodes[source_id]
             trg_host = self.__nodes[target_id]
@@ -193,6 +207,18 @@ class MiminetTopology(IPTopo):
                 duplicate_percentage=duplicate_percentage,
             )
 
+            logger.debug(
+                "Link created",
+                extra={
+                    "event": "link_created",
+                    "edge_id": edge_id,
+                    "link1": str(link1),
+                    "link2": str(link2),
+                    "src_iface": src_iface.name,
+                    "trg_iface": trg_iface.name,
+                },
+            )
+
             self.__configure_link(link1[src_host], src_iface)
             self.__configure_link(link2[trg_host], trg_iface)
 
@@ -203,6 +229,18 @@ class MiminetTopology(IPTopo):
             interfaces.append(trg_iface.name)
 
         if links:
+            logger.debug(
+                "Network capture setup",
+                extra={
+                    "event": "capture_setup",
+                    "interfaces": interfaces,
+                    "links": [str(link) for link in links],
+                    "options": {
+                        "base_filename": "capture",
+                        "extra_arguments": "not igmp",
+                    },
+                },
+            )
             # Set up packet capturing
             self.addNetworkCapture(
                 nodes=[],
@@ -210,6 +248,13 @@ class MiminetTopology(IPTopo):
                 base_filename="capture",
                 extra_arguments="not igmp",
             )
+        logger.info(
+            "Topology build completed",
+            extra={
+                "event": "topology_build_end",
+                "interfaces": self.__iface_pairs.copy(),
+            },
+        )
         super().build(*args, **kwargs)
 
     def addLink(

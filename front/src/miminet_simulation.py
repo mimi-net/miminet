@@ -1,11 +1,15 @@
 import os
 import uuid
-
+import logging
+import logging_config
 from celery_app import EXCHANGE_TYPE, SEND_NETWORK_EXCHANGE, app
 from flask import jsonify, make_response, redirect, request, url_for
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from miminet_model import Network, Simulate, SimulateLog, db
 from werkzeug.wrappers import Response
+
+logger = logging.getLogger(__name__)
+logging_config.configure_logging(logger)
 
 
 @jwt_required()
@@ -13,6 +17,15 @@ def run_simulation() -> Response:
     """Add new celery task and create record (for emulation result) in database."""
     user_id = get_jwt_identity()
     network_guid = request.args.get("guid", type=str)
+
+    logger.info(
+        "Run simulation start",
+        extra={
+            "user_id": getattr(user_id, "id", None),
+            "guid": network_guid,
+            "method": request.method,
+        },
+    )
 
     if not network_guid:
         ret = {
@@ -36,10 +49,17 @@ def run_simulation() -> Response:
 
         # Get saved emulations
         sims = Simulate.query.filter(Simulate.network_id == net.id).all()
+        removed = len(sims)
+
         # Remove all previous emulations
         for s in sims:
             db.session.delete(s)
             db.session.commit()
+
+        logger.info(
+            "Run simulation cleanup",
+            extra={"network_id": net.id, "removed_sims": removed},
+        )
 
         # Write log
         simlog = SimulateLog(
@@ -53,16 +73,48 @@ def run_simulation() -> Response:
         db.session.add(simlog)
         db.session.commit()
 
-        # Send emulation task to celery
-        app.send_task(
-            "tasks.mininet_worker",
-            (net.network,),
-            routing_key=str(uuid.uuid4()),
-            exchange=SEND_NETWORK_EXCHANGE,
-            exchange_type=EXCHANGE_TYPE,
-            task_id=str(task_guid),
-            headers={"network_task_name": "tasks.save_simulate_result"},
+        logger.info(
+            "Run simulation created",
+            extra={
+                "network_id": net.id,
+                "simulation_id": sim.id,
+                "task_guid": str(task_guid),
+            },
         )
+
+        # Send emulation task to celery
+        routing_key = str(uuid.uuid4())
+        try:
+            app.send_task(
+                "tasks.mininet_worker",
+                (net.network,),
+                routing_key=routing_key,
+                exchange=SEND_NETWORK_EXCHANGE,
+                exchange_type=EXCHANGE_TYPE,
+                task_id=str(task_guid),
+                headers={"network_task_name": "tasks.save_simulate_result"},
+            )
+            logger.info(
+                "Run simulation enqueued",
+                extra={
+                    "simulation_id": sim.id,
+                    "task_guid": str(task_guid),
+                    "routing_key": routing_key,
+                    "exchange": SEND_NETWORK_EXCHANGE.name,
+                },
+            )
+        except Exception as e:
+            logger.error(
+                "Run simulation enqueue failed",
+                extra={
+                    "simulation_id": sim.id,
+                    "task_guid": str(task_guid),
+                    "routing_key": routing_key,
+                    "exchange": SEND_NETWORK_EXCHANGE.name,
+                    "error": str(e),
+                },
+            )
+            raise
 
         # Return network id to check emulation result
         ret = {"simulation_id": sim.id}
