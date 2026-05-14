@@ -471,6 +471,17 @@ def generate_ai_task():
             ),
             400,
         )
+    if not model_id.startswith("anthropic/") and not (
+        yandex_folder_override or os.environ.get("YANDEX_FOLDER_ID")
+    ):
+        return make_response(
+            jsonify(
+                {
+                    "error": "Yandex Folder ID не найден в БД. Инструкция: https://github.com/mimi-net/miminet/pull/438"
+                }
+            ),
+            400,
+        )
     allowed_techs = set(TECHNOLOGY_HINTS.keys())
     technologies = [t for t in request.form.getlist("tech") if t in allowed_techs]
 
