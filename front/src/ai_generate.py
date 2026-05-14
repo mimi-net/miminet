@@ -453,14 +453,22 @@ def generate_ai_task():
     # Проверяем наличие нужного ключа для выбранной модели
     if model_id.startswith("anthropic/") and not user_api_key:
         return make_response(
-            jsonify({"error": "Ключи API не найдены в БД. Инструкция: https://github.com/mimi-net/miminet/pull/438"}),
+            jsonify(
+                {
+                    "error": "Ключи API не найдены в БД. Инструкция: https://github.com/mimi-net/miminet/pull/438"
+                }
+            ),
             400,
         )
     if not model_id.startswith("anthropic/") and not (
         yandex_api_key_override or os.environ.get("YANDEX_AI_API_KEY")
     ):
         return make_response(
-            jsonify({"error": "Ключи API не найдены в БД. Инструкция: https://github.com/mimi-net/miminet/pull/438"}),
+            jsonify(
+                {
+                    "error": "Ключи API не найдены в БД. Инструкция: https://github.com/mimi-net/miminet/pull/438"
+                }
+            ),
             400,
         )
     allowed_techs = set(TECHNOLOGY_HINTS.keys())

@@ -87,7 +87,10 @@ class TestValidateTopology:
             "nodes": [
                 make_node(
                     "host_1",
-                    [make_iface("edge_1", "host_1", 1), make_iface("edge_2", "host_1", 2)],
+                    [
+                        make_iface("edge_1", "host_1", 1),
+                        make_iface("edge_2", "host_1", 2),
+                    ],
                 ),
                 make_node("host_2", [make_iface("edge_1", "host_2", 1)]),
             ],
