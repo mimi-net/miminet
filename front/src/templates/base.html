@@ -323,7 +323,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="{{ url_for('static', filename='/icons.js') }}"></script>
 <script src="{{ url_for('static', filename='jwt_auth.js') }}"></script>
 <script src="{{ url_for('static', filename='config.js') }}"></script>
-<script src="{{ url_for('static', filename='/netfront_f.js') }}"></script>
+<script src="{{ url_for('static', filename='netfront/state.js') }}"></script>
+<script src="{{ url_for('static', filename='netfront/show_config.js') }}"></script>
+<script src="{{ url_for('static', filename='netfront/network_ops.js') }}"></script>
+<script src="{{ url_for('static', filename='netfront/draw.js') }}"></script>
+<script src="{{ url_for('static', filename='netfront/simulation.js') }}"></script>
+<script src="{{ url_for('static', filename='netfront/update_config.js') }}"></script>
+<script src="{{ url_for('static', filename='netfront/runtime.js') }}"></script>
 <script src="{{ url_for('static', filename='/miminet_animation.js') }}"></script>
 
 <script>
@@ -499,7 +505,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 {% endblock %}
 
 <script src="{{ url_for('static', filename='netfront.js') }}"></script>
-<script src="{{ url_for('static', filename='config_devices.js') }}"></script>
+<script src="{{ url_for('static', filename='config_forms/common.js') }}"></script>
+<script src="{{ url_for('static', filename='config_forms/device.js') }}"></script>
+<script src="{{ url_for('static', filename='config_forms/shared.js') }}"></script>
+<script src="{{ url_for('static', filename='config_forms/helpers.js') }}"></script>
+<script src="{{ url_for('static', filename='config_forms/jobs.js') }}"></script>
+<script src="{{ url_for('static', filename='config_forms/edit_jobs.js') }}"></script>
 <script src="{{ url_for('static', filename='config_vlan.js') }}"></script>
 <script src="{{ url_for('static', filename='config_vxlan.js') }}"></script>
 <script src="{{ url_for('static', filename='config_stp.js') }}"></script>
