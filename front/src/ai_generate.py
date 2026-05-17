@@ -448,7 +448,17 @@ def generate_ai_task():
     yandex_api_key_override = ai_keys.get("yandex_api_key", "")
     yandex_folder_override = ai_keys.get("yandex_folder_id", "")
 
+    ALLOWED_MODELS = {
+        "yandexgpt",
+        "yandexgpt-lite",
+        "deepseek-v32/latest",
+        "gemma-3-27b-it/latest",
+        "qwen3-235b-a22b-fp8/latest",
+        "anthropic/claude-sonnet-4.6",
+    }
     model_id = request.form.get("model", "yandexgpt")
+    if model_id not in ALLOWED_MODELS:
+        return make_response(jsonify({"error": "Недопустимая модель"}), 400)
 
     # Проверяем наличие нужного ключа для выбранной модели
     if model_id.startswith("anthropic/") and not user_api_key:
