@@ -11,3 +11,5 @@ back/rabbitmq/rabbitmq/
 *.log
 *.ini
 front/rabbitmq/rabbitmq
+front/src/static/dist/
+front/web/node_modules/

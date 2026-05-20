@@ -16,7 +16,7 @@ jobs:
     - name: Installing dependencies
       run: |
         sudo apt-get update
-        pip install -r front/requirements.txt
+        pip install -r front/requirements.lock
 
     - name: Running tests
       run: |

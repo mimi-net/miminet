@@ -1,0 +1,13 @@
+{
+  "name": "miminet-front-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Vite build pipeline for miminet front-end JS.",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  }
+}
