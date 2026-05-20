@@ -33,8 +33,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo python -m pip install pip pytest selenium --ignore-installed urllib3
-          sudo python -m pip install -r front/requirements.txt --ignore-installed
+          sudo python -m pip install pip pytest pytest-mock selenium --ignore-installed urllib3
+          sudo python -m pip install -r front/requirements.lock --ignore-installed
 
       - name: Check availability
         run: |

@@ -38,7 +38,7 @@ from google_auth_oauthlib.flow import Flow
 from miminet_config import make_example_net_switch_and_hub
 from miminet_model import Network, User, db
 from oauthlib.oauth2 import TokenExpiredError
-from pip._vendor import cachecontrol
+import cachecontrol
 from requests_oauthlib import OAuth2Session
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import check_password_hash, generate_password_hash

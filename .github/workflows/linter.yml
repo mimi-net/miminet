@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
-          cache-dependency-path: ${{matrix.node}}/requirements.txt
+          cache-dependency-path: ${{matrix.node}}/${{ matrix.node == 'front' && 'requirements.lock' || 'requirements.txt' }}
             
       - name: Install dependencies
         run: |
@@ -30,7 +30,7 @@ jobs:
             sudo apt-get install -y --no-install-recommends mininet
             mkdir -p /opt/mininet_dependencies
           fi
-          pip install -r ${{matrix.node}}/requirements.txt
+          pip install -r ${{matrix.node}}/${{ matrix.node == 'front' && 'requirements.lock' || 'requirements.txt' }}
           
       - name: Lint with mypy
         run: |
