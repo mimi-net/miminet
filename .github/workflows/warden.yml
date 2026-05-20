@@ -1,0 +1,62 @@
+name: Weekly AI Review
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  # schedule:
+  #   - cron: "0 6 * * 1" # Monday 06:00 UTC = 09:00 Europe/Moscow
+
+permissions:
+  contents: read
+
+concurrency:
+  group: weekly-ai-review
+  cancel-in-progress: false
+
+jobs:
+  weekly-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install warden dependencies
+        run: python -m pip install -r tools/warden/requirements.txt
+
+      - name: Run AI review
+        env:
+          PYTHONUNBUFFERED: "1"
+          YANDEX_API_KEY: ${{ secrets.YANDEX_API_KEY }}
+          YANDEX_FOLDER_ID: ${{ secrets.YANDEX_FOLDER_ID }}
+        run: |
+          python -m tools.warden.weekly_review \
+            --config tools/warden/review_config.toml \
+            --output-dir tmp/ai-review
+
+      - name: Publish job summary
+        if: always()
+        run: |
+          if [ -f tmp/ai-review/report.md ]; then
+            cat tmp/ai-review/report.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Weekly AI review did not produce report.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload review artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-ai-review-${{ github.run_id }}
+          path: tmp/ai-review
+          if-no-files-found: warn
+          retention-days: 14
