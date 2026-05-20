@@ -82,6 +82,7 @@ from miminet_network import (
 )
 from miminet_shark import mimishark_page
 from miminet_simulation import check_simulation, run_simulation
+from ai_generate import generate_ai_task
 from quiz.controller.image_controller import image_routes, upload_image_endpoint
 from quiz.controller.question_controller import (
     create_question_endpoint,
@@ -321,6 +322,9 @@ app.add_url_rule(
     "/edge/save_config", methods=["GET", "POST"], view_func=save_edge_config
 )
 app.add_url_rule("/host/delete_job", methods=["GET", "POST"], view_func=delete_job)
+
+# AI task generation
+app.add_url_rule("/ai/generate-task", methods=["POST"], view_func=generate_ai_task)
 
 # MimiShark
 app.add_url_rule("/host/mimishark", methods=["GET"], view_func=mimishark_page)
