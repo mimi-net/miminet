@@ -47,6 +47,7 @@ class User(db.Model, UserMixin):  # type: ignore[name-defined]
     tg_id = db.Column(Text, nullable=True)
 
     config = db.Column(Text, nullable=True)
+    ai_keys = db.Column(Text, nullable=True)
 
 
 class Network(db.Model):  # type: ignore[name-defined]
