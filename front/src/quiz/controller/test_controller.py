@@ -53,7 +53,13 @@ def get_tests_by_owner_endpoint():
 @login_required
 def get_all_tests_endpoint():
     quizzes = get_all_tests()
-    return make_response(render_template("quiz/quizzes.html", quizzes=quizzes), 200)
+    return make_response(
+        render_template(
+            "quiz/quizzes.html",
+            quizzes=quizzes,
+        ),
+        200,
+    )
 
 
 @login_required
