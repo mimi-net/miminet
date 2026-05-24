@@ -1,0 +1,549 @@
+{
+  "topics": [
+    "TCP/IP",
+    "IP-адресация",
+    "ARP",
+    "ICMP",
+    "Маршрутизация",
+    "TCP и UDP",
+    "DHCP",
+    "NAT",
+    "VLAN",
+    "Ethernet (CSMA/CD)",
+    "PMTUD",
+    "Модель OSI",
+    "Туннели и инкапсуляция",
+    "Основы сетей и коммутации",
+    "Сетевые утилиты",
+    "Wi‑Fi",
+    "Стандарты и RFC",
+    "Каналы связи"
+  ],
+  "questions": [
+    {
+      "topic": "ARP",
+      "difficulty": "easy",
+      "question": "Какой командой под ОС Windows можно посмотреть ARP-кэш?"
+    },
+    {
+      "topic": "Модель OSI",
+      "difficulty": "medium",
+      "question": "Хост только что принял данные, пакет был обработан на сетевом уровне. Какой следующий уровень будет обрабатывать пакет?"
+    },
+    {
+      "topic": "Модель OSI",
+      "difficulty": "easy",
+      "question": "Технологии канального уровня в рамках модели OSI располагаются на каком уровне?"
+    },
+    {
+      "topic": "Ethernet (CSMA/CD)",
+      "difficulty": "medium",
+      "question": "Возможна ли коллизия в Ethernet-сети, если используются только свитчи?"
+    },
+    {
+      "topic": "Ethernet (CSMA/CD)",
+      "difficulty": "medium",
+      "question": "Возможна ли коллизия в Ethernet-сети, если используются хабы?"
+    },
+    {
+      "topic": "Ethernet (CSMA/CD)",
+      "difficulty": "medium",
+      "question": "Свитч на первый порт получает пакет, в котором MAC-адрес источника 01:02:03:04:05:06. Такой MAC-адрес уже есть в таблице коммутации на порту 2. Как поступит свитч?"
+    },
+    {
+      "topic": "Основы сетей и коммутации",
+      "difficulty": "easy",
+      "question": "Что такое Интернет?"
+    },
+    {
+      "topic": "IP-адресация",
+      "difficulty": "easy",
+      "question": "Что в бесклассовой адресации позволяет определить, где адрес хоста, а где адрес сети?"
+    },
+    {
+      "topic": "IP-адресация",
+      "difficulty": "medium",
+      "question": "Как выглядит префикс для этого IPv6-адреса FE80:0000:0000:0000:049C:1C45:94AE:A37B/64?"
+    },
+    {
+      "topic": "IP-адресация",
+      "difficulty": "easy",
+      "question": "Какое поле в IP-заголовке предотвращает вечное циркулирование IP-пакета в сети?"
+    },
+    {
+      "topic": "IP-адресация",
+      "difficulty": "easy",
+      "question": "Стандартный размер IPv4-заголовка?"
+    },
+    {
+      "topic": "IP-адресация",
+      "difficulty": "easy",
+      "question": "IP-пакет прекратит свое существование, то есть будет отброшен хостом или маршрутизатором, когда его TTL будет равен чему?"
+    },
+    {
+      "topic": "ICMP",
+      "difficulty": "easy",
+      "question": "Для чего используется ICMP-протокол?"
+    },
+    {
+      "topic": "VLAN",
+      "difficulty": "medium",
+      "question": "Можно ли обеспечить общение между хостами из разных виртуальных сетей без использования trunk?"
+    },
+    {
+      "topic": "VLAN",
+      "difficulty": "medium",
+      "question": "Куда вставляется VLAN-тег в Ethernet-кадре?"
+    },
+    {
+      "topic": "DHCP",
+      "difficulty": "easy",
+      "question": "Чтобы найти DHCP-сервер, хост отправляет сообщение DHCP DISCOVER?"
+    },
+    {
+      "topic": "DHCP",
+      "difficulty": "medium",
+      "question": "Что сделает DHCP-клиент, если получит два сообщения DHCP OFFER от разных DHCP-серверов?"
+    },
+    {
+      "topic": "NAT",
+      "difficulty": "medium",
+      "question": "Если мой хост спрятан за NAT, какой туннель я могу использовать?"
+    },
+    {
+      "topic": "Туннели и инкапсуляция",
+      "difficulty": "medium",
+      "question": "Будет ли модифицирован IP-заголовок при использовании IPIP-туннеля?"
+    },
+    {
+      "topic": "Основы сетей и коммутации",
+      "difficulty": "easy",
+      "question": "Данные в компьютерной сети передаются как?"
+    },
+    {
+      "topic": "ARP",
+      "difficulty": "medium",
+      "question": "Если на первый ARP-запрос никто не ответил, то хост что сделает дальше?"
+    },
+    {
+      "topic": "Ethernet (CSMA/CD)",
+      "difficulty": "easy",
+      "question": "CSMA/CD — это что?"
+    },
+    {
+      "topic": "Ethernet (CSMA/CD)",
+      "difficulty": "easy",
+      "question": "Что такое MAC-адрес?"
+    },
+    {
+      "topic": "Сетевые утилиты",
+      "difficulty": "easy",
+      "question": "Какой командой в ОС Windows можно посмотреть текущий IP-адрес?"
+    },
+    {
+      "topic": "IP-адресация",
+      "difficulty": "easy",
+      "question": "Какие адреса используются на сетевом уровне модели OSI?"
+    },
+    {
+      "topic": "IP-адресация",
+      "difficulty": "medium",
+      "question": "Какие IP-адреса принадлежат сети 0.0.0.0/0?"
+    },
+    {
+      "topic": "NAT",
+      "difficulty": "medium",
+      "question": "Что остается неизменным, когда пакет проходит через NAT?"
+    },
+    {
+      "topic": "Маршрутизация",
+      "difficulty": "easy",
+      "question": "Таблица маршрутизации — это что?"
+    },
+    {
+      "topic": "Маршрутизация",
+      "difficulty": "easy",
+      "question": "Что такое маршрут по умолчанию?"
+    },
+    {
+      "topic": "TCP и UDP",
+      "difficulty": "medium",
+      "question": "Что такое скользящее окно (Sliding Window) в TCP?"
+    },
+    {
+      "topic": "DHCP",
+      "difficulty": "easy",
+      "question": "По какой модели работает протокол DHCP?"
+    },
+    {
+      "topic": "DHCP",
+      "difficulty": "medium",
+      "question": "Хост впервые подключился к сети. Для получения IP-адреса он обменивается какими DHCP-сообщениями?"
+    },
+    {
+      "topic": "Туннели и инкапсуляция",
+      "difficulty": "medium",
+      "question": "Где располагается GRE-заголовок?"
+    },
+    {
+      "topic": "Туннели и инкапсуляция",
+      "difficulty": "medium",
+      "question": "Какие протоколы можно инкапсулировать в IPIP-туннель?"
+    },
+    {
+      "topic": "Модель OSI",
+      "difficulty": "easy",
+      "question": "На 3-м уровне модели OSI располагается что?"
+    },
+    {
+      "topic": "Модель OSI",
+      "difficulty": "easy",
+      "question": "Модель ISO/OSI включает что?"
+    },
+    {
+      "topic": "Сетевые утилиты",
+      "difficulty": "easy",
+      "question": "Какой командой под ОС Windows можно посмотреть свой текущий MAC-адрес?"
+    },
+    {
+      "topic": "IP-адресация",
+      "difficulty": "easy",
+      "question": "Какие IP-адреса выделяются для многоадресной рассылки (multicast)?"
+    },
+    {
+      "topic": "PMTUD",
+      "difficulty": "medium",
+      "question": "Что произойдет, если размер IP-пакета больше, чем технология канального уровня разрешает передавать?"
+    },
+    {
+      "topic": "TCP и UDP",
+      "difficulty": "medium",
+      "question": "Может ли несколько разных приложений открыть один TCP/UDP-порт?"
+    },
+    {
+      "topic": "VLAN",
+      "difficulty": "easy",
+      "question": "VLAN позволяет что делать?"
+    },
+    {
+      "topic": "DHCP",
+      "difficulty": "medium",
+      "question": "Если выбранный DHCP-сервер не может адекватно реагировать на сообщение DHCP REQUEST, сервер должен ответить каким сообщением?"
+    },
+    {
+      "topic": "DHCP",
+      "difficulty": "medium",
+      "question": "На какой IP-адрес отправляется сообщение DHCP REQUEST?"
+    },
+    {
+      "topic": "Туннели и инкапсуляция",
+      "difficulty": "easy",
+      "question": "Может ли протокол IP быть инкапсулирован в IP?"
+    },
+    {
+      "topic": "Туннели и инкапсуляция",
+      "difficulty": "medium",
+      "question": "Зачем нужен GRE, если есть IPIP?"
+    },
+    {
+      "topic": "PMTUD",
+      "difficulty": "medium",
+      "question": "Какое ICMP-сообщение помогает адаптировать размер MTU?"
+    },
+    {
+      "topic": "Основы сетей и коммутации",
+      "difficulty": "medium",
+      "question": "Какой вид коммутации гарантирует пропускную способность для взаимодействующих абонентов?"
+    },
+    {
+      "topic": "ARP",
+      "difficulty": "medium",
+      "question": "Когда ОС устанавливает себе на сетевой интерфейс IP-адрес, она обычно что делает?"
+    },
+    {
+      "topic": "Ethernet (CSMA/CD)",
+      "difficulty": "easy",
+      "question": "Что такое коллизия?"
+    },
+    {
+      "topic": "Ethernet (CSMA/CD)",
+      "difficulty": "easy",
+      "question": "Максимальный размер Ethernet-фрейма?"
+    },
+    {
+      "topic": "Ethernet (CSMA/CD)",
+      "difficulty": "medium",
+      "question": "Свитч на первый порт получает пакет, в котором MAC-адрес источника FF:FF:FF:FF:FF:FF. Такого MAC-адреса нет в таблице коммутации. Как поступит свитч?"
+    },
+    {
+      "topic": "IP-адресация",
+      "difficulty": "medium",
+      "question": "Как будет выглядеть IPv6-адрес FF02:0000:0000:0000:0000:0002:FE00:0600 после сокращения?"
+    },
+    {
+      "topic": "IP-адресация",
+      "difficulty": "medium",
+      "question": "Какие поля в IP-заголовке помогают хосту или маршрутизатору собрать фрагменты IP-пакета?"
+    },
+    {
+      "topic": "VLAN",
+      "difficulty": "medium",
+      "question": "Можно ли построить VLAN на нескольких коммутаторах? Как это сделать?"
+    },
+    {
+      "topic": "Маршрутизация",
+      "difficulty": "medium",
+      "question": "Чем хост отличается от маршрутизатора?"
+    },
+    {
+      "topic": "TCP и UDP",
+      "difficulty": "hard",
+      "question": "Если отправитель получает TCP-пакет с подтверждением ACK, в котором поле Window установлено в 0, то что это означает?"
+    },
+    {
+      "topic": "ARP",
+      "difficulty": "medium",
+      "question": "В ARP-запросе на канальном уровне в качестве адреса назначения устанавливается какой адрес?"
+    },
+    {
+      "topic": "Модель OSI",
+      "difficulty": "easy",
+      "question": "На каком уровне модели OSI работает хаб (концентратор)?"
+    },
+    {
+      "topic": "ARP",
+      "difficulty": "hard",
+      "question": "У хоста IP-адрес 192.168.1.1/26. Он отправляет пакет на IP-адрес назначения 192.168.1.63. Будет ли в этом случае отправляться ARP-запрос?"
+    },
+    {
+      "topic": "IP-адресация",
+      "difficulty": "easy",
+      "question": "Что такое IP-сеть?"
+    },
+    {
+      "topic": "IP-адресация",
+      "difficulty": "easy",
+      "question": "Какая версия IP-протокола сейчас постепенно вводится в эксплуатацию в связи с нехваткой IP-адресов?"
+    },
+    {
+      "topic": "NAT",
+      "difficulty": "easy",
+      "question": "Что такое NAT?"
+    },
+    {
+      "topic": "TCP и UDP",
+      "difficulty": "easy",
+      "question": "Сколько пакетов нужно отправить друг другу двум хостам, чтобы установить TCP-соединение?"
+    },
+    {
+      "topic": "DHCP",
+      "difficulty": "easy",
+      "question": "Какой протокол транспортного уровня использует DHCP?"
+    },
+    {
+      "topic": "Модель OSI",
+      "difficulty": "easy",
+      "question": "На каком уровне модели OSI работает свитч (коммутатор)?"
+    },
+    {
+      "topic": "Ethernet (CSMA/CD)",
+      "difficulty": "medium",
+      "question": "Если хост принял Ethernet-пакет, но его контрольная сумма не совпадает с указанной, то что сделает хост?"
+    },
+    {
+      "topic": "Маршрутизация",
+      "difficulty": "easy",
+      "question": "На сетевом уровне для решения, куда отправить пакет, применяется что?"
+    },
+    {
+      "topic": "TCP и UDP",
+      "difficulty": "medium",
+      "question": "При попытке установить соединение на закрытый TCP-порт придет пакет с каким флагом?"
+    },
+    {
+      "topic": "ICMP",
+      "difficulty": "easy",
+      "question": "В какой протокол инкапсулируется ICMP?"
+    },
+    {
+      "topic": "Ethernet (CSMA/CD)",
+      "difficulty": "medium",
+      "question": "Свитч получает пакет на первый порт, MAC-адрес источника в пакете 01:02:03:04:05:06. При каком условии свитч добавит этот MAC-адрес в таблицу?"
+    },
+    {
+      "topic": "IP-адресация",
+      "difficulty": "easy",
+      "question": "Как выглядит аналог 127.0.0.1 в IPv6?"
+    },
+    {
+      "topic": "ARP",
+      "difficulty": "medium",
+      "question": "Может ли внутри IP-протокола лежать ARP-протокол?"
+    },
+    {
+      "topic": "IP-адресация",
+      "difficulty": "medium",
+      "question": "Какой IP-сети принадлежит IP-адрес 192.168.1.65/26?"
+    },
+    {
+      "topic": "TCP и UDP",
+      "difficulty": "medium",
+      "question": "Как TCP-протокол понимает, что произошла потеря данных?"
+    },
+    {
+      "topic": "Туннели и инкапсуляция",
+      "difficulty": "medium",
+      "question": "Будет ли модифицирован IP-заголовок при использовании IPIP-туннеля?"
+    },
+    {
+      "topic": "Ethernet (CSMA/CD)",
+      "difficulty": "medium",
+      "question": "Чего не могут сделать хосты, если соединены полудуплексным (half-duplex) каналом?"
+    },
+    {
+      "topic": "TCP и UDP",
+      "difficulty": "easy",
+      "question": "Чем UDP отличается от TCP?"
+    },
+    {
+      "topic": "VLAN",
+      "difficulty": "medium",
+      "question": "Какой VLAN используют коммутаторы при общении между собой?"
+    },
+    {
+      "topic": "DHCP",
+      "difficulty": "easy",
+      "question": "На каком порту работает DHCP-сервер?"
+    },
+    {
+      "topic": "PMTUD",
+      "difficulty": "easy",
+      "question": "В современных ОС размер MTU по умолчанию какой?"
+    },
+    {
+      "topic": "IP-адресация",
+      "difficulty": "medium",
+      "question": "Вы с другом сделали локальную сеть из двух хостов. Ваш друг говорит, что IP-адрес его хоста 127.0.0.1. Сможете ли вы подключиться к нему?"
+    },
+    {
+      "topic": "VLAN",
+      "difficulty": "easy",
+      "question": "Для чего служит идентификатор кадра (tag)?"
+    },
+    {
+      "topic": "Модель OSI",
+      "difficulty": "easy",
+      "question": "Какой уровень модели OSI решает, в каком виде будут отправляться данные: кодировка, сжатие, шифрование и так далее?"
+    },
+    {
+      "topic": "Ethernet (CSMA/CD)",
+      "difficulty": "easy",
+      "question": "Какая сетевая топология наиболее популярна в настоящее время для построения Ethernet-сетей?"
+    },
+    {
+      "topic": "Ethernet (CSMA/CD)",
+      "difficulty": "medium",
+      "question": "Из каких колонок состоит таблица коммутации?"
+    },
+    {
+      "topic": "IP-адресация",
+      "difficulty": "medium",
+      "question": "Для сети 172.16.12.0/25 широковещательным IP-адресом будет какой адрес?"
+    },
+    {
+      "topic": "Основы сетей и коммутации",
+      "difficulty": "easy",
+      "question": "Коммутация пакетов — это что?"
+    },
+    {
+      "topic": "Модель OSI",
+      "difficulty": "easy",
+      "question": "Какой уровень модели OSI отвечает за доставку данных между приложениями?"
+    },
+    {
+      "topic": "TCP и UDP",
+      "difficulty": "medium",
+      "question": "С какой целью TCP-протокол во время передачи данных измеряет RTT?"
+    },
+    {
+      "topic": "DHCP",
+      "difficulty": "medium",
+      "question": "Когда DHCP-клиент отправляет сообщение DHCP DISCOVER, какой IP-адрес источника устанавливается?"
+    },
+    {
+      "topic": "Wi‑Fi",
+      "difficulty": "medium",
+      "question": "Какую топологию создает домашний Wi‑Fi-роутер?"
+    },
+    {
+      "topic": "DHCP",
+      "difficulty": "medium",
+      "question": "На какой IP-адрес отправляется сообщение DHCP REQUEST?"
+    },
+    {
+      "topic": "TCP и UDP",
+      "difficulty": "easy",
+      "question": "Может ли одно приложение открыть несколько TCP/UDP-портов?"
+    },
+    {
+      "topic": "TCP и UDP",
+      "difficulty": "medium",
+      "question": "Что такое медленный старт (Slow Start) в TCP?"
+    },
+    {
+      "topic": "IP-адресация",
+      "difficulty": "medium",
+      "question": "Сколько IP-адресов можно раздать хостам в сети 10.10.10.0/30?"
+    },
+    {
+      "topic": "TCP и UDP",
+      "difficulty": "easy",
+      "question": "Сколько всего портов у TCP или UDP?"
+    },
+    {
+      "topic": "Сетевые утилиты",
+      "difficulty": "easy",
+      "question": "Какой утилитой можно посмотреть открытые порты под ОС Windows?"
+    },
+    {
+      "topic": "VLAN",
+      "difficulty": "medium",
+      "question": "Как обеспечивается общение между хостами из разных виртуальных сетей?"
+    },
+    {
+      "topic": "Стандарты и RFC",
+      "difficulty": "easy",
+      "question": "RFC описывают что?"
+    },
+    {
+      "topic": "Ethernet (CSMA/CD)",
+      "difficulty": "medium",
+      "question": "Свитч получает пакет, смотрит на MAC-адрес назначения и пытается его найти в таблице коммутации. Такого адреса нет. Как поведет себя свитч?"
+    },
+    {
+      "topic": "TCP и UDP",
+      "difficulty": "easy",
+      "question": "Номера каких портов являются привилегированными и для их открытия необходимы права администратора или суперпользователя?"
+    },
+    {
+      "topic": "Сетевые утилиты",
+      "difficulty": "easy",
+      "question": "Какой командой под ОС Linux можно посмотреть IP-настройки?"
+    },
+    {
+      "topic": "TCP и UDP",
+      "difficulty": "medium",
+      "question": "Каким протоколом транспортного уровня вы воспользуетесь для групповой рассылки?"
+    },
+    {
+      "topic": "TCP и UDP",
+      "difficulty": "medium",
+      "question": "Что помогает TCP-протоколу располагать полученные данные в правильном порядке?"
+    },
+    {
+      "topic": "IP-адресация",
+      "difficulty": "medium",
+      "question": "У вас есть IP-сеть 192.168.1.0/24. Если ее нужно разбить на 4 подсети, то какая маска будет у новых IP-сетей?"
+    }
+  ]
+}
