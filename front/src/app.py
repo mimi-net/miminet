@@ -30,6 +30,9 @@ from flask_login import current_user, login_required
 from flask_migrate import Migrate
 from miminet_admin import (
     AnswerView,
+    AiInterviewAttemptView,
+    AiInterviewAccessCodeView,
+    AiInterviewSettingView,
     CreateCheckTaskView,
     MiminetAdminIndexView,
     QuestionCategoryView,
@@ -84,6 +87,13 @@ from miminet_network import (
 from miminet_shark import mimishark_page
 from miminet_simulation import check_simulation, run_simulation
 from ai_generate import generate_ai_task
+from ai_interview.controller import ai_interview_routes
+from ai_interview.models import (
+    AiInterviewAccessCode,
+    AiInterviewAttempt,
+    AiInterviewSetting,
+    create_ai_interview_tables,
+)
 from quiz.controller.image_controller import image_routes, upload_image_endpoint
 from quiz.controller.question_controller import (
     create_question_endpoint,
@@ -403,6 +413,7 @@ app.add_url_rule(
 )
 
 app.register_blueprint(image_routes)
+app.register_blueprint(ai_interview_routes)
 
 # Init Flask-admin
 admin = Admin(
@@ -418,6 +429,20 @@ admin.add_view(QuestionView(Question, db.session, name="Задания", endpoin
 admin.add_view(AnswerView(Answer, db.session, name="Варианты"))
 admin.add_view(QuestionCategoryView(QuestionCategory, db.session, name="Категории"))
 admin.add_view(SessionQuestionView(SessionQuestion, db.session, name="Решения"))
+admin.add_view(
+    AiInterviewSettingView(AiInterviewSetting, db.session, name="AI настройки")
+)
+admin.add_view(
+    AiInterviewAccessCodeView(
+        AiInterviewAccessCode,
+        db.session,
+        name="AI коды доступа",
+        endpoint="ai_access_codes",
+    )
+)
+admin.add_view(
+    AiInterviewAttemptView(AiInterviewAttempt, db.session, name="AI попытки")
+)
 admin.add_view(
     CreateCheckTaskView(
         Network,
@@ -629,6 +654,8 @@ def sitemap():
 
 if __name__ == "__main__":
     init_db(app)
+    with app.app_context():
+        create_ai_interview_tables()
 
     if len(sys.argv) > 1:
         if sys.argv[1] == "dev":
