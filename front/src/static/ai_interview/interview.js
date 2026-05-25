@@ -27,6 +27,15 @@
     let currentTurn = null;
     let waiting = false;
 
+    function shouldOpenActiveSession() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get("continue") === "1" || params.get("session") === "active";
+    }
+
+    function activeSessionUrl() {
+        return config.interviewPageUrl + "?continue=1";
+    }
+
     function setVisible(element, visible) {
         if (!element) {
             return;
@@ -153,7 +162,7 @@
             }
             if (item.status === "active" || item.status === "failed-recoverable") {
                 return "<a class=\"ai-interview__history-row\" href=\"" +
-                    escapeHtml(config.interviewPageUrl) +
+                    escapeHtml(activeSessionUrl()) +
                     "\">" + content + "</a>";
             }
             return "<div class=\"ai-interview__history-row ai-interview__history-row--muted\">" +
@@ -164,17 +173,22 @@
 
     function renderState(state) {
         setError("");
-        setNotice(state.notice ? state.notice.message : "");
+        const isActiveSession = state.status === "active" || state.status === "failed-recoverable";
+        const showActiveSession = state.enabled && isActiveSession && shouldOpenActiveSession();
+        const showLaunch = state.enabled && (state.status === "ready" || (isActiveSession && !showActiveSession));
+        const noticeMessage = isActiveSession && !showActiveSession
+            ? "У вас есть незавершенная попытка. Ее можно открыть из истории попыток."
+            : (state.notice ? state.notice.message : "");
+        setNotice(noticeMessage);
         renderHistory(state.history || []);
         setVisible(closedPanel, !state.enabled);
-        setVisible(startPanel, state.enabled && state.status === "ready");
-        setVisible(sessionPanel, state.enabled &&
-            (state.status === "active" || state.status === "failed-recoverable"));
+        setVisible(startPanel, showLaunch);
+        setVisible(sessionPanel, showActiveSession);
         setVisible(resultPanel, false);
-        setVisible(historyPanel, state.enabled && state.status === "ready");
+        setVisible(historyPanel, state.enabled && (state.status === "ready" || (isActiveSession && !showActiveSession)));
         statusBox.textContent = state.enabled ? "" : (state.message || "");
 
-        if (!state.enabled || state.status === "ready") {
+        if (!state.enabled || state.status === "ready" || (isActiveSession && !showActiveSession)) {
             currentTurn = null;
             return;
         }
