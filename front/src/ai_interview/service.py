@@ -6,7 +6,12 @@ import re
 import secrets
 from datetime import datetime, timedelta, timezone
 
-from ai_interview.catalog import public_topics, topic_catalog, topic_label, validate_topic_keys
+from ai_interview.catalog import (
+    public_topics,
+    topic_catalog,
+    topic_label,
+    validate_topic_keys,
+)
 from ai_interview.models import (
     AiInterviewAccessCode,
     AiInterviewAttempt,
@@ -113,7 +118,9 @@ def _expires_at_utc(access_code):
 
 
 def delete_access_code(access_code):
-    AiInterviewAttempt.query.filter_by(access_code_id=access_code.id).update(
+    db.session.query(AiInterviewAttempt).filter_by(
+        access_code_id=access_code.id
+    ).update(
         {"access_code_id": None},
         synchronize_session=False,
     )
@@ -167,14 +174,12 @@ def _access_code_is_current(access_code):
 
 
 def find_valid_access_code(code):
-    cleanup_expired_access_codes()
     normalized = normalize_access_code(code)
     if len(normalized) != 6:
         raise InterviewError("Код доступа должен состоять из 6 цифр.")
 
-    access_code = AiInterviewAccessCode.query.filter_by(
-        code=normalized
-    ).first()
+    cleanup_expired_access_codes()
+    access_code = AiInterviewAccessCode.query.filter_by(code=normalized).first()
     if access_code is None:
         raise InterviewUnavailable("Код доступа не найден.")
     if not access_code.is_active:
@@ -264,7 +269,9 @@ def build_focus(
     topic = topic_catalog()[topic_key]
     avoid_section_ids = set(avoid_section_ids or [])
     available_sections = [
-        section for section in topic["sections"] if section["id"] not in avoid_section_ids
+        section
+        for section in topic["sections"]
+        if section["id"] not in avoid_section_ids
     ]
     section = rng.choice(available_sections or topic["sections"])
     concept_pool = list(dict.fromkeys(section["concepts"]))
@@ -283,9 +290,7 @@ def build_focus(
 
 
 def _example_block(context):
-    return "\n".join(
-        f"- {example['text']}" for example in context.example_questions
-    )
+    return "\n".join(f"- {example['text']}" for example in context.example_questions)
 
 
 def _question_stage(position):
@@ -324,7 +329,9 @@ difficulty должен быть одним из: basic, mechanism, practice, ad
 def _session_history_block(turn):
     answered_turns = [
         item
-        for item in sorted(turn.session.turns, key=lambda session_turn: session_turn.position)
+        for item in sorted(
+            turn.session.turns, key=lambda session_turn: session_turn.position
+        )
         if item.position < turn.position and item.answer is not None
     ]
     if not answered_turns:
@@ -480,7 +487,8 @@ def topic_confidence(session):
 
 def _ordered_topics_for_session(session):
     scheduled = [
-        topic_key for topic_key in (session.topic_schedule or [])
+        topic_key
+        for topic_key in (session.topic_schedule or [])
         if topic_key in session.selected_topics
     ]
     return scheduled + [
@@ -622,7 +630,9 @@ def _generate_question(provider, topic_key, focus, question_limit=None):
         [topic_label(topic_key), focus["section_label"], " ".join(focus["concepts"])]
     )
     context = retrieve_context([topic_key], query)
-    prompt = _generation_prompt(topic_key, focus, context, question_limit=question_limit)
+    prompt = _generation_prompt(
+        topic_key, focus, context, question_limit=question_limit
+    )
     temperature = generation_temperature()
     completion = _as_completion(
         provider.complete_json(
@@ -651,7 +661,9 @@ def _generate_question(provider, topic_key, focus, question_limit=None):
 
 
 def _last_session(attempt):
-    sessions = sorted(attempt.sessions, key=lambda session: session.created_on or now_utc())
+    sessions = sorted(
+        attempt.sessions, key=lambda session: session.created_on or now_utc()
+    )
     return sessions[-1] if sessions else None
 
 
@@ -1062,7 +1074,10 @@ def submit_answer(user, turn_id, answer):
     payload = completion.payload
     try:
         if turn.position < question_limit:
-            if payload["next_question"] is not None or payload["final_result"] is not None:
+            if (
+                payload["next_question"] is not None
+                or payload["final_result"] is not None
+            ):
                 raise ProviderError("LLM returned premature continuation data")
         elif payload["next_question"] is not None or payload["final_result"] is None:
             raise ProviderError("LLM did not finalize the last turn")
@@ -1159,7 +1174,9 @@ def submit_answer(user, turn_id, answer):
         session.status = "completed"
         session.finished_at = func.now()
         session.attempt.status = "completed"
-        session.final_result = _normalize_final_result(session.turns, payload["final_result"])
+        session.final_result = _normalize_final_result(
+            session.turns, payload["final_result"]
+        )
         _emit_llm_debug(
             "finalization",
             {

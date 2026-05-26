@@ -23,7 +23,6 @@ from wtforms import (
 
 from ai_interview.models import (
     AiInterviewAccessCode,
-    AiInterviewAttempt,
     AiInterviewSetting,
 )
 from ai_interview.providers import (
@@ -1048,9 +1047,7 @@ class AiInterviewAccessCodeView(MiminetAdminModelView):
     def list_gettext(message, **variables):
         if message == "Create":
             return Markup(
-                "<span class='btn btn-success btn-sm'>"
-                "Сгенерировать код"
-                "</span>"
+                "<span class='btn btn-success btn-sm'>" "Сгенерировать код" "</span>"
             )
         if message == "Create New Record":
             return "Сгенерировать новый код доступа"
@@ -1083,9 +1080,13 @@ class AiInterviewAccessCodeView(MiminetAdminModelView):
 
     def get_query(self):
         cleanup_expired_access_codes()
-        return super().get_query().order_by(
-            AiInterviewAccessCode.created_on.desc(),
-            AiInterviewAccessCode.id.desc(),
+        return (
+            super()
+            .get_query()
+            .order_by(
+                AiInterviewAccessCode.created_on.desc(),
+                AiInterviewAccessCode.id.desc(),
+            )
         )
 
 

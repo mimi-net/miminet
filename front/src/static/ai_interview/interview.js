@@ -171,14 +171,18 @@
         }).join("");
     }
 
-    function renderState(state) {
+    function renderState(state, options) {
+        options = options || {};
         setError("");
         const isActiveSession = state.status === "active" || state.status === "failed-recoverable";
-        const showActiveSession = state.enabled && isActiveSession && shouldOpenActiveSession();
+        const showActiveSession = state.enabled && isActiveSession &&
+            (options.openActiveSession || shouldOpenActiveSession());
         const showLaunch = state.enabled && (state.status === "ready" || (isActiveSession && !showActiveSession));
-        const noticeMessage = isActiveSession && !showActiveSession
-            ? "У вас есть незавершенная попытка. Ее можно открыть из истории попыток."
-            : (state.notice ? state.notice.message : "");
+        const noticeMessage = state.notice
+            ? state.notice.message
+            : (showLaunch && isActiveSession
+                ? "У вас есть незавершенная попытка. Ее можно открыть из истории попыток."
+                : "");
         setNotice(noticeMessage);
         renderHistory(state.history || []);
         setVisible(closedPanel, !state.enabled);
@@ -287,7 +291,7 @@
             renderState(await postJson(config.startUrl, {
                 topics: topics,
                 access_code: accessCode
-            }));
+            }), {openActiveSession: true});
         } catch (error) {
             setError(error.message);
         } finally {
@@ -305,7 +309,7 @@
             renderState(await postJson(config.answerUrl, {
                 turn_id: currentTurn.id,
                 answer: answerInput.value
-            }));
+            }), {openActiveSession: true});
         } catch (error) {
             setError(error.message);
         } finally {

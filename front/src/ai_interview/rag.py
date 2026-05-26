@@ -112,7 +112,12 @@ def _heading_for_chunk(chunk):
     heading_path = chunk.get("heading_path") or []
     if heading_path:
         return " > ".join(str(part) for part in heading_path if part)
-    return chunk.get("heading") or chunk.get("topic") or chunk.get("section") or chunk["id"]
+    return (
+        chunk.get("heading")
+        or chunk.get("topic")
+        or chunk.get("section")
+        or chunk["id"]
+    )
 
 
 def _topic_key_for_chunk(chunk):
@@ -127,14 +132,15 @@ def _topic_key_for_chunk(chunk):
         if marker.casefold() in topic_text:
             return topic_key
 
-    heading_text = " ".join(str(part) for part in chunk.get("heading_path", [])).casefold()
+    heading_text = " ".join(
+        str(part) for part in chunk.get("heading_path", [])
+    ).casefold()
     for marker, topic_key in COURSE_TOPIC_MAP.items():
         if marker.casefold() in heading_text:
             return topic_key
 
     fallback_text = " ".join(
-        str(part)
-        for part in [chunk.get("section", ""), chunk.get("topic_file", "")]
+        str(part) for part in [chunk.get("section", ""), chunk.get("topic_file", "")]
     ).casefold()
     for marker, topic_key in COURSE_TOPIC_MAP.items():
         if marker.casefold() in fallback_text:
@@ -152,7 +158,9 @@ def _normalize_chunk(chunk):
     normalized["topic"] = topic_key
     normalized["block_id"] = topic_key
     normalized["heading"] = _heading_for_chunk(chunk)
-    normalized["subtopics"] = chunk.get("subtopics") or chunk.get("subtopics_in_chunk") or []
+    normalized["subtopics"] = (
+        chunk.get("subtopics") or chunk.get("subtopics_in_chunk") or []
+    )
     normalized["text"] = str(chunk.get("text") or "").strip()
     return normalized
 
@@ -207,7 +215,10 @@ def load_example_questions():
     deduplicated = []
     seen = set()
     for row in rows:
-        key = (row.get("topic"), " ".join(WORD_RE.findall(row.get("text", "").casefold())))
+        key = (
+            row.get("topic"),
+            " ".join(WORD_RE.findall(row.get("text", "").casefold())),
+        )
         if key in seen:
             continue
         seen.add(key)
@@ -273,7 +284,9 @@ def _best_excerpt(text, query_words, max_chars):
 
     left = best_index - 1
     right = best_index + 1
-    while len("\n\n".join(selected)) < max_chars and (left >= 0 or right < len(paragraphs)):
+    while len("\n\n".join(selected)) < max_chars and (
+        left >= 0 or right < len(paragraphs)
+    ):
         candidates = []
         if left >= 0:
             candidates.append((left, paragraphs[left]))
@@ -374,7 +387,6 @@ def is_verbatim_example(question, examples):
     question_words = " ".join(WORD_RE.findall(str(question or "").casefold()))
     return any(
         question_words
-        and question_words
-        == " ".join(WORD_RE.findall(example["text"].casefold()))
+        and question_words == " ".join(WORD_RE.findall(example["text"].casefold()))
         for example in examples
     )

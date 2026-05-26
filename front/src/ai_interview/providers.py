@@ -60,9 +60,7 @@ EVALUATION_SCHEMA = {
         "misconceptions": {"type": "array", "items": {"type": "string"}},
         "answer_score": {"type": "integer", "minimum": 0, "maximum": 3},
         "critical_error": {"type": "boolean"},
-        "next_question": {
-            "anyOf": [EVALUATION_NEXT_QUESTION_SCHEMA, {"type": "null"}]
-        },
+        "next_question": {"anyOf": [EVALUATION_NEXT_QUESTION_SCHEMA, {"type": "null"}]},
         "final_result": {
             "anyOf": [
                 {
@@ -288,9 +286,7 @@ class ChatJsonProvider:
         session.trust_env = False
 
         if self.proxy_url:
-            session.proxies.update(
-                {"http": self.proxy_url, "https": self.proxy_url}
-            )
+            session.proxies.update({"http": self.proxy_url, "https": self.proxy_url})
 
         return session
 
@@ -321,11 +317,15 @@ class ChatJsonProvider:
                 status_code = (
                     exc.response.status_code if exc.response is not None else "error"
                 )
-                raise ProviderError(f"LLM API returned HTTP {status_code}", calls) from exc
+                raise ProviderError(
+                    f"LLM API returned HTTP {status_code}", calls
+                ) from exc
             except requests.RequestException as exc:
                 raise ProviderError("LLM API is unavailable", calls) from exc
 
-        raise ProviderError(f"LLM returned invalid structured output: {last_error}", calls)
+        raise ProviderError(
+            f"LLM returned invalid structured output: {last_error}", calls
+        )
 
 
 class OpenRouterProvider(ChatJsonProvider):

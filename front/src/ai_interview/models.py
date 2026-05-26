@@ -1,7 +1,14 @@
 import uuid
 
 from miminet_model import db
-from sqlalchemy import TIMESTAMP, BigInteger, Boolean, ForeignKey, Text, UniqueConstraint
+from sqlalchemy import (
+    TIMESTAMP,
+    BigInteger,
+    Boolean,
+    ForeignKey,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.sql import func
 
 
@@ -102,7 +109,9 @@ class AiInterviewSession(db.Model):  # type: ignore[name-defined]
     __tablename__ = "ai_interview_session"
 
     id = db.Column(BigInteger, primary_key=True)
-    guid = db.Column(Text, default=lambda: str(uuid.uuid4()), nullable=False, unique=True)
+    guid = db.Column(
+        Text, default=lambda: str(uuid.uuid4()), nullable=False, unique=True
+    )
     attempt_id = db.Column(
         BigInteger, ForeignKey("ai_interview_attempt.id"), nullable=False
     )
@@ -133,7 +142,9 @@ class AiInterviewSession(db.Model):  # type: ignore[name-defined]
 class AiInterviewTurn(db.Model):  # type: ignore[name-defined]
     __tablename__ = "ai_interview_turn"
     __table_args__ = (
-        UniqueConstraint("session_id", "position", name="uq_ai_interview_turn_position"),
+        UniqueConstraint(
+            "session_id", "position", name="uq_ai_interview_turn_position"
+        ),
     )
 
     id = db.Column(BigInteger, primary_key=True)
