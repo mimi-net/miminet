@@ -7,6 +7,7 @@ from jsonschema import ValidationError
 
 from ai_interview.catalog import public_topics
 from ai_interview.controller import ai_interview_routes
+from ai_interview.models import AiInterviewAccessCode
 from ai_interview.providers import (
     GENERATION_SCHEMA,
     ProviderNotConfigured,
@@ -77,7 +78,9 @@ def make_turn(position=1, answer=None, status="active"):
 
 
 def test_retrieval_is_topic_constrained_and_bounded():
-    context = retrieve_context(["advanced_networking"], "PMTUD large TCP traffic", max_chars=220)
+    context = retrieve_context(
+        ["advanced_networking"], "PMTUD large TCP traffic", max_chars=220
+    )
 
     assert context.chunks
     assert all(chunk["topic"] == "advanced_networking" for chunk in context.chunks)
@@ -86,10 +89,15 @@ def test_retrieval_is_topic_constrained_and_bounded():
 
 
 def test_course_chunks_are_normalized_from_course_topic_names():
-    context = retrieve_context(["transport_and_icmp"], "ICMP ping Destination Unreachable")
+    context = retrieve_context(
+        ["transport_and_icmp"], "ICMP ping Destination Unreachable"
+    )
 
     assert context.chunks
-    assert any("icmp" in (chunk.get("source_topic") or "").casefold() for chunk in context.chunks)
+    assert any(
+        "icmp" in (chunk.get("source_topic") or "").casefold()
+        for chunk in context.chunks
+    )
     assert all(chunk["topic"] == "transport_and_icmp" for chunk in context.chunks)
 
 
@@ -240,7 +248,9 @@ def test_start_resumes_existing_attempt_before_provider_call(mocker):
         "ai_interview.service._attempt_for_access_code",
         return_value=SimpleNamespace(status="active", sessions=[turn.session]),
     )
-    mocker.patch("ai_interview.service._latest_incomplete_session", return_value=turn.session)
+    mocker.patch(
+        "ai_interview.service._latest_incomplete_session", return_value=turn.session
+    )
     mocker.patch("ai_interview.service.get_interview_history", return_value=[])
     provider_factory = mocker.patch("ai_interview.service.get_provider")
 
@@ -269,6 +279,7 @@ def test_duplicate_answer_returns_state_without_provider_call(mocker):
 
 
 def test_completed_attempt_does_not_block_new_attempt(mocker):
+    access_code = AiInterviewAccessCode(id=11)
     mocker.patch(
         "ai_interview.service.get_global_setting",
         return_value=SimpleNamespace(
@@ -279,7 +290,7 @@ def test_completed_attempt_does_not_block_new_attempt(mocker):
     )
     mocker.patch(
         "ai_interview.service.find_valid_access_code",
-        return_value=SimpleNamespace(id=11),
+        return_value=access_code,
     )
     mocker.patch("ai_interview.service._attempt_for_access_code", return_value=None)
     mocker.patch("ai_interview.service._latest_incomplete_session", return_value=None)
@@ -293,11 +304,14 @@ def test_completed_attempt_does_not_block_new_attempt(mocker):
         },
     )
     mocker.patch("ai_interview.service.get_provider", return_value=provider)
-    mocker.patch("ai_interview.service.retrieve_context", return_value=SimpleNamespace(
-        text="ARP сопоставляет IP и MAC.",
-        example_questions=[],
-        provenance=lambda: {"chunks": []},
-    ))
+    mocker.patch(
+        "ai_interview.service.retrieve_context",
+        return_value=SimpleNamespace(
+            text="ARP сопоставляет IP и MAC.",
+            example_questions=[],
+            provenance=lambda: {"chunks": []},
+        ),
+    )
     mocker.patch("ai_interview.service.db.session.add")
     mocker.patch("ai_interview.service.db.session.commit")
 
@@ -309,15 +323,17 @@ def test_completed_attempt_does_not_block_new_attempt(mocker):
 
 def test_delete_access_code_detaches_attempts_before_delete(mocker):
     access_code = SimpleNamespace(id=11)
-    attempt_query = mocker.Mock()
+    session_query = mocker.Mock()
     update_query = mocker.Mock()
-    mocker.patch("ai_interview.service.AiInterviewAttempt.query", attempt_query)
+    query = mocker.patch("ai_interview.service.db.session.query")
     mocker.patch("ai_interview.service.db.session.delete")
-    attempt_query.filter_by.return_value = update_query
+    query.return_value = session_query
+    session_query.filter_by.return_value = update_query
 
     service.delete_access_code(access_code)
 
-    attempt_query.filter_by.assert_called_once_with(access_code_id=11)
+    query.assert_called_once_with(service.AiInterviewAttempt)
+    session_query.filter_by.assert_called_once_with(access_code_id=11)
     update_query.update.assert_called_once_with(
         {"access_code_id": None},
         synchronize_session=False,
@@ -353,7 +369,9 @@ def test_start_api_reports_missing_provider(api_client, mocker):
 
 
 def test_start_requires_access_code_before_provider_call(mocker):
-    mocker.patch("ai_interview.service.get_global_setting", return_value=SimpleNamespace())
+    mocker.patch(
+        "ai_interview.service.get_global_setting", return_value=SimpleNamespace()
+    )
     provider_factory = mocker.patch("ai_interview.service.get_provider")
 
     with pytest.raises(service.InterviewError):
@@ -368,8 +386,12 @@ def test_reusing_completed_access_code_returns_notice_without_opening_result(moc
     turn.session.final_result = {"grade": 4, "verdict": "OK"}
     access_code = SimpleNamespace(id=11)
     attempt = SimpleNamespace(status="completed", sessions=[turn.session])
-    mocker.patch("ai_interview.service.get_global_setting", return_value=SimpleNamespace())
-    mocker.patch("ai_interview.service.find_valid_access_code", return_value=access_code)
+    mocker.patch(
+        "ai_interview.service.get_global_setting", return_value=SimpleNamespace()
+    )
+    mocker.patch(
+        "ai_interview.service.find_valid_access_code", return_value=access_code
+    )
     mocker.patch("ai_interview.service._attempt_for_access_code", return_value=attempt)
     mocker.patch("ai_interview.service.get_interview_history", return_value=[])
     provider_factory = mocker.patch("ai_interview.service.get_provider")
