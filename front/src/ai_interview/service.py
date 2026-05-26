@@ -850,6 +850,20 @@ def used_code_completed_state(session):
     return state
 
 
+def used_code_aborted_state(session):
+    state = ready_state()
+    state["notice"] = {
+        "type": "info",
+        "code": "access_code_aborted",
+        "message": (
+            "Этот код уже был использован. Попытка была завершена досрочно "
+            "и не сохраняется в истории."
+        ),
+        "session_guid": session.guid,
+    }
+    return state
+
+
 def unavailable_state():
     return {
         "enabled": False,
@@ -888,6 +902,8 @@ def start_interview(user, requested_topics, access_code=None):
         if session is not None:
             if session.status == "completed":
                 return _with_history(user, used_code_completed_state(session))
+            if session.status == "aborted":
+                return _with_history(user, used_code_aborted_state(session))
             return _with_history(user, serialize_session(session, resumed=True))
         raise InterviewConflict("Попытка уже создана, но сессия не найдена.")
 
@@ -1031,6 +1047,8 @@ def submit_answer(user, turn_id, answer):
     session = turn.session
     if session.status == "completed":
         return _with_history(user, serialize_session(session, duplicate=True))
+    if session.status not in {"active", "failed-recoverable"}:
+        raise InterviewConflict("Эта попытка уже завершена.")
     if turn.answer is not None:
         return _with_history(user, serialize_session(session, duplicate=True))
     if _current_turn(session) != turn:
@@ -1191,6 +1209,30 @@ def submit_answer(user, turn_id, answer):
 
     db.session.commit()
     return _with_history(user, serialize_session(session))
+
+
+def abort_interview(user, session_guid):
+    session_guid = str(session_guid or "").strip()
+    if not session_guid:
+        raise InterviewError("Сессия собеседования не указана.")
+
+    session = _latest_incomplete_session(user)
+    if session is None or session.guid != session_guid:
+        raise InterviewNotFound("Сессия собеседования не найдена.")
+
+    session.status = "aborted"
+    session.finished_at = func.now()
+    session.final_result = None
+    session.attempt.status = "completed"
+    db.session.commit()
+
+    state = ready_state()
+    state["notice"] = {
+        "type": "info",
+        "code": "attempt_aborted",
+        "message": "Попытка завершена досрочно. Код считается использованным.",
+    }
+    return _with_history(user, state)
 
 
 def get_interview_result(user):

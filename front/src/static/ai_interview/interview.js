@@ -5,6 +5,7 @@
         interviewPageUrl: script.dataset.interviewPageUrl,
         startUrl: script.dataset.startUrl,
         answerUrl: script.dataset.answerUrl,
+        abortUrl: script.dataset.abortUrl,
         resultUrl: script.dataset.resultUrl,
         resultPageBaseUrl: script.dataset.resultPageBaseUrl,
         resultGuid: script.dataset.resultGuid || null
@@ -23,8 +24,10 @@
     const answerForm = document.getElementById("ai-interview-answer-form");
     const answerButton = document.getElementById("ai-interview-answer-button");
     const answerInput = document.getElementById("ai-interview-answer");
+    const abortButton = document.getElementById("ai-interview-abort-button");
     const charCount = document.getElementById("ai-interview-char-count");
     let currentTurn = null;
+    let currentSessionGuid = null;
     let waiting = false;
 
     function shouldOpenActiveSession() {
@@ -99,6 +102,9 @@
         }
         if (answerInput) {
             answerInput.disabled = value;
+        }
+        if (abortButton) {
+            abortButton.disabled = value;
         }
     }
 
@@ -194,15 +200,18 @@
 
         if (!state.enabled || state.status === "ready" || (isActiveSession && !showActiveSession)) {
             currentTurn = null;
+            currentSessionGuid = null;
             return;
         }
         if (state.status === "completed") {
+            currentSessionGuid = null;
             renderResult(state.result || {});
             statusBox.textContent = "Попытка завершена";
             return;
         }
 
         currentTurn = state.current_turn;
+        currentSessionGuid = state.session_guid;
         const meta = document.getElementById("ai-interview-meta");
         const topicLabels = (state.selected_topics || []).map(function (topic) {
             return "<span class=\"ai-interview__badge\">" + escapeHtml(topic.label) + "</span>";
@@ -310,6 +319,25 @@
                 turn_id: currentTurn.id,
                 answer: answerInput.value
             }), {openActiveSession: true});
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setWaiting(false);
+        }
+    });
+
+    abortButton.addEventListener("click", async function () {
+        if (waiting || !currentSessionGuid) {
+            return;
+        }
+        if (!window.confirm("Завершить попытку досрочно? Код сгорит, а попытка не сохранится в истории.")) {
+            return;
+        }
+        setWaiting(true);
+        try {
+            renderState(await postJson(config.abortUrl, {
+                session_guid: currentSessionGuid
+            }));
         } catch (error) {
             setError(error.message);
         } finally {

@@ -5,6 +5,7 @@ from ai_interview.catalog import public_topics
 from ai_interview.providers import ProviderError, ProviderNotConfigured
 from ai_interview.service import (
     InterviewError,
+    abort_interview,
     get_interview_result,
     get_interview_result_by_guid,
     get_interview_state,
@@ -82,6 +83,16 @@ def answer_interview_endpoint():
     except (InterviewError, ProviderNotConfigured) as error:
         return _json_error(error, default_status=503)
     except ProviderError as error:
+        return _json_error(error)
+
+
+@ai_interview_routes.route("/ai-interview/api/abort", methods=["POST"])
+@login_required
+def abort_interview_endpoint():
+    payload = request.get_json(silent=True) or {}
+    try:
+        return jsonify(abort_interview(current_user, payload.get("session_guid")))
+    except InterviewError as error:
         return _json_error(error)
 
 
