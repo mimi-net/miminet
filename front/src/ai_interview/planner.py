@@ -157,9 +157,7 @@ def build_focus(
     topic = topic_catalog()[topic_key]
     avoid_section_ids = set(avoid_section_ids or [])
     target_difficulty = _difficulty_for_plan_reason(plan_reason, position)
-    question_template = _choose_question_template(
-        plan_reason, target_difficulty, rng
-    )
+    question_template = _choose_question_template(plan_reason, target_difficulty, rng)
     available_sections = [
         section
         for section in topic["sections"]

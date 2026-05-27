@@ -376,9 +376,7 @@ def test_reusing_completed_access_code_returns_notice_without_opening_result(moc
     mocker.patch(
         "ai_interview.engine.get_global_setting", return_value=SimpleNamespace()
     )
-    mocker.patch(
-        "ai_interview.engine.find_valid_access_code", return_value=access_code
-    )
+    mocker.patch("ai_interview.engine.find_valid_access_code", return_value=access_code)
     mocker.patch("ai_interview.engine._attempt_for_access_code", return_value=attempt)
     mocker.patch("ai_interview.state.get_interview_history", return_value=[])
     provider_factory = mocker.patch("ai_interview.engine.get_provider")

@@ -7,7 +7,11 @@ from ai_interview.access import (
     resolve_llm_proxy_url,
 )
 from ai_interview.catalog import validate_topic_keys
-from ai_interview.debug_service import emit_llm_debug, generate_question, validate_answer
+from ai_interview.debug_service import (
+    emit_llm_debug,
+    generate_question,
+    validate_answer,
+)
 from ai_interview.errors import InterviewConflict, InterviewError, InterviewNotFound
 from ai_interview.models import AiInterviewAttempt, AiInterviewSession, AiInterviewTurn
 from ai_interview.planner import (
@@ -17,7 +21,12 @@ from ai_interview.planner import (
     question_limit_for_topics,
 )
 from ai_interview.prompts import SYSTEM_PROMPT, evaluation_prompt
-from ai_interview.providers import EVALUATION_SCHEMA, ProviderError, evaluation_temperature, get_provider
+from ai_interview.providers import (
+    EVALUATION_SCHEMA,
+    ProviderError,
+    evaluation_temperature,
+    get_provider,
+)
 from ai_interview.rag import retrieve_context
 from ai_interview.rubric import normalize_analysis, normalize_final_result
 from ai_interview.state import (
@@ -260,9 +269,7 @@ def submit_answer(user, turn_id, answer):
             "analysis": turn.analysis,
             "current_difficulty": (turn.focus or {}).get("difficulty"),
             "next_difficulty": (
-                next_seed["focus"].get("difficulty")
-                if next_seed is not None
-                else None
+                next_seed["focus"].get("difficulty") if next_seed is not None else None
             ),
             "rag": {
                 "current": current_context.provenance(),
