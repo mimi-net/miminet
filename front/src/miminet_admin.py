@@ -942,7 +942,7 @@ class AiInterviewSettingView(MiminetAdminModelView):
     def get_query(self):
         setting = AiInterviewSetting.query.order_by(AiInterviewSetting.id.asc()).first()
         if setting is None:
-            setting = AiInterviewSetting(id=1, is_ai_test_enabled=False)
+            setting = AiInterviewSetting(id=1)
             db.session.add(setting)
             db.session.commit()
         return super().get_query()

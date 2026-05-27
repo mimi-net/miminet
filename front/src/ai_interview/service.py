@@ -23,7 +23,6 @@ from ai_interview.models import (
 from ai_interview.providers import (
     EVALUATION_SCHEMA,
     GENERATION_SCHEMA,
-    JsonCompletion,
     ProviderError,
     ProxyConfigError,
     evaluation_temperature,
@@ -41,7 +40,6 @@ logger = logging.getLogger(__name__)
 MIN_QUESTIONS = 4
 MAX_QUESTIONS = 8
 MAX_ANSWER_CHARS = 1000
-CLOSED_MESSAGE = "Тестирование закрыто преподавателем"
 ACCESS_CODE_TTL_DAYS = 5
 MAX_FOLLOWUPS_PER_TOPIC = 1
 
@@ -218,7 +216,7 @@ def create_access_code(created_by_id=None, label=None, days_valid=ACCESS_CODE_TT
 def get_global_setting():
     setting = AiInterviewSetting.query.order_by(AiInterviewSetting.id.asc()).first()
     if setting is None:
-        setting = AiInterviewSetting(id=1, is_ai_test_enabled=False)
+        setting = AiInterviewSetting(id=1)
         db.session.add(setting)
         db.session.commit()
     return setting
@@ -279,7 +277,7 @@ def question_limit_for_topics(topic_keys):
     return min(MAX_QUESTIONS, topic_count + 3)
 
 
-def build_topic_schedule(topic_keys, rng=None):
+def build_topic_schedule(topic_keys):
     normalized = validate_topic_keys(topic_keys)
     if not normalized:
         return []
@@ -468,13 +466,12 @@ def _evaluation_prompt(turn, answer, current_context, question_limit, is_final):
   "misconceptions": ["ошибка"],
   "answer_score": 0,
   "critical_error": false,
-  "next_question": null,
   "final_result": null
 }
 Не добавляй answer_explanation и другие поля вне этого JSON-контракта."""
     if is_final:
         next_block = f"""
-Это последний ответ в сессии ({question_limit} из {question_limit}). Верни next_question=null.
+Это последний ответ в сессии ({question_limit} из {question_limit}).
 История предыдущих вопросов и ответов:
 {_session_history_block(turn)}
 
@@ -493,7 +490,7 @@ final_result должен агрегировать все вопросы и от
 Не возвращай final_result строкой."""
     else:
         next_block = """
-Это не последний ответ. Верни next_question=null и final_result=null.
+Это не последний ответ. Верни final_result=null.
 Следующий вопрос выберет backend-планировщик после твоей оценки текущего ответа."""
 
     return f"""Оцени текущий ответ и соблюдай JSON-контракт.
@@ -517,14 +514,6 @@ critical_error=true только при существенной техниче�
 и эта деталь не нужна для технически правильного ответа.
 Не снижай answer_score за необязательное расширение ответа; такие детали можно упоминать только как мягкую рекомендацию, не как gap.
 {next_block}"""
-
-
-def _as_completion(result):
-    if isinstance(result, JsonCompletion):
-        return result
-    if isinstance(result, dict):
-        return JsonCompletion(payload=result, calls=1)
-    return JsonCompletion(payload=result.payload, calls=getattr(result, "calls", 1))
 
 
 def _answered_turns(session):
@@ -733,13 +722,11 @@ def _generate_question(provider, topic_key, focus, question_limit=None):
         topic_key, focus, context, question_limit=question_limit
     )
     temperature = generation_temperature()
-    completion = _as_completion(
-        provider.complete_json(
-            SYSTEM_PROMPT,
-            prompt,
-            temperature,
-            GENERATION_SCHEMA,
-        )
+    completion = provider.complete_json(
+        SYSTEM_PROMPT,
+        prompt,
+        temperature,
+        GENERATION_SCHEMA,
     )
     question = _ensure_new_question(completion.payload, context)
     _emit_llm_debug(
@@ -781,8 +768,6 @@ def _session_sort_value(session):
 def _latest_incomplete_session(user):
     sessions = []
     for attempt in _owned_attempts(user):
-        if attempt.status == "reset":
-            continue
         sessions.extend(
             session
             for session in attempt.sessions
@@ -796,8 +781,6 @@ def _latest_incomplete_session(user):
 def _latest_completed_session(user):
     sessions = []
     for attempt in _owned_attempts(user):
-        if attempt.status == "reset":
-            continue
         sessions.extend(
             session for session in attempt.sessions if session.status == "completed"
         )
@@ -877,8 +860,6 @@ def _session_history_item(session):
 def get_interview_history(user):
     sessions = []
     for attempt in _owned_attempts(user):
-        if attempt.status == "reset":
-            continue
         sessions.extend(
             session for session in attempt.sessions if session.status != "aborted"
         )
@@ -965,16 +946,6 @@ def used_code_aborted_state(session):
     return state
 
 
-def unavailable_state():
-    return {
-        "enabled": False,
-        "status": "unavailable",
-        "message": CLOSED_MESSAGE,
-        "history": [],
-        "topics": public_topics(),
-    }
-
-
 def get_interview_state(user):
     cleanup_expired_access_codes()
     session = _latest_incomplete_session(user)
@@ -984,21 +955,12 @@ def get_interview_state(user):
     return _with_history(user, serialize_session(session, resumed=True))
 
 
-def get_testing_entry_state(user):
-    state = get_interview_state(user)
-    return {
-        "enabled": state["enabled"],
-        "status": state["status"],
-        "message": state.get("message"),
-    }
-
-
 def start_interview(user, requested_topics, access_code=None):
     setting = get_global_setting()
     access_code = find_valid_access_code(access_code)
 
     existing_attempt = _attempt_for_access_code(user, access_code)
-    if existing_attempt is not None and existing_attempt.status != "reset":
+    if existing_attempt is not None:
         session = _last_session(existing_attempt)
         if session is not None:
             if session.status == "completed":
@@ -1113,6 +1075,28 @@ def _normalize_final_result(turns, llm_result):
     return final_result
 
 
+def _planning_session_with_answer(session, turn, answer, analysis):
+    planning_turns = []
+    for item in session.turns:
+        if item is turn:
+            planning_turns.append(
+                SimpleNamespace(
+                    position=turn.position,
+                    topic_key=turn.topic_key,
+                    focus=turn.focus,
+                    answer=answer,
+                    analysis=analysis,
+                )
+            )
+        else:
+            planning_turns.append(item)
+    return SimpleNamespace(
+        selected_topics=session.selected_topics,
+        topic_schedule=session.topic_schedule,
+        turns=planning_turns,
+    )
+
+
 def _find_owned_turn(user, turn_id):
     return (
         AiInterviewTurn.query.join(AiInterviewSession)
@@ -1177,13 +1161,11 @@ def submit_answer(user, turn_id, answer):
     )
     temperature = evaluation_temperature()
     try:
-        completion = _as_completion(
-            provider.complete_json(
-                SYSTEM_PROMPT,
-                evaluation_prompt,
-                temperature,
-                EVALUATION_SCHEMA,
-            )
+        completion = provider.complete_json(
+            SYSTEM_PROMPT,
+            evaluation_prompt,
+            temperature,
+            EVALUATION_SCHEMA,
         )
     except ProviderError as error:
         session.status = "failed-recoverable"
@@ -1193,12 +1175,9 @@ def submit_answer(user, turn_id, answer):
     payload = completion.payload
     try:
         if turn.position < question_limit:
-            if (
-                payload["next_question"] is not None
-                or payload["final_result"] is not None
-            ):
-                raise ProviderError("LLM returned premature continuation data")
-        elif payload["next_question"] is not None or payload["final_result"] is None:
+            if payload["final_result"] is not None:
+                raise ProviderError("LLM returned premature final result")
+        elif payload["final_result"] is None:
             raise ProviderError("LLM did not finalize the last turn")
     except ProviderError:
         session.status = "failed-recoverable"
@@ -1206,13 +1185,40 @@ def submit_answer(user, turn_id, answer):
         db.session.commit()
         raise
 
+    analysis = _normalize_analysis(payload, answer)
+    next_seed = None
+    next_question = None
+    next_calls = 0
+    if turn.position < question_limit:
+        planning_session = _planning_session_with_answer(
+            session, turn, answer, analysis
+        )
+        next_seed = choose_next_seed(planning_session, turn.position + 1)
+        next_topic = next_seed["topic_key"]
+        next_focus = next_seed["focus"]
+        try:
+            next_question, next_context, next_calls = _generate_question(
+                provider,
+                next_topic,
+                next_focus,
+                question_limit=question_limit,
+            )
+        except ProviderError as error:
+            session.status = "failed-recoverable"
+            session.llm_call_count += completion.calls + getattr(error, "calls", 0)
+            db.session.commit()
+            raise
+        if not next_question.get("expected_concepts"):
+            next_question["expected_concepts"] = next_focus["concepts"]
+        next_focus["difficulty"] = next_question["difficulty"]
+
     turn.answer = answer
     turn.answered_on = func.now()
     turn.feedback = payload["feedback"]
     turn.answer_summary = payload["answer_summary"]
-    turn.analysis = _normalize_analysis(payload, answer)
+    turn.analysis = analysis
     turn.evaluation_rag = current_context.provenance()
-    session.llm_call_count += completion.calls
+    session.llm_call_count += completion.calls + next_calls
     session.status = "active"
     _emit_llm_debug(
         "evaluation",
@@ -1230,8 +1236,8 @@ def submit_answer(user, turn_id, answer):
             "analysis": turn.analysis,
             "current_difficulty": (turn.focus or {}).get("difficulty"),
             "next_difficulty": (
-                payload["next_question"].get("difficulty")
-                if payload.get("next_question")
+                next_seed["focus"].get("difficulty")
+                if next_seed is not None
                 else None
             ),
             "rag": {
@@ -1242,26 +1248,7 @@ def submit_answer(user, turn_id, answer):
     )
 
     if turn.position < question_limit:
-        next_seed = choose_next_seed(session, turn.position + 1)
-        next_topic = next_seed["topic_key"]
         next_focus = next_seed["focus"]
-        try:
-            next_question, next_context, next_calls = _generate_question(
-                provider,
-                next_topic,
-                next_focus,
-                question_limit=question_limit,
-            )
-        except ProviderError as error:
-            session.status = "failed-recoverable"
-            session.llm_call_count += getattr(error, "calls", 0)
-            db.session.commit()
-            raise
-        session.llm_call_count += next_calls
-        if not next_question.get("expected_concepts"):
-            next_question["expected_concepts"] = next_focus["concepts"]
-        next_focus = next_seed["focus"]
-        next_focus["difficulty"] = next_question["difficulty"]
         _emit_llm_debug(
             "difficulty_adaptation",
             {

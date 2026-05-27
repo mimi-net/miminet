@@ -10,6 +10,7 @@ from ai_interview.controller import ai_interview_routes
 from ai_interview.models import AiInterviewAccessCode
 from ai_interview.providers import (
     GENERATION_SCHEMA,
+    JsonCompletion,
     ProviderNotConfigured,
     ProxyConfigError,
     get_provider,
@@ -297,11 +298,14 @@ def test_completed_attempt_does_not_block_new_attempt(mocker):
     mocker.patch("ai_interview.service.get_interview_history", return_value=[])
     provider = SimpleNamespace(
         name="mock",
-        complete_json=lambda *args, **kwargs: {
-            "question": "Что делает ARP?",
-            "expected_concepts": ["ARP"],
-            "difficulty": "basic",
-        },
+        complete_json=lambda *args, **kwargs: JsonCompletion(
+            payload={
+                "question": "Что делает ARP?",
+                "expected_concepts": ["ARP"],
+                "difficulty": "basic",
+            },
+            calls=1,
+        ),
     )
     mocker.patch("ai_interview.service.get_provider", return_value=provider)
     mocker.patch(

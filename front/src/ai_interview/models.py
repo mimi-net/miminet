@@ -16,7 +16,6 @@ class AiInterviewSetting(db.Model):  # type: ignore[name-defined]
     __tablename__ = "ai_interview_setting"
 
     id = db.Column(BigInteger, primary_key=True)
-    is_ai_test_enabled = db.Column(Boolean, default=False, nullable=False)
     llm_proxy_enabled = db.Column(Boolean, default=False, nullable=False)
     llm_proxy_url = db.Column(Text, nullable=True)
     llm_proxy_env_fallback_enabled = db.Column(Boolean, default=True, nullable=False)
@@ -87,8 +86,6 @@ class AiInterviewAttempt(db.Model):  # type: ignore[name-defined]
         BigInteger, ForeignKey("ai_interview_access_code.id"), nullable=True
     )
     status = db.Column(Text, default="ready", nullable=False)
-    reset_by_id = db.Column(BigInteger, ForeignKey("user.id"), nullable=True)
-    reset_on = db.Column(TIMESTAMP(timezone=True), nullable=True)
     created_on = db.Column(TIMESTAMP(timezone=True), default=func.now())
     updated_on = db.Column(
         TIMESTAMP(timezone=True), default=func.now(), onupdate=func.now()
