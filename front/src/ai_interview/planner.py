@@ -15,6 +15,7 @@ QUESTION_TEMPLATES = [
         "operation": "one_fact",
         "allowed_plan_reasons": {"coverage", "rescue"},
         "concept_count": 1,
+        "min_reasoning_steps": 1,
         "instruction": (
             "Задай короткий вопрос на понимание одного понятия. "
             "Не превращай его в длинный кейс и не проси перечислять редкие детали."
@@ -27,6 +28,7 @@ QUESTION_TEMPLATES = [
         "operation": "cause_effect",
         "allowed_plan_reasons": {"coverage", "clarify", "rescue"},
         "concept_count": 2,
+        "min_reasoning_steps": 2,
         "instruction": (
             "Попроси объяснить, как работает механизм. "
             "Вопрос должен требовать связать причину и следствие, а не просто назвать термин."
@@ -39,6 +41,7 @@ QUESTION_TEMPLATES = [
         "operation": "two_fact_link",
         "allowed_plan_reasons": {"coverage", "clarify", "challenge"},
         "concept_count": 2,
+        "min_reasoning_steps": 2,
         "instruction": (
             "Сформулируй вопрос вида 'что произойдет, если изменить условие'. "
             "Проверяй следствие из двух понятий, но держи формулировку простой."
@@ -51,8 +54,37 @@ QUESTION_TEMPLATES = [
         "operation": "error_detection",
         "allowed_plan_reasons": {"clarify", "challenge"},
         "concept_count": 2,
+        "min_reasoning_steps": 2,
         "instruction": (
             "Дай короткое наблюдение или симптом и спроси наиболее вероятную причину. "
+        ),
+    },
+    {
+        "key": "packet_trace",
+        "label": "Трассировка обработки",
+        "difficulty": "advanced",
+        "operation": "state_transition",
+        "allowed_plan_reasons": {"coverage", "clarify", "challenge"},
+        "concept_count": 3,
+        "min_reasoning_steps": 3,
+        "instruction": (
+            "Дай компактную сетевую ситуацию и попроси пройти путь пакета, кадра "
+            "или соединения по ключевым решениям устройств. Не раскрывай эти решения "
+            "в условии вопроса."
+        ),
+    },
+    {
+        "key": "minimal_fix",
+        "label": "Минимальное исправление",
+        "difficulty": "advanced",
+        "operation": "debug_and_fix",
+        "allowed_plan_reasons": {"clarify", "challenge"},
+        "concept_count": 2,
+        "min_reasoning_steps": 3,
+        "instruction": (
+            "Опиши короткий сбой и спроси, какое минимальное изменение исправит "
+            "ситуацию и почему. Вопрос должен проверять диагностику, а не знание "
+            "названия технологии."
         ),
     },
     {
@@ -62,6 +94,7 @@ QUESTION_TEMPLATES = [
         "operation": "two_fact_link",
         "allowed_plan_reasons": {"coverage", "clarify", "challenge"},
         "concept_count": 2,
+        "min_reasoning_steps": 2,
         "instruction": (
             "Попроси сравнить два близких механизма через практическое последствие. "
             "Не задавай вопрос как просьбу пересказать два определения подряд."
@@ -106,9 +139,9 @@ def _difficulty_for_plan_reason(plan_reason, position):
         return "mechanism"
     if plan_reason == "challenge":
         return "advanced"
-    if position <= 1:
+    if plan_reason == "coverage" and position <= 1:
         return "basic"
-    if position == 2:
+    if plan_reason == "coverage":
         return "mechanism"
     return "practice"
 
@@ -176,6 +209,7 @@ def build_focus(
         "question_type_label": question_template["label"],
         "cognitive_operation": question_template["operation"],
         "question_instruction": question_template["instruction"],
+        "min_reasoning_steps": question_template["min_reasoning_steps"],
         "position": position,
         "plan_reason": plan_reason,
         "target_difficulty": target_difficulty,

@@ -25,6 +25,17 @@ GENERATION_SCHEMA = {
             "minItems": 1,
             "maxItems": 8,
         },
+        "expected_reasoning": {
+            "type": "array",
+            "items": {"type": "string"},
+            "minItems": 1,
+            "maxItems": 5,
+        },
+        "common_wrong_answers": {
+            "type": "array",
+            "items": {"type": "string"},
+            "maxItems": 4,
+        },
         "difficulty": {
             "type": "string",
             "enum": ["basic", "mechanism", "practice", "advanced"],
@@ -210,6 +221,11 @@ def _normalize_question_payload(payload):
         payload["difficulty"] = DIFFICULTY_ALIASES.get(
             difficulty.casefold(), difficulty
         )
+
+    for key in ("expected_reasoning", "common_wrong_answers"):
+        value = payload.get(key)
+        if isinstance(value, str) and value.strip():
+            payload[key] = [value.strip()]
 
 
 def _temperature(env_key, default):

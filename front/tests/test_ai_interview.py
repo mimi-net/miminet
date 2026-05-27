@@ -150,12 +150,43 @@ def test_dynamic_planner_rescues_weak_topic_after_coverage():
     assert seed["focus"]["section_id"] != "ethernet_frame"
 
 
+def test_late_coverage_question_stays_moderate_for_new_topic():
+    focus = planner.build_focus(
+        "network_l3",
+        4,
+        rng=planner.random.Random(11),
+        plan_reason="coverage",
+    )
+
+    assert focus["target_difficulty"] == "mechanism"
+    assert focus["question_type"] in {"mechanism", "compare"}
+    assert focus["min_reasoning_steps"] == 2
+
+
 def test_generation_payload_validation_rejects_missing_question():
     with pytest.raises(ValidationError):
         validate_payload(
             {"expected_concepts": ["ARP"], "difficulty": "basic"},
             GENERATION_SCHEMA,
         )
+
+
+def test_generation_payload_accepts_reasoning_rubric():
+    payload = validate_payload(
+        {
+            "question": "Почему пакет не попадет в соседнюю подсеть без шлюза?",
+            "expected_concepts": ["маска подсети", "шлюз"],
+            "expected_reasoning": [
+                "хост определяет, что адрес назначения вне своей подсети",
+                "для чужой подсети нужен маршрут или шлюз",
+            ],
+            "common_wrong_answers": ["пакет просто не доставится"],
+            "difficulty": "practice",
+        },
+        GENERATION_SCHEMA,
+    )
+
+    assert payload["expected_reasoning"][0].startswith("хост определяет")
 
 
 def test_grade_normalization_caps_critical_error():
@@ -167,6 +198,37 @@ def test_grade_normalization_caps_critical_error():
     ]
 
     assert rubric.normalize_grade(turns, candidate_grade=5) == 3
+
+
+def test_grade_five_requires_strong_reasoning_turn():
+    turns = [
+        {
+            "answer_score": 3,
+            "critical_error": False,
+            "focus": {"difficulty": "basic"},
+        },
+        {
+            "answer_score": 3,
+            "critical_error": False,
+            "focus": {"difficulty": "mechanism"},
+        },
+        {
+            "answer_score": 3,
+            "critical_error": False,
+            "focus": {"difficulty": "mechanism"},
+        },
+        {
+            "answer_score": 3,
+            "critical_error": False,
+            "focus": {"difficulty": "basic"},
+        },
+    ]
+
+    assert rubric.normalize_grade(turns, candidate_grade=5) == 4
+
+    turns[-1]["focus"] = {"difficulty": "advanced", "question_type": "packet_trace"}
+
+    assert rubric.normalize_grade(turns, candidate_grade=5) == 5
 
 
 def test_llm_proxy_env_fallback_is_used(monkeypatch):
