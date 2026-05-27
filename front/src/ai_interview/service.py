@@ -4,6 +4,7 @@ import os
 import random
 import re
 import secrets
+from types import SimpleNamespace
 from datetime import datetime, timedelta, timezone
 
 from ai_interview.catalog import (
@@ -44,16 +45,71 @@ CLOSED_MESSAGE = "Тестирование закрыто преподавате
 ACCESS_CODE_TTL_DAYS = 5
 MAX_FOLLOWUPS_PER_TOPIC = 1
 
-QUESTION_FORMATS = [
-    "Найди ошибку",
-    "Сравнение",
-    "Зачем это придумали",
-    "Практический troubleshooting",
-    "Что произойдет, если",
-    "Объясни поведение пакета",
-    "Ситуация в Miminet",
-    "Разбор условного Wireshark-наблюдения",
+QUESTION_TEMPLATES = [
+    {
+        "key": "recall",
+        "label": "Короткая проверка понятия",
+        "difficulty": "basic",
+        "operation": "one_fact",
+        "allowed_plan_reasons": {"coverage", "rescue"},
+        "concept_count": 1,
+        "instruction": (
+            "Задай короткий вопрос на понимание одного понятия. "
+            "Не превращай его в длинный кейс и не проси перечислять редкие детали."
+        ),
+    },
+    {
+        "key": "mechanism",
+        "label": "Механизм",
+        "difficulty": "mechanism",
+        "operation": "cause_effect",
+        "allowed_plan_reasons": {"coverage", "clarify", "rescue"},
+        "concept_count": 2,
+        "instruction": (
+            "Попроси объяснить, как работает механизм. "
+            "Вопрос должен требовать связать причину и следствие, а не просто назвать термин."
+        ),
+    },
+    {
+        "key": "consequence",
+        "label": "Что произойдет, если",
+        "difficulty": "practice",
+        "operation": "two_fact_link",
+        "allowed_plan_reasons": {"coverage", "clarify", "challenge"},
+        "concept_count": 2,
+        "instruction": (
+            "Сформулируй вопрос вида 'что произойдет, если изменить условие'. "
+            "Проверяй следствие из двух понятий, но держи формулировку простой."
+        ),
+    },
+    {
+        "key": "diagnosis",
+        "label": "Найти причину",
+        "difficulty": "practice",
+        "operation": "error_detection",
+        "allowed_plan_reasons": {"clarify", "challenge"},
+        "concept_count": 2,
+        "instruction": (
+            "Дай короткое наблюдение или симптом и спроси наиболее вероятную причину. "
+        ),
+    },
+    {
+        "key": "compare",
+        "label": "Сравнение по последствию",
+        "difficulty": "mechanism",
+        "operation": "two_fact_link",
+        "allowed_plan_reasons": {"coverage", "clarify", "challenge"},
+        "concept_count": 2,
+        "instruction": (
+            "Попроси сравнить два близких механизма через практическое последствие. "
+            "Не задавай вопрос как просьбу пересказать два определения подряд."
+        ),
+    },
 ]
+
+QUESTION_TEMPLATE_BY_KEY = {
+    template["key"]: template for template in QUESTION_TEMPLATES
+}
 
 INJECTION_PATTERNS = [
     re.compile(pattern, re.IGNORECASE)
@@ -228,10 +284,7 @@ def build_topic_schedule(topic_keys, rng=None):
     if not normalized:
         return []
 
-    rng = rng or random.SystemRandom()
-    shuffled = list(normalized)
-    rng.shuffle(shuffled)
-    return shuffled
+    return list(normalized)
 
 
 def _difficulty_for_stage(position):
@@ -258,6 +311,39 @@ def _difficulty_for_plan_reason(plan_reason, position):
     return "practice"
 
 
+def _templates_for_reason(plan_reason, target_difficulty=None):
+    templates = [
+        template
+        for template in QUESTION_TEMPLATES
+        if plan_reason in template["allowed_plan_reasons"]
+    ]
+    if target_difficulty:
+        exact = [
+            template
+            for template in templates
+            if template["difficulty"] == target_difficulty
+        ]
+        if exact:
+            return exact
+    return templates or QUESTION_TEMPLATES
+
+
+def _choose_question_template(plan_reason, target_difficulty, rng):
+    return rng.choice(_templates_for_reason(plan_reason, target_difficulty))
+
+
+def question_template_options():
+    return [
+        {
+            "key": template["key"],
+            "label": template["label"],
+            "difficulty": template["difficulty"],
+            "operation": template["operation"],
+        }
+        for template in QUESTION_TEMPLATES
+    ]
+
+
 def build_focus(
     topic_key,
     position,
@@ -268,6 +354,10 @@ def build_focus(
     rng = rng or random.SystemRandom()
     topic = topic_catalog()[topic_key]
     avoid_section_ids = set(avoid_section_ids or [])
+    target_difficulty = _difficulty_for_plan_reason(plan_reason, position)
+    question_template = _choose_question_template(
+        plan_reason, target_difficulty, rng
+    )
     available_sections = [
         section
         for section in topic["sections"]
@@ -275,17 +365,20 @@ def build_focus(
     ]
     section = rng.choice(available_sections or topic["sections"])
     concept_pool = list(dict.fromkeys(section["concepts"]))
-    concept_count = min(len(concept_pool), 2 + rng.randrange(0, 2))
+    concept_count = min(len(concept_pool), question_template["concept_count"])
     concepts = rng.sample(concept_pool, concept_count)
     return {
         "block_id": topic_key,
         "section_id": section["id"],
         "section_label": section["label"],
         "concepts": concepts,
-        "question_format": rng.choice(QUESTION_FORMATS),
+        "question_type": question_template["key"],
+        "question_type_label": question_template["label"],
+        "cognitive_operation": question_template["operation"],
+        "question_instruction": question_template["instruction"],
         "position": position,
         "plan_reason": plan_reason,
-        "target_difficulty": _difficulty_for_plan_reason(plan_reason, position),
+        "target_difficulty": target_difficulty,
     }
 
 
@@ -295,9 +388,9 @@ def _example_block(context):
 
 def _question_stage(position):
     return {
-        1: "базовый теоретический кейс",
+        1: "короткая входная проверка понимания",
         2: "проверка понимания механизма",
-        3: "практическая troubleshooting-ситуация",
+        3: "практический вопрос на следствие",
     }.get(position, "адаптивный углубляющий вопрос")
 
 
@@ -308,7 +401,9 @@ def _generation_prompt(topic_key, focus, context, question_limit=None):
 Выбранный блок курса: {topic_label(topic_key)}.
 Раздел внутри блока: {focus['section_label']}.
 Проверяемые concepts: {', '.join(focus['concepts'])}.
-Формат: {focus['question_format']}.
+Тип вопроса: {focus.get('question_type_label', focus.get('question_type', 'не указан'))}.
+Когнитивная операция: {focus.get('cognitive_operation', 'не указана')}.
+Инструкция к типу вопроса: {focus.get('question_instruction', '')}
 Причина выбора вопроса backend-планировщиком: {focus.get('plan_reason', 'coverage')}.
 Целевая сложность: {focus.get('target_difficulty', _difficulty_for_stage(focus['position']))}.
 
@@ -320,6 +415,10 @@ def _generation_prompt(topic_key, focus, context, question_limit=None):
 
 Верни JSON с question, expected_concepts и difficulty.
 question должен быть строкой с одним вопросом, не объектом с text или context.
+Пиши простым русским языком. Сложность должна быть в связи понятий, а не в длинной формулировке.
+Не маскируй простой вопрос на термин под длинную ситуацию.
+Не смешивай несколько разных механизмов в одном вопросе, если без этого нельзя дать однозначный короткий ответ.
+Структура хорошего вопроса: короткое условие, затем один понятный вопрос.
 expected_concepts должны быть только теми пунктами, которые реально проверяются формулировкой question.
 Не добавляй в expected_concepts факты, стандарты, имена RFC или детали из контекста, если question явно не требует их назвать
 и без них можно технически правильно ответить на заданный вопрос.
@@ -780,7 +879,9 @@ def get_interview_history(user):
     for attempt in _owned_attempts(user):
         if attempt.status == "reset":
             continue
-        sessions.extend(attempt.sessions)
+        sessions.extend(
+            session for session in attempt.sessions if session.status != "aborted"
+        )
     sessions = sorted(sessions, key=_session_sort_value, reverse=True)
     return [_session_history_item(session) for session in sessions]
 
