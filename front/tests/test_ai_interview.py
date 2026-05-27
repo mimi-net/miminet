@@ -160,7 +160,7 @@ def test_late_coverage_question_stays_moderate_for_new_topic():
 
     assert focus["target_difficulty"] == "mechanism"
     assert focus["question_type"] in {"mechanism", "compare"}
-    assert focus["min_reasoning_steps"] == 2
+    assert focus["min_reasoning_steps"] == 3
 
 
 def test_generation_payload_validation_rejects_missing_question():
