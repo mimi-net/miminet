@@ -127,7 +127,7 @@
                     "<div class=\"text-muted\">Вопрос " + turn.position + " из " + totalQuestions + "</div>" +
                     "<h4 class=\"h6 mt-2\">" + escapeHtml(turn.question) + "</h4>" +
                     "<p class=\"mb-1\"><strong>Ответ:</strong> " + escapeHtml(turn.answer) + "</p>" +
-                    "<p class=\"mb-0 text-muted\">" + escapeHtml(turn.answer_summary) + "</p>" +
+                    "<p class=\"mb-0 text-muted\">" + escapeHtml(turn.feedback) + "</p>" +
                     "</article>";
             }).join("");
         if (answerInput) {
