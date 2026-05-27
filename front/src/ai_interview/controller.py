@@ -1,10 +1,8 @@
-from flask import Blueprint, jsonify, render_template, request
+from flask import Blueprint, abort, jsonify, render_template, request
 from flask_login import current_user, login_required
 
 from ai_interview.catalog import public_topics
-from ai_interview.providers import ProviderError, ProviderNotConfigured
-from ai_interview.service import (
-    InterviewError,
+from ai_interview.engine import (
     abort_interview,
     get_interview_result,
     get_interview_result_by_guid,
@@ -12,6 +10,8 @@ from ai_interview.service import (
     start_interview,
     submit_answer,
 )
+from ai_interview.errors import InterviewError
+from ai_interview.providers import ProviderError, ProviderNotConfigured
 
 
 ai_interview_routes = Blueprint("ai_interview", __name__)

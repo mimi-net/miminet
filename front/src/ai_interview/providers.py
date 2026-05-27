@@ -34,21 +34,6 @@ GENERATION_SCHEMA = {
 }
 
 
-NEXT_QUESTION_SCHEMA = {
-    "type": "object",
-    "additionalProperties": False,
-    "properties": GENERATION_SCHEMA["properties"],
-    "required": GENERATION_SCHEMA["required"],
-}
-
-EVALUATION_NEXT_QUESTION_SCHEMA = {
-    "type": "object",
-    "additionalProperties": False,
-    "properties": GENERATION_SCHEMA["properties"],
-    "required": ["question", "difficulty"],
-}
-
-
 EVALUATION_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
@@ -60,7 +45,6 @@ EVALUATION_SCHEMA = {
         "misconceptions": {"type": "array", "items": {"type": "string"}},
         "answer_score": {"type": "integer", "minimum": 0, "maximum": 3},
         "critical_error": {"type": "boolean"},
-        "next_question": {"anyOf": [EVALUATION_NEXT_QUESTION_SCHEMA, {"type": "null"}]},
         "final_result": {
             "anyOf": [
                 {
@@ -96,7 +80,6 @@ EVALUATION_SCHEMA = {
         "misconceptions",
         "answer_score",
         "critical_error",
-        "next_question",
         "final_result",
     ],
 }
@@ -227,10 +210,6 @@ def _normalize_question_payload(payload):
         payload["difficulty"] = DIFFICULTY_ALIASES.get(
             difficulty.casefold(), difficulty
         )
-
-    next_question = payload.get("next_question")
-    if isinstance(next_question, dict):
-        _normalize_question_payload(next_question)
 
 
 def _temperature(env_key, default):

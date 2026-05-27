@@ -21,6 +21,13 @@ from wtforms import (
     SubmitField,
 )
 
+from ai_interview.access import (
+    ACCESS_CODE_TTL_DAYS,
+    cleanup_expired_access_codes,
+    create_access_code,
+    delete_access_code,
+    resolve_llm_proxy_url,
+)
 from ai_interview.models import (
     AiInterviewAccessCode,
     AiInterviewSetting,
@@ -31,13 +38,6 @@ from ai_interview.providers import (
     check_proxy,
     masked_proxy_url,
     normalize_proxy_url,
-)
-from ai_interview.service import (
-    ACCESS_CODE_TTL_DAYS,
-    cleanup_expired_access_codes,
-    create_access_code,
-    delete_access_code,
-    resolve_llm_proxy_url,
 )
 from quiz.service.network_upload_service import (
     create_check_task,
