@@ -51,6 +51,10 @@ QUESTION_REVIEW_SCHEMA = {
     "properties": {
         "verdict": {"type": "string", "enum": ["accept", "repair", "reject"]},
         "issues": {"type": "array", "items": {"type": "string"}, "maxItems": 6},
+        "estimated_level": {
+            "type": "string",
+            "enum": ["L1", "L2", "L3", "L4", "L5"],
+        },
         "estimated_reasoning_steps": {"type": "integer", "minimum": 0, "maximum": 5},
         "leaks_answer": {"type": "boolean"},
         "answerable_by_single_term": {"type": "boolean"},
@@ -76,6 +80,7 @@ QUESTION_REVIEW_SCHEMA = {
     "required": [
         "verdict",
         "issues",
+        "estimated_level",
         "estimated_reasoning_steps",
         "leaks_answer",
         "answerable_by_single_term",

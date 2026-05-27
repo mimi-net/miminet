@@ -106,6 +106,29 @@ QUESTION_TEMPLATE_BY_KEY = {
     template["key"]: template for template in QUESTION_TEMPLATES
 }
 
+QUESTION_LEVELS = {
+    "L1": {
+        "label": "термин или факт",
+        "min_reasoning_steps": 1,
+    },
+    "L2": {
+        "label": "объяснение механизма",
+        "min_reasoning_steps": 2,
+    },
+    "L3": {
+        "label": "трассировка состояния или последствий",
+        "min_reasoning_steps": 2,
+    },
+    "L4": {
+        "label": "диагностика по симптомам или конфигурации",
+        "min_reasoning_steps": 3,
+    },
+    "L5": {
+        "label": "минимальное исправление, tradeoff или смешанный кейс",
+        "min_reasoning_steps": 3,
+    },
+}
+
 
 def question_limit_for_topics(topic_keys):
     topic_count = len(validate_topic_keys(topic_keys))
@@ -140,10 +163,24 @@ def _difficulty_for_plan_reason(plan_reason, position):
     if plan_reason == "challenge":
         return "advanced"
     if plan_reason == "coverage" and position <= 1:
-        return "basic"
+        return "mechanism"
     if plan_reason == "coverage":
         return "mechanism"
     return "practice"
+
+
+def _question_level_for_plan_reason(plan_reason, position):
+    if plan_reason == "rescue":
+        return "L2"
+    if plan_reason == "challenge":
+        return "L5" if position >= 6 else "L4"
+    if plan_reason == "clarify":
+        return "L4" if position >= 5 else "L3"
+    if plan_reason == "coverage" and position <= 1:
+        return "L2"
+    if plan_reason == "coverage" and position <= 3:
+        return "L3"
+    return "L4"
 
 
 def _templates_for_reason(plan_reason, target_difficulty=None):
@@ -190,6 +227,7 @@ def build_focus(
     topic = topic_catalog()[topic_key]
     avoid_section_ids = set(avoid_section_ids or [])
     target_difficulty = _difficulty_for_plan_reason(plan_reason, position)
+    target_question_level = _question_level_for_plan_reason(plan_reason, position)
     question_template = _choose_question_template(plan_reason, target_difficulty, rng)
     available_sections = [
         section
@@ -209,7 +247,12 @@ def build_focus(
         "question_type_label": question_template["label"],
         "cognitive_operation": question_template["operation"],
         "question_instruction": question_template["instruction"],
-        "min_reasoning_steps": question_template["min_reasoning_steps"],
+        "min_reasoning_steps": max(
+            question_template["min_reasoning_steps"],
+            QUESTION_LEVELS[target_question_level]["min_reasoning_steps"],
+        ),
+        "target_question_level": target_question_level,
+        "target_question_level_label": QUESTION_LEVELS[target_question_level]["label"],
         "position": position,
         "plan_reason": plan_reason,
         "target_difficulty": target_difficulty,

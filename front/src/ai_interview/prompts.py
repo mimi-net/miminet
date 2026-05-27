@@ -37,6 +37,7 @@ def generation_prompt(topic_key, focus, context, question_limit=None):
 Когнитивная операция: {focus.get('cognitive_operation', 'не указана')}.
 Инструкция к типу вопроса: {focus.get('question_instruction', '')}
 Минимум шагов рассуждения в хорошем ответе: {focus.get('min_reasoning_steps', 1)}.
+Целевой уровень вопроса: {focus.get('target_question_level', 'L3')} — {focus.get('target_question_level_label', 'практическое рассуждение')}.
 Причина выбора вопроса backend-планировщиком: {focus.get('plan_reason', 'coverage')}.
 Целевая сложность: {focus.get('target_difficulty', _difficulty_for_stage(focus['position']))}.
 
@@ -66,6 +67,8 @@ difficulty должен быть одним из: basic, mechanism, practice, ad
 После первого вопроса избегай формата "что такое X", если backend не выбрал тип "Короткая проверка понятия".
 Для advanced-вопроса студент должен иметь возможность ответить в 3-6 предложениях, но простой ответ из одной фразы
 не должен покрывать весь expected_reasoning.
+Если целевой уровень L4 или L5, question должен содержать конкретную наблюдаемую ситуацию:
+конфигурацию, симптом, вывод команды, конфликт условий или требование минимального исправления.
 
 Плохой вопрос:
 "Какую основную проблему ограниченного адресного пространства IPv4 решает NAT в частных сетях?"
@@ -86,6 +89,7 @@ def question_review_prompt(topic_key, focus, context, question):
 Раздел внутри блока: {focus['section_label']}.
 Тип вопроса: {focus.get('question_type_label', focus.get('question_type', 'не указан'))}.
 Целевая сложность: {focus.get('target_difficulty', _difficulty_for_stage(focus['position']))}.
+Целевой уровень вопроса: {focus.get('target_question_level', 'L3')} — {focus.get('target_question_level_label', 'практическое рассуждение')}.
 Минимум шагов рассуждения: {focus.get('min_reasoning_steps', 1)}.
 Проверяемые concepts: {', '.join(question.get('expected_concepts') or focus.get('concepts') or [])}.
 Ожидаемые шаги рассуждения: {', '.join(question.get('expected_reasoning') or [])}.
@@ -100,6 +104,7 @@ def question_review_prompt(topic_key, focus, context, question):
 {{
   "verdict": "accept|repair|reject",
   "issues": ["короткая причина"],
+  "estimated_level": "L1|L2|L3|L4|L5",
   "estimated_reasoning_steps": 0,
   "leaks_answer": false,
   "answerable_by_single_term": false,
@@ -111,11 +116,20 @@ def question_review_prompt(topic_key, focus, context, question):
 }}
 
 Критерии reject/repair:
+- estimated_level классифицируй строго:
+  - L1: термин, факт, уровень OSI или узнавание понятия.
+  - L2: объяснение одного механизма без диагностики.
+  - L3: трассировка состояния, пути пакета/кадра или изменения условия.
+  - L4: диагностика по симптомам, конфигурации, выводу команды или конфликту условий.
+  - L5: минимальное исправление, tradeoff, дизайн-выбор или смешанный кейс с несколькими механизмами.
 - leaks_answer=true, если условие раскрывает причинную цепочку, которую студент должен вывести сам.
 - answerable_by_single_term=true, если полный ответ можно дать одним термином или названием уровня.
 - too_easy=true, если вопрос проверяет узнавание факта вместо применения механизма.
 - checks_course_context=false, если вопрос уходит за пределы переданного контекста курса.
 - Для practice/advanced хороший ответ должен требовать несколько шагов рассуждения, а не один вывод.
+- Если estimated_level ниже целевого уровня вопроса, ставь verdict="repair" или "reject", но не "accept".
+- Для L4/L5 вопрос должен содержать наблюдаемую ситуацию: конфигурацию, симптом, вывод команды, конфликт условий
+  или требование минимального изменения. Простое "объясните почему" недостаточно.
 
 Если вопрос можно исправить без смены темы и проверяемых concepts, ставь verdict="repair" и заполни repaired_question,
 repaired_expected_reasoning и repaired_common_wrong_answers.
@@ -124,6 +138,7 @@ repaired_expected_reasoning и repaired_common_wrong_answers.
 - не добавлять технологии вне контекста;
 - убрать прямые подсказки из условия;
 - быть коротким кейсом или вопросом на причинную цепочку;
+- для L4/L5 включать симптом, конфигурацию, вывод команды, конфликт условий или минимальное исправление;
 - оставаться одним вопросом.
 
 Если вопрос уже хороший, ставь verdict="accept" и оставь поля repair пустыми.
