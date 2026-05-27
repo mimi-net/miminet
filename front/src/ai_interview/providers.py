@@ -45,6 +45,49 @@ GENERATION_SCHEMA = {
 }
 
 
+QUESTION_REVIEW_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "verdict": {"type": "string", "enum": ["accept", "repair", "reject"]},
+        "issues": {"type": "array", "items": {"type": "string"}, "maxItems": 6},
+        "estimated_reasoning_steps": {"type": "integer", "minimum": 0, "maximum": 5},
+        "leaks_answer": {"type": "boolean"},
+        "answerable_by_single_term": {"type": "boolean"},
+        "too_easy": {"type": "boolean"},
+        "checks_course_context": {"type": "boolean"},
+        "repaired_question": {
+            "anyOf": [
+                {"type": "string", "minLength": 8},
+                {"type": "null"},
+            ]
+        },
+        "repaired_expected_reasoning": {
+            "type": "array",
+            "items": {"type": "string"},
+            "maxItems": 5,
+        },
+        "repaired_common_wrong_answers": {
+            "type": "array",
+            "items": {"type": "string"},
+            "maxItems": 4,
+        },
+    },
+    "required": [
+        "verdict",
+        "issues",
+        "estimated_reasoning_steps",
+        "leaks_answer",
+        "answerable_by_single_term",
+        "too_easy",
+        "checks_course_context",
+        "repaired_question",
+        "repaired_expected_reasoning",
+        "repaired_common_wrong_answers",
+    ],
+}
+
+
 EVALUATION_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
@@ -241,6 +284,10 @@ def generation_temperature():
 
 def evaluation_temperature():
     return _temperature("AI_INTERVIEW_EVALUATION_TEMPERATURE", 0.2)
+
+
+def question_review_temperature():
+    return _temperature("AI_INTERVIEW_QUESTION_REVIEW_TEMPERATURE", 0.15)
 
 
 def retry_limit():

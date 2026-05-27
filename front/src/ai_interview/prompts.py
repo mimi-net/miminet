@@ -78,6 +78,58 @@ difficulty должен быть одним из: basic, mechanism, practice, ad
 "Почему в частной сети обычно недостаточно просто назначить хостам адреса 192.168.x.x, чтобы они напрямую общались с интернетом?"""
 
 
+def question_review_prompt(topic_key, focus, context, question):
+    return f"""Проверь качество экзаменационного вопроса и при необходимости переформулируй его.
+Ты не оцениваешь ответ студента. Ты оцениваешь только вопрос.
+
+Выбранный блок курса: {topic_label(topic_key)}.
+Раздел внутри блока: {focus['section_label']}.
+Тип вопроса: {focus.get('question_type_label', focus.get('question_type', 'не указан'))}.
+Целевая сложность: {focus.get('target_difficulty', _difficulty_for_stage(focus['position']))}.
+Минимум шагов рассуждения: {focus.get('min_reasoning_steps', 1)}.
+Проверяемые concepts: {', '.join(question.get('expected_concepts') or focus.get('concepts') or [])}.
+Ожидаемые шаги рассуждения: {', '.join(question.get('expected_reasoning') or [])}.
+
+Контекст курса:
+{context.text}
+
+Вопрос-кандидат:
+{question['question']}
+
+Верни только JSON с полями:
+{{
+  "verdict": "accept|repair|reject",
+  "issues": ["короткая причина"],
+  "estimated_reasoning_steps": 0,
+  "leaks_answer": false,
+  "answerable_by_single_term": false,
+  "too_easy": false,
+  "checks_course_context": true,
+  "repaired_question": null,
+  "repaired_expected_reasoning": [],
+  "repaired_common_wrong_answers": []
+}}
+
+Критерии reject/repair:
+- leaks_answer=true, если условие раскрывает причинную цепочку, которую студент должен вывести сам.
+- answerable_by_single_term=true, если полный ответ можно дать одним термином или названием уровня.
+- too_easy=true, если вопрос проверяет узнавание факта вместо применения механизма.
+- checks_course_context=false, если вопрос уходит за пределы переданного контекста курса.
+- Для practice/advanced хороший ответ должен требовать несколько шагов рассуждения, а не один вывод.
+
+Если вопрос можно исправить без смены темы и проверяемых concepts, ставь verdict="repair" и заполни repaired_question,
+repaired_expected_reasoning и repaired_common_wrong_answers.
+Исправленный вопрос должен:
+- сохранить выбранный блок курса и concepts;
+- не добавлять технологии вне контекста;
+- убрать прямые подсказки из условия;
+- быть коротким кейсом или вопросом на причинную цепочку;
+- оставаться одним вопросом.
+
+Если вопрос уже хороший, ставь verdict="accept" и оставь поля repair пустыми.
+Если вопрос нельзя исправить без смены темы или выхода за контекст, ставь verdict="reject"."""
+
+
 def session_history_block(turn):
     answered_turns = [
         item
