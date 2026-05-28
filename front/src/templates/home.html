@@ -15,6 +15,17 @@
                 </div>
             </div>
 
+            {% if current_user.role >= 1 %}
+            <div class="card mb-3 px-1" style="max-width: 18rem; height: 18rem; border: 2px dashed #6c757d; background: #f8f9fa; cursor: pointer;"
+                 data-bs-toggle="modal" data-bs-target="#aiGenerateModal">
+                <div class="card-body d-flex flex-column justify-content-center align-items-center gap-2">
+                    <span style="font-size: 1.6rem;">✨</span>
+                    <h6 class="text-secondary mb-0 text-center">Задача от ИИ</h6>
+                    <small class="text-muted text-center">выбрать тему</small>
+                </div>
+            </div>
+            {% endif %}
+
             {% for net in networks %}
             <div class="card mb-3 px-1 hover-overlay ripple shadow-1-strong rounded" style="max-width: 18rem; height: 18rem; border: none;">
                 <img src="{{ url_for('static', filename='/images/preview/' + net.preview_uri) }}" class="card-img-top" alt="{{ net.title }}">
@@ -28,5 +39,150 @@
         </div>
     </div>
 </section>
+
+<!-- Modal -->
+<div class="modal fade" id="aiGenerateModal" tabindex="-1" aria-labelledby="aiGenerateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="aiGenerateModalLabel">✨ Генерация задачи</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small mb-3">Выберите тему — ИИ подберёт топологию и сгенерирует задачу.</p>
+
+                <label class="form-label fw-semibold">Тема</label>
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    <input type="checkbox" class="btn-check" id="tech-routing" value="routing">
+                    <label class="btn btn-sm btn-outline-primary" for="tech-routing">Маршруты</label>
+
+                    <input type="checkbox" class="btn-check" id="tech-vlan" value="vlan">
+                    <label class="btn btn-sm btn-outline-primary" for="tech-vlan">VLAN</label>
+
+                    <input type="checkbox" class="btn-check" id="tech-dhcp" value="dhcp">
+                    <label class="btn btn-sm btn-outline-primary" for="tech-dhcp">DHCP</label>
+
+                    <input type="checkbox" class="btn-check" id="tech-stp" value="stp">
+                    <label class="btn btn-sm btn-outline-primary" for="tech-stp">STP/RSTP</label>
+
+                    <input type="checkbox" class="btn-check" id="tech-nat" value="nat">
+                    <label class="btn btn-sm btn-outline-primary" for="tech-nat">NAT</label>
+
+                    <input type="checkbox" class="btn-check" id="tech-tunnel" value="tunnel">
+                    <label class="btn btn-sm btn-outline-primary" for="tech-tunnel">Туннель</label>
+
+                    <input type="checkbox" class="btn-check" id="tech-vxlan" value="vxlan">
+                    <label class="btn btn-sm btn-outline-primary" for="tech-vxlan">VXLAN</label>
+
+                    <input type="checkbox" class="btn-check" id="tech-portforward" value="portforward">
+                    <label class="btn btn-sm btn-outline-primary" for="tech-portforward">Port Forwarding</label>
+                </div>
+
+                <label class="form-label fw-semibold">Дополнительно</label>
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    <input type="checkbox" class="btn-check" id="opt-masks" value="masks">
+                    <label class="btn btn-sm btn-outline-secondary" for="opt-masks">Маски</label>
+                </div>
+
+                <label class="form-label fw-semibold">Сложность</label>
+                <div class="d-flex gap-2 mb-1">
+                    <input type="radio" class="btn-check" name="difficulty" id="diff-1" value="1" checked>
+                    <label class="btn btn-sm btn-outline-success" for="diff-1">1 — Лёгкая</label>
+
+                    <input type="radio" class="btn-check" name="difficulty" id="diff-2" value="2">
+                    <label class="btn btn-sm btn-outline-warning" for="diff-2">2 — Средняя</label>
+
+                    <input type="radio" class="btn-check" name="difficulty" id="diff-3" value="3">
+                    <label class="btn btn-sm btn-outline-danger" for="diff-3">3 — Сложная</label>
+                </div>
+                <small class="text-muted mb-3 d-block" id="difficulty-hint">1-2 роутера, 2 подсети, базовая настройка</small>
+
+                <label class="form-label fw-semibold">Модель</label>
+                <div class="d-flex flex-wrap gap-2">
+                    <input type="radio" class="btn-check" name="ai-model" id="model-yandexgpt" value="yandexgpt">
+                    <label class="btn btn-sm btn-outline-secondary" for="model-yandexgpt">YandexGPT</label>
+
+                    <input type="radio" class="btn-check" name="ai-model" id="model-deepseek" value="deepseek-v32/latest">
+                    <label class="btn btn-sm btn-outline-secondary" for="model-deepseek">DeepSeek 3.2</label>
+
+                    <input type="radio" class="btn-check" name="ai-model" id="model-gemma" value="gemma-3-27b-it/latest">
+                    <label class="btn btn-sm btn-outline-secondary" for="model-gemma">Gemma 3 27B</label>
+
+                    <input type="radio" class="btn-check" name="ai-model" id="model-qwen" value="qwen3-235b-a22b-fp8/latest">
+                    <label class="btn btn-sm btn-outline-secondary" for="model-qwen">Qwen3 235B</label>
+
+                    <input type="radio" class="btn-check" name="ai-model" id="model-claude" value="anthropic/claude-sonnet-4.6" checked>
+                    <label class="btn btn-sm btn-outline-secondary" for="model-claude">Claude Sonnet</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <small class="text-danger me-auto" id="ai-modal-status"></small>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="ai-generate-btn" onclick="generateAiTask()">
+                    <span id="ai-btn-spinner" class="spinner-border spinner-border-sm me-1 d-none" role="status"></span>
+                    <span id="ai-btn-text">Сгенерировать</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const difficultyHints = {
+    "1": "1-2 роутера, 2 подсети, базовая настройка",
+    "2": "3 роутера, 3+ подсети, коммутаторы для группировки",
+    "3": "5+ роутеров, асимметрия маршрутов, нетривиальные условия"
+};
+
+document.querySelectorAll("input[name='difficulty']").forEach(el => {
+    el.addEventListener("change", function() {
+        document.getElementById("difficulty-hint").textContent = difficultyHints[this.value];
+    });
+});
+
+
+function generateAiTask() {
+    const techs = [...document.querySelectorAll("input[id^='tech-']:checked")].map(el => el.value);
+    const difficulty = document.querySelector("input[name='difficulty']:checked").value;
+    const model = document.querySelector("input[name='ai-model']:checked").value;
+    const masks = document.getElementById("opt-masks").checked;
+    const btn = document.getElementById("ai-generate-btn");
+    btn.disabled = true;
+    document.getElementById("ai-btn-spinner").classList.remove("d-none");
+    document.getElementById("ai-btn-text").textContent = "Генерируем...";
+    document.getElementById("ai-modal-status").textContent = "";
+
+    const body = new FormData();
+    body.append("difficulty", difficulty);
+    body.append("model", model);
+    if (masks) body.append("masks", "1");
+    techs.forEach(t => body.append("tech", t));
+
+    fetch("/ai/generate-task", { method: "POST", body })
+        .then(r => {
+            if (r.redirected) { window.location.href = r.url; return; }
+            return r.json().then(j => {
+                const status = document.getElementById("ai-modal-status");
+                const msg = j.error || "Ошибка";
+                const urlMatch = msg.match(/https?:\/\/\S+/);
+                if (urlMatch) {
+                    const text = msg.replace(urlMatch[0], "").trim();
+                    status.innerHTML = "";
+                    status.appendChild(document.createTextNode(text + " "));
+                    const a = document.createElement("a");
+                    a.href = urlMatch[0];
+                    a.target = "_blank";
+                    a.textContent = "Инструкция";
+                    status.appendChild(a);
+                } else {
+                    status.textContent = msg;
+                }
+                btn.disabled = false;
+                document.getElementById("ai-btn-spinner").classList.add("d-none");
+                document.getElementById("ai-btn-text").textContent = "Сгенерировать";
+            });
+        });
+}
+</script>
 
 {% endblock %}
