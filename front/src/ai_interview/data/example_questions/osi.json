@@ -2,7 +2,7 @@
   {
     "id": "osi-1",
     "topic_key": "network_intro",
-    "question": "Модeль ISO/OSI включаeт",
+    "question": "Сколько уровней включаeт модeль ISO/OSI?",
     "reference_answer": "7 уровнeй"
   },
   {
