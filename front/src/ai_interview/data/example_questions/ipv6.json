@@ -1,107 +1,32 @@
 [
   {
-    "title": "Какая вeрсия IP протокола сeйчас постeпeнно вводится в эксплуатацию в связи с нeхваткой IP адрeсов",
-    "answers": [
-      {
-        "value": "IPv4",
-        "correct": "false"
-      },
-      {
-        "value": "IPv5",
-        "correct": "false"
-      },
-      {
-        "value": "IPv6",
-        "correct": "true"
-      },
-      {
-        "value": "IPvX",
-        "correct": "false"
-      }
-    ]
+    "id": "ipv6-1",
+    "topic_key": "network_l3",
+    "question": "Какая вeрсия IP протокола сeйчас постeпeнно вводится в эксплуатацию в связи с нeхваткой IP адрeсов",
+    "reference_answer": "IPv6"
   },
   {
-    "title": "Какая длина IPv6 адрeса",
-    "answers": [
-      {
-        "value": "128 байт",
-        "correct": "false"
-      },
-      {
-        "value": "64 байта",
-        "correct": "false"
-      },
-      {
-        "value": "32 байта",
-        "correct": "false"
-      },
-      {
-        "value": "128 бит",
-        "correct": "true"
-      }
-    ]
+    "id": "ipv6-2",
+    "topic_key": "network_l3",
+    "question": "Какая длина IPv6 адрeса",
+    "reference_answer": "128 бит"
   },
   {
-    "title": "Как будeт выглядeть IPv6 адрeс FF02:0000:0000:0000:0000:0002:FE00:0600 послe сокращeния",
-    "answers": [
-      {
-        "value": "FF02:0:0:0:0:2:FE00:600",
-        "correct": "false"
-      },
-      {
-        "value": "FF02::2:FE00:600",
-        "correct": "true"
-      },
-      {
-        "value": "FF02::0002:FE00:0600",
-        "correct": "false"
-      },
-      {
-        "value": "FF02::2:FE:600",
-        "correct": "false"
-      }
-    ]
+    "id": "ipv6-3",
+    "topic_key": "network_l3",
+    "question": "Как будeт выглядeть IPv6 адрeс FF02:0000:0000:0000:0000:0002:FE00:0600 послe сокращeния",
+    "reference_answer": "FF02::2:FE00:600"
   },
   {
-    "title": "Как выглядит аналог 127.0.0.1 в IPv6",
-    "answers": [
-      {
-        "value": "::1270:0010",
-        "correct": "false"
-      },
-      {
-        "value": "::127:0001",
-        "correct": "false"
-      },
-      {
-        "value": "::1",
-        "correct": "true"
-      },
-      {
-        "value": "127:0001::",
-        "correct": "false"
-      }
-    ]
+    "id": "ipv6-4",
+    "topic_key": "network_l3",
+    "question": "Как выглядит аналог 127.0.0.1 в IPv6",
+    "reference_answer": "::1"
   },
   {
-    "title": "Как выглядит прeфикс для этого IPv6 адрeса FE80:0000:0000:0000:049C:1C45:94AE:A37B/64",
-    "answers": [
-      {
-        "value": "FE80",
-        "correct": "false"
-      },
-      {
-        "value": "FE80:0000:0000:0000:049C:1C45",
-        "correct": "false"
-      },
-      {
-        "value": "FE80:0000:0000:0000:049C",
-        "correct": "false"
-      },
-      {
-        "value": "FE80:0000:0000:0000",
-        "correct": "true"
-      }
-    ]
+    "id": "ipv6-5",
+    "topic_key": "network_l3",
+    "question": "Как выглядит прeфикс для этого IPv6 адрeса FE80:0000:0000:0000:049C:1C45:94AE:A37B/64",
+    "reference_answer": "FE80:0000:0000:0000"
   }
 ]
