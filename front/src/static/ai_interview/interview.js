@@ -31,7 +31,7 @@
 
     function shouldOpenActiveSession() {
         const params = new URLSearchParams(window.location.search);
-        return params.get("continue") === "1" || params.get("session") === "active";
+        return params.get("continue") === "1";
     }
 
     function activeSessionUrl() {
@@ -278,12 +278,6 @@
             setVisible(startPanel, false);
             setVisible(sessionPanel, false);
             renderResult(payload);
-            await loadState();
-            setVisible(startPanel, false);
-            setVisible(sessionPanel, false);
-            setVisible(resultPanel, true);
-            setVisible(historyPanel, false);
-            statusBox.textContent = "Результат попытки";
         } catch (error) {
             setError(error.message);
         }

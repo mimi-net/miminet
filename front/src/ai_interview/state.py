@@ -94,7 +94,6 @@ def _result_payload(session):
     result["questions"] = [
         _turn_payload(turn, include_answer=True) for turn in session.turns
     ]
-    result["status_label"] = "Сессия завершена"
     return result
 
 

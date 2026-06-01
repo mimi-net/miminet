@@ -16,14 +16,8 @@ def _focus_for_grade(turn_or_analysis):
 def _has_strong_reasoning_turn(turns, analyses):
     for turn, analysis in zip(turns, analyses):
         focus = _focus_for_grade(turn)
-        difficulty = focus.get("difficulty") or focus.get("target_difficulty")
-        question_type = focus.get("question_type")
         score = int(analysis.get("answer_score", 0))
-        if score < 3:
-            continue
-        if difficulty in {"practice", "advanced"}:
-            return True
-        if question_type in {"diagnosis", "packet_trace", "minimal_fix", "consequence"}:
+        if score >= 3 and focus.get("difficulty") == "advanced":
             return True
     return False
 

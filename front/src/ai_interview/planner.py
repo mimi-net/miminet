@@ -2,10 +2,6 @@ from ai_interview.catalog import topic_catalog, validate_topic_keys
 from ai_interview.question_bank import choose_question
 
 
-MIN_PAIRS = 1
-MAX_PAIRS = 5
-
-
 def build_topic_schedule(topic_keys):
     selected = set(validate_topic_keys(topic_keys))
     return [topic_key for topic_key in topic_catalog() if topic_key in selected]
@@ -30,7 +26,6 @@ def build_followup_focus(main_turn, reference_answer):
         "flow_type": "followup",
         "pair_position": main_turn.focus["pair_position"],
         "source_question_id": main_turn.focus["source_question_id"],
-        "main_turn_id": main_turn.id,
         "reference_answer": reference_answer,
         "difficulty": "advanced",
     }

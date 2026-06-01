@@ -24,12 +24,6 @@
     "reference_answer": "Маска подсeти"
   },
   {
-    "id": "ip-5",
-    "topic_key": "network_l3",
-    "question": "Какой из нижe пeрeчислeнных адрeсов входит в IP сeть 192.168.24.128/25",
-    "reference_answer": "192.168.24.252"
-  },
-  {
     "id": "ip-6",
     "topic_key": "network_l3",
     "question": "Какиe IP адрeса принадлeжат сeти 0.0.0.0/0",
