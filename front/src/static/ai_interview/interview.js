@@ -13,7 +13,6 @@
     const errorBox = document.getElementById("ai-interview-error");
     const noticeBox = document.getElementById("ai-interview-notice");
     const statusBox = document.getElementById("ai-interview-status");
-    const closedPanel = document.getElementById("ai-interview-closed");
     const startPanel = document.getElementById("ai-interview-start");
     const sessionPanel = document.getElementById("ai-interview-session");
     const resultPanel = document.getElementById("ai-interview-result");
@@ -113,19 +112,23 @@
         setVisible(startPanel, false);
         setVisible(sessionPanel, false);
         setVisible(resultPanel, true);
-        setVisible(closedPanel, false);
         setVisible(historyPanel, false);
         document.getElementById("ai-interview-grade").textContent = result.grade;
+        document.getElementById("ai-interview-score").textContent =
+            "(" + result.score_total + " из " + result.score_max + " баллов)";
         document.getElementById("ai-interview-verdict").textContent = result.verdict || "";
         listInto("ai-interview-strengths", result.strengths);
         listInto("ai-interview-gaps", result.gaps);
         listInto("ai-interview-recommendations", result.recommendations);
-        const totalQuestions = (result.questions || []).length;
         document.getElementById("ai-interview-result-questions").innerHTML =
             (result.questions || []).map(function (turn) {
                 return "<article class=\"border rounded p-3\">" +
-                    "<div class=\"text-muted\">Вопрос " + turn.position + " из " + totalQuestions + "</div>" +
-                    "<h4 class=\"h6 mt-2\">" + escapeHtml(turn.question) + "</h4>" +
+                    (turn.pair_position
+                        ? "<div class=\"text-muted\">Тема " + turn.pair_position + "</div>"
+                        : "") +
+                    "<h4 class=\"h6 mt-2\">" + escapeHtml(turn.question) +
+                    " <span class=\"text-muted\">(" + turn.answer_score + " из " +
+                    turn.answer_max_score + " баллов)</span></h4>" +
                     "<p class=\"mb-1\"><strong>Ответ:</strong> " + escapeHtml(turn.answer) + "</p>" +
                     "<p class=\"mb-0 text-muted\">" + escapeHtml(turn.feedback) + "</p>" +
                     "</article>";
@@ -151,7 +154,7 @@
             const topics = (item.topics || []).map(function (topic) {
                 return topic.label;
             }).join(", ");
-            const questionText = item.answered_count + " из " + item.question_count + " вопросов";
+            const questionText = item.answered_count + " из " + item.question_count + " тем";
             const gradeText = item.grade ? "Оценка " + item.grade : "Без оценки";
             const content = "<div>" +
                     "<div class=\"fw-semibold\">" + escapeHtml(formatDate(item.finished_at || item.created_on)) + "</div>" +
@@ -181,9 +184,9 @@
         options = options || {};
         setError("");
         const isActiveSession = state.status === "active" || state.status === "failed-recoverable";
-        const showActiveSession = state.enabled && isActiveSession &&
+        const showActiveSession = isActiveSession &&
             (options.openActiveSession || shouldOpenActiveSession());
-        const showLaunch = state.enabled && (state.status === "ready" || (isActiveSession && !showActiveSession));
+        const showLaunch = state.status === "ready" || (isActiveSession && !showActiveSession);
         const noticeMessage = state.notice
             ? state.notice.message
             : (showLaunch && isActiveSession
@@ -191,14 +194,13 @@
                 : "");
         setNotice(noticeMessage);
         renderHistory(state.history || []);
-        setVisible(closedPanel, !state.enabled);
         setVisible(startPanel, showLaunch);
         setVisible(sessionPanel, showActiveSession);
         setVisible(resultPanel, false);
-        setVisible(historyPanel, state.enabled && (state.status === "ready" || (isActiveSession && !showActiveSession)));
-        statusBox.textContent = state.enabled ? "" : (state.message || "");
+        setVisible(historyPanel, state.status === "ready" || (isActiveSession && !showActiveSession));
+        statusBox.textContent = "";
 
-        if (!state.enabled || state.status === "ready" || (isActiveSession && !showActiveSession)) {
+        if (state.status === "ready" || (isActiveSession && !showActiveSession)) {
             currentTurn = null;
             currentSessionGuid = null;
             return;
@@ -216,8 +218,8 @@
         const topicLabels = (state.selected_topics || []).map(function (topic) {
             return "<span class=\"ai-interview__badge\">" + escapeHtml(topic.label) + "</span>";
         });
-        meta.innerHTML = "<span class=\"ai-interview__badge\">Вопрос " +
-            currentTurn.position + " из " + state.question_count + "</span>" +
+        meta.innerHTML = "<span class=\"ai-interview__badge\">Тема " +
+            currentTurn.pair_position + " из " + state.pair_count + "</span>" +
             topicLabels.join("");
         document.getElementById("ai-interview-current-meta").textContent =
             currentTurn.topic.label;
@@ -227,6 +229,7 @@
         answerButton.disabled = false;
         answerInput.value = "";
         charCount.textContent = "0/1000";
+        answerInput.focus();
     }
 
     async function responseJson(response) {
@@ -245,7 +248,7 @@
         });
         const payload = await responseJson(response);
         if (!response.ok) {
-            throw new Error(payload.error || "Ошибка AI-собеседования");
+            throw new Error(payload.error || "Ошибка AI-тестирования");
         }
         return payload;
     }
@@ -276,7 +279,6 @@
             setVisible(sessionPanel, false);
             renderResult(payload);
             await loadState();
-            setVisible(closedPanel, false);
             setVisible(startPanel, false);
             setVisible(sessionPanel, false);
             setVisible(resultPanel, true);

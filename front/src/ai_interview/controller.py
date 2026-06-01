@@ -1,4 +1,4 @@
-from flask import Blueprint, abort, jsonify, render_template, request
+from flask import Blueprint, jsonify, render_template, request
 from flask_login import current_user, login_required
 
 from ai_interview.catalog import public_topics
@@ -22,7 +22,7 @@ def _json_error(error, default_status=502):
     return jsonify({"error": str(error)}), status
 
 
-@ai_interview_routes.route("/ai-interview", methods=["GET"])
+@ai_interview_routes.route("/ai-testing", methods=["GET"])
 @login_required
 def interview_page():
     return render_template(
@@ -32,7 +32,7 @@ def interview_page():
     )
 
 
-@ai_interview_routes.route("/ai-interview/result/<session_guid>", methods=["GET"])
+@ai_interview_routes.route("/ai-testing/result/<session_guid>", methods=["GET"])
 @login_required
 def interview_result_page(session_guid):
     return render_template(
@@ -42,7 +42,7 @@ def interview_result_page(session_guid):
     )
 
 
-@ai_interview_routes.route("/ai-interview/api/state", methods=["GET"])
+@ai_interview_routes.route("/ai-testing/api/state", methods=["GET"])
 @login_required
 def interview_state_endpoint():
     try:
@@ -51,7 +51,7 @@ def interview_state_endpoint():
         return _json_error(error)
 
 
-@ai_interview_routes.route("/ai-interview/api/start", methods=["POST"])
+@ai_interview_routes.route("/ai-testing/api/start", methods=["POST"])
 @login_required
 def start_interview_endpoint():
     payload = request.get_json(silent=True) or {}
@@ -69,7 +69,7 @@ def start_interview_endpoint():
         return _json_error(error)
 
 
-@ai_interview_routes.route("/ai-interview/api/answer", methods=["POST"])
+@ai_interview_routes.route("/ai-testing/api/answer", methods=["POST"])
 @login_required
 def answer_interview_endpoint():
     payload = request.get_json(silent=True) or {}
@@ -86,7 +86,7 @@ def answer_interview_endpoint():
         return _json_error(error)
 
 
-@ai_interview_routes.route("/ai-interview/api/abort", methods=["POST"])
+@ai_interview_routes.route("/ai-testing/api/abort", methods=["POST"])
 @login_required
 def abort_interview_endpoint():
     payload = request.get_json(silent=True) or {}
@@ -96,7 +96,7 @@ def abort_interview_endpoint():
         return _json_error(error)
 
 
-@ai_interview_routes.route("/ai-interview/api/result", methods=["GET"])
+@ai_interview_routes.route("/ai-testing/api/result", methods=["GET"])
 @login_required
 def interview_result_endpoint():
     try:

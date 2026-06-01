@@ -134,7 +134,7 @@ def load_user(user_id):
 
 @login_manager.unauthorized_handler
 def handle_needs_login():
-    if request.path.startswith("/ai-interview/api/"):
+    if request.path.startswith("/ai-testing/api/"):
         return jsonify({"error": "Требуется авторизация"}), 401
 
     flash("Для выполнения этого действия необходимо войти.")

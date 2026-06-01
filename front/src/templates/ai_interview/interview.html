@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}AI-собеседование{% endblock %}
-{% block description %}AI-собеседование по компьютерным сетям в Miminet{% endblock %}
+{% block title %}AI-тестирование{% endblock %}
+{% block description %}AI-тестирование по компьютерным сетям в Miminet{% endblock %}
 
 {% block content %}
 <style>
@@ -168,18 +168,12 @@
 
 <section class="container py-5 my-lg-5 ai-interview">
     <div class="mb-4">
-        <h1 class="mb-2">AI-собеседование</h1>
+        <h1 class="mb-2">AI-тестирование</h1>
         <div id="ai-interview-status" class="text-muted"></div>
     </div>
 
     <div id="ai-interview-error" class="alert alert-danger d-none" role="alert"></div>
     <div id="ai-interview-notice" class="alert alert-info d-none" role="status"></div>
-
-    <div id="ai-interview-closed" class="card border-0 shadow-sm d-none">
-        <div class="card-body">
-            <h2 class="h4 mb-2">Тестирование закрыто преподавателем</h2>
-        </div>
-    </div>
 
     <div id="ai-interview-start" class="card border-0 shadow-sm d-none">
         <div class="card-body">
@@ -202,7 +196,7 @@
                         </button>
                     </div>
                     <div>
-                        <h2 class="h4 mb-3">Темы собеседования</h2>
+                        <h2 class="h4 mb-3">Темы тестирования</h2>
                         <div class="ai-interview__topics">
                             {% for topic in topics %}
                                 <div>
@@ -259,7 +253,10 @@
     <div id="ai-interview-result" class="card border-0 shadow-sm d-none">
         <div class="card-body">
             <div class="text-muted mb-2">Сессия завершена</div>
-            <h2 class="h3">Оценка <span id="ai-interview-grade"></span></h2>
+            <h2 class="h3">
+                Оценка <span id="ai-interview-grade"></span>
+                <span class="text-muted fs-5" id="ai-interview-score"></span>
+            </h2>
             <p id="ai-interview-verdict"></p>
             <div class="row g-4">
                 <div class="col-md-4">
