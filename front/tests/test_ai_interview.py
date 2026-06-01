@@ -13,6 +13,7 @@ from ai_interview.providers import (
     EVALUATION_SCHEMA,
     MAIN_ANSWER_SCHEMA,
     JsonCompletion,
+    OPENROUTER_MODEL,
     ProviderNotConfigured,
     get_provider,
     read_env_secret,
@@ -273,14 +274,13 @@ def test_openrouter_key_can_be_read_from_env_file(monkeypatch, tmp_path):
 def test_openrouter_provider_uses_secret_file(monkeypatch, tmp_path):
     secret_file = tmp_path / "openrouter_api_key"
     secret_file.write_text("file-secret\n", encoding="utf-8")
-    monkeypatch.setenv("AI_INTERVIEW_PROVIDER", "openrouter")
-    monkeypatch.setenv("AI_INTERVIEW_OPENROUTER_MODEL", "test-model")
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     monkeypatch.setenv("OPENROUTER_API_KEY_FILE", str(secret_file))
 
     provider = get_provider()
 
     assert provider.name == "openrouter"
+    assert provider.model == OPENROUTER_MODEL
     assert provider.api_key == "file-secret"
 
 

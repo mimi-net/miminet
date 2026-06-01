@@ -7,6 +7,9 @@ import requests
 from jsonschema import ValidationError, validate
 
 
+OPENROUTER_MODEL = "google/gemini-3.1-flash-lite"
+
+
 EVALUATION_SCHEMA: dict[str, Any] = {
     "type": "object",
     "additionalProperties": False,
@@ -215,12 +218,9 @@ class OpenRouterProvider(ChatJsonProvider):
 
 
 def get_provider():
-    provider_name = os.environ.get("AI_INTERVIEW_PROVIDER", "").casefold()
-    if provider_name == "openrouter":
-        api_key = read_env_secret("OPENROUTER_API_KEY")
-        model = os.environ.get("AI_INTERVIEW_OPENROUTER_MODEL", "")
-        if api_key and model:
-            return OpenRouterProvider(api_key, model)
+    api_key = read_env_secret("OPENROUTER_API_KEY")
+    if api_key:
+        return OpenRouterProvider(api_key, OPENROUTER_MODEL)
 
     raise ProviderNotConfigured(
         "AI-провайдер не настроен. Преподаватель должен настроить OpenRouter."
