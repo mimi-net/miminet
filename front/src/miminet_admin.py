@@ -868,7 +868,11 @@ class AiInterviewSettingView(MiminetAdminModelView):
     def checks_formatter(view, context, model, name):
         provider_url = url_for(".check_provider_view", setting_id=model.id)
         return Markup(
-            f"<a class='btn btn-sm btn-primary' href='{provider_url}'>Проверить OpenRouter</a>"
+            f"<form class='d-inline' method='post' action='{provider_url}'>"
+            "<button class='btn btn-sm btn-primary' type='submit'>"
+            "Проверить OpenRouter"
+            "</button>"
+            "</form>"
         )
 
     column_formatters = {
@@ -884,7 +888,7 @@ class AiInterviewSettingView(MiminetAdminModelView):
             db.session.commit()
         return super().get_query()
 
-    @expose("/check-provider/<int:setting_id>")
+    @expose("/check-provider/<int:setting_id>", methods=("POST",))
     def check_provider_view(self, setting_id):
         setting = AiInterviewSetting.query.get_or_404(setting_id)
         try:
@@ -953,11 +957,12 @@ class AiInterviewAccessCodeView(MiminetAdminModelView):
     def actions_formatter(view, context, model, name):
         delete_url = url_for(".delete_code_view", code_id=model.id)
         return Markup(
-            "<a class='btn btn-sm btn-danger' "
-            f"href='{delete_url}' "
+            f"<form class='d-inline' method='post' action='{delete_url}'>"
+            "<button class='btn btn-sm btn-danger' type='submit' "
             "onclick=\"return confirm('Удалить этот код доступа?');\">"
             "Удалить"
-            "</a>"
+            "</button>"
+            "</form>"
         )
 
     column_formatters = {
@@ -996,7 +1001,7 @@ class AiInterviewAccessCodeView(MiminetAdminModelView):
             return redirect(url_for(".index_view"))
         return self.render("admin/ai_access_code_create.html", form=form)
 
-    @expose("/delete/<int:code_id>")
+    @expose("/delete/<int:code_id>", methods=("POST",))
     def delete_code_view(self, code_id):
         access_code = AiInterviewAccessCode.query.get_or_404(code_id)
         delete_access_code(access_code)

@@ -52,7 +52,7 @@ from ai_interview.state import (
     serialize_session,
     attempts_exhausted_state,
 )
-from miminet_model import db
+from miminet_model import db, User
 from sqlalchemy import func
 
 
@@ -108,6 +108,10 @@ def _lock_access_code(access_code):
     )
 
 
+def _lock_user(user):
+    return User.query.filter_by(id=user.id).with_for_update().first()
+
+
 def _attempt_count(user, access_code):
     return AiInterviewSession.query.filter_by(
         user_id=user.id,
@@ -135,6 +139,11 @@ def start_interview(user, requested_topics, access_code=None, question_mode=None
     if question_mode not in QUESTION_MODES:
         raise InterviewError("Неизвестный режим вопросов AI-тестирования.")
     schedule = build_topic_schedule(topics)
+
+    _lock_user(user)
+    session = _latest_incomplete_session(user)
+    if session is not None:
+        return _with_history(user, serialize_session(session))
 
     access_code = _lock_access_code(access_code)
     if access_code is None or not access_code.is_active:
