@@ -10,7 +10,7 @@ from flask_admin.contrib.sqla.fields import QuerySelectField
 from flask_admin.form import DateTimePickerWidget, Select2Widget
 from flask_admin.model import typefmt
 from flask_login import current_user
-from markupsafe import Markup
+from markupsafe import Markup, escape
 from sqlalchemy import func
 from sqlalchemy.orm import selectinload
 from wtforms import (
@@ -26,18 +26,13 @@ from ai_interview.access import (
     cleanup_expired_access_codes,
     create_access_code,
     delete_access_code,
-    resolve_llm_proxy_url,
 )
 from ai_interview.models import (
     AiInterviewAccessCode,
     AiInterviewSetting,
 )
 from ai_interview.providers import (
-    ProxyConfigError,
     check_provider,
-    check_proxy,
-    masked_proxy_url,
-    normalize_proxy_url,
 )
 from quiz.service.network_upload_service import (
     create_check_task,
@@ -835,40 +830,17 @@ class CreateCheckTaskView(MiminetAdminModelView):
 class AiInterviewSettingView(MiminetAdminModelView):
     can_delete = False
     can_create = False
+    can_edit = False
 
     column_list = (
-        "llm_proxy_enabled",
-        "llm_proxy_display",
-        "llm_proxy_check",
         "llm_provider_check",
         "updated_on",
         "checks",
     )
     column_labels = {
-        "llm_proxy_enabled": "Прокси включён",
-        "llm_proxy_display": "Прокси",
-        "llm_proxy_check": "Проверка прокси",
         "llm_provider_check": "Проверка OpenRouter",
         "updated_on": "Изменено",
         "checks": "Действия",
-    }
-    form_columns = (
-        "llm_proxy_enabled",
-        "llm_proxy_url",
-        "llm_proxy_env_fallback_enabled",
-    )
-    form_args = {
-        "llm_proxy_url": {
-            "label": "URL прокси для LLM",
-            "description": "Например: socks5h://user:pass@host:1080 или http://host:3128",
-        },
-        "llm_proxy_enabled": {
-            "label": "Использовать прокси из этой формы для LLM",
-        },
-        "llm_proxy_env_fallback_enabled": {
-            "label": "Использовать AI_INTERVIEW_LLM_SOCKS_PROXY как fallback",
-            "description": "Если прокси выше выключен или URL пустой, backend попробует env-переменную.",
-        },
     }
 
     @staticmethod
@@ -877,30 +849,10 @@ class AiInterviewSettingView(MiminetAdminModelView):
             return Markup("<span class='text-success'>OK</span>")
         if status:
             return Markup(
-                f"<span class='text-danger'>{status}</span>"
-                f"<br><small>{message or ''}</small>"
+                f"<span class='text-danger'>{escape(status)}</span>"
+                f"<br><small>{escape(message or '')}</small>"
             )
         return Markup("<span class='text-muted'>Не проверялось</span>")
-
-    @staticmethod
-    def proxy_display_formatter(view, context, model, name):
-        proxy_url = masked_proxy_url(model.llm_proxy_url)
-        if proxy_url:
-            return proxy_url
-        if model.llm_proxy_env_fallback_enabled:
-            return Markup("<span class='text-muted'>env fallback</span>")
-        return Markup("<span class='text-muted'>Не задан</span>")
-
-    @staticmethod
-    def proxy_check_formatter(view, context, model, name):
-        label = AiInterviewSettingView._status_label(
-            model.llm_proxy_check_status,
-            model.llm_proxy_check_message,
-        )
-        parts = [str(label)]
-        if model.llm_proxy_check_ip:
-            parts.append(f"<br><small>IP: {model.llm_proxy_check_ip}</small>")
-        return Markup("".join(parts))
 
     @staticmethod
     def provider_check_formatter(view, context, model, name):
@@ -911,33 +863,15 @@ class AiInterviewSettingView(MiminetAdminModelView):
 
     @staticmethod
     def checks_formatter(view, context, model, name):
-        proxy_url = url_for(".check_proxy_view", setting_id=model.id)
         provider_url = url_for(".check_provider_view", setting_id=model.id)
         return Markup(
-            f"<a class='btn btn-sm btn-secondary' href='{proxy_url}'>Проверить прокси</a> "
             f"<a class='btn btn-sm btn-primary' href='{provider_url}'>Проверить OpenRouter</a>"
         )
 
     column_formatters = {
-        "llm_proxy_display": proxy_display_formatter,
-        "llm_proxy_check": proxy_check_formatter,
         "llm_provider_check": provider_check_formatter,
         "checks": checks_formatter,
     }
-
-    def on_model_change(self, form, model, is_created, **kwargs):
-        super().on_model_change(form, model, is_created, **kwargs)
-        model.llm_proxy_url = str(model.llm_proxy_url or "").strip() or None
-        if model.llm_proxy_url:
-            model.llm_proxy_url = normalize_proxy_url(model.llm_proxy_url)
-        if (
-            model.llm_proxy_enabled
-            and not model.llm_proxy_url
-            and not model.llm_proxy_env_fallback_enabled
-        ):
-            raise ProxyConfigError(
-                "Если прокси включён, укажите URL или включите env fallback."
-            )
 
     def get_query(self):
         setting = AiInterviewSetting.query.order_by(AiInterviewSetting.id.asc()).first()
@@ -947,36 +881,11 @@ class AiInterviewSettingView(MiminetAdminModelView):
             db.session.commit()
         return super().get_query()
 
-    @expose("/check-proxy/<int:setting_id>")
-    def check_proxy_view(self, setting_id):
-        setting = AiInterviewSetting.query.get_or_404(setting_id)
-        proxy_url = setting.llm_proxy_url
-        if not proxy_url and setting.llm_proxy_env_fallback_enabled:
-            proxy_url = resolve_llm_proxy_url(setting)
-
-        try:
-            if not proxy_url:
-                raise ProxyConfigError("URL прокси не задан.")
-            result = check_proxy(proxy_url)
-            setting.llm_proxy_check_status = "ok"
-            setting.llm_proxy_check_message = "Прокси доступен."
-            setting.llm_proxy_check_ip = result["ip"]
-            flash(f"Прокси работает. Внешний IP: {result['ip']}.", "success")
-        except Exception as exc:
-            setting.llm_proxy_check_status = "error"
-            setting.llm_proxy_check_message = str(exc)
-            setting.llm_proxy_check_ip = None
-            flash(f"Прокси не прошёл проверку: {exc}", "error")
-
-        setting.llm_proxy_checked_at = func.now()
-        db.session.commit()
-        return redirect(url_for(".index_view"))
-
     @expose("/check-provider/<int:setting_id>")
     def check_provider_view(self, setting_id):
         setting = AiInterviewSetting.query.get_or_404(setting_id)
         try:
-            result = check_provider(proxy_url=resolve_llm_proxy_url(setting))
+            result = check_provider()
             setting.llm_provider_check_status = "ok"
             setting.llm_provider_check_message = (
                 f"OpenRouter отвечает. Модель: {result['model']}."
@@ -1002,9 +911,7 @@ class AiInterviewAccessCodeView(MiminetAdminModelView):
         "label",
         "is_active",
         "expires_at",
-        "created_by_id",
         "created_on",
-        "attempt_count",
         "actions",
     )
     column_labels = {
@@ -1012,9 +919,7 @@ class AiInterviewAccessCodeView(MiminetAdminModelView):
         "label": "Комментарий",
         "is_active": "Активен",
         "expires_at": "Действует до",
-        "created_by_id": "Создал",
         "created_on": "Создан",
-        "attempt_count": "Попытки",
         "actions": "Действия",
     }
     form_columns = (
@@ -1022,10 +927,6 @@ class AiInterviewAccessCodeView(MiminetAdminModelView):
         "is_active",
         "expires_at",
     )
-
-    @staticmethod
-    def attempt_count_formatter(view, context, model, name):
-        return len(model.attempts or [])
 
     @staticmethod
     def actions_formatter(view, context, model, name):
@@ -1039,7 +940,6 @@ class AiInterviewAccessCodeView(MiminetAdminModelView):
         )
 
     column_formatters = {
-        "attempt_count": attempt_count_formatter,
         "actions": actions_formatter,
     }
 
@@ -1061,7 +961,6 @@ class AiInterviewAccessCodeView(MiminetAdminModelView):
     @expose("/new/", methods=("GET",))
     def create_view(self):
         code, access_code = create_access_code(
-            created_by_id=current_user.id,
             days_valid=ACCESS_CODE_TTL_DAYS,
         )
         flash(
@@ -1088,27 +987,3 @@ class AiInterviewAccessCodeView(MiminetAdminModelView):
                 AiInterviewAccessCode.id.desc(),
             )
         )
-
-
-class AiInterviewAttemptView(MiminetAdminModelView):
-    can_create = False
-    can_delete = False
-    can_edit = False
-
-    column_list = (
-        "user_id",
-        "access_code",
-        "status",
-        "created_on",
-        "updated_on",
-    )
-    column_labels = {
-        "user_id": "Пользователь",
-        "access_code": "Код доступа",
-        "status": "Статус",
-        "created_on": "Создана",
-        "updated_on": "Изменена",
-    }
-
-    def get_query(self):
-        return super().get_query()

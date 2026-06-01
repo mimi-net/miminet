@@ -1,3 +1,6 @@
+MAX_ANSWER_SCORE = 3
+
+
 def _analysis_for_grade(turn_or_analysis):
     if isinstance(turn_or_analysis, dict):
         return turn_or_analysis
@@ -28,10 +31,10 @@ def _has_strong_reasoning_turn(turns, analyses):
 def normalize_grade(turns, candidate_grade=None):
     analyses = [_analysis_for_grade(turn) for turn in turns]
     scores = [int(analysis.get("answer_score", 0)) for analysis in analyses]
-    score_total = sum(max(0, min(score, 3)) for score in scores)
+    score_total = sum(max(0, min(score, MAX_ANSWER_SCORE)) for score in scores)
     critical_error = any(analysis.get("critical_error") for analysis in analyses)
     question_count = max(1, len(scores))
-    score_ratio = score_total / (question_count * 3)
+    score_ratio = score_total / (question_count * MAX_ANSWER_SCORE)
     last_score = scores[-1] if scores else 0
 
     if score_ratio >= 0.83 and last_score >= 2 and not critical_error:
@@ -55,7 +58,7 @@ def normalize_grade(turns, candidate_grade=None):
     return max(2, min(rubric_grade, candidate_grade, 5))
 
 
-def normalize_analysis(payload, answer):
+def normalize_analysis(payload):
     return {
         "covered_concepts": payload["covered_concepts"],
         "missed_concepts": payload["missed_concepts"],
@@ -65,7 +68,25 @@ def normalize_analysis(payload, answer):
     }
 
 
+def score_summary(turns):
+    scores = [
+        max(
+            0,
+            min(
+                int(_analysis_for_grade(turn).get("answer_score", 0)),
+                MAX_ANSWER_SCORE,
+            ),
+        )
+        for turn in turns
+    ]
+    return {
+        "score_total": sum(scores),
+        "score_max": len(scores) * MAX_ANSWER_SCORE,
+    }
+
+
 def normalize_final_result(turns, llm_result):
     final_result = dict(llm_result)
     final_result["grade"] = normalize_grade(turns, llm_result.get("grade"))
+    final_result.update(score_summary(turns))
     return final_result

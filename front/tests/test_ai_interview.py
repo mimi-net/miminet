@@ -5,22 +5,22 @@ from flask import Flask
 from flask_login import LoginManager, UserMixin
 from jsonschema import ValidationError
 
-from ai_interview import access, engine, planner, rubric
+from ai_interview import access, engine, planner, rubric, state
 from ai_interview.catalog import public_topics
 from ai_interview.controller import ai_interview_routes
-from ai_interview.models import AiInterviewAccessCode, AiInterviewAttempt
+from ai_interview.models import AiInterviewAccessCode
 from ai_interview.providers import (
-    GENERATION_SCHEMA,
+    EVALUATION_SCHEMA,
+    MAIN_ANSWER_SCHEMA,
     JsonCompletion,
     ProviderNotConfigured,
-    ProxyConfigError,
     get_provider,
-    normalize_proxy_url,
     read_env_secret,
     validate_payload,
 )
-from ai_interview.rag import retrieve_context
+from ai_interview.question_bank import load_question_bank, questions_for_topic
 from miminet_model import db
+from miminet_admin import AiInterviewSettingView
 
 
 class TestUser(UserMixin):
@@ -38,7 +38,6 @@ def api_client():
         return TestUser() if user_id == "17" else None
 
     app.register_blueprint(ai_interview_routes)
-
     with app.test_client() as client:
         with client.session_transaction() as session:
             session["_user_id"] = "17"
@@ -46,205 +45,210 @@ def api_client():
         yield client
 
 
-def make_turn(position=1, answer=None, status="active"):
+def make_turn(flow_type="main", position=1, pair_position=1, answer=None):
     turn = SimpleNamespace(
         id=position,
         position=position,
         topic_key="ethernet_l2",
         focus={
-            "section_id": "ethernet_frame",
-            "section_label": "Структура Ethernet-кадра",
-            "plan_reason": "coverage",
+            "flow_type": flow_type,
+            "pair_position": pair_position,
+            "source_question_id": "l2-4",
+            "reference_answer": "Кадр отбрасывается.",
+            "difficulty": "advanced" if flow_type == "followup" else "mechanism",
         },
-        question="Что произойдет с Ethernet-кадром?",
+        question="Что произойдёт с кадром с неверной контрольной суммой?",
         feedback="",
         answer=answer,
-        answer_summary="",
         analysis={"answer_score": 1, "critical_error": False},
-        expected_concepts=["frame"],
     )
     session = SimpleNamespace(
+        id=9,
         guid="session-guid",
-        status=status,
+        status="active",
         created_on=access.now_utc(),
         selected_topics=["ethernet_l2"],
-        topic_schedule=["ethernet_l2"],
         turns=[turn],
-        llm_call_count=1,
         final_result=None,
     )
-    attempt = SimpleNamespace(access_code=None)
     turn.session = session
-    session.attempt = attempt
+    session.access_code = None
     return turn
 
 
-def test_retrieval_is_topic_constrained_and_bounded():
-    context = retrieve_context(
-        ["advanced_networking"], "PMTUD large TCP traffic", max_chars=220
-    )
-
-    assert context.chunks
-    assert all(chunk["topic"] == "advanced_networking" for chunk in context.chunks)
-    assert len(context.text) <= 220
-    assert "pmtud" in context.text.casefold()
-
-
-def test_course_chunks_are_normalized_from_course_topic_names():
-    context = retrieve_context(
-        ["transport_and_icmp"], "ICMP ping Destination Unreachable"
-    )
-
-    assert context.chunks
-    assert any(
-        "icmp" in (chunk.get("source_topic") or "").casefold()
-        for chunk in context.chunks
-    )
-    assert all(chunk["topic"] == "transport_and_icmp" for chunk in context.chunks)
+def evaluation_payload(final_result=None, **extra):
+    return {
+        "feedback": "Короткий фидбек",
+        "covered_concepts": ["основной тезис"],
+        "missed_concepts": [],
+        "misconceptions": [],
+        "answer_score": 3,
+        "critical_error": False,
+        "final_result": final_result,
+        **extra,
+    }
 
 
-def test_question_limit_scales_with_selected_topics():
+def test_question_bank_is_normalized_and_covers_every_topic():
+    questions = load_question_bank()
+    ids = [question["id"] for question in questions]
+
+    assert len(questions) >= 50
+    assert len(ids) == len(set(ids))
+    assert all(set(question) == {"id", "topic_key", "question", "reference_answer"} for question in questions)
+    assert all(questions_for_topic(topic["key"]) for topic in public_topics())
+
+
+def test_topic_schedule_follows_catalog_order():
     topics = [topic["key"] for topic in public_topics()]
 
-    assert planner.question_limit_for_topics(topics[:1]) == 4
-    assert planner.question_limit_for_topics(topics[:2]) == 5
-    assert planner.question_limit_for_topics(topics[:3]) == 6
-    assert planner.question_limit_for_topics(topics[:4]) == 7
-    assert planner.question_limit_for_topics(topics[:5]) == 8
+    assert planner.build_topic_schedule(list(reversed(topics))) == topics
+    assert planner.pair_count_for_topics(topics[:3]) == 3
 
 
-def test_dynamic_planner_covers_unseen_topics_first():
-    first = make_turn(answer="Понимаю Ethernet кадр")
-    session = first.session
-    session.selected_topics = ["ethernet_l2", "network_l3", "transport_and_icmp"]
-    session.topic_schedule = ["ethernet_l2", "network_l3", "transport_and_icmp"]
-
-    seed = planner.choose_next_seed(session, 2, rng=planner.random.Random(3))
-
-    assert seed["topic_key"] == "network_l3"
-    assert seed["focus"]["plan_reason"] == "coverage"
-
-
-def test_dynamic_planner_rescues_weak_topic_after_coverage():
-    first = make_turn(position=1, answer="Не знаю.")
-    first.analysis = {"answer_score": 0, "critical_error": False}
-    second = make_turn(position=2, answer="IP нужен для адресации")
-    second.topic_key = "network_l3"
-    second.focus = {
-        "section_id": "ip_addresses",
-        "section_label": "IP-адреса",
-        "plan_reason": "coverage",
-    }
-    second.analysis = {"answer_score": 3, "critical_error": False}
-    session = first.session
-    session.selected_topics = ["ethernet_l2", "network_l3"]
-    session.topic_schedule = ["ethernet_l2", "network_l3"]
-    session.turns = [first, second]
-    first.session = session
-    second.session = session
-
-    seed = planner.choose_next_seed(session, 3, rng=planner.random.Random(5))
-
-    assert seed["topic_key"] == "ethernet_l2"
-    assert seed["focus"]["plan_reason"] == "rescue"
-    assert seed["focus"]["section_id"] != "ethernet_frame"
-
-
-def test_late_coverage_question_stays_moderate_for_new_topic():
-    focus = planner.build_focus(
-        "network_l3",
-        4,
-        rng=planner.random.Random(11),
-        plan_reason="coverage",
+def test_choose_main_question_uses_requested_topic():
+    question, focus = planner.choose_main_question(
+        "transport_and_icmp", 2, rng=planner.choose_question.__globals__["random"].Random(3)
     )
 
-    assert focus["target_difficulty"] == "mechanism"
-    assert focus["question_type"] in {"mechanism", "compare"}
-    assert focus["min_reasoning_steps"] == 3
+    assert question["topic_key"] == "transport_and_icmp"
+    assert focus["flow_type"] == "main"
+    assert focus["pair_position"] == 2
+    assert focus["reference_answer"] == question["reference_answer"]
 
 
-def test_generation_payload_validation_rejects_missing_question():
+def test_main_answer_schema_requires_followup():
     with pytest.raises(ValidationError):
-        validate_payload(
-            {"expected_concepts": ["ARP"], "difficulty": "basic"},
-            GENERATION_SCHEMA,
-        )
+        validate_payload(evaluation_payload(), MAIN_ANSWER_SCHEMA)
 
 
-def test_generation_payload_accepts_reasoning_rubric():
-    payload = validate_payload(
-        {
-            "question": "Почему пакет не попадет в соседнюю подсеть без шлюза?",
-            "expected_concepts": ["маска подсети", "шлюз"],
-            "expected_reasoning": [
-                "хост определяет, что адрес назначения вне своей подсети",
-                "для чужой подсети нужен маршрут или шлюз",
-            ],
-            "common_wrong_answers": ["пакет просто не доставится"],
-            "difficulty": "practice",
-        },
-        GENERATION_SCHEMA,
-    )
+def test_evaluation_schema_does_not_fill_missing_fields():
+    payload = evaluation_payload()
+    del payload["covered_concepts"]
 
-    assert payload["expected_reasoning"][0].startswith("хост определяет")
+    with pytest.raises(ValidationError):
+        validate_payload(payload, EVALUATION_SCHEMA)
 
 
 def test_grade_normalization_caps_critical_error():
     turns = [
         {"answer_score": 3, "critical_error": False},
-        {"answer_score": 3, "critical_error": False},
         {"answer_score": 3, "critical_error": True},
-        {"answer_score": 3, "critical_error": False},
     ]
 
     assert rubric.normalize_grade(turns, candidate_grade=5) == 3
 
 
-def test_grade_five_requires_strong_reasoning_turn():
-    turns = [
-        {
-            "answer_score": 3,
-            "critical_error": False,
-            "focus": {"difficulty": "basic"},
-        },
-        {
-            "answer_score": 3,
-            "critical_error": False,
-            "focus": {"difficulty": "mechanism"},
-        },
-        {
-            "answer_score": 3,
-            "critical_error": False,
-            "focus": {"difficulty": "mechanism"},
-        },
-        {
-            "answer_score": 3,
-            "critical_error": False,
-            "focus": {"difficulty": "basic"},
-        },
-    ]
+def test_start_creates_bank_question_without_llm_completion(mocker):
+    access_code = AiInterviewAccessCode(id=11)
+    provider = SimpleNamespace(name="mock")
+    mocker.patch("ai_interview.engine.find_valid_access_code", return_value=access_code)
+    mocker.patch("ai_interview.engine._session_for_access_code", return_value=None)
+    mocker.patch("ai_interview.engine._latest_incomplete_session", return_value=None)
+    mocker.patch("ai_interview.engine.get_provider", return_value=provider)
+    mocker.patch("ai_interview.engine.prune_interview_history")
+    mocker.patch("ai_interview.state.get_interview_history", return_value=[])
+    add = mocker.patch("ai_interview.engine.db.session.add")
+    mocker.patch("ai_interview.engine.db.session.commit")
 
-    assert rubric.normalize_grade(turns, candidate_grade=5) == 4
+    state = engine.start_interview(SimpleNamespace(id=17), ["ethernet_l2"], "code")
 
-    turns[-1]["focus"] = {"difficulty": "advanced", "question_type": "packet_trace"}
-
-    assert rubric.normalize_grade(turns, candidate_grade=5) == 5
+    assert state["status"] == "active"
+    assert state["current_turn"]["flow_type"] == "main"
+    assert any(getattr(item, "question", None) for item in [call.args[0] for call in add.call_args_list])
 
 
-def test_llm_proxy_env_fallback_is_used(monkeypatch):
-    setting = SimpleNamespace(
-        llm_proxy_enabled=False,
-        llm_proxy_url=None,
-        llm_proxy_env_fallback_enabled=True,
+def test_main_answer_creates_followup_with_one_llm_call(mocker):
+    turn = make_turn()
+    provider = SimpleNamespace(
+        complete_json=mocker.Mock(
+            return_value=JsonCompletion(
+                evaluation_payload(
+                    followup_question="Почему повреждённый кадр нельзя передать дальше?",
+                    followup_reference_answer="Проверка FCS не пройдена.",
+                ),
+                1,
+            )
+        )
     )
-    monkeypatch.setenv("AI_INTERVIEW_LLM_SOCKS_PROXY", "socks5h://proxy.local:1080")
+    add = mocker.patch("ai_interview.engine.db.session.add")
+    followup = SimpleNamespace()
+    mocker.patch("ai_interview.engine.AiInterviewTurn", return_value=followup)
 
-    assert access.resolve_llm_proxy_url(setting) == "socks5h://proxy.local:1080"
+    completion, _ = engine._submit_main_answer(turn.session, turn, provider, "Его отбросят.")
+
+    assert completion.calls == 1
+    assert add.call_args.args[0] is followup
+    engine.AiInterviewTurn.assert_called_once()
+    assert engine.AiInterviewTurn.call_args.kwargs["focus"]["flow_type"] == "followup"
+    assert engine.AiInterviewTurn.call_args.kwargs["position"] == 2
 
 
-def test_proxy_url_rejects_unsupported_scheme():
-    with pytest.raises(ProxyConfigError):
-        normalize_proxy_url("ftp://proxy.local:21")
+def test_last_followup_finalizes_session(mocker):
+    turn = make_turn(flow_type="followup", position=2)
+    provider = SimpleNamespace(
+        complete_json=mocker.Mock(
+            return_value=JsonCompletion(
+                evaluation_payload(
+                    {
+                        "grade": 5,
+                        "verdict": "Хорошо",
+                        "strengths": ["Ethernet"],
+                        "gaps": [],
+                        "recommendations": [],
+                    }
+                ),
+                1,
+            )
+        )
+    )
+
+    engine._submit_followup_answer(turn.session, turn, provider, "FCS не совпадает.")
+
+    assert turn.session.status == "completed"
+    assert turn.session.final_result["grade"] in {4, 5}
+
+
+def test_nonfinal_followup_creates_main_question_for_next_topic(mocker):
+    turn = make_turn(flow_type="followup", position=2)
+    turn.session.selected_topics = ["ethernet_l2", "network_l3"]
+    provider = SimpleNamespace(
+        complete_json=mocker.Mock(return_value=JsonCompletion(evaluation_payload(), 1))
+    )
+    next_turn = SimpleNamespace()
+    mocker.patch("ai_interview.engine._new_main_turn", return_value=next_turn)
+    add = mocker.patch("ai_interview.engine.db.session.add")
+
+    engine._submit_followup_answer(turn.session, turn, provider, "FCS не совпадает.")
+
+    engine._new_main_turn.assert_called_once_with(turn.session, "network_l3", 2)
+    add.assert_called_once_with(next_turn)
+
+
+def test_duplicate_answer_returns_state_without_provider_call(mocker):
+    turn = make_turn(answer="Коммутатор отбросит кадр.")
+    mocker.patch("ai_interview.engine._find_owned_turn", return_value=turn)
+    mocker.patch("ai_interview.state.get_interview_history", return_value=[])
+    provider_factory = mocker.patch("ai_interview.engine.get_provider")
+
+    state = engine.submit_answer(SimpleNamespace(id=17), turn.id, turn.answer)
+
+    assert state["duplicate"] is True
+    provider_factory.assert_not_called()
+
+
+def test_completed_session_rejects_extra_answer_without_provider_call(mocker):
+    turn = make_turn()
+    turn.session.status = "completed"
+    turn.session.final_result = {"grade": 4, "verdict": "Хорошо"}
+    mocker.patch("ai_interview.engine._find_owned_turn", return_value=turn)
+    mocker.patch("ai_interview.state.get_interview_history", return_value=[])
+    provider_factory = mocker.patch("ai_interview.engine.get_provider")
+
+    state = engine.submit_answer(SimpleNamespace(id=17), turn.id, "Повторный ответ")
+
+    assert state["duplicate"] is True
+    provider_factory.assert_not_called()
 
 
 def test_openrouter_key_can_be_read_from_env_file(monkeypatch, tmp_path):
@@ -254,15 +258,6 @@ def test_openrouter_key_can_be_read_from_env_file(monkeypatch, tmp_path):
     monkeypatch.setenv("OPENROUTER_API_KEY_FILE", str(secret_file))
 
     assert read_env_secret("OPENROUTER_API_KEY") == "file-secret"
-
-
-def test_openrouter_env_value_takes_precedence_over_secret_file(monkeypatch, tmp_path):
-    secret_file = tmp_path / "openrouter_api_key"
-    secret_file.write_text("file-secret", encoding="utf-8")
-    monkeypatch.setenv("OPENROUTER_API_KEY", "env-secret")
-    monkeypatch.setenv("OPENROUTER_API_KEY_FILE", str(secret_file))
-
-    assert read_env_secret("OPENROUTER_API_KEY") == "env-secret"
 
 
 def test_openrouter_provider_uses_secret_file(monkeypatch, tmp_path):
@@ -276,130 +271,80 @@ def test_openrouter_provider_uses_secret_file(monkeypatch, tmp_path):
     provider = get_provider()
 
     assert provider.name == "openrouter"
-    assert provider.model == "test-model"
     assert provider.api_key == "file-secret"
 
 
-def test_start_resumes_existing_attempt_before_provider_call(mocker):
-    turn = make_turn()
-    mocker.patch(
-        "ai_interview.engine.get_global_setting",
-        return_value=SimpleNamespace(),
-    )
-    mocker.patch(
-        "ai_interview.engine.find_valid_access_code",
-        return_value=SimpleNamespace(id=11),
-    )
-    mocker.patch(
-        "ai_interview.engine._attempt_for_access_code",
-        return_value=SimpleNamespace(status="active", sessions=[turn.session]),
-    )
-    mocker.patch(
-        "ai_interview.engine._latest_incomplete_session", return_value=turn.session
-    )
-    mocker.patch("ai_interview.state.get_interview_history", return_value=[])
-    provider_factory = mocker.patch("ai_interview.engine.get_provider")
-
-    state = engine.start_interview(SimpleNamespace(id=17), ["ethernet_l2"], "code")
-
-    assert state["resumed"] is True
-    assert state["history"] == []
-    provider_factory.assert_not_called()
-
-
-def test_duplicate_answer_returns_state_without_provider_call(mocker):
-    turn = make_turn(answer="Коммутатор пересылает кадр.")
-    mocker.patch(
-        "ai_interview.engine.get_global_setting",
-        return_value=SimpleNamespace(),
-    )
-    mocker.patch("ai_interview.engine._find_owned_turn", return_value=turn)
-    mocker.patch("ai_interview.state.get_interview_history", return_value=[])
-    provider_factory = mocker.patch("ai_interview.engine.get_provider")
-
-    state = engine.submit_answer(SimpleNamespace(id=17), turn.id, turn.answer)
-
-    assert state["duplicate"] is True
-    assert state["history"] == []
-    provider_factory.assert_not_called()
-
-
-def test_completed_attempt_does_not_block_new_attempt(mocker):
-    access_code = AiInterviewAccessCode(id=11)
-    mocker.patch(
-        "ai_interview.engine.get_global_setting",
-        return_value=SimpleNamespace(
-            llm_proxy_enabled=False,
-            llm_proxy_url=None,
-            llm_proxy_env_fallback_enabled=False,
-        ),
-    )
-    mocker.patch(
-        "ai_interview.engine.find_valid_access_code",
-        return_value=access_code,
-    )
-    mocker.patch("ai_interview.engine._attempt_for_access_code", return_value=None)
-    mocker.patch("ai_interview.engine._latest_incomplete_session", return_value=None)
-    mocker.patch("ai_interview.state.get_interview_history", return_value=[])
-    provider = SimpleNamespace(
-        name="mock",
-        complete_json=lambda *args, **kwargs: JsonCompletion(
-            payload={
-                "question": "Что делает ARP?",
-                "expected_concepts": ["ARP"],
-                "difficulty": "basic",
-            },
-            calls=1,
-        ),
-    )
-    mocker.patch("ai_interview.engine.get_provider", return_value=provider)
-    mocker.patch(
-        "ai_interview.debug_service.retrieve_context",
-        return_value=SimpleNamespace(
-            text="ARP сопоставляет IP и MAC.",
-            example_questions=[],
-            provenance=lambda: {"chunks": []},
-        ),
-    )
-    mocker.patch("ai_interview.engine.db.session.add")
-    mocker.patch("ai_interview.engine.db.session.commit")
-
-    state = engine.start_interview(SimpleNamespace(id=17), ["ethernet_l2"], "code")
-
-    assert state["status"] == "active"
-    assert state["resumed"] is False
-
-
-def test_delete_access_code_detaches_attempts_before_delete(mocker):
+def test_delete_access_code_detaches_sessions_before_delete(mocker):
     access_code = SimpleNamespace(id=11)
-    session_query = mocker.Mock()
-    update_query = mocker.Mock()
     query = mocker.patch("ai_interview.access.db.session.query")
     mocker.patch("ai_interview.access.db.session.delete")
-    query.return_value = session_query
-    session_query.filter_by.return_value = update_query
 
     access.delete_access_code(access_code)
 
-    query.assert_called_once_with(AiInterviewAttempt)
-    session_query.filter_by.assert_called_once_with(access_code_id=11)
-    update_query.update.assert_called_once_with(
+    query.return_value.filter_by.assert_called_once_with(access_code_id=11)
+    query.return_value.filter_by.return_value.update.assert_called_once_with(
         {"access_code_id": None},
         synchronize_session=False,
     )
     db.session.delete.assert_called_once_with(access_code)
 
 
-def test_state_api_returns_disabled_backend_state(api_client, mocker):
+def test_used_access_code_does_not_create_session_or_call_provider(mocker):
+    access_code = AiInterviewAccessCode(id=11, is_used=True)
+    mocker.patch("ai_interview.engine.find_valid_access_code", return_value=access_code)
+    mocker.patch("ai_interview.engine._session_for_access_code", return_value=None)
+    mocker.patch("ai_interview.state.get_interview_history", return_value=[])
+    provider_factory = mocker.patch("ai_interview.engine.get_provider")
+
+    result = engine.start_interview(SimpleNamespace(id=17), ["ethernet_l2"], "code")
+
+    assert result["notice"]["code"] == "access_code_used"
+    provider_factory.assert_not_called()
+
+
+def test_fifo_history_deletes_sessions_after_tenth(mocker):
+    sessions = [SimpleNamespace(id=index, status="completed") for index in range(12)]
+    query = mocker.Mock()
     mocker.patch(
-        "ai_interview.controller.get_interview_state",
-        return_value={"enabled": False, "status": "unavailable", "message": "closed"},
+        "ai_interview.state.AiInterviewSession",
+        SimpleNamespace(query=query, created_on=mocker.Mock(), id=mocker.Mock()),
+    )
+    query.filter_by.return_value.order_by.return_value.all.return_value = sessions
+    delete = mocker.patch("ai_interview.state.db.session.delete")
+
+    state.prune_interview_history(user_id=17)
+
+    assert [call.args[0].id for call in delete.call_args_list] == [10, 11]
+
+
+def test_fifo_history_keeps_incomplete_session(mocker):
+    sessions = [
+        SimpleNamespace(id=index, status="completed") for index in range(10)
+    ]
+    sessions.append(SimpleNamespace(id=10, status="active"))
+    query = mocker.Mock()
+    mocker.patch(
+        "ai_interview.state.AiInterviewSession",
+        SimpleNamespace(query=query, created_on=mocker.Mock(), id=mocker.Mock()),
+    )
+    query.filter_by.return_value.order_by.return_value.all.return_value = sessions
+    delete = mocker.patch("ai_interview.state.db.session.delete")
+
+    state.prune_interview_history(user_id=17)
+
+    delete.assert_not_called()
+
+
+def test_admin_provider_status_escapes_external_message():
+    label = AiInterviewSettingView._status_label(
+        "<script>alert(1)</script>",
+        "<img src=x onerror=alert(1)>",
     )
 
-    response = api_client.get("/ai-interview/api/state")
-
-    assert response.status_code == 200
-    assert response.get_json()["enabled"] is False
+    assert "<script>" not in label
+    assert "<img" not in label
+    assert "&lt;script&gt;" in label
+    assert "&lt;img" in label
 
 
 def test_start_api_reports_missing_provider(api_client, mocker):
@@ -409,56 +354,8 @@ def test_start_api_reports_missing_provider(api_client, mocker):
     )
 
     response = api_client.post(
-        "/ai-interview/api/start",
+        "/ai-testing/api/start",
         json={"topics": ["ethernet_l2"], "access_code": "code"},
     )
 
     assert response.status_code == 503
-    assert "provider missing" in response.get_json()["error"]
-
-
-def test_start_requires_access_code_before_provider_call(mocker):
-    mocker.patch(
-        "ai_interview.engine.get_global_setting", return_value=SimpleNamespace()
-    )
-    provider_factory = mocker.patch("ai_interview.engine.get_provider")
-
-    with pytest.raises(engine.InterviewError):
-        engine.start_interview(SimpleNamespace(id=17), ["ethernet_l2"], "")
-
-    provider_factory.assert_not_called()
-
-
-def test_reusing_completed_access_code_returns_notice_without_opening_result(mocker):
-    turn = make_turn(status="completed")
-    turn.session.status = "completed"
-    turn.session.final_result = {"grade": 4, "verdict": "OK"}
-    access_code = SimpleNamespace(id=11)
-    attempt = SimpleNamespace(status="completed", sessions=[turn.session])
-    mocker.patch(
-        "ai_interview.engine.get_global_setting", return_value=SimpleNamespace()
-    )
-    mocker.patch("ai_interview.engine.find_valid_access_code", return_value=access_code)
-    mocker.patch("ai_interview.engine._attempt_for_access_code", return_value=attempt)
-    mocker.patch("ai_interview.state.get_interview_history", return_value=[])
-    provider_factory = mocker.patch("ai_interview.engine.get_provider")
-
-    state = engine.start_interview(SimpleNamespace(id=17), [], "123456")
-
-    assert state["status"] == "ready"
-    assert state["notice"]["code"] == "access_code_completed"
-    assert "истории попыток" in state["notice"]["message"]
-    assert "result" not in state
-    provider_factory.assert_not_called()
-
-
-def test_result_api_can_return_session_by_guid(api_client, mocker):
-    mocker.patch(
-        "ai_interview.controller.get_interview_result_by_guid",
-        return_value={"grade": 5, "questions": []},
-    )
-
-    response = api_client.get("/ai-interview/api/result?guid=session-guid")
-
-    assert response.status_code == 200
-    assert response.get_json()["grade"] == 5

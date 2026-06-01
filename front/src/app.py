@@ -30,7 +30,6 @@ from flask_login import current_user, login_required
 from flask_migrate import Migrate
 from miminet_admin import (
     AnswerView,
-    AiInterviewAttemptView,
     AiInterviewAccessCodeView,
     AiInterviewSettingView,
     CreateCheckTaskView,
@@ -90,7 +89,6 @@ from ai_generate import generate_ai_task
 from ai_interview.controller import ai_interview_routes
 from ai_interview.models import (
     AiInterviewAccessCode,
-    AiInterviewAttempt,
     AiInterviewSetting,
     create_ai_interview_tables,
 )
@@ -439,9 +437,6 @@ admin.add_view(
         name="AI коды доступа",
         endpoint="ai_access_codes",
     )
-)
-admin.add_view(
-    AiInterviewAttemptView(AiInterviewAttempt, db.session, name="AI попытки")
 )
 admin.add_view(
     CreateCheckTaskView(
