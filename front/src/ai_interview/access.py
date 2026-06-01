@@ -10,6 +10,10 @@ from miminet_model import db
 
 
 ACCESS_CODE_TTL_DAYS = 5
+DEFAULT_MAX_ATTEMPTS_PER_USER = 1
+QUESTION_MODE_ADAPTIVE = "adaptive"
+QUESTION_MODE_BANK_ONLY = "bank_only"
+QUESTION_MODES = {QUESTION_MODE_ADAPTIVE, QUESTION_MODE_BANK_ONLY}
 
 
 def now_utc():
@@ -52,10 +56,16 @@ def cleanup_expired_access_codes(commit=True):
     return len(expired_codes)
 
 
-def create_access_code(label=None, days_valid=ACCESS_CODE_TTL_DAYS):
+def create_access_code(
+    label=None,
+    days_valid=ACCESS_CODE_TTL_DAYS,
+    max_attempts_per_user=DEFAULT_MAX_ATTEMPTS_PER_USER,
+):
     cleanup_expired_access_codes()
     days_valid = max(1, int(days_valid or ACCESS_CODE_TTL_DAYS))
-
+    max_attempts_per_user = max(
+        1, int(max_attempts_per_user or DEFAULT_MAX_ATTEMPTS_PER_USER)
+    )
     for _ in range(20):
         code = generate_numeric_access_code()
         if AiInterviewAccessCode.query.filter_by(code=code).first() is None:
@@ -64,6 +74,7 @@ def create_access_code(label=None, days_valid=ACCESS_CODE_TTL_DAYS):
                 label=str(label or "").strip() or None,
                 expires_at=now_utc() + timedelta(days=days_valid),
                 is_active=True,
+                max_attempts_per_user=max_attempts_per_user,
             )
             db.session.add(access_code)
             db.session.commit()

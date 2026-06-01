@@ -45,7 +45,7 @@ class AiInterviewAccessCode(db.Model):  # type: ignore[name-defined]
     code = db.Column(Text, nullable=False, unique=True)
     label = db.Column(Text, nullable=True)
     is_active = db.Column(Boolean, default=True, nullable=False)
-    is_used = db.Column(Boolean, default=False, nullable=False)
+    max_attempts_per_user = db.Column(BigInteger, default=1, nullable=False)
     expires_at = db.Column(TIMESTAMP(timezone=True), nullable=False)
     created_on = db.Column(TIMESTAMP(timezone=True), default=func.now())
     updated_on = db.Column(
@@ -65,7 +65,12 @@ class AiInterviewAccessCode(db.Model):  # type: ignore[name-defined]
 class AiInterviewSession(db.Model):  # type: ignore[name-defined]
     __tablename__ = "ai_interview_session"
     __table_args__ = (
-        UniqueConstraint("access_code_id", name="uq_ai_interview_session_access_code"),
+        UniqueConstraint(
+            "user_id",
+            "access_code_id",
+            "attempt_number",
+            name="uq_ai_interview_session_user_code_attempt",
+        ),
     )
 
     id = db.Column(BigInteger, primary_key=True)
@@ -76,6 +81,8 @@ class AiInterviewSession(db.Model):  # type: ignore[name-defined]
     access_code_id = db.Column(
         BigInteger, ForeignKey("ai_interview_access_code.id"), nullable=True
     )
+    attempt_number = db.Column(BigInteger, default=1, nullable=False)
+    question_mode = db.Column(Text, default="adaptive", nullable=False)
     status = db.Column(Text, default="active", nullable=False)
     selected_topics = db.Column(db.JSON, default=list, nullable=False)
     final_result = db.Column(db.JSON, nullable=True)

@@ -1,16 +1,16 @@
 from ai_interview.access import now_utc
+from ai_interview.access import QUESTION_MODE_BANK_ONLY
 from ai_interview.catalog import topic_label
 from ai_interview.models import AiInterviewSession
 from ai_interview.planner import (
+    bank_question_count_for_topics,
     pair_count_for_topics,
     question_position_for_turn,
 )
 from ai_interview.rubric import MAX_ANSWER_SCORE, score_summary
-from miminet_model import db
 
 
 MAX_ANSWER_CHARS = 1000
-HISTORY_LIMIT = 10
 
 
 def _owned_sessions(user):
@@ -19,17 +19,6 @@ def _owned_sessions(user):
         .order_by(AiInterviewSession.created_on.asc(), AiInterviewSession.id.asc())
         .all()
     )
-
-
-def prune_interview_history(user_id):
-    sessions = (
-        AiInterviewSession.query.filter_by(user_id=user_id)
-        .order_by(AiInterviewSession.created_on.desc(), AiInterviewSession.id.desc())
-        .all()
-    )
-    for session in sessions[HISTORY_LIMIT:]:
-        if session.status not in {"active", "failed-recoverable"}:
-            db.session.delete(session)
 
 
 def _session_sort_value(session):
@@ -75,20 +64,24 @@ def _format_datetime(value):
 
 def _turn_payload(turn, include_answer=False):
     focus = turn.focus
+    flow_type = focus["flow_type"]
     payload = {
         "id": turn.id,
         "position": turn.position,
-        "flow_type": focus["flow_type"],
-        "pair_position": focus["pair_position"],
+        "flow_type": flow_type,
         "topic_position": focus["topic_position"],
-        "topic_pair_position": focus["topic_pair_position"],
-        "question_position": question_position_for_turn(
-            focus["pair_position"], focus["flow_type"]
+        "question_position": (
+            focus["topic_question_position"]
+            if flow_type == "bank"
+            else question_position_for_turn(focus["pair_position"], flow_type)
         ),
         "topic": {"key": turn.topic_key, "label": topic_label(turn.topic_key)},
         "question": turn.question,
         "feedback": turn.feedback,
     }
+    if flow_type != "bank":
+        payload["pair_position"] = focus["pair_position"]
+        payload["topic_pair_position"] = focus["topic_pair_position"]
     if include_answer:
         payload["answer"] = turn.answer
         payload["answer_score"] = int((turn.analysis or {}).get("answer_score", 0))
@@ -105,9 +98,14 @@ def _result_payload(session):
     return result
 
 
+def _question_count(session):
+    if getattr(session, "question_mode", "adaptive") == QUESTION_MODE_BANK_ONLY:
+        return bank_question_count_for_topics(session.selected_topics)
+    return pair_count_for_topics(session.selected_topics) * 2
+
+
 def _session_history_item(session):
     turns = sorted(session.turns, key=lambda turn: turn.position)
-    pair_count = pair_count_for_topics(session.selected_topics)
     answered_questions = len([turn for turn in turns if turn.answer is not None])
     status_labels = {
         "active": "В процессе",
@@ -123,8 +121,9 @@ def _session_history_item(session):
         "created_on": _format_datetime(session.created_on),
         "finished_at": _format_datetime(session.finished_at),
         "answered_count": answered_questions,
-        "question_count": pair_count * 2,
+        "question_count": _question_count(session),
         "grade": result.get("grade"),
+        "question_mode": getattr(session, "question_mode", "adaptive"),
         "access_code_label": access_code.label if access_code is not None else None,
         "topics": [
             {"key": topic_key, "label": topic_label(topic_key)}
@@ -138,7 +137,7 @@ def get_interview_history(user):
         session for session in _owned_sessions(user) if session.status != "aborted"
     ]
     sessions = sorted(sessions, key=_session_sort_value, reverse=True)
-    return [_session_history_item(session) for session in sessions[:HISTORY_LIMIT]]
+    return [_session_history_item(session) for session in sessions]
 
 
 def _with_history(user, state):
@@ -158,6 +157,8 @@ def serialize_session(session, duplicate=False):
             for topic_key in session.selected_topics
         ],
         "pair_count": pair_count,
+        "question_mode": getattr(session, "question_mode", "adaptive"),
+        "question_count": _question_count(session),
         "topic_count": len(session.selected_topics),
         "current_turn": (
             _turn_payload(current_turn) if current_turn is not None else None
@@ -176,40 +177,15 @@ def ready_state():
     }
 
 
-def used_code_completed_state(session):
+def attempts_exhausted_state():
     state = ready_state()
     state["notice"] = {
         "type": "info",
-        "code": "access_code_completed",
+        "code": "access_code_attempts_exhausted",
         "message": (
-            "Этот код уже был использован, AI-тестирование по нему завершено. "
-            "Результат можно посмотреть в истории попыток."
+            "Вы использовали все доступные попытки по этому коду. "
+            "Результаты можно посмотреть в истории попыток."
         ),
-        "session_guid": session.guid,
-    }
-    return state
-
-
-def used_code_aborted_state(session):
-    state = ready_state()
-    state["notice"] = {
-        "type": "info",
-        "code": "access_code_aborted",
-        "message": (
-            "Этот код уже был использован. Попытка была завершена досрочно "
-            "и не сохраняется в истории."
-        ),
-        "session_guid": session.guid,
-    }
-    return state
-
-
-def used_code_state():
-    state = ready_state()
-    state["notice"] = {
-        "type": "info",
-        "code": "access_code_used",
-        "message": "Этот код уже был использован.",
     }
     return state
 

@@ -14,12 +14,15 @@ from markupsafe import Markup, escape
 from sqlalchemy import func
 from sqlalchemy.orm import selectinload
 from wtforms import (
+    IntegerField,
     SelectField,
+    StringField,
     TextAreaField,
     DateTimeField,
     Form,
     SubmitField,
 )
+from wtforms.validators import InputRequired, NumberRange
 
 from ai_interview.access import (
     ACCESS_CODE_TTL_DAYS,
@@ -901,6 +904,16 @@ class AiInterviewSettingView(MiminetAdminModelView):
         return redirect(url_for(".index_view"))
 
 
+class AiInterviewAccessCodeCreateForm(Form):
+    label = StringField("Комментарий")
+    max_attempts_per_user = IntegerField(
+        "Количество попыток для каждого студента",
+        default=1,
+        validators=[InputRequired(), NumberRange(min=1)],
+    )
+    submit = SubmitField("Сгенерировать код")
+
+
 class AiInterviewAccessCodeView(MiminetAdminModelView):
     can_create = True
     can_delete = False
@@ -909,6 +922,7 @@ class AiInterviewAccessCodeView(MiminetAdminModelView):
     column_list = (
         "code",
         "label",
+        "max_attempts_per_user",
         "is_active",
         "expires_at",
         "created_on",
@@ -917,6 +931,7 @@ class AiInterviewAccessCodeView(MiminetAdminModelView):
     column_labels = {
         "code": "Код",
         "label": "Комментарий",
+        "max_attempts_per_user": "Попыток на студента",
         "is_active": "Активен",
         "expires_at": "Действует до",
         "created_on": "Создан",
@@ -924,9 +939,15 @@ class AiInterviewAccessCodeView(MiminetAdminModelView):
     }
     form_columns = (
         "label",
+        "max_attempts_per_user",
         "is_active",
         "expires_at",
     )
+    form_args = {
+        "max_attempts_per_user": {
+            "validators": [InputRequired(), NumberRange(min=1)],
+        },
+    }
 
     @staticmethod
     def actions_formatter(view, context, model, name):
@@ -958,16 +979,22 @@ class AiInterviewAccessCodeView(MiminetAdminModelView):
         self._template_args["_gettext"] = self.list_gettext
         return super().index_view()
 
-    @expose("/new/", methods=("GET",))
+    @expose("/new/", methods=("GET", "POST"))
     def create_view(self):
-        code, access_code = create_access_code(
-            days_valid=ACCESS_CODE_TTL_DAYS,
-        )
-        flash(
-            f"Код доступа: {code}. Он действует до {access_code.expires_at:%d.%m.%Y %H:%M}.",
-            "success",
-        )
-        return redirect(url_for(".index_view"))
+        form = AiInterviewAccessCodeCreateForm(request.form)
+        if request.method == "POST" and form.validate():
+            code, access_code = create_access_code(
+                label=form.label.data,
+                days_valid=ACCESS_CODE_TTL_DAYS,
+                max_attempts_per_user=form.max_attempts_per_user.data,
+            )
+            flash(
+                f"Код доступа: {code}. Он действует до "
+                f"{access_code.expires_at:%d.%m.%Y %H:%M}.",
+                "success",
+            )
+            return redirect(url_for(".index_view"))
+        return self.render("admin/ai_access_code_create.html", form=form)
 
     @expose("/delete/<int:code_id>")
     def delete_code_view(self, code_id):

@@ -3,6 +3,7 @@ from ai_interview.question_bank import choose_question
 
 
 PAIRS_PER_TOPIC = 2
+BANK_QUESTIONS_PER_TOPIC = 4
 
 
 def build_topic_schedule(topic_keys):
@@ -12,6 +13,10 @@ def build_topic_schedule(topic_keys):
 
 def pair_count_for_topics(topic_keys):
     return len(build_topic_schedule(topic_keys)) * PAIRS_PER_TOPIC
+
+
+def bank_question_count_for_topics(topic_keys):
+    return len(build_topic_schedule(topic_keys)) * BANK_QUESTIONS_PER_TOPIC
 
 
 def topic_for_pair(topic_keys, pair_position):
@@ -61,3 +66,28 @@ def build_followup_focus(main_turn, reference_answer):
 def choose_main_question(topic_key, pair_position, rng=None, excluded_ids=None):
     question = choose_question(topic_key, rng=rng, excluded_ids=excluded_ids)
     return question, build_main_focus(question, pair_position)
+
+
+def topic_for_bank_question(topic_keys, question_position):
+    schedule = build_topic_schedule(topic_keys)
+    topic_index = (question_position - 1) // BANK_QUESTIONS_PER_TOPIC
+    return schedule[topic_index]
+
+
+def build_bank_focus(question, question_position):
+    topic_position = (question_position - 1) // BANK_QUESTIONS_PER_TOPIC + 1
+    topic_question_position = (question_position - 1) % BANK_QUESTIONS_PER_TOPIC + 1
+    return {
+        "flow_type": "bank",
+        "question_position": question_position,
+        "topic_position": topic_position,
+        "topic_question_position": topic_question_position,
+        "source_question_id": question["id"],
+        "reference_answer": question["reference_answer"],
+        "difficulty": "advanced" if topic_question_position >= 3 else "mechanism",
+    }
+
+
+def choose_bank_question(topic_key, question_position, rng=None, excluded_ids=None):
+    question = choose_question(topic_key, rng=rng, excluded_ids=excluded_ids)
+    return question, build_bank_focus(question, question_position)

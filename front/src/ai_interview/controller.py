@@ -61,6 +61,7 @@ def start_interview_endpoint():
                 current_user,
                 payload.get("topics", []),
                 payload.get("access_code"),
+                payload.get("question_mode"),
             )
         )
     except (InterviewError, ProviderNotConfigured) as error:

@@ -1,3 +1,4 @@
+from datetime import timedelta
 from types import SimpleNamespace
 
 import pytest
@@ -45,6 +46,7 @@ def make_turn(flow_type="main", position=1, pair_position=1, answer=None):
         status="active",
         created_on=access.now_utc(),
         selected_topics=["ethernet_l2"],
+        question_mode="adaptive",
         turns=[turn],
         final_result=None,
     )
@@ -83,7 +85,7 @@ def make_provider(mocker, payload):
 
 
 def test_question_bank_covers_every_topic():
-    assert all(len(questions_for_topic(topic["key"])) >= 2 for topic in public_topics())
+    assert all(len(questions_for_topic(topic["key"])) >= 4 for topic in public_topics())
 
 
 def test_topic_schedule_follows_catalog_order():
@@ -104,6 +106,21 @@ def test_choose_main_question_excludes_already_used_question():
     )
 
     assert question["id"] == expected_question["id"]
+
+
+def test_choose_bank_question_excludes_already_used_question():
+    questions = questions_for_topic("ethernet_l2")
+    expected_question = questions[-1]
+
+    question, focus = planner.choose_bank_question(
+        "ethernet_l2",
+        4,
+        excluded_ids={item["id"] for item in questions[:-1]},
+    )
+
+    assert question["id"] == expected_question["id"]
+    assert focus["flow_type"] == "bank"
+    assert focus["topic_question_position"] == 4
 
 
 @pytest.mark.parametrize(
@@ -134,18 +151,25 @@ def test_grade_normalization_caps_critical_error():
 
 
 def test_start_creates_bank_question_without_llm_completion(mocker):
-    access_code = AiInterviewAccessCode(id=11)
+    access_code = AiInterviewAccessCode(
+        id=11,
+        is_active=True,
+        max_attempts_per_user=1,
+    )
     provider = SimpleNamespace(name="mock")
     mocker.patch("ai_interview.engine.find_valid_access_code", return_value=access_code)
     mocker.patch("ai_interview.engine._session_for_access_code", return_value=None)
     mocker.patch("ai_interview.engine._latest_incomplete_session", return_value=None)
+    mocker.patch("ai_interview.engine._lock_access_code", return_value=access_code)
+    mocker.patch("ai_interview.engine._attempt_count", return_value=0)
     mocker.patch("ai_interview.engine.get_provider", return_value=provider)
-    mocker.patch("ai_interview.engine.prune_interview_history")
     mocker.patch("ai_interview.state.get_interview_history", return_value=[])
     add = mocker.patch("ai_interview.engine.db.session.add")
     mocker.patch("ai_interview.engine.db.session.commit")
 
-    state = engine.start_interview(SimpleNamespace(id=17), ["ethernet_l2"], "code")
+    state = engine.start_interview(
+        SimpleNamespace(id=17), ["ethernet_l2"], "code", "adaptive"
+    )
 
     assert state["status"] == "active"
     assert state["current_turn"]["flow_type"] == "main"
@@ -153,6 +177,53 @@ def test_start_creates_bank_question_without_llm_completion(mocker):
         getattr(item, "question", None)
         for item in [call.args[0] for call in add.call_args_list]
     )
+
+
+def test_start_uses_bank_only_mode_selected_by_student(mocker):
+    access_code = AiInterviewAccessCode(
+        id=11,
+        is_active=True,
+        max_attempts_per_user=3,
+    )
+    provider = SimpleNamespace(name="mock")
+    mocker.patch("ai_interview.engine.find_valid_access_code", return_value=access_code)
+    mocker.patch("ai_interview.engine._session_for_access_code", return_value=None)
+    mocker.patch("ai_interview.engine._latest_incomplete_session", return_value=None)
+    mocker.patch("ai_interview.engine._lock_access_code", return_value=access_code)
+    mocker.patch("ai_interview.engine._attempt_count", return_value=1)
+    mocker.patch("ai_interview.engine.get_provider", return_value=provider)
+    mocker.patch("ai_interview.state.get_interview_history", return_value=[])
+    add = mocker.patch("ai_interview.engine.db.session.add")
+    mocker.patch("ai_interview.engine.db.session.commit")
+
+    result = engine.start_interview(
+        SimpleNamespace(id=17), ["ethernet_l2"], "code", "bank_only"
+    )
+
+    assert result["question_mode"] == "bank_only"
+    assert result["question_count"] == 4
+    assert result["current_turn"]["flow_type"] == "bank"
+    session = next(
+        call.args[0]
+        for call in add.call_args_list
+        if getattr(call.args[0], "selected_topics", None)
+    )
+    assert session.attempt_number == 2
+
+
+def test_start_rejects_unknown_question_mode(mocker):
+    access_code = AiInterviewAccessCode(id=11)
+    mocker.patch("ai_interview.engine.find_valid_access_code", return_value=access_code)
+    mocker.patch("ai_interview.engine._session_for_access_code", return_value=None)
+    mocker.patch("ai_interview.engine._latest_incomplete_session", return_value=None)
+    provider_factory = mocker.patch("ai_interview.engine.get_provider")
+
+    with pytest.raises(InterviewError, match="режим"):
+        engine.start_interview(
+            SimpleNamespace(id=17), ["ethernet_l2"], "code", "unknown"
+        )
+
+    provider_factory.assert_not_called()
 
 
 def test_main_answer_creates_followup_with_one_llm_call(mocker):
@@ -177,6 +248,44 @@ def test_main_answer_creates_followup_with_one_llm_call(mocker):
     engine.AiInterviewTurn.assert_called_once()
     assert engine.AiInterviewTurn.call_args.kwargs["focus"]["flow_type"] == "followup"
     assert engine.AiInterviewTurn.call_args.kwargs["position"] == 2
+
+
+def test_bank_answer_creates_next_bank_question_without_generated_followup(mocker):
+    turn = make_turn()
+    turn.focus = {
+        **turn.focus,
+        "flow_type": "bank",
+        "question_position": 1,
+        "topic_question_position": 1,
+    }
+    turn.session.question_mode = "bank_only"
+    provider = make_provider(mocker, evaluation_payload())
+    next_turn = SimpleNamespace()
+    mocker.patch("ai_interview.engine._new_bank_turn", return_value=next_turn)
+    add = mocker.patch("ai_interview.engine.db.session.add")
+
+    engine._submit_bank_answer(turn.session, turn, provider, "Его отбросят.")
+
+    assert provider.complete_json.call_args.args[-1] == EVALUATION_SCHEMA
+    engine._new_bank_turn.assert_called_once_with(turn.session, "ethernet_l2", 2)
+    add.assert_called_once_with(next_turn)
+
+
+def test_last_bank_answer_finalizes_session(mocker):
+    turn = make_turn(position=4)
+    turn.focus = {
+        **turn.focus,
+        "flow_type": "bank",
+        "question_position": 4,
+        "topic_question_position": 4,
+    }
+    turn.session.question_mode = "bank_only"
+    provider = make_provider(mocker, evaluation_payload(final_result_payload()))
+
+    engine._submit_bank_answer(turn.session, turn, provider, "FCS не совпадает.")
+
+    assert turn.session.status == "completed"
+    assert turn.session.final_result["grade"] in {4, 5}
 
 
 def test_last_followup_finalizes_session(mocker):
@@ -270,42 +379,59 @@ def test_delete_access_code_detaches_sessions_before_delete(mocker):
     delete.assert_called_once_with(access_code)
 
 
-def test_used_access_code_does_not_create_session_or_call_provider(mocker):
-    access_code = AiInterviewAccessCode(id=11, is_used=True)
+def test_exhausted_access_code_does_not_create_session_or_call_provider(mocker):
+    access_code = AiInterviewAccessCode(
+        id=11,
+        is_active=True,
+        max_attempts_per_user=2,
+    )
     mocker.patch("ai_interview.engine.find_valid_access_code", return_value=access_code)
     mocker.patch("ai_interview.engine._session_for_access_code", return_value=None)
+    mocker.patch("ai_interview.engine._latest_incomplete_session", return_value=None)
+    mocker.patch("ai_interview.engine._lock_access_code", return_value=access_code)
+    mocker.patch("ai_interview.engine._attempt_count", return_value=2)
     mocker.patch("ai_interview.state.get_interview_history", return_value=[])
     provider_factory = mocker.patch("ai_interview.engine.get_provider")
 
-    result = engine.start_interview(SimpleNamespace(id=17), ["ethernet_l2"], "code")
+    result = engine.start_interview(
+        SimpleNamespace(id=17), ["ethernet_l2"], "code", "adaptive"
+    )
 
-    assert result["notice"]["code"] == "access_code_used"
+    assert result["notice"]["code"] == "access_code_attempts_exhausted"
     provider_factory.assert_not_called()
 
 
-@pytest.mark.parametrize(
-    ("statuses", "deleted_ids"),
-    [
-        (["completed"] * 12, [10, 11]),
-        (["completed"] * 10 + ["active"], []),
-    ],
-)
-def test_fifo_history_prunes_only_old_completed_sessions(mocker, statuses, deleted_ids):
-    sessions = [
-        SimpleNamespace(id=index, status=status)
-        for index, status in enumerate(statuses)
-    ]
+def test_attempt_count_is_scoped_to_user_and_access_code(mocker):
     query = mocker.Mock()
     mocker.patch(
-        "ai_interview.state.AiInterviewSession",
-        SimpleNamespace(query=query, created_on=mocker.Mock(), id=mocker.Mock()),
+        "ai_interview.engine.AiInterviewSession",
+        SimpleNamespace(query=query),
     )
-    query.filter_by.return_value.order_by.return_value.all.return_value = sessions
-    delete = mocker.patch("ai_interview.state.db.session.delete")
+    query.filter_by.return_value.count.return_value = 3
 
-    state.prune_interview_history(user_id=17)
+    result = engine._attempt_count(SimpleNamespace(id=17), SimpleNamespace(id=11))
 
-    assert [call.args[0].id for call in delete.call_args_list] == deleted_ids
+    assert result == 3
+    query.filter_by.assert_called_once_with(user_id=17, access_code_id=11)
+
+
+def test_history_returns_all_sessions_newest_first(mocker):
+    created_on = access.now_utc()
+    sessions = [
+        SimpleNamespace(
+            id=index, status="completed", created_on=created_on + timedelta(days=index)
+        )
+        for index in range(12)
+    ]
+    mocker.patch("ai_interview.state._owned_sessions", return_value=sessions)
+    mocker.patch(
+        "ai_interview.state._session_history_item",
+        side_effect=lambda session: {"id": session.id},
+    )
+
+    history = state.get_interview_history(SimpleNamespace(id=17))
+
+    assert [item["id"] for item in history] == list(reversed(range(12)))
 
 
 def test_admin_provider_status_escapes_external_message():

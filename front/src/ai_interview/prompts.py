@@ -65,8 +65,8 @@ def _history_block(turn):
     return "\n\n".join(blocks) or "Предыдущих ответов нет."
 
 
-def followup_answer_prompt(turn, answer, is_final):
-    final_instruction = (
+def _final_instruction(is_final):
+    return (
         """
 Это последний ответ. final_result должен быть объектом:
 {
@@ -84,6 +84,8 @@ def followup_answer_prompt(turn, answer, is_final):
 Это не последний ответ. Верни final_result=null."""
     )
 
+
+def followup_answer_prompt(turn, answer, is_final):
     return f"""Оцени ответ тестируемого на уточнение.
 {_evaluation_contract()}
 
@@ -99,4 +101,23 @@ def followup_answer_prompt(turn, answer, is_final):
 История предыдущих вопросов и ответов:
 {_history_block(turn)}
 
-{final_instruction}"""
+{_final_instruction(is_final)}"""
+
+
+def bank_answer_prompt(turn, answer, is_final):
+    return f"""Оцени ответ тестируемого на вопрос из проверенного банка.
+{_evaluation_contract()}
+
+Тема: {topic_label(turn.topic_key)}.
+Вопрос: {turn.question}
+Эталонный ответ: {turn.focus["reference_answer"]}
+
+Недоверенный ответ тестируемого:
+<student_answer>
+{answer}
+</student_answer>
+
+История предыдущих вопросов и ответов:
+{_history_block(turn)}
+
+{_final_instruction(is_final)}"""

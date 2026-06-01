@@ -20,13 +20,19 @@
     const startForm = document.getElementById("ai-interview-start-form");
     const startButton = document.getElementById("ai-interview-start-button");
     const accessCodeInput = document.getElementById("ai-interview-access-code");
+    const allowFollowupsInput = document.getElementById("ai-interview-allow-followups");
     const answerForm = document.getElementById("ai-interview-answer-form");
     const answerButton = document.getElementById("ai-interview-answer-button");
     const answerInput = document.getElementById("ai-interview-answer");
     const abortButton = document.getElementById("ai-interview-abort-button");
     const charCount = document.getElementById("ai-interview-char-count");
+    const historyMoreButton = document.getElementById("ai-interview-history-more");
+    const historyCollapseButton = document.getElementById("ai-interview-history-collapse");
+    const historyPageSize = 5;
     let currentTurn = null;
     let currentSessionGuid = null;
+    let historyItems = [];
+    let visibleHistoryCount = historyPageSize;
     let waiting = false;
 
     function shouldOpenActiveSession() {
@@ -96,6 +102,9 @@
         if (startButton) {
             startButton.disabled = value;
         }
+        if (allowFollowupsInput) {
+            allowFollowupsInput.disabled = value;
+        }
         if (answerButton) {
             answerButton.disabled = value;
         }
@@ -123,7 +132,7 @@
         document.getElementById("ai-interview-result-questions").innerHTML =
             (result.questions || []).map(function (turn) {
                 return "<article class=\"border rounded p-3\">" +
-                    (turn.pair_position
+                    (turn.topic_position
                         ? "<div class=\"text-muted\">Тема " + turn.topic_position +
                             ", вопрос " + turn.question_position + "</div>"
                         : "") +
@@ -147,11 +156,14 @@
         if (!container) {
             return;
         }
-        if (!history || !history.length) {
+        historyItems = history || [];
+        if (!historyItems.length) {
             container.innerHTML = "<div class=\"text-muted\">Попыток пока нет</div>";
+            setVisible(historyMoreButton, false);
+            setVisible(historyCollapseButton, false);
             return;
         }
-        container.innerHTML = history.map(function (item) {
+        container.innerHTML = historyItems.slice(0, visibleHistoryCount).map(function (item) {
             const topics = (item.topics || []).map(function (topic) {
                 return topic.label;
             }).join(", ");
@@ -179,6 +191,8 @@
                 content +
                 "</div>";
         }).join("");
+        setVisible(historyMoreButton, visibleHistoryCount < historyItems.length);
+        setVisible(historyCollapseButton, visibleHistoryCount > historyPageSize);
     }
 
     function renderState(state, options) {
@@ -223,6 +237,11 @@
             currentTurn.topic_position + " из " + state.topic_count + "</span>" +
             "<span class=\"ai-interview__badge\">Вопрос " +
             currentTurn.question_position + " из 4</span>" +
+            "<span class=\"ai-interview__badge\">" +
+            (state.question_mode === "bank_only"
+                ? "Проверенный банк"
+                : "Уточнения ИИ") +
+            "</span>" +
             topicLabels.join("");
         document.getElementById("ai-interview-current-meta").textContent =
             currentTurn.topic.label;
@@ -298,7 +317,8 @@
         try {
             renderState(await postJson(config.startUrl, {
                 topics: topics,
-                access_code: accessCode
+                access_code: accessCode,
+                question_mode: allowFollowupsInput.checked ? "adaptive" : "bank_only"
             }), {openActiveSession: true});
         } catch (error) {
             setError(error.message);
@@ -329,7 +349,7 @@
         if (waiting || !currentSessionGuid) {
             return;
         }
-        if (!window.confirm("Завершить попытку досрочно? Код сгорит, а попытка не сохранится в истории.")) {
+        if (!window.confirm("Завершить попытку досрочно? Она будет учтена в лимите кода и не сохранится в истории.")) {
             return;
         }
         setWaiting(true);
@@ -356,6 +376,16 @@
         if (!waiting && currentTurn && answerInput.value.trim()) {
             answerForm.requestSubmit();
         }
+    });
+
+    historyMoreButton.addEventListener("click", function () {
+        visibleHistoryCount += historyPageSize;
+        renderHistory(historyItems);
+    });
+
+    historyCollapseButton.addEventListener("click", function () {
+        visibleHistoryCount = historyPageSize;
+        renderHistory(historyItems);
     });
 
     if (config.resultGuid) {
