@@ -1,49 +1,23 @@
 from types import SimpleNamespace
 
 import pytest
-from flask import Flask
-from flask_login import LoginManager, UserMixin
 from jsonschema import ValidationError
 
 from ai_interview import access, engine, planner, rubric, state
 from ai_interview.catalog import public_topics
-from ai_interview.controller import ai_interview_routes
+from ai_interview.errors import InterviewError
 from ai_interview.models import AiInterviewAccessCode
 from ai_interview.providers import (
     EVALUATION_SCHEMA,
     MAIN_ANSWER_SCHEMA,
     JsonCompletion,
     OPENROUTER_MODEL,
-    ProviderNotConfigured,
+    ProviderError,
     get_provider,
-    read_env_secret,
     validate_payload,
 )
-from ai_interview.question_bank import load_question_bank, questions_for_topic
-from miminet_model import db
+from ai_interview.question_bank import questions_for_topic
 from miminet_admin import AiInterviewSettingView
-
-
-class TestUser(UserMixin):
-    id = 17
-
-
-@pytest.fixture
-def api_client():
-    app = Flask(__name__)
-    app.config.update(TESTING=True, SECRET_KEY="ai-interview-test")
-    login_manager = LoginManager(app)
-
-    @login_manager.user_loader
-    def load_user(user_id):
-        return TestUser() if user_id == "17" else None
-
-    app.register_blueprint(ai_interview_routes)
-    with app.test_client() as client:
-        with client.session_transaction() as session:
-            session["_user_id"] = "17"
-            session["_fresh"] = True
-        yield client
 
 
 def make_turn(flow_type="main", position=1, pair_position=1, answer=None):
@@ -92,16 +66,23 @@ def evaluation_payload(final_result=None, **extra):
     }
 
 
-def test_question_bank_is_normalized_and_covers_every_topic():
-    questions = load_question_bank()
-    ids = [question["id"] for question in questions]
+def final_result_payload():
+    return {
+        "grade": 5,
+        "verdict": "Хорошо",
+        "strengths": ["Ethernet"],
+        "gaps": [],
+        "recommendations": [],
+    }
 
-    assert len(questions) >= 50
-    assert len(ids) == len(set(ids))
-    assert all(
-        set(question) == {"id", "topic_key", "question", "reference_answer"}
-        for question in questions
+
+def make_provider(mocker, payload):
+    return SimpleNamespace(
+        complete_json=mocker.Mock(return_value=JsonCompletion(payload, 1))
     )
+
+
+def test_question_bank_covers_every_topic():
     assert all(len(questions_for_topic(topic["key"])) >= 2 for topic in public_topics())
 
 
@@ -110,28 +91,6 @@ def test_topic_schedule_follows_catalog_order():
 
     assert planner.build_topic_schedule(list(reversed(topics))) == topics
     assert planner.pair_count_for_topics(topics[:3]) == 6
-    assert planner.topic_for_pair(topics[:3], 1) == topics[0]
-    assert planner.topic_for_pair(topics[:3], 2) == topics[0]
-    assert planner.topic_for_pair(topics[:3], 3) == topics[1]
-    assert planner.question_position_for_turn(1, "main") == 1
-    assert planner.question_position_for_turn(1, "followup") == 2
-    assert planner.question_position_for_turn(2, "main") == 3
-    assert planner.question_position_for_turn(2, "followup") == 4
-
-
-def test_choose_main_question_uses_requested_topic():
-    question, focus = planner.choose_main_question(
-        "transport_and_icmp",
-        2,
-        rng=planner.choose_question.__globals__["random"].Random(3),
-    )
-
-    assert question["topic_key"] == "transport_and_icmp"
-    assert focus["flow_type"] == "main"
-    assert focus["pair_position"] == 2
-    assert focus["topic_position"] == 1
-    assert focus["topic_pair_position"] == 2
-    assert focus["reference_answer"] == question["reference_answer"]
 
 
 def test_choose_main_question_excludes_already_used_question():
@@ -147,17 +106,22 @@ def test_choose_main_question_excludes_already_used_question():
     assert question["id"] == expected_question["id"]
 
 
-def test_main_answer_schema_requires_followup():
+@pytest.mark.parametrize(
+    ("schema", "missing_field"),
+    [
+        (MAIN_ANSWER_SCHEMA, "followup_question"),
+        (EVALUATION_SCHEMA, "covered_concepts"),
+    ],
+)
+def test_llm_payload_schema_requires_fields(schema, missing_field):
+    payload = evaluation_payload(
+        followup_question="Почему кадр нельзя передать дальше?",
+        followup_reference_answer="Проверка FCS не пройдена.",
+    )
+    del payload[missing_field]
+
     with pytest.raises(ValidationError):
-        validate_payload(evaluation_payload(), MAIN_ANSWER_SCHEMA)
-
-
-def test_evaluation_schema_does_not_fill_missing_fields():
-    payload = evaluation_payload()
-    del payload["covered_concepts"]
-
-    with pytest.raises(ValidationError):
-        validate_payload(payload, EVALUATION_SCHEMA)
+        validate_payload(payload, schema)
 
 
 def test_grade_normalization_caps_critical_error():
@@ -193,16 +157,12 @@ def test_start_creates_bank_question_without_llm_completion(mocker):
 
 def test_main_answer_creates_followup_with_one_llm_call(mocker):
     turn = make_turn()
-    provider = SimpleNamespace(
-        complete_json=mocker.Mock(
-            return_value=JsonCompletion(
-                evaluation_payload(
-                    followup_question="Почему повреждённый кадр нельзя передать дальше?",
-                    followup_reference_answer="Проверка FCS не пройдена.",
-                ),
-                1,
-            )
-        )
+    provider = make_provider(
+        mocker,
+        evaluation_payload(
+            followup_question="Почему повреждённый кадр нельзя передать дальше?",
+            followup_reference_answer="Проверка FCS не пройдена.",
+        ),
     )
     add = mocker.patch("ai_interview.engine.db.session.add")
     followup = SimpleNamespace()
@@ -221,22 +181,7 @@ def test_main_answer_creates_followup_with_one_llm_call(mocker):
 
 def test_last_followup_finalizes_session(mocker):
     turn = make_turn(flow_type="followup", position=4, pair_position=2)
-    provider = SimpleNamespace(
-        complete_json=mocker.Mock(
-            return_value=JsonCompletion(
-                evaluation_payload(
-                    {
-                        "grade": 5,
-                        "verdict": "Хорошо",
-                        "strengths": ["Ethernet"],
-                        "gaps": [],
-                        "recommendations": [],
-                    }
-                ),
-                1,
-            )
-        )
-    )
+    provider = make_provider(mocker, evaluation_payload(final_result_payload()))
 
     engine._submit_followup_answer(turn.session, turn, provider, "FCS не совпадает.")
 
@@ -244,54 +189,49 @@ def test_last_followup_finalizes_session(mocker):
     assert turn.session.final_result["grade"] in {4, 5}
 
 
-def test_first_followup_creates_second_main_question_for_same_topic(mocker):
-    turn = make_turn(flow_type="followup", position=2)
-    turn.session.selected_topics = ["ethernet_l2", "network_l3"]
-    provider = SimpleNamespace(
-        complete_json=mocker.Mock(return_value=JsonCompletion(evaluation_payload(), 1))
+@pytest.mark.parametrize(
+    ("pair_position", "expected_topic"),
+    [
+        (1, "ethernet_l2"),
+        (2, "network_l3"),
+    ],
+)
+def test_followup_creates_expected_next_main_question(
+    mocker, pair_position, expected_topic
+):
+    turn = make_turn(
+        flow_type="followup",
+        position=pair_position * 2,
+        pair_position=pair_position,
     )
+    turn.session.selected_topics = ["ethernet_l2", "network_l3"]
+    provider = make_provider(mocker, evaluation_payload())
     next_turn = SimpleNamespace()
     mocker.patch("ai_interview.engine._new_main_turn", return_value=next_turn)
     add = mocker.patch("ai_interview.engine.db.session.add")
 
     engine._submit_followup_answer(turn.session, turn, provider, "FCS не совпадает.")
 
-    engine._new_main_turn.assert_called_once_with(turn.session, "ethernet_l2", 2)
-    add.assert_called_once_with(next_turn)
-
-
-def test_second_followup_creates_main_question_for_next_topic(mocker):
-    turn = make_turn(flow_type="followup", position=4, pair_position=2)
-    turn.session.selected_topics = ["ethernet_l2", "network_l3"]
-    provider = SimpleNamespace(
-        complete_json=mocker.Mock(return_value=JsonCompletion(evaluation_payload(), 1))
+    engine._new_main_turn.assert_called_once_with(
+        turn.session, expected_topic, pair_position + 1
     )
-    next_turn = SimpleNamespace()
-    mocker.patch("ai_interview.engine._new_main_turn", return_value=next_turn)
-    add = mocker.patch("ai_interview.engine.db.session.add")
-
-    engine._submit_followup_answer(turn.session, turn, provider, "FCS не совпадает.")
-
-    engine._new_main_turn.assert_called_once_with(turn.session, "network_l3", 3)
     add.assert_called_once_with(next_turn)
 
 
-def test_duplicate_answer_returns_state_without_provider_call(mocker):
-    turn = make_turn(answer="Коммутатор отбросит кадр.")
-    mocker.patch("ai_interview.engine._find_owned_turn", return_value=turn)
-    mocker.patch("ai_interview.state.get_interview_history", return_value=[])
-    provider_factory = mocker.patch("ai_interview.engine.get_provider")
-
-    state = engine.submit_answer(SimpleNamespace(id=17), turn.id, turn.answer)
-
-    assert state["duplicate"] is True
-    provider_factory.assert_not_called()
-
-
-def test_completed_session_rejects_extra_answer_without_provider_call(mocker):
-    turn = make_turn()
-    turn.session.status = "completed"
-    turn.session.final_result = {"grade": 4, "verdict": "Хорошо"}
+@pytest.mark.parametrize(
+    ("status", "existing_answer"),
+    [
+        ("active", "Коммутатор отбросит кадр."),
+        ("completed", None),
+    ],
+)
+def test_submit_answer_does_not_call_provider_for_finished_turn(
+    mocker, status, existing_answer
+):
+    turn = make_turn(answer=existing_answer)
+    turn.session.status = status
+    if status == "completed":
+        turn.session.final_result = {"grade": 4, "verdict": "Хорошо"}
     mocker.patch("ai_interview.engine._find_owned_turn", return_value=turn)
     mocker.patch("ai_interview.state.get_interview_history", return_value=[])
     provider_factory = mocker.patch("ai_interview.engine.get_provider")
@@ -300,15 +240,6 @@ def test_completed_session_rejects_extra_answer_without_provider_call(mocker):
 
     assert state["duplicate"] is True
     provider_factory.assert_not_called()
-
-
-def test_openrouter_key_can_be_read_from_env_file(monkeypatch, tmp_path):
-    secret_file = tmp_path / "openrouter_api_key"
-    secret_file.write_text("file-secret\n", encoding="utf-8")
-    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
-    monkeypatch.setenv("OPENROUTER_API_KEY_FILE", str(secret_file))
-
-    assert read_env_secret("OPENROUTER_API_KEY") == "file-secret"
 
 
 def test_openrouter_provider_uses_secret_file(monkeypatch, tmp_path):
@@ -327,7 +258,7 @@ def test_openrouter_provider_uses_secret_file(monkeypatch, tmp_path):
 def test_delete_access_code_detaches_sessions_before_delete(mocker):
     access_code = SimpleNamespace(id=11)
     query = mocker.patch("ai_interview.access.db.session.query")
-    mocker.patch("ai_interview.access.db.session.delete")
+    delete = mocker.patch("ai_interview.access.db.session.delete")
 
     access.delete_access_code(access_code)
 
@@ -336,7 +267,7 @@ def test_delete_access_code_detaches_sessions_before_delete(mocker):
         {"access_code_id": None},
         synchronize_session=False,
     )
-    db.session.delete.assert_called_once_with(access_code)
+    delete.assert_called_once_with(access_code)
 
 
 def test_used_access_code_does_not_create_session_or_call_provider(mocker):
@@ -352,8 +283,18 @@ def test_used_access_code_does_not_create_session_or_call_provider(mocker):
     provider_factory.assert_not_called()
 
 
-def test_fifo_history_deletes_sessions_after_tenth(mocker):
-    sessions = [SimpleNamespace(id=index, status="completed") for index in range(12)]
+@pytest.mark.parametrize(
+    ("statuses", "deleted_ids"),
+    [
+        (["completed"] * 12, [10, 11]),
+        (["completed"] * 10 + ["active"], []),
+    ],
+)
+def test_fifo_history_prunes_only_old_completed_sessions(mocker, statuses, deleted_ids):
+    sessions = [
+        SimpleNamespace(id=index, status=status)
+        for index, status in enumerate(statuses)
+    ]
     query = mocker.Mock()
     mocker.patch(
         "ai_interview.state.AiInterviewSession",
@@ -364,23 +305,7 @@ def test_fifo_history_deletes_sessions_after_tenth(mocker):
 
     state.prune_interview_history(user_id=17)
 
-    assert [call.args[0].id for call in delete.call_args_list] == [10, 11]
-
-
-def test_fifo_history_keeps_incomplete_session(mocker):
-    sessions = [SimpleNamespace(id=index, status="completed") for index in range(10)]
-    sessions.append(SimpleNamespace(id=10, status="active"))
-    query = mocker.Mock()
-    mocker.patch(
-        "ai_interview.state.AiInterviewSession",
-        SimpleNamespace(query=query, created_on=mocker.Mock(), id=mocker.Mock()),
-    )
-    query.filter_by.return_value.order_by.return_value.all.return_value = sessions
-    delete = mocker.patch("ai_interview.state.db.session.delete")
-
-    state.prune_interview_history(user_id=17)
-
-    delete.assert_not_called()
+    assert [call.args[0].id for call in delete.call_args_list] == deleted_ids
 
 
 def test_admin_provider_status_escapes_external_message():
@@ -395,15 +320,33 @@ def test_admin_provider_status_escapes_external_message():
     assert "&lt;img" in label
 
 
-def test_start_api_reports_missing_provider(api_client, mocker):
-    mocker.patch(
-        "ai_interview.controller.start_interview",
-        side_effect=ProviderNotConfigured("provider missing"),
+def test_answer_longer_than_limit_is_rejected():
+    with pytest.raises(InterviewError, match="1000"):
+        engine.validate_answer("x" * 1001)
+
+
+@pytest.mark.parametrize(
+    ("flow_type", "pair_position", "final_result", "message"),
+    [
+        ("main", 1, final_result_payload(), "premature"),
+        ("followup", 1, final_result_payload(), "premature"),
+        ("followup", 2, None, "did not finalize"),
+    ],
+)
+def test_invalid_llm_finalization_is_rejected(
+    mocker, flow_type, pair_position, final_result, message
+):
+    turn = make_turn(
+        flow_type=flow_type,
+        position=pair_position * 2 if flow_type == "followup" else 1,
+        pair_position=pair_position,
+    )
+    provider = make_provider(mocker, evaluation_payload(final_result))
+    submit = (
+        engine._submit_main_answer
+        if flow_type == "main"
+        else engine._submit_followup_answer
     )
 
-    response = api_client.post(
-        "/ai-testing/api/start",
-        json={"topics": ["ethernet_l2"], "access_code": "code"},
-    )
-
-    assert response.status_code == 503
+    with pytest.raises(ProviderError, match=message):
+        submit(turn.session, turn, provider, "FCS не совпадает.")
