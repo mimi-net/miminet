@@ -54,6 +54,8 @@ def make_turn(flow_type="main", position=1, pair_position=1, answer=None):
         focus={
             "flow_type": flow_type,
             "pair_position": pair_position,
+            "topic_position": planner.topic_position_for_pair(pair_position),
+            "topic_pair_position": planner.topic_pair_position(pair_position),
             "source_question_id": "l2-4",
             "reference_answer": "Кадр отбрасывается.",
             "difficulty": "advanced" if flow_type == "followup" else "mechanism",
@@ -100,14 +102,21 @@ def test_question_bank_is_normalized_and_covers_every_topic():
         set(question) == {"id", "topic_key", "question", "reference_answer"}
         for question in questions
     )
-    assert all(questions_for_topic(topic["key"]) for topic in public_topics())
+    assert all(len(questions_for_topic(topic["key"])) >= 2 for topic in public_topics())
 
 
 def test_topic_schedule_follows_catalog_order():
     topics = [topic["key"] for topic in public_topics()]
 
     assert planner.build_topic_schedule(list(reversed(topics))) == topics
-    assert planner.pair_count_for_topics(topics[:3]) == 3
+    assert planner.pair_count_for_topics(topics[:3]) == 6
+    assert planner.topic_for_pair(topics[:3], 1) == topics[0]
+    assert planner.topic_for_pair(topics[:3], 2) == topics[0]
+    assert planner.topic_for_pair(topics[:3], 3) == topics[1]
+    assert planner.question_position_for_turn(1, "main") == 1
+    assert planner.question_position_for_turn(1, "followup") == 2
+    assert planner.question_position_for_turn(2, "main") == 3
+    assert planner.question_position_for_turn(2, "followup") == 4
 
 
 def test_choose_main_question_uses_requested_topic():
@@ -120,7 +129,22 @@ def test_choose_main_question_uses_requested_topic():
     assert question["topic_key"] == "transport_and_icmp"
     assert focus["flow_type"] == "main"
     assert focus["pair_position"] == 2
+    assert focus["topic_position"] == 1
+    assert focus["topic_pair_position"] == 2
     assert focus["reference_answer"] == question["reference_answer"]
+
+
+def test_choose_main_question_excludes_already_used_question():
+    questions = questions_for_topic("transport_and_icmp")
+    expected_question = questions[-1]
+
+    question, _ = planner.choose_main_question(
+        "transport_and_icmp",
+        2,
+        excluded_ids={item["id"] for item in questions[:-1]},
+    )
+
+    assert question["id"] == expected_question["id"]
 
 
 def test_main_answer_schema_requires_followup():
@@ -196,7 +220,7 @@ def test_main_answer_creates_followup_with_one_llm_call(mocker):
 
 
 def test_last_followup_finalizes_session(mocker):
-    turn = make_turn(flow_type="followup", position=2)
+    turn = make_turn(flow_type="followup", position=4, pair_position=2)
     provider = SimpleNamespace(
         complete_json=mocker.Mock(
             return_value=JsonCompletion(
@@ -220,7 +244,7 @@ def test_last_followup_finalizes_session(mocker):
     assert turn.session.final_result["grade"] in {4, 5}
 
 
-def test_nonfinal_followup_creates_main_question_for_next_topic(mocker):
+def test_first_followup_creates_second_main_question_for_same_topic(mocker):
     turn = make_turn(flow_type="followup", position=2)
     turn.session.selected_topics = ["ethernet_l2", "network_l3"]
     provider = SimpleNamespace(
@@ -232,7 +256,23 @@ def test_nonfinal_followup_creates_main_question_for_next_topic(mocker):
 
     engine._submit_followup_answer(turn.session, turn, provider, "FCS не совпадает.")
 
-    engine._new_main_turn.assert_called_once_with(turn.session, "network_l3", 2)
+    engine._new_main_turn.assert_called_once_with(turn.session, "ethernet_l2", 2)
+    add.assert_called_once_with(next_turn)
+
+
+def test_second_followup_creates_main_question_for_next_topic(mocker):
+    turn = make_turn(flow_type="followup", position=4, pair_position=2)
+    turn.session.selected_topics = ["ethernet_l2", "network_l3"]
+    provider = SimpleNamespace(
+        complete_json=mocker.Mock(return_value=JsonCompletion(evaluation_payload(), 1))
+    )
+    next_turn = SimpleNamespace()
+    mocker.patch("ai_interview.engine._new_main_turn", return_value=next_turn)
+    add = mocker.patch("ai_interview.engine.db.session.add")
+
+    engine._submit_followup_answer(turn.session, turn, provider, "FCS не совпадает.")
+
+    engine._new_main_turn.assert_called_once_with(turn.session, "network_l3", 3)
     add.assert_called_once_with(next_turn)
 
 

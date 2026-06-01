@@ -10,6 +10,7 @@ from ai_interview.planner import (
     build_topic_schedule,
     choose_main_question,
     pair_count_for_topics,
+    topic_for_pair,
 )
 from ai_interview.prompts import (
     SYSTEM_PROMPT,
@@ -52,7 +53,14 @@ def get_interview_state(user):
 
 
 def _new_main_turn(session, topic_key, pair_position):
-    question, focus = choose_main_question(topic_key, pair_position)
+    used_question_ids = {
+        turn.focus.get("source_question_id")
+        for turn in session.turns
+        if turn.topic_key == topic_key and turn.focus.get("flow_type") == "main"
+    }
+    question, focus = choose_main_question(
+        topic_key, pair_position, excluded_ids=used_question_ids
+    )
     return AiInterviewTurn(
         session=session,
         position=(pair_position - 1) * 2 + 1,
@@ -180,7 +188,7 @@ def _submit_followup_answer(session, turn, provider, answer):
             session.turns, payload["final_result"]
         )
     else:
-        topic_key = session.selected_topics[pair_position]
+        topic_key = topic_for_pair(session.selected_topics, pair_position + 1)
         db.session.add(_new_main_turn(session, topic_key, pair_position + 1))
     return completion, prompt
 

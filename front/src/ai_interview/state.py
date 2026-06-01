@@ -1,7 +1,10 @@
 from ai_interview.access import now_utc
 from ai_interview.catalog import topic_label
 from ai_interview.models import AiInterviewSession
-from ai_interview.planner import pair_count_for_topics
+from ai_interview.planner import (
+    pair_count_for_topics,
+    question_position_for_turn,
+)
 from ai_interview.rubric import MAX_ANSWER_SCORE, score_summary
 from miminet_model import db
 
@@ -77,6 +80,11 @@ def _turn_payload(turn, include_answer=False):
         "position": turn.position,
         "flow_type": focus["flow_type"],
         "pair_position": focus["pair_position"],
+        "topic_position": focus["topic_position"],
+        "topic_pair_position": focus["topic_pair_position"],
+        "question_position": question_position_for_turn(
+            focus["pair_position"], focus["flow_type"]
+        ),
         "topic": {"key": turn.topic_key, "label": topic_label(turn.topic_key)},
         "question": turn.question,
         "feedback": turn.feedback,
@@ -100,13 +108,7 @@ def _result_payload(session):
 def _session_history_item(session):
     turns = sorted(session.turns, key=lambda turn: turn.position)
     pair_count = pair_count_for_topics(session.selected_topics)
-    answered_pairs = len(
-        [
-            turn
-            for turn in turns
-            if turn.focus["flow_type"] == "followup" and turn.answer is not None
-        ]
-    )
+    answered_questions = len([turn for turn in turns if turn.answer is not None])
     status_labels = {
         "active": "В процессе",
         "failed-recoverable": "Можно продолжить",
@@ -120,8 +122,8 @@ def _session_history_item(session):
         "status_label": status_labels.get(session.status, "Черновик"),
         "created_on": _format_datetime(session.created_on),
         "finished_at": _format_datetime(session.finished_at),
-        "answered_count": answered_pairs,
-        "question_count": pair_count,
+        "answered_count": answered_questions,
+        "question_count": pair_count * 2,
         "grade": result.get("grade"),
         "access_code_label": access_code.label if access_code is not None else None,
         "topics": [
@@ -156,6 +158,7 @@ def serialize_session(session, duplicate=False):
             for topic_key in session.selected_topics
         ],
         "pair_count": pair_count,
+        "topic_count": len(session.selected_topics),
         "current_turn": (
             _turn_payload(current_turn) if current_turn is not None else None
         ),

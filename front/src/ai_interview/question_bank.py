@@ -56,8 +56,13 @@ def questions_for_topic(topic_key):
     ]
 
 
-def choose_question(topic_key, rng=None):
-    questions = questions_for_topic(topic_key)
+def choose_question(topic_key, rng=None, excluded_ids=None):
+    excluded_ids = set(excluded_ids or [])
+    questions = [
+        question
+        for question in questions_for_topic(topic_key)
+        if question["id"] not in excluded_ids
+    ]
     if not questions:
         raise ValueError(f"В банке нет вопросов для темы {topic_key}.")
     return (rng or random.SystemRandom()).choice(questions)

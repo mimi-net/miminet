@@ -124,7 +124,8 @@
             (result.questions || []).map(function (turn) {
                 return "<article class=\"border rounded p-3\">" +
                     (turn.pair_position
-                        ? "<div class=\"text-muted\">Тема " + turn.pair_position + "</div>"
+                        ? "<div class=\"text-muted\">Тема " + turn.topic_position +
+                            ", вопрос " + turn.question_position + "</div>"
                         : "") +
                     "<h4 class=\"h6 mt-2\">" + escapeHtml(turn.question) +
                     " <span class=\"text-muted\">(" + turn.answer_score + " из " +
@@ -154,7 +155,7 @@
             const topics = (item.topics || []).map(function (topic) {
                 return topic.label;
             }).join(", ");
-            const questionText = item.answered_count + " из " + item.question_count + " тем";
+            const questionText = item.answered_count + " из " + item.question_count + " вопросов";
             const gradeText = item.grade ? "Оценка " + item.grade : "Без оценки";
             const content = "<div>" +
                     "<div class=\"fw-semibold\">" + escapeHtml(formatDate(item.finished_at || item.created_on)) + "</div>" +
@@ -219,7 +220,9 @@
             return "<span class=\"ai-interview__badge\">" + escapeHtml(topic.label) + "</span>";
         });
         meta.innerHTML = "<span class=\"ai-interview__badge\">Тема " +
-            currentTurn.pair_position + " из " + state.pair_count + "</span>" +
+            currentTurn.topic_position + " из " + state.topic_count + "</span>" +
+            "<span class=\"ai-interview__badge\">Вопрос " +
+            currentTurn.question_position + " из 4</span>" +
             topicLabels.join("");
         document.getElementById("ai-interview-current-meta").textContent =
             currentTurn.topic.label;
