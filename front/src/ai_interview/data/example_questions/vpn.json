@@ -2,7 +2,7 @@
   {
     "id": "vpn-1",
     "topic_key": "advanced_networking",
-    "question": "Можeт ли протокол IP быть инкапсулирован в IP ?",
+    "question": "Можeт ли протокол IP быть инкапсулирован в IP?",
     "reference_answer": "Да"
   },
   {

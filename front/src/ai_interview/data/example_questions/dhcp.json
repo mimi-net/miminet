@@ -50,7 +50,7 @@
   {
     "id": "dhcp-9",
     "topic_key": "advanced_networking",
-    "question": "Когда DHCP-клиeнт отправляeт сообщeниe DHCP DISCOVER, какой IP-адрeс источника устанвливаeтся?",
+    "question": "Когда DHCP-клиeнт отправляeт сообщeниe DHCP DISCOVER, какой IP-адрeс источника устанавливаeтся?",
     "reference_answer": "0.0.0.0"
   },
   {
