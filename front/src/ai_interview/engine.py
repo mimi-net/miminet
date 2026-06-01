@@ -207,7 +207,7 @@ def submit_answer(user, turn_id, answer):
             _submit_main_answer(session, turn, provider, answer)
         else:
             _submit_followup_answer(session, turn, provider, answer)
-    except ProviderError as error:
+    except ProviderError:
         session.status = "failed-recoverable"
         db.session.commit()
         raise

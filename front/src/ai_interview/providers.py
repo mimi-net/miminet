@@ -1,11 +1,13 @@
 import json
 import os
 from dataclasses import dataclass
+from typing import Any
+
 import requests
 from jsonschema import ValidationError, validate
 
 
-EVALUATION_SCHEMA = {
+EVALUATION_SCHEMA: dict[str, Any] = {
     "type": "object",
     "additionalProperties": False,
     "properties": {

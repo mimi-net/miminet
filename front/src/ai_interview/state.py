@@ -105,8 +105,7 @@ def _session_history_item(session):
         [
             turn
             for turn in turns
-            if turn.focus["flow_type"] == "followup"
-            and turn.answer is not None
+            if turn.focus["flow_type"] == "followup" and turn.answer is not None
         ]
     )
     status_labels = {

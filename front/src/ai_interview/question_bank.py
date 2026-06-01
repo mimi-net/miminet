@@ -12,9 +12,7 @@ def _validate_question(question, source):
     if not isinstance(question, dict) or set(question) != QUESTION_FIELDS:
         raise ValueError(f"Некорректная структура вопроса в {source}.")
 
-    normalized = {
-        key: str(question.get(key) or "").strip() for key in QUESTION_FIELDS
-    }
+    normalized = {key: str(question.get(key) or "").strip() for key in QUESTION_FIELDS}
     if not all(normalized.values()):
         raise ValueError(f"Пустое обязательное поле вопроса в {source}.")
     if normalized["topic_key"] not in topic_catalog():

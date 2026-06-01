@@ -95,7 +95,10 @@ def test_question_bank_is_normalized_and_covers_every_topic():
 
     assert len(questions) >= 50
     assert len(ids) == len(set(ids))
-    assert all(set(question) == {"id", "topic_key", "question", "reference_answer"} for question in questions)
+    assert all(
+        set(question) == {"id", "topic_key", "question", "reference_answer"}
+        for question in questions
+    )
     assert all(questions_for_topic(topic["key"]) for topic in public_topics())
 
 
@@ -108,7 +111,9 @@ def test_topic_schedule_follows_catalog_order():
 
 def test_choose_main_question_uses_requested_topic():
     question, focus = planner.choose_main_question(
-        "transport_and_icmp", 2, rng=planner.choose_question.__globals__["random"].Random(3)
+        "transport_and_icmp",
+        2,
+        rng=planner.choose_question.__globals__["random"].Random(3),
     )
 
     assert question["topic_key"] == "transport_and_icmp"
@@ -155,7 +160,10 @@ def test_start_creates_bank_question_without_llm_completion(mocker):
 
     assert state["status"] == "active"
     assert state["current_turn"]["flow_type"] == "main"
-    assert any(getattr(item, "question", None) for item in [call.args[0] for call in add.call_args_list])
+    assert any(
+        getattr(item, "question", None)
+        for item in [call.args[0] for call in add.call_args_list]
+    )
 
 
 def test_main_answer_creates_followup_with_one_llm_call(mocker):
@@ -175,7 +183,9 @@ def test_main_answer_creates_followup_with_one_llm_call(mocker):
     followup = SimpleNamespace()
     mocker.patch("ai_interview.engine.AiInterviewTurn", return_value=followup)
 
-    completion, _ = engine._submit_main_answer(turn.session, turn, provider, "Его отбросят.")
+    completion, _ = engine._submit_main_answer(
+        turn.session, turn, provider, "Его отбросят."
+    )
 
     assert completion.calls == 1
     assert add.call_args.args[0] is followup
@@ -318,9 +328,7 @@ def test_fifo_history_deletes_sessions_after_tenth(mocker):
 
 
 def test_fifo_history_keeps_incomplete_session(mocker):
-    sessions = [
-        SimpleNamespace(id=index, status="completed") for index in range(10)
-    ]
+    sessions = [SimpleNamespace(id=index, status="completed") for index in range(10)]
     sessions.append(SimpleNamespace(id=10, status="active"))
     query = mocker.Mock()
     mocker.patch(

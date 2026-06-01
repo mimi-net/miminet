@@ -12,7 +12,7 @@ from sqlalchemy import (
 from sqlalchemy.sql import func
 
 
-class AiInterviewSetting(db.Model):
+class AiInterviewSetting(db.Model):  # type: ignore[name-defined]
     __tablename__ = "ai_interview_setting"
 
     id = db.Column(BigInteger, primary_key=True)
@@ -38,7 +38,7 @@ def create_ai_interview_tables():
         table.create(db.engine, checkfirst=True)
 
 
-class AiInterviewAccessCode(db.Model):
+class AiInterviewAccessCode(db.Model):  # type: ignore[name-defined]
     __tablename__ = "ai_interview_access_code"
 
     id = db.Column(BigInteger, primary_key=True)
@@ -62,7 +62,7 @@ class AiInterviewAccessCode(db.Model):
         return self.code or self.label or f"AI access code {self.id}"
 
 
-class AiInterviewSession(db.Model):
+class AiInterviewSession(db.Model):  # type: ignore[name-defined]
     __tablename__ = "ai_interview_session"
     __table_args__ = (
         UniqueConstraint("access_code_id", name="uq_ai_interview_session_access_code"),
@@ -97,7 +97,7 @@ class AiInterviewSession(db.Model):
         return f"AI testing session {self.guid}"
 
 
-class AiInterviewTurn(db.Model):
+class AiInterviewTurn(db.Model):  # type: ignore[name-defined]
     __tablename__ = "ai_interview_turn"
     __table_args__ = (
         UniqueConstraint(

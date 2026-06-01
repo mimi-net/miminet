@@ -9,9 +9,13 @@ SYSTEM_PROMPT = """Ты строгий, но помогающий AI-экзам�
 
 
 def _evaluation_contract(include_followup=False):
-    followup = """
+    followup = (
+        """
   "followup_question": "один связанный технический вопрос",
-  "followup_reference_answer": "краткий эталонный ответ на уточнение",""" if include_followup else ""
+  "followup_reference_answer": "краткий эталонный ответ на уточнение","""
+        if include_followup
+        else ""
+    )
     return f"""Верни только JSON-объект ровно с полями:
 {{
   "feedback": "короткий фидбек тестируемому без раскрытия полного ответа",
@@ -62,7 +66,8 @@ def _history_block(turn):
 
 
 def followup_answer_prompt(turn, answer, is_final):
-    final_instruction = """
+    final_instruction = (
+        """
 Это последний ответ. final_result должен быть объектом:
 {
   "grade": оценка 2-5,
@@ -73,8 +78,11 @@ def followup_answer_prompt(turn, answer, is_final):
 }
 Сформируй итог по всей истории сессии.
 В recommendations перечисляй только то, что нужно повторить: без глаголов, советов
-и фраз вроде "продолжать изучение", "стоит повторить" или "рекомендуется изучить".""" if is_final else """
+и фраз вроде "продолжать изучение", "стоит повторить" или "рекомендуется изучить"."""
+        if is_final
+        else """
 Это не последний ответ. Верни final_result=null."""
+    )
 
     return f"""Оцени ответ тестируемого на уточнение.
 {_evaluation_contract()}
