@@ -33,7 +33,6 @@ def make_turn(flow_type="main", position=1, pair_position=1, answer=None):
             "topic_pair_position": planner.topic_pair_position(pair_position),
             "source_question_id": "l2-4",
             "reference_answer": "Кадр отбрасывается.",
-            "difficulty": "advanced" if flow_type == "followup" else "mechanism",
         },
         question="Что произойдёт с кадром с неверной контрольной суммой?",
         feedback="",

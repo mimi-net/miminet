@@ -7,21 +7,6 @@ def _analysis_for_grade(turn_or_analysis):
     return turn_or_analysis.analysis or {}
 
 
-def _focus_for_grade(turn_or_analysis):
-    if isinstance(turn_or_analysis, dict):
-        return turn_or_analysis.get("focus") or {}
-    return turn_or_analysis.focus or {}
-
-
-def _has_strong_reasoning_turn(turns, analyses):
-    for turn, analysis in zip(turns, analyses):
-        focus = _focus_for_grade(turn)
-        score = int(analysis.get("answer_score", 0))
-        if score >= 3 and focus.get("difficulty") == "advanced":
-            return True
-    return False
-
-
 def normalize_grade(turns, candidate_grade=None):
     analyses = [_analysis_for_grade(turn) for turn in turns]
     scores = [int(analysis.get("answer_score", 0)) for analysis in analyses]
@@ -42,8 +27,6 @@ def normalize_grade(turns, candidate_grade=None):
 
     if critical_error:
         rubric_grade = min(rubric_grade, 3)
-    if rubric_grade == 5 and not _has_strong_reasoning_turn(turns, analyses):
-        rubric_grade = 4
 
     try:
         candidate_grade = int(candidate_grade)

@@ -47,7 +47,6 @@ def build_main_focus(question, pair_position):
         "topic_pair_position": topic_pair_position(pair_position),
         "source_question_id": question["id"],
         "reference_answer": question["reference_answer"],
-        "difficulty": "mechanism",
     }
 
 
@@ -59,7 +58,6 @@ def build_followup_focus(main_turn, reference_answer):
         "topic_pair_position": main_turn.focus["topic_pair_position"],
         "source_question_id": main_turn.focus["source_question_id"],
         "reference_answer": reference_answer,
-        "difficulty": "advanced",
     }
 
 
@@ -84,7 +82,6 @@ def build_bank_focus(question, question_position):
         "topic_question_position": topic_question_position,
         "source_question_id": question["id"],
         "reference_answer": question["reference_answer"],
-        "difficulty": "advanced" if topic_question_position >= 3 else "mechanism",
     }
 
 
