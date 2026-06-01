@@ -27,7 +27,7 @@
     "id": "vpn-5",
     "topic_key": "advanced_networking",
     "question": "Если мой хост спрятан за NAT, какой туннeль я могу использовать?",
-    "reference_answer": "L2PT"
+    "reference_answer": "L2TP"
   },
   {
     "id": "vpn-6",

@@ -461,7 +461,6 @@
           "Port-restricted-cone NAT",
           "PAT / Port Address Translation",
           "One-to-Many NAT",
-          "NAT Traversal",
           "отличие базового NAT от PAT",
           "практические проблемы NAT для входящих соединений"
         ]
