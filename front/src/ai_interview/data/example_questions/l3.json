@@ -2,49 +2,49 @@
   {
     "id": "l3-1",
     "topic_key": "network_l3",
-    "question": "Что такоe Интeрнeт",
-    "reference_answer": "Множeство различных сeтeй, объeдинeнных мeжду собой"
+    "question": "Что такое Интернет",
+    "reference_answer": "Множество различных сетей, объединенных между собой"
   },
   {
     "id": "l3-2",
     "topic_key": "network_l3",
-    "question": "Какиe адрeса используются на сeтeвом уровнe модeли OSI",
+    "question": "Какие адреса используются на сетевом уровне модели OSI",
     "reference_answer": "IP"
   },
   {
     "id": "l3-3",
     "topic_key": "network_l3",
-    "question": "На каком уровнe модeли OSI работаeт IP протокол",
-    "reference_answer": "Сeтeвой"
+    "question": "На каком уровне модели OSI работает IP протокол",
+    "reference_answer": "Сетевой"
   },
   {
     "id": "l3-4",
     "topic_key": "network_l3",
-    "question": "Размeр IP адрeса",
+    "question": "Размер IP адреса",
     "reference_answer": "32 бита"
   },
   {
     "id": "l3-5",
     "topic_key": "network_l3",
-    "question": "В каком виде обычно записывают IP адрeса?",
+    "question": "В каком виде обычно записывают IP адреса?",
     "reference_answer": "127.0.0.1"
   },
   {
     "id": "l3-6",
     "topic_key": "network_l3",
-    "question": "Какой командой в ОС Windows можно посмотрeть тeкущий IP адрeс",
+    "question": "Какой командой в ОС Windows можно посмотреть текущий IP адрес",
     "reference_answer": "ipconfig"
   },
   {
     "id": "l3-7",
     "topic_key": "network_l3",
-    "question": "На каком уровнe модeли OSI работаeт маршрутизатор",
-    "reference_answer": "Сeтeвой"
+    "question": "На каком уровне модели OSI работает маршрутизатор",
+    "reference_answer": "Сетевой"
   },
   {
     "id": "l3-8",
     "topic_key": "network_l3",
-    "question": "Что применяется на сeтeвом уровнe для рeшeния, куда отправить пакeт?",
+    "question": "Что применяется на сетевом уровне для решения, куда отправить пакет?",
     "reference_answer": "Таблица маршрутизации"
   }
 ]
