@@ -237,11 +237,6 @@
             currentTurn.topic_position + " из " + state.topic_count + "</span>" +
             "<span class=\"ai-interview__badge\">Вопрос " +
             currentTurn.question_position + " из 4</span>" +
-            "<span class=\"ai-interview__badge\">" +
-            (state.question_mode === "bank_only"
-                ? "Проверенный банк"
-                : "Уточнения ИИ") +
-            "</span>" +
             topicLabels.join("");
         document.getElementById("ai-interview-current-meta").textContent =
             currentTurn.topic.label;
