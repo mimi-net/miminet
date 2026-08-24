@@ -19,10 +19,9 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 class testing_setting:
     """Configuration settings for testing environment."""
 
-    nginx_docker_ip = "172.18.0.2"  # nginx IP inside miminet docker network
-    selenium_hub_url = (
-        "http://localhost:4444/wd/hub"  # route for sending selenium commands
-    )
+    nginx_docker_ip = os.getenv("TEST_TARGET_HOST", "172.18.0.2")
+    port = int(os.getenv("TEST_TARGET_PORT", 80))
+    selenium_hub_url = os.getenv("SELENIUM_HUB_URL", "http://localhost:4444/wd/hub")
     window_size = "1920,1080"
     auth_data = {
         "email": "selenium",
@@ -30,7 +29,15 @@ class testing_setting:
     }  # this data should be inserted into the database, selenium uses it for authentication
 
 
-MAIN_PAGE = f"http://{testing_setting.nginx_docker_ip}"
+def _main_url():
+    host = testing_setting.nginx_docker_ip
+    port = testing_setting.port
+    if port == 80:
+        return f"http://{host}"
+    return f"http://{host}:{port}"
+
+
+MAIN_PAGE = _main_url()
 HOME_PAGE = f"{MAIN_PAGE}/home"
 LOGIN_PAGE = f"{MAIN_PAGE}//auth/login.html"
 
