@@ -136,6 +136,8 @@ export provider=vbox/vmware
 2. Запуск контейнеров: ```sh front/tests/docker/run.sh```
 3. Запуск тестов: ```pytest front/tests```.
 
+Запуск без Docker (rootless podman): [DEVELOPMENT.md](DEVELOPMENT.md).
+
 ### <a name="backend-test"></a> Backend
 1. Установка необходимых пакетов:
 ```bash

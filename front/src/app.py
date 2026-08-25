@@ -506,8 +506,11 @@ def missing_token_callback(error):
 def confing_js():
     config = {key: os.getenv(key) for key in PUBLIC_CONFIG_KEYS if os.getenv(key)}
 
+    js_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "templates/config.js"
+    )
     js_content = render_template_string(
-        open("templates/config.js", "r", encoding="utf-8").read(), **config
+        open(js_path, "r", encoding="utf-8").read(), **config
     )
 
     return Response(js_content, mimetype="application/javascript")
