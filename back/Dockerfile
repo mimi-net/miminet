@@ -37,8 +37,9 @@ RUN git clone https://github.com/mimi-net/mimidump.git \
 WORKDIR /app
 ADD ./requirements.txt /app/requirements.txt
 RUN pip3 install -r requirements.txt
+ADD ./ovs-init.sh /app/ovs-init.sh
 ADD ./ENTRYPOINT.sh /app/ENTRYPOINT.sh
-RUN chmod +x ENTRYPOINT.sh
+RUN chmod +x ovs-init.sh ENTRYPOINT.sh
 ADD ./src /app
 
 ENTRYPOINT ["/app/ENTRYPOINT.sh"]

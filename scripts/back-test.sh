@@ -18,14 +18,19 @@ source "$HERE/lib-back-env.sh"
 
 CMD="${1:-help}"
 
+# OVS startup logic (start ovs-ctl, then ovs-vswitchd exactly once) lives in
+# back/ovs-init.sh — the single source of truth shared by the containerized
+# harness, CI and the prod image (baked to /app/ovs-init.sh). A second
+# ovs-vswitchd would fight over the bridges and break STP/RSTP state (random
+# "No such RSTP object" failures).
+
 run_emulation() {
     local pytest_args=("$@")
     "$BACK_ENGINE" run $(base_run_args) $(engine_flags) \
         "$BACK_IMAGE" \
         -c "
             set -e
-            /usr/share/openvswitch/scripts/ovs-ctl start >/dev/null 2>&1 || true
-            ovs-vswitchd >/dev/null 2>&1 &
+            bash /repo/back/ovs-init.sh
             pip3 install -q pytest
             cd /repo/back/tests
             PYTHONPATH=/repo/back/src pytest \"${pytest_args[*]}\" -o log_file=/tmp/back_test.log -p no:cacheprovider --basetemp=/tmp/pytest || { mn -c >/dev/null 2>&1; exit 1; }
@@ -44,8 +49,7 @@ cmd_probe() {
     "$BACK_ENGINE" run $(base_run_args) $(engine_flags) \
         "$BACK_IMAGE" \
         -c "
-            /usr/share/openvswitch/scripts/ovs-ctl start >/dev/null 2>&1 || true
-            ovs-vswitchd >/dev/null 2>&1 &
+            bash /repo/back/ovs-init.sh
             ns=\$(readlink /proc/self/ns/net)
             echo \"host ns  : $host_ns\"
             echo \"container: \$ns\"
@@ -90,8 +94,7 @@ cmd_worker() {
         -e queue_names="${queue_names:-task-checking-queue}" \
         "$BACK_IMAGE" \
         -c "
-            /usr/share/openvswitch/scripts/ovs-ctl start >/dev/null 2>&1 || true
-            ovs-vswitchd >/dev/null 2>&1 &
+            bash /repo/back/ovs-init.sh
             cd /repo/back/src
             exec python3 -m celery -A celery_app worker --loglevel=info --concurrency=\$celery_concurrency -Q \$queue_names
         "

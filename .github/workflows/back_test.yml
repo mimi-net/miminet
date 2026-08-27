@@ -60,8 +60,9 @@ jobs:
 
       - name: Run Open VSwitch
         run: |
-          sudo /usr/share/openvswitch/scripts/ovs-ctl start
-          sudo ovs-vswitchd &
+          # back/ovs-init.sh is the single source of truth for OVS startup
+          # (also used by the prod image ENTRYPOINT and the local harness).
+          sudo bash back/ovs-init.sh
 
       - name: Set up virtualenv
         run: |
