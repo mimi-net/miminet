@@ -4,7 +4,7 @@ import time
 import psutil
 from ipmininet.ipnet import IPNet
 from mininet.log import info
-from net_utils.captures import capture_paths, iter_capture_out_files
+from net_utils.captures import capture_out_path, capture_paths, iter_capture_out_files
 from net_utils.vlan import clean_bridges, has_vlan_interfaces, setup_vlans
 from net_utils.vxlan import (
     iter_vtep_network_interfaces,
@@ -56,12 +56,26 @@ class MiminetNetwork(IPNet):
         ``timeout`` seconds.
         """
         deadline = time.monotonic() + timeout
+        restart_grace = float(os.environ.get("MIMINET_CAPTURE_RESTART_GRACE", "2.0"))
+        capture_restarted = False
         while time.monotonic() < deadline:
             missing_captures = self.__missing_capture_files()
             unconverged = self.__unconverged_switches()
             unreachable = self.__unreachable_vtep_targets()
             if not missing_captures and not unconverged and not unreachable:
                 return
+            # mimidump can race interface startup: it may start while the
+            # interface is still down and block in its internal ifup wait for
+            # up to 100s, leaving the outbound capture file uncreated (the
+            # INOUT file appears first). The interface is certainly up now, so
+            # restart the stuck captures once and keep waiting.
+            if (
+                missing_captures
+                and not capture_restarted
+                and time.monotonic() - (deadline - timeout) > restart_grace
+            ):
+                self.__restart_captures(missing_captures)
+                capture_restarted = True
             info(
                 "[network] waiting for readiness: captures_missing=%s "
                 "stp_unconverged=%s vtep_unreachable=%s\n"
@@ -87,6 +101,48 @@ class MiminetNetwork(IPNet):
             for _, path in iter_capture_out_files(self.__network_topology.interfaces)
             if not os.path.exists(path)
         ]
+
+    def __restart_captures(self, missing_paths: list) -> None:
+        """Restart the packet capture on interfaces whose capture is missing.
+
+        mimidump may start while the interface is still down and block in its
+        internal ifup wait (up to 100s), never creating the outbound capture
+        file while the INOUT one appears. The interface is certainly up by the
+        time we get here, so kill the stale process and start a fresh capture
+        that will create both files immediately.
+        """
+        missing = {
+            (node_name, iface_name)
+            for link1, link2, _edge_id, edge_source, edge_target, *_rest in (
+                self.__network_topology.interfaces
+            )
+            for iface_name, node_name in (
+                (link1, edge_source),
+                (link2, edge_target),
+            )
+            if capture_out_path(iface_name) in missing_paths
+        }
+        for node_name, iface_name in missing:
+            try:
+                node = self[node_name]
+                intf = node.intf(iface_name)
+            except (KeyError, AttributeError):
+                continue
+            if intf is None:
+                continue
+            captures = intf.get("captures", [])
+            for capture in captures:
+                proc = capture.ongoing_captures.get(iface_name)
+                if proc is not None and proc.poll() is None:
+                    proc.kill()
+                    proc.wait()
+                capture.ongoing_captures.pop(iface_name, None)
+            for path in capture_paths(iface_name):
+                if os.path.exists(path):
+                    os.remove(path)
+            for capture in captures:
+                capture.start(intf=intf)
+            info("[network] restarted capture for interface %s\n" % iface_name)
 
     def __unconverged_switches(self) -> list:
         """Return switches whose STP/RSTP state machine has not settled yet."""
