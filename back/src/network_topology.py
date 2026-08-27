@@ -10,6 +10,11 @@ from pkt_parser import is_ipv4_address
 from node_types import NodeType
 
 
+def stp_enabled(config: NodeConfig) -> bool:
+    """Return True when STP or RSTP is enabled for the switch config."""
+    return config.stp in (1, 2)
+
+
 class MiminetTopology(IPTopo):
     """Class representing topology for miminet networks."""
 
@@ -18,8 +23,6 @@ class MiminetTopology(IPTopo):
         self.__iface_pairs: list = []
         # Used to generate unique names
         self.__switch_count = 0
-        # Minimum suitable time for which the network is configured
-        self.__network_configuration_time = 3
 
         self.__network: Network = network
         self.__nodes: dict = {}
@@ -33,15 +36,6 @@ class MiminetTopology(IPTopo):
 
         Return: List with useful information about every interface."""
         return self.__iface_pairs.copy()
-
-    @property
-    def network_configuration_time(self) -> int:
-        """Get amount of time it takes to properly configure the network (in seconds)."""
-        return self.__network_configuration_time
-
-    def __set_network_configuration_time(self, value: int):
-        """Set amount of time it takes to properly configure the network (in seconds)."""
-        self.__network_configuration_time = value
 
     def __handle_node(self, node: Node):
         config: NodeConfig = node.config
@@ -73,12 +67,6 @@ class MiminetTopology(IPTopo):
             cwd="/tmp",
             priority=config.priority,
         )
-
-        # Set emulation delay based on STP mode
-        if is_rstp_enabled:
-            self.__set_network_configuration_time(7)
-        elif is_stp_enabled:
-            self.__set_network_configuration_time(33)
 
     def __handle_host_or_server(self, node_id: str, config: NodeConfig):
         default_gw = config.default_gw

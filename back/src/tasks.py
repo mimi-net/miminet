@@ -54,11 +54,21 @@ def run_miminet(network_json: str):
 
     jnet = _filter_unknown_nodes(json.loads(network_json))
     schema = get_network_schema()
-    network_json = schema.load(jnet, unknown="include")
+    network_schema: Network = schema.load(jnet, unknown="include")
 
     for _ in range(4):
         try:
-            animation, pcaps = emulate(network_json)
+            animation, pcaps = emulate(network_schema)
+
+            # A network that defines jobs must show evidence of captured host
+            # traffic. Retry when the animation is empty or carries only
+            # STP/RSTP/LLC control frames — that means the capture never caught
+            # any host packet (cold start). If ARP was captured but no IP
+            # follows, the result is plausible (e.g. link_down / no-client
+            # tests) and is returned as-is.
+            if network_schema.jobs and not _has_meaningful_packets(animation):
+                error("Animation without captured host traffic; retrying.")
+                continue
 
             return json.dumps(animation), pcaps
         except Exception as e:
@@ -68,6 +78,25 @@ def run_miminet(network_json: str):
             continue
 
     return "[]", []
+
+
+def _has_meaningful_packets(animation) -> bool:
+    """Return True if the animation shows evidence of captured host traffic.
+
+    A warm capture always picks up at least the ARP exchange, so ARP counts as
+    meaningful too: animations carrying only STP/RSTP/LLC control frames mean
+    the capture started too late to see any host packet and must be retried.
+    """
+    if not animation:
+        return False
+    for group in animation:
+        for packet in group:
+            pkt_type = packet.get("config", {}).get("type", "")
+            if pkt_type.startswith("ARP"):
+                return True
+            if not pkt_type.startswith(("STP", "RSTP", "LLC", "Unknown")):
+                return True
+    return False
 
 
 @app.task(bind=True)
