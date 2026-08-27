@@ -5,6 +5,24 @@ from network_schema import Node
 from node_types import NodeType
 
 
+def iter_vtep_network_interfaces(nodes: list[Node]):
+    """Yield (node, iface, target_ips) for every VXLAN *network* interface.
+
+    Network interfaces are the ones on router nodes whose VXLAN encapsulation
+    points at remote targets (vxlan_connection_type == 1); endpoint interfaces
+    (connection_type == 0) are excluded. Kept in one place so that setup
+    (setup_vtep_interfaces) and the emulation readiness check agree on what
+    counts as a VXLAN underlay.
+    """
+    for node in nodes:
+        if node.config.type != NodeType.ROUTER:
+            continue
+        for iface in node.interface:
+            target_ips = iface.vxlan_vni_to_target_ip
+            if target_ips and iface.vxlan_connection_type == 1:
+                yield node, iface, target_ips
+
+
 def setup_vtep_interfaces(net: IPNet, nodes: list[Node]) -> None:
     """
     Configures VXLAN interfaces on router nodes within the network.
@@ -13,19 +31,16 @@ def setup_vtep_interfaces(net: IPNet, nodes: list[Node]) -> None:
         net (IPNet): The network containing all nodes.
         nodes (list[Node]): A list of nodes to configure.
     """
+    # Configure VXLAN network interfaces (connection_type == 1)
+    for node, iface, target_ips in iter_vtep_network_interfaces(nodes):
+        router = net.get(node.data.id)
+        setup_network_interface(router, iface.name, iface.ip, target_ips)
+
+    # Configure VXLAN endpoint interfaces (connection_type == 0)
     for node in nodes:
         if node.config.type == NodeType.ROUTER:
             router = net.get(node.data.id)
 
-            # Configure VXLAN network interfaces (connection_type == 1)
-            for iface in node.interface:
-                connection_type = iface.vxlan_connection_type
-                target_ips = iface.vxlan_vni_to_target_ip
-
-                if target_ips and connection_type == 1:
-                    setup_network_interface(router, iface.name, iface.ip, target_ips)
-
-            # Configure VXLAN endpoint interfaces (connection_type == 0)
             for iface in node.interface:
                 vni = iface.vxlan_vni
                 connection_type = iface.vxlan_connection_type

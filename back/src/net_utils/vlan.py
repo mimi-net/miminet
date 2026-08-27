@@ -69,9 +69,14 @@ def configure_trunk(switch: IPSwitch, intf: str, vlans: list[int]) -> None:
             switch.cmd(f"bridge vlan add dev {intf} vid {vlan}")
 
 
+def has_vlan_interfaces(interfaces: list[NodeInterface]) -> bool:
+    """Return True if any interface carries a VLAN tag (VLAN mode)."""
+    return any(iface.vlan is not None for iface in interfaces)
+
+
 def add_bridge(switch: IPSwitch, interface: list[NodeInterface]) -> None:
     if isinstance(switch, IPOVSSwitch):
-        if any(iface.vlan is not None for iface in interface):
+        if has_vlan_interfaces(interface):
             switch.vsctl(f' add-br {f"br-{switch.name}"}')
             switch.vsctl(
                 f' set bridge {f"br-{switch.name}"} other_config:enable-vlan-filtering=true'
