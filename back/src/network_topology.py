@@ -209,12 +209,16 @@ class MiminetTopology(IPTopo):
             interfaces.append(trg_iface.name)
 
         if links:
-            # Set up packet capturing
+            # Set up packet capturing.
+            # Networks are IPv4-only (use_v6=False), yet the switches emit a
+            # steady IPv6 MLDv2 multicast-report flood that crowds every capture
+            # buffer and drops the real ARP/ICMP exchange (see issue #450).
+            # "not igmp" only excludes IPv4 IGMP, so also exclude all IPv6.
             self.addNetworkCapture(
                 nodes=[],
                 interfaces=[*links],
                 base_filename="capture",
-                extra_arguments="not igmp",
+                extra_arguments="not igmp and not ip6",
             )
         super().build(*args, **kwargs)
 
