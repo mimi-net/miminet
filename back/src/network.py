@@ -36,6 +36,12 @@ class MiminetNetwork(IPNet):
         setup_vlans(self, self.__network_schema.nodes)
         setup_vtep_interfaces(self, self.__network_schema.nodes)
 
+        # Stop the IPv6 multicast chatter on this IPv4-only emulation (see
+        # __disable_ipv6); needed for the adaptive settle to see genuinely
+        # quiet links. On by default; opt out with MIMINET_DISABLE_IPV6=0.
+        if os.environ.get("MIMINET_DISABLE_IPV6", "1") == "1":
+            self.__disable_ipv6()
+
         # Wait until the network is actually usable, instead of a fixed sleep:
         # capture files exist, STP/RSTP switches have converged, and the VXLAN
         # underlay is reachable. This makes correctness independent of
@@ -228,6 +234,22 @@ class MiminetNetwork(IPNet):
                 if "unreachable" in out or not out.strip():
                     unreachable.append(f"{router.name}->{target_ip}")
         return unreachable
+
+    def __disable_ipv6(self) -> None:
+        """Disable IPv6 per interface: the emulated kernel stacks emit a
+        continuous DAD/MLDv2 multicast flood that keeps every OVS port busy,
+        defeating the adaptive settle. Harmless (Miminet is IPv4-only)."""
+        for node in list(self.hosts) + list(self.routers):
+            node.cmd("sysctl -w net.ipv6.conf.all.disable_ipv6=1 >/dev/null 2>&1")
+        for switch in self.switches:
+            switch.cmd(
+                "sysctl -w net.ipv6.conf.%s.disable_ipv6=1 >/dev/null 2>&1"
+                % switch.name
+            )
+            for intf in switch.intfNames():
+                switch.cmd(
+                    "sysctl -w net.ipv6.conf.%s.disable_ipv6=1 >/dev/null 2>&1" % intf
+                )
 
     def stop(self):
         info("[network.stop] called, sleeping 2s before teardown\n")

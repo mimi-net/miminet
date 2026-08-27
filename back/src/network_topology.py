@@ -71,7 +71,7 @@ class MiminetTopology(IPTopo):
     def __handle_host_or_server(self, node_id: str, config: NodeConfig):
         default_gw = config.default_gw
         route = f"via {default_gw}" if default_gw else ""
-        self.__nodes[node_id] = self.addHost(node_id, defaultRoute=route)
+        self.__nodes[node_id] = self.addHost(node_id, defaultRoute=route, use_v6=False)
 
     def __handle_l1_hub(self, node_id: str):
         self.__nodes[node_id] = self.addSwitch(
