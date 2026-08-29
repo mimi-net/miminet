@@ -56,6 +56,7 @@
             <option value="107">Включить ARP Proxy на интерфейсе</option>
             <option value="109">Добавить Port forwarding для TCP</option>
             <option value="110">Добавить Port forwarding для UDP</option>
+            <option value="204">Включить DHCP Relay</option>
         </select>
     </div>
 </script>
@@ -207,4 +208,13 @@
         <a href="" id="config_router_job_delete"><i class="bx bx-x fs-xl align-middle"></i></a>
       </span>
     </li>
+</script>
+
+<script id="config_router_dhcp_relay_script" type="text/plain">
+    <div class="form-group pt-1" name="config_router_select_input">
+        <label id="config_router_dhcp_relay_server_label" for="config_router_dhcp_relay_server_label" class="text-sm">IP-адрес DHCP сервера</label>
+        <input type="text" class="form-control form-control-sm w-75" id="config_router_dhcp_relay_server_ip_input_field" name="config_router_dhcp_relay_server_ip_input_field" autocomplete="none" value=''>
+        <label id="config_router_dhcp_relay_listening_label" for="config_router_dhcp_relay_listening_label" class="text-sm">IP-адрес для прослушивания клиентов</label>
+        <input type="text" class="form-control form-control-sm w-75" id="config_router_dhcp_relay_listening_ip_input_field" name="config_router_dhcp_relay_listening_ip_input_field" autocomplete="none" value=''>
+    </div>
 </script>
