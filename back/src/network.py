@@ -27,6 +27,9 @@ class MiminetNetwork(IPNet):
         self.__stp_snapshots: dict = {}
         # Diagnostic: last raw rstp/stp show output per switch (see __stp_settled).
         self.__stp_diag: dict = {}
+        # Whether the adaptive settle hit its cap instead of breaking early on
+        # quiescence. Exposed for the benchmark harness (back/bench/bench.py).
+        self.settle_hit_cap: bool = False
 
     def start(self):
         # Start network
@@ -35,6 +38,12 @@ class MiminetNetwork(IPNet):
         # Additional settings
         setup_vlans(self, self.__network_schema.nodes)
         setup_vtep_interfaces(self, self.__network_schema.nodes)
+
+        # Stop the IPv6 multicast chatter on this IPv4-only emulation (see
+        # __disable_ipv6); needed for the adaptive settle to see genuinely
+        # quiet links. On by default; opt out with MIMINET_DISABLE_IPV6=0.
+        if os.environ.get("MIMINET_DISABLE_IPV6", "1") == "1":
+            self.__disable_ipv6()
 
         # Wait until the network is actually usable, instead of a fixed sleep:
         # capture files exist, STP/RSTP switches have converged, and the VXLAN
@@ -229,10 +238,101 @@ class MiminetNetwork(IPNet):
                     unreachable.append(f"{router.name}->{target_ip}")
         return unreachable
 
+    def __disable_ipv6(self) -> None:
+        """Disable IPv6 per interface: the emulated kernel stacks emit a
+        continuous DAD/MLDv2 multicast flood that keeps every OVS port busy,
+        defeating the adaptive settle. Harmless (Miminet is IPv4-only)."""
+        for node in list(self.hosts) + list(self.routers):
+            node.cmd("sysctl -w net.ipv6.conf.all.disable_ipv6=1 >/dev/null 2>&1")
+        for switch in self.switches:
+            switch.cmd(
+                "sysctl -w net.ipv6.conf.%s.disable_ipv6=1 >/dev/null 2>&1"
+                % switch.name
+            )
+            for intf in switch.intfNames():
+                switch.cmd(
+                    "sysctl -w net.ipv6.conf.%s.disable_ipv6=1 >/dev/null 2>&1" % intf
+                )
+
+    def __own_observable_interfaces(self, pernic: dict) -> list:
+        """Root-netns OVS ports carrying this emulation's traffic (every edge
+        crosses a switch bridge port), so concurrent emulations or container
+        chatter cannot mask quiescence."""
+        names = set()
+        for switch in self.switches:
+            names.update(switch.intfNames())
+            # VLAN mode moves the data ports to a br-{switch} bridge.
+            names.add("br-%s" % switch.name)
+        return [n for n in names if n in pernic]
+
+    def __settle(self) -> None:
+        """Wait for async tail traffic (echo-replies, DHCP ACK, VXLAN/NAT
+        propagation) to drain by polling this emulation's own OVS ports; tear
+        down once they have been quiet for ~0.3s, capped at 2.0s. A fixed 2.0s
+        floor is reliable but dominates simple networks, hence the 1.2s floor.
+
+        Knobs (read at call time): MIMINET_STOP_SLEEP forces the old fixed
+        sleep; MIMINET_SETTLE_MIN sets the floor (default 1.2). Sets
+        ``self.settle_hit_cap`` so benchmarks can tell early breaks from
+        cap-bound ones.
+        """
+        override = os.environ.get("MIMINET_STOP_SLEEP")
+        if override is not None:
+            duration = float(override)
+            info("[network.settle] fixed override, sleeping %ss\n" % duration)
+            time.sleep(duration)
+            self.settle_hit_cap = False
+            return
+
+        min_s = float(os.environ.get("MIMINET_SETTLE_MIN", "1.2"))
+        max_s = 2.0
+        poll_s = 0.1
+        quiet_polls = 3
+
+        start = time.monotonic()
+        deadline = start + max_s
+        pernic = psutil.net_io_counters(pernic=True)
+        names = self.__own_observable_interfaces(pernic)
+        if not names:
+            info("[network.settle] no observable interfaces; fixed %ss floor\n" % min_s)
+            time.sleep(min_s)
+            self.settle_hit_cap = False
+            return
+
+        prev = {n: (pernic[n].packets_recv, pernic[n].packets_sent) for n in names}
+        quiet = 0
+        while time.monotonic() < deadline:
+            time.sleep(poll_s)
+            now = psutil.net_io_counters(pernic=True)
+            active = False
+            for n in names:
+                c = now.get(n)
+                if c is None:
+                    continue
+                p = prev.get(n)
+                if p is not None:
+                    if c.packets_recv - p[0] or c.packets_sent - p[1]:
+                        active = True
+                prev[n] = (c.packets_recv, c.packets_sent)
+            if active:
+                quiet = 0
+            else:
+                quiet += 1
+                if quiet >= quiet_polls and time.monotonic() - start >= min_s:
+                    break
+
+        elapsed = time.monotonic() - start
+        self.settle_hit_cap = elapsed >= max_s - 1e-6
+        info(
+            "[network.settle] settled in %.2fs (cap=%.1fs, hit_cap=%s)\n"
+            % (elapsed, max_s, self.settle_hit_cap)
+        )
+
     def stop(self):
-        info("[network.stop] called, sleeping 2s before teardown\n")
-        # Wait before stop
-        time.sleep(2)
+        info("[network.stop] called\n")
+        # Pre-teardown settle window for async tail traffic (echo-replies,
+        # DHCP ACK, ICMP unreachable, VXLAN/NAT propagation).
+        self.__settle()
 
         clean_bridges(self)
         teardown_vtep_bridges(self, self.__network_schema.nodes)

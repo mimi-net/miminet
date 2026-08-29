@@ -29,7 +29,9 @@ detect_engine() {
 engine_flags() {
     case "$BACK_ENGINE" in
         docker) echo "--privileged" ;;
-        podman) echo "--cap-add=ALL --device /dev/net/tun" ;;
+        # Privileged to mirror the production celery container (writable net
+        # sysctls for MIMINET_DISABLE_IPV6, /dev/net/tun for veths).
+        podman) echo "--privileged" ;;
     esac
 }
 
