@@ -2,6 +2,10 @@ name: Linter
 
 on: [push, pull_request]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
 
   build:
@@ -10,13 +14,12 @@ jobs:
       fail-fast: false
       matrix:
         node: ['back', 'front']
-        python-version: ["3.11"]
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version-file: .python-version
           cache: 'pip'
           cache-dependency-path: ${{matrix.node}}/requirements.txt
             
