@@ -1,11 +1,38 @@
 version: 2
 updates:
   - package-ecosystem: "pip"
-    directory: "/"
+    directory: "/back"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     groups:
-      pip-dependencies:
+      back-pip-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/front"
+    schedule:
+      interval: "monthly"
+    groups:
+      front-pip-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "docker"
+    directory: "/back"
+    schedule:
+      interval: "monthly"
+    groups:
+      back-docker-images:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "docker"
+    directory: "/front"
+    schedule:
+      interval: "monthly"
+    groups:
+      front-docker-images:
         patterns:
           - "*"
 
@@ -17,4 +44,3 @@ updates:
       github-actions:
         patterns:
           - "*"
-
