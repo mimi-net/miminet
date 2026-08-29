@@ -11,6 +11,7 @@ from network import MiminetNetwork
 from network_schema import Job, Network
 from pkt_parser import create_pkt_animation
 from mininet.log import setLogLevel, info, error
+from net_utils.captures import capture_out_path, capture_paths
 from network_topology import MiminetTopology
 
 
@@ -133,10 +134,7 @@ def emulate(
     animation, pcaps = create_animation(topo.interfaces)
     # Log pcap sizes after stop to compare with pre-stop sizes
     for link1, link2, *_ in topo.interfaces:
-        for fname in [
-            f"/tmp/capture_{link1}_out.pcapng",
-            f"/tmp/capture_{link2}_out.pcapng",
-        ]:
+        for fname in [capture_out_path(link1), capture_out_path(link2)]:
             size = os.path.getsize(fname) if os.path.exists(fname) else -1
             error("[emulator] pcap size after stop: %s = %d bytes\n" % (fname, size))
     error("[emulator] Animation groups before grouping: %d\n" % len(animation))
@@ -170,11 +168,8 @@ def create_animation(
         loss_percentage,
         duplicate_percentage,
     ) in interfaces_info:
-        pcap_out_file1 = "/tmp/capture_" + link1 + "_out.pcapng"
-        pcap_out_file2 = "/tmp/capture_" + link2 + "_out.pcapng"
-
-        pcap_file1 = "/tmp/capture_" + link1 + ".pcapng"
-        pcap_file2 = "/tmp/capture_" + link2 + ".pcapng"
+        pcap_file1, pcap_out_file1 = capture_paths(link1)
+        pcap_file2, pcap_out_file2 = capture_paths(link2)
 
         if not os.path.exists(pcap_out_file1):
             raise ValueError("No capture for interface: " + link1)

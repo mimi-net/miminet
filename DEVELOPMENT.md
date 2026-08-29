@@ -112,8 +112,7 @@ podman run --rm --entrypoint /bin/bash \
   --cap-add=ALL --device /dev/net/tun \
   miminet-back:test \
   -c "
-    /usr/share/openvswitch/scripts/ovs-ctl start >/dev/null 2>&1 || true
-    ovs-vswitchd >/dev/null 2>&1 &
+    bash /repo/back/ovs-init.sh
     mn --topo single,2 --test pingall 2>&1 | tail -5
   "
 
@@ -123,8 +122,7 @@ podman run --rm --entrypoint /bin/bash \
   --cap-add=ALL --device /dev/net/tun \
   miminet-back:test \
   -c "
-    /usr/share/openvswitch/scripts/ovs-ctl start >/dev/null 2>&1 || true
-    ovs-vswitchd >/dev/null 2>&1 &
+    bash /repo/back/ovs-init.sh
     pip3 install -q pytest
     cd /repo/back/tests
     PYTHONPATH=/repo/back/src pytest -v -o log_file=/tmp/back_test.log -p no:cacheprovider --basetemp=/tmp/pytest
