@@ -96,9 +96,15 @@ class MiminetTestNetwork:
         (str) : Network URL
         """
         self.__selenium.get(HOME_PAGE)
-        self.__selenium.find_element(
+        self.__selenium.wait_and_click(
             By.CSS_SELECTOR, Location.MyNetworks.NEW_NETWORK_BUTTON.selector
-        ).click()
+        )
+
+        # Wait for the frontend to finish creating the network and navigate to
+        # its editor page before capturing the URL (no navigation race).
+        self.__selenium.wait_until_appear(
+            By.CSS_SELECTOR, Location.Network.MAIN_PANEL.selector
+        )
 
         self.__url = self.__selenium.current_url
 
@@ -161,8 +167,12 @@ class MiminetTestNetwork:
 
         local_x, local_y = self.__calc_panel_offset(panel, x, y)
 
-        device_button = self.__selenium.find_element(*node_type)
-        self.__selenium.drag_and_drop(device_button, panel, local_x, local_y)
+        self.__selenium.drag_and_drop(
+            node_type,
+            (By.CSS_SELECTOR, Location.Network.MAIN_PANEL.selector),
+            local_x,
+            local_y,
+        )
         self.__selenium.wait_for(lambda _: old_nodes_len < len(self.nodes), timeout=5)
         return len(self.nodes) - 1
 

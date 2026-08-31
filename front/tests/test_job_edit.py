@@ -1,5 +1,3 @@
-import time
-
 from conftest import MiminetTester
 from selenium.webdriver.common.by import By
 from utils.locators import Location
@@ -40,20 +38,19 @@ class TestJobEdit:
 
         # Open config and click edit button for the job
         config1 = network.open_node_config(host1_id)
-        edit_button = selenium.find_element(
+        selenium.wait_and_click(
             By.CSS_SELECTOR, f"#config_host_job_edit_{initial_job_id}"
         )
-        edit_button.click()
 
-        time.sleep(0.3)
-
-        # Check that job field is pre-filled with original value
+        # Job field is pre-filled with original value (no fixed sleep)
+        selenium.wait_until_value(
+            By.CSS_SELECTOR,
+            Location.Network.ConfigPanel.Host.Job.PING_FIELD.selector,
+            "192.168.1.2",
+        )
         ping_field = selenium.find_element(
             By.CSS_SELECTOR, Location.Network.ConfigPanel.Host.Job.PING_FIELD.selector
         )
-        assert (
-            ping_field.get_attribute("value") == "192.168.1.2"
-        ), "Original ping target should be pre-filled"
 
         # Modify the job
         ping_field.clear()
@@ -113,11 +110,16 @@ class TestJobEdit:
 
         # Edit one of the jobs
         config1 = network.open_node_config(host1_id)
-        selenium.find_element(
+        selenium.wait_and_click(
             By.CSS_SELECTOR, f"#config_host_job_edit_{first_job_id}"
-        ).click()
+        )
 
-        time.sleep(0.3)
+        # Wait for the pre-filled value before clearing it (no fixed sleep)
+        selenium.wait_until_value(
+            By.CSS_SELECTOR,
+            Location.Network.ConfigPanel.Host.Job.PING_FIELD.selector,
+            first_job_original_ip,
+        )
 
         # Modify the ping target
         ping_field = selenium.find_element(
@@ -177,15 +179,18 @@ class TestJobEdit:
 
         assert len(network.jobs) == 3, "Should have 3 jobs initially"
 
-        # Store original job IDs
+        # Store original job IDs and values
         job_ids = [job["id"] for job in network.jobs]
+        job_values = {job["id"]: job["arg_1"] for job in network.jobs}
 
         # Edit first job
         config_host = network.open_node_config(host_id)
-        selenium.find_element(
-            By.CSS_SELECTOR, f"#config_host_job_edit_{job_ids[0]}"
-        ).click()
-        time.sleep(0.3)
+        selenium.wait_and_click(By.CSS_SELECTOR, f"#config_host_job_edit_{job_ids[0]}")
+        selenium.wait_until_value(
+            By.CSS_SELECTOR,
+            Location.Network.ConfigPanel.Host.Job.PING_FIELD.selector,
+            job_values[job_ids[0]],
+        )
 
         ping_field = selenium.find_element(
             By.CSS_SELECTOR, Location.Network.ConfigPanel.Host.Job.PING_FIELD.selector
@@ -196,10 +201,12 @@ class TestJobEdit:
 
         # Edit second job
         config_host = network.open_node_config(host_id)
-        selenium.find_element(
-            By.CSS_SELECTOR, f"#config_host_job_edit_{job_ids[1]}"
-        ).click()
-        time.sleep(0.3)
+        selenium.wait_and_click(By.CSS_SELECTOR, f"#config_host_job_edit_{job_ids[1]}")
+        selenium.wait_until_value(
+            By.CSS_SELECTOR,
+            Location.Network.ConfigPanel.Host.Job.PING_FIELD.selector,
+            job_values[job_ids[1]],
+        )
 
         ping_field = selenium.find_element(
             By.CSS_SELECTOR, Location.Network.ConfigPanel.Host.Job.PING_FIELD.selector
