@@ -4,7 +4,8 @@ import time
 import psutil
 from ipmininet.ipnet import IPNet
 from mininet.log import info
-from net_utils.captures import capture_out_path, capture_paths, iter_capture_out_files
+from net_utils.captures import capture_paths
+from net_utils.readiness import iter_capture_endpoints
 from net_utils.vlan import clean_bridges, has_vlan_interfaces, setup_vlans
 from net_utils.vxlan import (
     iter_vtep_network_interfaces,
@@ -51,8 +52,6 @@ class MiminetNetwork(IPNet):
         # network_configuration_time (even 0).
         self.__wait_until_ready()
 
-        self.__check_files()
-
     def __wait_until_ready(self, timeout: float = 90.0, poll: float = 0.5) -> None:
         """Poll until the emulation environment is really ready.
 
@@ -76,18 +75,17 @@ class MiminetNetwork(IPNet):
                 return
             # mimidump can race interface startup: it may start while the
             # interface is still down and block in its internal ifup wait for
-            # up to 100s, leaving the outbound capture file uncreated (the
-            # INOUT file appears first). The interface is certainly up now, so
-            # restart the stuck captures once and keep waiting. A stale file
-            # left by a died captor process is treated the same as a missing
-            # one — both mean the capture is not attached.
-            stale_captures = self.__stale_capture_interfaces()
+            # up to 100s, leaving the capture unattached. The interface is
+            # certainly up now, so once the grace window has passed restart the
+            # still-not-live captures a single time and keep waiting. A stale
+            # file left by a died captor process is treated the same as a
+            # missing one — both mean the capture is not attached.
             if (
-                stale_captures
+                captures_not_live
                 and not capture_restarted
                 and time.monotonic() - (deadline - timeout) > restart_grace
             ):
-                self.__restart_captures(stale_captures)
+                self.__restart_captures(self.__captures_not_live(timeout=1.0))
                 capture_restarted = True
             info(
                 "[network] waiting for readiness: captures_not_live=%s "
@@ -97,8 +95,12 @@ class MiminetNetwork(IPNet):
             time.sleep(poll)
 
         details = []
-        if self.__captures_not_live():
-            details.append("captures not live")
+        captures_not_live = self.__captures_not_live()
+        if captures_not_live:
+            details.append(
+                "captures not live: %s"
+                % ", ".join(iface for _node, iface in captures_not_live)
+            )
         if self.__unconverged_switches():
             details.append("STP/RSTP switches not forwarding")
         if self.__unreachable_vtep_targets():
@@ -108,91 +110,49 @@ class MiminetNetwork(IPNet):
             % (timeout, ", ".join(details))
         )
 
-    def __captures_not_live(self) -> list:
+    def __captures_not_live(self, timeout: float = 0.1) -> list:
         """Return interface endpoints whose capture is not confirmed live yet.
 
-        Consumes ipmininet's ``NetworkCapture.wait_until_capturing`` (mimidump
-        READY signal, file-existence fallback) so jobs start only after the
-        capture is actually attached — not just that its output file exists.
+        Consumes ipmininet's ``NetworkCapture.wait_until_capturing`` in strict
+        mode (mimidump READY signal, or a pcap file that keeps growing past its
+        header) so jobs start only after the capture is actually attached — not
+        just because its output file exists. The default ``timeout`` is a short
+        per-poll gate; callers that need a definitive answer (the restart path)
+        pass a longer one.
         """
         not_live = []
-        for (
-            link1,
-            link2,
-            _edge_id,
-            edge_source,
-            edge_target,
-            *_rest,
-        ) in self.__network_topology.interfaces:
-            for iface_name, node_name in (
-                (link1, edge_source),
-                (link2, edge_target),
-            ):
-                try:
-                    intf = self[node_name].intf(iface_name)
-                except (KeyError, AttributeError):
-                    continue
-                if intf is None:
-                    continue
-                for capture in intf.get("captures", []):
-                    if not capture.wait_until_capturing(iface_name, timeout=0.1):
-                        not_live.append(iface_name)
-                        break
+        for node_name, iface_name, _intf, captures in iter_capture_endpoints(
+            self.__network_topology.interfaces,
+            lambda node_name, iface_name: self[node_name].intf(iface_name),
+        ):
+            for capture in captures:
+                if not capture.wait_until_capturing(
+                    iface_name, timeout=timeout, strict=True
+                ):
+                    not_live.append((node_name, iface_name))
+                    break
         return not_live
-
-    def __stale_capture_interfaces(self) -> list:
-        """Return interface endpoints whose capture must be restarted.
-
-        A capture is stale when its output file is missing (mimidump raced
-        interface startup) or its captor process has died leaving a stale file
-        behind (crashed, OOM-killed or clobbered by ``mn -c``). Both mean the
-        capture is not attached, even if the file appears to exist.
-        """
-        stale = []
-        for (
-            link1,
-            link2,
-            _edge_id,
-            edge_source,
-            edge_target,
-            *_rest,
-        ) in self.__network_topology.interfaces:
-            for iface_name, node_name in ((link1, edge_source), (link2, edge_target)):
-                if not os.path.exists(capture_out_path(iface_name)):
-                    stale.append((node_name, iface_name))
-                    continue
-                try:
-                    intf = self[node_name].intf(iface_name)
-                except (KeyError, AttributeError):
-                    continue
-                if intf is None:
-                    continue
-                for capture in intf.get("captures", []):
-                    proc = capture.ongoing_captures.get(iface_name)
-                    if proc is not None and proc.poll() is not None:
-                        stale.append((node_name, iface_name))
-                        break
-        return stale
 
     def __restart_captures(self, stale: list) -> None:
         """Restart the packet capture on the given stale interface endpoints.
 
         mimidump may start while the interface is still down and block in its
-        internal ifup wait (up to 100s), never creating the outbound capture
-        file while the INOUT one appears; or the captor process may have died
-        leaving a stale file. Either way the interface is certainly up by the
-        time we get here, so kill any lingering process, drop the stale files
-        and start a fresh capture.
+        internal ifup wait (up to 100s), never attaching the capture; or the
+        captor process may have died leaving a stale file behind. Either way
+        the interface is certainly up by the time we get here, so kill any
+        lingering process, drop the stale files and start a fresh capture.
         """
+        endpoints = {
+            (node_name, iface_name): (intf, captures)
+            for node_name, iface_name, intf, captures in iter_capture_endpoints(
+                self.__network_topology.interfaces,
+                lambda node_name, iface_name: self[node_name].intf(iface_name),
+            )
+        }
         for node_name, iface_name in stale:
-            try:
-                node = self[node_name]
-                intf = node.intf(iface_name)
-            except (KeyError, AttributeError):
+            if (node_name, iface_name) not in endpoints:
                 continue
-            if intf is None:
-                continue
-            captures = intf.get("captures", [])
+            intf, captures = endpoints[(node_name, iface_name)]
             for capture in captures:
                 proc = capture.ongoing_captures.get(iface_name)
                 if proc is not None and proc.poll() is None:
@@ -397,21 +357,6 @@ class MiminetNetwork(IPNet):
         )
         super().stop()
         info("[network.stop] done\n")
-
-    def __check_files(self):
-        """Check that every interface capture file exists."""
-        for iface, path in iter_capture_out_files(self.__network_topology.interfaces):
-            if not os.path.exists(path):
-                self.__clear_files()
-                raise ValueError(f"No capture for interface '{iface}'.")
-
-    def __clear_files(self):
-        """Remove pcap files."""
-        for link1, link2, *_ in self.__network_topology.interfaces:
-            for iface in (link1, link2):
-                for f in capture_paths(iface):
-                    if os.path.exists(f):
-                        os.remove(f)
 
     def __clean_services(self):
         """
