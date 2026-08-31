@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 from contextlib import contextmanager
 from typing import Generator
 from unittest.mock import MagicMock
@@ -7,7 +8,7 @@ from unittest.mock import MagicMock
 import pytest
 import requests
 from requests import Session
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.remote.webdriver import WebDriver
@@ -52,30 +53,66 @@ class MiminetTester(WebDriver):
         """
         Waits for the specified element to become clickable before clicking it.
 
+        Re-finds the element on every attempt so a stale element caused by a
+        page re-render is not treated as a failure.
+
         Args:
             by (By): The locator strategy (e.g., By.ID, By.XPATH).
             element (str): The element locator (e.g., "myElementId", "//button[text()='Click Me']").
             timeout (int): The maximum time in seconds to wait (default: 20).
         """
-        WebDriverWait(self, timeout).until(
-            EC.element_to_be_clickable((by, element))
-        ).click()
+        deadline = time.monotonic() + timeout
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutException(
+                    f"Element {element} is not clickable within {timeout} seconds."
+                )
+            try:
+                WebDriverWait(self, remaining).until(
+                    EC.element_to_be_clickable((by, element))
+                ).click()
+                return
+            except StaleElementReferenceException:
+                continue
 
-    def drag_and_drop(self, source: WebElement, target: WebElement, x: int, y: int):
+    def drag_and_drop(self, source, target, x: int, y: int):
         """Performs a drag-and-drop action from a source element to a target element.
 
+        Elements may be given either as WebElement instances or as (by, selector)
+        locator tuples; locators are re-resolved on each attempt so a stale
+        element during the action is not treated as a failure.
+
         Args:
-            source (WebElement): The source element to be dragged.
-            target (WebElement): The target element to drop the source element onto.
+            source (WebElement | tuple): The source element to be dragged.
+            target (WebElement | tuple): The target element to drop the source element onto.
             x (int): The x-offset to move to.
             y (int): The y-offset to move to.
         """
-        actions_chain = ActionChains(self)
+        deadline = time.monotonic() + 20
 
-        actions_chain.click_and_hold(source)
-        actions_chain.move_to_element_with_offset(target, x, y)
-        actions_chain.release()
-        actions_chain.perform()
+        def _resolve(element):
+            if isinstance(element, tuple):
+                by, selector = element
+                return self.find_element(by, selector)
+            return element
+
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutException(
+                    "Drag-and-drop did not complete within 20 seconds."
+                )
+            try:
+                actions_chain = ActionChains(self)
+
+                actions_chain.click_and_hold(_resolve(source))
+                actions_chain.move_to_element_with_offset(_resolve(target), x, y)
+                actions_chain.release()
+                actions_chain.perform()
+                return
+            except StaleElementReferenceException:
+                continue
 
     def exist_element(self, by: str, element: str):
         """
@@ -119,13 +156,37 @@ class MiminetTester(WebDriver):
         Waits until text appears in the element.
 
         Args:
-            by (str): The locator strategy (e.g., By.ID, By.XPATH).
+            by (By): The locator strategy (e.g., By.ID, By.XPATH).
             element (str): The element locator (e.g., "myElementId", "//button[text()='Click Me']").
             timeout (int): The maximum time in seconds to wait (default: 20).
         """
         WebDriverWait(self, timeout).until(
             EC.text_to_be_present_in_element((by, element), text)
         )
+
+    def wait_until_value(self, by: str, element: str, value: str, timeout=20):
+        """
+        Waits until an input field holds the given value.
+
+        Re-finds the element on each attempt so a stale element caused by a page
+        re-render is not treated as a failure.
+
+        Args:
+            by (By): The locator strategy (e.g., By.ID, By.XPATH).
+            element (str): The element locator (e.g., "myElementId", "//button[text()='Click Me']").
+            value (str): The value the input field must hold.
+            timeout (int): The maximum time in seconds to wait (default: 20).
+        """
+        WebDriverWait(self, timeout).until(
+            lambda driver: self.__has_value(driver, by, element, value)
+        )
+
+    @staticmethod
+    def __has_value(driver: WebDriver, by: str, element: str, value: str):
+        try:
+            return driver.find_element(by, element).get_attribute("value") == value
+        except StaleElementReferenceException:
+            return False
 
     def wait_for(self, condition, timeout=20):
         """Waits for a given condition to be true.
@@ -150,22 +211,35 @@ class MiminetTester(WebDriver):
         except TimeoutException:
             raise Exception(f"Modal dialog {element} wasn't opened.")
         finally:
-            # TODO change it to wait_until_disappear when modal dialog will be fixed
-            self.wait_for(
-                lambda driver: not driver.find_element(by, element).is_displayed(),
-                timeout=5,
-            )
+            # EC.invisibility_of_element_located treats a stale element (e.g. while
+            # the modal-close animation removes the dialog) as already invisible,
+            # so the close is awaited without racing the DOM removal.
+            self.wait_until_disappear(by, element, timeout=5)
 
     def select_by_value(self, by: str, element: str, value: str):
         """Selects an option in a select element by its value.
 
+        Re-finds the select element on each attempt so a stale element caused by
+        a page re-render is not treated as a failure.
+
         Args:
-            by (str): The locator strategy (e.g., By.ID, By.XPATH).
+            by (By): The locator strategy (e.g., By.ID, By.XPATH).
             element (str): The element locator (e.g., "myElementId", "//button[text()='Click Me']").
             value: The value attribute of the option to select.
         """
-        select = Select(self.find_element(by, element))
-        select.select_by_value(value)
+        deadline = time.monotonic() + 20
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutException(
+                    f"Unable to select value {value} in {element} within 20 seconds."
+                )
+            try:
+                select = Select(self.find_element(by, element))
+                select.select_by_value(value)
+                return
+            except StaleElementReferenceException:
+                continue
 
     def get_logs(self, logs_filter=None):
         """
