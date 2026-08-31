@@ -1,0 +1,297 @@
+{
+    "nodes": [
+        {
+            "classes": [
+                "l3_router"
+            ],
+            "config": {
+                "default_gw": "",
+                "label": "router_1",
+                "type": "router"
+            },
+            "data": {
+                "id": "router_1",
+                "label": "router_1"
+            },
+            "interface": [
+                {
+                    "connect": "edge_m1uftm3s5boohtmek6g",
+                    "id": "iface_16050474",
+                    "ip": "192.168.1.10",
+                    "name": "iface_16050474",
+                    "netmask": 24,
+                    "vxlan_connection_type": 0,
+                    "vxlan_vni": 2000,
+                    "vxlan_vni_to_target_ip": null
+                },
+                {
+                    "connect": "edge_m1uftnzz5b7wla9mt1c",
+                    "id": "iface_57688254",
+                    "ip": "10.0.0.1",
+                    "name": "iface_57688254",
+                    "netmask": 24,
+                    "vxlan_connection_type": 1,
+                    "vxlan_vni": null,
+                    "vxlan_vni_to_target_ip": [
+                        [
+                            "2000",
+                            "10.0.0.2"
+                        ],
+                        [
+                            "1000",
+                            "10.0.0.2"
+                        ]
+                    ]
+                },
+                {
+                    "connect": "edge_m1uftoz5xis4twfvt",
+                    "id": "iface_02067447",
+                    "ip": "192.168.1.100",
+                    "name": "iface_02067447",
+                    "netmask": 24,
+                    "vxlan_connection_type": 0,
+                    "vxlan_vni": 1000,
+                    "vxlan_vni_to_target_ip": null
+                }
+            ],
+            "position": {
+                "x": 143.99780670300765,
+                "y": 162.79711869966582
+            }
+        },
+        {
+            "classes": [
+                "l3_router"
+            ],
+            "config": {
+                "default_gw": "",
+                "label": "router_2",
+                "type": "router"
+            },
+            "data": {
+                "id": "router_2",
+                "label": "router_2"
+            },
+            "interface": [
+                {
+                    "connect": "edge_m1uftn3ez2s9vjq6dpc",
+                    "id": "iface_04670040",
+                    "ip": "192.168.1.20",
+                    "name": "iface_04670040",
+                    "netmask": 24,
+                    "vxlan_vni": 2000,
+                    "vxlan_connection_type": 0,
+                    "vxlan_vni_to_target_ip": null
+                },
+                {
+                    "connect": "edge_m1uftnzz5b7wla9mt1c",
+                    "id": "iface_13818414",
+                    "ip": "10.0.0.2",
+                    "name": "iface_13818414",
+                    "netmask": 24,
+                    "vxlan_vni": null,
+                    "vxlan_connection_type": 1,
+                    "vxlan_vni_to_target_ip": [
+                        [
+                            "2000",
+                            "10.0.0.1"
+                        ],
+                        [
+                            "1000",
+                            "10.0.0.1"
+                        ]
+                    ]
+                },
+                {
+                    "connect": "edge_m1uftpvcdz8gc2fpbew",
+                    "id": "iface_64175116",
+                    "ip": "192.168.1.200",
+                    "name": "iface_64175116",
+                    "netmask": 24,
+                    "vxlan_vni": 1000,
+                    "vxlan_connection_type": 0,
+                    "vxlan_vni_to_target_ip": null
+                }
+            ],
+            "position": {
+                "x": 258,
+                "y": 162.796875
+            }
+        },
+        {
+            "classes": [
+                "host"
+            ],
+            "config": {
+                "default_gw": "192.168.1.100",
+                "label": "host_1",
+                "type": "host"
+            },
+            "data": {
+                "id": "host_1",
+                "label": "host_1"
+            },
+            "interface": [
+                {
+                    "connect": "edge_m1uftoz5xis4twfvt",
+                    "id": "iface_14567101",
+                    "ip": "192.168.1.1",
+                    "name": "iface_14567101",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 45.5,
+                "y": 230.5
+            }
+        },
+        {
+            "classes": [
+                "host"
+            ],
+            "config": {
+                "default_gw": "192.168.1.10",
+                "label": "host_2",
+                "type": "host"
+            },
+            "data": {
+                "id": "host_2",
+                "label": "host_2"
+            },
+            "interface": [
+                {
+                    "connect": "edge_m1uftm3s5boohtmek6g",
+                    "id": "iface_04672555",
+                    "ip": "192.168.1.1",
+                    "name": "iface_04672555",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 48.5,
+                "y": 104.5
+            }
+        },
+        {
+            "classes": [
+                "host"
+            ],
+            "config": {
+                "default_gw": "192.168.1.20",
+                "label": "host_3",
+                "type": "host"
+            },
+            "data": {
+                "id": "host_3",
+                "label": "host_3"
+            },
+            "interface": [
+                {
+                    "connect": "edge_m1uftn3ez2s9vjq6dpc",
+                    "id": "iface_53522355",
+                    "ip": "192.168.1.2",
+                    "name": "iface_53522355",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 343,
+                "y": 102
+            }
+        },
+        {
+            "classes": [
+                "host"
+            ],
+            "config": {
+                "default_gw": "192.168.1.200",
+                "label": "host_4",
+                "type": "host"
+            },
+            "data": {
+                "id": "host_4",
+                "label": "host_4"
+            },
+            "interface": [
+                {
+                    "connect": "edge_m1uftpvcdz8gc2fpbew",
+                    "id": "iface_20347788",
+                    "ip": "192.168.1.2",
+                    "name": "iface_20347788",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 350,
+                "y": 233
+            }
+        }
+    ],
+    "edges": [
+        {
+            "data": {
+                "id": "edge_m1uftm3s5boohtmek6g",
+                "source": "router_1",
+                "target": "host_2",
+                "loss_percentage": 0
+            }
+        },
+        {
+            "data": {
+                "id": "edge_m1uftn3ez2s9vjq6dpc",
+                "source": "router_2",
+                "target": "host_3",
+                "loss_percentage": 0
+            }
+        },
+        {
+            "data": {
+                "id": "edge_m1uftnzz5b7wla9mt1c",
+                "source": "router_1",
+                "target": "router_2",
+                "loss_percentage": 0
+            }
+        },
+        {
+            "data": {
+                "id": "edge_m1uftoz5xis4twfvt",
+                "source": "router_1",
+                "target": "host_1",
+                "loss_percentage": 0
+            }
+        },
+        {
+            "data": {
+                "id": "edge_m1uftpvcdz8gc2fpbew",
+                "source": "router_2",
+                "target": "host_4",
+                "loss_percentage": 0
+            }
+        }
+    ],
+    "jobs": [
+        {
+            "id": "77debad276b04a1da7ee69f672163b27",
+            "level": 0,
+            "job_id": 1,
+            "host_id": "host_1",
+            "arg_1": "192.168.1.2",
+            "print_cmd": "ping -c 1 192.168.1.2"
+        },
+        {
+            "id": "8bed6a2c6a5c4c74b7aba66cf602533e",
+            "level": 1,
+            "job_id": 1,
+            "host_id": "host_2",
+            "arg_1": "192.168.1.2",
+            "print_cmd": "ping -c 1 192.168.1.2"
+        }
+    ],
+    "config": {
+        "zoom": 2.0,
+        "pan_x": 264.0848965405208,
+        "pan_y": 47.02682620003628
+    },
+    "packets": "",
+    "pcap": []
+}
