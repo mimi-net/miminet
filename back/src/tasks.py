@@ -86,16 +86,34 @@ def _has_meaningful_packets(animation) -> bool:
     A warm capture always picks up at least the ARP exchange, so ARP counts as
     meaningful too: animations carrying only STP/RSTP/LLC control frames mean
     the capture started too late to see any host packet and must be retried.
+
+    DHCP is protocol-aware: a client's Discover alone (without a server Offer,
+    Request or ACK) means the DHCP server was not ready when the client ran, so
+    the capture is not meaningful and must be retried.
     """
     if not animation:
         return False
+
+    dhcp_seen = False
+    dhcp_answered = False
+
     for group in animation:
         for packet in group:
             pkt_type = packet.get("config", {}).get("type", "")
+
+            if pkt_type.startswith("DHCP"):
+                dhcp_seen = True
+                if not pkt_type.startswith("DHCP Discover"):
+                    dhcp_answered = True
+                continue
+
             if pkt_type.startswith("ARP"):
                 return True
             if not pkt_type.startswith(("STP", "RSTP", "LLC", "Unknown")):
                 return True
+
+    if dhcp_seen:
+        return dhcp_answered
     return False
 
 
