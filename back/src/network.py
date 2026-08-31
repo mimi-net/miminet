@@ -78,14 +78,16 @@ class MiminetNetwork(IPNet):
             # interface is still down and block in its internal ifup wait for
             # up to 100s, leaving the outbound capture file uncreated (the
             # INOUT file appears first). The interface is certainly up now, so
-            # restart the stuck captures once and keep waiting.
-            missing_captures = self.__missing_capture_files()
+            # restart the stuck captures once and keep waiting. A stale file
+            # left by a died captor process is treated the same as a missing
+            # one — both mean the capture is not attached.
+            stale_captures = self.__stale_capture_interfaces()
             if (
-                missing_captures
+                stale_captures
                 and not capture_restarted
                 and time.monotonic() - (deadline - timeout) > restart_grace
             ):
-                self.__restart_captures(missing_captures)
+                self.__restart_captures(stale_captures)
                 capture_restarted = True
             info(
                 "[network] waiting for readiness: captures_not_live=%s "
@@ -138,34 +140,51 @@ class MiminetNetwork(IPNet):
                         break
         return not_live
 
-    def __missing_capture_files(self) -> list:
-        return [
-            path
-            for _, path in iter_capture_out_files(self.__network_topology.interfaces)
-            if not os.path.exists(path)
-        ]
+    def __stale_capture_interfaces(self) -> list:
+        """Return interface endpoints whose capture must be restarted.
 
-    def __restart_captures(self, missing_paths: list) -> None:
-        """Restart the packet capture on interfaces whose capture is missing.
+        A capture is stale when its output file is missing (mimidump raced
+        interface startup) or its captor process has died leaving a stale file
+        behind (crashed, OOM-killed or clobbered by ``mn -c``). Both mean the
+        capture is not attached, even if the file appears to exist.
+        """
+        stale = []
+        for (
+            link1,
+            link2,
+            _edge_id,
+            edge_source,
+            edge_target,
+            *_rest,
+        ) in self.__network_topology.interfaces:
+            for iface_name, node_name in ((link1, edge_source), (link2, edge_target)):
+                if not os.path.exists(capture_out_path(iface_name)):
+                    stale.append((node_name, iface_name))
+                    continue
+                try:
+                    intf = self[node_name].intf(iface_name)
+                except (KeyError, AttributeError):
+                    continue
+                if intf is None:
+                    continue
+                for capture in intf.get("captures", []):
+                    proc = capture.ongoing_captures.get(iface_name)
+                    if proc is not None and proc.poll() is not None:
+                        stale.append((node_name, iface_name))
+                        break
+        return stale
+
+    def __restart_captures(self, stale: list) -> None:
+        """Restart the packet capture on the given stale interface endpoints.
 
         mimidump may start while the interface is still down and block in its
         internal ifup wait (up to 100s), never creating the outbound capture
-        file while the INOUT one appears. The interface is certainly up by the
-        time we get here, so kill the stale process and start a fresh capture
-        that will create both files immediately.
+        file while the INOUT one appears; or the captor process may have died
+        leaving a stale file. Either way the interface is certainly up by the
+        time we get here, so kill any lingering process, drop the stale files
+        and start a fresh capture.
         """
-        missing = {
-            (node_name, iface_name)
-            for link1, link2, _edge_id, edge_source, edge_target, *_rest in (
-                self.__network_topology.interfaces
-            )
-            for iface_name, node_name in (
-                (link1, edge_source),
-                (link2, edge_target),
-            )
-            if capture_out_path(iface_name) in missing_paths
-        }
-        for node_name, iface_name in missing:
+        for node_name, iface_name in stale:
             try:
                 node = self[node_name]
                 intf = node.intf(iface_name)
