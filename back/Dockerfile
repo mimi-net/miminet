@@ -34,7 +34,7 @@ RUN apt-get update \
  && mkdir /opt/mininet_dependencies
 
 RUN git clone https://github.com/mimi-net/mimidump.git \
-    && cd mimidump && git checkout 971ff5236 && make prefix=/usr install && cd .. && rm -rf mimidump
+    && cd mimidump && git checkout 854a3b0a1f712506a0d1a2d626be62ada9ffefe7 && make prefix=/usr install && cd .. && rm -rf mimidump
 
 WORKDIR /app
 ADD ./requirements.txt /app/requirements.txt
