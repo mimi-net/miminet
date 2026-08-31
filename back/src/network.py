@@ -57,7 +57,8 @@ class MiminetNetwork(IPNet):
         """Poll until the emulation environment is really ready.
 
         Deterministic conditions (no fixed sleeps):
-          1. Every interface capture file exists (mimidump has started).
+          1. Every interface capture is live (mimidump READY via
+             NetworkCapture.wait_until_capturing).
           2. STP/RSTP switches report all ports in the forwarding state.
           3. Every VXLAN underlay endpoint is reachable from its local router.
 
@@ -68,16 +69,17 @@ class MiminetNetwork(IPNet):
         restart_grace = float(os.environ.get("MIMINET_CAPTURE_RESTART_GRACE", "2.0"))
         capture_restarted = False
         while time.monotonic() < deadline:
-            missing_captures = self.__missing_capture_files()
+            captures_not_live = self.__captures_not_live()
             unconverged = self.__unconverged_switches()
             unreachable = self.__unreachable_vtep_targets()
-            if not missing_captures and not unconverged and not unreachable:
+            if not captures_not_live and not unconverged and not unreachable:
                 return
             # mimidump can race interface startup: it may start while the
             # interface is still down and block in its internal ifup wait for
             # up to 100s, leaving the outbound capture file uncreated (the
             # INOUT file appears first). The interface is certainly up now, so
             # restart the stuck captures once and keep waiting.
+            missing_captures = self.__missing_capture_files()
             if (
                 missing_captures
                 and not capture_restarted
@@ -86,15 +88,15 @@ class MiminetNetwork(IPNet):
                 self.__restart_captures(missing_captures)
                 capture_restarted = True
             info(
-                "[network] waiting for readiness: captures_missing=%s "
+                "[network] waiting for readiness: captures_not_live=%s "
                 "stp_unconverged=%s vtep_unreachable=%s\n"
-                % (missing_captures, unconverged, unreachable)
+                % (captures_not_live, unconverged, unreachable)
             )
             time.sleep(poll)
 
         details = []
-        if self.__missing_capture_files():
-            details.append("capture files missing")
+        if self.__captures_not_live():
+            details.append("captures not live")
         if self.__unconverged_switches():
             details.append("STP/RSTP switches not forwarding")
         if self.__unreachable_vtep_targets():
@@ -103,6 +105,38 @@ class MiminetNetwork(IPNet):
             "Network did not become ready within %ss: %s"
             % (timeout, ", ".join(details))
         )
+
+    def __captures_not_live(self) -> list:
+        """Return interface endpoints whose capture is not confirmed live yet.
+
+        Consumes ipmininet's ``NetworkCapture.wait_until_capturing`` (mimidump
+        READY signal, file-existence fallback) so jobs start only after the
+        capture is actually attached — not just that its output file exists.
+        """
+        not_live = []
+        for (
+            link1,
+            link2,
+            _edge_id,
+            edge_source,
+            edge_target,
+            *_rest,
+        ) in self.__network_topology.interfaces:
+            for iface_name, node_name in (
+                (link1, edge_source),
+                (link2, edge_target),
+            ):
+                try:
+                    intf = self[node_name].intf(iface_name)
+                except (KeyError, AttributeError):
+                    continue
+                if intf is None:
+                    continue
+                for capture in intf.get("captures", []):
+                    if not capture.wait_until_capturing(iface_name, timeout=0.1):
+                        not_live.append(iface_name)
+                        break
+        return not_live
 
     def __missing_capture_files(self) -> list:
         return [
