@@ -11,6 +11,12 @@ set -euo pipefail
 BACK_REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 detect_engine() {
+    if [[ -n "${BACK_ENGINE:-}" ]]; then
+        if command -v "$BACK_ENGINE" >/dev/null 2>&1; then
+            return 0
+        fi
+        echo "[warn] BACK_ENGINE=$BACK_ENGINE not found; auto-detecting" >&2
+    fi
     if command -v docker >/dev/null 2>&1; then
         if docker info >/dev/null 2>&1; then
             BACK_ENGINE="docker"
