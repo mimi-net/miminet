@@ -47,6 +47,7 @@ def emulate(
     if len(network.jobs) == 0:
         return [], []
 
+    net = None
     try:
         topo = MiminetTopology(network)
         net = MiminetNetwork(topo, network)
@@ -127,6 +128,15 @@ def emulate(
 
     except Exception as e:
         error(f"An error occurred during mininet configuration: {str(e)}")
+        # Always tear the network down, even on a failed start: skipping
+        # net.stop() would leave mimidump processes alive, still writing to the
+        # same /tmp/capture_* paths, so the next attempt would read stale data
+        # left behind by this one.
+        if net is not None:
+            try:
+                net.stop()
+            except Exception as stop_err:
+                error(f"Failed to stop network after error: {stop_err}")
         subprocess.call("mn -c", shell=True)
 
         raise e
