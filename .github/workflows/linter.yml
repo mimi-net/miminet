@@ -38,10 +38,10 @@ jobs:
         run: |
           uv run --frozen mypy --ignore-missing-imports ${{matrix.node}}
 
-      - name: Format with black
+      - name: Format with ruff
         run: |
-          uv run --frozen black --check --verbose --diff ${{matrix.node}}
+          uv run --frozen ruff format --check --verbose ${{matrix.node}}
 
-      - name: Lint with flake8
+      - name: Lint with ruff
         run: |
-          uv run --frozen flake8 --count --verbose --max-line-length=88 --extend-ignore=E501,W391,C901,E203 --statistics ${{matrix.node}}
+          uv run --frozen ruff check --verbose ${{matrix.node}}

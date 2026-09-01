@@ -36,8 +36,6 @@ dev = [
     "pytest-mock==3.15.1",
     "pytest-timeout==2.4.0",
     "selenium",
-    "black~=26.3",
-    "flake8",
     "isort",
     "mypy",
     "types-requests",

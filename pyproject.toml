@@ -13,5 +13,9 @@ ignore = ["E501", "W391", "C901", "E203"]
 quote-style = "double"
 
 [tool.ty]
-python_version = "3.12"
-ignore_missing_imports = true
+
+[[tool.ty.overrides]]
+include = ["**"]
+
+[tool.ty.overrides.analysis]
+allowed-unresolved-imports = ["**"]
