@@ -6,7 +6,6 @@ from utils.networks import MiminetTestNetwork, NodeType
 
 
 class TestFieldsFilter:
-
     @pytest.fixture(scope="function")
     def network(self, selenium: MiminetTester):
         # make simple network
@@ -35,9 +34,9 @@ class TestFieldsFilter:
         gw_input.send_keys("192,168ю1ю1")
 
         actual_value = gw_input.get_attribute("value")
-        assert (
-            actual_value == "192.168.1.1"
-        ), f"The filter failed. Expected '192.168.1.1', received '{actual_value}'"
+        assert actual_value == "192.168.1.1", (
+            f"The filter failed. Expected '192.168.1.1', received '{actual_value}'"
+        )
 
     def test_host_add_route_gateway_filter(
         self, selenium: MiminetTester, network: MiminetTestNetwork
@@ -62,9 +61,9 @@ class TestFieldsFilter:
         gw_element.clear()
         gw_element.send_keys("10,10ю10ю1")
 
-        assert (
-            gw_element.get_attribute("value") == "10.10.10.1"
-        ), "The gateway field filter did not work"
+        assert gw_element.get_attribute("value") == "10.10.10.1", (
+            "The gateway field filter did not work"
+        )
 
     def test_router_cidr_notation_add_ip(
         self, selenium: MiminetTester, network: MiminetTestNetwork

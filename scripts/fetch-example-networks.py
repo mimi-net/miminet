@@ -89,7 +89,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--out",
-        default=str(Path(__file__).resolve().parent.parent / "back" / "bench" / "examples"),
+        default=str(
+            Path(__file__).resolve().parent.parent / "back" / "bench" / "examples"
+        ),
         help="output directory for *_network.json files",
     )
     args = parser.parse_args()

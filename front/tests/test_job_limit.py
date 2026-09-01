@@ -51,9 +51,9 @@ class TestJobLimit:
             # Check error message quality
             assert "лимит" in error_message.lower(), "Error should mention limit"
             assert "30" in error_message, "Error should mention the limit number (30)"
-            assert (
-                "команд" in error_message.lower()
-            ), "Error should mention 'команд' (commands)"
+            assert "команд" in error_message.lower(), (
+                "Error should mention 'команд' (commands)"
+            )
 
         network.delete()
 
@@ -112,9 +112,9 @@ class TestJobLimit:
             )
         config_host2.submit()
 
-        assert (
-            len(network.jobs) == 30
-        ), f"Expected 30 jobs across all devices, but got {len(network.jobs)}"
+        assert len(network.jobs) == 30, (
+            f"Expected 30 jobs across all devices, but got {len(network.jobs)}"
+        )
 
         # Try to add 31st job to any device - should fail
         config_host2 = network.open_node_config(host2_id)
@@ -158,9 +158,9 @@ class TestJobLimit:
             )
         config1.submit()
 
-        assert (
-            len(network.jobs) == 30
-        ), f"Expected 30 jobs initially, but got {len(network.jobs)}"
+        assert len(network.jobs) == 30, (
+            f"Expected 30 jobs initially, but got {len(network.jobs)}"
+        )
 
         # Delete one job via API
         job_id_to_delete = network.jobs[0]["id"]
@@ -190,9 +190,9 @@ class TestJobLimit:
             }});
         """)
         assert delete_result["success"], "Failed to delete job"
-        assert (
-            len(network.jobs) == 29
-        ), f"Expected 29 jobs after deletion, but got {len(network.jobs)}"
+        assert len(network.jobs) == 29, (
+            f"Expected 29 jobs after deletion, but got {len(network.jobs)}"
+        )
 
         # Add a new job - should succeed
         config1 = network.open_node_config(host1_id)
@@ -202,8 +202,8 @@ class TestJobLimit:
         )
         config1.submit()
 
-        assert (
-            len(network.jobs) == 30
-        ), f"Expected 30 jobs after adding new one, but got {len(network.jobs)}"
+        assert len(network.jobs) == 30, (
+            f"Expected 30 jobs after adding new one, but got {len(network.jobs)}"
+        )
 
         network.delete()
