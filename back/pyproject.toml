@@ -1,0 +1,29 @@
+[project]
+name = "miminet-back"
+version = "0.1.0"
+description = "Miminet backend"
+requires-python = ">=3.12"
+dependencies = [
+    "celery==5.6.3",
+    "dpkt==1.9.8",
+    "python-dotenv==1.2.3",
+    "marshmallow-dataclass==8.7.1",
+    "psutil==7.2.2",
+    "netaddr==1.3.0",
+    "ipmininet @ git+https://github.com/mimi-net/ipmininet.git@v1.2.7",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-timeout==2.4.0",
+    "pytest-xdist",
+    "black~=24.0",
+    "flake8",
+    "isort",
+    "mypy",
+    "types-requests",
+    "wheel",
+    "ruff",
+    "ty",
+]

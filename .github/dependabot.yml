@@ -1,20 +1,11 @@
 version: 2
 updates:
   - package-ecosystem: "pip"
-    directory: "/back"
+    directory: "/"
     schedule:
       interval: "monthly"
     groups:
-      back-pip-dependencies:
-        patterns:
-          - "*"
-
-  - package-ecosystem: "pip"
-    directory: "/front"
-    schedule:
-      interval: "monthly"
-    groups:
-      front-pip-dependencies:
+      pip-dependencies:
         patterns:
           - "*"
 

@@ -12,10 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - name: Set up Python
-        uses: actions/setup-python@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
         with:
-          python-version-file: .python-version
+          cache-dependency-path: uv.lock
 
       - name: Install apt package
         run: |
@@ -64,17 +65,14 @@ jobs:
           # (also used by the prod image ENTRYPOINT and the local harness).
           sudo bash back/ovs-init.sh
 
-      - name: Set up virtualenv
+      - name: Install dependencies
         run: |
-          python -m venv venv
-          source venv/bin/activate
-          python -m pip install pip wheel pytest
-          pip install -r back/requirements.txt
+          uv sync --frozen --project back
 
       - name: Test with pytest
         run: |
           sudo bash -c '
-            source venv/bin/activate
+            source .venv/bin/activate
             cd back/tests
             export PYTHONPATH=$PYTHONPATH:../src
             pytest .

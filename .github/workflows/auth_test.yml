@@ -17,15 +17,19 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v7
 
+    - name: Install uv
+      uses: astral-sh/setup-uv@v7
+      with:
+        cache-dependency-path: uv.lock
+
     - name: Installing dependencies
       run: |
-        sudo apt-get update
-        pip install -r front/requirements.txt
+        uv sync --frozen
 
     - name: Running tests
       run: |
+        source .venv/bin/activate
         cd front/src
-        pip install pytest pytest_mock
         python -m pytest -vv .
       env:
           CLIENT_YANDEX: ${{ secrets.CLIENT_YANDEX }}
