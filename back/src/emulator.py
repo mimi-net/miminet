@@ -23,6 +23,13 @@ from network_topology import MiminetTopology
 SERVER_SETTLE_JOBS = frozenset({200, 201, 203})
 SERVER_SETTLE_SECONDS = float(os.environ.get("MIMINET_SERVER_SETTLE", "0.5"))
 
+# iproute2 >= 6.19 colorizes `ip` output whenever stdout is a TTY, and Mininet
+# runs every host/switch shell on a pseudo-tty. ipmininet parses `ip address
+# show` output as plain text, so ANSI-wrapped addresses break interface
+# configuration (empty captures). Disable color for the emulation process and
+# everything it spawns (mininet node shells inherit os.environ).
+os.environ.setdefault("NO_COLOR", "1")
+
 
 def emulate(
     network: Network,
