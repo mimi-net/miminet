@@ -104,7 +104,7 @@ Build the image and run the full suite inside an isolated container:
 
 ```bash
 # Build
-podman build -t miminet-back:test -f back/Dockerfile back/
+podman build -t miminet-back:test -f back/Dockerfile .
 
 # Probe: verify emulation works in the container's own network namespace
 podman run --rm --entrypoint /bin/bash \
