@@ -10,6 +10,10 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     steps:
       - uses: actions/checkout@v7
 
@@ -71,18 +75,25 @@ jobs:
           uv sync --frozen --project back
 
       - name: Test with pytest
+        env:
+          SHARD: ${{ matrix.shard }}
+          N_SHARDS: 3
         run: |
-          sudo bash -c '
+          sudo SHARD="$SHARD" N_SHARDS="$N_SHARDS" bash -c '
             source .venv/bin/activate
             cd back/tests
             export PYTHONPATH=$PYTHONPATH:../src
-            pytest .
+            files=$(find . -name "test_*.py" | sort)
+            slice=$(echo "$files" | awk -v n="$N_SHARDS" -v s="$SHARD" "NR % n == s-1")
+            [ -n "$slice" ] || { echo "ERROR: shard $SHARD/$N_SHARDS got an empty slice" >&2; exit 1; }
+            echo "Shard $SHARD/$N_SHARDS (files: $slice)"
+            pytest $slice
           '
 
       - name: Upload test logs
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: test-logs
+          name: test-logs-shard-${{ matrix.shard }}
           path: back/tests/back_test.log
           if-no-files-found: ignore
