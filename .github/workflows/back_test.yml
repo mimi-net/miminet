@@ -70,13 +70,11 @@ jobs:
         run: |
           uv sync --frozen --project back
 
-      - name: Test with pytest
+      - name: Test with pytest (parallel, isolated namespaces)
         run: |
           sudo bash -c '
             source .venv/bin/activate
-            cd back/tests
-            export PYTHONPATH=$PYTHONPATH:../src
-            pytest .
+            scripts/run-tests-parallel.sh
           '
 
       - name: Upload test logs

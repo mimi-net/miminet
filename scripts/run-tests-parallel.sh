@@ -7,7 +7,6 @@
 # does not work in execnet popen workers.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$ROOT"
 
 export PYTHONPATH="$ROOT/back/src${PYTHONPATH:+:$PYTHONPATH}"
 
@@ -24,7 +23,10 @@ if [ -z "$N" ]; then
     N="$(nproc)"
 fi
 if [ ${#ARGS[@]} -eq 0 ]; then
-    ARGS=(back/tests)
+    # Tests resolve network_examples_json/test_json relative to the CWD, so
+    # run from back/tests like the serial suite does.
+    cd "$ROOT/back/tests"
+    ARGS=(.)
 fi
 
 WRAPPER="$ROOT/scripts/py-unshare.sh"
