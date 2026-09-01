@@ -61,15 +61,15 @@ class TestJobEdit:
 
         # Verify job was updated, not duplicated
         final_jobs_count = len(network.jobs)
-        assert (
-            final_jobs_count == 1
-        ), f"Job should be updated, not duplicated. Got {final_jobs_count} jobs"
+        assert final_jobs_count == 1, (
+            f"Job should be updated, not duplicated. Got {final_jobs_count} jobs"
+        )
 
         # Verify the new value is saved
         updated_job = network.jobs[0]
-        assert (
-            updated_job["arg_1"] == "192.168.1.100"
-        ), f"Job should have new IP, got: {updated_job['arg_1']}"
+        assert updated_job["arg_1"] == "192.168.1.100", (
+            f"Job should have new IP, got: {updated_job['arg_1']}"
+        )
 
         network.delete()
 
@@ -132,15 +132,15 @@ class TestJobEdit:
         config1.submit()
 
         # Verify still 30 jobs
-        assert (
-            len(network.jobs) == 30
-        ), f"Should still have 30 jobs after edit, got {len(network.jobs)}"
+        assert len(network.jobs) == 30, (
+            f"Should still have 30 jobs after edit, got {len(network.jobs)}"
+        )
 
         # Verify at least one job has the new IP (jobs may be reordered)
         job_ips = [job["arg_1"] for job in network.jobs]
-        assert (
-            "192.168.5.99" in job_ips
-        ), f"Updated IP should be in jobs list: {job_ips}"
+        assert "192.168.5.99" in job_ips, (
+            f"Updated IP should be in jobs list: {job_ips}"
+        )
         assert (
             first_job_original_ip not in job_ips
             or job_ips.count(first_job_original_ip) < 30
@@ -172,7 +172,7 @@ class TestJobEdit:
             config_host.add_jobs(
                 1,
                 {
-                    Location.Network.ConfigPanel.Host.Job.PING_FIELD.selector: f"10.20.30.{10+i}"
+                    Location.Network.ConfigPanel.Host.Job.PING_FIELD.selector: f"10.20.30.{10 + i}"
                 },
             )
         config_host.submit()
@@ -220,11 +220,11 @@ class TestJobEdit:
 
         # Verify new IPs are present
         updated_ips = [job["arg_1"] for job in network.jobs]
-        assert (
-            "10.20.30.100" in updated_ips
-        ), f"First edited IP not found in {updated_ips}"
-        assert (
-            "10.20.30.101" in updated_ips
-        ), f"Second edited IP not found in {updated_ips}"
+        assert "10.20.30.100" in updated_ips, (
+            f"First edited IP not found in {updated_ips}"
+        )
+        assert "10.20.30.101" in updated_ips, (
+            f"Second edited IP not found in {updated_ips}"
+        )
 
         network.delete()

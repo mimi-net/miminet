@@ -304,9 +304,9 @@ def requester():
 
     response = session.get(MAIN_PAGE)
 
-    assert (
-        response.status_code == 200
-    ), "Miminet is not running or its address is incorrect: unable to get home page!"
+    assert response.status_code == 200, (
+        "Miminet is not running or its address is incorrect: unable to get home page!"
+    )
 
     response = session.post(
         f"{MAIN_PAGE}//auth/login.html",

@@ -219,9 +219,11 @@ def test_restart_captures_kills_removes_restarts():
     }
     net = make_net(interfaces, intfs)
 
-    with mock.patch("src.network.os.path.exists", return_value=True), mock.patch(
-        "src.network.os.remove"
-    ) as remove_mock, mock.patch("src.network.info"):
+    with (
+        mock.patch("src.network.os.path.exists", return_value=True),
+        mock.patch("src.network.os.remove") as remove_mock,
+        mock.patch("src.network.info"),
+    ):
         restart_captures(net, [("host1", "l1a")])
 
     assert proc.killed
@@ -242,9 +244,11 @@ def test_restart_captures_skips_unknown_endpoints():
     }
     net = make_net(interfaces, intfs)
 
-    with mock.patch("src.network.os.path.exists", return_value=True), mock.patch(
-        "src.network.os.remove"
-    ) as remove_mock, mock.patch("src.network.info"):
+    with (
+        mock.patch("src.network.os.path.exists", return_value=True),
+        mock.patch("src.network.os.remove") as remove_mock,
+        mock.patch("src.network.info"),
+    ):
         restart_captures(net, [("ghost", "nope")])
 
     assert not capture.started
@@ -256,19 +260,22 @@ def test_restart_captures_skips_unknown_endpoints():
 
 def test_wait_until_ready_all_live_returns():
     net = MiminetNetwork.__new__(MiminetNetwork)
-    with mock.patch.object(
-        MiminetNetwork, "_MiminetNetwork__captures_not_live", return_value=[]
-    ), mock.patch.object(
-        MiminetNetwork, "_MiminetNetwork__unconverged_switches", return_value=[]
-    ), mock.patch.object(
-        MiminetNetwork, "_MiminetNetwork__unreachable_vtep_targets", return_value=[]
-    ), mock.patch(
-        "src.network.time.monotonic", return_value=0.0
-    ), mock.patch(
-        "src.network.time.sleep"
-    ), mock.patch.object(
-        MiminetNetwork, "_MiminetNetwork__restart_captures"
-    ) as restart:
+    with (
+        mock.patch.object(
+            MiminetNetwork, "_MiminetNetwork__captures_not_live", return_value=[]
+        ),
+        mock.patch.object(
+            MiminetNetwork, "_MiminetNetwork__unconverged_switches", return_value=[]
+        ),
+        mock.patch.object(
+            MiminetNetwork, "_MiminetNetwork__unreachable_vtep_targets", return_value=[]
+        ),
+        mock.patch("src.network.time.monotonic", return_value=0.0),
+        mock.patch("src.network.time.sleep"),
+        mock.patch.object(
+            MiminetNetwork, "_MiminetNetwork__restart_captures"
+        ) as restart,
+    ):
         wait_until_ready(net)
 
     restart.assert_not_called()
@@ -277,19 +284,22 @@ def test_wait_until_ready_all_live_returns():
 def test_wait_until_ready_timeout_lists_captures():
     net = MiminetNetwork.__new__(MiminetNetwork)
     not_live = [("host1", "l1a"), ("router1", "l1b")]
-    with mock.patch.object(
-        MiminetNetwork, "_MiminetNetwork__captures_not_live", return_value=not_live
-    ), mock.patch.object(
-        MiminetNetwork, "_MiminetNetwork__unconverged_switches", return_value=[]
-    ), mock.patch.object(
-        MiminetNetwork, "_MiminetNetwork__unreachable_vtep_targets", return_value=[]
-    ), mock.patch(
-        "src.network.time.monotonic", side_effect=monotonic_clock()
-    ), mock.patch(
-        "src.network.time.sleep"
-    ), mock.patch.object(
-        MiminetNetwork, "_MiminetNetwork__restart_captures"
-    ) as restart:
+    with (
+        mock.patch.object(
+            MiminetNetwork, "_MiminetNetwork__captures_not_live", return_value=not_live
+        ),
+        mock.patch.object(
+            MiminetNetwork, "_MiminetNetwork__unconverged_switches", return_value=[]
+        ),
+        mock.patch.object(
+            MiminetNetwork, "_MiminetNetwork__unreachable_vtep_targets", return_value=[]
+        ),
+        mock.patch("src.network.time.monotonic", side_effect=monotonic_clock()),
+        mock.patch("src.network.time.sleep"),
+        mock.patch.object(
+            MiminetNetwork, "_MiminetNetwork__restart_captures"
+        ) as restart,
+    ):
         with pytest.raises(TimeoutError) as excinfo:
             wait_until_ready(net)
 
@@ -300,21 +310,25 @@ def test_wait_until_ready_timeout_lists_captures():
 def test_wait_until_ready_restarts_once_after_grace():
     net = MiminetNetwork.__new__(MiminetNetwork)
     not_live = [("host1", "l1a")]
-    with mock.patch.dict(
-        "src.network.os.environ", {"MIMINET_CAPTURE_RESTART_GRACE": "0.0"}
-    ), mock.patch.object(
-        MiminetNetwork, "_MiminetNetwork__captures_not_live", return_value=not_live
-    ), mock.patch.object(
-        MiminetNetwork, "_MiminetNetwork__unconverged_switches", return_value=[]
-    ), mock.patch.object(
-        MiminetNetwork, "_MiminetNetwork__unreachable_vtep_targets", return_value=[]
-    ), mock.patch(
-        "src.network.time.monotonic", side_effect=monotonic_clock()
-    ), mock.patch(
-        "src.network.time.sleep"
-    ), mock.patch.object(
-        MiminetNetwork, "_MiminetNetwork__restart_captures"
-    ) as restart:
+    with (
+        mock.patch.dict(
+            "src.network.os.environ", {"MIMINET_CAPTURE_RESTART_GRACE": "0.0"}
+        ),
+        mock.patch.object(
+            MiminetNetwork, "_MiminetNetwork__captures_not_live", return_value=not_live
+        ),
+        mock.patch.object(
+            MiminetNetwork, "_MiminetNetwork__unconverged_switches", return_value=[]
+        ),
+        mock.patch.object(
+            MiminetNetwork, "_MiminetNetwork__unreachable_vtep_targets", return_value=[]
+        ),
+        mock.patch("src.network.time.monotonic", side_effect=monotonic_clock()),
+        mock.patch("src.network.time.sleep"),
+        mock.patch.object(
+            MiminetNetwork, "_MiminetNetwork__restart_captures"
+        ) as restart,
+    ):
         with pytest.raises(TimeoutError):
             wait_until_ready(net)
 

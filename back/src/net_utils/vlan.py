@@ -38,20 +38,20 @@ def clean_bridges(net: IPNet) -> None:
     """
 
     for switch in net.switches:
-        switch.cmd(f'ip link set {f"br-{switch.name}"} down')
+        switch.cmd(f"ip link set {f'br-{switch.name}'} down")
         if isinstance(switch, IPOVSSwitch):
-            switch.vsctl(f' del-br {f"br-{switch.name}"}')
+            switch.vsctl(f" del-br {f'br-{switch.name}'}")
         else:
-            switch.cmd(f'brctl delbr {f"br-{switch.name}"}')
+            switch.cmd(f"brctl delbr {f'br-{switch.name}'}")
 
 
 def configure_access(switch: IPSwitch, intf: str, vlan: int) -> None:
     if isinstance(switch, IPOVSSwitch):
         switch.vsctl(f" del-port {switch} {intf}")
-        switch.vsctl(f' add-port {f"br-{switch.name}"} {intf}')
+        switch.vsctl(f" add-port {f'br-{switch.name}'} {intf}")
         switch.vsctl(f" set port {intf} tag={vlan}")
     else:
-        switch.cmd(f'ip link set {intf} master {f"br-{switch.name}"}')
+        switch.cmd(f"ip link set {intf} master {f'br-{switch.name}'}")
         switch.cmd(f"bridge vlan del dev {intf} vid 1")
         switch.cmd(f"bridge vlan add dev {intf} vid {vlan} pvid untagged")
 
@@ -59,10 +59,10 @@ def configure_access(switch: IPSwitch, intf: str, vlan: int) -> None:
 def configure_trunk(switch: IPSwitch, intf: str, vlans: list[int]) -> None:
     if isinstance(switch, IPOVSSwitch):
         switch.vsctl(f" del-port {switch} {intf}")
-        switch.vsctl(f' add-port {f"br-{switch.name}"} {intf}')
+        switch.vsctl(f" add-port {f'br-{switch.name}'} {intf}")
         switch.vsctl(f" set port {intf} trunks={','.join(map(str, vlans))}")
     else:
-        switch.cmd(f'ip link set {intf} master {f"br-{switch.name}"}')
+        switch.cmd(f"ip link set {intf} master {f'br-{switch.name}'}")
         switch.cmd(f"bridge vlan del dev {intf} vid 1")
 
         for vlan in vlans:
@@ -77,11 +77,11 @@ def has_vlan_interfaces(interfaces: list[NodeInterface]) -> bool:
 def add_bridge(switch: IPSwitch, interface: list[NodeInterface]) -> None:
     if isinstance(switch, IPOVSSwitch):
         if has_vlan_interfaces(interface):
-            switch.vsctl(f' add-br {f"br-{switch.name}"}')
+            switch.vsctl(f" add-br {f'br-{switch.name}'}")
             switch.vsctl(
-                f' set bridge {f"br-{switch.name}"} other_config:enable-vlan-filtering=true'
+                f" set bridge {f'br-{switch.name}'} other_config:enable-vlan-filtering=true"
             )
     else:
-        switch.cmd(f'ip link add name {f"br-{switch.name}"} type bridge')
-    switch.cmd(f'ip link set dev {f"br-{switch.name}"} up')
-    switch.cmd(f'ip link set dev {f"br-{switch.name}"} type bridge vlan_filtering 1')
+        switch.cmd(f"ip link add name {f'br-{switch.name}'} type bridge")
+    switch.cmd(f"ip link set dev {f'br-{switch.name}'} up")
+    switch.cmd(f"ip link set dev {f'br-{switch.name}'} type bridge vlan_filtering 1")

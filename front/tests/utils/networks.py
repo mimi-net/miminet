@@ -407,9 +407,9 @@ class NodeConfig:
         """Fill default gateway with data."""
         self.__check_config_open()
 
-        assert (
-            self.__config_locator.DEFAULT_GATEWAY_FIELD
-        ), f'Unable to change default gateway for this element: "{self.__config_locator}".'
+        assert self.__config_locator.DEFAULT_GATEWAY_FIELD, (
+            f'Unable to change default gateway for this element: "{self.__config_locator}".'
+        )
 
         gw_field = self.__selenium.find_element(
             By.CSS_SELECTOR, self.__config_locator.DEFAULT_GATEWAY_FIELD.selector
@@ -421,9 +421,9 @@ class NodeConfig:
         """Change device name."""
         self.__check_config_open()
 
-        assert (
-            self.__config_locator.NAME_FIELD
-        ), f'Unable to change name for this element: "{self.__config_locator}".'
+        assert self.__config_locator.NAME_FIELD, (
+            f'Unable to change name for this element: "{self.__config_locator}".'
+        )
 
         name_field = self.__selenium.find_element(
             By.CSS_SELECTOR, self.__config_locator.NAME_FIELD.selector
@@ -559,9 +559,9 @@ class NodeConfig:
         else:
             raise Exception("Can't find device type !!!")
 
-        assert (
-            self.__config_locator.MAIN_FORM
-        ), f'Unable to open node config form for this element: "{self.__config_locator}".'
+        assert self.__config_locator.MAIN_FORM, (
+            f'Unable to open node config form for this element: "{self.__config_locator}".'
+        )
 
         self.__selenium.wait_until_appear(
             By.CSS_SELECTOR, self.__config_locator.MAIN_FORM.selector
