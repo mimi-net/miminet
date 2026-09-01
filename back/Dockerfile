@@ -47,4 +47,10 @@ COPY back/ENTRYPOINT.sh /app/ENTRYPOINT.sh
 RUN chmod +x ovs-init.sh ENTRYPOINT.sh
 COPY back/src /app
 
+# iproute2 >= 6.19 colorizes `ip` output whenever stdout is a TTY. Mininet
+# spawns every host/switch shell on a pseudo-tty, and ipmininet parses
+# `ip address show` output as plain text, so colored output (e.g. an IP
+# wrapped in ANSI escapes) breaks interface configuration. Disable color.
+ENV NO_COLOR=1
+
 ENTRYPOINT ["/app/ENTRYPOINT.sh"]
