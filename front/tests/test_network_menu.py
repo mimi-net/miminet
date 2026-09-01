@@ -1,6 +1,5 @@
 import pytest
 from conftest import HOME_PAGE, MAIN_PAGE, MiminetTester
-from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
 from utils.locators import Location
 from utils.networks import MiminetTestNetwork
@@ -15,12 +14,12 @@ class TestNetworkMenu:
 
         empty_network.delete()
 
-    def test_my_networks_button_press(self, selenium: Chrome):
+    def test_my_networks_button_press(self, selenium: MiminetTester):
         """Checks if it is possible to get to the network selection menu"""
         selenium.get(MAIN_PAGE)
-        selenium.find_element(
+        selenium.wait_and_click(
             By.CSS_SELECTOR, Location.NavigationButton.MY_NETWORKS_BUTTON.selector
-        ).click()
+        )
 
         assert selenium.current_url == HOME_PAGE
 
@@ -36,8 +35,8 @@ class TestNetworkMenu:
     def test_new_network_open(self, selenium: MiminetTester, empty_network: str):
         """Checks is it possible to open new network via home menu"""
         selenium.get(HOME_PAGE)
-        selenium.find_element(
+        selenium.wait_and_click(
             By.XPATH, Location.MyNetworks.get_network_button_xpath(0)
-        ).click()
+        )
 
         assert empty_network == selenium.current_url
