@@ -74,7 +74,7 @@ jobs:
         run: |
           sudo bash -c '
             source .venv/bin/activate
-            scripts/run-tests-parallel.sh
+            XDIST_WORKERS=1 scripts/run-tests-parallel.sh
           '
 
       - name: Upload test logs
