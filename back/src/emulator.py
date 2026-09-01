@@ -14,6 +14,15 @@ from mininet.log import setLogLevel, info, error
 from net_utils.captures import capture_out_path, capture_paths
 from network_topology import MiminetTopology
 
+# Server-start jobs launch background listeners (`nc -k -l`, `nc -d -u -l`,
+# dhcpd). Client jobs that follow can race ahead of the bind: the first SYN
+# hits a not-yet-listening socket and the kernel answers RST (connection
+# refused), which surfaces as a flaky tcp/port-forwarding handshake in the test
+# suite. Give these jobs a short grace so the socket is bound before clients
+# act. MIMINET_SERVER_SETTLE overrides the window (seconds) for tuning.
+SERVER_SETTLE_JOBS = frozenset({200, 201, 203})
+SERVER_SETTLE_SECONDS = float(os.environ.get("MIMINET_SERVER_SETTLE", "0.5"))
+
 
 def emulate(
     network: Network,
@@ -91,6 +100,12 @@ def emulate(
                 "[emulator] Finished job: host=%s job_id=%s elapsed=%.2fs\n"
                 % (job.host_id, job.job_id, elapsed)
             )
+            if job.job_id in SERVER_SETTLE_JOBS:
+                info(
+                    "[emulator] server job %s started; settling %.2fs\n"
+                    % (job.job_id, SERVER_SETTLE_SECONDS)
+                )
+                time.sleep(SERVER_SETTLE_SECONDS)
 
         # Log pcap file sizes AND actual paths used by mimidump before stop().
         # mimidump writes to {intf.node.cwd}/capture_{intf.name}_out.pcapng —
