@@ -31,15 +31,15 @@ run_emulation() {
         -c "
             set -e
             bash /repo/back/ovs-init.sh
-            pip3 install -q pytest
+            uv pip install --python /app/.venv/bin/python pytest
             cd /repo/back/tests
-            PYTHONPATH=/repo/back/src pytest \"${pytest_args[*]}\" -o log_file=/tmp/back_test.log -p no:cacheprovider --basetemp=/tmp/pytest || { mn -c >/dev/null 2>&1; exit 1; }
+            PYTHONPATH=/repo/back/src /app/.venv/bin/python -m pytest \"${pytest_args[*]}\" -o log_file=/tmp/back_test.log -p no:cacheprovider --basetemp=/tmp/pytest || { mn -c >/dev/null 2>&1; exit 1; }
             mn -c >/dev/null 2>&1 || true
         "
 }
 
 cmd_build() {
-    "$BACK_ENGINE" build -t "$BACK_IMAGE" -f "$BACK_REPO_ROOT/back/Dockerfile" "$BACK_REPO_ROOT/back"
+    "$BACK_ENGINE" build -t "$BACK_IMAGE" -f "$BACK_REPO_ROOT/back/Dockerfile" "$BACK_REPO_ROOT"
     echo "[ok] image $BACK_IMAGE built"
 }
 
