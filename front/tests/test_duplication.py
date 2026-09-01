@@ -30,10 +30,10 @@ class TestDuplicateBasic:
         dup_field.clear()
         dup_field.send_keys("30")
 
-        selenium.find_element(
+        selenium.wait_and_click(
             By.CSS_SELECTOR,
             Location.Network.ConfigPanel.Edge.SUBMIT_BUTTON.selector,
-        ).click()
+        )
 
         selenium.wait_for(
             lambda _: network.edges[0]["data"].get("duplicate_percentage") == "30"
@@ -58,10 +58,14 @@ class TestDuplicateCopyNetwork:
             By.CSS_SELECTOR, Location.Network.ConfigPanel.Edge.DUPLICATE_FIELD.selector
         ).send_keys("50")
 
-        selenium.find_element(
+        selenium.wait_and_click(
             By.CSS_SELECTOR,
             Location.Network.ConfigPanel.Edge.SUBMIT_BUTTON.selector,
-        ).click()
+        )
+
+        selenium.wait_for(
+            lambda _: network.edges[0]["data"].get("duplicate_percentage") == "50"
+        )
 
         yield network
         network.delete()
@@ -74,15 +78,15 @@ class TestDuplicateCopyNetwork:
 
         initial_edges = network.edges
 
-        selenium.find_element(
+        selenium.wait_and_click(
             By.CSS_SELECTOR, Location.Network.TopButton.COPY.selector
-        ).click()
+        )
 
         selenium.wait_until_appear(By.XPATH, Location.Network.MODAL_DIALOG.xpath)
 
-        selenium.find_element(
+        selenium.wait_and_click(
             By.XPATH, Location.Network.ModalButton.GO_TO_EDITING.xpath
-        ).click()
+        )
 
         copy_net = MiminetTestNetwork(selenium, selenium.current_url)
 

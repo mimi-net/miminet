@@ -54,9 +54,9 @@ class TestPacketFilters:
         )
 
     def _open_settings_modal(self, selenium: MiminetTester):
-        selenium.find_element(
+        selenium.wait_and_click(
             By.CSS_SELECTOR, Location.Network.TopButton.OPTIONS.selector
-        ).click()
+        )
         selenium.wait_until_appear(By.CSS_SELECTOR, "#netConfigModal")
         self._wait_filters_ready(selenium)
 
@@ -69,10 +69,9 @@ class TestPacketFilters:
             selenium.wait_until_appear(By.CSS_SELECTOR, locator.selector)
 
     def _save_network_options(self, selenium: MiminetTester):
-        submit_button = selenium.find_element(
+        selenium.wait_and_click(
             By.CSS_SELECTOR, Location.Network.Options.SUBMIT_BUTTON.selector
         )
-        submit_button.click()
         selenium.wait_for(
             lambda driver: driver.execute_script(
                 "return !document.querySelector('#netConfigModal')"
@@ -88,8 +87,7 @@ class TestPacketFilters:
             " || $('#netConfigModal').is(':hidden');"
         ):
             return
-        cancel_button = selenium.find_element(By.ID, cancel_button_id)
-        cancel_button.click()
+        selenium.wait_and_click(By.ID, cancel_button_id)
         selenium.wait_for(
             lambda driver: driver.execute_script(
                 "return !document.querySelector('#netConfigModal')"

@@ -231,9 +231,9 @@ class MiminetTestNetwork:
         """Delete current network."""
         self.__check_page()
 
-        self.__selenium.find_element(
+        self.__selenium.wait_and_click(
             By.CSS_SELECTOR, Location.Network.TopButton.OPTIONS.selector
-        ).click()
+        )
 
         self.__selenium.wait_and_click(
             By.CSS_SELECTOR,
@@ -311,10 +311,10 @@ class NodeConfig:
         """Switch the FTP configuration toggle."""
         self.__check_config_open()
 
-        self.__selenium.find_element(
+        self.__selenium.wait_and_click(
             By.CSS_SELECTOR,
             Location.Network.ConfigPanel.Switch.RSTP_BUTTON.selector,
-        ).click()
+        )
 
         modal_el = (
             By.CSS_SELECTOR,
@@ -324,10 +324,10 @@ class NodeConfig:
         )
 
         with self.__selenium.run_in_modal_context(*modal_el) as dialog:
-            dialog.find_element(
+            self.__selenium.wait_and_click(
                 By.CSS_SELECTOR,
                 Location.Network.ConfigPanel.Switch.StpPanel.STP_BUTTON.selector,
-            ).click()
+            )
 
             priority_field = dialog.find_element(
                 By.CSS_SELECTOR,
@@ -336,19 +336,19 @@ class NodeConfig:
             priority_field.clear()
             priority_field.send_keys(str(priority))
 
-            dialog.find_element(
+            self.__selenium.wait_and_click(
                 By.CSS_SELECTOR,
                 Location.Network.ConfigPanel.Switch.StpPanel.SUBMIT_BUTTON.selector,
-            ).click()
+            )
 
     def disable_stp(self):
         """Switch the FTP configuration toggle."""
         self.__check_config_open()
 
-        self.__selenium.find_element(
+        self.__selenium.wait_and_click(
             By.CSS_SELECTOR,
             Location.Network.ConfigPanel.Switch.RSTP_BUTTON.selector,
-        ).click()
+        )
 
         modal_el = (
             By.CSS_SELECTOR,
@@ -357,16 +357,16 @@ class NodeConfig:
             ),
         )
 
-        with self.__selenium.run_in_modal_context(*modal_el) as dialog:
-            dialog.find_element(
+        with self.__selenium.run_in_modal_context(*modal_el) as _:
+            self.__selenium.wait_and_click(
                 By.CSS_SELECTOR,
                 Location.Network.ConfigPanel.Switch.StpPanel.OFF_STP_BUTTON.selector,
-            ).click()
+            )
 
-            dialog.find_element(
+            self.__selenium.wait_and_click(
                 By.CSS_SELECTOR,
                 Location.Network.ConfigPanel.Switch.StpPanel.SUBMIT_BUTTON.selector,
-            ).click()
+            )
 
     def add_jobs(self, job_id: int, args: dict[str, str], by=By.CSS_SELECTOR):
         """Adds a job to the system using Selenium.
@@ -439,10 +439,9 @@ class NodeConfig:
         """
         switch_name = self.name
 
-        vlan_config_button = self.__selenium.find_element(
+        self.__selenium.wait_and_click(
             By.CSS_SELECTOR, Location.Network.ConfigPanel.Switch.VLAN_BUTTON.selector
         )
-        vlan_config_button.click()
 
         modal = (
             By.CSS_SELECTOR,
@@ -452,12 +451,10 @@ class NodeConfig:
         )
 
         with self.__selenium.run_in_modal_context(*modal) as dialog:
-            switch_button = dialog.find_element(
+            self.__selenium.wait_and_click(
                 By.CSS_SELECTOR,
                 Location.Network.ConfigPanel.Switch.VlanPanel.SWITCH_BUTTON.selector,
             )
-
-            switch_button.click()
 
             # Go through each row
             row_id = 0
@@ -495,25 +492,24 @@ class NodeConfig:
                 row_id += 1
 
             # Save new table
-            submit_button = dialog.find_element(
+            self.__selenium.wait_and_click(
                 By.CSS_SELECTOR,
                 Location.Network.ConfigPanel.Switch.VlanPanel.SUBMIT_BUTTON.selector,
             )
-            submit_button.click()
 
     def submit(self):
         """Submit configuration."""
         self.__check_config_open()
 
-        self.__selenium.find_element(
+        self.__selenium.wait_and_click(
             By.CSS_SELECTOR, self.__config_locator.SUBMIT_BUTTON.selector
-        ).click()
+        )
 
         self.__selenium.wait_until_text(
             By.CSS_SELECTOR,
             self.__config_locator.SUBMIT_BUTTON.selector,
             self.__config_locator.SUBMIT_BUTTON.text,
-            timeout=5,
+            timeout=20,
         )
 
     def __select_job(self, job_id, by):
