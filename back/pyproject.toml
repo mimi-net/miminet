@@ -18,8 +18,6 @@ dev = [
     "pytest",
     "pytest-timeout==2.4.0",
     "pytest-xdist",
-    "black~=26.3",
-    "flake8",
     "isort",
     "mypy",
     "types-requests",
