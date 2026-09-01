@@ -18,7 +18,7 @@ dev = [
     "pytest",
     "pytest-timeout==2.4.0",
     "pytest-xdist",
-    "black~=24.0",
+    "black~=26.3",
     "flake8",
     "isort",
     "mypy",

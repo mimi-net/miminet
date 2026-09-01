@@ -16,7 +16,6 @@ from src.net_utils.captures import capture_paths
 from src.net_utils.readiness import iter_capture_endpoints
 from src.network import MiminetNetwork
 
-
 # ---------------- Fakes ---------------- #
 
 
