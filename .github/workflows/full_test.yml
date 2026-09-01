@@ -21,6 +21,11 @@ jobs:
       - name: Set up Docker BuildX
         uses: docker/setup-buildx-action@v4
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          cache-dependency-path: uv.lock
+
       - name: Start frontend
         run: |
           cd front/
@@ -34,15 +39,9 @@ jobs:
           cd front/tests/docker
           docker compose up -d
 
-      - name: Set up Python
-        uses: actions/setup-python@v7
-        with:
-          python-version-file: .python-version
-
       - name: Install dependencies
         run: |
-          sudo python -m pip install pip pytest selenium --ignore-installed urllib3
-          sudo python -m pip install -r front/requirements.txt --ignore-installed
+          uv sync --frozen
 
       - name: Check availability
         run: |
@@ -51,4 +50,7 @@ jobs:
 
       - name: Run tests
         run: |
-          sudo python3 -m pytest -vv -s front/tests
+          sudo bash -c '
+            source .venv/bin/activate
+            python -m pytest -vv -s front/tests
+          '

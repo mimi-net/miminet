@@ -4,8 +4,8 @@ services:
   miminet:
     init: true
     build:
-      context: .
-      dockerfile: ./Dockerfile
+      context: ..
+      dockerfile: back/Dockerfile
     container_name: celery
     network_mode: "host"
     restart: always

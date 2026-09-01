@@ -48,15 +48,20 @@
       args:
         chdir: /vagrant/
 
-    - name: Create env
+    - name: Install uv
       ansible.builtin.shell:
-        python3 -m venv venv
+        python3 -m pip install uv
+      become: true
+      become_method: sudo
       args:
         chdir: /vagrant/
 
     - name: Install requirements
-      ansible.builtin.pip:
-        requirements: requirements.txt
-        virtualenv: venv
+      ansible.builtin.shell:
+        uv sync --frozen --no-dev --project back
+      become: true
+      become_method: sudo
+      args:
         chdir: /vagrant/
-        version: 23.3.1
+      environment:
+        UV_PROJECT_ENVIRONMENT: venv

@@ -37,11 +37,14 @@ RUN git clone https://github.com/mimi-net/mimidump.git \
     && cd mimidump && git checkout 854a3b0a1f712506a0d1a2d626be62ada9ffefe7 && make prefix=/usr install && cd .. && rm -rf mimidump
 
 WORKDIR /app
-ADD ./requirements.txt /app/requirements.txt
-RUN pip3 install -r requirements.txt
-ADD ./ovs-init.sh /app/ovs-init.sh
-ADD ./ENTRYPOINT.sh /app/ENTRYPOINT.sh
+COPY pyproject.toml uv.lock /app/
+COPY back/pyproject.toml /app/back/pyproject.toml
+COPY front/pyproject.toml /app/front/pyproject.toml
+RUN pip3 install uv && uv sync --frozen --no-dev --project back
+ENV PATH="/app/.venv/bin:$PATH"
+COPY back/ovs-init.sh /app/ovs-init.sh
+COPY back/ENTRYPOINT.sh /app/ENTRYPOINT.sh
 RUN chmod +x ovs-init.sh ENTRYPOINT.sh
-ADD ./src /app
+COPY back/src /app
 
 ENTRYPOINT ["/app/ENTRYPOINT.sh"]
