@@ -75,14 +75,27 @@ jobs:
           N_SHARDS: 3
         run: |
           sudo SHARD="$SHARD" N_SHARDS="$N_SHARDS" bash -c '
+            set -euo pipefail
             source .venv/bin/activate
             mkdir -p .tmp
-            files=$(find front/tests -maxdepth 1 -name "test_*.py" | sort)
-            slice=$(echo "$files" | awk -v n="$N_SHARDS" -v s="$SHARD" "NR % n == s-1")
-            [ -n "$slice" ] || { echo "ERROR: shard $SHARD/$N_SHARDS got an empty slice" >&2; exit 1; }
-            echo "Shard $SHARD/$N_SHARDS (files: $slice)"
-            set -o pipefail
-            python -m pytest -vv -s $slice 2>&1 | tee .tmp/full-test-shard-$SHARD.log
+            # -maxdepth 1: only flat front/tests/test_*.py files participate in
+            # sharding. A future test file under front/tests/<subdir>/ will NOT
+            # be collected; revisit the shard partition if sub-suite discovery
+            # is ever wanted.
+            files=$(find front/tests -maxdepth 1 -name "test_*.py" | sort) || { echo "ERROR: find/sort failed" >&2; exit 1; }
+            slice=()
+            idx=0
+            while IFS= read -r f; do
+              [ -n "$f" ] || continue
+              idx=$((idx + 1))
+              if [ $((idx % N_SHARDS)) -eq $((SHARD - 1)) ]; then
+                slice+=("$f")
+              fi
+            done <<<"$files"
+            [ "${#slice[@]}" -gt 0 ] || { echo "ERROR: shard $SHARD/$N_SHARDS got an empty slice" >&2; exit 1; }
+            echo "Shard $SHARD/$N_SHARDS (${#slice[@]} files)"
+            printf '%s\n' "${slice[@]}"
+            python -m pytest -vv -s "${slice[@]}" 2>&1 | tee .tmp/full-test-shard-$SHARD.log
           '
 
       - name: Capture container logs
@@ -111,4 +124,5 @@ jobs:
         with:
           name: full-test-logs-shard-${{ matrix.shard }}
           path: .tmp/*-shard-${{ matrix.shard }}.log
+          include-hidden-files: true
           if-no-files-found: ignore
