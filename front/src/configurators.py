@@ -7,6 +7,7 @@ from typing import Callable, Optional
 from celery_app import app
 from flask import Response, jsonify, make_response, request
 from flask_login import current_user
+from miminet_config import ARP_SPOOF_JOB_ID, SLEEP_JOB_ID
 from miminet_model import Network, Simulate, db
 
 
@@ -145,11 +146,21 @@ class JobConfigurator:
 
         # insert arguments into label string
         command_label: str = self.__print_cmd
+        label_args = configured_args.copy()
+
+        if self.__job_id == ARP_SPOOF_JOB_ID and len(label_args) > 3:
+            if label_args[3] == "mitm":
+                label_args[3] = "ARP Spoofing MITM"
+            elif label_args[3] == "reply_only":
+                label_args[3] = "ARP Spoofing"
 
         for i, conf_arg in enumerate(configured_args):
             if conf_arg is None:  # check whether the arguments passed the checks
                 raise ArgCheckError(self.__args[i].error_msg)
-            command_label = command_label.replace(f"[{i}]", conf_arg)
+            label_arg = label_args[i]
+            if label_arg is None:
+                raise ArgCheckError(self.__args[i].error_msg)
+            command_label = command_label.replace(f"[{i}]", label_arg)
 
         response = {
             "id": random_id,
@@ -267,7 +278,7 @@ class AbstractNodeConfigurator(AbstractConfigurator):
 
 class AbstractDeviceConfigurator(AbstractNodeConfigurator):
     __MAX_JOBS_COUNT: int = 30
-    __SLEEP_JOB_ID: int = 7
+    __SLEEP_JOB_ID: int = SLEEP_JOB_ID
     __MAX_SLEEP_TIME: int = 60
 
     def __init__(self, device_type: str):
@@ -297,6 +308,11 @@ class AbstractDeviceConfigurator(AbstractNodeConfigurator):
         job_id = int(job_id_str)
         if job_id not in self.__jobs.keys():
             return  # if user didn't select job
+
+        if job_id == ARP_SPOOF_JOB_ID and self._node["config"].get("type") != "hacker":
+            raise ConfigurationError(
+                'Команда "ARP spoofing / ARP cache poisoning" доступна только хосту-хакеру'
+            )
 
         editing_job_id = get_data("editing_job_id")
 
@@ -525,6 +541,13 @@ class HostConfigurator(AbstractDeviceConfigurator):
         )
 
         return res
+
+
+class HostHackerConfigurator(HostConfigurator):
+    # hacker has the same base configuration method as host
+    def __init__(self):
+        super().__init__()
+        self._device_type = "host_hacker"
 
 
 class RouterConfigurator(HostConfigurator):

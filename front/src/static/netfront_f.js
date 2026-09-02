@@ -57,6 +57,24 @@ const HostUid = function(){
     return "host_" + uid();
 }
 
+const HackerUid = function(){
+
+    let host_name = "hacker_";
+
+    for (let host_number = 1; host_number < 100; host_number++) {
+        host = host_name + host_number;
+
+        let t = nodes.find(t => t.data.id === host);
+
+        if (!t)
+        {
+            return host;
+        }
+    }
+
+    return "hacker_" + uid();
+}
+
 const RouterUid = function(){
 
     let host_name = "router_";
@@ -167,6 +185,10 @@ const ShowTextboxConfig = function(n, shared = 0) {
     ConfigTextboxContent(textbox_name);
 }
 
+const IsHostLikeNode = function(nodeType) {
+    return nodeType === 'host' || nodeType === 'hacker';
+}
+
 const ShowHostConfig = function(n, shared = 0){
 
     // Exit edit mode when switching to different device
@@ -210,6 +232,56 @@ const ShowHostConfig = function(n, shared = 0){
         }
 
         ConfigHostGateway(default_gw);
+    }
+
+    if (shared){
+        DisableFormInputs();
+    }
+}
+
+const ShowHostHackerConfig = function(n, shared = 0){
+
+    // Exit edit mode when switching to different device
+    if (editingJobId && editingDeviceType) {
+        ExitEditMode(editingDeviceType);
+    }
+
+    let hostname = n.config.label;
+    hostname = hostname || n.data.id;
+
+    // Create form
+    if (shared){
+        SharedConfigHostHackerForm(n.data.id);
+    } else {
+        ConfigHostHackerForm(n.data.id);
+    }
+
+    // Add hostname
+    ConfigHostHackerName(hostname);
+
+    // Add jobs
+    let host_jobs = [];
+
+    if (jobs){
+        host_jobs = jobs.filter(j => j.host_id === n.data.id);
+    }
+
+    ConfigHostHackerJob(host_jobs, shared);
+
+    // Add interfaces
+    $.each(n.interface, function(i) {
+        ActionWithInterface(n, i, ConfigHostHackerInterface)
+    });
+
+    if(n.interface.length)
+    {
+        let default_gw = '';
+
+        if ("default_gw" in n.config){
+            default_gw = n.config.default_gw;
+        }
+
+        ConfigHostHackerGateway(default_gw);
     }
 
     if (shared){
@@ -556,7 +628,7 @@ const AddEdge = function(source_id, target_id){
         });
 
         // Add interface If edge connects to host or to router or to server
-        if (source_node.config.type === 'host' || source_node.config.type === 'router' || source_node.config.type === 'server'){
+        if (IsHostLikeNode(source_node.config.type) || source_node.config.type === 'router' || source_node.config.type === 'server'){
             let iface_id = InterfaceUid();
             source_node.interface.push({
                 id: iface_id,
@@ -565,7 +637,7 @@ const AddEdge = function(source_id, target_id){
             });
         }
 
-        if (target_node.config.type === 'host' || target_node.config.type === 'router' || target_node.config.type === 'server'){
+        if (IsHostLikeNode(target_node.config.type) || target_node.config.type === 'router' || target_node.config.type === 'server'){
             let iface_id = InterfaceUid();
             target_node.interface.push({
                 id: iface_id,
@@ -1308,7 +1380,7 @@ const DrawGraph = function() {
     }
 
     let customDefaults = {
-        handleNodes: '.host, .l2_switch, .l1_hub, .l3_router, .server',
+        handleNodes: '.host, .hacker, .l2_switch, .l1_hub, .l3_router, .server',
         canConnect: (src, tgt) => allowEdges(src, tgt),
 
         edgeParams: (src, tgt) => allowEdges(src, tgt) ? {} : null,
@@ -1437,6 +1509,8 @@ const DrawGraph = function() {
 
         if (n.config.type === 'host'){
             ShowHostConfig(n);
+        } else if (n.config.type === 'hacker'){
+            ShowHostHackerConfig(n);
         } else if (n.config.type === 'l1_hub'){
             ShowHubConfig(n);
         } else if (n.config.type === 'l2_switch'){
@@ -1689,6 +1763,8 @@ const DrawSharedGraph = function(nodes, edges) {
 
         if (n.config.type === 'host'){
             ShowHostConfig(n, 1);
+        } else if (n.config.type === 'hacker'){
+            ShowHostHackerConfig(n, 1);
         } else if (n.config.type === 'l1_hub'){
             ShowHubConfig(n, 1);
         } else if (n.config.type === 'l2_switch'){
@@ -1879,6 +1955,8 @@ const UpdateHostConfiguration = function (data, host_id)
 
                 if (n.config.type === 'host'){
                     ShowHostConfig(n);
+                } else if (n.config.type === 'hacker'){
+                    ShowHostHackerConfig(n);
                 } else {
                     ClearConfigForm('Узел есть, но это не хост');
                     return;
@@ -1906,6 +1984,77 @@ const UpdateHostConfiguration = function (data, host_id)
             // Exit edit mode on error to allow retry
             if (editingJobId && editingDeviceType === 'host') {
                 ExitEditMode('host');
+            }
+        },
+        dataType: 'json'
+    });
+}
+
+// Update hacker host configuration
+const UpdateHostHackerConfiguration = function (data, host_id)
+{
+    // Reset network player
+    SetNetworkPlayerState(-1);
+
+    $.ajax({
+        type: 'POST',
+        url: '/host_hacker/save_config',
+        data: data,
+        success: function(data, textStatus, xhr) {
+
+            if (xhr.status === 200)
+            {
+                // Exit edit mode on successful save
+                if (editingJobId && editingDeviceType === 'host_hacker') {
+                    ExitEditMode('host_hacker');
+                }
+                if (!data.warning){
+                    // Update nodes
+                    nodes = data.nodes;
+                    // Update jobs
+                    jobs = data.jobs;
+
+                    // Update graph
+                    DrawGraph();
+                }
+
+                // Ok, let's try to update host hacker config form
+                let n = nodes.find(n => n.data.id === host_id);
+
+                if (!n) {
+                    ClearConfigForm('Нет такого хоста');
+                    return;
+                }
+
+                if (n.config.type === 'hacker'){
+                    ShowHostHackerConfig(n);
+                } else {
+                    ClearConfigForm('Узел есть, но это не хост-хакер');
+                    return;
+                }
+
+                if (data.warning){
+                    HostWarningMsg(data.warning);
+                }
+
+                // Update job counter after successful configuration
+                UpdateJobCounter('config_host_hacker_job_counter', host_id);
+            }
+        },
+        error: function(xhr) {
+            console.log('Не удалось обновить конфигурацию хоста-хакера');
+            console.log(xhr);
+
+            // Show error message to user
+            let errorMsg = 'Ошибка при сохранении конфигурации';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMsg = xhr.responseJSON.message;
+            }
+            HostErrorMsg(errorMsg);
+
+            // Exit edit mode on error to allow retry
+            if (editingJobId && editingDeviceType === 'host_hacker') {
+                ExitEditMode('host_hacker');
             }
         },
         dataType: 'json'
@@ -1948,12 +2097,18 @@ const DeleteJobFromHost = function (host_id, job_id, network_guid)
 
                 if (n.config.type === 'host'){
                     ShowHostConfig(n);
+                } else if (n.config.type === 'hacker'){
+                    ShowHostHackerConfig(n);
                 } else {
                     ClearConfigForm('Узел есть, но это не хост');
                 }
 
                 // Update job counter after deletion
-                UpdateJobCounter('config_host_job_counter', host_id);
+                if (n.config.type === 'hacker') {
+                    UpdateJobCounter('config_host_hacker_job_counter', host_id);
+                } else {
+                    UpdateJobCounter('config_host_job_counter', host_id);
+                }
 
             }
         },
