@@ -80,14 +80,24 @@ jobs:
           N_SHARDS: 3
         run: |
           sudo SHARD="$SHARD" N_SHARDS="$N_SHARDS" bash -c '
+            set -euo pipefail
             source .venv/bin/activate
             cd back/tests
-            export PYTHONPATH=$PYTHONPATH:../src
-            files=$(find . -name "test_*.py" | sort)
-            slice=$(echo "$files" | awk -v n="$N_SHARDS" -v s="$SHARD" "NR % n == s-1")
-            [ -n "$slice" ] || { echo "ERROR: shard $SHARD/$N_SHARDS got an empty slice" >&2; exit 1; }
-            echo "Shard $SHARD/$N_SHARDS (files: $slice)"
-            pytest $slice
+            export PYTHONPATH=${PYTHONPATH:-}:../src
+            files=$(find . -name "test_*.py" | sort) || { echo "ERROR: find/sort failed" >&2; exit 1; }
+            slice=()
+            idx=0
+            while IFS= read -r f; do
+              [ -n "$f" ] || continue
+              idx=$((idx + 1))
+              if [ $((idx % N_SHARDS)) -eq $((SHARD - 1)) ]; then
+                slice+=("$f")
+              fi
+            done <<<"$files"
+            [ "${#slice[@]}" -gt 0 ] || { echo "ERROR: shard $SHARD/$N_SHARDS got an empty slice" >&2; exit 1; }
+            echo "Shard $SHARD/$N_SHARDS (${#slice[@]} files)"
+            printf '%s\n' "${slice[@]}"
+            python -m pytest -vv -s -o log_file=/dev/null -o log_cli=true -o log_cli_level=INFO "${slice[@]}" 2>&1 | tee back_test.log
           '
 
       - name: Upload test logs
