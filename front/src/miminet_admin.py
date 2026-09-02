@@ -4,22 +4,39 @@ from datetime import date
 from flask import flash, redirect, request, url_for
 from flask_admin import AdminIndexView, expose
 from flask_admin.actions import action
+from flask_admin.babel import gettext as admin_gettext
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.fields import QuerySelectField
 from flask_admin.form import DateTimePickerWidget, Select2Widget
 from flask_admin.model import typefmt
 from flask_login import current_user
-from markupsafe import Markup
+from markupsafe import Markup, escape
 from sqlalchemy import func
 from sqlalchemy.orm import selectinload
 from wtforms import (
+    IntegerField,
     SelectField,
+    StringField,
     TextAreaField,
     DateTimeField,
     Form,
     SubmitField,
 )
+from wtforms.validators import InputRequired, NumberRange
 
+from ai_interview.access import (
+    ACCESS_CODE_TTL_DAYS,
+    cleanup_expired_access_codes,
+    create_access_code,
+    delete_access_code,
+)
+from ai_interview.models import (
+    AiInterviewAccessCode,
+    AiInterviewSetting,
+)
+from ai_interview.providers import (
+    check_provider,
+)
 from quiz.service.network_upload_service import (
     create_check_task,
     create_check_task_json,
@@ -811,3 +828,194 @@ class CreateCheckTaskView(MiminetAdminModelView):
                 flash(f"Ошибка: {str(e)}", "error")
 
         return self.render("admin/create_check_task.html", form=form)
+
+
+class AiInterviewSettingView(MiminetAdminModelView):
+    can_delete = False
+    can_create = False
+    can_edit = False
+
+    column_list = (
+        "llm_provider_check",
+        "updated_on",
+        "checks",
+    )
+    column_labels = {
+        "llm_provider_check": "Проверка OpenRouter",
+        "updated_on": "Изменено",
+        "checks": "Действия",
+    }
+
+    @staticmethod
+    def _status_label(status, message=None):
+        if status == "ok":
+            return Markup("<span class='text-success'>OK</span>")
+        if status:
+            return Markup(
+                f"<span class='text-danger'>{escape(status)}</span>"
+                f"<br><small>{escape(message or '')}</small>"
+            )
+        return Markup("<span class='text-muted'>Не проверялось</span>")
+
+    @staticmethod
+    def provider_check_formatter(view, context, model, name):
+        return AiInterviewSettingView._status_label(
+            model.llm_provider_check_status,
+            model.llm_provider_check_message,
+        )
+
+    @staticmethod
+    def checks_formatter(view, context, model, name):
+        provider_url = url_for(".check_provider_view", setting_id=model.id)
+        return Markup(
+            f"<form class='d-inline' method='post' action='{provider_url}'>"
+            "<button class='btn btn-sm btn-primary' type='submit'>"
+            "Проверить OpenRouter"
+            "</button>"
+            "</form>"
+        )
+
+    column_formatters = {
+        "llm_provider_check": provider_check_formatter,
+        "checks": checks_formatter,
+    }
+
+    def get_query(self):
+        setting = AiInterviewSetting.query.order_by(AiInterviewSetting.id.asc()).first()
+        if setting is None:
+            setting = AiInterviewSetting(id=1)
+            db.session.add(setting)
+            db.session.commit()
+        return super().get_query()
+
+    @expose("/check-provider/<int:setting_id>", methods=("POST",))
+    def check_provider_view(self, setting_id):
+        setting = AiInterviewSetting.query.get_or_404(setting_id)
+        try:
+            result = check_provider()
+            setting.llm_provider_check_status = "ok"
+            setting.llm_provider_check_message = (
+                f"OpenRouter отвечает. Модель: {result['model']}."
+            )
+            flash("OpenRouter API ключ и модель работают.", "success")
+        except Exception as exc:
+            setting.llm_provider_check_status = "error"
+            setting.llm_provider_check_message = str(exc)
+            flash(f"OpenRouter не прошёл проверку: {exc}", "error")
+
+        setting.llm_provider_checked_at = func.now()
+        db.session.commit()
+        return redirect(url_for(".index_view"))
+
+
+class AiInterviewAccessCodeCreateForm(Form):
+    label = StringField("Комментарий")
+    max_attempts_per_user = IntegerField(
+        "Количество попыток для каждого студента",
+        default=1,
+        validators=[InputRequired(), NumberRange(min=1)],
+    )
+    submit = SubmitField("Сгенерировать код")
+
+
+class AiInterviewAccessCodeView(MiminetAdminModelView):
+    can_create = True
+    can_delete = False
+    can_edit = True
+
+    column_list = (
+        "code",
+        "label",
+        "max_attempts_per_user",
+        "is_active",
+        "expires_at",
+        "created_on",
+        "actions",
+    )
+    column_labels = {
+        "code": "Код",
+        "label": "Комментарий",
+        "max_attempts_per_user": "Попыток на студента",
+        "is_active": "Активен",
+        "expires_at": "Действует до",
+        "created_on": "Создан",
+        "actions": "Действия",
+    }
+    form_columns = (
+        "label",
+        "max_attempts_per_user",
+        "is_active",
+        "expires_at",
+    )
+    form_args = {
+        "max_attempts_per_user": {
+            "validators": [InputRequired(), NumberRange(min=1)],
+        },
+    }
+
+    @staticmethod
+    def actions_formatter(view, context, model, name):
+        delete_url = url_for(".delete_code_view", code_id=model.id)
+        return Markup(
+            f"<form class='d-inline' method='post' action='{delete_url}'>"
+            "<button class='btn btn-sm btn-danger' type='submit' "
+            "onclick=\"return confirm('Удалить этот код доступа?');\">"
+            "Удалить"
+            "</button>"
+            "</form>"
+        )
+
+    column_formatters = {
+        "actions": actions_formatter,
+    }
+
+    @staticmethod
+    def list_gettext(message, **variables):
+        if message == "Create":
+            return Markup(
+                "<span class='btn btn-success btn-sm'>" "Сгенерировать код" "</span>"
+            )
+        if message == "Create New Record":
+            return "Сгенерировать новый код доступа"
+        return admin_gettext(message, **variables)
+
+    @expose("/")
+    def index_view(self):
+        self._template_args["_gettext"] = self.list_gettext
+        return super().index_view()
+
+    @expose("/new/", methods=("GET", "POST"))
+    def create_view(self):
+        form = AiInterviewAccessCodeCreateForm(request.form)
+        if request.method == "POST" and form.validate():
+            code, access_code = create_access_code(
+                label=form.label.data,
+                days_valid=ACCESS_CODE_TTL_DAYS,
+                max_attempts_per_user=form.max_attempts_per_user.data,
+            )
+            flash(
+                f"Код доступа: {code}. Он действует до "
+                f"{access_code.expires_at:%d.%m.%Y %H:%M}.",
+                "success",
+            )
+            return redirect(url_for(".index_view"))
+        return self.render("admin/ai_access_code_create.html", form=form)
+
+    @expose("/delete/<int:code_id>", methods=("POST",))
+    def delete_code_view(self, code_id):
+        access_code = AiInterviewAccessCode.query.get_or_404(code_id)
+        delete_access_code(access_code)
+        db.session.commit()
+        flash("Код доступа удален.", "success")
+        return redirect(url_for(".index_view"))
+
+    def get_query(self):
+        cleanup_expired_access_codes()
+        return (
+            super()
+            .get_query()
+            .order_by(
+                AiInterviewAccessCode.created_on.desc(),
+                AiInterviewAccessCode.id.desc(),
+            )
+        )

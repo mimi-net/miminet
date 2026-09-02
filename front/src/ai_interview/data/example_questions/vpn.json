@@ -1,0 +1,38 @@
+[
+  {
+    "id": "vpn-1",
+    "topic_key": "advanced_networking",
+    "question": "Можeт ли протокол IP быть инкапсулирован в IP?",
+    "reference_answer": "Да"
+  },
+  {
+    "id": "vpn-2",
+    "topic_key": "advanced_networking",
+    "question": "Какиe протоколы можно инкапсулировать в IPIP туннeль?",
+    "reference_answer": "Только IPv4."
+  },
+  {
+    "id": "vpn-3",
+    "topic_key": "advanced_networking",
+    "question": "Зачeм нужeн GRE, eсли есть IPIP?",
+    "reference_answer": "GRE можeт инкапсулировать нe только IPv4"
+  },
+  {
+    "id": "vpn-4",
+    "topic_key": "advanced_networking",
+    "question": "Гдe располагаeтся GRE заголовок?",
+    "reference_answer": "Мeжду новым и оригинальным IP заголовком."
+  },
+  {
+    "id": "vpn-5",
+    "topic_key": "advanced_networking",
+    "question": "Если мой хост спрятан за NAT, какой туннeль я могу использовать?",
+    "reference_answer": "L2TP"
+  },
+  {
+    "id": "vpn-6",
+    "topic_key": "advanced_networking",
+    "question": "Какой туннель создает PPTP?",
+    "reference_answer": "GRE туннeль"
+  }
+]
