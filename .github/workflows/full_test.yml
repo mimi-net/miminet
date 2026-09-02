@@ -13,6 +13,10 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
 
     steps:
       - name: Checkout code
@@ -49,9 +53,62 @@ jobs:
           docker ps
           curl -f localhost
 
+      - name: Wait for selenium grid
+        run: |
+          for i in $(seq 1 60); do
+            status=$(curl -sf http://localhost:4444/wd/hub/status 2>/dev/null) || true
+            ready=$(printf '%s' "$status" | python3 -c 'import json,sys; v=json.load(sys.stdin).get("value",{}); print(1 if v.get("ready") and any(n.get("availability")=="up" for n in (v.get("nodes") or [])) else 0)' 2>/dev/null || echo 0)
+            if [ "$ready" = "1" ]; then
+              echo "Selenium grid ready after ~$((i * 2))s:"
+              printf '%s\n' "$status"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "ERROR: selenium grid (localhost:4444) not ready after 120s" >&2
+          docker ps
+          exit 1
+
       - name: Run tests
+        env:
+          SHARD: ${{ matrix.shard }}
+          N_SHARDS: 3
+        run: |
+          sudo SHARD="$SHARD" N_SHARDS="$N_SHARDS" bash -c '
+            source .venv/bin/activate
+            mkdir -p .tmp
+            files=$(find front/tests -maxdepth 1 -name "test_*.py" | sort)
+            slice=$(echo "$files" | awk -v n="$N_SHARDS" -v s="$SHARD" "NR % n == s-1")
+            [ -n "$slice" ] || { echo "ERROR: shard $SHARD/$N_SHARDS got an empty slice" >&2; exit 1; }
+            echo "Shard $SHARD/$N_SHARDS (files: $slice)"
+            set -o pipefail
+            python -m pytest -vv -s $slice 2>&1 | tee .tmp/full-test-shard-$SHARD.log
+          '
+
+      - name: Capture container logs
+        if: failure()
         run: |
           sudo bash -c '
-            source .venv/bin/activate
-            python -m pytest -vv -s front/tests
+            mkdir -p .tmp
+            log=".tmp/containers-shard-${{ matrix.shard }}.log"
+            {
+              echo "=== docker ps -a ==="
+              docker ps -a
+              echo
+              echo "=== front compose logs ==="
+              cd front && docker compose logs --tail=300 2>&1
+              echo
+              echo "=== grid compose logs ==="
+              cd front/tests/docker && docker compose logs --tail=300 2>&1
+            } > "$log" 2>&1
+            chmod 644 "$log"
           '
+          cat .tmp/containers-shard-${{ matrix.shard }}.log
+
+      - name: Upload test logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: full-test-logs-shard-${{ matrix.shard }}
+          path: .tmp/*-shard-${{ matrix.shard }}.log
+          if-no-files-found: ignore
