@@ -8,7 +8,11 @@ from unittest.mock import MagicMock
 import pytest
 import requests
 from requests import Session
-from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
+from selenium.common.exceptions import (
+    NoSuchElementException,
+    StaleElementReferenceException,
+    TimeoutException,
+)
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.remote.webdriver import WebDriver
@@ -49,17 +53,29 @@ class MiminetTester(WebDriver):
     adding new methods for convenient element interaction.
     """
 
-    def wait_and_click(self, by: str, element: str, timeout=20):
+    def wait_and_click(
+        self,
+        by: str,
+        element: str,
+        timeout=20,
+        scope=None,
+    ):
         """
         Waits for the specified element to become clickable before clicking it.
 
         Re-finds the element on every attempt so a stale element caused by a
         page re-render is not treated as a failure.
 
+        If ``scope`` is given (a WebElement or a ``(by, selector)`` locator
+        tuple), the target element is searched within it on every attempt.
+        This keeps the click bound to e.g. the correct modal dialog when the
+        same inner id exists in several rendered dialogs.
+
         Args:
             by (By): The locator strategy (e.g., By.ID, By.XPATH).
             element (str): The element locator (e.g., "myElementId", "//button[text()='Click Me']").
             timeout (int): The maximum time in seconds to wait (default: 20).
+            scope (WebElement | tuple): Optional container to re-find the element within.
         """
         deadline = time.monotonic() + timeout
         while True:
@@ -69,12 +85,32 @@ class MiminetTester(WebDriver):
                     f"Element {element} is not clickable within {timeout} seconds."
                 )
             try:
-                WebDriverWait(self, remaining).until(
-                    EC.element_to_be_clickable((by, element))
-                ).click()
+                if scope is None:
+                    wait_target = EC.element_to_be_clickable((by, element))
+                else:
+                    container = (
+                        self.find_element(*scope) if isinstance(scope, tuple) else scope
+                    )
+                    wait_target = self.__scoped_element_clickable(
+                        container, by, element
+                    )
+                WebDriverWait(self, remaining).until(wait_target).click()
                 return
             except StaleElementReferenceException:
                 continue
+
+    @staticmethod
+    def __scoped_element_clickable(container, by: str, element: str):
+        """Return the element when it is visible and enabled inside the container."""
+
+        def _condition(_driver):
+            try:
+                el = container.find_element(by, element)
+            except NoSuchElementException:
+                return None
+            return el if el.is_displayed() and el.is_enabled() else None
+
+        return _condition
 
     def drag_and_drop(self, source, target, x: int, y: int):
         """Performs a drag-and-drop action from a source element to a target element.

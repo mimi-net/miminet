@@ -327,6 +327,7 @@ class NodeConfig:
             self.__selenium.wait_and_click(
                 By.CSS_SELECTOR,
                 Location.Network.ConfigPanel.Switch.StpPanel.STP_BUTTON.selector,
+                scope=modal_el,
             )
 
             priority_field = dialog.find_element(
@@ -339,6 +340,7 @@ class NodeConfig:
             self.__selenium.wait_and_click(
                 By.CSS_SELECTOR,
                 Location.Network.ConfigPanel.Switch.StpPanel.SUBMIT_BUTTON.selector,
+                scope=modal_el,
             )
 
     def disable_stp(self):
@@ -361,11 +363,13 @@ class NodeConfig:
             self.__selenium.wait_and_click(
                 By.CSS_SELECTOR,
                 Location.Network.ConfigPanel.Switch.StpPanel.OFF_STP_BUTTON.selector,
+                scope=modal_el,
             )
 
             self.__selenium.wait_and_click(
                 By.CSS_SELECTOR,
                 Location.Network.ConfigPanel.Switch.StpPanel.SUBMIT_BUTTON.selector,
+                scope=modal_el,
             )
 
     def add_jobs(self, job_id: int, args: dict[str, str], by=By.CSS_SELECTOR):
@@ -454,6 +458,7 @@ class NodeConfig:
             self.__selenium.wait_and_click(
                 By.CSS_SELECTOR,
                 Location.Network.ConfigPanel.Switch.VlanPanel.SWITCH_BUTTON.selector,
+                scope=modal,
             )
 
             # Go through each row
@@ -495,6 +500,7 @@ class NodeConfig:
             self.__selenium.wait_and_click(
                 By.CSS_SELECTOR,
                 Location.Network.ConfigPanel.Switch.VlanPanel.SUBMIT_BUTTON.selector,
+                scope=modal,
             )
 
     def submit(self):
