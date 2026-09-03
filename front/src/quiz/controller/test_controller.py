@@ -1,7 +1,9 @@
 import json
+from typing import cast
 
 from flask import abort, jsonify, make_response, render_template, request
 from flask_login import current_user, login_required
+from miminet_model import User
 from quiz.service.test_service import (
     create_test,
     delete_test,
@@ -19,7 +21,7 @@ from quiz.util.encoder import UUIDEncoder
 
 @login_required
 def create_test_endpoint():
-    user = current_user
+    user = cast(User, current_user)
     res_id = create_test(
         name=request.json["name"],
         description=request.json["description"],
@@ -42,7 +44,7 @@ def get_test_endpoint():
 
 @login_required
 def get_tests_by_owner_endpoint():
-    user = current_user
+    user = cast(User, current_user)
     res = get_tests_by_owner(user)
 
     return make_response(
@@ -65,7 +67,7 @@ def get_retakeable_tests_endpoint():
 
 @login_required
 def get_deleted_tests_by_owner_endpoint():
-    user = current_user
+    user = cast(User, current_user)
     res = get_deleted_tests_by_owner(user)
 
     return make_response(
@@ -76,7 +78,7 @@ def get_deleted_tests_by_owner_endpoint():
 @login_required
 def delete_test_endpoint():
     test_id = request.args["id"]
-    deleted = delete_test(current_user, test_id)
+    deleted = delete_test(cast(User, current_user), test_id)
     if deleted == 404:
         ret = {"message": "Тест не существует", "id": test_id}
     elif deleted == 403:
@@ -93,7 +95,7 @@ def delete_test_endpoint():
 def edit_test_endpoint():
     test_id = request.json["id"]
     edited = edit_test(
-        user=current_user,
+        user=cast(User, current_user),
         name=request.json["name"],
         test_id=test_id,
         description=request.json["description"],
@@ -123,7 +125,7 @@ def publish_or_unpublish_test_endpoint():
     is_to_publish = request.json["to_publish"]
     test_id = request.args["id"]
     published = publish_or_unpublish_test(
-        user=current_user, test_id=test_id, is_to_publish=is_to_publish
+        user=cast(User, current_user), test_id=test_id, is_to_publish=is_to_publish
     )
     if published == 404:
         ret = {"message": "Тест не существует", "id": test_id}

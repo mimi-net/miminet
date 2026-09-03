@@ -6,6 +6,7 @@ import os
 import pathlib
 import time
 import uuid
+from typing import cast
 
 import google.auth.transport.requests
 import requests
@@ -18,6 +19,7 @@ from flask import (
     url_for,
     jsonify,
     abort,
+    Response,
 )
 from flask_jwt_extended import (
     create_access_token,
@@ -39,6 +41,7 @@ from miminet_config import make_example_net_switch_and_hub
 from miminet_model import Network, User, db
 from oauthlib.oauth2 import TokenExpiredError
 from pip._vendor import cachecontrol
+from pip._vendor.requests.sessions import Session as _VendoredSession
 from requests_oauthlib import OAuth2Session
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -257,7 +260,9 @@ def login_index():
         password = request.form.get("password")
         user = User.query.filter_by(email=email).first()
         if user:
-            if check_password_hash(user.password_hash, password):
+            if password is not None and check_password_hash(
+                user.password_hash, password
+            ):
                 login_user(user, remember=True)
                 access_token = create_access_token(identity=str(user.id))
                 refresh_token = create_refresh_token(identity=str(user.id))
@@ -429,7 +434,7 @@ def _load_user_config(user: User) -> dict:
 
 @login_required
 def animation_filters():
-    user = current_user
+    user = cast(User, current_user)
     user_config = _load_user_config(user)
 
     # Ensure defaults are present
@@ -466,7 +471,7 @@ def logout():
     session.pop("next_url", None)
     logout_user()
     response = redirect(url_for("index"))
-    unset_jwt_cookies(response)
+    unset_jwt_cookies(cast(Response, response))
     return response
 
 
@@ -518,7 +523,7 @@ def google_callback():
 
     credentials = flow.credentials
     request_session = requests.session()
-    cached_session = cachecontrol.CacheControl(request_session)
+    cached_session = cachecontrol.CacheControl(cast(_VendoredSession, request_session))
     token_request = google.auth.transport.requests.Request(session=cached_session)
 
     id_info = id_token.verify_oauth2_token(
@@ -734,6 +739,7 @@ def vk_callback():
 
 
 def yandex_login(yandex_json=yandex_json):
+    assert yandex_json is not None, "client_yandex.json is not configured"
     _start_social_link("yandex")
     yandex_session = OAuth2Session(
         yandex_json["web"]["client_id"],
@@ -750,6 +756,7 @@ def yandex_login(yandex_json=yandex_json):
 
 
 def yandex_callback(yandex_json=yandex_json):
+    assert yandex_json is not None, "client_yandex.json is not configured"
     state = session.get("state")
     if not state:
         return redirect(url_for("login_index"))
@@ -813,6 +820,7 @@ def yandex_callback(yandex_json=yandex_json):
 
 
 def check_tg_authorization(auth_data, tg_json=tg_json):
+    assert tg_json is not None, "client_tg.json is not configured"
     BOT_TOKEN = tg_json["token"]["BOT_TOKEN"]
     check_hash = auth_data["hash"]
     del auth_data["hash"]

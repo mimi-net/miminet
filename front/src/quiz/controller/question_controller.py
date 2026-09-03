@@ -1,7 +1,9 @@
 import json
+from typing import cast
 
 from flask import abort, jsonify, make_response, request
 from flask_login import current_user, login_required
+from miminet_model import User
 from quiz.facade.question_facade import create_question, delete_question
 from quiz.service.question_service import get_questions_by_section
 from quiz.util.encoder import UUIDEncoder
@@ -22,7 +24,7 @@ def get_questions_by_section_endpoint():
 @login_required
 def create_question_endpoint():
     section_id = request.args.get("id", None)
-    res = create_question(section_id, request.json, current_user)
+    res = create_question(section_id, request.json, cast(User, current_user))
     if res[1] == 404 and "message" in res[0]:
         msg = res[0]["message"]
         ret = {"message": f"{msg}"}
@@ -52,7 +54,7 @@ def create_question_endpoint():
 def delete_question_endpoint():
     question_id = request.args["id"]
 
-    res = delete_question(request.args["id"], current_user)
+    res = delete_question(request.args["id"], cast(User, current_user))
     if res == 404:
         ret = {"message": "Вопрос не существует", "id": question_id}
     elif res == 403:

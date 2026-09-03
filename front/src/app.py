@@ -621,7 +621,11 @@ def sitemap():
         if "admin/" in rule.rule:
             continue
 
-        if "GET" in rule.methods and len(rule.arguments) == 0:
+        if (
+            rule.methods is not None
+            and "GET" in rule.methods
+            and len(rule.arguments) == 0
+        ):
             pages.append(["https://miminet.ru" + str(rule.rule), zero_days_ago])
 
     sitemap_xml = render_template("sitemap_template.xml", pages=pages)

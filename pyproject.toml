@@ -28,3 +28,14 @@ include = ["front/tests"]
 
 [tool.ty.overrides.rules]
 all = "ignore"
+
+# flask_sqlalchemy's db.Model is built through a dynamic metaclass that ty
+# cannot resolve to a concrete base — every declarative model class inheriting
+# db.Model trips `unsupported-base` (mypy-era `# type: ignore[name-defined]`
+# comments mark the same known limitation). Scoped to the two model-definition
+# files; unsupported-base stays enabled everywhere else.
+[[tool.ty.overrides]]
+include = ["front/src/miminet_model.py", "front/src/quiz/entity/entity.py"]
+
+[tool.ty.overrides.rules]
+unsupported-base = "ignore"
