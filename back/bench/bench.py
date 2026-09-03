@@ -70,7 +70,6 @@ def ovs_vswitchd_rss():
         except (
             psutil.NoSuchProcess,
             psutil.AccessDenied,
-            psutil.ProcessLookupError,
             psutil.ZombieProcess,
         ):
             continue
@@ -97,7 +96,6 @@ class Sampler:
                     except (
                         psutil.NoSuchProcess,
                         psutil.AccessDenied,
-                        psutil.ProcessLookupError,
                         psutil.ZombieProcess,
                     ):
                         pass
@@ -105,7 +103,6 @@ class Sampler:
             except (
                 psutil.NoSuchProcess,
                 psutil.AccessDenied,
-                psutil.ProcessLookupError,
                 psutil.ZombieProcess,
             ):
                 break
