@@ -24,4 +24,5 @@ dev = [
     "wheel",
     "ruff",
     "ty",
+    "coverage>=7.16.0",
 ]

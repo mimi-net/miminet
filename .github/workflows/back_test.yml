@@ -97,7 +97,12 @@ jobs:
             [ "${#slice[@]}" -gt 0 ] || { echo "ERROR: shard $SHARD/$N_SHARDS got an empty slice" >&2; exit 1; }
             echo "Shard $SHARD/$N_SHARDS (${#slice[@]} files)"
             printf '%s\n' "${slice[@]}"
-            python -m pytest -vv -s -o log_file=/dev/null -o log_cli=true -o log_cli_level=INFO "${slice[@]}" 2>&1 | tee back_test.log
+            # Run under coverage (branch mode) so per-shard data can be merged
+            # into a whole-suite back/src report by the `coverage` job.
+            # --data-file is relative to cwd (back/tests); --source=../src maps
+            # to back/src. Each shard runs on its own runner, so the names are
+            # unique per shard.
+            python -m coverage run --branch --source=../src --data-file=".coverage.shard${SHARD}" -m pytest -vv -s -o log_file=/dev/null -o log_cli=true -o log_cli_level=INFO "${slice[@]}" 2>&1 | tee back_test.log
           '
 
       - name: Upload test logs
@@ -106,4 +111,59 @@ jobs:
         with:
           name: test-logs-shard-${{ matrix.shard }}
           path: back/tests/back_test.log
+          if-no-files-found: ignore
+
+      - name: Upload coverage data
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: back-coverage-shard-${{ matrix.shard }}
+          path: back/tests/.coverage.shard${{ matrix.shard }}
+          include-hidden-files: true
+          if-no-files-found: warn
+
+  coverage:
+    name: Backend coverage report
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install dependencies
+        run: |
+          uv sync --frozen --project back
+
+      - name: Download coverage data
+        uses: actions/download-artifact@v7
+        with:
+          pattern: back-coverage-shard-*
+          path: .tmp/cov
+          merge-multiple: true
+
+      - name: Combine and report
+        run: |
+          source .venv/bin/activate
+          cd .tmp/cov
+          files=$(find . -name ".coverage.shard*" | sort) || { echo "ERROR: find failed" >&2; exit 1; }
+          [ -n "$files" ] || { echo "ERROR: no coverage data collected" >&2; exit 1; }
+          echo "Combining:"
+          printf '%s\n' "$files"
+          # shellcheck disable=SC2086
+          python -m coverage combine $files
+          python -m coverage report
+          python -m coverage json -o coverage.json
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: back-coverage-report
+          path: .tmp/cov/coverage.json
+          include-hidden-files: true
           if-no-files-found: ignore
