@@ -15,6 +15,7 @@ from selenium.common.exceptions import (
 )
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.remote.command import Command
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
@@ -288,7 +289,10 @@ class MiminetTester(WebDriver):
         Returns:
             list: list with the filtered log entries.
         """
-        logs = self.get_log("browser")
+        # Remote WebDriver has no `get_log` in Selenium 4 (it lives only on
+        # ChromiumDriver); the grid session is a chromedriver underneath, so run
+        # the same GET_LOG command ChromiumDriver.get_log would run.
+        logs = self.execute(Command.GET_LOG, {"type": "browser"})["value"]
         return list(filter(logs_filter, logs)) if logs_filter else list(logs)
 
     def get_console_messages(self):
