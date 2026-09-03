@@ -19,3 +19,12 @@ include = ["**"]
 
 [tool.ty.overrides.analysis]
 allowed-unresolved-imports = ["**"]
+
+# Staging: ty checks untyped bodies (mypy skipped them), so front/tests carries
+# ~133 diagnostics today. mypy never meaningfully checked these files (untyped
+# defs) — this is not a coverage regression. Re-enable once src is clean.
+[[tool.ty.overrides]]
+include = ["front/tests"]
+
+[tool.ty.overrides.rules]
+all = "ignore"
