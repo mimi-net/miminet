@@ -80,15 +80,18 @@ class MiminetTopology(IPTopo):
 
     def __handle_router(self, node_id: str, config: NodeConfig):
         default_gw = config.default_gw
-        kwargs = {
-            "use_v6": False,
-            "config": RouterConfig,
-        }
 
         if default_gw:
-            kwargs["routerDefaultRoute"] = f"via {default_gw}"
+            router = self.addRouter(
+                node_id,
+                use_v6=False,
+                config=RouterConfig,
+                routerDefaultRoute=f"via {default_gw}",
+            )
+        else:
+            router = self.addRouter(node_id, use_v6=False, config=RouterConfig)
 
-        self.__nodes[node_id] = self.addRouter(node_id, **kwargs)
+        self.__nodes[node_id] = router
 
     def __find_interface(
         self, edge_id: str, node_interfaces: list[NodeInterface]
@@ -177,7 +180,7 @@ class MiminetTopology(IPTopo):
             )
 
             # Put virtual switch between nodes and return link between them
-            link1, link2 = self.addLink(
+            link1, link2 = self._add_link_via_switch(
                 src_host,
                 trg_host,
                 interface_name_1=src_iface.name,
@@ -210,7 +213,7 @@ class MiminetTopology(IPTopo):
             )
         super().build(*args, **kwargs)
 
-    def addLink(
+    def _add_link_via_switch(
         self,
         h_source,
         h_target,
@@ -221,7 +224,11 @@ class MiminetTopology(IPTopo):
         loss_percentage=0,
         duplicate_percentage=0,
     ):
-        """Connects two hosts through a virtual switch."""
+        """Connect two hosts through a freshly-created virtual switch.
+
+        Returns the (host<->switch, switch<->host) link pair. This is NOT an
+        IPTopo.addLink override (which links two named nodes directly): it is
+        an internal helper that inserts an extra hub switch on the path."""
         # Create unique switch name
         self.__switch_count += 1
         switch_name = "mimiswsw%d" % self.__switch_count
