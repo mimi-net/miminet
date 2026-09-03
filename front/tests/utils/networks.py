@@ -1,9 +1,14 @@
 import random
+import time
 from json import dumps as json_dumps
 from typing import Optional, Tuple, Type
 
 from conftest import HOME_PAGE, MiminetTester
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import (
+    NoSuchElementException,
+    StaleElementReferenceException,
+    TimeoutException,
+)
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from utils.locators import Location
@@ -300,19 +305,46 @@ class NodeConfig:
     def fill_link(self, ip: str, mask: int, link_id: int = 0):
         """Fill link (in config panel) with ip address and mask.
 
+        The config form container appears before its async-loaded link rows are
+        rendered, so wait for the ip field before typing and re-find per
+        attempt so a re-render between find and type is not treated as a
+        missing link.
+
         Args:
             link_id: Link number in the config list (starts from 0)."""
         self.__check_config_open()
 
+        ip_field_xpath = Location.Network.ConfigPanel.get_ip_field_xpath(link_id)
+        mask_field_xpath = Location.Network.ConfigPanel.get_mask_field_xpath(link_id)
+
         try:
-            self.__selenium.find_element(
-                By.XPATH, Location.Network.ConfigPanel.get_ip_field_xpath(link_id)
-            ).send_keys(ip)
-            self.__selenium.find_element(
-                By.XPATH, Location.Network.ConfigPanel.get_mask_field_xpath(link_id)
-            ).send_keys(str(mask))
-        except Exception:
+            self.__selenium.wait_until_appear(By.XPATH, ip_field_xpath)
+            self.__fill_link_field(ip_field_xpath, ip)
+            self.__fill_link_field(mask_field_xpath, str(mask))
+        except TimeoutException:
             raise Exception("Unable to find link. Maybe you forgot to add edges.")
+
+    def __fill_link_field(self, field_xpath: str, value: str):
+        """Clear and type ``value`` into the link field at ``field_xpath``.
+
+        Re-finds the element on each attempt so a stale element caused by a
+        config-panel re-render is not treated as a failure.
+        """
+        deadline = time.monotonic() + 20
+
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutException(
+                    f"Link field {field_xpath} is not interactable within 20 seconds."
+                )
+            try:
+                field = self.__selenium.find_element(By.XPATH, field_xpath)
+                field.clear()
+                field.send_keys(value)
+                return
+            except (NoSuchElementException, StaleElementReferenceException):
+                continue
 
     def fill_links(self, ip_mask_list: list):
         """Fill multiple links (in config panel) with IP addresses and masks.
