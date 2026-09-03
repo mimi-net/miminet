@@ -147,6 +147,8 @@ jobs:
           merge-multiple: true
 
       - name: Combine and report
+        env:
+          N_SHARDS: 3
         run: |
           source .venv/bin/activate
           cd .tmp/cov
@@ -154,9 +156,16 @@ jobs:
           [ -n "$files" ] || { echo "ERROR: no coverage data collected" >&2; exit 1; }
           echo "Combining:"
           printf '%s\n' "$files"
+          # A partial merge (fewer shard files than the matrix) would silently
+          # understate the whole-suite report and could hide a real regression,
+          # so assert the full shard count before reporting.
+          n_files=$(printf '%s\n' "$files" | wc -l)
+          [ "$n_files" -eq "$N_SHARDS" ] || { echo "ERROR: expected $N_SHARDS coverage data files, got $n_files" >&2; exit 1; }
           # shellcheck disable=SC2086
           python -m coverage combine $files
-          python -m coverage report
+          # Gate at the measured whole-suite baseline (76.15% statements on
+          # upstream/main after the W4a tooling landed) rounded down to 75%.
+          python -m coverage report --fail-under=75
           python -m coverage json -o coverage.json
 
       - name: Upload coverage report
