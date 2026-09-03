@@ -20,15 +20,6 @@ include = ["**"]
 [tool.ty.overrides.analysis]
 allowed-unresolved-imports = ["**"]
 
-# Staging: ty checks untyped bodies (mypy skipped them), so front/tests carries
-# ~133 diagnostics today. mypy never meaningfully checked these files (untyped
-# defs) — this is not a coverage regression. Re-enable once src is clean.
-[[tool.ty.overrides]]
-include = ["front/tests"]
-
-[tool.ty.overrides.rules]
-all = "ignore"
-
 # flask_sqlalchemy's db.Model is built through a dynamic metaclass that ty
 # cannot resolve to a concrete base — every declarative model class inheriting
 # db.Model trips `unsupported-base` (mypy-era `# type: ignore[name-defined]`

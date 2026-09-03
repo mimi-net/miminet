@@ -12,11 +12,26 @@ from utils.locators import Location
 class NodeType:
     """Node types for testing purposes."""
 
-    Host = (By.CSS_SELECTOR, Location.Network.DevicePanel.HOST.selector)
-    Switch = (By.CSS_SELECTOR, Location.Network.DevicePanel.SWITCH.selector)
-    Router = (By.CSS_SELECTOR, Location.Network.DevicePanel.ROUTER.selector)
-    Hub = (By.CSS_SELECTOR, Location.Network.DevicePanel.HUB.selector)
-    Server = (By.CSS_SELECTOR, Location.Network.DevicePanel.SERVER.selector)
+    Host: Tuple[str, str] = (
+        By.CSS_SELECTOR,
+        Location.Network.DevicePanel.HOST.selector,
+    )
+    Switch: Tuple[str, str] = (
+        By.CSS_SELECTOR,
+        Location.Network.DevicePanel.SWITCH.selector,
+    )
+    Router: Tuple[str, str] = (
+        By.CSS_SELECTOR,
+        Location.Network.DevicePanel.ROUTER.selector,
+    )
+    Hub: Tuple[str, str] = (
+        By.CSS_SELECTOR,
+        Location.Network.DevicePanel.HUB.selector,
+    )
+    Server: Tuple[str, str] = (
+        By.CSS_SELECTOR,
+        Location.Network.DevicePanel.SERVER.selector,
+    )
 
 
 class MiminetTestNetwork:
@@ -263,8 +278,10 @@ class NodeConfig:
     @property
     def name(self):
         """Current name of the network device displayed in the configuration."""
+        name_field = self.__config_locator.NAME_FIELD
+        assert name_field is not None
         name = self.__selenium.find_element(
-            By.CSS_SELECTOR, self.__config_locator.NAME_FIELD.selector
+            By.CSS_SELECTOR, name_field.selector
         ).get_attribute("value")
 
         return name
@@ -272,8 +289,10 @@ class NodeConfig:
     @property
     def default_gw(self):
         """Current default gateway of the network device displayed in the configuration."""
+        gw_field = self.__config_locator.DEFAULT_GATEWAY_FIELD
+        assert gw_field is not None
         gw = self.__selenium.find_element(
-            By.CSS_SELECTOR, self.__config_locator.DEFAULT_GATEWAY_FIELD.selector
+            By.CSS_SELECTOR, gw_field.selector
         ).get_attribute("value")
 
         return gw
@@ -507,14 +526,14 @@ class NodeConfig:
         """Submit configuration."""
         self.__check_config_open()
 
-        self.__selenium.wait_and_click(
-            By.CSS_SELECTOR, self.__config_locator.SUBMIT_BUTTON.selector
-        )
+        submit_button = self.__config_locator.SUBMIT_BUTTON
+        assert submit_button is not None
+        self.__selenium.wait_and_click(By.CSS_SELECTOR, submit_button.selector)
 
         self.__selenium.wait_until_text(
             By.CSS_SELECTOR,
-            self.__config_locator.SUBMIT_BUTTON.selector,
-            self.__config_locator.SUBMIT_BUTTON.text,
+            submit_button.selector,
+            submit_button.text,
             timeout=20,
         )
 
@@ -525,9 +544,9 @@ class NodeConfig:
             or self.__config_locator == Location.Network.ConfigPanel.Server
             or self.__config_locator == Location.Network.ConfigPanel.Switch
         ):
-            self.__selenium.select_by_value(
-                by, self.__config_locator.JOB_SELECT.selector, str(job_id)
-            )
+            job_select = self.__config_locator.JOB_SELECT
+            assert job_select is not None
+            self.__selenium.select_by_value(by, job_select.selector, str(job_id))
         else:
             raise ValueError(
                 f"Can't add job. Node with type {self.__config_locator} can't use jobs"
@@ -571,10 +590,10 @@ class NodeConfig:
 
     def __check_config_open(self):
         """Check that the config is open and handle any errors."""
+        main_form = self.__config_locator.MAIN_FORM
+        assert main_form is not None
         try:
-            self.__selenium.find_element(
-                By.CSS_SELECTOR, self.__config_locator.MAIN_FORM.selector
-            )
+            self.__selenium.find_element(By.CSS_SELECTOR, main_form.selector)
         except NoSuchElementException:
             raise Exception("Config panel isn't open during some operation.")
 
