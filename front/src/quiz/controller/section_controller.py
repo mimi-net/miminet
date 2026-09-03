@@ -1,8 +1,10 @@
 import json
 from datetime import datetime
+from typing import cast
 
 from flask import abort, jsonify, make_response, render_template, request
 from flask_login import current_user, login_required
+from miminet_model import User
 from quiz.service.section_service import (
     create_section,
     delete_section,
@@ -18,7 +20,7 @@ from quiz.util.encoder import UUIDEncoder
 
 @login_required
 def create_section_endpoint():
-    user = current_user
+    user = cast(User, current_user)
     res = create_section(
         name=request.json["name"],
         description=request.json["description"],
@@ -61,7 +63,9 @@ def get_sections_by_test_endpoint():
 
 @login_required
 def get_deleted_sections_by_test_endpoint():
-    res = get_deleted_sections_by_test(request.args["test_id"], current_user)
+    res = get_deleted_sections_by_test(
+        request.args["test_id"], cast(User, current_user)
+    )
     if res[1] == 404 or res[1] == 403:
         abort(res[1])
     else:
@@ -73,7 +77,7 @@ def get_deleted_sections_by_test_endpoint():
 @login_required
 def delete_section_endpoint():
     section_id = request.args["id"]
-    deleted = delete_section(current_user, section_id)
+    deleted = delete_section(cast(User, current_user), section_id)
     if deleted == 404:
         ret = {"message": "Раздел не существует", "id": section_id}
     elif deleted == 403:
@@ -88,7 +92,7 @@ def delete_section_endpoint():
 def edit_section_endpoint():
     section_id = request.json["id"]
     edited = edit_section(
-        user=current_user,
+        user=cast(User, current_user),
         name=request.json["name"],
         section_id=section_id,
         description=request.json["description"],
@@ -109,7 +113,9 @@ def publish_or_unpublish_test_by_section_endpoint():
     is_to_publish = request.json["to_publish"]
     section_id = request.args["id"]
     published = publish_or_unpublish_test_by_section(
-        user=current_user, section_id=section_id, is_to_publish=is_to_publish
+        user=cast(User, current_user),
+        section_id=section_id,
+        is_to_publish=is_to_publish,
     )
     if published == 404:
         ret = {"message": "Тест по данной секции не существует", "id": section_id}

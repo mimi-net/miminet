@@ -3,8 +3,8 @@ from uuid import UUID
 
 
 class UUIDEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, UUID):
-            return obj.hex
+    def default(self, o):
+        if isinstance(o, UUID):
+            return o.hex
 
-        return json.JSONEncoder.default(self, obj)
+        return json.JSONEncoder.default(self, o)

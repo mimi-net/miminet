@@ -12,6 +12,7 @@ from flask_login import current_user
 from markupsafe import Markup
 from sqlalchemy import func
 from sqlalchemy.orm import selectinload
+from typing import Any, cast
 from wtforms import (
     SelectField,
     TextAreaField,
@@ -108,8 +109,12 @@ def _get_admin_tests(user_id):
             Test.is_deleted.is_(False),
         )
         .options(
-            selectinload(Test.sections).selectinload(Section.quiz_sessions),
-            selectinload(Test.sections).selectinload(Section.questions),
+            selectinload(cast(Any, Test.sections)).selectinload(
+                cast(Any, Section.quiz_sessions)
+            ),
+            selectinload(cast(Any, Test.sections)).selectinload(
+                cast(Any, Section.questions)
+            ),
         )
         .order_by(Test.created_on.desc())
         .all()
@@ -203,8 +208,10 @@ def _build_statistics_data(tests):
         )
         .filter(latest_sessions_subquery.c.row_num == 1)
         .options(
-            selectinload(QuizSession.sessions).selectinload(SessionQuestion.question),
-            selectinload(QuizSession.created_by_user),
+            selectinload(cast(Any, QuizSession.sessions)).selectinload(
+                cast(Any, SessionQuestion.question)
+            ),
+            selectinload(cast(Any, QuizSession.created_by_user)),
         )
         .all()
     )
@@ -266,9 +273,9 @@ def _build_statistics_data(tests):
 
     rows.sort(
         key=lambda row: (
-            -row["total_score"],
-            -row["completed_sections"],
-            row["user_name"].casefold(),
+            -cast(int, row["total_score"]),
+            -cast(int, row["completed_sections"]),
+            cast(str, row["user_name"]).casefold(),
         )
     )
 
@@ -342,7 +349,7 @@ class MiminetAdminModelView(ModelView):
     MY_DEFAULT_FORMATTERS.update(
         {
             type(None): typefmt.null_formatter,
-            date: lambda view, value: value.strftime("%d.%m.%Y"),
+            date: lambda view, value, name: value.strftime("%d.%m.%Y"),
         }
     )
 
@@ -540,9 +547,9 @@ class QuestionView(MiminetAdminModelView):
     }
 
     column_formatters = {
-        "created_by_id": created_by_formatter,  # type: ignore
-        "section_id": get_section_name,  # type: ignore
-        "question_type": get_question_type,  # type: ignore
+        "created_by_id": created_by_formatter,
+        "section_id": get_section_name,
+        "question_type": get_question_type,
         "text": lambda v, c, model, n, **kwargs: Markup.unescape(model.text),
     }
 
