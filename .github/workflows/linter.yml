@@ -34,9 +34,9 @@ jobs:
         run: |
           uv sync --frozen
 
-      - name: Lint with mypy
+      - name: Lint with ty
         run: |
-          uv run --frozen mypy --ignore-missing-imports ${{matrix.node}}
+          uv run --frozen ty check --no-progress ${{matrix.node}}
 
       - name: Format with ruff
         run: |
