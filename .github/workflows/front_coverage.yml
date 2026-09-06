@@ -1,0 +1,61 @@
+name: Front browser-free coverage
+
+on: [push, pull_request]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install dependencies
+        run: |
+          uv sync --frozen
+
+      - name: Run browser-free unit tests under coverage
+        run: |
+          source .venv/bin/activate
+          cd front/tests
+          # Explicit list of browser-free test files (no selenium grid / no
+          # live compose needed). If a future file is added here it must be
+          # added to the list explicitly — `find` is deliberately NOT used so
+          # the browser-free set never silently changes shape.
+          files=(
+            test_get_logs.py
+            test_config_db.py
+            test_quiz_progress.py
+            test_ai_generate.py
+          )
+          [ "${#files[@]}" -gt 0 ] || { echo "ERROR: empty browser-free file list" >&2; exit 1; }
+          printf 'Browser-free files: %s\n' "${files[@]}"
+          # Raw coverage CLI (not pytest-cov), matching the back_test.yml
+          # pattern. --source=../src maps to front/src; --data-file is cwd-
+          # relative (front/tests).
+          python -m coverage run --branch --source=../src \
+            --data-file=".coverage.browserfree" -m pytest -vv -s \
+            -o log_file=/dev/null -o log_cli=true "${files[@]}"
+          # Gate at the measured whole-suite baseline (22.65% statements on
+          # upstream/main from the 4 browser-free files, measured 2026-09-06)
+          # rounded down to 21% — a browser-free regression now fails the PR.
+          python -m coverage report --fail-under=21
+          python -m coverage json -o coverage.json
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: front-browserfree-coverage-report
+          path: front/tests/coverage.json
+          include-hidden-files: true
+          if-no-files-found: ignore

@@ -1253,6 +1253,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "coverage" },
     { name = "isort" },
     { name = "mypy" },
     { name = "pytest" },
@@ -1295,6 +1296,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "coverage", specifier = ">=7.16.0" },
     { name = "isort" },
     { name = "mypy" },
     { name = "pytest", specifier = "==9.0.3" },
