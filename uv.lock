@@ -790,8 +790,8 @@ wheels = [
 
 [[package]]
 name = "ipmininet"
-version = "1.2.7"
-source = { git = "https://github.com/mimi-net/ipmininet.git?rev=v1.2.7#058d4ea7c31d4959156bc1993cda535c394a3b70" }
+version = "1.3.0"
+source = { git = "https://github.com/mimi-net/ipmininet.git?rev=v1.3.0#d3ce325808a32b5f8b2d6757a454cdb461637788" }
 dependencies = [
     { name = "mako" },
     { name = "mininet" },
@@ -1199,7 +1199,7 @@ dev = [
 requires-dist = [
     { name = "celery", specifier = "==5.6.3" },
     { name = "dpkt", specifier = "==1.9.8" },
-    { name = "ipmininet", git = "https://github.com/mimi-net/ipmininet.git?rev=v1.2.7" },
+    { name = "ipmininet", git = "https://github.com/mimi-net/ipmininet.git?rev=v1.3.0" },
     { name = "marshmallow-dataclass", specifier = "==8.7.1" },
     { name = "netaddr", specifier = "==1.3.0" },
     { name = "psutil", specifier = "==7.2.2" },
