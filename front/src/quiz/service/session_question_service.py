@@ -66,7 +66,7 @@ def get_question_by_session_question_id(session_question_id: str):
     )
 
 
-def get_session_question_data(session_question_id: str):
+def get_session_question_data(session_question_id: str | None):
     if not session_question_id:
         return None, 400
 

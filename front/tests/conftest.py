@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 from contextlib import contextmanager
 from typing import Generator
 from unittest.mock import MagicMock
@@ -7,9 +8,14 @@ from unittest.mock import MagicMock
 import pytest
 import requests
 from requests import Session
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import (
+    NoSuchElementException,
+    StaleElementReferenceException,
+    TimeoutException,
+)
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.remote.command import Command
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
@@ -19,10 +25,9 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 class testing_setting:
     """Configuration settings for testing environment."""
 
-    nginx_docker_ip = "172.18.0.2"  # nginx IP inside miminet docker network
-    selenium_hub_url = (
-        "http://localhost:4444/wd/hub"  # route for sending selenium commands
-    )
+    nginx_docker_ip = os.getenv("TEST_TARGET_HOST", "172.18.0.2")
+    port = int(os.getenv("TEST_TARGET_PORT", 80))
+    selenium_hub_url = os.getenv("SELENIUM_HUB_URL", "http://localhost:4444/wd/hub")
     window_size = "1920,1080"
     auth_data = {
         "email": "selenium",
@@ -30,7 +35,15 @@ class testing_setting:
     }  # this data should be inserted into the database, selenium uses it for authentication
 
 
-MAIN_PAGE = f"http://{testing_setting.nginx_docker_ip}"
+def _main_url():
+    host = testing_setting.nginx_docker_ip
+    port = testing_setting.port
+    if port == 80:
+        return f"http://{host}"
+    return f"http://{host}:{port}"
+
+
+MAIN_PAGE = _main_url()
 HOME_PAGE = f"{MAIN_PAGE}/home"
 LOGIN_PAGE = f"{MAIN_PAGE}//auth/login.html"
 
@@ -41,34 +54,102 @@ class MiminetTester(WebDriver):
     adding new methods for convenient element interaction.
     """
 
-    def wait_and_click(self, by: str, element: str, timeout=20):
+    def wait_and_click(
+        self,
+        by: str,
+        element: str,
+        timeout=20,
+        scope=None,
+    ):
         """
         Waits for the specified element to become clickable before clicking it.
+
+        Re-finds the element on every attempt so a stale element caused by a
+        page re-render is not treated as a failure.
+
+        If ``scope`` is given (a WebElement or a ``(by, selector)`` locator
+        tuple), the target element is searched within it on every attempt.
+        This keeps the click bound to e.g. the correct modal dialog when the
+        same inner id exists in several rendered dialogs.
 
         Args:
             by (By): The locator strategy (e.g., By.ID, By.XPATH).
             element (str): The element locator (e.g., "myElementId", "//button[text()='Click Me']").
             timeout (int): The maximum time in seconds to wait (default: 20).
+            scope (WebElement | tuple): Optional container to re-find the element within.
         """
-        WebDriverWait(self, timeout).until(
-            EC.element_to_be_clickable((by, element))
-        ).click()
+        deadline = time.monotonic() + timeout
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutException(
+                    f"Element {element} is not clickable within {timeout} seconds."
+                )
+            try:
+                if scope is None:
+                    wait_target = EC.element_to_be_clickable((by, element))
+                else:
+                    container = (
+                        self.find_element(*scope) if isinstance(scope, tuple) else scope
+                    )
+                    wait_target = self.__scoped_element_clickable(
+                        container, by, element
+                    )
+                WebDriverWait(self, remaining).until(wait_target).click()
+                return
+            except StaleElementReferenceException:
+                continue
 
-    def drag_and_drop(self, source: WebElement, target: WebElement, x: int, y: int):
+    @staticmethod
+    def __scoped_element_clickable(container, by: str, element: str):
+        """Return the element when it is visible and enabled inside the container."""
+
+        def _condition(_driver):
+            try:
+                el = container.find_element(by, element)
+            except NoSuchElementException:
+                return None
+            return el if el.is_displayed() and el.is_enabled() else None
+
+        return _condition
+
+    def drag_and_drop(self, source, target, x: int, y: int):
         """Performs a drag-and-drop action from a source element to a target element.
 
+        Elements may be given either as WebElement instances or as (by, selector)
+        locator tuples; locators are re-resolved on each attempt so a stale
+        element during the action is not treated as a failure.
+
         Args:
-            source (WebElement): The source element to be dragged.
-            target (WebElement): The target element to drop the source element onto.
+            source (WebElement | tuple): The source element to be dragged.
+            target (WebElement | tuple): The target element to drop the source element onto.
             x (int): The x-offset to move to.
             y (int): The y-offset to move to.
         """
-        actions_chain = ActionChains(self)
+        deadline = time.monotonic() + 20
 
-        actions_chain.click_and_hold(source)
-        actions_chain.move_to_element_with_offset(target, x, y)
-        actions_chain.release()
-        actions_chain.perform()
+        def _resolve(element):
+            if isinstance(element, tuple):
+                by, selector = element
+                return self.find_element(by, selector)
+            return element
+
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutException(
+                    "Drag-and-drop did not complete within 20 seconds."
+                )
+            try:
+                actions_chain = ActionChains(self)
+
+                actions_chain.click_and_hold(_resolve(source))
+                actions_chain.move_to_element_with_offset(_resolve(target), x, y)
+                actions_chain.release()
+                actions_chain.perform()
+                return
+            except StaleElementReferenceException:
+                continue
 
     def exist_element(self, by: str, element: str):
         """
@@ -112,13 +193,37 @@ class MiminetTester(WebDriver):
         Waits until text appears in the element.
 
         Args:
-            by (str): The locator strategy (e.g., By.ID, By.XPATH).
+            by (By): The locator strategy (e.g., By.ID, By.XPATH).
             element (str): The element locator (e.g., "myElementId", "//button[text()='Click Me']").
             timeout (int): The maximum time in seconds to wait (default: 20).
         """
         WebDriverWait(self, timeout).until(
             EC.text_to_be_present_in_element((by, element), text)
         )
+
+    def wait_until_value(self, by: str, element: str, value: str, timeout=20):
+        """
+        Waits until an input field holds the given value.
+
+        Re-finds the element on each attempt so a stale element caused by a page
+        re-render is not treated as a failure.
+
+        Args:
+            by (By): The locator strategy (e.g., By.ID, By.XPATH).
+            element (str): The element locator (e.g., "myElementId", "//button[text()='Click Me']").
+            value (str): The value the input field must hold.
+            timeout (int): The maximum time in seconds to wait (default: 20).
+        """
+        WebDriverWait(self, timeout).until(
+            lambda driver: self.__has_value(driver, by, element, value)
+        )
+
+    @staticmethod
+    def __has_value(driver: WebDriver, by: str, element: str, value: str):
+        try:
+            return driver.find_element(by, element).get_attribute("value") == value
+        except StaleElementReferenceException:
+            return False
 
     def wait_for(self, condition, timeout=20):
         """Waits for a given condition to be true.
@@ -143,22 +248,35 @@ class MiminetTester(WebDriver):
         except TimeoutException:
             raise Exception(f"Modal dialog {element} wasn't opened.")
         finally:
-            # TODO change it to wait_until_disappear when modal dialog will be fixed
-            self.wait_for(
-                lambda driver: not driver.find_element(by, element).is_displayed(),
-                timeout=5,
-            )
+            # EC.invisibility_of_element_located treats a stale element (e.g. while
+            # the modal-close animation removes the dialog) as already invisible,
+            # so the close is awaited without racing the DOM removal.
+            self.wait_until_disappear(by, element, timeout=5)
 
     def select_by_value(self, by: str, element: str, value: str):
         """Selects an option in a select element by its value.
 
+        Re-finds the select element on each attempt so a stale element caused by
+        a page re-render is not treated as a failure.
+
         Args:
-            by (str): The locator strategy (e.g., By.ID, By.XPATH).
+            by (By): The locator strategy (e.g., By.ID, By.XPATH).
             element (str): The element locator (e.g., "myElementId", "//button[text()='Click Me']").
             value: The value attribute of the option to select.
         """
-        select = Select(self.find_element(by, element))
-        select.select_by_value(value)
+        deadline = time.monotonic() + 20
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutException(
+                    f"Unable to select value {value} in {element} within 20 seconds."
+                )
+            try:
+                select = Select(self.find_element(by, element))
+                select.select_by_value(value)
+                return
+            except StaleElementReferenceException:
+                continue
 
     def get_logs(self, logs_filter=None):
         """
@@ -171,7 +289,10 @@ class MiminetTester(WebDriver):
         Returns:
             list: list with the filtered log entries.
         """
-        logs = self.get_log("browser")
+        # Remote WebDriver has no `get_log` in Selenium 4 (it lives only on
+        # ChromiumDriver); the grid session is a chromedriver underneath, so run
+        # the same GET_LOG command ChromiumDriver.get_log would run.
+        logs = self.execute(Command.GET_LOG, {"type": "browser"})["value"]
         return list(filter(logs_filter, logs)) if logs_filter else list(logs)
 
     def get_console_messages(self):
@@ -223,9 +344,9 @@ def requester():
 
     response = session.get(MAIN_PAGE)
 
-    assert (
-        response.status_code == 200
-    ), "Miminet is not running or its address is incorrect: unable to get home page!"
+    assert response.status_code == 200, (
+        "Miminet is not running or its address is incorrect: unable to get home page!"
+    )
 
     response = session.post(
         f"{MAIN_PAGE}//auth/login.html",

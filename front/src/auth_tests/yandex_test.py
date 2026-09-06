@@ -141,9 +141,7 @@ def test_yandex_callback_links_yandex_to_current_profile(app, mocker):
         mock_user = mocker.patch("miminet_auth.User")
         mock_user.query.get.return_value = linked_user
         mock_user.query.filter_by.return_value.first.return_value = None
-        mock_oauth2session.return_value.get.return_value.raise_for_status.return_value = (
-            None
-        )
+        mock_oauth2session.return_value.get.return_value.raise_for_status.return_value = None
         mock_oauth2session.return_value.get.return_value.json.return_value = {
             "id": "test_id",
             "login": "test_login",
@@ -234,9 +232,7 @@ def test_yandex_callback_redirects_to_home_after_login(app, mocker):
         mock_oauth2session = mocker.patch("miminet_auth.OAuth2Session")
         mock_user = mocker.patch("miminet_auth.User")
         mock_login_user = mocker.patch("miminet_auth.login_user")
-        mock_oauth2session.return_value.get.return_value.raise_for_status.return_value = (
-            None
-        )
+        mock_oauth2session.return_value.get.return_value.raise_for_status.return_value = None
         mock_oauth2session.return_value.get.return_value.json.return_value = {
             "id": "test_id",
             "login": "test_login",
@@ -273,9 +269,7 @@ def test_yandex_callback_handles_user_not_added_to_db_error(app, mocker):
         mock_session = mocker.patch("miminet_auth.db.session")
         mock_flash = mocker.patch("miminet_auth.flash")
         mock_logger = mocker.patch("miminet_auth.logger.error")
-        mock_oauth2session.return_value.get.return_value.raise_for_status.return_value = (
-            None
-        )
+        mock_oauth2session.return_value.get.return_value.raise_for_status.return_value = None
         mock_oauth2session.return_value.get.return_value.json.return_value = {
             "id": "test_id",
             "login": "test_login",

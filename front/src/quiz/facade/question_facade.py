@@ -18,7 +18,7 @@ from quiz.facade.json_schema_validation import validate_requirements
 UPLOAD_FOLDER = "/app/static/quiz_images"
 
 
-def create_single_question(section_id: str, question_dict, user: User):
+def create_single_question(section_id: str | None, question_dict, user: User):
     if "requirements" in question_dict:
         validation_result = validate_requirements(question_dict["requirements"])
         if validation_result is not True:
@@ -162,7 +162,7 @@ def create_single_question(section_id: str, question_dict, user: User):
     return question.id, 201
 
 
-def create_question(section_id: str, question_data, user: User):
+def create_question(section_id: str | None, question_data, user: User):
     """
     Если question_data – список, то обрабатывает все объекты.
     Если одиночный объект – обрабатывает его.

@@ -1,7 +1,9 @@
 import json
+from typing import cast
 
 from flask import abort, jsonify, make_response, render_template, request
 from flask_login import current_user, login_required
+from miminet_model import User
 from quiz.facade.quiz_session_facade import (
     finish_old_sessions,
     finish_session,
@@ -20,7 +22,9 @@ from quiz.service.session_question_service import (
 
 @login_required
 def answer_on_session_question_endpoint():
-    res = answer_on_session_question(request.args["id"], request.json, current_user)
+    res = answer_on_session_question(
+        request.args["id"], request.json, cast(User, current_user)
+    )
     if res[1] == 404 or res[1] == 403:
         abort(res[1])
     return make_response(json.dumps(res[0].to_dict(), default=str), res[1])
@@ -43,7 +47,7 @@ def get_session_question_json():
 def check_network_task_endpoint():
     session_question_id = request.args["id"]
     answer = request.json
-    user = current_user
+    user = cast(User, current_user)
 
     result, aux, status = handle_exam_answer(session_question_id, answer, user)
 
@@ -93,7 +97,7 @@ def get_question_by_session_question_id_endpoint():
 
 @login_required
 def start_session_endpoint():
-    res = start_session(request.args["section_id"], current_user)
+    res = start_session(request.args["section_id"], cast(User, current_user))
 
     if res[2] == 404:
         abort(res[2])
@@ -106,7 +110,7 @@ def start_session_endpoint():
 
 @login_required
 def finish_session_endpoint():
-    code = finish_session(request.args["id"], current_user)
+    code = finish_session(request.args["id"], cast(User, current_user))
 
     if code == 404 or code == 403:
         abort(code)
@@ -116,7 +120,7 @@ def finish_session_endpoint():
 
 @login_required
 def finish_old_session_endpoint():
-    code = finish_old_sessions(current_user)
+    code = finish_old_sessions(cast(User, current_user))
 
     if code == 404:
         abort(404)

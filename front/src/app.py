@@ -526,8 +526,11 @@ def missing_token_callback(error):
 def confing_js():
     config = {key: os.getenv(key) for key in PUBLIC_CONFIG_KEYS if os.getenv(key)}
 
+    js_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "templates/config.js"
+    )
     js_content = render_template_string(
-        open("templates/config.js", "r", encoding="utf-8").read(), **config
+        open(js_path, "r", encoding="utf-8").read(), **config
     )
 
     return Response(js_content, mimetype="application/javascript")
@@ -638,7 +641,11 @@ def sitemap():
         if "admin/" in rule.rule:
             continue
 
-        if "GET" in rule.methods and len(rule.arguments) == 0:
+        if (
+            rule.methods is not None
+            and "GET" in rule.methods
+            and len(rule.arguments) == 0
+        ):
             pages.append(["https://miminet.ru" + str(rule.rule), zero_days_ago])
 
     sitemap_xml = render_template("sitemap_template.xml", pages=pages)

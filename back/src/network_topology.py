@@ -10,6 +10,11 @@ from pkt_parser import is_ipv4_address
 from node_types import NodeType
 
 
+def stp_enabled(config: NodeConfig) -> bool:
+    """Return True when STP or RSTP is enabled for the switch config."""
+    return config.stp in (1, 2)
+
+
 class MiminetTopology(IPTopo):
     """Class representing topology for miminet networks."""
 
@@ -18,8 +23,6 @@ class MiminetTopology(IPTopo):
         self.__iface_pairs: list = []
         # Used to generate unique names
         self.__switch_count = 0
-        # Minimum suitable time for which the network is configured
-        self.__network_configuration_time = 3
 
         self.__network: Network = network
         self.__nodes: dict = {}
@@ -33,15 +36,6 @@ class MiminetTopology(IPTopo):
 
         Return: List with useful information about every interface."""
         return self.__iface_pairs.copy()
-
-    @property
-    def network_configuration_time(self) -> int:
-        """Get amount of time it takes to properly configure the network (in seconds)."""
-        return self.__network_configuration_time
-
-    def __set_network_configuration_time(self, value: int):
-        """Set amount of time it takes to properly configure the network (in seconds)."""
-        self.__network_configuration_time = value
 
     def __handle_node(self, node: Node):
         config: NodeConfig = node.config
@@ -74,16 +68,10 @@ class MiminetTopology(IPTopo):
             priority=config.priority,
         )
 
-        # Set emulation delay based on STP mode
-        if is_rstp_enabled:
-            self.__set_network_configuration_time(7)
-        elif is_stp_enabled:
-            self.__set_network_configuration_time(33)
-
     def __handle_host_or_server(self, node_id: str, config: NodeConfig):
         default_gw = config.default_gw
         route = f"via {default_gw}" if default_gw else ""
-        self.__nodes[node_id] = self.addHost(node_id, defaultRoute=route)
+        self.__nodes[node_id] = self.addHost(node_id, defaultRoute=route, use_v6=False)
 
     def __handle_l1_hub(self, node_id: str):
         self.__nodes[node_id] = self.addSwitch(
@@ -92,15 +80,18 @@ class MiminetTopology(IPTopo):
 
     def __handle_router(self, node_id: str, config: NodeConfig):
         default_gw = config.default_gw
-        kwargs = {
-            "use_v6": False,
-            "config": RouterConfig,
-        }
 
         if default_gw:
-            kwargs["routerDefaultRoute"] = f"via {default_gw}"
+            router = self.addRouter(
+                node_id,
+                use_v6=False,
+                config=RouterConfig,
+                routerDefaultRoute=f"via {default_gw}",
+            )
+        else:
+            router = self.addRouter(node_id, use_v6=False, config=RouterConfig)
 
-        self.__nodes[node_id] = self.addRouter(node_id, **kwargs)
+        self.__nodes[node_id] = router
 
     def __find_interface(
         self, edge_id: str, node_interfaces: list[NodeInterface]
@@ -189,7 +180,7 @@ class MiminetTopology(IPTopo):
             )
 
             # Put virtual switch between nodes and return link between them
-            link1, link2 = self.addLink(
+            link1, link2 = self._add_link_via_switch(
                 src_host,
                 trg_host,
                 interface_name_1=src_iface.name,
@@ -209,16 +200,20 @@ class MiminetTopology(IPTopo):
             interfaces.append(trg_iface.name)
 
         if links:
-            # Set up packet capturing
+            # Set up packet capturing.
+            # Networks are IPv4-only (use_v6=False), yet the switches emit a
+            # steady IPv6 MLDv2 multicast-report flood that crowds every capture
+            # buffer and drops the real ARP/ICMP exchange (see issue #450).
+            # "not igmp" only excludes IPv4 IGMP, so also exclude all IPv6.
             self.addNetworkCapture(
                 nodes=[],
                 interfaces=[*links],
                 base_filename="capture",
-                extra_arguments="not igmp",
+                extra_arguments="not igmp and not ip6",
             )
         super().build(*args, **kwargs)
 
-    def addLink(
+    def _add_link_via_switch(
         self,
         h_source,
         h_target,
@@ -229,7 +224,11 @@ class MiminetTopology(IPTopo):
         loss_percentage=0,
         duplicate_percentage=0,
     ):
-        """Connects two hosts through a virtual switch."""
+        """Connect two hosts through a freshly-created virtual switch.
+
+        Returns the (host<->switch, switch<->host) link pair. This is NOT an
+        IPTopo.addLink override (which links two named nodes directly): it is
+        an internal helper that inserts an extra hub switch on the path."""
         # Create unique switch name
         self.__switch_count += 1
         switch_name = "mimiswsw%d" % self.__switch_count

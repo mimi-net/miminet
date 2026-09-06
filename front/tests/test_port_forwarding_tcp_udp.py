@@ -8,7 +8,6 @@ from utils.networks import MiminetTestNetwork, NodeType
 
 
 class TestPortForwardingTCP:
-
     @pytest.fixture(scope="class", params=["tcp", "udp"])
     def protocol_and_network(self, selenium: MiminetTester, request):
         protocol = request.param

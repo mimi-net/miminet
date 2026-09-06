@@ -571,12 +571,14 @@ def get_last_emulation_time():
 @jwt_required()
 def get_emulation_queue_size():
     """Answer with current emulation queue size filtered by emulation time."""
-    time_filter_req: str = request.args.get("time-filter", type=str).replace(" ", "+")
-    time_filter: datetime.datetime = datetime.datetime.fromisoformat(time_filter_req)
-    if not time_filter:
+    time_filter_req = request.args.get("time-filter", type=str)
+    if not time_filter_req:
         return make_response(
             jsonify({"message": "Пропущен параметр 'time-filter'."}), 400
         )
+    time_filter: datetime.datetime = datetime.datetime.fromisoformat(
+        time_filter_req.replace(" ", "+")
+    )
 
     emulated_networks_count = (
         SimulateLog.query.filter(not_(SimulateLog.ready))

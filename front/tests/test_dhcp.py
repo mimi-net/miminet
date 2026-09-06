@@ -6,7 +6,6 @@ from utils.networks import MiminetTestNetwork, NodeType
 
 
 class TestDHCP:
-
     @pytest.fixture(scope="class")
     def network(self, selenium: MiminetTester):
         network = MiminetTestNetwork(selenium)

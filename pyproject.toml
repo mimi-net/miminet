@@ -1,0 +1,32 @@
+[tool.uv.workspace]
+members = ["back", "front"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "W605"]
+ignore = ["E501", "W391", "C901", "E203"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.ty]
+
+[[tool.ty.overrides]]
+include = ["**"]
+
+[tool.ty.overrides.analysis]
+allowed-unresolved-imports = ["**"]
+
+# flask_sqlalchemy's db.Model is built through a dynamic metaclass that ty
+# cannot resolve to a concrete base — every declarative model class inheriting
+# db.Model trips `unsupported-base` (mypy-era `# type: ignore[name-defined]`
+# comments mark the same known limitation). Scoped to the two model-definition
+# files; unsupported-base stays enabled everywhere else.
+[[tool.ty.overrides]]
+include = ["front/src/miminet_model.py", "front/src/quiz/entity/entity.py"]
+
+[tool.ty.overrides.rules]
+unsupported-base = "ignore"

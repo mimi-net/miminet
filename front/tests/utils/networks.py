@@ -1,9 +1,14 @@
 import random
+import time
 from json import dumps as json_dumps
 from typing import Optional, Tuple, Type
 
 from conftest import HOME_PAGE, MiminetTester
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import (
+    NoSuchElementException,
+    StaleElementReferenceException,
+    TimeoutException,
+)
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from utils.locators import Location
@@ -12,11 +17,26 @@ from utils.locators import Location
 class NodeType:
     """Node types for testing purposes."""
 
-    Host = (By.CSS_SELECTOR, Location.Network.DevicePanel.HOST.selector)
-    Switch = (By.CSS_SELECTOR, Location.Network.DevicePanel.SWITCH.selector)
-    Router = (By.CSS_SELECTOR, Location.Network.DevicePanel.ROUTER.selector)
-    Hub = (By.CSS_SELECTOR, Location.Network.DevicePanel.HUB.selector)
-    Server = (By.CSS_SELECTOR, Location.Network.DevicePanel.SERVER.selector)
+    Host: Tuple[str, str] = (
+        By.CSS_SELECTOR,
+        Location.Network.DevicePanel.HOST.selector,
+    )
+    Switch: Tuple[str, str] = (
+        By.CSS_SELECTOR,
+        Location.Network.DevicePanel.SWITCH.selector,
+    )
+    Router: Tuple[str, str] = (
+        By.CSS_SELECTOR,
+        Location.Network.DevicePanel.ROUTER.selector,
+    )
+    Hub: Tuple[str, str] = (
+        By.CSS_SELECTOR,
+        Location.Network.DevicePanel.HUB.selector,
+    )
+    Server: Tuple[str, str] = (
+        By.CSS_SELECTOR,
+        Location.Network.DevicePanel.SERVER.selector,
+    )
 
 
 class MiminetTestNetwork:
@@ -96,9 +116,15 @@ class MiminetTestNetwork:
         (str) : Network URL
         """
         self.__selenium.get(HOME_PAGE)
-        self.__selenium.find_element(
+        self.__selenium.wait_and_click(
             By.CSS_SELECTOR, Location.MyNetworks.NEW_NETWORK_BUTTON.selector
-        ).click()
+        )
+
+        # Wait for the frontend to finish creating the network and navigate to
+        # its editor page before capturing the URL (no navigation race).
+        self.__selenium.wait_until_appear(
+            By.CSS_SELECTOR, Location.Network.MAIN_PANEL.selector
+        )
 
         self.__url = self.__selenium.current_url
 
@@ -161,8 +187,12 @@ class MiminetTestNetwork:
 
         local_x, local_y = self.__calc_panel_offset(panel, x, y)
 
-        device_button = self.__selenium.find_element(*node_type)
-        self.__selenium.drag_and_drop(device_button, panel, local_x, local_y)
+        self.__selenium.drag_and_drop(
+            node_type,
+            (By.CSS_SELECTOR, Location.Network.MAIN_PANEL.selector),
+            local_x,
+            local_y,
+        )
         self.__selenium.wait_for(lambda _: old_nodes_len < len(self.nodes), timeout=5)
         return len(self.nodes) - 1
 
@@ -221,9 +251,9 @@ class MiminetTestNetwork:
         """Delete current network."""
         self.__check_page()
 
-        self.__selenium.find_element(
+        self.__selenium.wait_and_click(
             By.CSS_SELECTOR, Location.Network.TopButton.OPTIONS.selector
-        ).click()
+        )
 
         self.__selenium.wait_and_click(
             By.CSS_SELECTOR,
@@ -253,8 +283,10 @@ class NodeConfig:
     @property
     def name(self):
         """Current name of the network device displayed in the configuration."""
+        name_field = self.__config_locator.NAME_FIELD
+        assert name_field is not None
         name = self.__selenium.find_element(
-            By.CSS_SELECTOR, self.__config_locator.NAME_FIELD.selector
+            By.CSS_SELECTOR, name_field.selector
         ).get_attribute("value")
 
         return name
@@ -262,8 +294,10 @@ class NodeConfig:
     @property
     def default_gw(self):
         """Current default gateway of the network device displayed in the configuration."""
+        gw_field = self.__config_locator.DEFAULT_GATEWAY_FIELD
+        assert gw_field is not None
         gw = self.__selenium.find_element(
-            By.CSS_SELECTOR, self.__config_locator.DEFAULT_GATEWAY_FIELD.selector
+            By.CSS_SELECTOR, gw_field.selector
         ).get_attribute("value")
 
         return gw
@@ -271,19 +305,46 @@ class NodeConfig:
     def fill_link(self, ip: str, mask: int, link_id: int = 0):
         """Fill link (in config panel) with ip address and mask.
 
+        The config form container appears before its async-loaded link rows are
+        rendered, so wait for the ip field before typing and re-find per
+        attempt so a re-render between find and type is not treated as a
+        missing link.
+
         Args:
             link_id: Link number in the config list (starts from 0)."""
         self.__check_config_open()
 
+        ip_field_xpath = Location.Network.ConfigPanel.get_ip_field_xpath(link_id)
+        mask_field_xpath = Location.Network.ConfigPanel.get_mask_field_xpath(link_id)
+
         try:
-            self.__selenium.find_element(
-                By.XPATH, Location.Network.ConfigPanel.get_ip_field_xpath(link_id)
-            ).send_keys(ip)
-            self.__selenium.find_element(
-                By.XPATH, Location.Network.ConfigPanel.get_mask_field_xpath(link_id)
-            ).send_keys(str(mask))
-        except Exception:
+            self.__selenium.wait_until_appear(By.XPATH, ip_field_xpath)
+            self.__fill_link_field(ip_field_xpath, ip)
+            self.__fill_link_field(mask_field_xpath, str(mask))
+        except TimeoutException:
             raise Exception("Unable to find link. Maybe you forgot to add edges.")
+
+    def __fill_link_field(self, field_xpath: str, value: str):
+        """Clear and type ``value`` into the link field at ``field_xpath``.
+
+        Re-finds the element on each attempt so a stale element caused by a
+        config-panel re-render is not treated as a failure.
+        """
+        deadline = time.monotonic() + 20
+
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutException(
+                    f"Link field {field_xpath} is not interactable within 20 seconds."
+                )
+            try:
+                field = self.__selenium.find_element(By.XPATH, field_xpath)
+                field.clear()
+                field.send_keys(value)
+                return
+            except (NoSuchElementException, StaleElementReferenceException):
+                continue
 
     def fill_links(self, ip_mask_list: list):
         """Fill multiple links (in config panel) with IP addresses and masks.
@@ -301,10 +362,10 @@ class NodeConfig:
         """Switch the FTP configuration toggle."""
         self.__check_config_open()
 
-        self.__selenium.find_element(
+        self.__selenium.wait_and_click(
             By.CSS_SELECTOR,
             Location.Network.ConfigPanel.Switch.RSTP_BUTTON.selector,
-        ).click()
+        )
 
         modal_el = (
             By.CSS_SELECTOR,
@@ -314,10 +375,11 @@ class NodeConfig:
         )
 
         with self.__selenium.run_in_modal_context(*modal_el) as dialog:
-            dialog.find_element(
+            self.__selenium.wait_and_click(
                 By.CSS_SELECTOR,
                 Location.Network.ConfigPanel.Switch.StpPanel.STP_BUTTON.selector,
-            ).click()
+                scope=modal_el,
+            )
 
             priority_field = dialog.find_element(
                 By.CSS_SELECTOR,
@@ -326,19 +388,20 @@ class NodeConfig:
             priority_field.clear()
             priority_field.send_keys(str(priority))
 
-            dialog.find_element(
+            self.__selenium.wait_and_click(
                 By.CSS_SELECTOR,
                 Location.Network.ConfigPanel.Switch.StpPanel.SUBMIT_BUTTON.selector,
-            ).click()
+                scope=modal_el,
+            )
 
     def disable_stp(self):
         """Switch the FTP configuration toggle."""
         self.__check_config_open()
 
-        self.__selenium.find_element(
+        self.__selenium.wait_and_click(
             By.CSS_SELECTOR,
             Location.Network.ConfigPanel.Switch.RSTP_BUTTON.selector,
-        ).click()
+        )
 
         modal_el = (
             By.CSS_SELECTOR,
@@ -347,16 +410,18 @@ class NodeConfig:
             ),
         )
 
-        with self.__selenium.run_in_modal_context(*modal_el) as dialog:
-            dialog.find_element(
+        with self.__selenium.run_in_modal_context(*modal_el) as _:
+            self.__selenium.wait_and_click(
                 By.CSS_SELECTOR,
                 Location.Network.ConfigPanel.Switch.StpPanel.OFF_STP_BUTTON.selector,
-            ).click()
+                scope=modal_el,
+            )
 
-            dialog.find_element(
+            self.__selenium.wait_and_click(
                 By.CSS_SELECTOR,
                 Location.Network.ConfigPanel.Switch.StpPanel.SUBMIT_BUTTON.selector,
-            ).click()
+                scope=modal_el,
+            )
 
     def add_jobs(self, job_id: int, args: dict[str, str], by=By.CSS_SELECTOR):
         """Adds a job to the system using Selenium.
@@ -397,9 +462,9 @@ class NodeConfig:
         """Fill default gateway with data."""
         self.__check_config_open()
 
-        assert (
-            self.__config_locator.DEFAULT_GATEWAY_FIELD
-        ), f'Unable to change default gateway for this element: "{self.__config_locator}".'
+        assert self.__config_locator.DEFAULT_GATEWAY_FIELD, (
+            f'Unable to change default gateway for this element: "{self.__config_locator}".'
+        )
 
         gw_field = self.__selenium.find_element(
             By.CSS_SELECTOR, self.__config_locator.DEFAULT_GATEWAY_FIELD.selector
@@ -411,9 +476,9 @@ class NodeConfig:
         """Change device name."""
         self.__check_config_open()
 
-        assert (
-            self.__config_locator.NAME_FIELD
-        ), f'Unable to change name for this element: "{self.__config_locator}".'
+        assert self.__config_locator.NAME_FIELD, (
+            f'Unable to change name for this element: "{self.__config_locator}".'
+        )
 
         name_field = self.__selenium.find_element(
             By.CSS_SELECTOR, self.__config_locator.NAME_FIELD.selector
@@ -429,10 +494,9 @@ class NodeConfig:
         """
         switch_name = self.name
 
-        vlan_config_button = self.__selenium.find_element(
+        self.__selenium.wait_and_click(
             By.CSS_SELECTOR, Location.Network.ConfigPanel.Switch.VLAN_BUTTON.selector
         )
-        vlan_config_button.click()
 
         modal = (
             By.CSS_SELECTOR,
@@ -442,12 +506,11 @@ class NodeConfig:
         )
 
         with self.__selenium.run_in_modal_context(*modal) as dialog:
-            switch_button = dialog.find_element(
+            self.__selenium.wait_and_click(
                 By.CSS_SELECTOR,
                 Location.Network.ConfigPanel.Switch.VlanPanel.SWITCH_BUTTON.selector,
+                scope=modal,
             )
-
-            switch_button.click()
 
             # Go through each row
             row_id = 0
@@ -485,25 +548,25 @@ class NodeConfig:
                 row_id += 1
 
             # Save new table
-            submit_button = dialog.find_element(
+            self.__selenium.wait_and_click(
                 By.CSS_SELECTOR,
                 Location.Network.ConfigPanel.Switch.VlanPanel.SUBMIT_BUTTON.selector,
+                scope=modal,
             )
-            submit_button.click()
 
     def submit(self):
         """Submit configuration."""
         self.__check_config_open()
 
-        self.__selenium.find_element(
-            By.CSS_SELECTOR, self.__config_locator.SUBMIT_BUTTON.selector
-        ).click()
+        submit_button = self.__config_locator.SUBMIT_BUTTON
+        assert submit_button is not None
+        self.__selenium.wait_and_click(By.CSS_SELECTOR, submit_button.selector)
 
         self.__selenium.wait_until_text(
             By.CSS_SELECTOR,
-            self.__config_locator.SUBMIT_BUTTON.selector,
-            self.__config_locator.SUBMIT_BUTTON.text,
-            timeout=5,
+            submit_button.selector,
+            submit_button.text,
+            timeout=20,
         )
 
     def __select_job(self, job_id, by):
@@ -513,9 +576,9 @@ class NodeConfig:
             or self.__config_locator == Location.Network.ConfigPanel.Server
             or self.__config_locator == Location.Network.ConfigPanel.Switch
         ):
-            self.__selenium.select_by_value(
-                by, self.__config_locator.JOB_SELECT.selector, str(job_id)
-            )
+            job_select = self.__config_locator.JOB_SELECT
+            assert job_select is not None
+            self.__selenium.select_by_value(by, job_select.selector, str(job_id))
         else:
             raise ValueError(
                 f"Can't add job. Node with type {self.__config_locator} can't use jobs"
@@ -549,9 +612,9 @@ class NodeConfig:
         else:
             raise Exception("Can't find device type !!!")
 
-        assert (
-            self.__config_locator.MAIN_FORM
-        ), f'Unable to open node config form for this element: "{self.__config_locator}".'
+        assert self.__config_locator.MAIN_FORM, (
+            f'Unable to open node config form for this element: "{self.__config_locator}".'
+        )
 
         self.__selenium.wait_until_appear(
             By.CSS_SELECTOR, self.__config_locator.MAIN_FORM.selector
@@ -559,10 +622,10 @@ class NodeConfig:
 
     def __check_config_open(self):
         """Check that the config is open and handle any errors."""
+        main_form = self.__config_locator.MAIN_FORM
+        assert main_form is not None
         try:
-            self.__selenium.find_element(
-                By.CSS_SELECTOR, self.__config_locator.MAIN_FORM.selector
-            )
+            self.__selenium.find_element(By.CSS_SELECTOR, main_form.selector)
         except NoSuchElementException:
             raise Exception("Config panel isn't open during some operation.")
 

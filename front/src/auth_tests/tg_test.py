@@ -54,6 +54,7 @@ def auth_data():
 def create_hash():
     bot_token_secret = os.environ.get("BOT_TOKEN")
     BOT_TOKEN = json.loads(bot_token_secret) if bot_token_secret else None
+    assert BOT_TOKEN is not None, "BOT_TOKEN env var is not set"
     auth_data = {"id": "hash", "auth_date": str(int(time.time()))}
     data_check_arr = [f"{key}={value}" for key, value in auth_data.items()]
     data_check_arr.sort()

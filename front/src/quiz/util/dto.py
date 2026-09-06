@@ -31,7 +31,7 @@ def calculate_question_count(section: Section) -> int:
             return sum(meta_data.values())
         except json.JSONDecodeError:
             return 0
-    return len(section.questions)
+    return len(cast(Any, section.questions))
 
 
 MOSCOW_TZ = ZoneInfo("Europe/Moscow")

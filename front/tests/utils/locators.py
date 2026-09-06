@@ -2,25 +2,65 @@ from typing import Optional
 
 
 class Locator:
-    """Holds different types of locators for UI elements."""
+    """Holds different types of locators for UI elements.
 
-    def __init__(self, selector=None, xpath=None, text=None, **kwargs):
-        self.xpath = xpath
-        self.selector = selector
-        self.text = text
+    A locator is built with the strategy it needs (CSS ``selector``,
+    ``xpath``, and/or ``text``). Each accessor is a typed property that
+    asserts the strategy was provided at construction, so a read that
+    requests a strategy the locator does not carry fails loudly instead of
+    flowing ``None`` into a Selenium call.
+    """
+
+    def __init__(
+        self,
+        selector: Optional[str] = None,
+        xpath: Optional[str] = None,
+        text: Optional[str] = None,
+        **kwargs,
+    ):
+        self._selector = selector
+        self._xpath = xpath
+        self._text = text
 
         for key, value in kwargs.items():
             setattr(self, key, value)
+
+    @property
+    def selector(self) -> str:
+        assert self._selector is not None, "Locator was not built with a selector"
+        return self._selector
+
+    @property
+    def xpath(self) -> str:
+        assert self._xpath is not None, "Locator was not built with an xpath"
+        return self._xpath
+
+    @property
+    def text(self) -> str:
+        assert self._text is not None, "Locator was not built with text"
+        return self._text
 
 
 class DeviceLocator(Locator):
     """Holds different types of locators for network devices."""
 
     def __init__(
-        self, selector=None, xpath=None, text=None, device_class=None, **kwargs
+        self,
+        selector: Optional[str] = None,
+        xpath: Optional[str] = None,
+        text: Optional[str] = None,
+        device_class: Optional[str] = None,
+        **kwargs,
     ):
         super().__init__(selector=selector, xpath=xpath, text=text, **kwargs)
-        self.device_class = device_class
+        self._device_class = device_class
+
+    @property
+    def device_class(self) -> str:
+        assert self._device_class is not None, (
+            "DeviceLocator was not built with a device_class"
+        )
+        return self._device_class
 
 
 class Location:

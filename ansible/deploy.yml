@@ -42,18 +42,25 @@
       become: true
       become_method: sudo
 
-    - name: Create env and create mininet dependencies directory
+    - name: Create mininet dependencies directory
       ansible.builtin.shell: |
-        python3 -m venv venv
         sudo mkdir -p /opt/mininet_dependencies
       args:
-        chdir: "/home/{{ ansible_target_ssh_user }}/miminet/back"
+        chdir: "/home/{{ ansible_target_ssh_user }}/miminet"
+
+    - name: Install uv
+      ansible.builtin.shell: |
+        python3 -m pip install uv
+      args:
+        chdir: "/home/{{ ansible_target_ssh_user }}/miminet"
 
     - name: Install requirements
-      ansible.builtin.pip:
-        requirements: requirements.txt
-        virtualenv: venv
-        chdir: "/home/{{ ansible_target_ssh_user }}/miminet/back"
+      ansible.builtin.shell: |
+        uv sync --frozen --no-dev --project back
+      args:
+        chdir: "/home/{{ ansible_target_ssh_user }}/miminet"
+      environment:
+        UV_PROJECT_ENVIRONMENT: venv
 
     #- name: Restart celery service
      # ansible.builtin.shell: |

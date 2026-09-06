@@ -49,14 +49,14 @@ class TestPingAndCopy:
         edges = network.edges
         jobs = network.jobs
 
-        selenium.find_element(
+        selenium.wait_and_click(
             By.CSS_SELECTOR, Location.Network.TopButton.COPY.selector
-        ).click()
+        )
         selenium.wait_until_appear(By.XPATH, Location.Network.MODAL_DIALOG.xpath)
 
-        selenium.find_element(
+        selenium.wait_and_click(
             By.XPATH, Location.Network.ModalButton.GO_TO_EDITING.xpath
-        ).click()
+        )
 
         copy_network = MiminetTestNetwork(selenium, selenium.current_url)
 

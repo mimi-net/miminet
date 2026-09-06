@@ -31,9 +31,9 @@ def assert_duplicate_and_loss_present(animation_json: str) -> None:
     for group in animation:
         for pkt in group:
             cfg = pkt.get("config", {})
-            assert (
-                "duplicate_percentage" in cfg
-            ), "duplicate_percentage missing in packet config"
+            assert "duplicate_percentage" in cfg, (
+                "duplicate_percentage missing in packet config"
+            )
             assert "loss_percentage" in cfg, "loss_percentage missing in packet config"
 
 
@@ -50,9 +50,9 @@ def test_duplicate_edges_double_packets():
     count_with_dup = count_packets(animation_with_dup)
     count_no_dup = count_packets(animation_no_dup)
 
-    assert (
-        count_with_dup > count_no_dup
-    ), f"Packets with duplication ({count_with_dup}) should be greater than packets without duplication ({count_no_dup})"
+    assert count_with_dup > count_no_dup, (
+        f"Packets with duplication ({count_with_dup}) should be greater than packets without duplication ({count_no_dup})"
+    )
 
 
 def test_backward_compatibility_no_dup_percentage():

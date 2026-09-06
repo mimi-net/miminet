@@ -1,6 +1,7 @@
 import os
 import random
 import string
+from typing import cast
 
 import dpkt
 from dpkt.pcap import Reader
@@ -39,12 +40,21 @@ def is_dhcp(udp) -> bool:
         return False
 
 
+def _dhcp_opt_bytes(opts: dict, code: int) -> bytes:
+    """Return a DHCP option payload as bytes.
+
+    dpkt stores option values as ``bytes`` (raw wire data); its annotations
+    advertise ``str`` for some options, so coerce for the type checker only."""
+    value = opts.get(code, b"")
+    return value if isinstance(value, bytes) else cast(bytes, value)
+
+
 def udp_packet_type(pkt) -> str:
     if is_dhcp(pkt):
         dh = dpkt.dhcp.DHCP(pkt.data)
         opts = dict(dh.opts)
         msg_type = int.from_bytes(
-            opts.get(dpkt.dhcp.DHCP_OPT_MSGTYPE, b""), byteorder="big"
+            _dhcp_opt_bytes(opts, dpkt.dhcp.DHCP_OPT_MSGTYPE), byteorder="big"
         )
         match msg_type:
             case dpkt.dhcp.DHCPDISCOVER:
@@ -53,13 +63,14 @@ def udp_packet_type(pkt) -> str:
                 ip = dh.yiaddr
                 mask = bin(
                     int.from_bytes(
-                        opts.get(dpkt.dhcp.DHCP_OPT_NETMASK, b""), byteorder="big"
+                        _dhcp_opt_bytes(opts, dpkt.dhcp.DHCP_OPT_NETMASK),
+                        byteorder="big",
                     )
                 ).count("1")
                 return f"DHCP Offer {int_to_ip(ip)}/{mask}"
             case dpkt.dhcp.DHCPREQUEST:
                 ip = int.from_bytes(
-                    opts.get(dpkt.dhcp.DHCP_OPT_REQ_IP, b""), byteorder="big"
+                    _dhcp_opt_bytes(opts, dpkt.dhcp.DHCP_OPT_REQ_IP), byteorder="big"
                 )
                 return f"DHCP Request {int_to_ip(ip)}"
             case dpkt.dhcp.DHCPDECLINE:

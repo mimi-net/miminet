@@ -1,0 +1,10 @@
+.git
+.venv
+venv
+__pycache__
+*.pyc
+*.log
+.bench
+.worktrees
+.tmp
+back/bench/examples
