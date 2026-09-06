@@ -1,4 +1,5 @@
 $('#config_host').load(ExternalUrlFor("/config_host.html"));
+$('#config_host_hacker').load(ExternalUrlFor("/config_host_hacker.html"));
 $('#config_hub').load(ExternalUrlFor("/config_hub.html"));
 $('#config_switch').load(ExternalUrlFor("/config_switch.html"));
 $('#config_edge').load(ExternalUrlFor("/config_edge.html"));
@@ -76,6 +77,7 @@ const HostErrorMsg = function (msg) {
     $("config_switch_main_form :input").prop("disabled", false);
 
     $('#config_host_main_form_submit_button').text('Сохранить').removeClass('disabled');
+    $('#config_host_hacker_main_form_submit_button').text('Сохранить').removeClass('disabled');
     $('#config_router_main_form_submit_button').text('Сохранить').removeClass('disabled');
     $('#config_server_main_form_submit_button').text('Сохранить').removeClass('disabled');
     $('#config_switch_main_form_submit_button').text('Сохранить').removeClass('disabled');
@@ -148,6 +150,20 @@ const ConfigTextboxForm = function (textbox_id) {
 		"click",
 		handleTextboxClick,
 	);
+	};
+
+const UpdateHostHackerConfigurationForm = function(host_id) {
+    let data = $('#config_main_form').serialize();
+
+    // Disable all input fields
+    $("#config_main_form :input").prop("disabled", true);
+
+    // Set loading spinner
+    $('#config_host_hacker_main_form_submit_button').text('');
+    $('#config_host_hacker_main_form_submit_button').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ps-3">Сохранение...</span>');
+
+    // Use unified delete and save function
+    DeleteAndSaveJob('host_hacker', UpdateHostHackerConfiguration, data, host_id);
 };
 
 const ConfigHostForm = function (host_id) {
@@ -182,6 +198,41 @@ const ConfigHostForm = function (host_id) {
     }
 
     $('#config_host_main_form_submit_button, #config_host_end_form').on('click', handleHostClick);
+
+    // Update grid to exclude config panel area
+    if (typeof updateGridForConfigPanel === 'function') {
+        updateGridForConfigPanel();
+    }
+}
+
+const ConfigHostHackerForm = function(host_id){
+    var form = document.getElementById('config_host_hacker_main_form_script').innerHTML;
+    var button = document.getElementById('config_host_hacker_save_script').innerHTML;
+    var banner = document.getElementById('config_host_hacker_edit_banner_script').innerHTML;
+
+    // Clear all child
+    $(config_content_id).empty();
+    $(config_content_save_tag).empty();
+
+    document.getElementById(config_content_save_id).style.display='block';
+
+    // Add new form
+    $(config_content_id).append(form);
+    $(config_content_id).append(banner);
+    $(config_content_save_tag).append(button);
+
+    addIpFieldHandlers();
+
+    // Set host_id
+    $('#host_hacker_id').val(host_id);
+    $('#net_guid').val(network_guid);
+
+    function handleHostHackerClick(event) {
+        event.preventDefault();
+        UpdateHostHackerConfigurationForm(host_id);
+    }
+
+    $('#config_host_hacker_main_form_submit_button, #config_host_hacker_end_form').on('click', handleHostHackerClick);
 
     // Update grid to exclude config panel area
     if (typeof updateGridForConfigPanel === 'function') {
@@ -626,6 +677,23 @@ const SharedConfigHostForm = function(host_id){
     $('#config_host_main_form_submit_button').prop('disabled', true);
 }
 
+const SharedConfigHostHackerForm = function(host_id){
+    var form = document.getElementById('config_host_hacker_main_form_script').innerHTML;
+
+    // Clear all child
+    $(config_content_id).empty();
+    $(config_content_save_tag).empty();
+    document.getElementById(config_content_save_id).style.display='none';
+
+    // Add new form
+    $(config_content_id).append(form);
+
+    // Set host_id
+    $('#host_hacker_id').val( host_id );
+    $('#net_guid').val( network_guid );
+    $('#config_host_hacker_main_form_submit_button').prop('disabled', true);
+}
+
 const SharedConfigRouterForm = function (router_id) {
     var form = document.getElementById('config_router_main_form_script').innerHTML;
 
@@ -710,6 +778,14 @@ const ConfigHostName = function (hostname) {
     $('#config_host_name').val(hostname);
 }
 
+const ConfigHostHackerName = function (hostname) {
+
+    var text = document.getElementById('config_host_hacker_name_script').innerHTML;
+
+    $(config_main_form_id).prepend((text));
+    $('#config_host_hacker_name').val(hostname);
+}
+
 const ConfigRouterName = function (hostname) {
 
     var text = document.getElementById('config_router_name_script').innerHTML;
@@ -759,6 +835,10 @@ const ConfigItemInterface = function (name, ip, netmask, connected_to, item) {
 
 const ConfigHostInterface = function (name, ip, netmask, connected_to) {
     ConfigItemInterface(name, ip, netmask, connected_to, "host");
+}
+
+const ConfigHostHackerInterface = function (name, ip, netmask, connected_to) {
+    ConfigItemInterface(name, ip, netmask, connected_to, "host_hacker");
 }
 
 const ConfigRouterInterface = function (name, ip, netmask, connected_to) {
@@ -817,6 +897,18 @@ const UpdateHostForm = function(name) {
     $(elem).insertBefore(host_job_list);
 };
 
+const UpdateHostHackerForm = function(name) {
+    elem = document.getElementById(name).innerHTML;
+    host_job_list = document.getElementById('config_host_hacker_job_list');
+
+    if (!elem || !host_job_list) {
+        return;
+    }
+
+    $('div[name="config_host_hacker_select_input"]').remove();
+    $(elem).insertBefore(host_job_list);
+};
+
 const ConfigHostJobOnChange = function (evnt) {
 
     let elem = null;
@@ -856,8 +948,52 @@ const ConfigHostJobOnChange = function (evnt) {
             FillDeviceSelectIntf('#config_host_add_dhclient_interface_select_iface_field', '#host_id', "Выберите линк", false)
             break;
 
+        case '205':
+            UpdateHostForm('config_host_add_arp_spoof_script');
+            FillDeviceSelectIntf('#config_host_add_arp_spoof_interface_select_field', '#host_id', "Выберите линк", false)
+            break;
+
         case '0':
             $('div[name="config_host_select_input"]').remove();
+            break;
+
+        default:
+            console.log("Unknown target.value");
+    }
+
+}
+
+const ConfigHostHackerJobOnChange = function (evnt) {
+
+    switch (evnt.target.value) {
+        case '1':
+            UpdateHostHackerForm('config_host_hacker_ping_c_1_script');
+            break;
+
+        case '5':
+            UpdateHostHackerForm('config_host_hacker_traceroute_with_options_script');
+            break;
+
+        case '102':
+            UpdateHostHackerForm('config_host_hacker_add_route_script');
+            break;
+
+        case '103':
+            UpdateHostHackerForm('config_host_hacker_add_arp_cache_script');
+            break;
+
+        case '108':
+            UpdateHostHackerForm('config_host_hacker_add_dhclient');
+            FillDeviceSelectIntf('#config_host_hacker_add_dhclient_interface_select_iface_field', '#host_hacker_id', "Выберите линк", false)
+            break;
+
+        case '205':
+            UpdateHostHackerForm('config_host_hacker_add_arp_spoof_script');
+            FillDeviceSelectIntf('#config_host_hacker_add_arp_spoof_interface_select_field', '#host_hacker_id', "Выберите линк", false)
+            break;
+
+        case '0':
+            $('div[name="config_host_hacker_select_input"]').remove();
             break;
 
         default:
@@ -933,12 +1069,87 @@ const ConfigHostJob = function (host_jobs, shared = 0) {
     });
 }
 
+const ConfigHostHackerJob = function (host_jobs, shared = 0) {
+
+    let elem = document.getElementById('config_host_hacker_job_script').innerHTML;
+    let host_id = document.getElementById('host_hacker_id');
+
+    if (!elem || !host_id) {
+        return;
+    }
+
+    $(elem).insertBefore(host_id);
+
+    // Set onchange
+    document.getElementById('config_host_hacker_job_select_field').addEventListener('change', ConfigHostHackerJobOnChange);
+
+    // Update job counter with device ID
+    UpdateJobCounter('config_host_hacker_job_counter', host_id.value);
+
+    elem = document.getElementById('config_host_hacker_job_list_script').innerHTML;
+    if (!elem) {
+        return;
+    }
+
+    $(elem).insertBefore(host_id);
+
+    // Print jobs if we have
+    if (!host_jobs) {
+        return;
+    }
+
+    $.each(host_jobs, function (i) {
+        let jid = host_jobs[i].id;
+
+        if (i == 0) {
+            $('#config_host_hacker_job_list').append('<label class="text-sm">Команды</label>');
+        }
+
+        elem = document.getElementById('config_host_hacker_job_list_elem_script');
+
+        if (!elem) {
+            return;
+        }
+
+        let job_elem = jQuery.extend({}, elem);
+        job_elem.innerHTML = job_elem.innerHTML.replace(/config_host_hacker_job_delete/g, 'config_host_hacker_job_delete_' + jid);
+        job_elem.innerHTML = job_elem.innerHTML.replace(/config_host_hacker_job_edit/g, 'config_host_hacker_job_edit_' + jid);
+        job_elem.innerHTML = job_elem.innerHTML.replace(/justify-content-between align-items-center\">/, 'justify-content-between align-items-center\"><small>' + host_jobs[i].print_cmd + '</small>');
+
+        let text = job_elem.innerHTML;
+        //$(text).insertBefore(host_id);
+        $('#config_host_hacker_job_list').append(text);
+
+        $('#config_host_hacker_job_delete_' + jid).click(function (event) {
+            event.preventDefault();
+            if (!shared) {
+                DeleteJobFromHost(host_id.value, jid, network_guid);
+            }
+        });
+
+        $('#config_host_hacker_job_edit_' + jid).click(function (event) {
+            event.preventDefault();
+            if (!shared) {
+                EditJobInHostHacker(host_id.value, jid, network_guid);
+            }
+        });
+    });
+}
+
 const ConfigHostGateway = function (gw) {
 
     var text = document.getElementById('config_host_default_gw_script').innerHTML;
 
     $(text).insertBefore('#config_host_end_form');
     $('#config_host_default_gw').val(gw);
+}
+
+const ConfigHostHackerGateway = function (gw) {
+
+    var text = document.getElementById('config_host_hacker_default_gw_script').innerHTML;
+
+    $(text).insertBefore('#config_host_hacker_end_form');
+    $('#config_host_hacker_default_gw').val(gw);
 }
 
 const ConfigRouterGateway = function (gw) {
@@ -1482,6 +1693,66 @@ const EditJobInHost = function(host_id, job_id, network_guid) {
                     break;
                 case '108': // Запросить IP адрес автоматически
                     // No parameters needed - DHCP client request
+                    break;
+                case '205': // ARP spoofing / ARP cache poisoning
+                    FillDeviceSelectIntf('#config_host_add_arp_spoof_interface_select_field', '#host_id', "Выберите линк", false);
+                    $('#config_host_add_arp_spoof_interface_select_field').val(job.arg_1 || '');
+                    $('#config_host_add_arp_spoof_victim_ip_input_field').val(job.arg_2 || '');
+                    $('#config_host_add_arp_spoof_target_ip_input_field').val(job.arg_3 || '');
+                    $('#config_host_add_arp_spoof_mode_select_field').val(job.arg_4 || 'mitm');
+                    break;
+            }
+        }, 200);
+    }
+};
+
+// Edit job in hacker host
+const EditJobInHostHacker = function(host_id, job_id, network_guid) {
+    const job = jobs.find(j => j.id === job_id);
+
+    if (!job) {
+        console.error('Job not found:', job_id);
+        return;
+    }
+
+    EnterEditMode('host_hacker', job_id, job.job_id);
+
+    // Set the select field to the job type
+    const selectField = document.getElementById('config_host_hacker_job_select_field');
+    if (selectField) {
+        selectField.value = job.job_id.toString();
+
+        // Trigger change event to show the form
+        const event = new Event('change');
+        selectField.dispatchEvent(event);
+
+        // Fill in the form fields with job data
+        setTimeout(() => {
+            switch(job.job_id.toString()) {
+                case '1': // ping (1 пакет)
+                    $('#config_host_hacker_ping_c_1_ip').val(job.arg_1 || '');
+                    break;
+                case '5': // traceroute (с опциями)
+                    $('#config_host_hacker_traceroute_with_options_options_input_field').val(job.arg_1 || '');
+                    $('#config_host_hacker_traceroute_with_options_ip_input_field').val(job.arg_2 || '');
+                    break;
+                case '102': // Добавить маршрут
+                    $('#config_host_hacker_add_route_ip_input_field').val(job.arg_1 || '');
+                    $('#config_host_hacker_add_route_mask_input_field').val(job.arg_2 || '0');
+                    $('#config_host_hacker_add_route_gw_input_field').val(job.arg_3 || '');
+                    break;
+                case '103': // Добавить запись в ARP-cache
+                    $('#config_host_hacker_add_arp_cache_ip_input_field').val(job.arg_1 || '');
+                    $('#config_host_hacker_add_arp_cache_mac_input_field').val(job.arg_2 || '');
+                    break;
+                case '108': // Запросить IP адрес автоматически
+                    break;
+                case '205': // ARP spoofing / ARP cache poisoning
+                    FillDeviceSelectIntf('#config_host_hacker_add_arp_spoof_interface_select_field', '#host_hacker_id', "Выберите линк", false);
+                    $('#config_host_hacker_add_arp_spoof_interface_select_field').val(job.arg_1 || '');
+                    $('#config_host_hacker_add_arp_spoof_victim_ip_input_field').val(job.arg_2 || '');
+                    $('#config_host_hacker_add_arp_spoof_target_ip_input_field').val(job.arg_3 || '');
+                    $('#config_host_hacker_add_arp_spoof_mode_select_field').val(job.arg_4 || 'mitm');
                     break;
             }
         }, 200);
