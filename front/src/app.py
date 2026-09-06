@@ -128,7 +128,7 @@ MODE = os.getenv("MODE", "dev")
 
 app.config.update(
     JWT_SECRET_KEY=os.environ.get("JWT_SECRET_KEY", "secret-key"),
-    JWT_TOKEN_LOCATION=["cookies"],
+    JWT_TOKEN_LOCATION=["cookies", "headers"],
     JWT_COOKIE_DOMAIN=f".{BASE_DOMAIN}" if BASE_DOMAIN else None,
     JWT_COOKIE_SECURE=False if MODE == "dev" else True,
     JWT_COOKIE_CSRF_PROTECT=False if MODE == "dev" else True,
