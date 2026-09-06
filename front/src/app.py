@@ -235,7 +235,12 @@ def get_database_uri(mode):
         raise ValueError(f"Unknown MODE: {mode}. Expected 'dev' or 'prod'")
 
 
-app.config["SQLALCHEMY_DATABASE_URI"] = get_database_uri(MODE)
+# Explicit SQLALCHEMY_DATABASE_URI overrides MODE-based selection (used by
+# tests and ephemeral local runs to point at a throwaway DB without changing
+# MODE or touching real credentials).
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI") or (
+    get_database_uri(MODE)
+)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 app.config["SECRET_KEY"] = SECRET_KEY
 app.config["SESSION_COOKIE_NAME"] = "mimi_session"
