@@ -45,11 +45,15 @@ jobs:
           python -m coverage run --branch --source=../src \
             --data-file=".coverage.browserfree" -m pytest -vv -s \
             -o log_file=/dev/null -o log_cli=true "${files[@]}"
-          # Gate at the measured whole-suite baseline (22.65% statements on
-          # upstream/main from the 4 browser-free files, measured 2026-09-06)
-          # rounded down to 21% — a browser-free regression now fails the PR.
-          python -m coverage report --fail-under=21
-          python -m coverage json -o coverage.json
+          # Gate at the measured whole-suite baseline (22.65% blended
+          # stmts+branches on upstream/main from the 4 browser-free files,
+          # measured 2026-09-06) rounded down to 21% — a browser-free
+          # regression now fails the PR. report/json read the run's data file
+          # explicitly (no reliance on coverage's implicit auto-combine).
+          python -m coverage report --fail-under=21 \
+            --data-file=".coverage.browserfree"
+          python -m coverage json -o coverage.json \
+            --data-file=".coverage.browserfree"
 
       - name: Upload coverage report
         if: always()
