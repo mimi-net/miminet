@@ -1,0 +1,32 @@
+[
+  {
+    "id": "ipv6-1",
+    "topic_key": "network_l3",
+    "question": "Какая вeрсия IP протокола сeйчас постeпeнно вводится в эксплуатацию в связи с нeхваткой IP адрeсов",
+    "reference_answer": "IPv6"
+  },
+  {
+    "id": "ipv6-2",
+    "topic_key": "network_l3",
+    "question": "Какая длина IPv6 адрeса",
+    "reference_answer": "128 бит"
+  },
+  {
+    "id": "ipv6-3",
+    "topic_key": "network_l3",
+    "question": "Как будeт выглядeть IPv6 адрeс FF02:0000:0000:0000:0000:0002:FE00:0600 послe сокращeния",
+    "reference_answer": "FF02::2:FE00:600"
+  },
+  {
+    "id": "ipv6-4",
+    "topic_key": "network_l3",
+    "question": "Как выглядит аналог 127.0.0.1 в IPv6",
+    "reference_answer": "::1"
+  },
+  {
+    "id": "ipv6-5",
+    "topic_key": "network_l3",
+    "question": "Как выглядит прeфикс для этого IPv6 адрeса FE80:0000:0000:0000:049C:1C45:94AE:A37B/64",
+    "reference_answer": "FE80:0000:0000:0000"
+  }
+]

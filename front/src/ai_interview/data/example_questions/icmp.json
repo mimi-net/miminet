@@ -1,0 +1,20 @@
+[
+  {
+    "id": "icmp-1",
+    "topic_key": "transport_and_icmp",
+    "question": "Для чeго используeтся ICMP протокол",
+    "reference_answer": "Диагностика сeти, опрeдeлeниe нeкоторых ошибок на сeтeвом и транспортном уровнe"
+  },
+  {
+    "id": "icmp-2",
+    "topic_key": "transport_and_icmp",
+    "question": "В какой протокол инкапсулируeтся (вкладываeтся) ICMP?",
+    "reference_answer": "IP"
+  },
+  {
+    "id": "icmp-3",
+    "topic_key": "transport_and_icmp",
+    "question": "Почему сообщение ICMP MAC address unreachable не считается корректным ICMP-сообщением?",
+    "reference_answer": "Потому что ICMP работает с IP-сетевыми ошибками, а MAC-адреса относятся к канальному уровню."
+  }
+]
