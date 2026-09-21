@@ -142,12 +142,12 @@ Expected: **24 passed**.
 
 ## Required environment variables
 
-| Variable | Default | Rootless dev value |
-|----------|---------|--------------------|
-| `MODE` | `prod` | `dev` |
-| `POSTGRES_HOST` | `postgres` | `localhost` |
-| `TEST_TARGET_HOST` | `172.28.0.2` | `localhost` |
-| `TEST_TARGET_PORT` | `80` | `5000` |
+| Variable | Default                        | Rootless dev value |
+|----------|--------------------------------|--------------------|
+| `MODE` | `prod`                         | `dev` |
+| `POSTGRES_HOST` | `postgres`                     | `localhost` |
+| `TEST_TARGET_HOST` | `172.18.0.2`                   | `localhost` |
+| `TEST_TARGET_PORT` | `80`                           | `5000` |
 | `SELENIUM_HUB_URL` | `http://localhost:4444/wd/hub` | (unchanged) |
 
 ## Docker network conflicts

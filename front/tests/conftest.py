@@ -25,7 +25,7 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 class testing_setting:
     """Configuration settings for testing environment."""
 
-    nginx_docker_ip = os.getenv("TEST_TARGET_HOST", "172.28.0.2")
+    nginx_docker_ip = os.getenv("TEST_TARGET_HOST", "172.18.0.2")
     port = int(os.getenv("TEST_TARGET_PORT", 80))
     selenium_hub_url = os.getenv("SELENIUM_HUB_URL", "http://localhost:4444/wd/hub")
     window_size = "1920,1080"
