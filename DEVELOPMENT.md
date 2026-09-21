@@ -145,10 +145,23 @@ Expected: **24 passed**.
 | Variable | Default | Rootless dev value |
 |----------|---------|--------------------|
 | `MODE` | `prod` | `dev` |
-| `POSTGRES_HOST` | `172.18.0.4` | `localhost` |
-| `TEST_TARGET_HOST` | `172.18.0.2` | `localhost` |
+| `POSTGRES_HOST` | `postgres` | `localhost` |
+| `TEST_TARGET_HOST` | `172.28.0.2` | `localhost` |
 | `TEST_TARGET_PORT` | `80` | `5000` |
 | `SELENIUM_HUB_URL` | `http://localhost:4444/wd/hub` | (unchanged) |
+
+## Docker network conflicts
+
+`front/.env` pins the compose networks via `DOCKER_SUBNET` (default `172.28.0.0/16`),
+`RABBITMQ_SUBNET` (default `172.20.0.0/16`) and the static addresses
+`NGINX_IP` / `MIMINET_IP` / `POSTGRES_IP` (default `172.28.0.2/.3/.4`).
+If a subnet is already taken by another docker network on your machine, pick a
+free one (e.g. `172.29.0.0/16`), change the subnet **and** the matching host IPs
+in `front/.env`, then recreate the stack:
+
+```bash
+docker compose down && docker compose up -d
+```
 
 ## Notes
 

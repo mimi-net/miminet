@@ -26,7 +26,7 @@ services:
     environment:
       - RABBITMQ_URL=amqp://rabbitmq:5672
   rabbitmq:
-    image: rabbitmq:latest
+    image: rabbitmq:4.3-management
     hostname: rabbitmq
     container_name: rabbitmq
     restart: always

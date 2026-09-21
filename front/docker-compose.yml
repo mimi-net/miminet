@@ -9,7 +9,7 @@ services:
     restart: always
     networks:
       miminet_network:
-        ipv4_address: 172.18.0.3
+        ipv4_address: ${MIMINET_IP:-172.18.0.3}
       rabbitmq_network:
     env_file:
       - .env
@@ -29,9 +29,9 @@ services:
       postgres:
         condition: service_healthy
   rabbitmq:
-    image: rabbitmq:latest
+    image: rabbitmq:4.3-management
     hostname: rabbitmq
-    container_name: rabbitmq
+    container_name: miminet-rabbitmq
     restart: always
     networks:
       - rabbitmq_network
@@ -56,7 +56,7 @@ services:
       retries: 3
       start_period: 20s
   nginx:
-    container_name: nginx
+    container_name: miminet-nginx
     image: nginx
     restart: always
     env_file:
@@ -67,10 +67,10 @@ services:
       - "80:80"
     networks:
       miminet_network:
-        ipv4_address: 172.18.0.2
+        ipv4_address: ${NGINX_IP:-172.18.0.2}
   postgres:
     image: postgres:18
-    container_name: postgres
+    container_name: miminet-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_DEFAULT_USER}
       POSTGRES_PASSWORD: ${POSTGRES_DEFAULT_PASSWORD}
@@ -90,7 +90,7 @@ services:
       - pgdata:/var/lib/postgresql
     networks:
       miminet_network:
-        ipv4_address: 172.18.0.4
+        ipv4_address: ${POSTGRES_IP:-172.18.0.4}
 
 volumes:
   pgdata:
@@ -104,9 +104,9 @@ networks:
       com.docker.network.driver.mtu: "1450"
     ipam:
       config:
-        - subnet: 172.18.0.0/16
+        - subnet: ${DOCKER_SUBNET:-172.18.0.0/16}
   rabbitmq_network:
     name: rabbitmq_network
     ipam:
       config:
-        - subnet: 172.20.0.0/16
+        - subnet: ${RABBITMQ_SUBNET:-172.20.0.0/16}
