@@ -2,28 +2,11 @@
 description: Creates a fix branch and implements a task.
 ---
 
-1. Switch to `main` branch:
+1. Create and switch to a new branch from fresh `main`. Generate the name per `docs/GIT.md`:
    ```
-   git checkout main
-   ```
-
-2. Pull latest changes:
-   ```
-   git pull origin main
+   git checkout main && git pull --ff-only && git checkout -b fix/<issue>-<description>
    ```
 
-3. Based on the task description, generate a branch name. See `docs/GIT.md`
-
-4. Create and switch to a new branch:
-   ```
-   git checkout -b fix/<issue>-<description>
-   ```
-
-5. Study the codebase and describe an implementation plan.
-6. *DO NOT* implement plan until user approve it!
-7. User *CAN* clarify plan and ask for changes. 
-8. Implement the task *ONLY* after user approve plan. 
-9. Implement the task by following project best practices (see AGENTS.md,).
-10. *DO NOT* implement any test.
+2. Study the codebase and describe an implementation plan. Implement *ONLY* after user approves the plan.
 
 Task: $ARGUMENTS
