@@ -1,5 +1,6 @@
 .*
 !.python-version
+!.opencode/
 celery_restart.sh
 restart_front.sh
 mimidump/
@@ -12,4 +13,3 @@ back/rabbitmq/rabbitmq/
 *.log
 *.ini
 front/rabbitmq/rabbitmq
-.venv/
