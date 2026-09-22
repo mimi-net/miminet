@@ -126,10 +126,19 @@ BASE_DOMAIN = os.environ.get("BASE_DOMAIN", None)
 # Получаем режим работы из переменных окружения
 MODE = os.getenv("MODE", "dev")
 
+# JWT cookie domain: explicit JWT_COOKIE_DOMAIN wins (empty string = host-only
+# cookies, required when the app is accessed by IP/localhost instead of
+# BASE_DOMAIN); otherwise cookies are scoped to BASE_DOMAIN if it is set.
+_jwt_cookie_domain_env = os.environ.get("JWT_COOKIE_DOMAIN")
+if _jwt_cookie_domain_env is None:
+    JWT_COOKIE_DOMAIN = f".{BASE_DOMAIN}" if BASE_DOMAIN else None
+else:
+    JWT_COOKIE_DOMAIN = _jwt_cookie_domain_env or None
+
 app.config.update(
     JWT_SECRET_KEY=os.environ.get("JWT_SECRET_KEY", "secret-key"),
     JWT_TOKEN_LOCATION=["cookies", "headers"],
-    JWT_COOKIE_DOMAIN=f".{BASE_DOMAIN}" if BASE_DOMAIN else None,
+    JWT_COOKIE_DOMAIN=JWT_COOKIE_DOMAIN,
     JWT_COOKIE_SECURE=False if MODE == "dev" else True,
     JWT_COOKIE_CSRF_PROTECT=False if MODE == "dev" else True,
     JWT_COOKIE_SAMESITE="Lax",

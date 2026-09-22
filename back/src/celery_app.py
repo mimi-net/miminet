@@ -40,3 +40,4 @@ SEND_NETWORK_RESPONSE_ROUTING_KEY = "result-routing-key"
 
 app.conf.task_queues = QUEUES
 app.config_from_object(celeryconfig)
+app.conf.control_queue_exclusive = True
