@@ -7,7 +7,7 @@ import requests
 from jsonschema import ValidationError, validate
 
 
-OPENROUTER_MODEL = "google/gemini-3.1-flash-lite"
+ROUTERAI_MODEL = "deepseek/deepseek-v4.1-flash"
 
 
 EVALUATION_SCHEMA: dict[str, Any] = {
@@ -204,26 +204,18 @@ class ChatJsonProvider:
         )
 
 
-class OpenRouterProvider(ChatJsonProvider):
-    name = "openrouter"
-    api_url = "https://openrouter.ai/api/v1/chat/completions"
-
-    def _headers(self):
-        headers = super()._headers()
-        site_url = os.environ.get("EXTERNAL_BASE_URL")
-        if site_url:
-            headers["HTTP-Referer"] = site_url
-        headers["X-Title"] = "Miminet AI Testing"
-        return headers
+class RouterAIProvider(ChatJsonProvider):
+    name = "routerai"
+    api_url = "https://routerai.ru/api/v1/chat/completions"
 
 
 def get_provider():
-    api_key = read_env_secret("OPENROUTER_API_KEY")
+    api_key = read_env_secret("ROUTERAI_API_KEY")
     if api_key:
-        return OpenRouterProvider(api_key, OPENROUTER_MODEL)
+        return RouterAIProvider(api_key, ROUTERAI_MODEL)
 
     raise ProviderNotConfigured(
-        "AI-провайдер не настроен. Преподаватель должен настроить OpenRouter."
+        "AI-провайдер не настроен. Преподаватель должен настроить RouterAI."
     )
 
 

@@ -12,7 +12,7 @@ from ai_interview.providers import (
     EVALUATION_SCHEMA,
     MAIN_ANSWER_SCHEMA,
     JsonCompletion,
-    OPENROUTER_MODEL,
+    ROUTERAI_MODEL,
     ProviderError,
     get_provider,
     validate_payload,
@@ -352,16 +352,16 @@ def test_submit_answer_does_not_call_provider_for_finished_turn(
     provider_factory.assert_not_called()
 
 
-def test_openrouter_provider_uses_secret_file(monkeypatch, tmp_path):
-    secret_file = tmp_path / "openrouter_api_key"
+def test_routerai_provider_uses_secret_file(monkeypatch, tmp_path):
+    secret_file = tmp_path / "routerai_api_key"
     secret_file.write_text("file-secret\n", encoding="utf-8")
-    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
-    monkeypatch.setenv("OPENROUTER_API_KEY_FILE", str(secret_file))
+    monkeypatch.delenv("ROUTERAI_API_KEY", raising=False)
+    monkeypatch.setenv("ROUTERAI_API_KEY_FILE", str(secret_file))
 
     provider = get_provider()
 
-    assert provider.name == "openrouter"
-    assert provider.model == OPENROUTER_MODEL
+    assert provider.name == "routerai"
+    assert provider.model == ROUTERAI_MODEL
     assert provider.api_key == "file-secret"
 
 

@@ -841,7 +841,7 @@ class AiInterviewSettingView(MiminetAdminModelView):
         "checks",
     )
     column_labels = {
-        "llm_provider_check": "Проверка OpenRouter",
+        "llm_provider_check": "Проверка RouterAI",
         "updated_on": "Изменено",
         "checks": "Действия",
     }
@@ -870,7 +870,7 @@ class AiInterviewSettingView(MiminetAdminModelView):
         return Markup(
             f"<form class='d-inline' method='post' action='{provider_url}'>"
             "<button class='btn btn-sm btn-primary' type='submit'>"
-            "Проверить OpenRouter"
+            "Проверить RouterAI"
             "</button>"
             "</form>"
         )
@@ -895,13 +895,13 @@ class AiInterviewSettingView(MiminetAdminModelView):
             result = check_provider()
             setting.llm_provider_check_status = "ok"
             setting.llm_provider_check_message = (
-                f"OpenRouter отвечает. Модель: {result['model']}."
+                f"RouterAI отвечает. Модель: {result['model']}."
             )
-            flash("OpenRouter API ключ и модель работают.", "success")
+            flash("RouterAI API ключ и модель работают.", "success")
         except Exception as exc:
             setting.llm_provider_check_status = "error"
             setting.llm_provider_check_message = str(exc)
-            flash(f"OpenRouter не прошёл проверку: {exc}", "error")
+            flash(f"RouterAI не прошёл проверку: {exc}", "error")
 
         setting.llm_provider_checked_at = func.now()
         db.session.commit()
