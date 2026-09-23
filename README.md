@@ -136,12 +136,13 @@ export provider=vbox/vmware
 2. Запуск контейнеров: ```sh front/tests/docker/run.sh```
 3. Запуск тестов: ```pytest front/tests```.
 
+Запуск без Docker (rootless podman): [DEVELOPMENT.md](DEVELOPMENT.md).
+
 ### <a name="backend-test"></a> Backend
-1. Установка необходимых пакетов:
+1. Установка необходимых пакетов (требуется [uv](https://docs.astral.sh/uv/)):
 ```bash
-python -m venv .venv
+uv sync --project back
 source .venv/bin/activate
-pip install -r back/requirements.txt
 ```
 2. Запуск тестов:
 ```bash

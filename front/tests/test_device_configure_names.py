@@ -39,9 +39,9 @@ class TestDeviceNameChange:
 
             updated_node = network.nodes[node_id]
 
-            assert (
-                updated_node["config"]["label"] == new_device_name
-            ), "Failed to change device name."
+            assert updated_node["config"]["label"] == new_device_name, (
+                "Failed to change device name."
+            )
 
     def test_device_name_change_to_long(
         self, selenium: MiminetTester, network: MiminetTestNetwork
@@ -60,6 +60,6 @@ class TestDeviceNameChange:
             updated_node = network.nodes[node_id]
 
             # check that the name was cut off
-            assert (
-                updated_node["config"]["label"] != new_device_name
-            ), "The device name isn't limited in size."
+            assert updated_node["config"]["label"] != new_device_name, (
+                "The device name isn't limited in size."
+            )

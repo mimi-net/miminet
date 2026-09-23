@@ -4,6 +4,10 @@ on:
   push:
   pull_request_target:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -11,17 +15,22 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v7
+      with:
+        enable-cache: true
+        cache-dependency-glob: uv.lock
 
     - name: Installing dependencies
       run: |
-        sudo apt-get update
-        pip install -r front/requirements.txt
+        uv sync --frozen
 
     - name: Running tests
       run: |
+        source .venv/bin/activate
         cd front/src
-        pip install pytest pytest_mock
         python -m pytest -vv .
       env:
           CLIENT_YANDEX: ${{ secrets.CLIENT_YANDEX }}

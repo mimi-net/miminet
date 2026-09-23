@@ -1,0 +1,249 @@
+{
+    "nodes": [
+        {
+            "classes": [
+                "l3_router"
+            ],
+            "config": {
+                "default_gw": "212.220.12.2",
+                "label": "router_1",
+                "type": "router"
+            },
+            "data": {
+                "id": "router_1",
+                "label": "router_1"
+            },
+            "interface": [
+                {
+                    "connect": "edge_luwhjn7nn9x220bh3ta",
+                    "id": "iface_31731256",
+                    "ip": "212.220.12.1",
+                    "name": "iface_31731256",
+                    "netmask": 30
+                },
+                {
+                    "connect": "edge_luwhjr6b987231uxai",
+                    "id": "iface_34532004",
+                    "ip": "192.168.1.1",
+                    "name": "iface_34532004",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 75,
+                "y": 150
+            }
+        },
+        {
+            "classes": [
+                "l3_router"
+            ],
+            "config": {
+                "default_gw": "",
+                "label": "router_2",
+                "type": "router"
+            },
+            "data": {
+                "id": "router_2",
+                "label": "router_2"
+            },
+            "interface": [
+                {
+                    "connect": "edge_luwhjn7nn9x220bh3ta",
+                    "id": "iface_82284025",
+                    "ip": "212.220.12.2",
+                    "name": "iface_82284025",
+                    "netmask": 30
+                },
+                {
+                    "connect": "edge_luwhjnslnoweys6xvt",
+                    "id": "iface_67864584",
+                    "ip": "212.220.12.6",
+                    "name": "iface_67864584",
+                    "netmask": 30
+                }
+            ],
+            "position": {
+                "x": 200,
+                "y": 75
+            }
+        },
+        {
+            "classes": [
+                "l3_router"
+            ],
+            "config": {
+                "default_gw": "212.220.12.6",
+                "label": "router_3",
+                "type": "router"
+            },
+            "data": {
+                "id": "router_3",
+                "label": "router_3"
+            },
+            "interface": [
+                {
+                    "connect": "edge_luwhjnslnoweys6xvt",
+                    "id": "iface_24716477",
+                    "ip": "212.220.12.5",
+                    "name": "iface_24716477",
+                    "netmask": 30
+                },
+                {
+                    "connect": "edge_luwhjtmt3g86jf3la4",
+                    "id": "iface_40054476",
+                    "ip": "10.0.0.1",
+                    "name": "iface_40054476",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 325,
+                "y": 175
+            }
+        },
+        {
+            "classes": [
+                "host"
+            ],
+            "config": {
+                "default_gw": "192.168.1.1",
+                "label": "host_1",
+                "type": "host"
+            },
+            "data": {
+                "id": "host_1",
+                "label": "host_1"
+            },
+            "interface": [
+                {
+                    "connect": "edge_luwhjr6b987231uxai",
+                    "id": "iface_60663141",
+                    "ip": "192.168.1.2",
+                    "name": "iface_60663141",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 75,
+                "y": 250
+            }
+        },
+        {
+            "classes": [
+                "host"
+            ],
+            "config": {
+                "default_gw": "10.0.0.1",
+                "label": "host_2",
+                "type": "host"
+            },
+            "data": {
+                "id": "host_2",
+                "label": "host_2"
+            },
+            "interface": [
+                {
+                    "connect": "edge_luwhjtmt3g86jf3la4",
+                    "id": "iface_52355412",
+                    "ip": "10.0.0.2",
+                    "name": "iface_52355412",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 325,
+                "y": 250
+            }
+        }
+    ],
+    "edges": [
+        {
+            "data": {
+                "id": "edge_luwhjn7nn9x220bh3ta",
+                "source": "router_1",
+                "target": "router_2"
+            }
+        },
+        {
+            "data": {
+                "id": "edge_luwhjnslnoweys6xvt",
+                "source": "router_2",
+                "target": "router_3"
+            }
+        },
+        {
+            "data": {
+                "id": "edge_luwhjr6b987231uxai",
+                "source": "host_1",
+                "target": "router_1"
+            }
+        },
+        {
+            "data": {
+                "id": "edge_luwhjtmt3g86jf3la4",
+                "source": "host_2",
+                "target": "router_3"
+            }
+        }
+    ],
+    "jobs": [
+        {
+            "id": "d524e95df26e44af88a857c746490bb9",
+            "level": 3,
+            "job_id": 105,
+            "host_id": "router_1",
+            "arg_1": "212.220.12.1",
+            "arg_2": "212.220.12.5",
+            "arg_3": "1.1.1.1",
+            "arg_4": "tun0",
+            "print_cmd": "ipip: tun0 from 212.220.12.1 to 212.220.12.5 \ntun0: 1.1.1.1"
+        },
+        {
+            "id": "06ba7158fc0b40e1903254e0740dafb5",
+            "level": 4,
+            "job_id": 102,
+            "host_id": "router_1",
+            "arg_1": "10.0.0.0",
+            "arg_2": 24,
+            "arg_3": "1.1.1.1",
+            "print_cmd": "ip route add 10.0.0.0/24 via 1.1.1.1"
+        },
+        {
+            "id": "46987fef5607422d8e926123e5827fab",
+            "level": 3,
+            "job_id": 105,
+            "host_id": "router_3",
+            "arg_1": "212.220.12.5",
+            "arg_2": "212.220.12.1",
+            "arg_3": "2.2.2.2",
+            "arg_4": "tun0",
+            "print_cmd": "ipip: tun0 from 212.220.12.5 to 212.220.12.1 \ntun0: 2.2.2.2"
+        },
+        {
+            "id": "8f7b1abf34a1471e8588446d015b073e",
+            "level": 4,
+            "job_id": 102,
+            "host_id": "router_3",
+            "arg_1": "192.168.1.0",
+            "arg_2": 24,
+            "arg_3": "2.2.2.2",
+            "print_cmd": "ip route add 192.168.1.0/24 via 2.2.2.2"
+        },
+        {
+            "id": "d7c792d3ac69444aa975630092998c80",
+            "level": 4,
+            "job_id": 1,
+            "host_id": "host_1",
+            "arg_1": "10.0.0.2",
+            "print_cmd": "ping -c 1 10.0.0.2"
+        }
+    ],
+    "config": {
+        "zoom": 1.8924743227315863,
+        "pan_x": 251.72222095515735,
+        "pan_y": 14.304389317170898
+    },
+    "packets": "",
+    "pcap": []
+}

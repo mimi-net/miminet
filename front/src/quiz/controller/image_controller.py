@@ -34,13 +34,14 @@ def upload_image_endpoint():
         return jsonify({"error": "No file field in form-data"}), 400
 
     file = request.files["file"]
-    if file.filename == "":
+    filename = file.filename
+    if not filename:
         return jsonify({"error": "Empty filename"}), 400
 
-    if not allowed_file(file.filename):
+    if not allowed_file(filename):
         return jsonify({"error": "Invalid file type"}), 400
 
-    ext = file.filename.rsplit(".", 1)[1].lower()
+    ext = filename.rsplit(".", 1)[1].lower()
     unique_filename = f"{uuid.uuid4().hex}.{ext}"
 
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)

@@ -209,6 +209,7 @@ class AbstractConfigurator(ABC):
 
     def __conf_sims_delete(self):
         """Delete saved simulations. Typically used at the end of the configuration"""
+        assert self._cur_network is not None
         sims = Simulate.query.filter(Simulate.network_id == self._cur_network.id).all()
         for s in sims:
             app.control.revoke(s.task_guid, terminate=False)
@@ -235,7 +236,7 @@ class AbstractConfigurator(ABC):
 class AbstractNodeConfigurator(AbstractConfigurator):
     def __init__(self, element_type: str):
         super().__init__(element_type)
-        self._node = None
+        self._node: dict | None = None
         self._nodes: list = []
 
     def _conf_prepare_node(self):
@@ -257,6 +258,7 @@ class AbstractNodeConfigurator(AbstractConfigurator):
 
     def _conf_label_update(self):
         """Update device label(name). Typically used at the end of the configuration"""
+        assert self._node is not None
         # get label with device name
         label = get_data(f"config_{self._element_type}_name")
 
@@ -289,6 +291,7 @@ class AbstractDeviceConfigurator(AbstractNodeConfigurator):
 
     def _conf_jobs(self):
         """Configure jobs added to the device"""
+        assert self._node is not None
         job_id_str = get_data(f"config_{self._element_type}_job_select_field")
 
         if not job_id_str:
@@ -338,7 +341,11 @@ class AbstractDeviceConfigurator(AbstractNodeConfigurator):
         current_time = sum(int(j["arg_1"]) for j in sleep_job_list)
 
         if job_id == self.__SLEEP_JOB_ID:
-            new_job_arg = int(job_conf_res["arg_1"])
+            sleep_arg = job_conf_res["arg_1"]
+            assert isinstance(
+                sleep_arg, str
+            )  # sleep time arg is a validated digit string
+            new_job_arg = int(sleep_arg)
             if current_time + new_job_arg > 60:
                 raise ConfigurationError(
                     f"Превышен лимит по времени для команды sleep ({self.__MAX_SLEEP_TIME} секунд на сеть)"
@@ -360,6 +367,7 @@ class AbstractDeviceConfigurator(AbstractNodeConfigurator):
 
     def _conf_ip_addresses(self):
         """Configurate device IP-addresses"""
+        assert self._node is not None
 
         # all interfaces
         iface_ids = request.form.getlist(f"config_{self._element_type}_iface_ids[]")
@@ -408,6 +416,7 @@ class AbstractDeviceConfigurator(AbstractNodeConfigurator):
             interface["netmask"] = mask_value
 
     def _conf_gw(self):
+        assert self._node is not None
         default_gw = get_data(f"config_{self._element_type}_default_gw")
 
         if default_gw:
@@ -434,6 +443,7 @@ class TextboxConfigurator(AbstractNodeConfigurator):
         super().__init__(element_type="textbox")
 
     def _conf_content_update(self):
+        assert self._node is not None
         label = get_data(f"config_{self._element_type}_content")
         fontsize = get_data("config_textbox_font_size")
         font_color = get_data("config_textbox_font_color")
@@ -469,6 +479,7 @@ class SwitchConfigurator(AbstractDeviceConfigurator):
 
     def _configure(self):
         self._conf_prepare_node()
+        assert self._node is not None
         self._conf_label_update()
         res = {}
         try:  # catch argument check errors

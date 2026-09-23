@@ -1,0 +1,277 @@
+{
+    "nodes": [
+        {
+            "classes": [
+                "host"
+            ],
+            "config": {
+                "default_gw": "192.168.1.2",
+                "label": "host_1",
+                "type": "host"
+            },
+            "data": {
+                "id": "host_1",
+                "label": "host_1"
+            },
+            "interface": [
+                {
+                    "connect": "edge_lgofmx22um9v6xfm0q",
+                    "id": "iface_02042",
+                    "ip": "192.168.1.1",
+                    "name": "iface_02042",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 38.17546400169729,
+                "y": 64.53089480227483
+            }
+        },
+        {
+            "classes": [
+                "host"
+            ],
+            "config": {
+                "default_gw": "192.168.1.2",
+                "label": "host_2",
+                "type": "host"
+            },
+            "data": {
+                "id": "host_2",
+                "label": "host_2"
+            },
+            "interface": [
+                {
+                    "connect": "edge_lgofmz9vs222f21q6j",
+                    "id": "iface_3203577",
+                    "ip": "192.168.1.1",
+                    "name": "iface_3203577",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 41.98754478893972,
+                "y": 194.33669344269467
+            }
+        },
+        {
+            "classes": [
+                "l3_router"
+            ],
+            "config": {
+                "default_gw": "172.16.0.2",
+                "label": "router_1",
+                "type": "router"
+            },
+            "data": {
+                "id": "router_1",
+                "label": "router_1"
+            },
+            "interface": [
+                {
+                    "connect": "edge_lgofmx22um9v6xfm0q",
+                    "id": "iface_44732175",
+                    "ip": "192.168.1.2",
+                    "name": "iface_44732175",
+                    "netmask": 24
+                },
+                {
+                    "connect": "edge_lgofmy4l0iyhv0h2fkac",
+                    "id": "iface_85686184",
+                    "ip": "172.16.0.1",
+                    "name": "iface_85686184",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 169.97466191640646,
+                "y": 63.95278153866573
+            }
+        },
+        {
+            "classes": [
+                "l3_router"
+            ],
+            "config": {
+                "default_gw": "172.16.1.2",
+                "label": "router_2",
+                "type": "router"
+            },
+            "data": {
+                "id": "router_2",
+                "label": "router_2"
+            },
+            "interface": [
+                {
+                    "connect": "edge_lgofmz9vs222f21q6j",
+                    "id": "iface_704342856",
+                    "ip": "192.168.1.2",
+                    "name": "iface_704342856",
+                    "netmask": 24
+                },
+                {
+                    "connect": "edge_lgofn12tix61u5t1m17",
+                    "id": "iface_57510705",
+                    "ip": "172.16.1.1",
+                    "name": "iface_57510705",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 175.48180410845129,
+                "y": 194.07284113781247
+            }
+        },
+        {
+            "classes": [
+                "l3_router"
+            ],
+            "config": {
+                "default_gw": "",
+                "label": "router_3",
+                "type": "router"
+            },
+            "data": {
+                "id": "router_3",
+                "label": "router_3"
+            },
+            "interface": [
+                {
+                    "connect": "edge_lgofmy4l0iyhv0h2fkac",
+                    "id": "iface_2076423",
+                    "ip": "172.16.0.2",
+                    "name": "iface_2076423",
+                    "netmask": 24
+                },
+                {
+                    "connect": "edge_lgofn12tix61u5t1m17",
+                    "id": "iface_1535761",
+                    "ip": "172.16.1.2",
+                    "name": "iface_1535761",
+                    "netmask": 24
+                },
+                {
+                    "connect": "edge_lgofn22ep4u1hysps9",
+                    "id": "iface_71873576",
+                    "ip": "10.0.0.2",
+                    "name": "iface_71873576",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 270.56390285005637,
+                "y": 122.868866118641
+            }
+        },
+        {
+            "classes": [
+                "host"
+            ],
+            "config": {
+                "default_gw": "10.0.0.2",
+                "label": "host_3",
+                "type": "host"
+            },
+            "data": {
+                "id": "host_3",
+                "label": "host_3"
+            },
+            "interface": [
+                {
+                    "connect": "edge_lgofn22ep4u1hysps9",
+                    "id": "iface_832047",
+                    "ip": "10.0.0.1",
+                    "name": "iface_832047",
+                    "netmask": 24
+                }
+            ],
+            "position": {
+                "x": 367.27807851777607,
+                "y": 122.50760841220644
+            }
+        }
+    ],
+    "edges": [
+        {
+            "data": {
+                "id": "edge_lgofmx22um9v6xfm0q",
+                "source": "host_1",
+                "target": "router_1",
+                "loss_percentage": 0
+            }
+        },
+        {
+            "data": {
+                "id": "edge_lgofmy4l0iyhv0h2fkac",
+                "source": "router_1",
+                "target": "router_3",
+                "loss_percentage": 0
+            }
+        },
+        {
+            "data": {
+                "id": "edge_lgofmz9vs222f21q6j",
+                "source": "host_2",
+                "target": "router_2",
+                "loss_percentage": 0
+            }
+        },
+        {
+            "data": {
+                "id": "edge_lgofn12tix61u5t1m17",
+                "source": "router_2",
+                "target": "router_3",
+                "loss_percentage": 0
+            }
+        },
+        {
+            "data": {
+                "id": "edge_lgofn22ep4u1hysps9",
+                "source": "router_3",
+                "target": "host_3",
+                "loss_percentage": 0
+            }
+        }
+    ],
+    "jobs": [
+        {
+            "id": "f5cd0fb973f0421f9df684a46ba113a4",
+            "level": 1,
+            "job_id": 101,
+            "host_id": "router_2",
+            "arg_1": "iface_57510705",
+            "print_cmd": "add nat -o iface_57510705 -j masquerad"
+        },
+        {
+            "id": "856565f4c69247dcabe086a19e9c5365",
+            "level": 2,
+            "job_id": 1,
+            "host_id": "host_1",
+            "arg_1": "10.0.0.1",
+            "print_cmd": "ping -c 1 10.0.0.1"
+        },
+        {
+            "id": "96a04a9081e34dac9cea9c1fbf43992d",
+            "level": 3,
+            "job_id": 1,
+            "host_id": "host_2",
+            "arg_1": "10.0.0.1",
+            "print_cmd": "ping -c 1 10.0.0.1"
+        },
+        {
+            "id": "bbdf1c352a914dbf82b7af11616d26d7",
+            "level": 3,
+            "job_id": 101,
+            "host_id": "router_1",
+            "arg_1": "iface_85686184",
+            "print_cmd": "add nat -o iface_85686184 -j masquerad"
+        }
+    ],
+    "config": {
+        "zoom": 2.0,
+        "pan_x": 362.8407564919588,
+        "pan_y": 129.10685170381572
+    },
+    "packets": "",
+    "pcap": []
+}

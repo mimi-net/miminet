@@ -532,7 +532,29 @@ def dhcp_server(job: Job, job_host):
         info(f"[dhcp_server] could not read dnsmasq config: {e}")
 
     job_host.start_daemon(daemon)
+    _wait_for_daemon_bind(job_host, daemon, timeout=15)
     info(f"[dhcp_server] dnsmasq started on host={job_host.name}")
+
+
+def _wait_for_daemon_bind(host, daemon: Dnsmasq, timeout: float = 15.0) -> None:
+    """Wait until a daemon has bound its sockets.
+
+    A DHCP client may start right after the server job and race dnsmasq's
+    startup, so the server job must not return until the daemon is actually
+    listening. Uses the daemon's own liveness probe (socket table) instead of a
+    fixed sleep.
+
+    Args:
+        host: Host the daemon was started on.
+        daemon (Dnsmasq): Daemon to wait for.
+        timeout (float): Maximum time in seconds to wait.
+    """
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        if daemon.pids:
+            return
+        time.sleep(0.1)
+    info(f"[dhcp_server] dnsmasq did not bind sockets within {timeout}s on {host.name}")
 
 
 class Jobs:

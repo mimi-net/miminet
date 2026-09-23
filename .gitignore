@@ -1,4 +1,5 @@
 .*
+!.python-version
 celery_restart.sh
 restart_front.sh
 mimidump/

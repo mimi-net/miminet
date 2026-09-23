@@ -11,7 +11,24 @@ from network import MiminetNetwork
 from network_schema import Job, Network
 from pkt_parser import create_pkt_animation
 from mininet.log import setLogLevel, info, error
+from net_utils.captures import capture_out_path, capture_paths
 from network_topology import MiminetTopology
+
+# Server-start jobs launch background listeners (`nc -k -l`, `nc -d -u -l`,
+# dhcpd). Client jobs that follow can race ahead of the bind: the first SYN
+# hits a not-yet-listening socket and the kernel answers RST (connection
+# refused), which surfaces as a flaky tcp/port-forwarding handshake in the test
+# suite. Give these jobs a short grace so the socket is bound before clients
+# act. MIMINET_SERVER_SETTLE overrides the window (seconds) for tuning.
+SERVER_SETTLE_JOBS = frozenset({200, 201, 203})
+SERVER_SETTLE_SECONDS = float(os.environ.get("MIMINET_SERVER_SETTLE", "0.5"))
+
+# iproute2 >= 6.19 colorizes `ip` output whenever stdout is a TTY, and Mininet
+# runs every host/switch shell on a pseudo-tty. ipmininet parses `ip address
+# show` output as plain text, so ANSI-wrapped addresses break interface
+# configuration (empty captures). Disable color for the emulation process and
+# everything it spawns (mininet node shells inherit os.environ).
+os.environ.setdefault("NO_COLOR", "1")
 
 
 def emulate(
@@ -46,6 +63,7 @@ def emulate(
     if len(network.jobs) == 0:
         return [], []
 
+    net = None
     try:
         topo = MiminetTopology(network)
         net = MiminetNetwork(topo, network)
@@ -89,6 +107,12 @@ def emulate(
                 "[emulator] Finished job: host=%s job_id=%s elapsed=%.2fs\n"
                 % (job.host_id, job.job_id, elapsed)
             )
+            if job.job_id in SERVER_SETTLE_JOBS:
+                info(
+                    "[emulator] server job %s started; settling %.2fs\n"
+                    % (job.job_id, SERVER_SETTLE_SECONDS)
+                )
+                time.sleep(SERVER_SETTLE_SECONDS)
 
         # Log pcap file sizes AND actual paths used by mimidump before stop().
         # mimidump writes to {intf.node.cwd}/capture_{intf.name}_out.pcapng —
@@ -126,6 +150,15 @@ def emulate(
 
     except Exception as e:
         error(f"An error occurred during mininet configuration: {str(e)}")
+        # Always tear the network down, even on a failed start: skipping
+        # net.stop() would leave mimidump processes alive, still writing to the
+        # same /tmp/capture_* paths, so the next attempt would read stale data
+        # left behind by this one.
+        if net is not None:
+            try:
+                net.stop()
+            except Exception as stop_err:
+                error(f"Failed to stop network after error: {stop_err}")
         subprocess.call("mn -c", shell=True)
 
         raise e
@@ -133,10 +166,7 @@ def emulate(
     animation, pcaps = create_animation(topo.interfaces)
     # Log pcap sizes after stop to compare with pre-stop sizes
     for link1, link2, *_ in topo.interfaces:
-        for fname in [
-            f"/tmp/capture_{link1}_out.pcapng",
-            f"/tmp/capture_{link2}_out.pcapng",
-        ]:
+        for fname in [capture_out_path(link1), capture_out_path(link2)]:
             size = os.path.getsize(fname) if os.path.exists(fname) else -1
             error("[emulator] pcap size after stop: %s = %d bytes\n" % (fname, size))
     error("[emulator] Animation groups before grouping: %d\n" % len(animation))
@@ -170,11 +200,8 @@ def create_animation(
         loss_percentage,
         duplicate_percentage,
     ) in interfaces_info:
-        pcap_out_file1 = "/tmp/capture_" + link1 + "_out.pcapng"
-        pcap_out_file2 = "/tmp/capture_" + link2 + "_out.pcapng"
-
-        pcap_file1 = "/tmp/capture_" + link1 + ".pcapng"
-        pcap_file2 = "/tmp/capture_" + link2 + ".pcapng"
+        pcap_file1, pcap_out_file1 = capture_paths(link1)
+        pcap_file2, pcap_out_file2 = capture_paths(link2)
 
         if not os.path.exists(pcap_out_file1):
             raise ValueError("No capture for interface: " + link1)

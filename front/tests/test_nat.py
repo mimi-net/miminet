@@ -6,7 +6,6 @@ from utils.networks import MiminetTestNetwork, NodeConfig, NodeType
 
 
 class TestNat:
-
     @pytest.fixture(scope="class")
     def network(self, selenium: MiminetTester):
         network = MiminetTestNetwork(selenium)
