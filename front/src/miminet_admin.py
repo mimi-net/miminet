@@ -922,6 +922,7 @@ class AiInterviewAccessCodeView(MiminetAdminModelView):
     can_create = True
     can_delete = False
     can_edit = True
+    list_template = "admin/ai_access_code_list.html"
 
     column_list = (
         "code",
@@ -954,6 +955,20 @@ class AiInterviewAccessCodeView(MiminetAdminModelView):
     }
 
     @staticmethod
+    def code_formatter(view, context, model, name):
+        code = escape(model.code)
+        return Markup(
+            "<span class='ai-access-code'>"
+            f"<span class='ai-access-code__value'>{code}</span>"
+            "<button type='button' class='btn btn-sm btn-outline-secondary "
+            "ai-access-code__copy' data-toggle='tooltip' data-placement='top' "
+            "title='Скопировать код' "
+            f"aria-label='Скопировать код {code}'>"
+            "<i class='fa fa-copy fa-fw' aria-hidden='true'></i>"
+            "</button></span>"
+        )
+
+    @staticmethod
     def actions_formatter(view, context, model, name):
         delete_url = url_for(".delete_code_view", code_id=model.id)
         return Markup(
@@ -966,6 +981,7 @@ class AiInterviewAccessCodeView(MiminetAdminModelView):
         )
 
     column_formatters = {
+        "code": code_formatter,
         "actions": actions_formatter,
     }
 
