@@ -134,10 +134,19 @@ BASE_DOMAIN = os.environ.get("BASE_DOMAIN", None)
 # Получаем режим работы из переменных окружения
 MODE = os.getenv("MODE", "dev")
 
+# JWT cookie domain: explicit JWT_COOKIE_DOMAIN wins (empty string = host-only
+# cookies, required when the app is accessed by IP/localhost instead of
+# BASE_DOMAIN); otherwise cookies are scoped to BASE_DOMAIN if it is set.
+_jwt_cookie_domain_env = os.environ.get("JWT_COOKIE_DOMAIN")
+if _jwt_cookie_domain_env is None:
+    JWT_COOKIE_DOMAIN = f".{BASE_DOMAIN}" if BASE_DOMAIN else None
+else:
+    JWT_COOKIE_DOMAIN = _jwt_cookie_domain_env or None
+
 app.config.update(
     JWT_SECRET_KEY=os.environ.get("JWT_SECRET_KEY", "secret-key"),
-    JWT_TOKEN_LOCATION=["cookies"],
-    JWT_COOKIE_DOMAIN=f".{BASE_DOMAIN}" if BASE_DOMAIN else None,
+    JWT_TOKEN_LOCATION=["cookies", "headers"],
+    JWT_COOKIE_DOMAIN=JWT_COOKIE_DOMAIN,
     JWT_COOKIE_SECURE=False if MODE == "dev" else True,
     JWT_COOKIE_CSRF_PROTECT=False if MODE == "dev" else True,
     JWT_COOKIE_SAMESITE="Lax",
@@ -243,7 +252,12 @@ def get_database_uri(mode):
         raise ValueError(f"Unknown MODE: {mode}. Expected 'dev' or 'prod'")
 
 
-app.config["SQLALCHEMY_DATABASE_URI"] = get_database_uri(MODE)
+# Explicit SQLALCHEMY_DATABASE_URI overrides MODE-based selection (used by
+# tests and ephemeral local runs to point at a throwaway DB without changing
+# MODE or touching real credentials).
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI") or (
+    get_database_uri(MODE)
+)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 app.config["SECRET_KEY"] = SECRET_KEY
 app.config["SESSION_COOKIE_NAME"] = "mimi_session"

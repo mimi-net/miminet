@@ -31,7 +31,7 @@ services:
       - routerai_api_key
 
   rabbitmq:
-    image: rabbitmq:latest
+    image: rabbitmq:4.3-management
     hostname: rabbitmq
     container_name: rabbitmq
     restart: always

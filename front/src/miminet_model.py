@@ -200,8 +200,20 @@ def init_db(app):
         else:
             raise ValueError(f"Unknown MODE: {mode}")
 
-        # Проверить/создать БД для обоих режимов
-        if postgres_host and postgres_user and postgres_password and postgres_db:
+        # Проверить/создать БД для обоих режимов. Provisioning is only
+        # meaningful for the MODE-derived target: an explicit
+        # SQLALCHEMY_DATABASE_URI override (same truth test as app.py) means
+        # the caller owns the database (create a throwaway postgres beforehand;
+        # sqlite is auto-created by the engine), so never probe or auto-create
+        # the real dev/prod database from the mode env vars.
+        uri_override = os.getenv("SQLALCHEMY_DATABASE_URI")
+        if (
+            not uri_override
+            and postgres_host
+            and postgres_user
+            and postgres_password
+            and postgres_db
+        ):
             ensure_db_exists(
                 postgres_host,
                 postgres_user,
