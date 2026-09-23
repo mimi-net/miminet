@@ -996,7 +996,7 @@ class AiInterviewAccessCodeView(MiminetAdminModelView):
     def list_gettext(message, **variables):
         if message == "Create":
             return Markup(
-                "<span class='btn btn-success btn-sm'>" "Сгенерировать код" "</span>"
+                "<span class='btn btn-success btn-sm'>Сгенерировать код</span>"
             )
         if message == "Create New Record":
             return "Сгенерировать новый код доступа"

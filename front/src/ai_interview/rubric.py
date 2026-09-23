@@ -28,6 +28,9 @@ def normalize_grade(turns, candidate_grade=None):
     if critical_error:
         rubric_grade = min(rubric_grade, 3)
 
+    if candidate_grade is None:
+        return rubric_grade
+
     try:
         candidate_grade = int(candidate_grade)
     except (TypeError, ValueError):

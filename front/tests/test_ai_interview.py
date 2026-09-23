@@ -149,6 +149,12 @@ def test_grade_normalization_caps_critical_error():
     assert rubric.normalize_grade(turns, candidate_grade=5) == 3
 
 
+def test_grade_normalization_uses_scores_when_candidate_missing():
+    turns = [{"answer_score": 3, "critical_error": False}]
+
+    assert rubric.normalize_grade(turns) == 5
+
+
 def test_start_creates_bank_question_without_llm_completion(mocker):
     access_code = AiInterviewAccessCode(
         id=11,
