@@ -4,6 +4,7 @@ from copy import deepcopy
 from typing import Any, Dict, List, Tuple
 
 from celery_app import app
+from miminet_config import EXCLUDED_JOB_IDS
 
 
 def create_check_task(network: dict, requirements: list[dict], session_question_id):
@@ -41,10 +42,6 @@ def create_check_task_json(networks, requirements: list[dict]):
             exchange="task-checking-exchange",
             exchange_type="direct",
         )
-
-
-# Unnecessary for task checking: (ping, ping with options, TCP/UDP ping, TCP/UDP server)
-EXCLUDED_JOB_IDS = (1, 2, 3, 4, 200, 201)
 
 
 def prepare_task(user_network: dict, task_req: list[dict]):
