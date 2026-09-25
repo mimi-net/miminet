@@ -6,6 +6,14 @@ let NetworkCache = [];
 let lastSimulationId = 0
 
 let packetsNotFiltered = null;
+// Global animation data. Defined as var so network pages can override it
+// with their own `var packets = ...`; on pages without a network (e.g. /home)
+// it stays null instead of throwing ReferenceError on access.
+var packets = null;
+// List of interfaces with captured pcaps. Declared here so pages without
+// a network (e.g. /home) don't throw ReferenceError; network pages override
+// it with their own `var pcaps = ...`.
+var pcaps = [];
 let packetFilterState = {
     hideARP: false,
     hideSTP: false,
@@ -1748,7 +1756,7 @@ const CheckSimulation = function (simulation_id)
             if (xhr.status === 200)
             {
                 packets = JSON.parse(data.packets);
-                pcaps = data.pcaps;
+                pcaps = Array.isArray(data.pcaps) ? data.pcaps : [];
 
                 // Set filters
                 packetsNotFiltered = null;
@@ -2860,7 +2868,10 @@ const TakeGraphPictureAndUpdate = function()
             }
 
         },
-        dataType: 'image/png'
+        dataType: 'json'
+    }).catch(() => {
+        // Error already logged via the error callback above;
+        // swallow to avoid Uncaught (in promise) in console.
     });
 }
 

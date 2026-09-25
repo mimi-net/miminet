@@ -25,7 +25,7 @@ function refreshTokens() {
 }
 
 function ajaxWithAuth(options) {
-    return new Promise((resolve, reject) => {
+    const request = new Promise((resolve, reject) => {
         $.ajax({
             ...options,
             xhrFields: { withCredentials: true },
@@ -80,10 +80,16 @@ function ajaxWithAuth(options) {
                 });
         });
     });
+    // All call sites use legacy jQuery-style success/error callbacks and ignore
+    // the returned promise, so an unobserved rejection spams the console with
+    // Uncaught (in promise). Mark it handled here; promise-style callers can
+    // still observe the rejection via their own .then/.catch chain.
+    request.catch(() => {});
+    return request;
 }
 
 function fetchWithAuth(url, options = {}) {
-    return new Promise((resolve, reject) => {
+    const request = new Promise((resolve, reject) => {
         fetch(url, {
             ...options,
             credentials: 'include',
@@ -136,4 +142,8 @@ function fetchWithAuth(url, options = {}) {
         .then(resolve)
         .catch(reject);
     });
+    // Same as ajaxWithAuth: avoid Uncaught (in promise) for callers that
+    // rely on callbacks and ignore the returned promise.
+    request.catch(() => {});
+    return request;
 }
