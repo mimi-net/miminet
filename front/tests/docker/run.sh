@@ -1,1 +1,1 @@
-cd front/tests/docker && docker compose up -d --build
+cd front/tests/docker && docker-compose up -d --build
