@@ -750,10 +750,13 @@ const ConfigItemInterface = function (name, ip, netmask, connected_to, item) {
     $(tag + ids[2] + name).val(ip);
     $(tag + ids[3] + name).val(netmask);
 
-    if (Array.isArray(pcaps) && pcaps.includes(name)) {
+    if (!Array.isArray(pcaps)) {
+        console.warn('pcaps не определен или не является массивом:', typeof pcaps !== "undefined" ? pcaps : "undefined");
+        return;
+    }
+
+    if (pcaps.includes(name)) {
         $(tag + '_iface_name_label_' + name).html('Линк к (<a href="/' + item + '/mimishark?guid=' + network_guid + '&iface=' + name + '" target="_blank">pcap</a>)');
-    } else {
-        console.warn('pcaps не определен или не является массивом:', pcaps);
     }
 }
 

@@ -360,7 +360,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         if (typeof UpdateFilterStates === "function") {
             UpdateFilterStates(serverAnimationFilters);
-            if (packets) {
+            if (typeof packets !== "undefined" && packets) {
                 SetPacketFilter(shared);
             }
         }
@@ -375,7 +375,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 packetFilterState || serverAnimationFilters;
             UpdateFilterStates(storedFilters);
 
-            if (packets) {
+            if (typeof packets !== "undefined" && packets) {
                 SetPacketFilter(shared);
             }
         };
