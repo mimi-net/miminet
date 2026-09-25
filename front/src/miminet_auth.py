@@ -11,6 +11,8 @@ from typing import cast
 import google.auth.transport.requests
 import requests
 from flask import (
+    abort,
+    current_app,
     flash,
     redirect,
     render_template,
@@ -18,7 +20,6 @@ from flask import (
     session,
     url_for,
     jsonify,
-    abort,
     Response,
 )
 from flask_jwt_extended import (
@@ -67,6 +68,69 @@ login_manager.login_view = "login_index"
 
 # create an alias of login_required decorator
 login_required = login_required
+
+
+def _stale_jwt_cookie_domains():
+    """Cookie scopes that may still hold JWT cookies issued under a previous config.
+
+    f93fabd changed the prod cookie scope from ``Domain=.BASE_DOMAIN`` to
+    host-only (empty ``JWT_COOKIE_DOMAIN``). JWT cookies are session cookies
+    (no ``Expires``), so browsers keep sending the stranded Domain-scoped
+    copies; the server reads the stale (expired) copy first and answers
+    401 "Token expired" forever — re-login does not help because logout only
+    clears the current scope. Every fresh issuance must therefore explicitly
+    expire the other scope as well (issue #550).
+    """
+    domains = set()
+    base_domain = os.environ.get("BASE_DOMAIN")
+    if base_domain:
+        domains.add(f".{base_domain}")
+    domains.add(None)  # host-only variant
+    domains.discard(current_app.config.get("JWT_COOKIE_DOMAIN"))
+    return domains
+
+
+def clear_stale_scope_jwt_cookies(response):
+    """Expire JWT cookies stranded under a previous cookie scope (issue #550)."""
+    config = current_app.config
+    names = [
+        (
+            config.get("JWT_ACCESS_COOKIE_NAME") or "access_token_cookie",
+            config.get("JWT_ACCESS_COOKIE_PATH") or "/",
+        ),
+        (
+            config.get("JWT_REFRESH_COOKIE_NAME") or "refresh_token_cookie",
+            config.get("JWT_REFRESH_COOKIE_PATH") or "/",
+        ),
+        (
+            config.get("JWT_ACCESS_CSRF_COOKIE_NAME") or "csrf_access_token",
+            config.get("JWT_ACCESS_CSRF_COOKIE_PATH")
+            or config.get("JWT_ACCESS_COOKIE_PATH")
+            or "/",
+        ),
+        (
+            config.get("JWT_REFRESH_CSRF_COOKIE_NAME") or "csrf_refresh_token",
+            config.get("JWT_REFRESH_CSRF_COOKIE_PATH")
+            or config.get("JWT_REFRESH_COOKIE_PATH")
+            or "/",
+        ),
+    ]
+    secure = bool(config.get("JWT_COOKIE_SECURE", False))
+    samesite = config.get("JWT_COOKIE_SAMESITE") or "Lax"
+    for domain in _stale_jwt_cookie_domains():
+        for name, path in names:
+            response.delete_cookie(
+                name, path=path, domain=domain, secure=secure, samesite=samesite
+            )
+    return response
+
+
+def issue_jwt_cookies(response, access_token, refresh_token):
+    """Set fresh JWT cookies and expire copies stranded under a previous scope."""
+    clear_stale_scope_jwt_cookies(response)
+    set_access_cookies(response, access_token)
+    set_refresh_cookies(response, refresh_token)
+    return response
 
 
 def generate_avatar_uri(extension=".jpg"):
@@ -246,8 +310,7 @@ def login_index():
         response = redirect_next_url(fallback=url_for("home"))
         if next_url:
             response = redirect_next_url(fallback=next_url)
-        set_access_cookies(response, access_token)
-        set_refresh_cookies(response, refresh_token)
+        issue_jwt_cookies(response, access_token, refresh_token)
         return response
 
     if next_url:
@@ -268,8 +331,7 @@ def login_index():
                 refresh_token = create_refresh_token(identity=str(user.id))
 
                 response = redirect_next_url(fallback=url_for("user_profile"))
-                set_access_cookies(response, access_token)
-                set_refresh_cookies(response, refresh_token)
+                issue_jwt_cookies(response, access_token, refresh_token)
                 return response
             else:
                 flash("Пара логин и пароль указаны неверно", category="error")
@@ -472,6 +534,7 @@ def logout():
     logout_user()
     response = redirect(url_for("index"))
     unset_jwt_cookies(cast(Response, response))
+    clear_stale_scope_jwt_cookies(response)
     return response
 
 
@@ -592,8 +655,7 @@ def google_callback():
     refresh_token = create_refresh_token(identity=str(user.id))
 
     response = redirect_next_url(fallback=url_for("home"))
-    set_access_cookies(response, access_token)
-    set_refresh_cookies(response, refresh_token)
+    issue_jwt_cookies(response, access_token, refresh_token)
 
     if user_is_new:
         u = uuid.uuid4()
@@ -718,8 +780,7 @@ def vk_callback():
     refresh_token = create_refresh_token(identity=str(user.id))
 
     response = redirect_next_url(fallback=url_for("home"))
-    set_access_cookies(response, access_token)
-    set_refresh_cookies(response, refresh_token)
+    issue_jwt_cookies(response, access_token, refresh_token)
 
     print(f"access_token: {access_token}; refresh_token: {refresh_token}")
 
@@ -809,8 +870,7 @@ def yandex_callback(yandex_json=yandex_json):
         refresh_token = create_refresh_token(identity=str(user.id))
 
         response = redirect_next_url(fallback=url_for("home"))
-        set_access_cookies(response, access_token)
-        set_refresh_cookies(response, refresh_token)
+        issue_jwt_cookies(response, access_token, refresh_token)
         return response
 
     except TokenExpiredError as e:
@@ -894,8 +954,7 @@ def tg_callback():
     refresh_token = create_refresh_token(identity=str(user.id))
 
     response = redirect_next_url(fallback=url_for("home"))
-    set_access_cookies(response, access_token)
-    set_refresh_cookies(response, refresh_token)
+    issue_jwt_cookies(response, access_token, refresh_token)
     return response
 
 

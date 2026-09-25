@@ -1984,7 +1984,7 @@ const DeleteJobFromRouter = function (router_id, job_id, network_guid)
       guid: network_guid,
     };
 
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
         url: '/host/delete_job',
         data: data,
@@ -2035,7 +2035,7 @@ const DeleteJobFromSwitch = function (switch_id, job_id, network_guid)
       guid: network_guid,
     };
 
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
         url: '/host/delete_job',
         data: data,
@@ -2085,7 +2085,7 @@ const DeleteJobFromServer = function (server_id, job_id, network_guid)
       guid: network_guid,
     };
 
-    $.ajax({
+    ajaxWithAuth({
         type: 'POST',
         url: '/host/delete_job',
         data: data,
@@ -2331,7 +2331,7 @@ const UpdateHubConfiguration = function (data, hub_id)
 const UpdateTextboxConfiguration = function (data, textbox_id) {
 	SetNetworkPlayerState(-1);
 
-	$.ajax({
+	ajaxWithAuth({
 		type: "POST",
 		url: "/host/textbox_save_config",
 		data: data,
@@ -2505,7 +2505,7 @@ const SaveAnimationFilters = function () {
         hideSYN: Boolean(packetFilterState.hideSYN),
     };
 
-    $.ajax({
+    ajaxWithAuth({
         type: "POST",
         url: "/user/animation_filters",
         data: JSON.stringify(payload),
