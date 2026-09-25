@@ -92,6 +92,11 @@ def _stale_jwt_cookie_domains():
 
 def clear_stale_scope_jwt_cookies(response):
     """Expire JWT cookies stranded under a previous cookie scope (issue #550)."""
+    delete_cookie = getattr(response, "delete_cookie", None)
+    if not callable(delete_cookie):
+        # Unit tests stub the redirect with a plain string while the
+        # set_*_cookies seam is mocked; there is nothing to clear there.
+        return response
     config = current_app.config
     names = [
         (
@@ -119,7 +124,7 @@ def clear_stale_scope_jwt_cookies(response):
     samesite = config.get("JWT_COOKIE_SAMESITE") or "Lax"
     for domain in _stale_jwt_cookie_domains():
         for name, path in names:
-            response.delete_cookie(
+            delete_cookie(
                 name, path=path, domain=domain, secure=secure, samesite=samesite
             )
     return response
