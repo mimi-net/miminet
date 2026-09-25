@@ -1,0 +1,3240 @@
+[
+    [
+        {
+            "data": {
+                "id": "pkt_NF71HMZQ",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377603788949"
+        },
+        {
+            "data": {
+                "id": "pkt_YIKEGMU9",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377603789009"
+        },
+        {
+            "data": {
+                "id": "pkt_U0JB4X1J",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377603789027"
+        },
+        {
+            "data": {
+                "id": "pkt_FUI0OX1O",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377603789043"
+        },
+        {
+            "data": {
+                "id": "pkt_NDDA1QZV",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377603794452"
+        },
+        {
+            "data": {
+                "id": "pkt_YN01PJ64",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377603794484"
+        },
+        {
+            "data": {
+                "id": "pkt_EK9U3TQK",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw2",
+                "target": "l2sw1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377603794501"
+        },
+        {
+            "data": {
+                "id": "pkt_0J8HRLKC",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377603794517"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_QFPQPO4M",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw4",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377603804229"
+        },
+        {
+            "data": {
+                "id": "pkt_JAI9EVL1",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377603804314"
+        },
+        {
+            "data": {
+                "id": "pkt_ZVBNID2Z",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw4",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377603804333"
+        },
+        {
+            "data": {
+                "id": "pkt_UQMXKP8U",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377603804370"
+        },
+        {
+            "data": {
+                "id": "pkt_RSR06QWG",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377603804386"
+        },
+        {
+            "data": {
+                "id": "pkt_706NQDK5",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw3",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377603804420"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_O9S4LV88",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw4",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377604822634"
+        },
+        {
+            "data": {
+                "id": "pkt_Z3OXVNLC",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377604822725"
+        },
+        {
+            "data": {
+                "id": "pkt_BLQ1HPVV",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw3",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377604822735"
+        },
+        {
+            "data": {
+                "id": "pkt_ERF0OFMO",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377604822783"
+        },
+        {
+            "data": {
+                "id": "pkt_9GGYFE4D",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377604822830"
+        },
+        {
+            "data": {
+                "id": "pkt_P21XKDO1",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377604822840"
+        },
+        {
+            "data": {
+                "id": "pkt_QZGIYMBP",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377604822849"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_TV91G9SX",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377605838929"
+        },
+        {
+            "data": {
+                "id": "pkt_G4C56O6G",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377605838969"
+        },
+        {
+            "data": {
+                "id": "pkt_K86W7AUD",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377605838987"
+        },
+        {
+            "data": {
+                "id": "pkt_T00XEA6C",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377605839007"
+        },
+        {
+            "data": {
+                "id": "pkt_XRNFS6VJ",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377605839100"
+        },
+        {
+            "data": {
+                "id": "pkt_BJJP5C1L",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377605839118"
+        },
+        {
+            "data": {
+                "id": "pkt_VF8CKM5H",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377605839135"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_JOXDODFQ",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377605854136"
+        },
+        {
+            "data": {
+                "id": "pkt_BQDXHU08",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377605854217"
+        },
+        {
+            "data": {
+                "id": "pkt_0KTM097Q",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377605854238"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_M5PKA28J",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377606839687"
+        },
+        {
+            "data": {
+                "id": "pkt_V3T5PL78",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377606839723"
+        },
+        {
+            "data": {
+                "id": "pkt_C2TCIDU9",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377606839739"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_MP4USPE2",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377607840919"
+        },
+        {
+            "data": {
+                "id": "pkt_2XDXUI2X",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377607840953"
+        },
+        {
+            "data": {
+                "id": "pkt_S1NLMB3R",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377607840972"
+        },
+        {
+            "data": {
+                "id": "pkt_FYKD20XO",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377607840988"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_CY5LYK58",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377607856110"
+        },
+        {
+            "data": {
+                "id": "pkt_CSO3YX1A",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377607856182"
+        },
+        {
+            "data": {
+                "id": "pkt_6SK2KZ3A",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377607856202"
+        },
+        {
+            "data": {
+                "id": "pkt_G33QU74S",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377607856233"
+        },
+        {
+            "data": {
+                "id": "pkt_6T0LF40K",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377607856254"
+        },
+        {
+            "data": {
+                "id": "pkt_858KBAWY",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377607856272"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_N32VBLD0",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377609840935"
+        },
+        {
+            "data": {
+                "id": "pkt_B0Q879EM",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377609840973"
+        },
+        {
+            "data": {
+                "id": "pkt_D2PXXISJ",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377609840991"
+        },
+        {
+            "data": {
+                "id": "pkt_EO770VLU",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377609841007"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_D8EJ3WDX",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377609856224"
+        },
+        {
+            "data": {
+                "id": "pkt_FYS9V8EB",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377609856310"
+        },
+        {
+            "data": {
+                "id": "pkt_FUXASWKC",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377609856329"
+        },
+        {
+            "data": {
+                "id": "pkt_AQMW7BJY",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377609856355"
+        },
+        {
+            "data": {
+                "id": "pkt_LSR9GHCE",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377609856372"
+        },
+        {
+            "data": {
+                "id": "pkt_I4BI1DP7",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377609856388"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_VVXWOKY2",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377611841825"
+        },
+        {
+            "data": {
+                "id": "pkt_GEO24VVZ",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377611841866"
+        },
+        {
+            "data": {
+                "id": "pkt_7CPOX1KH",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377611841886"
+        },
+        {
+            "data": {
+                "id": "pkt_QTEDFTDP",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377611841909"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_8THXXEV8",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377611857077"
+        },
+        {
+            "data": {
+                "id": "pkt_7WDE8X74",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377611857173"
+        },
+        {
+            "data": {
+                "id": "pkt_7IFBGLOJ",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377611857203"
+        },
+        {
+            "data": {
+                "id": "pkt_0JZ0PSBJ",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377611857249"
+        },
+        {
+            "data": {
+                "id": "pkt_NY2S5SXQ",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377611857279"
+        },
+        {
+            "data": {
+                "id": "pkt_RE3N1E4G",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377611857308"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_LUHKE0XL",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377613842077"
+        },
+        {
+            "data": {
+                "id": "pkt_BGI5B1TU",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377613842118"
+        },
+        {
+            "data": {
+                "id": "pkt_9CNP33HO",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377613842136"
+        },
+        {
+            "data": {
+                "id": "pkt_Q7I3RNEP",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377613842151"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_H1ZFPVDP",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377613857277"
+        },
+        {
+            "data": {
+                "id": "pkt_NNI7XHZ1",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377613857354"
+        },
+        {
+            "data": {
+                "id": "pkt_0GFZZNMG",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377613857381"
+        },
+        {
+            "data": {
+                "id": "pkt_8QC18AME",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377613857466"
+        },
+        {
+            "data": {
+                "id": "pkt_RQ3P1VUO",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377613857492"
+        },
+        {
+            "data": {
+                "id": "pkt_GXWCBI0K",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377613857517"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_VB0QA5OY",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377615842940"
+        },
+        {
+            "data": {
+                "id": "pkt_U7NO2CLG",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377615842979"
+        },
+        {
+            "data": {
+                "id": "pkt_IMQPYU2W",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377615842996"
+        },
+        {
+            "data": {
+                "id": "pkt_VWQH636J",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377615843012"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_QGVKXAHY",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377615858151"
+        },
+        {
+            "data": {
+                "id": "pkt_T539YH0J",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377615858208"
+        },
+        {
+            "data": {
+                "id": "pkt_9IW3A6FQ",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377615858226"
+        },
+        {
+            "data": {
+                "id": "pkt_M3YTP1QQ",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377615858253"
+        },
+        {
+            "data": {
+                "id": "pkt_O2OBOD2J",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377615858270"
+        },
+        {
+            "data": {
+                "id": "pkt_B1FC0XM3",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377615858286"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_12LH9DZD",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377617856227"
+        },
+        {
+            "data": {
+                "id": "pkt_3LF8QFJF",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377617856274"
+        },
+        {
+            "data": {
+                "id": "pkt_9GASIOM2",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377617856293"
+        },
+        {
+            "data": {
+                "id": "pkt_QR9L3TSO",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377617856310"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_LE2GT6MY",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377617871517"
+        },
+        {
+            "data": {
+                "id": "pkt_LVK1NRGD",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377617871626"
+        },
+        {
+            "data": {
+                "id": "pkt_Z35JEGJ5",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377617871660"
+        },
+        {
+            "data": {
+                "id": "pkt_2FSMDA0N",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377617871695"
+        },
+        {
+            "data": {
+                "id": "pkt_CEVY1WXO",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377617871714"
+        },
+        {
+            "data": {
+                "id": "pkt_K31L4N9X",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377617871731"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_INHI0QFG",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377619933307"
+        },
+        {
+            "data": {
+                "id": "pkt_MHOFK0F1",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377619933345"
+        },
+        {
+            "data": {
+                "id": "pkt_75TM01XG",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377619933363"
+        },
+        {
+            "data": {
+                "id": "pkt_U0JHGXTD",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377619933379"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_OX8U28EO",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377619948527"
+        },
+        {
+            "data": {
+                "id": "pkt_NTZZPAQF",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377619948584"
+        },
+        {
+            "data": {
+                "id": "pkt_TZDMMJYN",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377619948602"
+        },
+        {
+            "data": {
+                "id": "pkt_ERU8JPNZ",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377619948629"
+        },
+        {
+            "data": {
+                "id": "pkt_BSO1ZR0H",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377619948646"
+        },
+        {
+            "data": {
+                "id": "pkt_1JDW9SJL",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377619948663"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_40WWZZZ3",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377622009357"
+        },
+        {
+            "data": {
+                "id": "pkt_I1EMLKQ6",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377622009395"
+        },
+        {
+            "data": {
+                "id": "pkt_D6DXM4OK",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377622009435"
+        },
+        {
+            "data": {
+                "id": "pkt_NKD1N0ND",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377622009453"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_HBQ52WKF",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377622024547"
+        },
+        {
+            "data": {
+                "id": "pkt_KO31ETTJ",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377622024602"
+        },
+        {
+            "data": {
+                "id": "pkt_ZCMOJU34",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377622024622"
+        },
+        {
+            "data": {
+                "id": "pkt_R8REJT4J",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377622024668"
+        },
+        {
+            "data": {
+                "id": "pkt_04GDBCWP",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377622024685"
+        },
+        {
+            "data": {
+                "id": "pkt_WTBU2TRZ",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377622024701"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_Q8A0M3P3",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377624096007"
+        },
+        {
+            "data": {
+                "id": "pkt_WVVY0R4R",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377624096047"
+        },
+        {
+            "data": {
+                "id": "pkt_9ICZPNSJ",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377624096066"
+        },
+        {
+            "data": {
+                "id": "pkt_DTMSDW7Z",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377624096083"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_RJSJU5WH",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377624111212"
+        },
+        {
+            "data": {
+                "id": "pkt_2GHYU3UZ",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377624111293"
+        },
+        {
+            "data": {
+                "id": "pkt_B7EWZR9K",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377624111323"
+        },
+        {
+            "data": {
+                "id": "pkt_OLUYGLHV",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377624111368"
+        },
+        {
+            "data": {
+                "id": "pkt_K3CPSS6K",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377624111396"
+        },
+        {
+            "data": {
+                "id": "pkt_XAVWC2XC",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377624111443"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_03VLSKNQ",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377626182575"
+        },
+        {
+            "data": {
+                "id": "pkt_NSP67U1W",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377626182612"
+        },
+        {
+            "data": {
+                "id": "pkt_G53D6IJ9",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377626182629"
+        },
+        {
+            "data": {
+                "id": "pkt_YDEI9PXO",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377626182645"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_GCESG2EG",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377626197772"
+        },
+        {
+            "data": {
+                "id": "pkt_02W9T8YD",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377626197876"
+        },
+        {
+            "data": {
+                "id": "pkt_B6IOUQ7W",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377626197906"
+        },
+        {
+            "data": {
+                "id": "pkt_EI16E2Q8",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377626197948"
+        },
+        {
+            "data": {
+                "id": "pkt_HJ97GD62",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377626197969"
+        },
+        {
+            "data": {
+                "id": "pkt_91RH62OQ",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377626197987"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_R8NLHRDM",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377628257521"
+        },
+        {
+            "data": {
+                "id": "pkt_91PO3TYN",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377628257558"
+        },
+        {
+            "data": {
+                "id": "pkt_DB8QMOVM",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377628257577"
+        },
+        {
+            "data": {
+                "id": "pkt_ROKATQMV",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377628257593"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_ZZJF5BPE",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377628272745"
+        },
+        {
+            "data": {
+                "id": "pkt_ZBNO22T1",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377628272800"
+        },
+        {
+            "data": {
+                "id": "pkt_KHHQVUXL",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377628272819"
+        },
+        {
+            "data": {
+                "id": "pkt_1012MTFN",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377628272873"
+        },
+        {
+            "data": {
+                "id": "pkt_EKA5Y4A5",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377628272892"
+        },
+        {
+            "data": {
+                "id": "pkt_VUEKMGSN",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377628272908"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_SJTEGXBL",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377630322214"
+        },
+        {
+            "data": {
+                "id": "pkt_SIYC7RC1",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377630322251"
+        },
+        {
+            "data": {
+                "id": "pkt_B8FQD50M",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377630322268"
+        },
+        {
+            "data": {
+                "id": "pkt_DIFCFZI9",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377630322284"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_TRA2CQJB",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377630337433"
+        },
+        {
+            "data": {
+                "id": "pkt_0KNAU37W",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377630337504"
+        },
+        {
+            "data": {
+                "id": "pkt_IZQC74AS",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377630337531"
+        },
+        {
+            "data": {
+                "id": "pkt_HZAZ3RVH",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377630337577"
+        },
+        {
+            "data": {
+                "id": "pkt_8NU9W24G",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377630337603"
+        },
+        {
+            "data": {
+                "id": "pkt_H2PX2GQ2",
+                "label": "STP (Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377630337629"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_IQPXBD4N",
+                "label": "STP",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377631840203"
+        },
+        {
+            "data": {
+                "id": "pkt_BLZOUOVM",
+                "label": "STP",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377631840426"
+        },
+        {
+            "data": {
+                "id": "pkt_7CXN4UBP",
+                "label": "STP",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377631840703"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_ARFTNHL8",
+                "label": "STP (TC + Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (TC + Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377631855561"
+        },
+        {
+            "data": {
+                "id": "pkt_RTNOQOJO",
+                "label": "STP (TC + Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (TC + Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377631855635"
+        },
+        {
+            "data": {
+                "id": "pkt_CD10OG70",
+                "label": "STP (TC + Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (TC + Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377631855653"
+        },
+        {
+            "data": {
+                "id": "pkt_BG5J1QJX",
+                "label": "STP (TC + Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (TC + Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377631855759"
+        },
+        {
+            "data": {
+                "id": "pkt_7I6AY0S2",
+                "label": "STP (TC + Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (TC + Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377631855777"
+        },
+        {
+            "data": {
+                "id": "pkt_892BAV2P",
+                "label": "STP (TC + Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (TC + Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377631855792"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_C7B83BDA",
+                "label": "STP (TC + Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (TC + Root)",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632331132"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_FSH7SXA5",
+                "label": "ARP-request\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "host_1",
+                "target": "l2sw1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632435123"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_9F1NFJ2Q",
+                "label": "ARP-request\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632450410"
+        },
+        {
+            "data": {
+                "id": "pkt_9P9Z2WGM",
+                "label": "ARP-request\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632450421"
+        },
+        {
+            "data": {
+                "id": "pkt_9IFRX9DK",
+                "label": "ARP-request\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632450425"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_A5IT995L",
+                "label": "ARP-request\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632465726"
+        },
+        {
+            "data": {
+                "id": "pkt_W5RQD4GB",
+                "label": "ARP-request\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632465734"
+        },
+        {
+            "data": {
+                "id": "pkt_6Y13TMLP",
+                "label": "ARP-request\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632465739"
+        },
+        {
+            "data": {
+                "id": "pkt_N3JF3PLN",
+                "label": "ARP-request\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632465782"
+        },
+        {
+            "data": {
+                "id": "pkt_M4U05N14",
+                "label": "ARP-request\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632465786"
+        },
+        {
+            "data": {
+                "id": "pkt_OTGKY2WX",
+                "label": "ARP-request\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-request\nWho has 192.168.1.4? Tell 192.168.1.1",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632465806"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_K3YUFYC2",
+                "label": "ARP-response\n192.168.1.4 at 00:00:00:00:00:04",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-response\n192.168.1.4 at 00:00:00:00:00:04",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "host_4",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632480877"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_4VQZJ6YY",
+                "label": "ARP-response\n192.168.1.4 at 00:00:00:00:00:04",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-response\n192.168.1.4 at 00:00:00:00:00:04",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw4",
+                "target": "l2sw1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632496093"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_ZD9SLY7I",
+                "label": "ARP-response\n192.168.1.4 at 00:00:00:00:00:04",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ARP-response\n192.168.1.4 at 00:00:00:00:00:04",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632511307"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_4SED6UBX",
+                "label": "ICMP echo-request\n192.168.1.1 > 192.168.1.4",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ICMP echo-request\n192.168.1.1 > 192.168.1.4",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "host_1",
+                "target": "l2sw1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632526443"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_BLSYN2MV",
+                "label": "ICMP echo-request\n192.168.1.1 > 192.168.1.4",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ICMP echo-request\n192.168.1.1 > 192.168.1.4",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632541626"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_KQ9CQYIF",
+                "label": "ICMP echo-request\n192.168.1.1 > 192.168.1.4",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ICMP echo-request\n192.168.1.1 > 192.168.1.4",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632556823"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_DVEO298Y",
+                "label": "ICMP echo-reply\n192.168.1.4 > 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ICMP echo-reply\n192.168.1.4 > 192.168.1.1",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "host_4",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632571915"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_M8UAPR2O",
+                "label": "ICMP echo-reply\n192.168.1.4 > 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ICMP echo-reply\n192.168.1.4 > 192.168.1.1",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw4",
+                "target": "l2sw1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632587114"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_TDZC05WM",
+                "label": "ICMP echo-reply\n192.168.1.4 > 192.168.1.1",
+                "type": "packet"
+            },
+            "config": {
+                "type": "ICMP echo-reply\n192.168.1.4 > 192.168.1.1",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632602332"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_YMR7MZKA",
+                "label": "STP (TC + Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (TC + Root)",
+                "path": "edge_m8zttbcte972khv21hl",
+                "source": "l2sw1",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632832161"
+        },
+        {
+            "data": {
+                "id": "pkt_KEB22JZK",
+                "label": "STP (TC + Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (TC + Root)",
+                "path": "edge_m8ztt8n6a7g6mu5pyst",
+                "source": "l2sw1",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632832200"
+        },
+        {
+            "data": {
+                "id": "pkt_RZ4M4NFI",
+                "label": "STP (TC + Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (TC + Root)",
+                "path": "edge_m8ztt9pc1qt4n4rxxef",
+                "source": "l2sw1",
+                "target": "l2sw2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632832218"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_PZS5ADYM",
+                "label": "STP (TC + Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (TC + Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632847384"
+        },
+        {
+            "data": {
+                "id": "pkt_LI9AZJ4B",
+                "label": "STP (TC + Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (TC + Root)",
+                "path": "edge_m8ztvyhrz0r2rmmgr0c",
+                "source": "l2sw3",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632847526"
+        },
+        {
+            "data": {
+                "id": "pkt_9101GGUN",
+                "label": "STP (TC + Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (TC + Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632847558"
+        },
+        {
+            "data": {
+                "id": "pkt_XL3QNLWQ",
+                "label": "STP (TC + Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (TC + Root)",
+                "path": "edge_m8ztupam4ynz8247t7x",
+                "source": "l2sw2",
+                "target": "l2sw4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632847606"
+        },
+        {
+            "data": {
+                "id": "pkt_DKHOL1C2",
+                "label": "STP (TC + Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (TC + Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632847637"
+        },
+        {
+            "data": {
+                "id": "pkt_VE4G3BUU",
+                "label": "STP (TC + Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (TC + Root)",
+                "path": "edge_m8ztur165ghw77ndpix",
+                "source": "l2sw2",
+                "target": "l2sw3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377632847668"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_BXL3ICI0",
+                "label": "STP (TC + Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (TC + Root)",
+                "path": "edge_m8ztwl50r9b0kur5wfq",
+                "source": "l2sw2",
+                "target": "host_2",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377634282910"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_Q74RV10L",
+                "label": "STP (TC + Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (TC + Root)",
+                "path": "edge_m8ztwicxert5cnkbhgp",
+                "source": "l2sw1",
+                "target": "host_1",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377634304924"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_7VL6AWCC",
+                "label": "STP (TC + Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (TC + Root)",
+                "path": "edge_m8ztwn54zgzkhc252ub",
+                "source": "l2sw3",
+                "target": "host_3",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377634336876"
+        }
+    ],
+    [
+        {
+            "data": {
+                "id": "pkt_6BBIRCCI",
+                "label": "STP (TC + Root)",
+                "type": "packet"
+            },
+            "config": {
+                "type": "STP (TC + Root)",
+                "path": "edge_m8ztxl35ufghlsrwdl",
+                "source": "l2sw4",
+                "target": "host_4",
+                "loss_percentage": 0.0,
+                "duplicate_percentage": 0.0
+            },
+            "timestamp": "1790377634446120"
+        }
+    ]
+]
