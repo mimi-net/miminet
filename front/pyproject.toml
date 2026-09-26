@@ -37,6 +37,7 @@ dev = [
     "pytest-timeout==2.4.0",
     "selenium",
     "pytest-playwright>=0.7.1",
+    "pytest-xdist>=3.8.0",
     "coverage>=7.16.0",
     "isort",
     "mypy",

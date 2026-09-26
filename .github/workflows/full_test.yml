@@ -126,3 +126,71 @@ jobs:
           path: .tmp/*-shard-${{ matrix.shard }}.log
           include-hidden-files: true
           if-no-files-found: ignore
+
+  playwright:
+    name: Frontend E2E (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Docker BuildX
+        uses: docker/setup-buildx-action@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Start frontend
+        run: |
+          cd front/
+          sed -i 's/MODE=prod/MODE=dev/' .env
+          sed -i '/^BASE_DOMAIN/d' .env
+          sed -i '/^ALLOWED_HOSTS/d' .env && printf "\nALLOWED_HOSTS=http://localhost,http://172.18.0.2,http://172.18.0.3" >> .env
+          docker compose up -d
+
+      - name: Install dependencies
+        run: |
+          uv sync --frozen
+
+      # No selenium grid here: playwright drives a browser it launches itself.
+      - name: Install browser
+        run: |
+          uv run playwright install --with-deps chromium
+
+      - name: Check availability
+        run: |
+          docker ps
+          curl -f localhost
+
+      # Same entry point developers use locally, so the two cannot drift.
+      - name: Run tests
+        env:
+          TEST_TARGET_HOST: localhost
+        run: |
+          mkdir -p .tmp
+          sh front/tests/playwright/run.sh 2>&1 | tee .tmp/playwright-test.log
+
+      - name: Capture container logs
+        if: failure()
+        run: |
+          mkdir -p .tmp
+          {
+            echo "=== docker ps -a ==="
+            docker ps -a
+            echo
+            echo "=== front compose logs ==="
+            (cd front && docker compose logs --tail=300 2>&1)
+          } > .tmp/playwright-containers.log 2>&1
+          cat .tmp/playwright-containers.log
+
+      - name: Upload test logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-test-logs
+          path: .tmp/playwright-*.log
+          include-hidden-files: true
+          if-no-files-found: ignore
