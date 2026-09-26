@@ -124,6 +124,8 @@ def finish_old_session_endpoint():
 
     if code == 404:
         abort(404)
+    if code == 204:
+        return make_response("", code)
     return make_response(
         jsonify({"message": "Старые сессии завершены или удалены"}), code
     )
