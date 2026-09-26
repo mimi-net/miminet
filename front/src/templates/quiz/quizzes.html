@@ -56,6 +56,37 @@
             color: var(--si-primary);
         }
 
+        .quiz-card__link {
+            display: block;
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .quiz-card__link:hover {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .quiz-card__link:hover .quiz-card__title {
+            color: var(--si-primary);
+        }
+
+        .quiz-card__icon {
+            position: absolute;
+            top: 50%;
+            left: 28px;
+            width: 48px;
+            height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: rgba(var(--si-primary-rgb), .09);
+            color: var(--si-primary);
+            font-size: 28px;
+            transform: translateY(-50%);
+        }
+
         .quiz-card__description {
             margin: 0;
         }
@@ -162,6 +193,13 @@
                 font-size: 12px;
             }
 
+            .quiz-card__icon {
+                left: 20px;
+                width: 42px;
+                height: 42px;
+                font-size: 24px;
+            }
+
             .quiz-card__meta {
                 margin-top: 0;
                 white-space: normal;
@@ -184,6 +222,25 @@
                 <a href="/admin" class="btn btn-primary">Добавить тест</a>
             </div>#}
         </div>
+
+
+        <article class="card border-0 shadow-sm overflow-hidden mb-4 quiz-card">
+            <a class="quiz-card__link" href="{{ url_for('ai_interview.interview_page') }}">
+                <span class="quiz-card__icon" aria-hidden="true">
+                    <i class="bx bx-message-rounded-dots"></i>
+                </span>
+                <div class="card-body quiz-card__body">
+                    <div class="quiz-card__header">
+                        <div>
+                            <h4 class="h4 quiz-card__title">AI-тестирование</h4>
+                            <p class="quiz-card__description">
+                                Проверка знаний по выбранным темам курса.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </article>
 
         {% for quiz in quizzes %}
             <article class="card border-0 shadow-sm overflow-hidden mb-4 quiz-card"

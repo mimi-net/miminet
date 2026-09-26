@@ -1,0 +1,128 @@
+[
+  {
+    "id": "l4-1",
+    "topic_key": "transport_and_icmp",
+    "question": "Что используется для адресации на транспортном уровне модели OSI",
+    "reference_answer": "Порты"
+  },
+  {
+    "id": "l4-2",
+    "topic_key": "transport_and_icmp",
+    "question": "Какие протоколы стека TCP/IP работают на транспортном уровне",
+    "reference_answer": "TCP и UDP"
+  },
+  {
+    "id": "l4-3",
+    "topic_key": "transport_and_icmp",
+    "question": "Сколько всего портов у TCP или UDP",
+    "reference_answer": "65536"
+  },
+  {
+    "id": "l4-4",
+    "topic_key": "transport_and_icmp",
+    "question": "Номера каких портов являются привилегированными и для их открытия необходимы права администратора или суперпользователя",
+    "reference_answer": "0-1023"
+  },
+  {
+    "id": "l4-5",
+    "topic_key": "transport_and_icmp",
+    "question": "Может ли одно приложение открыть несколько TCP/UDP портов и в каком случае?",
+    "reference_answer": "Да"
+  },
+  {
+    "id": "l4-6",
+    "topic_key": "transport_and_icmp",
+    "question": "Может ли несколько разных приложений открыть один TCP/UDP порт и в каком случае?",
+    "reference_answer": "Нет"
+  },
+  {
+    "id": "l4-7",
+    "topic_key": "transport_and_icmp",
+    "question": "Какой утилитой можно посмотреть открытые порты под ОС Windows",
+    "reference_answer": "netstat"
+  },
+  {
+    "id": "l4-8",
+    "topic_key": "transport_and_icmp",
+    "question": "Чем UDP отличается от TCP",
+    "reference_answer": "UDP не гарантирует доставку данных, а TCP обеспечивает надежность доставки данных"
+  },
+  {
+    "id": "l4-9",
+    "topic_key": "transport_and_icmp",
+    "question": "Длина UDP заголовка",
+    "reference_answer": "8 байт"
+  },
+  {
+    "id": "l4-10",
+    "topic_key": "transport_and_icmp",
+    "question": "Какой протокол транспортного уровня лучше подходит для передачи данных в реальном времени",
+    "reference_answer": "UDP"
+  },
+  {
+    "id": "l4-11",
+    "topic_key": "transport_and_icmp",
+    "question": "Каким протоколом транспортного уровня вы воспользуетесь для групповой рассылке",
+    "reference_answer": "UDP"
+  },
+  {
+    "id": "l4-12",
+    "topic_key": "transport_and_icmp",
+    "question": "Длина TCP заголовка без опций",
+    "reference_answer": "20 байт"
+  },
+  {
+    "id": "l4-13",
+    "topic_key": "transport_and_icmp",
+    "question": "Сколько пакетов нужно отправить друг другу двум хостам, чтобы установить TCP соединение",
+    "reference_answer": "3"
+  },
+  {
+    "id": "l4-14",
+    "topic_key": "transport_and_icmp",
+    "question": "При попытке установить соединение на закрытый TCP порт придет пакет с флагом",
+    "reference_answer": "RST"
+  },
+  {
+    "id": "l4-15",
+    "topic_key": "transport_and_icmp",
+    "question": "Что помогает TCP протоколу располагать полученные данные в правильном порядке?",
+    "reference_answer": "Номер последовательности (Seq)"
+  },
+  {
+    "id": "l4-16",
+    "topic_key": "transport_and_icmp",
+    "question": "Как TCP протокол понимает, что произошла потеря данных",
+    "reference_answer": "Отсутствует или дублируется номер подтверждения (Ack)"
+  },
+  {
+    "id": "l4-17",
+    "topic_key": "transport_and_icmp",
+    "question": "Что такое Скользящее окно (Sliding Window) в TCP?",
+    "reference_answer": "Механизм, который позволяет отправителю знать, сколько байт получатель гарантированно готов принять"
+  },
+  {
+    "id": "l4-18",
+    "topic_key": "transport_and_icmp",
+    "question": "если отправитель получает TCP пакет с подтверждением (ACK), в котором поле Windows установлено в 0, то",
+    "reference_answer": "Отправитель будет ждать, пока не получит новый пакет с подтверждением (ACK), в котором поле Windows будет больше 0"
+  },
+  {
+    "id": "l4-19",
+    "topic_key": "transport_and_icmp",
+    "question": "С какой целью TCP протокол во время передачи данных измеряет RTT",
+    "reference_answer": "Чтобы определять возникновение затора на пути следования пакета"
+  },
+  {
+    "id": "l4-20",
+    "topic_key": "transport_and_icmp",
+    "question": "Нужно ли использовать алгоритм Нагла в интерактивном приложении. Например, в ssh - удаленная консоль?",
+    "reference_answer": "Нет"
+  },
+  {
+    "id": "l4-21",
+    "topic_key": "transport_and_icmp",
+    "question": "Что такое низкий старт (Slow start) в TCP?",
+    "reference_answer": "Состояние, когда TCP разгоняется очень быстро, например, экспоненциально"
+  }
+]

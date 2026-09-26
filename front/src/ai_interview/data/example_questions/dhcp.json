@@ -1,0 +1,62 @@
+[
+  {
+    "id": "dhcp-1",
+    "topic_key": "advanced_networking",
+    "question": "DHCP расшифровывается как",
+    "reference_answer": "Протокол динамической конфигурации хостов"
+  },
+  {
+    "id": "dhcp-2",
+    "topic_key": "advanced_networking",
+    "question": "По какой модели работает протокол DHCP?",
+    "reference_answer": "Клиент-серверная"
+  },
+  {
+    "id": "dhcp-3",
+    "topic_key": "advanced_networking",
+    "question": "Куда хост отправляет сообщение DHCP DISCOVER, чтобы найти DHCP-сервер",
+    "reference_answer": "На широковещательный IP-адрес"
+  },
+  {
+    "id": "dhcp-4",
+    "topic_key": "advanced_networking",
+    "question": "Какой протокол транспортного уровня использует DHCP?",
+    "reference_answer": "UDP"
+  },
+  {
+    "id": "dhcp-5",
+    "topic_key": "advanced_networking",
+    "question": "Хост впервые подключился к сети. Какими DHCP-сообщениями он обменяется для получения IP адреса?",
+    "reference_answer": "DISCOVER, OFFER, REQUEST, ACK"
+  },
+  {
+    "id": "dhcp-6",
+    "topic_key": "advanced_networking",
+    "question": "На каком порту работает DHCP-сервер?",
+    "reference_answer": "UDP/67"
+  },
+  {
+    "id": "dhcp-7",
+    "topic_key": "advanced_networking",
+    "question": "Что сделает DHCP-клиент, если получит два сообщения DHCP OFFER от разных DHCP-серверов?",
+    "reference_answer": "Применит первое полученное"
+  },
+  {
+    "id": "dhcp-8",
+    "topic_key": "advanced_networking",
+    "question": "Если выбранный DHCP-сервер не может адекватно реагировать на сообщение DHCP REQUEST, каким сообщение ответит сервер",
+    "reference_answer": "DHCP NAK"
+  },
+  {
+    "id": "dhcp-9",
+    "topic_key": "advanced_networking",
+    "question": "Когда DHCP-клиент отправляет сообщение DHCP DISCOVER, какой IP-адрес источника устанавливается?",
+    "reference_answer": "0.0.0.0"
+  },
+  {
+    "id": "dhcp-10",
+    "topic_key": "advanced_networking",
+    "question": "На какой IP-адрес отправляется сообщение DHCP REQUEST",
+    "reference_answer": "255.255.255.255"
+  }
+]

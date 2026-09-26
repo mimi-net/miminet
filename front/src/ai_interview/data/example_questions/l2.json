@@ -1,0 +1,74 @@
+[
+  {
+    "id": "l2-1",
+    "topic_key": "ethernet_l2",
+    "question": "Что такое MAC адрес",
+    "reference_answer": "адрес сетевой карты, который считается относящимся к канальному уровню модели OSI"
+  },
+  {
+    "id": "l2-2",
+    "topic_key": "ethernet_l2",
+    "question": "Какой размер MAC адреса в Ethernet",
+    "reference_answer": "48 бит"
+  },
+  {
+    "id": "l2-3",
+    "topic_key": "ethernet_l2",
+    "question": "Максимальный размер Ethernet фрейма",
+    "reference_answer": "1514 байт"
+  },
+  {
+    "id": "l2-4",
+    "topic_key": "ethernet_l2",
+    "question": "Если хост принял Ethernet пакет, но его контрольная сумма не совпадает с указанной, то хост",
+    "reference_answer": "отбрасывает такой пакет"
+  },
+  {
+    "id": "l2-5",
+    "topic_key": "ethernet_l2",
+    "question": "Какой командой под ОС Windows можно посмотреть свой текущий MAC адрес",
+    "reference_answer": "ipconfig /all"
+  },
+  {
+    "id": "l2-6",
+    "topic_key": "ethernet_l2",
+    "question": "Как выглядит широковещательный MAC адрес",
+    "reference_answer": "FF:FF:FF:FF:FF:FF"
+  },
+  {
+    "id": "l2-7",
+    "topic_key": "ethernet_l2",
+    "question": "Какая сетевая топология наиболее популярна в настоящее время для построения Ethernet-сетей?",
+    "reference_answer": "Звезда"
+  },
+  {
+    "id": "l2-8",
+    "topic_key": "ethernet_l2",
+    "question": "Какую топологию создает домашний Wi-Fi роутер?",
+    "reference_answer": "Звезда"
+  },
+  {
+    "id": "l2-9",
+    "topic_key": "ethernet_l2",
+    "question": "На каком уровне модели OSI работает хаб (концентратор)",
+    "reference_answer": "Физический"
+  },
+  {
+    "id": "l2-10",
+    "topic_key": "ethernet_l2",
+    "question": "Что такое коллизия",
+    "reference_answer": "Столкновение двух сигналов"
+  },
+  {
+    "id": "l2-11",
+    "topic_key": "ethernet_l2",
+    "question": "На каком уровне модели OSI работает свитч (коммутатор)",
+    "reference_answer": "Канальный"
+  },
+  {
+    "id": "l2-12",
+    "topic_key": "ethernet_l2",
+    "question": "Из каких колонок состоит таблица коммутации",
+    "reference_answer": "MAC адрес и порт коммутатора"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "basic-1",
+    "topic_key": "network_intro",
+    "question": "Какой вид коммутации гарантирует пропускную способность (полосу пропускания) для взаимодействующих абонентов",
+    "reference_answer": "Канальная коммутация"
+  },
+  {
+    "id": "basic-2",
+    "topic_key": "network_intro",
+    "question": "При каком виде коммутации данные состоят из двух частей: заголовок и данные",
+    "reference_answer": "Пакетная"
+  },
+  {
+    "id": "basic-3",
+    "topic_key": "network_intro",
+    "question": "Коммутация пакетов это",
+    "reference_answer": "Передача сообщения в виде нескольких частей, называемых пакетами"
+  },
+  {
+    "id": "basic-4",
+    "topic_key": "network_intro",
+    "question": "Какой тип канала использует ГЛОНАСС",
+    "reference_answer": "Симплексный"
+  },
+  {
+    "id": "basic-5",
+    "topic_key": "network_intro",
+    "question": "Чего не могут сделать хосты, если соединены полудуплексным (half-duplex) каналом",
+    "reference_answer": "Одновременно передавать данные в сеть"
+  },
+  {
+    "id": "basic-6",
+    "topic_key": "network_intro",
+    "question": "RFC расшифровываются как",
+    "reference_answer": "Request for Comments"
+  }
+]

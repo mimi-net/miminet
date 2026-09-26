@@ -1,0 +1,56 @@
+[
+  {
+    "id": "vlan-1",
+    "topic_key": "advanced_networking",
+    "question": "VLAN позволяет:",
+    "reference_answer": "Разделить широковещательный домен"
+  },
+  {
+    "id": "vlan-2",
+    "topic_key": "advanced_networking",
+    "question": "Куда вставляется VLAN тег в Ethernet кадре?",
+    "reference_answer": "Между полями MAC-адрес отправителя и Тип/Длина"
+  },
+  {
+    "id": "vlan-3",
+    "topic_key": "advanced_networking",
+    "question": "Сколько можно создать виртуальных сетей?",
+    "reference_answer": "4096"
+  },
+  {
+    "id": "vlan-4",
+    "topic_key": "advanced_networking",
+    "question": "Как обеспечивается общение между хостами из разных виртуальных сетей?",
+    "reference_answer": "Маршрутизатором с саб-интерфейсами и их подключением к Trunk порту."
+  },
+  {
+    "id": "vlan-5",
+    "topic_key": "advanced_networking",
+    "question": "Можно ли построить VLAN на нескольких коммутаторах? Как это сделать?",
+    "reference_answer": "Можно, включив VLAN на коммутаторах и настроив свзывающий их порт в режим Trunk."
+  },
+  {
+    "id": "vlan-6",
+    "topic_key": "advanced_networking",
+    "question": "Для чего служит идентификатор кадра (tag)?",
+    "reference_answer": "Содержит информацию о VLAN Id."
+  },
+  {
+    "id": "vlan-7",
+    "topic_key": "advanced_networking",
+    "question": "Можно ли обеспечить общение между хостами из разных виртуальных сетей без использования Trunk? Как это сделать?",
+    "reference_answer": "Можно, для этого нужен будет маршрутизатор с двумя сетевыми интерфейсами."
+  },
+  {
+    "id": "vlan-8",
+    "topic_key": "advanced_networking",
+    "question": "На сколько байт увеличивается размер Ethernet пакета при использовании VLAN по портам (Access)",
+    "reference_answer": "0 байт"
+  },
+  {
+    "id": "vlan-9",
+    "topic_key": "advanced_networking",
+    "question": "Какой VLAN используют коммутаторы при общении между собой?",
+    "reference_answer": "Native VLAN"
+  }
+]
