@@ -1,0 +1,406 @@
+{
+  "nodes": [
+    {
+      "classes": [
+        "l2_switch"
+      ],
+      "config": {
+        "label": "l2sw1",
+        "priority": 10000,
+        "stp": 1,
+        "type": "l2_switch"
+      },
+      "data": {
+        "id": "l2sw1",
+        "label": "l2sw1"
+      },
+      "interface": [
+        {
+          "connect": "edge_m8ztt8n6a7g6mu5pyst",
+          "id": "l2sw1_1",
+          "name": "l2sw1_1",
+          "type_connection": null,
+          "vlan": null
+        },
+        {
+          "connect": "edge_m8ztt9pc1qt4n4rxxef",
+          "id": "l2sw1_2",
+          "name": "l2sw1_2",
+          "type_connection": null,
+          "vlan": null
+        },
+        {
+          "connect": "edge_m8zttbcte972khv21hl",
+          "id": "l2sw1_3",
+          "name": "l2sw1_3",
+          "type_connection": null,
+          "vlan": null
+        },
+        {
+          "connect": "edge_m8ztwicxert5cnkbhgp",
+          "id": "l2sw1_4",
+          "name": "l2sw1_4",
+          "type_connection": null,
+          "vlan": null
+        }
+      ],
+      "position": {
+        "x": 145.9305925068644,
+        "y": 81.9863528187144
+      }
+    },
+    {
+      "classes": [
+        "l2_switch"
+      ],
+      "config": {
+        "label": "l2sw2",
+        "priority": 20000,
+        "stp": 1,
+        "type": "l2_switch"
+      },
+      "data": {
+        "id": "l2sw2",
+        "label": "l2sw2"
+      },
+      "interface": [
+        {
+          "connect": "edge_m8ztt9pc1qt4n4rxxef",
+          "id": "l2sw2_1",
+          "name": "l2sw2_1",
+          "type_connection": null,
+          "vlan": null
+        },
+        {
+          "connect": "edge_m8ztupam4ynz8247t7x",
+          "id": "l2sw2_2",
+          "name": "l2sw2_2",
+          "type_connection": null,
+          "vlan": null
+        },
+        {
+          "connect": "edge_m8ztur165ghw77ndpix",
+          "id": "l2sw2_3",
+          "name": "l2sw2_3",
+          "type_connection": null,
+          "vlan": null
+        },
+        {
+          "connect": "edge_m8ztwl50r9b0kur5wfq",
+          "id": "l2sw2_4",
+          "name": "l2sw2_4",
+          "type_connection": null,
+          "vlan": null
+        }
+      ],
+      "position": {
+        "x": 145.43156730552766,
+        "y": 149.0034117953214
+      }
+    },
+    {
+      "classes": [
+        "l2_switch"
+      ],
+      "config": {
+        "label": "l2sw3",
+        "priority": 30000,
+        "stp": 1,
+        "type": "l2_switch"
+      },
+      "data": {
+        "id": "l2sw3",
+        "label": "l2sw3"
+      },
+      "interface": [
+        {
+          "connect": "edge_m8ztt8n6a7g6mu5pyst",
+          "id": "l2sw3_1",
+          "name": "l2sw3_1",
+          "type_connection": null,
+          "vlan": null
+        },
+        {
+          "connect": "edge_m8ztur165ghw77ndpix",
+          "id": "l2sw3_2",
+          "name": "l2sw3_2",
+          "type_connection": null,
+          "vlan": null
+        },
+        {
+          "connect": "edge_m8ztvyhrz0r2rmmgr0c",
+          "id": "l2sw3_3",
+          "name": "l2sw3_3",
+          "type_connection": null,
+          "vlan": null
+        },
+        {
+          "connect": "edge_m8ztwn54zgzkhc252ub",
+          "id": "l2sw3_4",
+          "name": "l2sw3_4",
+          "type_connection": null,
+          "vlan": null
+        }
+      ],
+      "position": {
+        "x": 254.44618928547652,
+        "y": 79.49780670300768
+      }
+    },
+    {
+      "classes": [
+        "l2_switch"
+      ],
+      "config": {
+        "label": "l2sw4",
+        "priority": 40000,
+        "stp": 1,
+        "type": "l2_switch"
+      },
+      "data": {
+        "id": "l2sw4",
+        "label": "l2sw4"
+      },
+      "interface": [
+        {
+          "connect": "edge_m8zttbcte972khv21hl",
+          "id": "l2sw4_1",
+          "name": "l2sw4_1",
+          "type_connection": null,
+          "vlan": null
+        },
+        {
+          "connect": "edge_m8ztupam4ynz8247t7x",
+          "id": "l2sw4_2",
+          "name": "l2sw4_2",
+          "type_connection": null,
+          "vlan": null
+        },
+        {
+          "connect": "edge_m8ztvyhrz0r2rmmgr0c",
+          "id": "l2sw4_3",
+          "name": "l2sw4_3",
+          "type_connection": null,
+          "vlan": null
+        },
+        {
+          "connect": "edge_m8ztxl35ufghlsrwdl",
+          "id": "l2sw4_4",
+          "name": "l2sw4_4",
+          "type_connection": null,
+          "vlan": null
+        }
+      ],
+      "position": {
+        "x": 253.44838258246887,
+        "y": 149.99634450501281
+      }
+    },
+    {
+      "classes": [
+        "host"
+      ],
+      "config": {
+        "default_gw": "",
+        "label": "host_1",
+        "type": "host"
+      },
+      "data": {
+        "id": "host_1",
+        "label": "host_1"
+      },
+      "interface": [
+        {
+          "connect": "edge_m8ztwicxert5cnkbhgp",
+          "id": "iface_25670637",
+          "ip": "192.168.1.1",
+          "name": "iface_25670637",
+          "netmask": 24
+        }
+      ],
+      "position": {
+        "x": 88.43652520133675,
+        "y": 63.503411795321426
+      }
+    },
+    {
+      "classes": [
+        "host"
+      ],
+      "config": {
+        "default_gw": "",
+        "label": "host_2",
+        "type": "host"
+      },
+      "data": {
+        "id": "host_2",
+        "label": "host_2"
+      },
+      "interface": [
+        {
+          "connect": "edge_m8ztwl50r9b0kur5wfq",
+          "id": "iface_76202164",
+          "ip": "192.168.1.2",
+          "name": "iface_76202164",
+          "netmask": 24
+        }
+      ],
+      "position": {
+        "x": 87.93116380868884,
+        "y": 183.49561340601537
+      }
+    },
+    {
+      "classes": [
+        "host"
+      ],
+      "config": {
+        "default_gw": "",
+        "label": "host_3",
+        "type": "host"
+      },
+      "data": {
+        "id": "host_3",
+        "label": "host_3"
+      },
+      "interface": [
+        {
+          "connect": "edge_m8ztwn54zgzkhc252ub",
+          "id": "iface_11423274",
+          "ip": "192.168.1.3",
+          "name": "iface_11423274",
+          "netmask": 24
+        }
+      ],
+      "position": {
+        "x": 322.44091179532137,
+        "y": 59.50877318796933
+      }
+    },
+    {
+      "classes": [
+        "host"
+      ],
+      "config": {
+        "default_gw": "",
+        "label": "host_4",
+        "type": "host"
+      },
+      "data": {
+        "id": "host_4",
+        "label": "host_4"
+      },
+      "interface": [
+        {
+          "connect": "edge_m8ztxl35ufghlsrwdl",
+          "id": "iface_85745522",
+          "ip": "192.168.1.4",
+          "name": "iface_85745522",
+          "netmask": 24
+        }
+      ],
+      "position": {
+        "x": 317.4357941023393,
+        "y": 187.4963445050128
+      }
+    }
+  ],
+  "edges": [
+    {
+      "data": {
+        "id": "edge_m8ztt8n6a7g6mu5pyst",
+        "source": "l2sw1",
+        "target": "l2sw3",
+        "loss_percentage": 0
+      }
+    },
+    {
+      "data": {
+        "id": "edge_m8ztt9pc1qt4n4rxxef",
+        "source": "l2sw1",
+        "target": "l2sw2",
+        "loss_percentage": 0
+      }
+    },
+    {
+      "data": {
+        "id": "edge_m8zttbcte972khv21hl",
+        "source": "l2sw1",
+        "target": "l2sw4",
+        "loss_percentage": 0
+      }
+    },
+    {
+      "data": {
+        "id": "edge_m8ztupam4ynz8247t7x",
+        "source": "l2sw2",
+        "target": "l2sw4",
+        "loss_percentage": 0
+      }
+    },
+    {
+      "data": {
+        "id": "edge_m8ztur165ghw77ndpix",
+        "source": "l2sw2",
+        "target": "l2sw3",
+        "loss_percentage": 0
+      }
+    },
+    {
+      "data": {
+        "id": "edge_m8ztvyhrz0r2rmmgr0c",
+        "source": "l2sw3",
+        "target": "l2sw4",
+        "loss_percentage": 0
+      }
+    },
+    {
+      "data": {
+        "id": "edge_m8ztwicxert5cnkbhgp",
+        "source": "host_1",
+        "target": "l2sw1",
+        "loss_percentage": 0
+      }
+    },
+    {
+      "data": {
+        "id": "edge_m8ztwl50r9b0kur5wfq",
+        "source": "host_2",
+        "target": "l2sw2",
+        "loss_percentage": 0
+      }
+    },
+    {
+      "data": {
+        "id": "edge_m8ztwn54zgzkhc252ub",
+        "source": "host_3",
+        "target": "l2sw3",
+        "loss_percentage": 0
+      }
+    },
+    {
+      "data": {
+        "id": "edge_m8ztxl35ufghlsrwdl",
+        "source": "host_4",
+        "target": "l2sw4",
+        "loss_percentage": 0
+      }
+    }
+  ],
+  "jobs": [
+    {
+      "arg_1": "192.168.1.4",
+      "host_id": "host_1",
+      "id": "3468d19c75b84dbaba3f49c8aa01439c",
+      "job_id": 1,
+      "level": 0,
+      "print_cmd": "ping -c 1 192.168.1.4"
+    }
+  ],
+  "config": {
+    "zoom": 2.0,
+    "pan_x": 87.00000025910037,
+    "pan_y": 72.00000021442798
+  },
+  "pcap": []
+}

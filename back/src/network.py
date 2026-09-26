@@ -28,6 +28,9 @@ class MiminetNetwork(IPNet):
         self.__stp_snapshots: dict = {}
         # Diagnostic: last raw rstp/stp show output per switch (see __stp_settled).
         self.__stp_diag: dict = {}
+        # Last parsed (port, role, state) rows per switch, lowercased, for
+        # compact status summaries in logs and timeout errors.
+        self.__stp_last_ports: dict = {}
         # Whether the adaptive settle hit its cap instead of breaking early on
         # quiescence. Exposed for the benchmark harness (back/bench/bench.py).
         self.settle_hit_cap: bool = False
@@ -89,8 +92,13 @@ class MiminetNetwork(IPNet):
                 capture_restarted = True
             info(
                 "[network] waiting for readiness: captures_not_live=%s "
-                "stp_unconverged=%s vtep_unreachable=%s\n"
-                % (captures_not_live, unconverged, unreachable)
+                "stp_unconverged=%s stp_states=%s vtep_unreachable=%s\n"
+                % (
+                    captures_not_live,
+                    unconverged,
+                    self.__stp_states_summary(unconverged),
+                    unreachable,
+                )
             )
             time.sleep(poll)
 
@@ -101,8 +109,22 @@ class MiminetNetwork(IPNet):
                 "captures not live: %s"
                 % ", ".join(iface for _node, iface in captures_not_live)
             )
-        if self.__unconverged_switches():
-            details.append("STP/RSTP switches not forwarding")
+        unconverged = self.__unconverged_switches()
+        if unconverged:
+            details.append(
+                "STP/RSTP switches not forwarding: %s"
+                % self.__stp_states_summary(unconverged)
+            )
+            for name in unconverged:
+                info(
+                    "[network] STP/RSTP raw state for %s:\n%s\n"
+                    % (
+                        name,
+                        getattr(self, "_MiminetNetwork__stp_diag", {}).get(
+                            name, "<no output>"
+                        ),
+                    )
+                )
         if self.__unreachable_vtep_targets():
             details.append("VXLAN underlay unreachable")
         raise TimeoutError(
@@ -188,9 +210,16 @@ class MiminetNetwork(IPNet):
         Uses the authoritative ``ovs-appctl rstp/stp show`` output. A bridge is
         considered ready when, on two consecutive polls, every port has a
         settled (role, state) pair: at least one port is forwarding, nothing is
-        still listening/learning, and the only discarding ports are the
-        Alternate/Backup ones (a discarding Designated/Root port means the
+        still listening/learning, and the only blocked ports are the
+        Alternate/Backup ones (a blocked Designated/Root port means the
         state machine is still converging).
+
+        Classic STP and RSTP spell the table differently (see OVS lib/stp.c
+        vs lib/rstp.c): STP prints lowercase roles/states (``designated``,
+        ``blocking``) and has no Backup role, while RSTP prints capitalized
+        ones (``Designated``, ``Discarding``). Matching is therefore
+        case-insensitive and ``blocking`` is treated as the STP equivalent
+        of ``discarding``.
 
         If the state cannot be determined at all (command error, or the
         daemon has no object for the bridge), the switch is treated as ready —
@@ -211,24 +240,29 @@ class MiminetNetwork(IPNet):
         for line in out.splitlines():
             parts = line.split()
             # "name  Role  State  Cost  Pri.Nbr" — e.g. "l2sw1_3 Designated Discarding 2000 128.1"
-            if len(parts) == 5 and parts[1] in (
-                "Root",
-                "Designated",
-                "Alternate",
-                "Backup",
-                "Disabled",
+            if len(parts) == 5 and parts[1].lower() in (
+                "root",
+                "designated",
+                "alternate",
+                "backup",
+                "disabled",
             ):
-                ports.append((parts[0], parts[1], parts[2]))
+                ports.append((parts[0], parts[1].lower(), parts[2].lower()))
+        self.__stp_last_ports[switch.name] = list(ports)
 
-        if not ports or not any(state == "Forwarding" for _, _, state in ports):
+        if not ports or not any(state == "forwarding" for _, _, state in ports):
             self.__stp_snapshots.pop(switch.name, None)
             return False
-        if any(state in ("Learning", "Listening") for _, _, state in ports):
+        if any(state in ("learning", "listening") for _, _, state in ports):
             self.__stp_snapshots.pop(switch.name, None)
             return False
-        # Discarding is only allowed on the blocked Alternate/Backup port.
+        # Blocking (STP) / discarding (RSTP) is only allowed on the blocked
+        # Alternate/Backup port.
         for _, role, state in ports:
-            if state == "Discarding" and role not in ("Alternate", "Backup"):
+            if state in ("discarding", "blocking") and role not in (
+                "alternate",
+                "backup",
+            ):
                 self.__stp_snapshots.pop(switch.name, None)
                 return False
 
@@ -237,6 +271,23 @@ class MiminetNetwork(IPNet):
             return True
         self.__stp_snapshots[switch.name] = snapshot
         return False
+
+    def __stp_states_summary(self, names: list) -> str:
+        """Compact one-line port states per switch for logs and errors."""
+        # getattr: the readiness unit tests build the object via __new__
+        # without __init__, so the dict may not exist there.
+        last_ports = getattr(self, "_MiminetNetwork__stp_last_ports", {})
+        chunks = []
+        for name in names:
+            ports = last_ports.get(name) or []
+            if ports:
+                chunks.append(
+                    "%s(%s)"
+                    % (name, ", ".join("%s=%s/%s" % (p, r, s) for p, r, s in ports))
+                )
+            else:
+                chunks.append("%s(no parseable ports)" % name)
+        return "; ".join(chunks)
 
     def __unreachable_vtep_targets(self) -> list:
         """Return VXLAN underlay targets that are not yet reachable."""

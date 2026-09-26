@@ -3,7 +3,7 @@ from datetime import timedelta
 from types import SimpleNamespace
 
 import pytest
-from flask import Flask, session
+from flask import Flask, redirect, session
 from werkzeug.exceptions import Forbidden
 
 import miminet_auth
@@ -188,17 +188,21 @@ def test_google_callback_new_user_without_picture_uses_empty_avatar(mocker):
     mocker.patch("miminet_auth.requests.get")
     mocker.patch("miminet_auth.login_user")
     mocker.patch("miminet_auth.create_access_token")
-    mocker.patch("miminet_auth.set_access_cookies", return_value="redirected")
-    mocker.patch("miminet_auth.set_refresh_cookies", return_value="redirected")
+    mocker.patch("miminet_auth.set_access_cookies")
+    mocker.patch("miminet_auth.set_refresh_cookies")
+    # google_callback() passes the response through issue_jwt_cookies()
+    # (delete_cookie/set_cookie), so the mock must be a real Response.
     redirect_next_mock = mocker.patch(
-        "miminet_auth.redirect_next_url", return_value="redirected"
+        "miminet_auth.redirect_next_url",
+        side_effect=lambda *args, **kwargs: redirect("/home"),
     )
 
     with app.test_request_context("/auth/google_callback?state=state", method="GET"):
         session["state"] = "state"
         result = miminet_auth.google_callback()
 
-    assert result == "redirected"
+    assert result.status_code == 302
+    assert result.location == "/home"
     assert user_ctor.call_args.kwargs["avatar_uri"] == "empty.jpg"
     redirect_next_mock.assert_called_once()
 
