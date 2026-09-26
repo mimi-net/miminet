@@ -284,8 +284,10 @@ def finish_old_sessions(user):
         section = qs.section
         test = section.test if section is not None else None
 
-        if section is not None and section.timer == 0 and (
-            test is None or not test.is_retakeable
+        if (
+            section is not None
+            and section.timer == 0
+            and (test is None or not test.is_retakeable)
         ):
             qs.is_deleted = True
             qs.finished_at = func.now()
