@@ -14,7 +14,12 @@ function finishOldQuiz() {
     fetch(finishOldSessionUrl, {
         method: 'PUT'
     })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok || response.status === 204) {
+                return null;
+            }
+            return response.json();
+        })
         .catch(error => {
             console.error('Error:', error);
         });

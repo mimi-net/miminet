@@ -258,10 +258,10 @@ def start_session(section_id: str, user: User):
 def finish_session(quiz_session_id: str, user: User):
     quiz_session = QuizSession.query.filter_by(id=quiz_session_id).first()
 
+    if quiz_session is None:
+        return 404
     if quiz_session.created_by_id != user.id:
         return 403
-    elif quiz_session is None:
-        return 404
 
     quiz_session.finished_at = func.now()
 
@@ -282,10 +282,13 @@ def finish_old_sessions(user):
 
     for qs in unfinished_sessions:
         section = qs.section
-        test = section.test
+        test = section.test if section is not None else None
 
-        if section.timer == 0 and not test.is_retakeable:
-            db.session.delete(qs)
+        if section is not None and section.timer == 0 and (
+            test is None or not test.is_retakeable
+        ):
+            qs.is_deleted = True
+            qs.finished_at = func.now()
         else:
             qs.finished_at = func.now()
 
