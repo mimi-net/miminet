@@ -151,7 +151,7 @@ jobs:
           tags: front-miminet:latest
           load: true
           cache-from: type=gha,scope=front-miminet
-          cache-to: type=gha,scope=front-miminet,mode=max
+          cache-to: type=gha,scope=front-miminet,mode=min
 
       - name: Start frontend
         run: |
