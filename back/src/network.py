@@ -1,9 +1,10 @@
 import os
+import threading
 import time
 
 import psutil
 from ipmininet.ipnet import IPNet
-from mininet.log import info
+from mininet.log import error, info
 from net_utils.captures import capture_paths
 from net_utils.readiness import iter_capture_endpoints
 from net_utils.vlan import clean_bridges, has_vlan_interfaces, setup_vlans
@@ -34,6 +35,9 @@ class MiminetNetwork(IPNet):
         # Whether the adaptive settle hit its cap instead of breaking early on
         # quiescence. Exposed for the benchmark harness (back/bench/bench.py).
         self.settle_hit_cap: bool = False
+        # Idempotence guard: teardown is only ever executed once, even when
+        # both the happy path and the exception path of emulate() ask for it.
+        self._stopped: bool = False
 
     def start(self):
         # Start network
@@ -393,21 +397,129 @@ class MiminetNetwork(IPNet):
         )
 
     def stop(self):
+        """Tear the emulated network down. Idempotent and time-bounded.
+
+        Every phase is guarded so one broken subsystem (a dead router
+        namespace, a wedged OVS bridge) cannot wedge the whole teardown:
+        Mininet's own stop runs under MIMINET_STOP_TIMEOUT (default 15s);
+        on timeout leftover capture processes are force-killed and the
+        worker is released instead of hanging forever (issue #517).
+        """
+        if self._stopped:
+            info("[network.stop] already stopped, skipping\n")
+            return
+        self._stopped = True
+
         info("[network.stop] called\n")
         # Pre-teardown settle window for async tail traffic (echo-replies,
         # DHCP ACK, ICMP unreachable, VXLAN/NAT propagation).
-        self.__settle()
+        try:
+            self.__settle()
+        except Exception as e:
+            error("[network.stop] settle failed: %r\n" % (e,))
 
-        clean_bridges(self)
-        teardown_vtep_bridges(self, self.__network_schema.nodes)
+        try:
+            clean_bridges(self)
+        except Exception as e:
+            error("[network.stop] clean_bridges failed: %r\n" % (e,))
+        try:
+            teardown_vtep_bridges(self, self.__network_schema.nodes)
+        except Exception as e:
+            error("[network.stop] teardown_vtep_bridges failed: %r\n" % (e,))
 
         info("[network.stop] calling __clean_services\n")
-        self.__clean_services()
+        try:
+            self.__clean_services()
+        except Exception as e:
+            error("[network.stop] __clean_services failed: %r\n" % (e,))
         info(
             "[network.stop] calling super().stop() — this will send SIGINT to mimidump\n"
         )
-        super().stop()
+        stopped = self.__stop_mininet_bounded()
+        # Sweep leftover captors in both cases: on the normal path this
+        # reaps anything that outlived the graceful SIGINT; on timeout it
+        # stops wedged processes from keeping /tmp/capture_* open and
+        # poisoning the next run ("We already run tcpdump on this
+        # interface"). Kernel leftovers (bridges/veths) are reclaimed by
+        # the next emulation's pre-cleanup (`mn -c`).
+        try:
+            self.__kill_leftover_captures()
+        except Exception as e:
+            error("[network.stop] capture sweep failed: %r\n" % (e,))
+        if not stopped:
+            error(
+                "[network.stop] super().stop() hit its cap; "
+                "leftover kernel state will be reclaimed by the next pre-cleanup\n"
+            )
         info("[network.stop] done\n")
+
+    def __stop_mininet_bounded(self) -> bool:
+        """Run Mininet's stop() with a hard cap. Returns False on timeout.
+
+        The cap comes from MIMINET_STOP_TIMEOUT (seconds, default 15).
+        The worker thread is a daemon, so a timeout never blocks the
+        Celery worker: the worst case is a stray background thread while
+        the next emulation reclaims kernel state via its pre-cleanup.
+        """
+        try:
+            timeout = float(os.environ.get("MIMINET_STOP_TIMEOUT", "15"))
+        except ValueError:
+            timeout = 15.0
+        done = threading.Event()
+        failures: list = []
+
+        def _target() -> None:
+            try:
+                super(MiminetNetwork, self).stop()
+            except Exception as e:  # noqa: BLE001 — teardown must not propagate
+                failures.append(e)
+            finally:
+                done.set()
+
+        worker = threading.Thread(target=_target, name="miminet-stop", daemon=True)
+        worker.start()
+        if not done.wait(timeout=timeout):
+            return False
+        for failure in failures:
+            error("[network.stop] super().stop() raised: %r\n" % (failure,))
+        return True
+
+    def __kill_leftover_captures(self) -> None:
+        """Force-kill capture processes (mimidump/tcpdump) owned by this worker.
+
+        Only touches this process's own children — never system-wide.
+        """
+        try:
+            children = Process().children(recursive=True)
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            return
+        for child in children:
+            try:
+                name = child.name()
+                pid = child.pid
+            except (
+                psutil.NoSuchProcess,
+                psutil.AccessDenied,
+                psutil.ZombieProcess,
+            ):
+                continue
+            if name not in ("mimidump", "tcpdump"):
+                continue
+            try:
+                info("Force-killing leftover capture: %s %s\n" % (name, pid))
+                child.kill()
+                child.wait(timeout=5)
+            except (
+                psutil.NoSuchProcess,
+                psutil.AccessDenied,
+                psutil.ZombieProcess,
+            ):
+                continue
+            except psutil.TimeoutExpired:
+                error(
+                    "[network.stop] capture %s (%s) did not die after kill\n"
+                    % (name, pid)
+                )
 
     def __clean_services(self):
         """
@@ -416,16 +528,49 @@ class MiminetNetwork(IPNet):
         This function kill them manually.
         """
         info("Starting processes cleanup... ")
-        current_process = Process()
-        children = current_process.children(recursive=True)
+        try:
+            children = Process().children(recursive=True)
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            return
         allowed = ("mimidump", "bash")
 
         for child in children:
-            if child.status() == psutil.STATUS_ZOMBIE:
-                # in case we already have zombies
-                child.wait()
-            elif child.name() not in allowed:
-                # finish other processes
-                info(f"Killed: {child.name()} {child.pid}")
-                child.kill()
-                child.wait()
+            try:
+                name = child.name()
+                pid = child.pid
+            except (
+                psutil.NoSuchProcess,
+                psutil.AccessDenied,
+                psutil.ZombieProcess,
+            ):
+                # Raced with the process exiting on its own — nothing to do.
+                continue
+            try:
+                if child.status() == psutil.STATUS_ZOMBIE:
+                    # in case we already have zombies
+                    try:
+                        child.wait(timeout=5)
+                    except (
+                        psutil.NoSuchProcess,
+                        psutil.AccessDenied,
+                        psutil.TimeoutExpired,
+                    ):
+                        pass
+                elif name not in allowed:
+                    # finish other processes
+                    info(f"Killed: {name} {pid}")
+                    child.kill()
+                    try:
+                        child.wait(timeout=5)
+                    except psutil.TimeoutExpired:
+                        error(
+                            "[network.stop] process %s (%s) did not die after kill\n"
+                            % (name, pid)
+                        )
+            except (
+                psutil.NoSuchProcess,
+                psutil.AccessDenied,
+                psutil.ZombieProcess,
+            ):
+                # Raced with the process exiting on its own — nothing to do.
+                continue

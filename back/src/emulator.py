@@ -1,9 +1,11 @@
+import glob
 import os
 import os.path
 import subprocess
 import time
 
 import dpkt
+import psutil
 
 from ipmininet.ipnet import IPNet
 from jobs import Jobs
@@ -29,6 +31,61 @@ SERVER_SETTLE_SECONDS = float(os.environ.get("MIMINET_SERVER_SETTLE", "0.5"))
 # configuration (empty captures). Disable color for the emulation process and
 # everything it spawns (mininet node shells inherit os.environ).
 os.environ.setdefault("NO_COLOR", "1")
+
+
+def _drop_stale_emulation_state() -> None:
+    """Remove leftovers of a previous incompletely-torn-down emulation.
+
+    A wedged teardown (see issue #517) leaves OVS bridges/veth pairs,
+    stale mimidump/tcpdump processes and /tmp/capture_*.pcapng files
+    behind; without this the next run logs "We already run tcpdump on
+    this interface" and captures 0 bytes. Scoped to this worker's own
+    children plus Mininet kernel state — never touches other processes.
+    """
+    try:
+        subprocess.run(
+            "mn -c",
+            shell=True,
+            timeout=20,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except (subprocess.SubprocessError, OSError) as e:
+        error("[emulator] pre-cleanup `mn -c` failed: %r\n" % (e,))
+    try:
+        root = psutil.Process()
+        children = root.children(recursive=True)
+    except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
+        error("[emulator] pre-cleanup process sweep failed: %r\n" % (e,))
+        children = []
+    for child in children:
+        try:
+            name = child.name()
+            pid = child.pid
+        except (
+            psutil.NoSuchProcess,
+            psutil.AccessDenied,
+            psutil.ZombieProcess,
+        ):
+            continue
+        if name not in ("mimidump", "tcpdump"):
+            continue
+        try:
+            child.kill()
+            child.wait(timeout=5)
+        except (
+            psutil.NoSuchProcess,
+            psutil.AccessDenied,
+            psutil.ZombieProcess,
+        ):
+            continue
+        except psutil.TimeoutExpired:
+            error("[emulator] stale capture %s (%s) did not die\n" % (name, pid))
+    for path in glob.glob("/tmp/capture_*.pcapng"):
+        try:
+            os.remove(path)
+        except OSError as e:
+            error("[emulator] pre-cleanup could not remove %s: %r\n" % (path, e))
 
 
 def emulate(
@@ -65,6 +122,10 @@ def emulate(
 
     net = None
     try:
+        # Never trust the previous run's teardown: a wedged stop() leaves
+        # bridges, captors and pcap files behind that poison this run.
+        _drop_stale_emulation_state()
+
         topo = MiminetTopology(network)
         net = MiminetNetwork(topo, network)
 
@@ -150,18 +211,17 @@ def emulate(
 
     except Exception as e:
         error(f"An error occurred during mininet configuration: {str(e)}")
-        # Always tear the network down, even on a failed start: skipping
-        # net.stop() would leave mimidump processes alive, still writing to the
-        # same /tmp/capture_* paths, so the next attempt would read stale data
-        # left behind by this one.
+        raise e
+    finally:
+        # MiminetNetwork.stop() is idempotent, so calling it here as well
+        # is safe: exactly one teardown runs no matter which path we took.
+        # (Previously the except-branch called net.stop() a second time on
+        # an already half-torn-down network, which wedged the worker.)
         if net is not None:
             try:
                 net.stop()
             except Exception as stop_err:
-                error(f"Failed to stop network after error: {stop_err}")
-        subprocess.call("mn -c", shell=True)
-
-        raise e
+                error(f"Failed to stop network: {stop_err}")
 
     animation, pcaps = create_animation(topo.interfaces)
     # Log pcap sizes after stop to compare with pre-stop sizes

@@ -1,6 +1,4 @@
 import json
-import os
-import signal
 
 from marshmallow import Schema
 import marshmallow_dataclass
@@ -48,10 +46,12 @@ def run_miminet(network_json: str):
 
     setLogLevel("info")
 
-    if os.name == "posix":
-        print("Set default handler to SIGCHLD")
-        signal.signal(signal.SIGCHLD, signal.SIG_IGN)
-
+    # NOTE: do NOT set SIGCHLD to SIG_IGN here. With SIG_IGN the kernel
+    # auto-reaps child processes, so Mininet/psutil waitpid()/wait() calls
+    # during teardown fail with "[Errno 3] No such process" and `net.stop()`
+    # (ovs-vsctl del-br, switch shutdown) hangs — the prefork worker then
+    # never returns and the emulator looks "stopped" until restart.
+    # Celery billiard manages SIGCHLD itself; leave the default disposition.
     jnet = _filter_unknown_nodes(json.loads(network_json))
     schema = get_network_schema()
     network_schema: Network = schema.load(jnet, unknown="include")
