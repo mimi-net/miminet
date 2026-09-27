@@ -143,6 +143,16 @@ jobs:
           enable-cache: true
           cache-dependency-glob: uv.lock
 
+      - name: Build frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: front/Dockerfile
+          tags: front-miminet:latest
+          load: true
+          cache-from: type=gha,scope=front-miminet
+          cache-to: type=gha,scope=front-miminet,mode=max
+
       - name: Start frontend
         run: |
           cd front/
