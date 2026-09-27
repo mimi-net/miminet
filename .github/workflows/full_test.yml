@@ -155,10 +155,20 @@ jobs:
         run: |
           uv sync --frozen
 
-      # No selenium grid here: playwright drives a browser it launches itself.
+      - name: Cache browser
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+
       - name: Install browser
         run: |
-          uv run playwright install --with-deps chromium
+          if [ "${{ steps.playwright-cache.outputs.cache-hit }}" = "true" ]; then
+            uv run playwright install-deps chromium
+          else
+            uv run playwright install --with-deps chromium
+          fi
 
       - name: Check availability
         run: |
