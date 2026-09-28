@@ -23,8 +23,6 @@ from flask_jwt_extended import (
     create_refresh_token,
     get_jwt_identity,
     jwt_required,
-    set_access_cookies,
-    set_refresh_cookies,
 )
 from flask_login import current_user, login_required
 from flask_migrate import Migrate
@@ -43,6 +41,7 @@ from miminet_auth import (
     google_callback,
     google_login,
     insert_test_user,
+    issue_jwt_cookies,
     login_index,
     login_manager,
     logout,
@@ -538,8 +537,7 @@ def refresh_access():
     refresh_token = create_refresh_token(identity=identity)
 
     response = jsonify({"msg": "access token refreshed"})
-    set_access_cookies(response, access_token)
-    set_refresh_cookies(response, refresh_token)
+    issue_jwt_cookies(response, access_token, refresh_token)
     return response
 
 
