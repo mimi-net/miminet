@@ -322,13 +322,20 @@ def abort_interview(user, session_guid):
     if not session_guid:
         raise InterviewError("Сессия AI-тестирования не указана.")
 
-    session = _latest_incomplete_session(user)
-    if session is None or session.guid != session_guid:
+    updated = (
+        AiInterviewSession.query.filter_by(user_id=user.id, guid=session_guid)
+        .filter(AiInterviewSession.status.in_({"active", "failed-recoverable"}))
+        .update(
+            {
+                AiInterviewSession.status: "aborted",
+                AiInterviewSession.finished_at: func.now(),
+                AiInterviewSession.final_result: None,
+            },
+            synchronize_session=False,
+        )
+    )
+    if not updated:
         raise InterviewNotFound("Сессия AI-тестирования не найдена.")
-
-    session.status = "aborted"
-    session.finished_at = func.now()
-    session.final_result = None
     db.session.commit()
 
     state = ready_state()
