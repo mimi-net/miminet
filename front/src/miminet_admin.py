@@ -909,7 +909,6 @@ class AiInterviewSettingView(MiminetAdminModelView):
             setting.llm_provider_check_message = str(exc)
             flash(f"RouterAI не прошёл проверку: {exc}", "error")
 
-        setting.llm_provider_checked_at = func.now()
         db.session.commit()
         return redirect(url_for(".index_view"))
 

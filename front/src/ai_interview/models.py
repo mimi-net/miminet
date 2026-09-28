@@ -18,7 +18,6 @@ class AiInterviewSetting(db.Model):  # type: ignore[name-defined]
     id = db.Column(BigInteger, primary_key=True)
     llm_provider_check_status = db.Column(Text, nullable=True)
     llm_provider_check_message = db.Column(Text, nullable=True)
-    llm_provider_checked_at = db.Column(TIMESTAMP(timezone=True), nullable=True)
     created_on = db.Column(TIMESTAMP(timezone=True), default=func.now())
     updated_on = db.Column(
         TIMESTAMP(timezone=True), default=func.now(), onupdate=func.now()
@@ -124,7 +123,6 @@ class AiInterviewTurn(db.Model):  # type: ignore[name-defined]
     feedback = db.Column(Text, nullable=True)
     analysis = db.Column(db.JSON, nullable=True)
     created_on = db.Column(TIMESTAMP(timezone=True), default=func.now())
-    answered_on = db.Column(TIMESTAMP(timezone=True), nullable=True)
 
     session = db.relationship("AiInterviewSession", back_populates="turns")
 

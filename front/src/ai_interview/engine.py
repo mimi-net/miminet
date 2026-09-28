@@ -204,7 +204,6 @@ def _complete(provider, prompt, schema):
 
 def _record_answer(turn, answer, payload):
     turn.answer = answer
-    turn.answered_on = func.now()
     turn.feedback = payload["feedback"]
     turn.analysis = {
         "answer_score": payload["answer_score"],
