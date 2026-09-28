@@ -20,7 +20,6 @@ import argparse
 import glob
 import json
 import os
-import signal
 import subprocess
 import sys
 import threading
@@ -42,8 +41,8 @@ import tasks  # noqa: E402
 
 
 def setup():
-    if os.name == "posix":
-        signal.signal(signal.SIGCHLD, signal.SIG_IGN)
+    # NOTE: never SIG_IGN/SIGCHLD here — it makes the kernel auto-reap
+    # children and breaks Mininet teardown waits (see tasks.run_miminet).
     setLogLevel("info")
 
 
