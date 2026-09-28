@@ -26,7 +26,6 @@ from wtforms import (
 from wtforms.validators import InputRequired, NumberRange
 
 from ai_interview.access import (
-    ACCESS_CODE_TTL_DAYS,
     cleanup_expired_access_codes,
     create_access_code,
     delete_access_code,
@@ -1013,7 +1012,6 @@ class AiInterviewAccessCodeView(MiminetAdminModelView):
         if request.method == "POST" and form.validate():
             code, access_code = create_access_code(
                 label=form.label.data,
-                days_valid=ACCESS_CODE_TTL_DAYS,
                 max_attempts_per_user=form.max_attempts_per_user.data,
             )
             flash(

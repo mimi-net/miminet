@@ -19,9 +19,6 @@ def _evaluation_contract(include_followup=False):
     return f"""Верни только JSON-объект ровно с полями:
 {{
   "feedback": "короткий фидбек тестируемому без раскрытия полного ответа",
-  "covered_concepts": ["покрытый тезис"],
-  "missed_concepts": ["пропущенный тезис"],
-  "misconceptions": ["существенная ошибка"],
   "answer_score": 0,
   "critical_error": false,{followup}
   "final_result": null

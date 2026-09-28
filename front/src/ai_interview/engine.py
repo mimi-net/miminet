@@ -39,7 +39,7 @@ from ai_interview.providers import (
     evaluation_temperature,
     get_provider,
 )
-from ai_interview.rubric import normalize_analysis, normalize_final_result
+from ai_interview.rubric import normalize_final_result
 from ai_interview.state import (
     _latest_completed_session,
     _latest_incomplete_session,
@@ -206,15 +206,17 @@ def _record_answer(turn, answer, payload):
     turn.answer = answer
     turn.answered_on = func.now()
     turn.feedback = payload["feedback"]
-    turn.analysis = normalize_analysis(payload)
+    turn.analysis = {
+        "answer_score": payload["answer_score"],
+        "critical_error": payload["critical_error"],
+    }
 
 
 def _submit_main_answer(session, turn, provider, answer):
     prompt = main_answer_prompt(turn, answer)
-    completion = _complete(provider, prompt, MAIN_ANSWER_SCHEMA)
-    payload = completion.payload
+    payload = _complete(provider, prompt, MAIN_ANSWER_SCHEMA)
     if payload["final_result"] is not None:
-        raise ProviderError("LLM returned premature final result", completion.calls)
+        raise ProviderError("LLM returned premature final result")
 
     _record_answer(turn, answer, payload)
     followup_focus = build_followup_focus(turn, payload["followup_reference_answer"])
@@ -227,7 +229,6 @@ def _submit_main_answer(session, turn, provider, answer):
             question=payload["followup_question"].strip(),
         )
     )
-    return completion, prompt
 
 
 def _submit_followup_answer(session, turn, provider, answer):
@@ -235,13 +236,12 @@ def _submit_followup_answer(session, turn, provider, answer):
     pair_count = pair_count_for_topics(session.selected_topics)
     is_final = pair_position >= pair_count
     prompt = followup_answer_prompt(turn, answer, is_final)
-    completion = _complete(provider, prompt, EVALUATION_SCHEMA)
-    payload = completion.payload
+    payload = _complete(provider, prompt, EVALUATION_SCHEMA)
 
     if is_final and payload["final_result"] is None:
-        raise ProviderError("LLM did not finalize the last turn", completion.calls)
+        raise ProviderError("LLM did not finalize the last turn")
     if not is_final and payload["final_result"] is not None:
-        raise ProviderError("LLM returned premature final result", completion.calls)
+        raise ProviderError("LLM returned premature final result")
 
     _record_answer(turn, answer, payload)
     if is_final:
@@ -253,7 +253,6 @@ def _submit_followup_answer(session, turn, provider, answer):
     else:
         topic_key = topic_for_pair(session.selected_topics, pair_position + 1)
         db.session.add(_new_main_turn(session, topic_key, pair_position + 1))
-    return completion, prompt
 
 
 def _submit_bank_answer(session, turn, provider, answer):
@@ -261,13 +260,12 @@ def _submit_bank_answer(session, turn, provider, answer):
     question_count = bank_question_count_for_topics(session.selected_topics)
     is_final = question_position >= question_count
     prompt = bank_answer_prompt(turn, answer, is_final)
-    completion = _complete(provider, prompt, EVALUATION_SCHEMA)
-    payload = completion.payload
+    payload = _complete(provider, prompt, EVALUATION_SCHEMA)
 
     if is_final and payload["final_result"] is None:
-        raise ProviderError("LLM did not finalize the last turn", completion.calls)
+        raise ProviderError("LLM did not finalize the last turn")
     if not is_final and payload["final_result"] is not None:
-        raise ProviderError("LLM returned premature final result", completion.calls)
+        raise ProviderError("LLM returned premature final result")
 
     _record_answer(turn, answer, payload)
     if is_final:
@@ -280,7 +278,6 @@ def _submit_bank_answer(session, turn, provider, answer):
         next_position = question_position + 1
         topic_key = topic_for_bank_question(session.selected_topics, next_position)
         db.session.add(_new_bank_turn(session, topic_key, next_position))
-    return completion, prompt
 
 
 def submit_answer(user, turn_id, answer):

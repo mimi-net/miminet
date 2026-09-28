@@ -1,6 +1,5 @@
 import json
 import os
-from dataclasses import dataclass
 from typing import Any
 
 import requests
@@ -15,9 +14,6 @@ EVALUATION_SCHEMA: dict[str, Any] = {
     "additionalProperties": False,
     "properties": {
         "feedback": {"type": "string", "minLength": 1},
-        "covered_concepts": {"type": "array", "items": {"type": "string"}},
-        "missed_concepts": {"type": "array", "items": {"type": "string"}},
-        "misconceptions": {"type": "array", "items": {"type": "string"}},
         "answer_score": {"type": "integer", "minimum": 0, "maximum": 3},
         "critical_error": {"type": "boolean"},
         "final_result": {
@@ -49,9 +45,6 @@ EVALUATION_SCHEMA: dict[str, Any] = {
     },
     "required": [
         "feedback",
-        "covered_concepts",
-        "missed_concepts",
-        "misconceptions",
         "answer_score",
         "critical_error",
         "final_result",
@@ -83,16 +76,8 @@ PROVIDER_CHECK_SCHEMA = {
 }
 
 
-@dataclass(frozen=True)
-class JsonCompletion:
-    payload: dict
-    calls: int
-
-
 class ProviderError(Exception):
-    def __init__(self, message, calls=0):
-        super().__init__(message)
-        self.calls = calls
+    pass
 
 
 class ProviderNotConfigured(ProviderError):
@@ -180,13 +165,11 @@ class ChatJsonProvider:
 
     def complete_json(self, system_prompt, user_prompt, temperature, schema):
         last_error = None
-        calls = 0
         for _ in range(retry_limit() + 1):
-            calls += 1
             try:
                 raw = self._request(system_prompt, user_prompt, temperature)
                 payload = json.loads(raw)
-                return JsonCompletion(validate_payload(payload, schema), calls)
+                return validate_payload(payload, schema)
             except (KeyError, TypeError, json.JSONDecodeError, ValidationError) as exc:
                 last_error = exc
             except requests.HTTPError as exc:
@@ -194,13 +177,13 @@ class ChatJsonProvider:
                     exc.response.status_code if exc.response is not None else "error"
                 )
                 raise ProviderError(
-                    f"LLM API returned HTTP {status_code}", calls
+                    f"LLM API returned HTTP {status_code}"
                 ) from exc
             except requests.RequestException as exc:
-                raise ProviderError("LLM API is unavailable", calls) from exc
+                raise ProviderError("LLM API is unavailable") from exc
 
         raise ProviderError(
-            f"LLM returned invalid structured output: {last_error}", calls
+            f"LLM returned invalid structured output: {last_error}"
         )
 
 
@@ -221,12 +204,12 @@ def get_provider():
 
 def check_provider():
     provider = get_provider()
-    completion = provider.complete_json(
+    payload = provider.complete_json(
         "Return only valid JSON.",
         'Return exactly {"ok": true}.',
         0,
         PROVIDER_CHECK_SCHEMA,
     )
-    if completion.payload.get("ok") is not True:
-        raise ProviderError("LLM вернула неожиданный ответ.", completion.calls)
-    return {"model": provider.model, "calls": completion.calls}
+    if payload.get("ok") is not True:
+        raise ProviderError("LLM вернула неожиданный ответ.")
+    return {"model": provider.model}

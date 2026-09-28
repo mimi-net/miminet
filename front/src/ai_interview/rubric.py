@@ -38,16 +38,6 @@ def normalize_grade(turns, candidate_grade=None):
     return max(2, min(rubric_grade, candidate_grade, 5))
 
 
-def normalize_analysis(payload):
-    return {
-        "covered_concepts": payload["covered_concepts"],
-        "missed_concepts": payload["missed_concepts"],
-        "misconceptions": payload["misconceptions"],
-        "answer_score": payload["answer_score"],
-        "critical_error": payload["critical_error"],
-    }
-
-
 def score_summary(turns):
     scores = [
         max(

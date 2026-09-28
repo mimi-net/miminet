@@ -171,10 +171,7 @@ def serialize_session(session, duplicate=False):
 
 
 def ready_state():
-    return {
-        "status": "ready",
-        "history": [],
-    }
+    return {"status": "ready"}
 
 
 def attempts_exhausted_state():

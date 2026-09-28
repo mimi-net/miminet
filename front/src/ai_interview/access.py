@@ -45,24 +45,22 @@ def delete_access_code(access_code):
     db.session.delete(access_code)
 
 
-def cleanup_expired_access_codes(commit=True):
+def cleanup_expired_access_codes():
     expired_codes = AiInterviewAccessCode.query.filter(
         AiInterviewAccessCode.expires_at <= now_utc()
     ).all()
     for access_code in expired_codes:
         delete_access_code(access_code)
-    if expired_codes and commit:
+    if expired_codes:
         db.session.commit()
     return len(expired_codes)
 
 
 def create_access_code(
     label=None,
-    days_valid=ACCESS_CODE_TTL_DAYS,
     max_attempts_per_user=DEFAULT_MAX_ATTEMPTS_PER_USER,
 ):
     cleanup_expired_access_codes()
-    days_valid = max(1, int(days_valid or ACCESS_CODE_TTL_DAYS))
     max_attempts_per_user = max(
         1, int(max_attempts_per_user or DEFAULT_MAX_ATTEMPTS_PER_USER)
     )
@@ -72,7 +70,7 @@ def create_access_code(
             access_code = AiInterviewAccessCode(
                 code=code,
                 label=str(label or "").strip() or None,
-                expires_at=now_utc() + timedelta(days=days_valid),
+                expires_at=now_utc() + timedelta(days=ACCESS_CODE_TTL_DAYS),
                 is_active=True,
                 max_attempts_per_user=max_attempts_per_user,
             )

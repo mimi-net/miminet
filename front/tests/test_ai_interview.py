@@ -11,7 +11,6 @@ from ai_interview.models import AiInterviewAccessCode
 from ai_interview.providers import (
     EVALUATION_SCHEMA,
     MAIN_ANSWER_SCHEMA,
-    JsonCompletion,
     ROUTERAI_MODEL,
     ProviderError,
     get_provider,
@@ -57,9 +56,6 @@ def make_turn(flow_type="main", position=1, pair_position=1, answer=None):
 def evaluation_payload(final_result=None, **extra):
     return {
         "feedback": "Короткий фидбек",
-        "covered_concepts": ["основной тезис"],
-        "missed_concepts": [],
-        "misconceptions": [],
         "answer_score": 3,
         "critical_error": False,
         "final_result": final_result,
@@ -79,7 +75,7 @@ def final_result_payload():
 
 def make_provider(mocker, payload):
     return SimpleNamespace(
-        complete_json=mocker.Mock(return_value=JsonCompletion(payload, 1))
+        complete_json=mocker.Mock(return_value=payload)
     )
 
 
@@ -126,7 +122,7 @@ def test_choose_bank_question_excludes_already_used_question():
     ("schema", "missing_field"),
     [
         (MAIN_ANSWER_SCHEMA, "followup_question"),
-        (EVALUATION_SCHEMA, "covered_concepts"),
+        (EVALUATION_SCHEMA, "answer_score"),
     ],
 )
 def test_llm_payload_schema_requires_fields(schema, missing_field):
@@ -246,11 +242,11 @@ def test_main_answer_creates_followup_with_one_llm_call(mocker):
     followup = SimpleNamespace()
     mocker.patch("ai_interview.engine.AiInterviewTurn", return_value=followup)
 
-    completion, _ = engine._submit_main_answer(
+    engine._submit_main_answer(
         turn.session, turn, provider, "Его отбросят."
     )
 
-    assert completion.calls == 1
+    provider.complete_json.assert_called_once()
     assert add.call_args.args[0] is followup
     engine.AiInterviewTurn.assert_called_once()
     assert engine.AiInterviewTurn.call_args.kwargs["focus"]["flow_type"] == "followup"
