@@ -12,7 +12,7 @@
     "reference_answer": "48 бит"
   },
   {
-    "id": "l2-3",
+      "id": "l2-3",
     "topic_key": "ethernet_l2",
     "question": "Максимальный размер Ethernet фрейма",
     "reference_answer": "1514 байт"

@@ -26,7 +26,7 @@
   {
     "id": "l4-5",
     "topic_key": "transport_and_icmp",
-    "question": "Может ли одно приложение открыть несколько TCP/UDP портов и в каком случае?",
+    "question": "Может ли одно приложение открыть несколько TCP/UDP портов?",
     "reference_answer": "Да"
   },
   {
