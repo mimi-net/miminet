@@ -74,9 +74,7 @@ def final_result_payload():
 
 
 def make_provider(mocker, payload):
-    return SimpleNamespace(
-        complete_json=mocker.Mock(return_value=payload)
-    )
+    return SimpleNamespace(complete_json=mocker.Mock(return_value=payload))
 
 
 def test_question_bank_covers_every_topic():
@@ -242,9 +240,7 @@ def test_main_answer_creates_followup_with_one_llm_call(mocker):
     followup = SimpleNamespace()
     mocker.patch("ai_interview.engine.AiInterviewTurn", return_value=followup)
 
-    engine._submit_main_answer(
-        turn.session, turn, provider, "Его отбросят."
-    )
+    engine._submit_main_answer(turn.session, turn, provider, "Его отбросят.")
 
     provider.complete_json.assert_called_once()
     assert add.call_args.args[0] is followup

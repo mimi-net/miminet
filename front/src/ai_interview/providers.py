@@ -176,15 +176,11 @@ class ChatJsonProvider:
                 status_code = (
                     exc.response.status_code if exc.response is not None else "error"
                 )
-                raise ProviderError(
-                    f"LLM API returned HTTP {status_code}"
-                ) from exc
+                raise ProviderError(f"LLM API returned HTTP {status_code}") from exc
             except requests.RequestException as exc:
                 raise ProviderError("LLM API is unavailable") from exc
 
-        raise ProviderError(
-            f"LLM returned invalid structured output: {last_error}"
-        )
+        raise ProviderError(f"LLM returned invalid structured output: {last_error}")
 
 
 class RouterAIProvider(ChatJsonProvider):
