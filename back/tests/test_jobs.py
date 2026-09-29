@@ -360,6 +360,98 @@ def test_arp_proxy_enable():
     assert len(host.calls) == 1
 
 
+def test_dhcp_client_rejects_untrusted_interface():
+    host = FakeHost()
+    J.dhcp_client(job(108, arg_1="eth0;touch /tmp/pwned;"), host)
+    assert host.calls == []
+
+
+def test_dhcp_client_accepts_generated_interface_id():
+    host = FakeHost()
+    J.dhcp_client(job(108, arg_1="iface_87480866"), host)
+    assert host.calls == [
+        "ifconfig iface_87480866 0",
+        "rm -f /var/lib/dhcp/dhclient.leases",
+        "echo 'initial-interval 6;' > /tmp/dhclient.conf",
+        "timeout -k 1 5 dhclient -d -v -4 -cf /tmp/dhclient.conf iface_87480866 && ip route show && rm -f /tmp/dhclient.conf",
+        "ip addr show iface_87480866",
+    ]
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        {
+            "arg_1": "10.0.0.100;touch /tmp/pwned;",
+            "arg_2": "10.0.0.200",
+            "arg_3": "24",
+            "arg_4": "10.0.0.1",
+            "arg_5": "eth0",
+        },
+        {
+            "arg_1": "10.0.0.100",
+            "arg_2": "10.0.0.200;touch /tmp/pwned;",
+            "arg_3": "24",
+            "arg_4": "10.0.0.1",
+            "arg_5": "eth0",
+        },
+        {
+            "arg_1": "10.0.0.100",
+            "arg_2": "10.0.0.200",
+            "arg_3": "24;touch /tmp/pwned;",
+            "arg_4": "10.0.0.1",
+            "arg_5": "eth0",
+        },
+        {
+            "arg_1": "10.0.0.100",
+            "arg_2": "10.0.0.200",
+            "arg_3": "24",
+            "arg_4": "10.0.0.1;touch /tmp/pwned;",
+            "arg_5": "eth0",
+        },
+        {
+            "arg_1": "10.0.0.100",
+            "arg_2": "10.0.0.200",
+            "arg_3": "24",
+            "arg_4": "10.0.0.1",
+            "arg_5": "eth0;touch /tmp/pwned;",
+        },
+    ],
+)
+def test_dhcp_server_rejects_untrusted_arguments(args):
+    host = FakeHost()
+    J.dhcp_server(job(203, **args), host)
+    assert host.calls == []
+
+
+def test_dhcp_server_accepts_valid_arguments(monkeypatch):
+    class FakeDaemon:
+        cfg_filenames = ["/tmp/dnsmasq.conf"]
+        pids = [123]
+
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+
+    monkeypatch.setattr(J, "Dnsmasq", FakeDaemon)
+    host = FakeHost()
+    host.build_daemon = lambda daemon: None
+    host.start_daemon = lambda daemon: None
+
+    J.dhcp_server(
+        job(
+            203,
+            arg_1="10.0.0.100",
+            arg_2="10.0.0.200",
+            arg_3="24",
+            arg_4="10.0.0.1",
+            arg_5="iface_75316443",
+        ),
+        host,
+    )
+
+    assert host.calls == ["cat /tmp/dnsmasq.conf"]
+
+
 def test_jobs_dispatch_ping():
     host = FakeHost()
     j = J.Jobs(job(1, arg_1="10.0.0.1"), host)
