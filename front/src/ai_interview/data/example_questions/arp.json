@@ -1,0 +1,32 @@
+[
+  {
+    "id": "arp-1",
+    "topic_key": "network_l3",
+    "question": "Зачем нужен ARP протокол?",
+    "reference_answer": "Узнать MAC адрес хоста по его IP адресу"
+  },
+  {
+    "id": "arp-2",
+    "topic_key": "network_l3",
+    "question": "В ARP запросе на канальном уровне в качестве адреса назначения устанавливается",
+    "reference_answer": "Широковещательный MAC адрес (FF:FF:FF:FF:FF:FF)"
+  },
+  {
+    "id": "arp-3",
+    "topic_key": "network_l3",
+    "question": "Если на первый ARP запрос никто не ответил, то хост",
+    "reference_answer": "Делает еще несколько попыток, отправляет ARP запрос"
+  },
+  {
+    "id": "arp-4",
+    "topic_key": "network_l3",
+    "question": "Какой командой под ОС Windows можно посмотреть arp кэш",
+    "reference_answer": "arp"
+  },
+  {
+    "id": "arp-5",
+    "topic_key": "network_l3",
+    "question": "Когда ОС устанавливает себе на сетевой интерфейс IP адрес, она обычно",
+    "reference_answer": "Отправляет в сеть беспричинный ARP запрос"
+  }
+]

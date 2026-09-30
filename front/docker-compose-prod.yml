@@ -25,6 +25,11 @@ services:
       - ./src/static/quiz_images:/app/static/quiz_images
     environment:
       - RABBITMQ_URL=amqp://rabbitmq:5672
+      - ROUTERAI_API_KEY=
+      - ROUTERAI_API_KEY_FILE=/run/secrets/routerai_api_key
+    secrets:
+      - routerai_api_key
+
   rabbitmq:
     image: rabbitmq:4.3-management
     hostname: rabbitmq
@@ -58,6 +63,8 @@ services:
     restart: always
     env_file:
       - .env
+    environment:
+      - ROUTERAI_API_KEY=
     volumes:
       - ./default.conf.template:/etc/nginx/templates/default.conf.template
     ports:
@@ -78,3 +85,7 @@ networks:
     ipam:
       config:
         - subnet: 172.20.0.0/16
+
+secrets:
+  routerai_api_key:
+    file: /opt/miminet/secrets/routerai_api_key

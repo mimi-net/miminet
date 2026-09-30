@@ -1,0 +1,22 @@
+[
+  {
+    "key": "network_intro",
+    "label": "Введение в компьютерные сети"
+  },
+  {
+    "key": "ethernet_l2",
+    "label": "Канальный уровень: Ethernet, кадры, топологии и коммутация"
+  },
+  {
+    "key": "network_l3",
+    "label": "Сетевой уровень: IP-адресация, ARP, маршрутизация, NAT, Multicast и IPv6"
+  },
+  {
+    "key": "transport_and_icmp",
+    "label": "Транспортный уровень: UDP, TCP, особенности TCP и ICMP-диагностика"
+  },
+  {
+    "key": "advanced_networking",
+    "label": "Дополнительные сетевые технологии: VLAN, VPN, DHCP, Proxy ARP, разновидности NAT и PMTUD"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "osi-1",
+    "topic_key": "network_intro",
+    "question": "Сколько уровней включает модель ISO/OSI?",
+    "reference_answer": "7 уровней"
+  },
+  {
+    "id": "osi-2",
+    "topic_key": "network_intro",
+    "question": "Какой уровень модели OSI обеспечивает режим передачи (симплексный, дуплексный, полудуплексный, многоточечное соединение)",
+    "reference_answer": "Физический"
+  },
+  {
+    "id": "osi-3",
+    "topic_key": "network_intro",
+    "question": "На 3-м уровне модели OSI располагается",
+    "reference_answer": "Сетевой уровень"
+  },
+  {
+    "id": "osi-4",
+    "topic_key": "network_intro",
+    "question": "Какой уровень модели OSI отвечает за доставку данных между приложениями",
+    "reference_answer": "Транспортный"
+  },
+  {
+    "id": "osi-5",
+    "topic_key": "network_intro",
+    "question": "Хост только что принял данные данные, пакет был обработан на сетевом уровне. Какой следующий уровень будет обрабатывать пакет?",
+    "reference_answer": "Транспортный"
+  },
+  {
+    "id": "osi-6",
+    "topic_key": "network_intro",
+    "question": "Какой уровень модели OSI решает, в каком виде будут отправляться данные - кодировка, сжатие, шифрование и т.д.",
+    "reference_answer": "Представления"
+  },
+  {
+    "id": "osi-7",
+    "topic_key": "network_intro",
+    "question": "CSMA/CD это?",
+    "reference_answer": "Carrier Sense Multiple Access with Collision Detection"
+  },
+  {
+    "id": "osi-8",
+    "topic_key": "network_intro",
+    "question": "Рабочее название технологии канального уровня Ethernet это",
+    "reference_answer": "CSMA/CD"
+  },
+  {
+    "id": "osi-9",
+    "topic_key": "network_intro",
+    "question": "Технологии канального уровня в рамках модели OSI располагаются на",
+    "reference_answer": "На физическом и канальном уровне"
+  },
+  {
+    "id": "osi-10",
+    "topic_key": "network_intro",
+    "question": "Может ли внутри IP протокола лежать ARP протокол?",
+    "reference_answer": "Нет"
+  }
+]
