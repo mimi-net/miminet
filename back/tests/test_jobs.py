@@ -432,10 +432,15 @@ def test_dhcp_server_accepts_valid_arguments(monkeypatch):
         def __init__(self, **kwargs):
             self.kwargs = kwargs
 
+    class FakeDhcpHost(FakeHost):
+        def build_daemon(self, daemon):
+            pass
+
+        def start_daemon(self, daemon):
+            pass
+
     monkeypatch.setattr(J, "Dnsmasq", FakeDaemon)
-    host = FakeHost()
-    host.build_daemon = lambda daemon: None
-    host.start_daemon = lambda daemon: None
+    host = FakeDhcpHost()
 
     J.dhcp_server(
         job(
