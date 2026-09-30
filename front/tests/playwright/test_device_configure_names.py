@@ -1,0 +1,65 @@
+import pytest
+from playwright.sync_api import Page
+
+from utils.networks import MiminetTestNetwork, NodeType
+
+
+class TestDeviceNameChange:
+    @pytest.fixture(scope="class")
+    def network(self, authorized_page: Page):
+        network = MiminetTestNetwork(authorized_page)
+
+        network.add_node(NodeType.Host)
+        network.add_node(NodeType.Hub)
+        network.add_node(NodeType.Router)
+        network.add_node(NodeType.Server)
+        network.add_node(NodeType.Switch)
+
+        yield network
+
+        network.delete()
+
+    def test_device_name_change(
+        self,
+        authorized_page: Page,
+        network: MiminetTestNetwork,
+    ):
+        """Just change the name of the device"""
+        authorized_page.goto(network.url)
+
+        for node_id, node in enumerate(network.nodes):
+            config = network.open_node_config(node)
+
+            # change device name
+            new_device_name = "new name!"
+            config.change_name(new_device_name)
+
+            # save data
+            config.submit()
+
+            updated_node = network.nodes[node_id]
+
+            assert updated_node["config"]["label"] == new_device_name, (
+                "Failed to change device name."
+            )
+
+    def test_device_name_change_to_long(
+        self, authorized_page: Page, network: MiminetTestNetwork
+    ):
+        """Change device name to long string and checks if it has been cut"""
+        for node_id, node in enumerate(network.nodes):
+            config = network.open_node_config(node)
+
+            # change device name
+            new_device_name = "a" * 100  # long name
+            config.change_name(new_device_name)
+
+            # save changes
+            config.submit()
+
+            updated_node = network.nodes[node_id]
+
+            # check that the name was cut off
+            assert updated_node["config"]["label"] != new_device_name, (
+                "The device name isn't limited in size."
+            )
