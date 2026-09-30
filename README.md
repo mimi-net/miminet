@@ -138,6 +138,37 @@ export provider=vbox/vmware
 
 Запуск без Docker (rootless podman): [DEVELOPMENT.md](DEVELOPMENT.md).
 
+#### Набор на Playwright
+
+В ```front/tests/playwright``` лежит тот же набор E2E-тестов, переписанный на [Playwright](https://playwright.dev/python/). Он работает параллельно с основным: Selenium-тесты остаются на месте, оба набора проверяют одно и то же.
+
+Отличия: браузер запускается как обычный процесс, поэтому ```selenium-hub``` и контейнер с Chrome не нужны, а весь набор проходит примерно за минуту вместо пяти.
+
+Первоначальная установка (один раз):
+```bash
+uv sync                              # поставит pytest-playwright
+uv run playwright install chromium   # ~658 МБ на диске
+```
+
+Запуск — из корня репозитория:
+```bash
+sh front/tests/playwright/run.sh                 # весь набор в 4 процесса
+sh front/tests/playwright/run.sh test_vlan.py    # один файл
+sh front/tests/playwright/run.sh . --headed      # с видимым браузером
+```
+
+Скрипт сам подставляет адрес и число воркеров; переопределяются переменными ```TEST_TARGET_HOST``` и ```WORKERS```. То же самое вручную:
+```bash
+cd front/tests/playwright
+TEST_TARGET_HOST=127.0.0.1 uv run pytest . -n 4
+```
+
+- ```-n 4``` — тесты в четыре параллельных процесса. Больше брать не стоит: на восьми воркерах тесты начинают падать из-за конкуренции за одну учётную запись.
+- ```TEST_TARGET_HOST=127.0.0.1``` нужен при запуске с хоста: адрес по умолчанию (```172.18.0.2```) — это nginx внутри docker-сети, снаружи он отдаёт 502.
+- ```--headed``` показывает браузер, ```--slowmo 500``` замедляет действия — удобно при отладке падающего теста.
+
+Подробности — в [docs/FUNCTIONAL_TESTS.md](docs/FUNCTIONAL_TESTS.md): что покрывает каждый тест, чем порт отличается от оригинала и с какими особенностями пришлось столкнуться.
+
 ### <a name="backend-test"></a> Backend
 1. Установка необходимых пакетов (требуется [uv](https://docs.astral.sh/uv/)):
 ```bash
@@ -153,4 +184,6 @@ export PYTHONPATH=$PYTHONPATH:../src
 pytest .
 ```
 > Для mininet обязательно нужен root!
+
+Что покрывают тесты бэкенда, какие из них требуют root, а какие запускаются за секунду без Mininet — в [docs/BACKEND_TESTS.md](docs/BACKEND_TESTS.md).
 
