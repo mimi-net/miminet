@@ -486,6 +486,9 @@ def arp_proxy_enable(job: Job, job_host: Any) -> None:
 
 
 def dhcp_client(job: Job, job_host):
+    if not valid_iface(job.arg_1):
+        info("[dhcp_client] invalid iface %r, skipping" % (job.arg_1,))
+        return
     info(f"[dhcp_client] host={job_host.name} iface={job.arg_1}")
     out_ifconfig = job_host.cmd(f"ifconfig {job.arg_1} 0")
     info(f"[dhcp_client] ifconfig {job.arg_1} 0 -> {out_ifconfig!r}")
@@ -505,6 +508,14 @@ def dhcp_client(job: Job, job_host):
 
 
 def dhcp_server(job: Job, job_host):
+    _range_and_gw = (job.arg_1, job.arg_2, job.arg_4)
+    if not (
+        all(valid_ip(a) for a in _range_and_gw)
+        and re.fullmatch(r"\d{1,2}", str(job.arg_3))
+        and valid_iface(job.arg_5)
+    ):
+        info("[dhcp_server] invalid args, skipping")
+        return
     ip_range_start = job.arg_1
     ip_range_end = job.arg_2
     mask = job.arg_3

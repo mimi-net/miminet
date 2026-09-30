@@ -1,0 +1,85 @@
+{% extends 'admin/model/list.html' %}
+
+{% block head %}
+{{ super() }}
+<style>
+  .ai-access-code {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    white-space: nowrap;
+  }
+  .ai-access-code__value {
+    padding: .125rem .375rem;
+    border: 1px solid #e9ecef;
+    border-radius: .25rem;
+    background: #f8f9fa;
+    color: #212529;
+    font-family: monospace;
+  }
+  .ai-access-code__copy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 1.9rem;
+    height: 1.9rem;
+    padding: 0;
+  }
+  .ai-access-code__copy:focus-visible {
+    box-shadow: 0 0 0 .2rem rgba(108, 117, 125, .35);
+  }
+  .ai-access-code__copy--done {
+    color: #28a745;
+    border-color: #28a745;
+  }
+</style>
+{% endblock %}
+
+{% block tail %}
+{{ super() }}
+<script>
+  document.querySelectorAll('.ai-access-code__copy').forEach((button) => {
+    const $button = $(button);
+    const icon = button.querySelector('i');
+    let resetTimer;
+    let copyAttempt = 0;
+    $button.tooltip({ trigger: 'hover focus', container: 'body' });
+
+    function reset(code) {
+      icon.classList.replace('fa-check', 'fa-copy');
+      button.classList.remove('ai-access-code__copy--done');
+      button.setAttribute('aria-label', `Скопировать код ${code}`);
+      $button.tooltip('hide').attr('data-original-title', 'Скопировать код');
+    }
+
+    function showFeedback(message) {
+      $button.tooltip('hide').attr('data-original-title', message).tooltip('show');
+    }
+
+    button.addEventListener('click', async () => {
+      const code = button.parentElement.querySelector('.ai-access-code__value').textContent.trim();
+      const attempt = ++copyAttempt;
+      clearTimeout(resetTimer);
+      reset(code);
+
+      try {
+        await navigator.clipboard.writeText(code);
+      } catch (error) {
+        if (attempt !== copyAttempt) return;
+        button.setAttribute('aria-label', `Не удалось скопировать код ${code}`);
+        showFeedback('Не удалось скопировать');
+        resetTimer = setTimeout(() => reset(code), 1800);
+        return;
+      }
+
+      if (attempt !== copyAttempt) return;
+      icon.classList.replace('fa-copy', 'fa-check');
+      button.classList.add('ai-access-code__copy--done');
+      button.setAttribute('aria-label', `Скопировано: ${code}`);
+      showFeedback('Скопировано');
+      resetTimer = setTimeout(() => reset(code), 1800);
+    });
+  });
+</script>
+{% endblock %}

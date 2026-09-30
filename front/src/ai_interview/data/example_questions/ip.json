@@ -1,0 +1,68 @@
+[
+  {
+    "id": "ip-1",
+    "topic_key": "network_l3",
+    "question": "Что такое IP сеть",
+    "reference_answer": "Множество IP адресов"
+  },
+  {
+    "id": "ip-2",
+    "topic_key": "network_l3",
+    "question": "Какие IP адреса выделяются для многоадресной рассылки (мультикаст)",
+    "reference_answer": "224.0.0.0 - 239.255.255.255"
+  },
+  {
+    "id": "ip-3",
+    "topic_key": "network_l3",
+    "question": "Используя классовую адресацию, сколько IP адресов в сети 192.168.0.0",
+    "reference_answer": "255"
+  },
+  {
+    "id": "ip-4",
+    "topic_key": "network_l3",
+    "question": "Что в бесклассовой адресации позволяет определить где адрес хоста и где адрес сети?",
+    "reference_answer": "Маска подсети"
+  },
+  {
+    "id": "ip-6",
+    "topic_key": "network_l3",
+    "question": "Какие IP адреса принадлежат сети 0.0.0.0/0",
+    "reference_answer": "0.0.0.0 - 255.255.255.255"
+  },
+  {
+    "id": "ip-7",
+    "topic_key": "network_l3",
+    "question": "Сколько IP адресов можно раздать хостам в сети 10.10.10.0/30",
+    "reference_answer": "3"
+  },
+  {
+    "id": "ip-8",
+    "topic_key": "network_l3",
+    "question": "Какой IP сети принадлежит IP адрес 192.168.1.65/26",
+    "reference_answer": "192.168.1.64/26"
+  },
+  {
+    "id": "ip-9",
+    "topic_key": "network_l3",
+    "question": "У вас есть IP сеть 192.168.1.0/24. если ее нужно разбить на 4 подсети, то какая маска будет у новых IP сетей?",
+    "reference_answer": "У всех будет маска 26"
+  },
+  {
+    "id": "ip-10",
+    "topic_key": "network_l3",
+    "question": "Какой командой под ОС Linux можно посмотреть IP настройки",
+    "reference_answer": "ifconfig"
+  },
+  {
+    "id": "ip-11",
+    "topic_key": "network_l3",
+    "question": "Для сети 172.16.12.0/25 широковещательным IP адресом будет",
+    "reference_answer": "172.16.12.127"
+  },
+  {
+    "id": "ip-12",
+    "topic_key": "network_l3",
+    "question": "Какие первые 3 байта группового MAC адреса",
+    "reference_answer": "01:00:5E"
+  }
+]
