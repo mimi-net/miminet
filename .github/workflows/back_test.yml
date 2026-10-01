@@ -140,7 +140,7 @@ jobs:
           uv sync --frozen --project back
 
       - name: Download coverage data
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: back-coverage-shard-*
           path: .tmp/cov
