@@ -147,7 +147,7 @@ jobs:
           cache-dependency-glob: uv.lock
 
       - name: Build frontend image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: front/Dockerfile
@@ -170,7 +170,7 @@ jobs:
 
       - name: Cache browser
         id: playwright-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('uv.lock') }}
