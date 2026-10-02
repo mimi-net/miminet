@@ -11,3 +11,4 @@ class NodeType(str, Enum):
     SWITCH = "l2_switch"
     HUB = "l1_hub"
     ROUTER = "router"
+    HACKER = "hacker"
