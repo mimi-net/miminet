@@ -130,8 +130,8 @@ both (they share `utils/networks.py`; the locators are duplicated).
 
 ## Git and workflow
 
-- Docs and code comments are written in English. `README.md`, `DEVELOPMENT.md`,
-  `docs/DEVELOPMENT.md` and `docs/*_TESTS.md` are still in Russian — leave them
-  as they are, but write anything new in English.
+- Docs and code comments are written in English. `README.md` and `docs/*_TESTS.md`
+  are still in Russian — leave them as they are, but write anything new in
+  English.
 - Branch naming rules — `docs/GIT.md`. Read it before creating a branch.
 - Commit messages are in English: `<scope>: <description> (#<issue>)`.
