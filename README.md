@@ -136,7 +136,7 @@ export provider=vbox/vmware
 2. Запуск контейнеров: ```sh front/tests/docker/run.sh```
 3. Запуск тестов: ```pytest front/tests```.
 
-Запуск без Docker (rootless podman): [DEVELOPMENT.md](DEVELOPMENT.md).
+Запуск без Docker (rootless podman): [DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 #### Набор на Playwright
 
