@@ -11,7 +11,6 @@ everything already implemented that deserves a description.
 
 - [Sections](#sections)
 - [Principles](#principles)
-- [Related documents](#related-documents)
 
 ---
 
@@ -54,16 +53,3 @@ the section that owns it, and the other sections link back from there.
 
 **Fixes belong to the section that owns the subject.** A new requirement about
 routes goes into the section about routes, not at the end of the shared file.
-
-## Related documents
-
-Documents outside the scope of the specification:
-
-| Document | Description |
-|---|---|
-| [GIT.md](GIT.md) | Branch and commit naming rules |
-| [DEVELOPMENT.md](DEVELOPMENT.md) | Running the tests on a rootless Linux host, without Docker |
-| [BACKEND_TESTS.md](BACKEND_TESTS.md) | Backend test inventory |
-| [FUNCTIONAL_TESTS.md](FUNCTIONAL_TESTS.md) | Functional test inventory |
-| [../AGENTS.md](../AGENTS.md) | Instructions for agents working on the project |
-| [../README.md](../README.md) | Project overview, deployment, architecture |
