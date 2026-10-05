@@ -1,11 +1,14 @@
 # SYSTEM.md — system shape
 
-How the two halves are deployed and how they reach each other. It is a section
-of the architecture reference, see [ARCHITECTURE.md](../ARCHITECTURE.md).
+How the two halves are deployed, what can reach what, and how the halves talk to
+each other. It is a section of the architecture reference, see
+[ARCHITECTURE.md](../ARCHITECTURE.md).
 
 ## Contents
 
 - [Topology](#topology)
+  - [Reachability](#reachability)
+  - [nginx configuration](#nginx-configuration)
 - [Processes per container](#processes-per-container)
 - [Exchanges and queues](#exchanges-and-queues)
 
@@ -18,28 +21,37 @@ imports the other; they exchange a single JSON document.
 
 ```
   browser
-     │  HTTP
+     │  HTTP :80
      ▼
-  ┌──────────────┐        ┌────────────┐
-  │    nginx     │───────▶│  postgres  │
-  └──────────────┘        └────────────┘
-         │                      ▲
-         ▼                      │ SQLAlchemy
+  ┌──────────────┐
+  │    nginx     │
+  └──────────────┘
+         │ uwsgi_pass miminet:80
+         ▼
   ┌────────────────────────────────────────┐
-  │ front container                        │
-  │   uwsgi  → front/src/app.py (Flask)    │
-  │   celery  → front/src/tasks.py         │
+  │front container (miminet)               │
+  │  uwsgi  → front/src/app.py (Flask)     │
+  │  celery → front/src/tasks.py           │
   └────────────────────────────────────────┘
-         │                      ▲
-         │ AMQP                │ SQLAlchemy
-         ▼                      │
-  ┌────────────┐         ┌─────┴──────────────┐
-  │  rabbitmq  │────────▶│ back container(s)  │
-  └────────────┘         │  celery → back/src │
-                         │  mininet + OVS     │
-                         │  + mimidump        │
-                         └────────────────────┘
+       │               │               │
+       │ SQLAlchemy    │ AMQP          │ volumes
+       ▼               ▼               ▼
+ ┌───────────┐   ┌───────────┐   static/pcaps, images, avatar,
+ │ postgres  │   │ rabbitmq  │   svg, video, assets, quiz_images
+ └───────────┘   └─────┬─────┘
+                       │ AMQP
+                       ▼
+  ┌───────────────────────┐
+  │back container(s)      │
+  │  celery → back/src    │
+  │  mininet + OVS        │
+  │  + mimidump           │
+  └───────────────────────┘
 ```
+
+**nginx is a pure reverse proxy in front of the front container.** It forwards
+every request to `miminet:80` and opens no database or broker connection of its
+own — postgres is reached only by the front container, over SQLAlchemy.
 
 `front/docker-compose.yml` defines `miminet`, `nginx`, `postgres`, `rabbitmq`.
 `back/docker-compose.yml` defines a single `celery` service with
@@ -48,6 +60,43 @@ network namespace and kernel access.
 
 The module map is in [MODULES.md](MODULES.md); the request/response sequences
 that cross this topology are in [DATA-FLOW.md](DATA-FLOW.md).
+
+### Reachability
+
+| From | To | How | Network |
+|---|---|---|---|
+| nginx | miminet | `uwsgi_pass miminet:80` (`front/default.conf.template:17`, `front/default.conf.template:24`) | `miminet_network` |
+| miminet | postgres | SQLAlchemy/psycopg2, `POSTGRES_HOST=postgres` | `miminet_network` |
+| miminet | rabbitmq | AMQP, `amqp_urls` | `rabbitmq_network` |
+| rabbitmq | back | AMQP | host networking |
+| back | — | nothing — privileged, host netns, talks to OVS and the kernel | host |
+
+The compose file splits the front stack over two bridges, which is what makes the
+table above unambiguous: `miminet` is the **only** container on
+`rabbitmq_network`, while `nginx` and `postgres` sit on `miminet_network` only.
+So the broker is reachable from the front half through one container, and nginx
+is never a peer of it.
+
+The static volumes bind-mount `./src/static/{images,svg,avatar,video,pcaps,assets,quiz_images}`
+into the front container, which is why a pcap written by
+`save_simulate_result` is immediately servable as `/static/pcaps/…` — no restart,
+no upload step.
+
+### nginx configuration
+
+`front/default.conf.template` is mounted into the nginx container's
+`templates/` directory, so the image substitutes the `.env` variables into it.
+It declares one active server block on port 80 with two locations:
+
+- `location /ai/` — same upstream, but `uwsgi_read_timeout` and
+  `uwsgi_send_timeout` raised to 300 s, because AI generation is slow enough to
+  outlast the default timeouts.
+- `location /` — everything else, default timeouts.
+
+`server_name` is commented out, so the block is the default server for port 80
+and catches every `Host`. The separate `QUIZ_DOMAIN` vhost that would proxy to a
+`quiz` service is commented out too (`front/default.conf.template:1-9`); the
+quiz is served by `miminet` like everything else.
 
 ---
 
