@@ -10,11 +10,12 @@ Two independent halves, wired together through RabbitMQ:
 - `back/` — the Mininet/OVS emulation celery worker. Sources in `back/src`,
   entry into the logic is `run_miminet` in `back/src/tasks.py`.
 
-Docs: `README.md` (Russian, deployment), `docs/DEVELOPMENT.md` (running tests on
-a rootless Linux host, no Docker), `docs/FUNCTIONAL_TESTS.md`,
-`docs/BACKEND_TESTS.md` (per-file test inventory), `docs/GIT.md`,
-`docs/REQUIREMENTS.md` (specification index, one file per subject in
-`docs/REQUIREMENTS/`).
+Docs: `README.md` (Russian, deployment), `docs/ARCHITECTURE.md` (index; one file
+per subject in `docs/ARCHITECTURE/` — module map, data flow, templates,
+conventions), `docs/DEVELOPMENT.md` (running tests on a rootless Linux host, no
+Docker), `docs/FUNCTIONAL_TESTS.md`, `docs/BACKEND_TESTS.md` (per-file test
+inventory), `docs/GIT.md`, `docs/REQUIREMENTS.md` (specification index, one file
+per subject in `docs/REQUIREMENTS/`).
 
 Lint commands, ruff/ty config, CI triggers, test selection, coverage gates and
 per-workflow environment setup are all defined in `.github/workflows/*.yml` and
