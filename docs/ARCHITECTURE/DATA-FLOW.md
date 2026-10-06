@@ -219,7 +219,9 @@ Grading itself is a pure function of `(requirements, animation)`:
 `check_practice_service.check_task` (`front/src/quiz/service/check_practice_service.py:330`)
 dispatches to `check_host_service` for per-device assertions and
 `check_network_service` for whole-network ones. No Mininet, no root, no worker —
-which is why the browser-free front tests can cover it.
+which is why the browser-free front tests can cover it. What a requirement may
+contain, and how a task is created over the API, is documented in
+[../QUIZ.md](../QUIZ.md).
 
 The same task supports a headless variant: with `session_question_id=None` the
 grading writes a result file instead of a database row

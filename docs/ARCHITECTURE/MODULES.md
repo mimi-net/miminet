@@ -83,7 +83,9 @@ grading services — `check_host_service.py` (per-device assertions: subnet mask
 VLAN IDs, required paths, echo requests), `check_network_service.py`
 (whole-network assertions), and `check_practice_service.py` (the dispatcher
 that walks a task's requirement list). `network_upload_service.py` turns a
-user-submitted network plus requirements into a check payload.
+user-submitted network plus requirements into a check payload. The document that
+defines what a requirement may say, and the endpoint that stores it, is
+[../QUIZ.md](../QUIZ.md).
 
 `entity.py` defines reusable mixins — `IdMixin` (GUID primary key),
 `SoftDeleteMixin`, `TimeMixin`, `CreatedByMixin` — and the `GUID` and `Json`

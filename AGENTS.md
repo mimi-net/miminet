@@ -12,10 +12,11 @@ Two independent halves, wired together through RabbitMQ:
 
 Docs: `README.md` (Russian, deployment), `docs/ARCHITECTURE.md` (index; one file
 per subject in `docs/ARCHITECTURE/` — module map, data flow, templates,
-conventions), `docs/DEVELOPMENT.md` (running tests on a rootless Linux host, no
-Docker), `docs/FUNCTIONAL_TESTS.md`, `docs/BACKEND_TESTS.md` (per-file test
-inventory), `docs/GIT.md`, `docs/REQUIREMENTS.md` (specification index, one file
-per subject in `docs/REQUIREMENTS/`).
+conventions), `docs/QUIZ.md` (creating a practice task over the API and every
+available requirement check), `docs/DEVELOPMENT.md` (running tests on a rootless
+Linux host, no Docker), `docs/FUNCTIONAL_TESTS.md`, `docs/BACKEND_TESTS.md`
+(per-file test inventory), `docs/GIT.md`, `docs/REQUIREMENTS.md` (specification
+index, one file per subject in `docs/REQUIREMENTS/`).
 
 Lint commands, ruff/ty config, CI triggers, test selection, coverage gates and
 per-workflow environment setup are all defined in `.github/workflows/*.yml` and
