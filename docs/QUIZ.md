@@ -40,7 +40,7 @@ The quiz is layered `controller → facade → service → entity`
 ```
 POST /quiz/question/create?id=<section_id>
 Content-Type: application/json
-Cookie: session=…                     # flask_login session, see below
+Cookie: mimi_session=…                # flask_login cookie, see below
 ```
 
 Registered at `front/src/app.py:373`, handled by
@@ -48,10 +48,13 @@ Registered at `front/src/app.py:373`, handled by
 (`front/src/quiz/controller/question_controller.py:25`).
 
 The endpoint is `@login_required` from `flask_login`, not `@jwt_required`, so it
-needs the **session cookie** issued by the OAuth login flow — a request with
-JWT cookies only is redirected (302) to the login page
-(`front/src/miminet_auth.py:203`). The section in `?id=` must exist, not be soft
-deleted and belong to the caller, otherwise 404/403.
+needs the **session cookie** issued by the login flow — the cookie is named
+`mimi_session` (`front/src/app.py:262`), and a request with the JWT cookies only
+is redirected (302) to the login page (`front/src/miminet_auth.py:203`). `?id=`
+is optional: with no `id` the section lookup is skipped and the question is
+created with `section_id = NULL` (`question_facade.py:27`). With an `id`, the
+section must exist, not be soft deleted and belong to the caller — see
+[Response codes](#response-codes) for what each case actually returns.
 
 The body is either one object or an array of objects; an array is created
 one by one and the response contains the list of created ids
@@ -96,6 +99,10 @@ So the student's canvas starts from an immutable copy of the source network, and
 each student gets a further copy at session start
 (`quiz/util/dto.py:335` `PracticeQuestionDto`). Editing the source network later
 does not change the task.
+
+The copy is committed at `question_facade.py:122`, **before** the image check, so
+a request that fails later with 400 (a name in `images` that is not on disk)
+still leaves an orphan `is_task` network row behind.
 
 ### Minimal request
 
@@ -270,6 +277,24 @@ These checks exist in the grader and are reachable **only** through
 | `cmd["vxlan-echo-request"]` | target, `tunnel_start`, `tunnel_end`, `points`, optional `different_paths` | Both directions traverse a VXLAN tunnel (UDP port 4789) | `check_host_service.py:412` |
 | `in_one_network_with` | `target`, `points` | The two devices' interface subnets overlap (`IPv4Network(…).overlaps`) | `check_practice_service.py:8` |
 | `abstract_ip_equal` | `to`, `expected_equal_with`, `points` | The device's IPs toward `to` intersect `expected_equal_with`'s IPs. A negative `points` is allowed here and penalises | `check_practice_service.py:58` |
+
+Tunnel interaction rules, all verified against `check_task`:
+
+- `tunnel-echo-request` and `vxlan-echo-request` replace `echo-request`; the
+  three are **mutually exclusive**. `check_echo_request` and `check_path` only
+  follow *consecutive* `ICMP` packets (`check_host_service.py:526`, `:263`), so
+  on tunnelled traffic the hop chain breaks and both report
+  *"Запрос не достиг <target>"* even though the ping succeeded.
+- The tunnel chain may span intermediate routers: `tunnel_used_correctly` hops
+  packet by packet and only requires every hop to be a tunnel packet, so
+  `router_1 → router_2 → router_4` counts as a tunnel `router_1 → router_4`.
+- Both directions must use the **same** tunnel type; GRE in one direction and IPIP
+  in the other scores 0 with no hint about the mismatch.
+- `check_vxlan_echo_request.trace_path` matches tunnel packets through
+  `("UDP" in ptype and "> 4789 in ptype")` (`check_host_service.py:436`) — the
+  second operand is a non-empty **string literal**, not a comparison, so the
+  condition is true for *every* UDP packet. The VXLAN tunnel assertion itself is
+  correct (`"> 4789" in ptype`, `:459`); only the ICMP hop walk is too lax.
 
 ---
 
@@ -490,9 +515,13 @@ The answer is always the **student's network guid**, never the schema
 | 400 | `{"message": "Некоторые изображения отсутствуют", "details": {"missing": [...]}}` | A name in `images` is not on disk |
 | 400 | `{"message": "Нельзя создать вопрос с данными параметрами в данном разделе", "id": …}` | Unknown `question_type`, or every item of a batch failed |
 | 403 | `{"message": "Нельзя создать вопрос по чужому разделу", "id": …}` | The section belongs to another user |
-| 404 | `{"message": "Не существует данного раздела", "id": …}` | Missing or soft-deleted section |
 | 404 | `{"message": "Сеть <guid> не найдена"}` | `start_configuration` does not resolve |
 | 500 | HTML error page | Missing `text`/`question_type`/`start_configuration`, a dict instead of a list in the nested `requirements`, or a commit failure — the facade reads these keys with `[]` outside its `try` |
+| 500 | HTML error page | **Missing or soft-deleted section.** The facade returns `(None, 404)`, and the controller tests `"message" in res[0]` before anything else (`question_controller.py:28`) → `TypeError: argument of type 'NoneType' is not iterable`. The intended `{"message": "Не существует данного раздела"}` is unreachable |
+
+`GET /quiz/question/all?id=<section_id>` answers with `QuestionForEditorDto`,
+which carries `question_id` and `question_text` only — no `question_type`, no
+`start_configuration`, no `requirements` (`dto.py:550`).
 
 ---
 
@@ -529,6 +558,14 @@ The answer is always the **student's network guid**, never the schema
 13. **`points` is mandatory in every check**, and `additionalProperties` is
     strict everywhere — a typo in a key name is a 400 with the offending key
     named.
+14. **A missing section is a 500, not a 404.** `create_single_question` returns
+    `(None, 404)`, but the controller's first branch does
+    `"message" in res[0]` on that `None` (`question_controller.py:28`) and dies
+    with a `TypeError` before it can answer 404. Omitting `?id=` avoids the
+    lookup and quietly stores `section_id = NULL`.
+15. **A 400 for a missing image still creates the task network copy**, because
+    the copy is committed before the image check (`question_facade.py:122` vs
+    `140-153`). Retrying the request creates another copy.
 
 ---
 
@@ -548,6 +585,16 @@ database or Mininet:
   `add_ping` re-adds one, and the `ValueError` cases of
   [Scenario modifications](#scenario-modifications).
 
+The payload of [Minimal request](#minimal-request) and the `?id=` behaviours were
+additionally exercised over HTTP against a running stand: 201 for a valid
+section, 403 for a section of another user, 500 for an unknown section, and 201
+with a `NULL` `section_id` when `id` is omitted.
+
 Grading has no external dependency, so a new requirement kind can be checked the
 same way: call `check_task(requirements, answer)` with a hand-built
 `{"nodes": [...], "edges": [...], "packets": [...]}` document.
+
+`create_practice_task.py` in the repository root is a worked example that does
+all of it: it builds the payload of a real task, grades a synthetic answer and
+two broken ones offline (`--self-test`), and posts the question to a stand
+(`--section-id`, `--email`, `--password`).
