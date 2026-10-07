@@ -1,0 +1,99 @@
+{
+  "jobs": [
+    {
+      "id": "job_arp_spoof",
+      "level": 0,
+      "job_id": 205,
+      "host_id": "hacker_1",
+      "arg_1": "iface_30000002",
+      "arg_2": "192.168.1.10",
+      "arg_3": "192.168.1.1",
+      "arg_4": "reply_only",
+      "print_cmd": "ARP Spoofing -> 192.168.1.10"
+    },
+    {
+      "id": "job_ping_router",
+      "level": 1,
+      "job_id": 1,
+      "host_id": "host_1",
+      "arg_1": "192.168.1.1",
+      "print_cmd": "ping -c 1 192.168.1.1"
+    }
+  ],
+  "nodes": [
+    {
+      "classes": ["host"],
+      "config": {"default_gw": "192.168.1.1", "label": "host_1", "type": "host"},
+      "data": {"id": "host_1", "label": "host_1"},
+      "interface": [
+        {
+          "connect": "edge_arp_host_switch",
+          "id": "iface_30000001",
+          "ip": "192.168.1.10",
+          "name": "iface_30000001",
+          "netmask": 24
+        }
+      ],
+      "position": {"x": 50, "y": 50}
+    },
+    {
+      "classes": ["hacker"],
+      "config": {"default_gw": "", "label": "hacker_1", "type": "hacker"},
+      "data": {"id": "hacker_1", "label": "hacker_1"},
+      "interface": [
+        {
+          "connect": "edge_arp_hacker_switch",
+          "id": "iface_30000002",
+          "ip": "192.168.1.66",
+          "name": "iface_30000002",
+          "netmask": 24
+        }
+      ],
+      "position": {"x": 120, "y": 30}
+    },
+    {
+      "classes": ["l2_switch"],
+      "config": {"label": "l2sw1", "stp": 0, "type": "l2_switch"},
+      "data": {"id": "l2sw1", "label": "l2sw1"},
+      "interface": [
+        {"connect": "edge_arp_host_switch", "id": "l2sw1_1", "name": "l2sw1_1"},
+        {"connect": "edge_arp_hacker_switch", "id": "l2sw1_2", "name": "l2sw1_2"},
+        {"connect": "edge_arp_switch_backbone", "id": "l2sw1_3", "name": "l2sw1_3"}
+      ],
+      "position": {"x": 120, "y": 90}
+    },
+    {
+      "classes": ["l2_switch"],
+      "config": {"label": "l2sw2", "stp": 0, "type": "l2_switch"},
+      "data": {"id": "l2sw2", "label": "l2sw2"},
+      "interface": [
+        {"connect": "edge_arp_switch_backbone", "id": "l2sw2_1", "name": "l2sw2_1"},
+        {"connect": "edge_arp_router_switch", "id": "l2sw2_2", "name": "l2sw2_2"}
+      ],
+      "position": {"x": 180, "y": 90}
+    },
+    {
+      "classes": ["l3_router"],
+      "config": {"default_gw": "", "label": "router_1", "type": "router"},
+      "data": {"id": "router_1", "label": "router_1"},
+      "interface": [
+        {
+          "connect": "edge_arp_router_switch",
+          "id": "iface_30000003",
+          "ip": "192.168.1.1",
+          "name": "iface_30000003",
+          "netmask": 24
+        }
+      ],
+      "position": {"x": 190, "y": 50}
+    }
+  ],
+  "edges": [
+    {"data": {"id": "edge_arp_host_switch", "source": "host_1", "target": "l2sw1", "loss_percentage": 0, "duplicate_percentage": 0}},
+    {"data": {"id": "edge_arp_hacker_switch", "source": "hacker_1", "target": "l2sw1", "loss_percentage": 0, "duplicate_percentage": 0}},
+    {"data": {"id": "edge_arp_switch_backbone", "source": "l2sw1", "target": "l2sw2", "loss_percentage": 0, "duplicate_percentage": 0}},
+    {"data": {"id": "edge_arp_router_switch", "source": "router_1", "target": "l2sw2", "loss_percentage": 0, "duplicate_percentage": 0}}
+  ],
+  "config": {"zoom": 1, "pan_x": 0, "pan_y": 0},
+  "pcap": []
+}
