@@ -8,7 +8,7 @@ from celery_app import app
 from flask import Response, jsonify, make_response, request
 from flask_login import current_user
 from miminet_config import ARP_SPOOF_JOB_ID, SLEEP_JOB_ID
-from miminet_model import Network, Simulate, db
+from miminet_model import NON_EMULATED_NODE_TYPES, Network, Simulate, db
 
 
 def get_data(arg: str):
@@ -195,6 +195,9 @@ class AbstractConfigurator(ABC):
         self._element_type: str = element_type
         self._cur_network: Network | None = None
         self._json_network: dict = {}
+        # Only elements that take part in the emulation make the last
+        # simulation stale when they change.
+        self._resets_simulation: bool = element_type not in NON_EMULATED_NODE_TYPES
 
     def _conf_prepare_network(self):
         if request.method != "POST":
@@ -219,12 +222,16 @@ class AbstractConfigurator(ABC):
         self._json_network: dict = json.loads(self._cur_network.network)
 
     def __conf_sims_delete(self):
-        """Delete saved simulations. Typically used at the end of the configuration"""
+        """Save the network and, unless the element is outside the emulation,
+        delete its saved simulations. Typically used at the end of the configuration"""
         assert self._cur_network is not None
-        sims = Simulate.query.filter(Simulate.network_id == self._cur_network.id).all()
-        for s in sims:
-            app.control.revoke(s.task_guid, terminate=False)
-            db.session.delete(s)
+        if self._resets_simulation:
+            sims = Simulate.query.filter(
+                Simulate.network_id == self._cur_network.id
+            ).all()
+            for s in sims:
+                app.control.revoke(s.task_guid, terminate=False)
+                db.session.delete(s)
 
         self._cur_network.network = json.dumps(self._json_network)
         db.session.commit()
