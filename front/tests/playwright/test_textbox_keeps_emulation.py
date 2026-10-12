@@ -3,8 +3,8 @@
 CI starts no emulation backend for the E2E suite, so a finished emulation is
 planted in the page the same way ``test_packet_filters.py`` does it. Every
 textbox change then goes through the real UI -- drag from the tool panel, the
-config form, the Delete key -- and the player must survive it. The server side
-of the fix is covered by ``front/tests/test_textbox_emulation.py``.
+config form, the Delete key, Ctrl+Z -- and the player must survive it. The
+server side of the fix is covered by ``front/tests/test_textbox_emulation.py``.
 """
 
 import pytest
@@ -47,6 +47,11 @@ def _assert_emulation_kept(page: Page):
     expect(
         page.locator(Location.Network.EMULATE_PLAYER_PAUSE_BUTTON.selector)
     ).to_be_visible()
+
+
+def _assert_emulation_reset(page: Page):
+    assert page.evaluate("packets === null"), "The emulation was kept"
+    expect(page.locator(Location.Network.EMULATE_BUTTON.selector)).to_be_visible()
 
 
 def _add_textbox(page: Page, network: MiminetTestNetwork) -> str:
@@ -94,11 +99,30 @@ def test_deleting_textbox_keeps_emulation(authorized_page: Page, network):
     _assert_emulation_kept(authorized_page)
 
 
+def test_undoing_textbox_keeps_emulation(authorized_page: Page, network):
+    textbox_id = _add_textbox(authorized_page, network)
+
+    authorized_page.keyboard.press("Control+z")
+    authorized_page.wait_for_function(f"!nodes.some(n => n.data.id === '{textbox_id}')")
+
+    _assert_emulation_kept(authorized_page)
+
+
 def test_adding_device_still_resets_emulation(authorized_page: Page, network):
     """Control: without it the cases above would pass if nothing reset at all."""
     network.add_node(NodeType.Host)
 
-    assert authorized_page.evaluate("packets === null")
-    expect(
-        authorized_page.locator(Location.Network.EMULATE_BUTTON.selector)
-    ).to_be_visible()
+    _assert_emulation_reset(authorized_page)
+
+
+def test_undoing_device_still_resets_emulation(authorized_page: Page, network):
+    """Control for undo: the emulation of a network with the host is stale
+    once the host is undone."""
+    network.add_node(NodeType.Host)
+    authorized_page.evaluate(PLANT_EMULATION)
+    _assert_emulation_kept(authorized_page)
+
+    authorized_page.keyboard.press("Control+z")
+    authorized_page.wait_for_function("nodes.length === 1")
+
+    _assert_emulation_reset(authorized_page)

@@ -56,6 +56,39 @@ const IsEmulatedNodeType = function(type){
     return !NON_EMULATED_NODE_TYPES.includes(type);
 }
 
+// JSON with object keys sorted, so two networks compare by content alone:
+// nodes the server sent back may list their keys in another order.
+const CanonicalJson = function(value){
+    if (Array.isArray(value)) {
+        return '[' + value.map(CanonicalJson).join(',') + ']';
+    }
+
+    if (value && typeof value === 'object') {
+        return '{' + Object.keys(value).sort().map(
+            key => JSON.stringify(key) + ':' + CanonicalJson(value[key])
+        ).join(',') + '}';
+    }
+
+    return JSON.stringify(value);
+}
+
+// The part of the network the emulation depends on: devices without their
+// canvas position, and edges. Mirrors emulation_changed in miminet_network.py.
+const EmulatedView = function(network){
+    const devices = network.nodes
+        .filter(n => !n.config || IsEmulatedNodeType(n.config.type))
+        .map(n => {
+            const {position, ...rest} = n;
+            return rest;
+        });
+
+    return CanonicalJson({nodes: devices, edges: network.edges});
+}
+
+const EmulationChanged = function(before, after){
+    return EmulatedView(before) !== EmulatedView(after);
+}
+
 // A change to a non-emulated node redraws the graph, which would orphan an
 // animation running on the previous Cytoscape instance. Stop the playback but
 // keep the packets, so the emulation can be replayed right away.
@@ -1646,7 +1679,15 @@ const DrawGraph = function() {
             selecteed_node_id = 0;
             selected_edge_id = 0;
 
+            const before = {nodes: nodes, edges: edges};
             RestoreNetworkObject();
+
+            // Undoing a textbox change keeps the emulation, as the change did.
+            const resets_emulation = EmulationChanged(before, {nodes: nodes, edges: edges});
+
+            if (!resets_emulation) {
+                StopPlaybackKeepEmulation();
+            }
 
             PostNodesEdges();               // Update network on server
             cy.elements().remove();
@@ -1656,7 +1697,9 @@ const DrawGraph = function() {
             TakeGraphPictureAndUpdate();
 
             // Reset network state
-            SetNetworkPlayerState(-1);
+            if (resets_emulation) {
+                SetNetworkPlayerState(-1);
+            }
         }
 
     });
