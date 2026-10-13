@@ -320,6 +320,8 @@ class AnswerResultDto:
 
 class AnswerDto:
     def __init__(self, question_type: str, answer: Answer) -> None:
+        # Sent as a string: ids are BigInteger and JS numbers lose precision
+        self.id = str(answer.id)
         if question_type == "matching":
             self.left = answer.left
             self.right = answer.right
@@ -327,7 +329,7 @@ class AnswerDto:
             self.variant = answer.variant
 
     def to_dict(self):
-        attributes = ["variant", "left", "right"]
+        attributes = ["id", "variant", "left", "right"]
         data = {attr: getattr(self, attr) for attr in attributes if hasattr(self, attr)}
         return data
 

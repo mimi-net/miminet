@@ -76,38 +76,29 @@ function RunAndWaitSimulation(network_guid) {
     })
 }
 
+// Answers are sent as Answer ids, not the visible text: a browser translator
+// rewrites the text, which made correct answers grade as wrong.
 function getAnswer() {
     switch (questionType) {
         case 'variable':
-            const checked = $('input.form-check-input:checked');
-            if ($('input[type=radio].form-check-input').length !== 0) {
-                return [{'variant': checked.siblings('label').text()}];
-            }
-            return checked.map(function () {
-                return {'variant': $(this).siblings('label').text()};
+            return $('input.form-check-input:checked').map(function () {
+                return {'id': $(this).attr('data-answer-id')};
             }).get();
         case 'matching':
-            const leftSide = $('#sortContainer div').map(function () {
-                return $(this).text();
+            const leftIds = $('#sortContainer div').map(function () {
+                return $(this).attr('data-answer-id');
             }).get();
-            const rightSide = $('#rightSide div').map(function () {
-                return $(this).text();
+            const rightIds = $('#rightSide div').map(function () {
+                return $(this).attr('data-answer-id');
             }).get();
-            let resultArray = [];
-            leftSide.forEach((leftValue, index) => {
-                resultArray.push({
-                    "left": leftValue,
-                    "right": rightSide[index]
-                });
-            });
-            return resultArray;
+            return leftIds.map((leftId, index) => ({
+                'left_id': leftId,
+                'right_id': rightIds[index]
+            }));
         case 'sorting':
-            let sortableArray = $('#sortContainer div').map(function () {
-                return $(this).text();
-            }).get();
             let dictionary = {};
-            sortableArray.forEach((value, index) => {
-                dictionary[index] = value;
+            $('#sortContainer div').each(function (index) {
+                dictionary[index] = {'id': $(this).attr('data-answer-id')};
             });
             return dictionary;
     }

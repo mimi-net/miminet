@@ -6,6 +6,14 @@ from zoneinfo import ZoneInfo
 from markupsafe import Markup
 from miminet_model import Network, User, db
 from quiz.entity.entity import Answer, PracticeQuestion, SessionQuestion
+from quiz.service.answer_grading import (
+    grade_matching,
+    grade_sorting,
+    grade_variable,
+    is_matching_by_id,
+    is_sorting_by_id,
+    is_variable_by_id,
+)
 from quiz.service.check_practice_service import check_task
 from quiz.service.network_upload_service import prepare_task
 from quiz.util.dto import (
@@ -109,7 +117,46 @@ def get_session_question_data(session_question_id: str | None):
     return result, 200
 
 
+def _save_theory_result(session_question, question, correct):
+    session_question.is_correct = correct
+    session_question.score = 1 if correct else 0
+    session_question.max_score = 1
+    db.session.add(session_question)
+    db.session.commit()
+
+    return AnswerResultDto(question.explanation, correct), 200
+
+
+def _check_theory_answer_by_id(session_question, question, payload):
+    """Grade by Answer.id, which a browser translator can't change.
+
+    Returns None when the payload is in the old text-based format.
+    """
+    graders = {
+        1: (is_variable_by_id, grade_variable),
+        2: (is_sorting_by_id, grade_sorting),
+        3: (is_matching_by_id, grade_matching),
+    }
+    if question.question_type not in graders:
+        return None
+
+    is_by_id, grade = graders[question.question_type]
+    if not is_by_id(payload):
+        return None
+
+    answers = Answer.query.filter_by(question_id=question.id, is_deleted=False).all()
+    correct, user_answer = grade(answers, payload)
+    session_question.user_answer = user_answer
+
+    return _save_theory_result(session_question, question, correct)
+
+
 def check_theory_answer(session_question, question, answer):
+    result = _check_theory_answer_by_id(session_question, question, answer["answer"])
+    if result is not None:
+        return result
+
+    # Fallback: text-based check for pages loaded before the id-based update
     session_question.user_answer = answer["answer"]
 
     # variable
