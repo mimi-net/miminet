@@ -47,6 +47,63 @@ const TextboxUid = function(){
     return "text_" + uid();
 }
 
+// Node types that take no part in the emulation. Mirrors
+// NON_EMULATED_NODE_TYPES in miminet_model.py: the server keeps the network's
+// simulation when only such nodes change, so the player keeps it too.
+const NON_EMULATED_NODE_TYPES = ['textbox'];
+
+const IsEmulatedNodeType = function(type){
+    return !NON_EMULATED_NODE_TYPES.includes(type);
+}
+
+// JSON with object keys sorted, so two networks compare by content alone:
+// nodes the server sent back may list their keys in another order.
+const CanonicalJson = function(value){
+    if (Array.isArray(value)) {
+        return '[' + value.map(CanonicalJson).join(',') + ']';
+    }
+
+    if (value && typeof value === 'object') {
+        return '{' + Object.keys(value).sort().map(
+            key => JSON.stringify(key) + ':' + CanonicalJson(value[key])
+        ).join(',') + '}';
+    }
+
+    return JSON.stringify(value);
+}
+
+// The part of the network the emulation depends on: devices without their
+// canvas position, and edges. Mirrors emulation_changed in miminet_network.py.
+const EmulatedView = function(network){
+    const devices = network.nodes
+        .filter(n => !n.config || IsEmulatedNodeType(n.config.type))
+        .map(n => {
+            const {position, ...rest} = n;
+            return rest;
+        });
+
+    return CanonicalJson({nodes: devices, edges: network.edges});
+}
+
+const EmulationChanged = function(before, after){
+    return EmulatedView(before) !== EmulatedView(after);
+}
+
+// A change to a non-emulated node redraws the graph, which would orphan an
+// animation running on the previous Cytoscape instance. Stop the playback but
+// keep the packets, so the emulation can be replayed right away.
+const StopPlaybackKeepEmulation = function(){
+    const player = PacketPlayer.getInstance();
+
+    if (!player.getPlayerPlay() && !player.getPlayerPause()) {
+        return;
+    }
+
+    player.resetAnimationTrafficStepCallback();
+    player.StopPlayer();
+    SetNetworkPlayerState(0);
+}
+
 const HostUid = function(){
 
     let host_name = "host_";
@@ -1554,6 +1611,15 @@ const DrawGraph = function() {
                 hideResizeFrame();
             }
 
+            // Removing a non-emulated node (a textbox) keeps the emulation.
+            const deleted_node = nodes.find(n => n.data.id === selecteed_node_id);
+            const resets_emulation = !deleted_node || !deleted_node.config ||
+                IsEmulatedNodeType(deleted_node.config.type);
+
+            if (!resets_emulation) {
+                StopPlaybackKeepEmulation();
+            }
+
             // Save the network state.
             SaveNetworkObject();
 
@@ -1572,7 +1638,9 @@ const DrawGraph = function() {
             TakeGraphPictureAndUpdate();
 
             // Reset network state
-            SetNetworkPlayerState(-1);
+            if (resets_emulation) {
+                SetNetworkPlayerState(-1);
+            }
         }
         if (e.keyCode ==  46 && selected_edge_id) {
 
@@ -1611,7 +1679,15 @@ const DrawGraph = function() {
             selecteed_node_id = 0;
             selected_edge_id = 0;
 
+            const before = {nodes: nodes, edges: edges};
             RestoreNetworkObject();
+
+            // Undoing a textbox change keeps the emulation, as the change did.
+            const resets_emulation = EmulationChanged(before, {nodes: nodes, edges: edges});
+
+            if (!resets_emulation) {
+                StopPlaybackKeepEmulation();
+            }
 
             PostNodesEdges();               // Update network on server
             cy.elements().remove();
@@ -1621,7 +1697,9 @@ const DrawGraph = function() {
             TakeGraphPictureAndUpdate();
 
             // Reset network state
-            SetNetworkPlayerState(-1);
+            if (resets_emulation) {
+                SetNetworkPlayerState(-1);
+            }
         }
 
     });
@@ -2484,7 +2562,8 @@ const UpdateHubConfiguration = function (data, hub_id)
 }
 
 const UpdateTextboxConfiguration = function (data, textbox_id) {
-	SetNetworkPlayerState(-1);
+	// A textbox is not emulated: keep the emulation, only stop its playback.
+	StopPlaybackKeepEmulation();
 
 	ajaxWithAuth({
 		type: "POST",

@@ -16,7 +16,13 @@ from flask import (
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_login import current_user, login_required
 from miminet_config import check_image_with_pil
-from miminet_model import Network, Simulate, SimulateLog, db
+from miminet_model import (
+    NON_EMULATED_NODE_TYPES,
+    Network,
+    Simulate,
+    SimulateLog,
+    db,
+)
 from sqlalchemy import not_
 
 PREVIEW_IMAGES_ROOT = "static/images/preview"
@@ -339,6 +345,30 @@ def remove_preview_image(preview_uri):
 
 
 # Depricated?
+def _emulated_nodes(nodes: list) -> list:
+    """Nodes that take part in the emulation, stripped of their canvas position."""
+    return [
+        {key: value for key, value in node.items() if key != "position"}
+        for node in nodes
+        if node.get("config", {}).get("type") not in NON_EMULATED_NODE_TYPES
+    ]
+
+
+def emulation_changed(old_jnet: dict, new_jnet: dict) -> bool:
+    """Tell whether an edit changes what the emulation would produce.
+
+    Positions and non-emulated nodes (textboxes) are left out of the
+    comparison: back never sees them, so an edit that touches only those keeps
+    the network's last simulation valid.
+    """
+    return (
+        _emulated_nodes(old_jnet.get("nodes", []))
+        != _emulated_nodes(new_jnet.get("nodes", []))
+        or old_jnet.get("edges", []) != new_jnet.get("edges", [])
+        or old_jnet.get("jobs", []) != new_jnet.get("jobs", [])
+    )
+
+
 @jwt_required()
 def post_nodes():
     user_id = get_jwt_identity()
@@ -361,13 +391,15 @@ def post_nodes():
     if request.method == "POST":
         nodes = request.json
         jnet = json.loads(net.network)
+        resets_simulation = emulation_changed(jnet, {**jnet, "nodes": nodes})
         jnet["nodes"] = nodes
         net.network = json.dumps(jnet)
 
-        # Remove all previous simulations
-        sims = Simulate.query.filter(Simulate.network_id == net.id).all()
-        for s in sims:
-            db.session.delete(s)
+        # Remove all previous simulations, unless only non-emulated nodes changed
+        if resets_simulation:
+            sims = Simulate.query.filter(Simulate.network_id == net.id).all()
+            for s in sims:
+                db.session.delete(s)
 
         db.session.commit()
 
@@ -405,19 +437,23 @@ def post_nodes_edges():
             edge_data["duplicate_percentage"] = edge_data.get("duplicate_percentage", 0)
 
         jnet = json.loads(net.network)
+        resets_simulation = emulation_changed(
+            jnet, {"nodes": nodes, "edges": edges, "jobs": jobs}
+        )
         jnet["edges"] = edges
         jnet["nodes"] = nodes
         jnet["jobs"] = jobs
 
-        # Remove all pcaps
-        jnet["pcap"] = []
+        # Remove all pcaps and previous simulations, unless only non-emulated
+        # nodes changed
+        if resets_simulation:
+            jnet["pcap"] = []
+
+            sims = Simulate.query.filter(Simulate.network_id == net.id).all()
+            for s in sims:
+                db.session.delete(s)
 
         net.network = json.dumps(jnet)
-
-        # Remove all previous simulations
-        sims = Simulate.query.filter(Simulate.network_id == net.id).all()
-        for s in sims:
-            db.session.delete(s)
 
         db.session.commit()
 

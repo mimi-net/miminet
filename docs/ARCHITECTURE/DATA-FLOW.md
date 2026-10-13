@@ -124,7 +124,12 @@ Details that matter:
 - **`Simulate` rows are one-per-network-in-flight.** Starting a simulation
   deletes every previous row for that network
   (`front/src/miminet_simulation.py:38`), so the browser only ever polls the
-  newest one. Editing the topology through `post_nodes_edges` clears them too.
+  newest one. Editing the topology through `post_nodes` / `post_nodes_edges`
+  or a configurator clears them too — unless the edit touches only node
+  positions or non-emulated nodes (`NON_EMULATED_NODE_TYPES` in
+  `front/src/miminet_model.py`, i.e. textboxes). Back never sees those, so the
+  last simulation stays valid and is kept; `emulation_changed` in
+  `front/src/miminet_network.py` makes that call.
 - **`check_simulation` answers 210 while running**, which the editor treats as
   "keep polling".
 

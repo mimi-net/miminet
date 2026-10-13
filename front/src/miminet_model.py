@@ -29,6 +29,11 @@ convention = {
 metadata = MetaData(naming_convention=convention)
 db = SQLAlchemy(metadata=metadata)
 
+# Node types that live on the canvas but take no part in the emulation: back
+# drops them before building the topology. Adding, editing or removing one
+# leaves the network's last simulation valid.
+NON_EMULATED_NODE_TYPES = frozenset({"textbox"})
+
 
 class User(db.Model, UserMixin):  # type: ignore[name-defined]
     id = db.Column(BigInteger, primary_key=True, unique=True, autoincrement=True)

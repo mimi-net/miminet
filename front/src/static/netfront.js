@@ -20,8 +20,10 @@ $('#network_scheme').droppable({
             return;
         }
 
-        // We add new device. Drop the network state.
-        SetNetworkPlayerState(-1);
+        // A new device makes the emulation stale; a textbox does not.
+        if (IsEmulatedNodeType(type)) {
+            SetNetworkPlayerState(-1);
+        }
 
         // Save the network state if we gonna CTRL+Z.
         SaveNetworkObject();
