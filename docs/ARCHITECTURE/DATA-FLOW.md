@@ -259,7 +259,7 @@ dispatches to the RouterAI or Yandex implementation.
 
 ## Authentication
 
-`miminet_auth.py` owns four OAuth providers (VK, Google, Yandex, Telegram) and
+`miminet_auth.py` owns two OAuth providers (VK, Yandex) and
 two session mechanisms that coexist: `flask_login` sessions for HTML pages and
 `flask_jwt_extended` access/refresh cookies for the XHR API. JWT error handlers
 branch on `is_api_request()` (`front/src/app.py:501`) so a dead token yields JSON
