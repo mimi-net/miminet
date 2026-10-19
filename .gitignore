@@ -5,6 +5,7 @@ restart_front.sh
 mimidump/
 __pycache__
 vk_auth.json
+client_yandex.json
 __init__.py
 eslint.config.mjs
 back/rabbitmq/rabbitmq/
