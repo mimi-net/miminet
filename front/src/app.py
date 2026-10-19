@@ -40,15 +40,12 @@ from miminet_admin import (
 )
 from miminet_auth import (
     animation_filters,
-    google_callback,
-    google_login,
     insert_test_user,
     issue_jwt_cookies,
     login_index,
     login_manager,
     logout,
     remove_test_user,
-    tg_callback,
     user_profile,
     user_profile_view,
     vk_callback,
@@ -278,13 +275,10 @@ zero_days_ago = (datetime.now()).date().isoformat()
 # App add_url_rule
 # Login
 app.add_url_rule("/auth/login.html", methods=["GET", "POST"], view_func=login_index)
-app.add_url_rule("/auth/google_login", methods=["GET"], view_func=google_login)
 app.add_url_rule("/auth/vk_login", methods=["GET"], view_func=vk_login)
 app.add_url_rule("/auth/yandex_login", methods=["GET"], view_func=yandex_login)
 app.add_url_rule("/auth/vk_callback", methods=["GET"], view_func=vk_callback)
-app.add_url_rule("/auth/google_callback", methods=["GET"], view_func=google_callback)
 app.add_url_rule("/auth/yandex_callback", methods=["GET"], view_func=yandex_callback)
-app.add_url_rule("/auth/tg_callback", methods=["GET"], view_func=tg_callback)
 app.add_url_rule("/user/profile.html", methods=["GET", "POST"], view_func=user_profile)
 app.add_url_rule("/profile", methods=["GET", "POST"], view_func=user_profile)
 app.add_url_rule("/profile/<int:user_id>", methods=["GET"], view_func=user_profile_view)
@@ -629,12 +623,9 @@ def sitemap():
         "/Sitemap.xml",
         "/sitemap.xml",
         "/404.html",
-        "/auth/google_login",
-        "/auth/google_callback",
         "/auth/vk_callback",
         "/auth/yandex_login",
         "/auth/yandex_callback",
-        "/auth/tg_callback",
         "/auth/logout",
         "/run_simulation",
         "/check_simulation",

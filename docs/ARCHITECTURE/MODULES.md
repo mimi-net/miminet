@@ -28,7 +28,7 @@ nesting and no enforced layering — dependency direction follows the table belo
 | `tasks.py` | Front celery tasks: `save_simulate_result`, `perform_task_check` | `app`, `celery_app`, `miminet_model`, `quiz.service.session_question_service` |
 | `miminet_config.py` | `SECRET_KEY` load-or-generate, `make_empty_network()` factory, Pillow image probe | — |
 | `miminet_model.py` | The `db` instance; `User`, `Network`, `Simulate`, `SimulateLog`; `init_db()` provisioning and schema creation | `miminet_config` |
-| `miminet_auth.py` | VK/Google/Yandex/Telegram login and callbacks, `LoginManager`, JWT cookie issuance and stale-cookie cleanup, profile pages, animation filter preferences | `miminet_model`, `miminet_config` |
+| `miminet_auth.py` | VK/Yandex login and callbacks, `LoginManager`, JWT cookie issuance and stale-cookie cleanup, profile pages, animation filter preferences | `miminet_model`, `miminet_config` |
 | `miminet_network.py` | Network CRUD, editor page rendering (`web_network`, `web_network_shared`), preview images, node/edge persistence, emulation queue statistics | `miminet_model`, `miminet_config` |
 | `miminet_host.py` | Job argument validators (`IPv4_check`, `port_check`, …), option filters, error message catalog, the seven device-config endpoints and `delete_job` | `configurators`, `miminet_model` |
 | `configurators.py` | The object model behind the device dialogs: `JobConfigurator`/`JobArgConfigurator` validation pipeline and the `AbstractConfigurator` → node/device/edge hierarchy | — |
@@ -37,7 +37,7 @@ nesting and no enforced layering — dependency direction follows the table belo
 | `pcap_parser.py` | pcap → JSON for MimiShark (frame tree for Wireshark-like display) | — |
 | `miminet_admin.py` | Flask-Admin `ModelView` subclasses for quiz entities and AI interview settings, statistics dashboard, check-task builder | `miminet_model`, `quiz.*`, `ai_interview.models` |
 | `ai_generate.py` | `/ai/generate-task`: LLM-generated network topologies with topology repair and validation | `miminet_model`, `miminet_auth` |
-| `auth_tests/` | Yandex/Telegram authorization tests. Not part of the app; run by a dedicated CI workflow | — |
+| `auth_tests/` | Yandex authorization tests. Not part of the app; run by a dedicated CI workflow | — |
 | `miminet_util.py` | Empty placeholder, kept for future shared helpers | — |
 
 Note the deliberate separation between `miminet_host.py` (validators, error
@@ -179,7 +179,7 @@ How to *run* these is in [DEVELOPMENT.md](../DEVELOPMENT.md) and
 | `front/tests/` | Selenium E2E suite plus browser-free unit tests |
 | `front/tests/playwright/` | Playwright port of the same E2E scenarios |
 | `front/tests/utils/` | Shared `locators.py`, `networks.py`, `checkers.py` — duplicated verbatim under `playwright/utils/` |
-| `front/src/auth_tests/` | Auth tests that need real Yandex/Telegram secrets; CI-only |
+| `front/src/auth_tests/` | Auth tests that need real Yandex secrets; CI-only |
 | `back/tests/` | Backend suite, split by whether it needs root and Mininet |
 | `back/tests/test_json/` | Network/answer fixture pairs — one per scenario |
 | `back/bench/` | Benchmark harness plus example topologies |

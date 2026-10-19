@@ -1,14 +1,10 @@
-import hashlib
-import hmac
 import json
 import logging
 import os
 import pathlib
-import time
 import uuid
 from typing import cast
 
-import google.auth.transport.requests
 import requests
 from flask import (
     abort,
@@ -36,13 +32,9 @@ from flask_login import (
     login_user,
     logout_user,
 )
-from google.oauth2 import id_token
-from google_auth_oauthlib.flow import Flow
 from miminet_config import make_example_net_switch_and_hub
 from miminet_model import Network, User, db
 from oauthlib.oauth2 import TokenExpiredError
-from pip._vendor import cachecontrol
-from pip._vendor.requests.sessions import Session as _VendoredSession
 from requests_oauthlib import OAuth2Session
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -151,21 +143,12 @@ def save_avatar_blob(avatar_uri, blob):
     return avatar_path
 
 
-# Google auth (https://github.com/code-specialist/flask_google_login/blob/main/app.py)
+# oauthlib needs this to allow plain-http redirects on the local test stand.
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
-client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_google.json")
-
-GOOGLE_CLIENT_ID = ""
 VK_CLIENT_ID = ""
 VK_CLIENT_SECRET = ""
 VK_REDIRECT_URI = ""
-
-if os.path.exists(client_secrets_file):
-    with open(client_secrets_file, "r") as file:
-        google_json = json.loads(file.read())
-
-    GOOGLE_CLIENT_ID = google_json["web"]["client_id"]
 
 vk_secrets_file = os.path.join(pathlib.Path(__file__).parent, "vk_auth.json")
 
@@ -182,13 +165,6 @@ yandex_json = None
 if os.path.exists(yandex_secrets_file):
     with open(yandex_secrets_file, "r") as file:
         yandex_json = json.loads(file.read())
-
-tg_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_tg.json")
-tg_json = None
-
-if os.path.exists(tg_secrets_file):
-    with open(tg_secrets_file, "r") as file:
-        tg_json = json.loads(file.read())
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("miminet_auth")
@@ -297,19 +273,10 @@ def _bind_social_account(provider_name, field_name, field_value):
 def login_index():
     next_url = request.args.get("next")
 
-    link_provider = request.args.get("link_provider", type=str)
-    telegram_link_mode = current_user.is_authenticated and link_provider == "tg"
-
     if current_user.is_authenticated:
-        if telegram_link_mode:
-            _start_social_link("tg", redirect_endpoint=next_url or "user_profile")
-            return render_template("auth/login.html", user=current_user)
-
         access_token = create_access_token(identity=str(current_user.id))
         refresh_token = create_refresh_token(identity=str(current_user.id))
 
-        # if current_user.is_authenticated and not telegram_link_mode:
-        #     return redirect(url_for("user_profile"))
         response = redirect_next_url(fallback=url_for("home"))
         if next_url:
             response = redirect_next_url(fallback=next_url)
@@ -541,138 +508,11 @@ def logout():
     return response
 
 
-def google_login():
-    _start_social_link("google")
-    flow = Flow.from_client_secrets_file(
-        client_secrets_file=client_secrets_file,
-        scopes=[
-            "https://www.googleapis.com/auth/userinfo.profile",
-            "https://www.googleapis.com/auth/userinfo.email",
-            "openid",
-        ],
-    )
-
-    flow.redirect_uri = url_for("google_callback", _external=True)
-    authorization_url, state = flow.authorization_url(
-        access_type="offline", include_granted_scopes="true"
-    )
-    session["state"] = state
-    return redirect(authorization_url)
-
-
 def vk_login():
     _start_social_link("vk")
     authorization_link = "https://oauth.vk.com/authorize"
     authorization_url = f"{authorization_link}?client_id={VK_CLIENT_ID}&display=page&redirect_uri={VK_REDIRECT_URI}&scope=friends,email&response_type=code&v=5.130"
     return redirect(authorization_url)
-
-
-def google_callback():
-    state = session["state"]
-    print(request.args.get("state"), session)
-    user_is_new = False
-
-    if not state:
-        redirect(url_for("login_index"))
-
-    flow = Flow.from_client_secrets_file(
-        client_secrets_file=client_secrets_file,
-        scopes=[
-            "https://www.googleapis.com/auth/userinfo.profile",
-            "https://www.googleapis.com/auth/userinfo.email",
-            "openid",
-        ],
-    )
-
-    flow.redirect_uri = url_for("google_callback", _external=True)
-    flow.fetch_token(authorization_response=request.url)
-
-    credentials = flow.credentials
-    request_session = requests.session()
-    cached_session = cachecontrol.CacheControl(cast(_VendoredSession, request_session))
-    token_request = google.auth.transport.requests.Request(session=cached_session)
-
-    id_info = id_token.verify_oauth2_token(
-        id_token=credentials._id_token,
-        request=token_request,
-        audience=GOOGLE_CLIENT_ID,
-        clock_skew_in_seconds=60,
-    )
-
-    google_id = id_info.get("sub")
-    social_link_response = _bind_social_account("google", "google_id", google_id)
-    if social_link_response is not None:
-        return social_link_response
-
-    user = User.query.filter_by(google_id=google_id).first()
-
-    # New user?
-    if user is None:
-        # Yes
-        try:
-            avatar_uri = "empty.jpg"
-
-            photo_uri = id_info.get("picture")
-            if photo_uri:
-                generated_avatar_uri = generate_avatar_uri()
-                try:
-                    r = requests.get(photo_uri, allow_redirects=True, timeout=10)
-                    r.raise_for_status()  # Проверяет HTTP-ошибки (например, 404)
-                    save_avatar_blob(generated_avatar_uri, r.content)
-                    avatar_uri = generated_avatar_uri
-                except requests.RequestException as e:
-                    logger.error(
-                        f"Failed to download avatar from Google for user {id_info.get('sub')}: {e}"
-                    )
-                    avatar_uri = "empty.jpg"  # Дефолтный аватар при ошибке
-                except (IOError, PermissionError) as e:
-                    logger.error(
-                        f"Failed to save avatar file for user {id_info.get('sub')}: {e}"
-                    )
-                    avatar_uri = "empty.jpg"
-
-            f = id_info.get("family_name", "")
-            n = id_info.get("given_name", "")
-
-            new_user = User(
-                nick=f + n,
-                avatar_uri=avatar_uri,
-                google_id=google_id,
-                email=id_info.get("email"),
-            )
-            db.session.add(new_user)
-            db.session.commit()
-            user_is_new = True
-        except SQLAlchemyError as e:
-            db.session.rollback()
-            error = str(e.__dict__["orig"])
-            print(error)
-            print("Can't add new user to Database")
-            flash(error, category="error")
-            return redirect(url_for("login_index"))
-
-        user = User.query.filter_by(google_id=google_id).first()
-
-    login_user(user, remember=True)
-    access_token = create_access_token(identity=str(user.id))
-    refresh_token = create_refresh_token(identity=str(user.id))
-
-    response = redirect_next_url(fallback=url_for("home"))
-    issue_jwt_cookies(response, access_token, refresh_token)
-
-    if user_is_new:
-        u = uuid.uuid4()
-        n = Network(
-            author_id=user.id,
-            network=make_example_net_switch_and_hub(),
-            title="Свитч и хаб (пример сети)",
-            guid=str(u),
-            preview_uri="switch_and_hub.png",
-        )
-        db.session.add(n)
-        db.session.commit()
-
-    return response
 
 
 # https://vk.com/dev/authcode_flow_user
@@ -880,85 +720,6 @@ def yandex_callback(yandex_json=yandex_json):
         logger.error("Token expired: %s", e)
         flash("Token expired. Please log in again.", category="error")
         return redirect(url_for("login_index"))
-
-
-def check_tg_authorization(auth_data, tg_json=tg_json):
-    assert tg_json is not None, "client_tg.json is not configured"
-    BOT_TOKEN = tg_json["token"]["BOT_TOKEN"]
-    check_hash = auth_data["hash"]
-    del auth_data["hash"]
-
-    data_check_arr = [f"{key}={value}" for key, value in auth_data.items()]
-    data_check_arr.sort()
-
-    data_check_string = "\n".join(data_check_arr)
-
-    secret_key = hashlib.sha256(BOT_TOKEN.encode()).digest()
-    hash_result = hmac.new(
-        secret_key, data_check_string.encode(), hashlib.sha256
-    ).hexdigest()
-
-    if hash_result != check_hash:
-        raise Exception("Data is NOT from Telegram")
-
-    if (time.time() - int(auth_data["auth_date"])) > 86400:
-        raise Exception("Data is outdated")
-
-    return auth_data
-
-
-def tg_callback():
-    user_json = request.args.get("user")
-
-    if not user_json:
-        flash("Invalid Telegram user data", category="error")
-        return redirect(url_for("login_index"))
-
-    user_data = json.loads(user_json)
-    try:
-        check_tg_authorization(user_data)
-    except Exception as e:
-        logger.error("Error while processing Telegram callback: %s", e)
-        flash(str(e), category="error")
-        return redirect(url_for("login_index"))
-
-    tg_id = str(user_data.get("id", ""))
-    social_link_response = _bind_social_account("tg", "tg_id", tg_id)
-    if social_link_response is not None:
-        return social_link_response
-
-    user = User.query.filter(
-        (User.tg_id == tg_id) | (User.email == user_data.get("username", ""))
-    ).first()
-
-    if user is None:
-        try:
-            new_user = User(
-                nick=user_data.get("first_name", ""),
-                tg_id=tg_id,
-                email=user_data.get("username", ""),
-            )
-            db.session.add(new_user)
-            db.session.commit()
-
-        except SQLAlchemyError as e:
-            db.session.rollback()
-            error = str(e.__dict__["orig"])
-            logger.error("Error while adding new Telegram user: %s", e)
-            flash(error, category="error")
-            return redirect(url_for("login_index"))
-
-        user = User.query.filter(
-            (User.tg_id == tg_id) | (User.email == user_data.get("username", ""))
-        ).first()
-
-    login_user(user, remember=True)
-    access_token = create_access_token(identity=str(user.id))
-    refresh_token = create_refresh_token(identity=str(user.id))
-
-    response = redirect_next_url(fallback=url_for("home"))
-    issue_jwt_cookies(response, access_token, refresh_token)
-    return response
 
 
 class TestUserData:

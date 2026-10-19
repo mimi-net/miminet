@@ -168,7 +168,7 @@ and they change often.
 | Front E2E | Selenium (`front/tests`) and Playwright (`front/tests/playwright`) | `full_test.yml` |
 | Front unit | browser-free tests, listed explicitly in the workflow | `front_coverage.yml` |
 | Back | `PYTHONPATH=../src pytest`, needs root + Mininet + OVS + `mimidump` | `back_test.yml` |
-| Auth | needs `CLIENT_YANDEX` and `BOT_TOKEN` secrets | `auth_test.yml` |
+| Auth | needs the `CLIENT_YANDEX` secret | `auth_test.yml` |
 
 Ruff: line length 88, target `py312`, `select = ["E4", "E7", "E9", "F", "W605"]`,
 double quotes. `E501` is ignored, so long lines pass but still wrap badly in
