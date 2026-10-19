@@ -148,6 +148,13 @@ class Location:
             ROUTER = DeviceLocator("#l3_router_device", device_class="l3_router")
             SERVER = DeviceLocator("#server_device", device_class="server")
 
+        class ToolPanel:
+            """Panel with non-device canvas elements, behind the side menu arrow."""
+
+            # Switches the side menu from devices to tools
+            TOGGLE = Locator("#side_menu .side-menu-arrow.right")
+            TEXTBOX = DeviceLocator("#textbox_device", device_class="textbox")
+
         class ConfigPanel:
             """Elements in the configuration panel."""
 
@@ -161,6 +168,13 @@ class Location:
                 DEFAULT_GATEWAY_FIELD: Optional[Locator] = None
                 SUBMIT_BUTTON: Optional[Locator] = None
                 JOB_SELECT: Optional[Locator] = None
+
+            class Textbox(CommonDevice):
+                MAIN_FORM = Locator("#config_textbox_main_form")
+                CONTENT_FIELD = Locator("#config_textbox_content")
+                SUBMIT_BUTTON = Locator(
+                    "#config_textbox_main_form_submit_button", text="Сохранить"
+                )
 
             class Switch(CommonDevice):
                 MAIN_FORM = Locator("#config_switch_main_form")
