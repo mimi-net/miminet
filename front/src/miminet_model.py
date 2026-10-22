@@ -1,3 +1,4 @@
+import logging
 import os
 from os import urandom
 
@@ -17,6 +18,8 @@ from sqlalchemy import (
     not_,
 )
 from werkzeug.security import generate_password_hash
+
+logger = logging.getLogger(__name__)
 
 convention = {
     "ix": "ix_%(column_0_label)s",
@@ -135,20 +138,22 @@ def ensure_db_exists(
 
     try:
         with psycopg2.connect(**conn_params) as conn:
-            print(f"[OK] Successfully connected to database '{target_db}'")
+            logger.info(f"[OK] Successfully connected to database '{target_db}'")
             return True
     except OperationalError:
         # If connection failed
         if mode == "prod":
-            print(f"[ERROR] Database '{target_db}' does not exist or unreachable.")
-            print(
+            logger.error(
+                f"[ERROR] Database '{target_db}' does not exist or unreachable."
+            )
+            logger.error(
                 "[HINT] In PROD mode (Yandex Cloud), you must create the database manually via Console!"
             )
             # In PROD we DO NOT try to create DB via postgres system db
             raise
 
     # 2. Only if mode == 'dev' and connection failed
-    print(
+    logger.info(
         f"[DEV] Target db '{target_db}' not found. Trying to create via 'postgres' db..."
     )
 
@@ -164,15 +169,15 @@ def ensure_db_exists(
                 )
 
                 if not cur.fetchone():
-                    print(f"[DEV] Creating database {target_db}...")
+                    logger.info(f"[DEV] Creating database {target_db}...")
                     cur.execute(f"CREATE DATABASE {target_db}")
                 else:
-                    print(
+                    logger.warning(
                         f"[DEV] Database {target_db} exists but connection failed previously. Check permissions."
                     )
         return True
     except Exception as e:
-        print(f"[ERROR] Failed to auto-create database in DEV mode: {e}")
+        logger.error(f"[ERROR] Failed to auto-create database in DEV mode: {e}")
         raise
 
 
@@ -235,12 +240,12 @@ def init_db(app):
         tables_exist = inspector.has_table("user")
 
         if not tables_exist:
-            print(f"[{mode.upper()}] Tables not found. Creating schema...")
+            logger.info(f"[{mode.upper()}] Tables not found. Creating schema...")
             db.create_all()
 
             # Create test data only for DEV
             if mode == "dev":
-                print("[DEV] Creating test users...")
+                logger.info("[DEV] Creating test users...")
                 users = []
 
                 for user in users:
@@ -253,14 +258,14 @@ def init_db(app):
                     db.session.add(u)
                     db.session.commit()
         else:
-            print(f"[{mode.upper()}] Schema exists.")
+            logger.info(f"[{mode.upper()}] Schema exists.")
             # Only fix data if tables exist
             try:
                 # Some networks can be marked as non-emulated in the database, we should fix them.
-                print("[!] Fix nonemulated networks...")
+                logger.info("[!] Fix nonemulated networks...")
                 SimulateLog.query.filter(not_(SimulateLog.ready)).update(
                     {"ready": True}
                 )
                 db.session.commit()
             except Exception as e:
-                print(f"[!] Error fixing nonemulated networks: {e}")
+                logger.error(f"[!] Error fixing nonemulated networks: {e}")

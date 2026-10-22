@@ -41,7 +41,7 @@ def save_simulate_result(self, animation, pcaps):
 
         if not os.path.exists(pcap_dir):
             os.makedirs(pcap_dir)
-            print("Created pcap dir", pcap_dir)
+            logging.info(f"Created pcap dir {pcap_dir}")
         else:
             shutil.rmtree(pcap_dir)
             os.makedirs(pcap_dir)

@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 from ipmininet.ipnet import IPNet
@@ -8,6 +9,8 @@ from ipmininet.router.config import RouterConfig
 from network_schema import Network, Node, NodeConfig, NodeInterface
 from pkt_parser import is_ipv4_address
 from node_types import NodeType
+
+logger = logging.getLogger(__name__)
 
 
 def stp_enabled(config: NodeConfig) -> bool:
@@ -65,7 +68,7 @@ class MiminetTopology(IPTopo):
         elif node_type == NodeType.HACKER:
             self.__handle_host_hacker(node_id, config)
         else:
-            print(f"Unknown node type: {node_type}")
+            logger.warning(f"Unknown node type: {node_type}")
             return
 
     def __handle_l2_switch(self, node_id: str, config: NodeConfig):
