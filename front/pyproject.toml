@@ -17,7 +17,7 @@ dependencies = [
     "flask-jwt-extended==4.7.1",
     "jsonschema==4.25.1",
     "openai>=1.0.0",
-    "Pillow==12.3.0",
+    "Pillow==13.0.0",
     "psycopg2-binary==2.9.10",
     "python-dotenv==1.2.3",
     "requests==2.33.0",
