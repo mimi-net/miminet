@@ -3088,7 +3088,8 @@ const TakeGraphPictureAndUpdate = function()
         return;
     }
 
-    let png_blob = global_cy.png({output: 'blob', maxWidth: 512, maxHeight: 512});
+    // Without bg the PNG is transparent and link previews render it on gray.
+    let png_blob = global_cy.png({output: 'blob', maxWidth: 512, maxHeight: 512, bg: '#ffffff'});
 
     ajaxWithAuth({
         type: 'POST',
