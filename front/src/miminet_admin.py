@@ -463,6 +463,10 @@ class SectionView(MiminetAdminModelView):
         "created_by_user",
         "created_on",
         "updated_on",
+        # Relation selects list every question/session of the section and
+        # make the form load very slowly once many users took the test.
+        "questions",
+        "quiz_sessions",
     ]
 
     # form_extra_fields = {
