@@ -625,8 +625,6 @@ def vk_callback():
     response = redirect_next_url(fallback=url_for("home"))
     issue_jwt_cookies(response, access_token, refresh_token)
 
-    print(f"access_token: {access_token}; refresh_token: {refresh_token}")
-
     if user_is_new:
         u = uuid.uuid4()
         n = Network(
