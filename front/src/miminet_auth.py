@@ -611,8 +611,7 @@ def vk_callback():
         except SQLAlchemyError as e:
             db.session.rollback()
             error = str(e.__dict__["orig"])
-            print(error)
-            print("Can't add new user to the Database")
+            logger.error(f"Can't add new user to the Database: {error}")
             flash(error, category="error")
             return redirect(url_for("login_index"))
 
@@ -742,7 +741,7 @@ def insert_test_user(app):
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            print(f"An error occurred while adding the test user: {e}")
+            logger.error(f"An error occurred while adding the test user: {e}")
 
 
 def remove_test_user(app):
@@ -755,4 +754,4 @@ def remove_test_user(app):
                 db.session.commit()
         except Exception as e:
             db.session.rollback()
-            print(f"An error occurred while removing the test user: {e}")
+            logger.error(f"An error occurred while removing the test user: {e}")

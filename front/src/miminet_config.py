@@ -1,8 +1,11 @@
+import logging
 import os
 import pathlib
 from datetime import datetime
 
 from PIL import Image
+
+logger = logging.getLogger(__name__)
 
 SECRET_KEY_FILE = os.path.join(pathlib.Path(__file__).parent, "miminet_secret.conf")
 SECRET_KEY = ""
@@ -11,7 +14,7 @@ if os.path.exists(SECRET_KEY_FILE):
     with open(SECRET_KEY_FILE, "r") as file:
         SECRET_KEY = file.read().rstrip()
 else:
-    print("There is no SECRET_KEY_FILE, generate random SECRET_KEY")
+    logger.warning("There is no SECRET_KEY_FILE, generate random SECRET_KEY")
     SECRET_KEY = os.urandom(16).hex()
 
 
