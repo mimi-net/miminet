@@ -35,9 +35,11 @@ jobs:
             test_get_logs.py
             test_config_db.py
             test_quiz_progress.py
+            test_admin_section_form.py
             test_ai_generate.py
             test_jwt_cookies.py
             test_textbox_emulation.py
+            test_admin_author.py
           )
           [ "${#files[@]}" -gt 0 ] || { echo "ERROR: empty browser-free file list" >&2; exit 1; }
           printf 'Browser-free files: %s\n' "${files[@]}"

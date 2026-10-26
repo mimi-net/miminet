@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import date
 
 from flask import flash, redirect, request, url_for
@@ -51,6 +52,8 @@ from quiz.entity.entity import (
     SessionQuestion,
 )
 from quiz.util.dto import calculate_question_count
+
+logger = logging.getLogger(__name__)
 
 ADMIN_ROLE_LEVEL = 1
 
@@ -373,10 +376,17 @@ class MiminetAdminModelView(ModelView):
 
 
 def created_by_formatter(view, context, model, name, **kwargs):
-    user = User.query.get(model.created_by_id)
+    user = User.query.get(model.created_by_id) if model.created_by_id else None
     if user and user.nick:
         return user.nick
-    raise Exception("Error occurred while retrieving user nickname")
+    # A single row without an author must not take the whole list page down.
+    logger.warning(
+        "%s id=%s has no author nickname (created_by_id=%s)",
+        type(model).__name__,
+        getattr(model, "id", None),
+        model.created_by_id,
+    )
+    return "—"
 
 
 class TestView(MiminetAdminModelView):
@@ -400,6 +410,12 @@ class TestView(MiminetAdminModelView):
     }
 
     column_formatters = {"created_by_id": created_by_formatter}
+
+    # A blank author field in the form would overwrite created_by_id with NULL.
+    form_excluded_columns = MiminetAdminModelView.form_excluded_columns + [
+        "created_by_id",
+        "created_by_user",
+    ]
 
     pass
 
@@ -447,6 +463,10 @@ class SectionView(MiminetAdminModelView):
         "created_by_user",
         "created_on",
         "updated_on",
+        # Relation selects list every question/session of the section and
+        # make the form load very slowly once many users took the test.
+        "questions",
+        "quiz_sessions",
     ]
 
     # form_extra_fields = {
@@ -646,6 +666,11 @@ class AnswerView(MiminetAdminModelView):
         "question_id": get_question_text,
         "created_by_id": created_by_formatter,
     }
+
+    form_excluded_columns = MiminetAdminModelView.form_excluded_columns + [
+        "created_by_id",
+        "created_by_user",
+    ]
 
     form_extra_fields = {
         "question_id": QuerySelectField(
