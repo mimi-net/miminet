@@ -611,8 +611,7 @@ def vk_callback():
         except SQLAlchemyError as e:
             db.session.rollback()
             error = str(e.__dict__["orig"])
-            print(error)
-            print("Can't add new user to the Database")
+            logger.error(f"Can't add new user to the Database: {error}")
             flash(error, category="error")
             return redirect(url_for("login_index"))
 
@@ -624,8 +623,6 @@ def vk_callback():
 
     response = redirect_next_url(fallback=url_for("home"))
     issue_jwt_cookies(response, access_token, refresh_token)
-
-    print(f"access_token: {access_token}; refresh_token: {refresh_token}")
 
     if user_is_new:
         u = uuid.uuid4()
@@ -744,7 +741,7 @@ def insert_test_user(app):
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            print(f"An error occurred while adding the test user: {e}")
+            logger.error(f"An error occurred while adding the test user: {e}")
 
 
 def remove_test_user(app):
@@ -757,4 +754,4 @@ def remove_test_user(app):
                 db.session.commit()
         except Exception as e:
             db.session.rollback()
-            print(f"An error occurred while removing the test user: {e}")
+            logger.error(f"An error occurred while removing the test user: {e}")

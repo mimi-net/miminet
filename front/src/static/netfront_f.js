@@ -613,7 +613,7 @@ const l2SwitchPortUid = function(switch_id){
     }
 
     for (let port_number = 1; port_number < 128; port_number++) {
-        port = t.data.id + "_" + port_number;
+        let port = t.data.id + "_" + port_number;
 
         let i = t.interface.find(i => i.id === port);
 
@@ -633,7 +633,7 @@ const l1HubPortUid = function(hub_id){
     }
 
     for (let port_number = 1; port_number < 128; port_number++) {
-        port = t.data.id + "_" + port_number;
+        let port = t.data.id + "_" + port_number;
 
         let i = t.interface.find(i => i.id === port);
 
@@ -3088,7 +3088,8 @@ const TakeGraphPictureAndUpdate = function()
         return;
     }
 
-    let png_blob = global_cy.png({output: 'blob', maxWidth: 512, maxHeight: 512});
+    // Without bg the PNG is transparent and link previews render it on gray.
+    let png_blob = global_cy.png({output: 'blob', maxWidth: 512, maxHeight: 512, bg: '#ffffff'});
 
     ajaxWithAuth({
         type: 'POST',

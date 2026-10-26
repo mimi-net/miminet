@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 from datetime import datetime, timedelta
@@ -122,6 +123,8 @@ from quiz.entity.entity import (
     Test,
 )
 
+logger = logging.getLogger(__name__)
+
 app = Flask(
     __name__, static_url_path="", static_folder="static", template_folder="templates"
 )
@@ -160,7 +163,7 @@ allowed_hosts = []
 if allowed_hosts_env:
     allowed_hosts = [item.strip() for item in allowed_hosts_env.split(",")]
 
-print(f"Allowed Origins: {allowed_hosts}")
+logger.info(f"Allowed Origins: {allowed_hosts}")
 CORS(
     app,
     resources={
@@ -220,7 +223,7 @@ def get_database_uri(mode):
         POSTGRES_DB_NAME = os.getenv("POSTGRES_DATABASE_NAME")
         POSTGRES_URL = f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB_NAME}"
 
-        print(f"[DB] Using local PostgreSQL: {POSTGRES_HOST}/{POSTGRES_DB_NAME}")
+        logger.info(f"[DB] Using local PostgreSQL: {POSTGRES_HOST}/{POSTGRES_DB_NAME}")
         return POSTGRES_URL
     elif mode == "prod":
         # Yandex Cloud PostgreSQL для продакшена
@@ -241,7 +244,7 @@ def get_database_uri(mode):
 
         POSTGRES_URL = f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB_NAME}?sslmode={POSTGRES_SSLMODE}&sslrootcert={POSTGRES_SSLROOTCERT}"
 
-        print(
+        logger.info(
             f"[DB] Using Yandex Cloud PostgreSQL: {POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB_NAME}"
         )
         return POSTGRES_URL
