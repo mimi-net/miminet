@@ -20,6 +20,11 @@ from conftest import HOME_PAGE, WAIT_UNTIL
 from utils.locators import Location
 
 
+def _wait_for_pending_requests(page: Page):
+    """Не начинаем следующий шаг до завершения AJAX-сохранения текущего."""
+    page.wait_for_function("typeof $ !== 'undefined' && $.active === 0")
+
+
 class NodeType:
     """Node types for testing purposes.
 
@@ -52,6 +57,7 @@ class MiminetTestNetwork:
     def __check_page(self):
         if self.__page.url != self.__url:
             self.__page.goto(self.__url)
+        _wait_for_pending_requests(self.__page)
 
     @property
     def url(self) -> str:
@@ -209,6 +215,7 @@ class MiminetTestNetwork:
             f"nodes.length > {old_nodes_len}",
             timeout=5_000,
         )
+        _wait_for_pending_requests(self.__page)
         return len(self.nodes) - 1
 
     def add_edge(self, source_id: int, target_id: int) -> int:
@@ -225,6 +232,7 @@ class MiminetTestNetwork:
         self.__page.evaluate("PostNodesEdges()")
 
         self.__page.wait_for_function(f"edges.length > {old_edges_len}")
+        _wait_for_pending_requests(self.__page)
         return len(self.edges) - 1
 
     def get_nodes_by_class(self, device_class: str) -> list[dict]:
@@ -503,6 +511,7 @@ class NodeConfig:
         self.__page.wait_for_selector(
             f"{submit_button.selector}:has-text('{submit_button.text}')"
         )
+        _wait_for_pending_requests(self.__page)
 
     def __select_job(self, job_id: int):
         if self.__config_locator in (
