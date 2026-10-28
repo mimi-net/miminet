@@ -1,5 +1,6 @@
 import datetime
 import json
+import math
 import os
 import shutil
 import uuid
@@ -23,7 +24,7 @@ from miminet_model import (
     SimulateLog,
     db,
 )
-from sqlalchemy import not_
+from sqlalchemy import not_, or_
 
 PREVIEW_IMAGES_ROOT = "static/images/preview"
 
@@ -70,35 +71,51 @@ def update_network_config():
         ret = {"message": "Неверный запрос"}
         return CORS_header(make_response(jsonify(ret), 400))
 
-    net_config = request.json
+    # Неверный Content-Type и повреждённый JSON сохраняют стандартные 415/400.
+    net_config = request.get_json()
+    if not isinstance(net_config, dict):
+        return CORS_header(
+            make_response(jsonify({"message": "Ожидается JSON-объект"}), 400)
+        )
+
+    title = net_config.get("network_title", "")
+    description = net_config.get("network_description", "")
+    if not isinstance(title, str) or not isinstance(description, str):
+        return CORS_header(
+            make_response(
+                jsonify({"message": "Название и описание должны быть строками"}), 400
+            )
+        )
+
+    camera = [net_config.get(key) for key in ("zoom", "pan_x", "pan_y")]
+    if any(
+        isinstance(value, bool)
+        or (value is not None and not isinstance(value, (int, float, str)))
+        for value in camera
+    ):
+        return CORS_header(
+            make_response(jsonify({"message": "Неверные параметры камеры"}), 400)
+        )
+    try:
+        # Нулевой масштаб сохраняет прежнее поведение: выбирается значение 2.
+        zoom = float(camera[0] or 2)
+        pan_x = float(camera[1] or 0)
+        pan_y = float(camera[2] or 0)
+    except (ValueError, TypeError, OverflowError):
+        return CORS_header(
+            make_response(jsonify({"message": "Неверные параметры камеры"}), 400)
+        )
+    if zoom <= 0 or not all(math.isfinite(value) for value in (zoom, pan_x, pan_y)):
+        return CORS_header(
+            make_response(jsonify({"message": "Неверные параметры камеры"}), 400)
+        )
+
+    # Меняем ORM-объект только после проверки всех входных полей.
     jnet = json.loads(net.network)
-
-    title = net_config.get("network_title").strip()
-
-    if title:
-        net.title = title
-
-    description = net_config.get("network_description").strip()
-
-    if description:
-        net.description = description
-
-    zoom = net_config.get("zoom")
-
-    # Default zoom
-    if not zoom:
-        zoom = 2
-
-    zoom = float(zoom)
-
-    pan_x = net_config.get("pan_x")
-    pan_y = net_config.get("pan_y")
-
-    if not pan_x:
-        pan_x = 0
-
-    if not pan_y:
-        pan_y = 0
+    if title.strip():
+        net.title = title.strip()
+    if description.strip():
+        net.description = description.strip()
 
     if "config" not in jnet:
         jnet["config"] = {}
@@ -136,10 +153,11 @@ def delete_network():
     if request.method == "POST":
         sims = Simulate.query.filter(Simulate.network_id == net.id).all()
 
-        # Remove all previous simulations
+        # Удаление результатов и сети выполняется одной транзакцией:
+        # при ошибке внешнего ключа прежние результаты должны сохраниться.
         for s in sims:
             db.session.delete(s)
-            db.session.commit()
+        db.session.flush()
 
         db.session.delete(net)
         db.session.commit()
@@ -369,6 +387,15 @@ def emulation_changed(old_jnet: dict, new_jnet: dict) -> bool:
     )
 
 
+def _object_list(value, mapping_fields=()):
+    """Проверяем контейнеры до обхода и сохранения пользовательской топологии."""
+    return isinstance(value, list) and all(
+        isinstance(item, dict)
+        and all(isinstance(item.get(field, {}), dict) for field in mapping_fields)
+        for item in value
+    )
+
+
 @jwt_required()
 def post_nodes():
     user_id = get_jwt_identity()
@@ -389,18 +416,23 @@ def post_nodes():
         return CORS_header(make_response(jsonify(ret), 400))
 
     if request.method == "POST":
-        nodes = request.json
+        nodes = request.get_json()
+        if not _object_list(nodes, ("config",)):
+            return CORS_header(
+                make_response(jsonify({"message": "Неверный формат узлов"}), 400)
+            )
         jnet = json.loads(net.network)
         resets_simulation = emulation_changed(jnet, {**jnet, "nodes": nodes})
         jnet["nodes"] = nodes
-        net.network = json.dumps(jnet)
 
-        # Remove all previous simulations, unless only non-emulated nodes changed
+        # При изменении эмуляции сбрасываем и результат, и устаревшие захваты.
         if resets_simulation:
+            jnet["pcap"] = []
             sims = Simulate.query.filter(Simulate.network_id == net.id).all()
             for s in sims:
                 db.session.delete(s)
 
+        net.network = json.dumps(jnet)
         db.session.commit()
 
     ret = {"message": "Done", "code": "SUCCESS"}
@@ -427,12 +459,21 @@ def post_nodes_edges():
         return make_response(jsonify(ret), 400)
 
     if request.method == "POST":
-        nodes = request.json[0]
-        edges = request.json[1]
-        jobs = request.json[2]
+        payload = request.get_json()
+        if not isinstance(payload, list) or len(payload) != 3:
+            return make_response(
+                jsonify({"message": "Ожидаются узлы, связи и задания"}), 400
+            )
+        nodes, edges, jobs = payload
+        if not (
+            _object_list(nodes, ("config",))
+            and _object_list(edges, ("data",))
+            and _object_list(jobs)
+        ):
+            return make_response(jsonify({"message": "Неверный формат топологии"}), 400)
 
         for edge in edges:
-            edge_data = edge.get("data", {})
+            edge_data = edge.setdefault("data", {})
             edge_data["loss_percentage"] = edge_data.get("loss_percentage", 0)
             edge_data["duplicate_percentage"] = edge_data.get("duplicate_percentage", 0)
 
@@ -481,7 +522,9 @@ def move_nodes():
         return make_response(jsonify(ret), 400)
 
     if request.method == "POST":
-        nodes = request.json
+        nodes = request.get_json()
+        if not _object_list(nodes, ("config",)):
+            return make_response(jsonify({"message": "Неверный формат узлов"}), 400)
         jnet = json.loads(net.network)
         jnet["nodes"] = nodes
         net.network = json.dumps(jnet)
@@ -553,7 +596,12 @@ def copy_network():
         ret = {"message": "Пропущен параметр GUID. И какую сеть мне открыть?!"}
         return make_response(jsonify(ret), 400)
 
-    net = Network.query.filter(Network.guid == network_guid).first()
+    # Копировать можно свою сеть или сеть с явно включённым общим доступом.
+    net = (
+        Network.query.filter(Network.guid == network_guid)
+        .filter(or_(Network.author_id == user_id, Network.share_mode.is_(True)))
+        .first()
+    )
 
     if not net:
         ret = {"message": "Нет такой сети."}
