@@ -34,6 +34,7 @@ jobs:
           files=(
             test_get_logs.py
             test_config_db.py
+            test_network_delete.py
             test_quiz_progress.py
             test_admin_section_form.py
             test_ai_generate.py

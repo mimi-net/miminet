@@ -200,7 +200,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <div class="modal-body">
                     <form id="networkDeleteForm" method="POST" action="{{ url_for('delete_network', guid=network.guid) }}">
                     </form>
-                    <button type="button" class="btn btn-danger" style="float: left;" id="networkDeleteSubmitButton">Да, удалить!</button>
+                    <p id="networkDeleteError" class="text-danger" role="alert" hidden></p>
+                    <button type="submit" form="networkDeleteForm" class="btn btn-danger" style="float: left;" id="networkDeleteSubmitButton">Да, удалить!</button>
                     <button type="button" data-dismiss="modal" class="btn btn-secondary" style="float: right;" id="networkDeleteCancel">Нет</button>
                 </div>
             </div>
@@ -441,8 +442,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             $('#deleteNetConfirmModal').modal('hide');
         });
 
-        $("#networkDeleteSubmitButton").click(function(){
-            $("#networkDeleteForm").submit(); // Submit the form
+        $("#networkDeleteForm").on('submit', function(event){
+            event.preventDefault();
+            const submitButton = $("#networkDeleteSubmitButton");
+            if (submitButton.prop('disabled')) {
+                return;
+            }
+            submitButton.prop('disabled', true);
+            $("#networkDeleteError").prop('hidden', true);
+            // Общий обработчик передаёт CSRF из cookie и обновляет истёкший JWT.
+            ajaxWithAuth({url: this.action, method: this.method})
+                .then(() => {
+                    window.location.href = {{ url_for('home') | tojson }};
+                })
+                .catch(() => {
+                    $("#networkDeleteError")
+                        .text('Не удалось удалить сеть. Попробуйте ещё раз.')
+                        .prop('hidden', false);
+                    submitButton.prop('disabled', false);
+                });
         });
 
         $("#noJobsModalCancelIcon").click(function(){

@@ -188,6 +188,11 @@ jobs:
           docker ps
           curl -f localhost
 
+      - name: Test network deletion dialog with production CSRF
+        run: |
+          MODE=dev SQLALCHEMY_DATABASE_URI=sqlite:///:memory: uv run --frozen python -m pytest -q \
+            -o addopts= -o log_file=/dev/null front/tests/dialog/test_network_delete_dialog.py
+
       # Same entry point developers use locally, so the two cannot drift.
       - name: Run tests
         env:
