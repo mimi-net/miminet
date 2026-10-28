@@ -99,9 +99,8 @@ def data_size_check(arg: str) -> bool:
 
 
 def name_check(arg: str) -> bool:
-    """Check that the name is in the allowed length from 2 to 15,
-    from allowed characters: a-z, A-Z, 0-9, -, _."""
-    return bool(re.match("^[A-Za-z][A-Za-z0-9_-]{1,14}$", arg))
+    """Имя содержит от 2 до 15 символов: латинские буквы, цифры, дефис и _."""
+    return bool(re.fullmatch("[A-Za-z][A-Za-z0-9_-]{1,14}", arg))
 
 
 def interface_check(arg: str) -> bool:
@@ -110,9 +109,9 @@ def interface_check(arg: str) -> bool:
 
 
 def MAC_check(arg: str) -> bool:
-    """Check MAC-address correctness"""
+    """Вся строка должна соответствовать формату MAC-адреса."""
     return bool(
-        re.match("[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", arg.lower())
+        re.fullmatch("[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}", arg.lower())
     )
 
 
