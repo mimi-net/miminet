@@ -66,7 +66,8 @@ from miminet_host import (
     save_server_config,
     save_switch_config,
 )
-from miminet_model import Network, db, init_db
+from database_bootstrap import init_db
+from miminet_model import Network, db
 from miminet_network import (
     copy_network,
     create_network,

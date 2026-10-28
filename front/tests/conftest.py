@@ -430,8 +430,8 @@ def mock_env_prod(monkeypatch):
 
 @pytest.fixture
 def mock_psycopg2(mocker):
-    """Mocks psycopg2 to capture connection attempts."""
-    mock_connect = mocker.patch("miminet_model.psycopg2.connect")
+    """Подменяем подключение драйвера в модуле подготовки базы."""
+    mock_connect = mocker.patch("database_bootstrap.psycopg2.connect")
     mock_conn = MagicMock()
     mock_cursor = MagicMock()
 
@@ -443,8 +443,8 @@ def mock_psycopg2(mocker):
 
 @pytest.fixture
 def mock_sqlalchemy_inspect(mocker):
-    """Mocks sqlalchemy.inspect."""
-    mock_inspect = mocker.patch("miminet_model.inspect")
+    """Подменяем проверку существующей схемы при инициализации."""
+    mock_inspect = mocker.patch("database_bootstrap.inspect")
     mock_inspector = MagicMock()
     mock_inspect.return_value = mock_inspector
     return mock_inspector
@@ -452,5 +452,5 @@ def mock_sqlalchemy_inspect(mocker):
 
 @pytest.fixture
 def mock_db(mocker):
-    """Mocks the entire db object to prevent context errors with db.engine."""
-    return mocker.patch("miminet_model.db")
+    """Подменяем ссылку на db в инициализаторе, сохраняя исходный объект моделей."""
+    return mocker.patch("database_bootstrap.db")
