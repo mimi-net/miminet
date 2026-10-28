@@ -5,6 +5,34 @@
 миграции с Selenium на Playwright.
 Парный документ по бэкенду — [BACKEND_TESTS.md](BACKEND_TESTS.md).
 
+### Регрессия удаления сети (#552)
+
+`test_network_delete.py` проверяет настоящий Flask-обработчик с cookie JWT,
+включённой CSRF-защитой и временной SQLite с внешними ключами. Проверяются
+правильный, отсутствующий и неверный CSRF, анонимный запрос, владелец/чужая сеть,
+отсутствующая сеть и безопасный GET. HTTP-набор включён в `front_coverage.yml`.
+
+`dialog/test_network_delete_dialog.py` поднимает локальный Flask-сервер и открывает
+настоящий `base.html` в браузере: используются реальные jQuery, Bootstrap и
+`jwt_auth.js`. Аналитика и скрипты эмулятора исключены. Проверяются подтверждение
+в prod/dev, обе кнопки отмены, блокировка повторной отправки, сообщение об ошибке
+500 и успешная повторная попытка. Брокер, Docker и Mininet не нужны.
+
+Из корня репозитория после установки зависимостей:
+
+```sh
+MODE=dev SQLALCHEMY_DATABASE_URI=sqlite:///:memory: uv run --frozen python -m pytest -q -o addopts= -o log_file=/dev/null front/tests/test_network_delete.py
+uv run playwright install chromium
+MODE=dev SQLALCHEMY_DATABASE_URI=sqlite:///:memory: uv run --frozen python -m pytest -q -o addopts= -o log_file=/dev/null front/tests/dialog/test_network_delete_dialog.py
+```
+
+В Windows задайте `MODE` и `SQLALCHEMY_DATABASE_URI` через `$env:`, используйте
+`-o log_file=NUL`; при установленном Chrome можно указать `--browser-channel chrome`.
+В CI браузерный набор запускается отдельным шагом Playwright job в `full_test.yml`.
+Это проверка изолированного диалога, а не всего приложения: дополнительные
+Selenium/Playwright-проверки в обоих `test_network_menu.py` требуют полного стенда
+и проверяют возврат домой и невозможность повторно открыть удалённую сеть.
+
 ## Содержание
 
 - [Сводка](#сводка)

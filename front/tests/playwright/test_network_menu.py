@@ -7,6 +7,15 @@ from utils.networks import MiminetTestNetwork
 
 
 class TestNetworkMenu:
+    def test_confirmed_deletion_removes_network(self, authorized_page: Page):
+        """После подтверждения удалённая сеть не открывается повторно (#552)."""
+        network = MiminetTestNetwork(authorized_page)
+        deleted_url = network.url
+        network.delete()
+        expect(authorized_page).to_have_url(HOME_PAGE)
+        authorized_page.goto(deleted_url)
+        expect(authorized_page).to_have_url(HOME_PAGE)
+
     @pytest.fixture(scope="class")
     def empty_network(self, authorized_page: Page):
         empty_network = MiminetTestNetwork(authorized_page)
