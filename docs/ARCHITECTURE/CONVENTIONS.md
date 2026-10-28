@@ -97,13 +97,20 @@ a check. Note also that `filter_arg_for_options` exists in both
   the `[[tool.ty.overrides]]` block of the root `pyproject.toml`, or `ty` fails
   on `unsupported-base`.
 - There are **no committed migrations**. `Migrate(app, db)` is wired in
-  `app.py:268`, but `migrations/` must be created with `flask db init` first.
+  `app.py:270`, but `migrations/` must be created with `flask db init` first.
 - Core tables (`user`, `network`, `simulate`, `simulate_log`) are created by
-  `init_db`; the quiz tables by `db.create_all()`; the AI interview tables by
-  `create_ai_interview_tables()` (`front/src/app.py:672`).
+  `database_bootstrap.init_db`; the quiz tables by `db.create_all()`; the AI
+  interview tables by `create_ai_interview_tables()` (`front/src/app.py:674`).
 - `init_db` only probes or auto-creates the database when `MODE` derives it.
   With an explicit `SQLALCHEMY_DATABASE_URI` the caller owns the database and
-  nothing is provisioned (`front/src/miminet_model.py:209`).
+  nothing is provisioned (`front/src/database_bootstrap.py:153`).
+- Bootstrap imports the shared `db` from the models; it creates no second
+  SQLAlchemy instance. Its logger keeps the legacy `miminet_model` name so the
+  extraction does not change configured log filters or error handling.
+- Pending-log repair errors retain traceback frames but replace exception text
+  and chains to avoid SQL/parameter disclosure. UTC time, stage, mode, original
+  exception class and validated SQLSTATE are recorded. See [LOGGING.md](../LOGGING.md)
+  and `front/src/database_bootstrap.py:92`; return/rollback policy is unchanged.
 
 ---
 
