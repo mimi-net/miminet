@@ -27,7 +27,8 @@ nesting and no enforced layering — dependency direction follows the table belo
 | `celery_app.py`, `celeryconfig.py` | Celery app, queue/exchange declarations, broker URLs | — |
 | `tasks.py` | Front celery tasks: `save_simulate_result`, `perform_task_check` | `app`, `celery_app`, `miminet_model`, `quiz.service.session_question_service` |
 | `miminet_config.py` | `SECRET_KEY` load-or-generate, `make_empty_network()` factory, Pillow image probe | — |
-| `miminet_model.py` | The `db` instance; `User`, `Network`, `Simulate`, `SimulateLog`; `init_db()` provisioning and schema creation | `miminet_config` |
+| `miminet_model.py` | The shared `db` instance; `User`, `Network`, `Simulate`, `SimulateLog`; model defaults and constants | `miminet_config` |
+| `database_bootstrap.py` | `ensure_db_exists()` provisioning, `init_db()` schema creation and pending-log repair at startup | `miminet_model` |
 | `miminet_auth.py` | VK/Yandex login and callbacks, `LoginManager`, JWT cookie issuance and stale-cookie cleanup, profile pages, animation filter preferences | `miminet_model`, `miminet_config` |
 | `miminet_network.py` | Network CRUD, editor page rendering (`web_network`, `web_network_shared`), preview images, node/edge persistence, emulation queue statistics | `miminet_model`, `miminet_config` |
 | `miminet_host.py` | Job argument validators (`IPv4_check`, `port_check`, …), option filters, error message catalog, the seven device-config endpoints and `delete_job` | `configurators`, `miminet_model` |
@@ -39,6 +40,11 @@ nesting and no enforced layering — dependency direction follows the table belo
 | `ai_generate.py` | `/ai/generate-task`: LLM-generated network topologies with topology repair and validation | `miminet_model`, `miminet_auth` |
 | `auth_tests/` | Yandex authorization tests. Not part of the app; run by a dedicated CI workflow | — |
 | `miminet_util.py` | Empty placeholder, kept for future shared helpers | — |
+
+Bootstrap imports models, and the application imports bootstrap; models do not
+import bootstrap or the Flask application. `db` is still constructed only once
+in `miminet_model.py:23`. The initialization entry point remains the `__main__`
+path in `app.py`, importing `init_db` from `database_bootstrap`.
 
 Note the deliberate separation between `miminet_host.py` (validators, error
 messages and thin HTTP endpoints) and `configurators.py` (the pipeline that

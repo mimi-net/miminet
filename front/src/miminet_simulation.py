@@ -36,10 +36,11 @@ def run_simulation() -> Response:
 
         # Get saved emulations
         sims = Simulate.query.filter(Simulate.network_id == net.id).all()
-        # Remove all previous emulations
+        # Старые результаты удаляются в той же транзакции, что создаёт новые.
+        # Ошибка записи не должна оставлять сеть без предыдущего результата.
         for s in sims:
             db.session.delete(s)
-            db.session.commit()
+        db.session.flush()
 
         # Write log
         simlog = SimulateLog(

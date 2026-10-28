@@ -21,7 +21,7 @@ section of the architecture reference, see
 ## The network document — the shared contract
 
 One JSON document is the only thing that crosses the RabbitMQ boundary. It is
-stored as text in `Network.network` (`front/src/miminet_model.py:62`) and typed
+stored as text in `Network.network` (`front/src/miminet_model.py:60`) and typed
 by the dataclasses in `back/src/network_schema.py`.
 
 ```jsonc
@@ -130,6 +130,13 @@ Details that matter:
   `front/src/miminet_model.py`, i.e. textboxes). Back never sees those, so the
   last simulation stays valid and is kept; `emulation_changed` in
   `front/src/miminet_network.py` makes that call.
+- **Topology edits invalidate capture references together with results.** Both
+  `post_nodes` and `post_nodes_edges` clear `pcap` when emulated content changes;
+  position-only edits retain it (`front/src/miminet_network.py:400`, `:443`).
+- **Copying respects shared visibility.** A JWT holder can copy their own
+  network or one explicitly shared publicly, but not another user's private
+  network (`front/src/miminet_network.py:591`). Copies get a new GUID, owner and
+  preview file; saved simulation rows are not copied.
 - **`check_simulation` answers 210 while running**, which the editor treats as
   "keep polling".
 

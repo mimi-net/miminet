@@ -10,6 +10,22 @@ jobs:
 
   coverage:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: miminet_test
+          POSTGRES_PASSWORD: miminet_ci_test_only
+          POSTGRES_DB: miminet_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U miminet_test -d miminet_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      MIMINET_TEST_POSTGRES_URL: postgresql+psycopg2://miminet_test:miminet_ci_test_only@127.0.0.1:5432/miminet_test
     steps:
       - uses: actions/checkout@v7
 
@@ -34,6 +50,11 @@ jobs:
           files=(
             test_get_logs.py
             test_config_db.py
+            test_database_bootstrap_integration.py
+            test_bootstrap_logging.py
+            test_critical_boundaries.py
+            test_simulation_regressions.py
+            test_network_editing.py
             test_quiz_progress.py
             test_admin_section_form.py
             test_ai_generate.py
