@@ -10,7 +10,8 @@ from selenium.common.exceptions import (
     TimeoutException,
 )
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select, WebDriverWait
 from utils.locators import Location
 
 
@@ -263,6 +264,8 @@ class MiminetTestNetwork:
             By.CSS_SELECTOR,
             Location.Network.ModalButton.DELETE_SUBMIT_BUTTON.selector,
         )
+        # Удаление асинхронное: следующий тест не должен прерывать переход домой.
+        WebDriverWait(self.__selenium, 20).until(EC.url_to_be(HOME_PAGE))
 
 
 class NodeConfig:

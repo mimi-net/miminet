@@ -46,7 +46,7 @@ def deletion_app(tmp_path):
             rule.rule,
             endpoint=rule.endpoint,
             view_func=unused,
-            methods=sorted(rule.methods - {"HEAD", "OPTIONS"}),
+            methods=sorted((rule.methods or set()) - {"HEAD", "OPTIONS"}),
         )
     application.view_functions["delete_network"] = delete_network
     application.view_functions["home"] = lambda: "Мои сети"

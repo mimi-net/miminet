@@ -16,7 +16,7 @@ from playwright._impl._api_structures import FloatRect
 from playwright.sync_api import Locator as PWLocator
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 
-from conftest import HOME_PAGE
+from conftest import HOME_PAGE, WAIT_UNTIL
 from utils.locators import Location
 
 
@@ -259,6 +259,8 @@ class MiminetTestNetwork:
         self.__page.click(Location.Network.TopButton.OPTIONS.selector)
         self.__page.click(Location.Network.ModalButton.DELETE_MODAL_BUTTON.selector)
         self.__page.click(Location.Network.ModalButton.DELETE_SUBMIT_BUTTON.selector)
+        # Дожидаемся конца удаления до следующего перехода или создания сети.
+        self.__page.wait_for_url(HOME_PAGE, wait_until=WAIT_UNTIL)
 
 
 class NodeConfig:
@@ -526,6 +528,13 @@ class NodeConfig:
             self.__config_locator = Location.Network.ConfigPanel.Host
 
         elif device_class == Location.Network.DevicePanel.SWITCH.device_class:
+            # После reload шаблоны форм могут ещё загружаться асинхронно.
+            self.__page.wait_for_selector(
+                "#config_switch_main_form_script", state="attached"
+            )
+            self.__page.wait_for_selector(
+                "#config_switch_save_script", state="attached"
+            )
             self.__page.evaluate(f"ShowSwitchConfig({node_json})")
             self.__config_locator = Location.Network.ConfigPanel.Switch
 

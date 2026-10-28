@@ -198,6 +198,7 @@ jobs:
         env:
           TEST_TARGET_HOST: localhost
         run: |
+          set -o pipefail
           mkdir -p .tmp
           sh front/tests/playwright/run.sh 2>&1 | tee .tmp/playwright-test.log
 
