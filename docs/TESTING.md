@@ -72,11 +72,14 @@ Check the pull request's Actions status for remote results.
 
 ## Verification checkpoints
 
-PR branch, 2026-10-28: the thirteen-file browser-free selection reports
-**285 passed, 118 skipped** without a PostgreSQL test URL. The skipped cases
-require PostgreSQL; Docker Desktop was unavailable during this run. The adjacent
-job-validator file reports **11 passed**. This does not revalidate PostgreSQL.
-Ruff format/lint and ty pass for `front/`.
+PR branch, 2026-10-28: after Docker became available, the thirteen-file
+browser-free selection reports **403 passed, no skips** with disposable
+PostgreSQL 17.11 and SQLite. Zero temporary `miminet_test_*` schemas remained.
+Combined statement/branch coverage is **30.36%** for web source, **56.77%** for
+network operations and **96.52%** for bootstrap; the existing 21% gate passes.
+This run includes the preserved simulation polling-by-ID contract.
+The adjacent job-validator file previously reported **11 passed**; Ruff
+format/lint and ty passed for `front/` at the earlier PR checkpoint.
 
 Earlier snapshot, 2026-10-27, Windows/Python 3.12.10 and PostgreSQL 17.11
 (before restoring the existing simulation polling contract):
