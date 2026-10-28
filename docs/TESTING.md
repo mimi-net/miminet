@@ -78,6 +78,8 @@ PostgreSQL 17.11 and SQLite. Zero temporary `miminet_test_*` schemas remained.
 Combined statement/branch coverage is **30.36%** for web source, **56.77%** for
 network operations and **96.52%** for bootstrap; the existing 21% gate passes.
 This run includes the preserved simulation polling-by-ID contract.
+The same selection also reports **403 passed, no skips** on PostgreSQL 18.6,
+the version used by the Docker web stand; zero temporary schemas remained.
 The adjacent job-validator file previously reported **11 passed**; Ruff
 format/lint and ty passed for `front/` at the earlier PR checkpoint.
 
