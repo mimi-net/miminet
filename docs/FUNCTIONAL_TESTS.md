@@ -5,6 +5,60 @@
 миграции с Selenium на Playwright.
 Парный документ по бэкенду — [BACKEND_TESTS.md](BACKEND_TESTS.md).
 
+### Регрессия удаления сети (#552)
+
+`test_network_delete.py` проверяет настоящий Flask-обработчик с cookie JWT,
+включённой CSRF-защитой и временной SQLite с внешними ключами. Проверяются
+правильный, отсутствующий и неверный CSRF, анонимный запрос, владелец/чужая сеть,
+отсутствующая сеть и безопасный GET. HTTP-набор включён в `front_coverage.yml`.
+
+`dialog/test_network_delete_dialog.py` поднимает локальный Flask-сервер и открывает
+настоящий `base.html` в браузере: используются реальные jQuery, Bootstrap и
+`jwt_auth.js`. Аналитика и скрипты эмулятора исключены. Проверяются подтверждение
+в prod/dev, обе кнопки отмены, блокировка повторной отправки, сообщение об ошибке
+500 и успешная повторная попытка. Брокер, Docker и Mininet не нужны.
+
+Из корня репозитория после установки зависимостей:
+
+```sh
+MODE=dev SQLALCHEMY_DATABASE_URI=sqlite:///:memory: uv run --frozen python -m pytest -q -o addopts= -o log_file=/dev/null front/tests/test_network_delete.py
+uv run playwright install chromium
+MODE=dev SQLALCHEMY_DATABASE_URI=sqlite:///:memory: uv run --frozen python -m pytest -q -o addopts= -o log_file=/dev/null front/tests/dialog/test_network_delete_dialog.py
+```
+
+В Windows задайте `MODE` и `SQLALCHEMY_DATABASE_URI` через `$env:`, используйте
+`-o log_file=NUL`; при установленном Chrome можно указать `--browser-channel chrome`.
+В CI браузерный набор запускается отдельным шагом Playwright job в `full_test.yml`.
+Это проверка изолированного диалога, а не всего приложения: дополнительные
+Selenium/Playwright-проверки в обоих `test_network_menu.py` требуют полного стенда
+и проверяют возврат домой и невозможность повторно открыть удалённую сеть.
+
+После подтверждения оба тестовых хелпера `delete()` ждут возврата домой:
+асинхронное удаление не должно прерываться следующим переходом теста.
+Playwright-хелперы дополнительно ждут окончания AJAX-сохранений между
+операциями с графом и появления шаблонов формы коммутатора после reload.
+В шаге CI с `tee` включён `pipefail`, чтобы ошибки тестов приводили к падению job.
+Прямое удаление задания в обоих `test_job_limit.py` использует `ajaxWithAuth`,
+чтобы тот же сценарий работал при включённой cookie CSRF-защите.
+
+Проверка 2026-10-28 на изолированном Docker web-стенде с PostgreSQL 18.6,
+nginx, uWSGI/Flask и RabbitMQ:
+
+| Проверка | Результат |
+| --- | --- |
+| Полный Playwright-набор, 4 воркера, dev | 96 passed |
+| Тот же набор с `JWT_COOKIE_CSRF_PROTECT=True` | 96 passed |
+| Плоский Selenium/HTTP-набор, 3 CI-шарда с отдельными сессиями | 73 + 66 + 65 = 204 passed |
+| HTTP-регрессии удаления в Linux | 8 passed |
+
+Для CSRF-проверки локальная обёртка WSGI включает только соответствующую
+настройку, сохраняя MODE=dev и локальную БД; Secure-cookie выключены для HTTP.
+Это не развёртывание production-конфигурации. Дополнительно проверено через
+настоящий HTTP API и SQL-запросы: отсутствие/неверный CSRF запрещают удаление,
+GET сохраняет данные, чужая сеть остаётся, своя сеть удаляется вместе с
+результатом симуляции. Mininet/OVS не запускались: Docker Desktop использует
+WSL2, а backend требует поддерживаемого Linux-хоста.
+
 ## Содержание
 
 - [Сводка](#сводка)

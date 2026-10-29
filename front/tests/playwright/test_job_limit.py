@@ -162,12 +162,12 @@ class TestJobLimit:
             f"Expected 30 jobs initially, but got {len(network.jobs)}"
         )
 
-        # Delete one job via API
+        # Удаляем задание через общий обработчик JWT/CSRF, как в интерфейсе.
         job_id_to_delete = network.jobs[0]["id"]
 
         delete_result = authorized_page.evaluate(f"""
             () => new Promise((resolve) => {{
-                $.ajax({{
+                ajaxWithAuth({{
                     type: 'POST',
                     url: '/host/delete_job',
                     data: {{

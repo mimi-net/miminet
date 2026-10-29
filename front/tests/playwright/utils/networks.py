@@ -16,8 +16,13 @@ from playwright._impl._api_structures import FloatRect
 from playwright.sync_api import Locator as PWLocator
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 
-from conftest import HOME_PAGE
+from conftest import HOME_PAGE, WAIT_UNTIL
 from utils.locators import Location
+
+
+def _wait_for_pending_requests(page: Page):
+    """Не начинаем следующий шаг до завершения AJAX-сохранения текущего."""
+    page.wait_for_function("typeof $ !== 'undefined' && $.active === 0")
 
 
 class NodeType:
@@ -52,6 +57,7 @@ class MiminetTestNetwork:
     def __check_page(self):
         if self.__page.url != self.__url:
             self.__page.goto(self.__url)
+        _wait_for_pending_requests(self.__page)
 
     @property
     def url(self) -> str:
@@ -209,6 +215,7 @@ class MiminetTestNetwork:
             f"nodes.length > {old_nodes_len}",
             timeout=5_000,
         )
+        _wait_for_pending_requests(self.__page)
         return len(self.nodes) - 1
 
     def add_edge(self, source_id: int, target_id: int) -> int:
@@ -225,6 +232,7 @@ class MiminetTestNetwork:
         self.__page.evaluate("PostNodesEdges()")
 
         self.__page.wait_for_function(f"edges.length > {old_edges_len}")
+        _wait_for_pending_requests(self.__page)
         return len(self.edges) - 1
 
     def get_nodes_by_class(self, device_class: str) -> list[dict]:
@@ -259,6 +267,8 @@ class MiminetTestNetwork:
         self.__page.click(Location.Network.TopButton.OPTIONS.selector)
         self.__page.click(Location.Network.ModalButton.DELETE_MODAL_BUTTON.selector)
         self.__page.click(Location.Network.ModalButton.DELETE_SUBMIT_BUTTON.selector)
+        # Дожидаемся конца удаления до следующего перехода или создания сети.
+        self.__page.wait_for_url(HOME_PAGE, wait_until=WAIT_UNTIL)
 
 
 class NodeConfig:
@@ -501,6 +511,7 @@ class NodeConfig:
         self.__page.wait_for_selector(
             f"{submit_button.selector}:has-text('{submit_button.text}')"
         )
+        _wait_for_pending_requests(self.__page)
 
     def __select_job(self, job_id: int):
         if self.__config_locator in (
@@ -526,6 +537,13 @@ class NodeConfig:
             self.__config_locator = Location.Network.ConfigPanel.Host
 
         elif device_class == Location.Network.DevicePanel.SWITCH.device_class:
+            # После reload шаблоны форм могут ещё загружаться асинхронно.
+            self.__page.wait_for_selector(
+                "#config_switch_main_form_script", state="attached"
+            )
+            self.__page.wait_for_selector(
+                "#config_switch_save_script", state="attached"
+            )
             self.__page.evaluate(f"ShowSwitchConfig({node_json})")
             self.__config_locator = Location.Network.ConfigPanel.Switch
 

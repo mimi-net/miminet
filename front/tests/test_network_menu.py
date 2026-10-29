@@ -1,11 +1,22 @@
 import pytest
 from conftest import HOME_PAGE, MAIN_PAGE, MiminetTester
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from utils.locators import Location
 from utils.networks import MiminetTestNetwork
 
 
 class TestNetworkMenu:
+    def test_confirmed_deletion_removes_network(self, selenium: MiminetTester):
+        """После подтверждения удалённая сеть не открывается повторно (#552)."""
+        network = MiminetTestNetwork(selenium)
+        deleted_url = network.url
+        network.delete()
+        WebDriverWait(selenium, 20).until(EC.url_to_be(HOME_PAGE))
+        selenium.get(deleted_url)
+        WebDriverWait(selenium, 20).until(EC.url_to_be(HOME_PAGE))
+
     @pytest.fixture(scope="class")
     def empty_network(self, selenium: MiminetTester):
         empty_network = MiminetTestNetwork(selenium)
