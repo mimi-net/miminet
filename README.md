@@ -1,19 +1,12 @@
-<p align="center">
-    <a href="https://github.com/mimi-net/miminet/actions" alt="Miminet Github Actions">
-    <img src="https://github.com/mimi-net/miminet/actions/workflows/full_test.yml/badge.svg" /></a>
-    <a href="https://github.com/mimi-net/miminet/actions" alt="Miminet Github Actions">
-    <img src="https://github.com/mimi-net/miminet/actions/workflows/back_test.yml/badge.svg" /></a>
-    <a href="https://en.wikipedia.org/wiki/Linux" alt="OS Linux">
-    <img src="https://img.shields.io/badge/OS-linux-0078D4" /></a>
-    <a href="https://opensource.org/licenses/Apache" alt="License">
-    <img src="https://img.shields.io/badge/License-Apache-yellow.svg" /></a>
-    <a href="https://github.com/mimi-net/miminet/commits/main/" alt="Last Commit">
-    <img src="https://img.shields.io/github/last-commit/mimi-net/miminet" /></a>
-    <a href="https://github.com/mimi-net/miminet/commits/main/" alt="GitHub commit activity">
-    <img src="https://img.shields.io/github/commit-activity/m/mimi-net/miminet" /></a>
-    <a href="https://miminet.ru/" alt="Site">
-    <img src="https://img.shields.io/website?url=https%3A%2F%2Fmiminet.ru%2F" /></a>
-</p>
+⚠️ **РЕПОЗИТОРИЙ ПЕРЕНЕСЕН**
+ 
+Этот репозиторий находится в архиве и больше не развивается. Основная разработка переехала:
+ 
+**Новый репозиторий:** https://sourcecraft.dev/miminet/miminet — там же открывайте issues и присылайте pull request'ы.
+
+**Новости и вопросы:** https://pubble.ru/p/miminet — сообщество Miminet, там публикуются обновления проекта и можно задавать вопросы.
+
+Здесь issues и pull request'ы закрыты. Спасибо всем, кто контрибьютил сюда!
 
 # Miminet
 
